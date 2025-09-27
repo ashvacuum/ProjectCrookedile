@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<engine:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.UIElements"
+    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+>
+    <engine:VisualElement name="ProjectElement" class="project-item">
+
+        <engine:Label name="project-name" text="Project Name" class="project-name" />
+        <engine:Label name="project-progress" text="Progress: 1/2 weeks" class="project-progress" />
+        <engine:ProgressBar name="project-progress-bar" low-value="0" high-value="100" value="50" class="project-progress-bar" />
+
+    </engine:VisualElement>
+</engine:UXML>

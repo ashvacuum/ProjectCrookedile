@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<engine:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+>
+    <Style src="project://database/Assets/UI/Styles/GameUI.uss" />
+
+    <engine:VisualElement name="GameRoot" class="game-root">
+
+        <!-- Top Bar with Resources and Turn Info -->
+        <engine:VisualElement name="TopBar" class="top-bar">
+            <engine:VisualElement name="ResourcesPanel" class="resources-panel">
+
+                <engine:VisualElement name="BudgetResource" class="resource-item">
+                    <engine:Label name="budget-value" text="₱200" class="resource-value" />
+                    <engine:Label text="Budget" class="resource-label" />
+                </engine:VisualElement>
+
+                <engine:VisualElement name="ApprovalResource" class="resource-item">
+                    <engine:Label name="approval-value" text="65%" class="resource-value" />
+                    <engine:Label text="Approval" class="resource-label" />
+                    <engine:ProgressBar name="approval-bar" low-value="0" high-value="100" value="65" class="approval-bar approval-medium" />
+                </engine:VisualElement>
+
+                <engine:VisualElement name="WealthResource" class="resource-item">
+                    <engine:Label name="wealth-value" text="₱100" class="resource-value" />
+                    <engine:Label text="Wealth" class="resource-label" />
+                </engine:VisualElement>
+
+                <engine:VisualElement name="HeatResource" class="resource-item">
+                    <engine:Label name="heat-value" text="0" class="resource-value" />
+                    <engine:Label text="Heat" class="resource-label" />
+                    <engine:ProgressBar name="heat-bar" low-value="0" high-value="100" value="0" class="heat-bar heat-low" />
+                </engine:VisualElement>
+
+                <engine:VisualElement name="EnergyResource" class="resource-item">
+                    <engine:Label name="energy-value" text="3" class="resource-value" />
+                    <engine:Label text="Energy" class="resource-label" />
+                </engine:VisualElement>
+
+                <engine:VisualElement name="ImpunityResource" class="resource-item">
+                    <engine:Label name="impunity-value" text="0" class="resource-value" />
+                    <engine:Label text="Impunity" class="resource-label" />
+                </engine:VisualElement>
+
+            </engine:VisualElement>
+
+            <engine:VisualElement name="TurnInfo" class="turn-info">
+                <engine:Label name="turn-info" text="Turn 1/12" class="turn-number" />
+                <engine:Label name="season-info" text="Summer" class="season-info" />
+            </engine:VisualElement>
+
+        </engine:VisualElement>
+
+        <!-- Main Content Area -->
+        <engine:VisualElement name="MainContent" class="main-content">
+
+            <!-- Left Panel - Cards and Actions -->
+            <engine:VisualElement name="LeftPanel" class="left-panel">
+
+                <engine:VisualElement name="CardSection" class="card-hand">
+                    <engine:Label text="Hand" class="card-hand-title" />
+                    <engine:ScrollView name="card-hand" scroll-deceleration-rate="0.135" elasticity="0.1" />
+                </engine:VisualElement>
+
+                <engine:VisualElement name="ActionButtons" class="action-buttons">
+                    <engine:Button name="projects-button" text="Manage Projects" class="action-button" />
+                    <engine:Button name="map-button" text="View Map Detail" class="action-button" />
+                    <engine:Button name="settings-button" text="Settings" class="action-button" />
+                    <engine:Button name="end-turn-button" text="End Turn" class="action-button end-turn-button" />
+                </engine:VisualElement>
+
+            </engine:VisualElement>
+
+            <!-- Center Panel - Map View -->
+            <engine:VisualElement name="CenterPanel" class="center-panel">
+                <engine:VisualElement name="MapContainer" class="map-container">
+                    <!-- Map will be populated dynamically or use background image -->
+                </engine:VisualElement>
+            </engine:VisualElement>
+
+            <!-- Right Panel - Projects and Relationships -->
+            <engine:VisualElement name="RightPanel" class="right-panel">
+
+                <engine:VisualElement name="ProjectsSection" class="panel-section">
+                    <engine:Label text="Active Projects" class="panel-title" />
+                    <engine:ScrollView name="project-list" scroll-deceleration-rate="0.135" elasticity="0.1" />
+                </engine:VisualElement>
+
+                <engine:VisualElement name="RelationshipsSection" class="panel-section">
+                    <engine:Label text="Relationships" class="panel-title" />
+                    <engine:ScrollView name="relationship-list" scroll-deceleration-rate="0.135" elasticity="0.1" />
+                </engine:VisualElement>
+
+            </engine:VisualElement>
+
+        </engine:VisualElement>
+
+    </engine:VisualElement>
+</engine:UXML>

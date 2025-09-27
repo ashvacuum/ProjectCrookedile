@@ -1,0 +1,350 @@
+/* Corruption Tycoon - Main Game UI Styles */
+
+/* Root Container */
+.game-root {
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    background-color: rgb(30, 30, 30);
+    color: white;
+}
+
+/* Top Bar - Resources and Turn Info */
+.top-bar {
+    flex-direction: row;
+    height: 80px;
+    background-color: rgb(20, 20, 20);
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(100, 100, 100);
+    padding: 10px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.resources-panel {
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-width: 60%;
+}
+
+.resource-item {
+    margin-right: 20px;
+    margin-bottom: 5px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.resource-value {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.resource-label {
+    font-size: 12px;
+    color: rgb(180, 180, 180);
+}
+
+.turn-info {
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.turn-number {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.season-info {
+    font-size: 14px;
+    color: rgb(200, 200, 200);
+}
+
+/* Resource Progress Bars */
+.approval-bar {
+    width: 100px;
+    height: 8px;
+    margin-top: 4px;
+}
+
+.approval-low {
+    --unity-progress-bar-fill-color: rgb(200, 50, 50);
+}
+
+.approval-medium {
+    --unity-progress-bar-fill-color: rgb(200, 150, 50);
+}
+
+.approval-high {
+    --unity-progress-bar-fill-color: rgb(50, 200, 50);
+}
+
+.heat-bar {
+    width: 100px;
+    height: 8px;
+    margin-top: 4px;
+}
+
+.heat-low {
+    --unity-progress-bar-fill-color: rgb(50, 150, 200);
+}
+
+.heat-medium {
+    --unity-progress-bar-fill-color: rgb(200, 150, 50);
+}
+
+.heat-high {
+    --unity-progress-bar-fill-color: rgb(200, 50, 50);
+}
+
+/* Main Game Area */
+.main-content {
+    flex: 1;
+    flex-direction: row;
+}
+
+/* Left Panel - Cards and Actions */
+.left-panel {
+    width: 400px;
+    background-color: rgb(25, 25, 25);
+    border-right-width: 2px;
+    border-right-color: rgb(100, 100, 100);
+    padding: 15px;
+}
+
+.card-hand {
+    flex: 1;
+    margin-bottom: 20px;
+}
+
+.card-hand-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: rgb(220, 220, 220);
+}
+
+/* Card Styling */
+.card {
+    background-color: rgb(40, 40, 40);
+    border-width: 2px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    background-color: rgb(50, 50, 50);
+    border-color: rgb(150, 150, 150);
+}
+
+.card-disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.card-disabled:hover {
+    background-color: rgb(40, 40, 40);
+    border-color: rgb(60, 60, 60);
+}
+
+.card-charm {
+    border-color: rgb(255, 100, 150);
+}
+
+.card-defense {
+    border-color: rgb(100, 150, 255);
+}
+
+.card-attack {
+    border-color: rgb(255, 100, 100);
+}
+
+.card-leverage {
+    border-color: rgb(255, 200, 50);
+}
+
+.card-power {
+    border-color: rgb(150, 50, 200);
+}
+
+.card-header {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.card-name {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.card-cost {
+    font-size: 12px;
+    color: rgb(180, 180, 180);
+}
+
+.card-type {
+    font-size: 10px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.card-description {
+    font-size: 11px;
+    color: rgb(200, 200, 200);
+    white-space: normal;
+}
+
+/* Action Buttons */
+.action-buttons {
+    flex-direction: column;
+}
+
+.action-button {
+    height: 40px;
+    margin-bottom: 10px;
+    background-color: rgb(60, 100, 140);
+    border-radius: 4px;
+    border-width: 0;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.action-button:hover {
+    background-color: rgb(70, 120, 160);
+}
+
+.end-turn-button {
+    background-color: rgb(140, 100, 60);
+}
+
+.end-turn-button:hover {
+    background-color: rgb(160, 120, 70);
+}
+
+/* Center Panel - Map and Main View */
+.center-panel {
+    flex: 1;
+    background-color: rgb(35, 35, 35);
+    position: relative;
+}
+
+.map-container {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(40, 60, 40);
+    background-image: url('Assets/Sprites/town_map_placeholder.png');
+    background-size: cover;
+    background-position: center;
+}
+
+/* Right Panel - Projects and Relationships */
+.right-panel {
+    width: 350px;
+    background-color: rgb(25, 25, 25);
+    border-left-width: 2px;
+    border-left-color: rgb(100, 100, 100);
+    padding: 15px;
+}
+
+.panel-section {
+    margin-bottom: 25px;
+}
+
+.panel-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: rgb(220, 220, 220);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(100, 100, 100);
+    padding-bottom: 5px;
+}
+
+/* Project Items */
+.project-item {
+    background-color: rgb(40, 40, 40);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.project-item:hover {
+    background-color: rgb(50, 50, 50);
+}
+
+.project-name {
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.project-progress {
+    font-size: 11px;
+    color: rgb(180, 180, 180);
+    margin-bottom: 4px;
+}
+
+.project-progress-bar {
+    height: 6px;
+}
+
+/* Character Items */
+.character-item {
+    background-color: rgb(40, 40, 40);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.character-item:hover {
+    background-color: rgb(50, 50, 50);
+}
+
+.character-header {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.character-name {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.character-status {
+    font-size: 11px;
+    color: rgb(180, 180, 180);
+}
+
+.rapport-bar {
+    height: 6px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .left-panel {
+        width: 300px;
+    }
+
+    .right-panel {
+        width: 280px;
+    }
+}
+
+@media (max-width: 900px) {
+    .main-content {
+        flex-direction: column;
+    }
+
+    .left-panel, .right-panel {
+        width: 100%;
+        height: 200px;
+    }
+}

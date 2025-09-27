@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<engine:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.UIElements"
+    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+>
+    <Style src="project://database/Assets/UI/Styles/LoadingScreen.uss" />
+
+    <engine:VisualElement name="LoadingRoot" class="loading-root">
+
+        <engine:VisualElement name="LoadingContent" class="loading-content">
+            <engine:Label text="Loading..." name="loading-text" class="loading-text" />
+            <engine:ProgressBar name="loading-progress" low-value="0" high-value="100" value="0" class="loading-progress" />
+        </engine:VisualElement>
+
+    </engine:VisualElement>
+</engine:UXML>
