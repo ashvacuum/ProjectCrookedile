@@ -1,6 +1,21 @@
 # Character Origins
 
+[🏠 Home](README.md) | [📖 Full Documentation](README.md#-game-design-documentation)
+
+**Related:** [Game Overview](game_overview.md) | [Resources](resources.md) | [Cards](cards.md) | [Locations](locations.md)
+
+---
+
 Four distinct playable characters, each with unique mechanics, strengths, and weaknesses.
+
+## Table of Contents
+
+- [The Strongman](#1-the-strongman-mano-dura)
+- [The Celebrity](#2-the-celebrity-artista)
+- [The Religious Leader](#3-the-religious-leader-anointed-one)
+- [The Nepo Baby](#4-the-nepo-baby-anak-ng)
+- [Origin Synergies & Rivalries](#origin-synergies--rivalries)
+- [Difficulty Rankings](#difficulty-rankings)
 
 ---
 

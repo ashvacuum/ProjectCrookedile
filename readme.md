@@ -2,26 +2,37 @@
 
 A roguelike collectible card game set in the Philippines where you play as a politician in the final 45 days before an election.
 
+---
+
 ## Quick Start
 
-**Genre:** Roguelike Deck-Builder + Social Navigation  
-**Tone:** Absurdist Political Satire  
+**Genre:** Roguelike Deck-Builder + Social Navigation
+**Tone:** Absurdist Political Satire
 **Objective:** Reach 10,000 Support Points by Day 45 without exceeding 100 Heat
+
+---
 
 ## Core Concept
 
 Navigate a Potionomics-style town map, build relationships through card battles, manage corruption, and win the election through charm, intimidation, faith, or family connections.
 
-## Documentation
+---
 
-- [Game Overview](GAME_OVERVIEW.md) - Core mechanics and game loop
-- [Origins](ORIGINS.md) - Four playable character classes
-- [Resources](RESOURCES.md) - Currency and stat management
-- [Cards](CARDS.md) - Complete card system breakdown
-- [Locations](LOCATIONS.md) - Map navigation and venues
-- [Events](EVENTS.md) - Random events and special mechanics
-- [Progression](PROGRESSION.md) - Roguelike elements and unlocks
-- [Technical Notes](TECHNICAL.md) - Implementation details
+## 📚 Game Design Documentation
+
+### Core Systems
+- **[Game Overview](game_overview.md)** - Core mechanics, game loop, and victory conditions
+- **[Origins](origins.md)** - Four playable character classes with unique abilities
+- **[Resources](resources.md)** - Currency and stat management systems
+- **[Cards](cards.md)** - Complete card system and deck building
+
+### World & Content
+- **[Locations](locations.md)** - Map navigation, venues, and location mechanics
+- **[Events](events.md)** - Random events, special mechanics, and milestone encounters
+- **[Progression](progression.md)** - Roguelike elements, unlocks, and meta progression
+
+### Development
+- **[Technical Notes](technical.md)** - Implementation details and architecture
 
 ## Design Pillars
 

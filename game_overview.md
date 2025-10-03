@@ -1,5 +1,24 @@
 # Game Overview
 
+[🏠 Home](README.md) | [📖 Full Documentation](README.md#-game-design-documentation)
+
+**Related:** [Origins](origins.md) | [Resources](resources.md) | [Cards](cards.md) | [Locations](locations.md) | [Events](events.md)
+
+---
+
+## Table of Contents
+
+- [Core Game Loop](#core-game-loop)
+- [Victory Conditions](#victory-conditions)
+- [Loss Conditions](#loss-conditions)
+- [Card Battle System](#card-battle-system)
+- [Special Events](#special-events)
+- [Regional Factions](#regional-factions)
+- [Palakasan System](#palakasan-system-connections)
+- [Difficulty Scaling](#difficulty-scaling)
+
+---
+
 ## Core Game Loop
 
 ### Time System
