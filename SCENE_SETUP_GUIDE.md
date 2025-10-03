@@ -44,10 +44,82 @@ Bootstrap
     └── Script: SaveLoadManager.cs
 ```
 
-#### Script Configuration:
-- **GameManager**: Must have all manager references assigned in inspector
-- **UIToolkitManager**: Requires UIDocument and VisualTreeAsset references
-- **All Managers**: Will be auto-found by GameManager.InitializeGame() using FindObjectOfType()
+#### Critical Script Assignments:
+
+**GameManager.cs Configuration:**
+```
+[Header("Managers")] - MUST BE ASSIGNED IN INSPECTOR:
+✓ resourceManager → Drag ResourceManager GameObject
+✓ cardManager → Drag CardManager GameObject
+✓ relationshipManager → Drag RelationshipManager GameObject
+✓ projectManager → Drag ProjectManager GameObject
+✓ mapManager → Drag MapManager GameObject
+✓ seasonManager → Drag SeasonManager GameObject
+✓ enemyManager → Drag EnemyManager GameObject
+```
+
+**UIToolkitManager.cs Configuration:**
+```
+[Header("UI Documents")] - MUST BE ASSIGNED IN INSPECTOR:
+✓ gameUIDocument → Drag GameUI UIDocument from Game scene
+✓ mainMenuUIDocument → Drag MainMenuUI UIDocument from MainMenu scene
+✓ loadingUIDocument → Drag LoadingUI UIDocument (child of UIToolkitManager)
+
+[Header("Visual Tree Assets")] - MUST BE ASSIGNED IN INSPECTOR:
+✓ cardElementTemplate → CardElement.uxml asset
+✓ characterElementTemplate → CharacterElement.uxml asset
+✓ projectElementTemplate → ProjectElement.uxml asset
+```
+
+**SceneController.cs Configuration:**
+```
+[Header("Scene Names")] - VERIFY EXACT SPELLING:
+✓ bootstrapScene = "Bootstrap"
+✓ mainMenuScene = "MainMenu"
+✓ gameScene = "Game"
+✓ mapDetailScene = "MapDetail"
+✓ endGameScene = "EndGame"
+```
+
+**ResourceManager.cs Configuration:**
+```
+[Header("Resource Limits")] - SET INITIAL VALUES:
+✓ budget = 200 (starting budget)
+✓ approval = 65 (starting approval)
+✓ wealth = 100 (starting wealth)
+✓ heat = 0 (starting heat)
+✓ energy = 3 (starting energy)
+✓ impunity = 0 (starting impunity)
+```
+
+**CardManager.cs Configuration:**
+```
+[Header("Starting Cards")] - ASSIGN STARTER DECK:
+✓ starterCards → List of 14 starter Card ScriptableObjects
+  ├── 6 Charm cards (Kind Words, Small Gift, etc.)
+  ├── 4 Defense cards (Plausible Deniability, etc.)
+  └── 4 Attack cards (Regulatory Pressure, etc.)
+```
+
+**RelationshipManager.cs Configuration:**
+```
+[Header("Character Database")] - ASSIGN CHARACTER DATA:
+✓ _allCharacters → List of all Character ScriptableObjects
+  ├── Government sector characters (Carmen, Santos, Rivera, Torres)
+  ├── Business sector characters (Alex, Don Ricardo, Jennifer, Patricia)
+  ├── Media sector characters (River, Carlos, Ramon)
+  └── Community sector characters (Sage, Rodriguez, Sarah)
+```
+
+**ProjectManager.cs Configuration:**
+```
+[Header("Project Database")] - ASSIGN PROJECT DATA:
+✓ availableProjects → List of all Project ScriptableObjects
+  ├── Quick projects (1 week: Pothole repairs, etc.)
+  ├── Standard projects (2 weeks: Road resurfacing, etc.)
+  ├── Major projects (4 weeks: Highway extension, etc.)
+  └── Mega projects (6-8 weeks: Airport terminal, etc.)
+```
 
 #### Manager Dependencies:
 - **GameManager**: References to all other managers
@@ -61,16 +133,23 @@ Bootstrap
 **Purpose**: Title screen, new game, continue, settings
 **Load Type**: Standard scene replacement
 
-#### Required GameObjects:
+#### Required GameObjects & Scripts:
 ```
 MainMenuScene
-├── MainMenuUI (UIDocument)
-│   └── UXML: MainMenu.uxml
-│   └── USS: MainMenu.uss
-└── MainMenuCamera
+├── MainMenuUI (GameObject)
+│   └── Script: UIDocument
+│   └── Source Asset: MainMenu.uxml
+│   └── Panel Settings: Default Runtime Panel Settings
+└── MainMenuCamera (GameObject)
+    └── Script: Camera
     └── Clear Flags: Solid Color
     └── Background: Dark/Black
 ```
+
+#### Script Configuration:
+- **UIDocument**: Source Asset must reference MainMenu.uxml
+- **Camera**: Standard camera setup for menu display
+- **No custom scripts required** - UI handled by UIToolkitManager singleton
 
 #### UIDocument Configuration:
 - **Source Asset**: MainMenu.uxml
@@ -89,17 +168,24 @@ MainMenuScene
 **Purpose**: Main gameplay interface
 **Load Type**: Standard scene replacement
 
-#### Required GameObjects:
+#### Required GameObjects & Scripts:
 ```
 GameScene
-├── GameUI (UIDocument)
-│   └── UXML: GameUI.uxml
-│   └── USS: GameUI.uss
-├── MainCamera
-│   └── Clear Flags: Solid Color
-│   └── Background: Dark Gray
-└── EventSystem (if using hybrid UI)
+├── GameUI (GameObject)
+│   └── Script: UIDocument
+│   └── Source Asset: GameUI.uxml
+│   └── Panel Settings: Default Runtime Panel Settings
+└── MainCamera (GameObject)
+    └── Script: Camera
+    └── Clear Flags: Solid Color
+    └── Background: Dark Gray (#2B2B2B)
 ```
+
+#### Script Configuration:
+- **UIDocument**: Source Asset must reference GameUI.uxml
+- **Camera**: Standard camera for main game view
+- **No EventSystem needed** - UI Toolkit handles input directly
+- **No custom scripts required** - UI handled by UIToolkitManager singleton
 
 #### UIDocument Configuration:
 - **Source Asset**: GameUI.uxml
@@ -138,15 +224,22 @@ Action Buttons:
 **Purpose**: Detailed map view for project management
 **Load Type**: Additive loading over Game scene
 
-#### Required GameObjects:
+#### Required GameObjects & Scripts:
 ```
 MapDetailScene
-├── MapDetailUI (UIDocument)
-│   └── UXML: MapDetail.uxml (TODO: Create)
-│   └── USS: MapDetail.uss (TODO: Create)
-└── MapDetailCamera (Optional)
+├── MapDetailUI (GameObject)
+│   └── Script: UIDocument
+│   └── Source Asset: MapDetail.uxml (TODO: Create)
+│   └── Panel Settings: Default Runtime Panel Settings
+└── MapDetailCamera (GameObject - Optional)
+    └── Script: Camera
     └── Culling Mask: MapDetail layer only
 ```
+
+#### Script Configuration:
+- **UIDocument**: Source Asset references MapDetail.uxml (to be created)
+- **Camera**: Optional overlay camera for detailed map view
+- **No custom scripts required** - UI handled by UIToolkitManager singleton
 
 #### UI Requirements:
 - Interactive town map
@@ -160,16 +253,23 @@ MapDetailScene
 **Purpose**: Election results and final statistics
 **Load Type**: Standard scene replacement
 
-#### Required GameObjects:
+#### Required GameObjects & Scripts:
 ```
 EndGameScene
-├── EndGameUI (UIDocument)
-│   └── UXML: EndGame.uxml (TODO: Create)
-│   └── USS: EndGame.uss (TODO: Create)
-└── ResultsCamera
+├── EndGameUI (GameObject)
+│   └── Script: UIDocument
+│   └── Source Asset: EndGame.uxml (TODO: Create)
+│   └── Panel Settings: Default Runtime Panel Settings
+└── ResultsCamera (GameObject)
+    └── Script: Camera
     └── Clear Flags: Solid Color
-    └── Background: Contextual (victory/defeat)
+    └── Background: Contextual (Green for victory, Red for defeat)
 ```
+
+#### Script Configuration:
+- **UIDocument**: Source Asset references EndGame.uxml (to be created)
+- **Camera**: Standard camera with contextual background color
+- **No custom scripts required** - Results handled by GameManager and UIToolkitManager
 
 #### UI Requirements:
 - Election results display
@@ -179,17 +279,22 @@ EndGameScene
 
 ---
 
-### 6. LOADING SCENE (Overlay)
+### 6. LOADING OVERLAY (Built into UIToolkitManager)
 **Purpose**: Async loading progress display
 **Load Type**: Overlay during transitions
+**Implementation**: UIDocument managed by UIToolkitManager singleton
 
-#### Required GameObjects:
+#### Required Configuration in UIToolkitManager:
 ```
-LoadingOverlay
-└── LoadingUI (UIDocument)
-    └── UXML: LoadingScreen.uxml
-    └── USS: LoadingScreen.uss
+UIToolkitManager.loadingUIDocument → References LoadingScreen UIDocument
 ```
+
+#### Loading UIDocument Setup:
+- **GameObject**: LoadingUI (child of UIToolkitManager GameObject)
+- **Script**: UIDocument
+- **Source Asset**: LoadingScreen.uxml
+- **Panel Settings**: Default Runtime Panel Settings
+- **Sort Order**: 100 (appears above game UI)
 
 #### UI Elements Required:
 - `loading-progress` (ProgressBar)
@@ -303,6 +408,67 @@ LoadingUI (Sort Order: 100)
 
 PopupUI (Sort Order: 200)
 └── Modal Dialogs (Center)
+```
+
+---
+
+## 🚨 CRITICAL TROUBLESHOOTING
+
+### Common Setup Errors & Solutions:
+
+**1. NullReferenceException on GameManager.Instance:**
+```
+Problem: Managers not found by GameManager.InitializeGame()
+Solution: Ensure all manager GameObjects exist in Bootstrap scene
+Check: Each manager has correct script attached
+```
+
+**2. UI Elements not updating:**
+```
+Problem: UIDocument references not assigned in UIToolkitManager
+Solution: Drag UI Documents from each scene to UIToolkitManager inspector
+Check: UXML files are properly assigned to UIDocument components
+```
+
+**3. Scene transitions fail:**
+```
+Problem: Scene names don't match Build Settings
+Solution: Verify exact spelling in SceneController scene name fields
+Check: All scenes added to Build Settings in correct order
+```
+
+**4. Cards/Characters/Projects not loading:**
+```
+Problem: ScriptableObject lists not assigned to managers
+Solution: Create ScriptableObject data files and assign to manager lists
+Check: Assets exist in project and are properly referenced
+```
+
+**5. EventBus errors:**
+```
+Problem: Namespace conflicts with new namespaces
+Solution: Add proper using statements to all files
+Check: All scripts compile without errors
+```
+
+### Required Namespace Usage:
+```csharp
+// Add these using statements as needed:
+using Core;           // For GameManager, Singleton, EventBus
+using UI;             // For UIToolkitManager
+using Projects;       // For Project, ProjectManager
+using Relationships;  // For Character, RelationshipManager
+```
+
+### Critical File Locations:
+```
+Scripts/Core/         → Core managers and systems
+Scripts/UI/           → UIToolkitManager
+Scripts/Cards/        → Card system
+Scripts/Projects/     → Project system
+Scripts/Relationships/ → Character system
+UI/UXML/             → UI layout files
+UI/Styles/           → UI styling files
 ```
 
 This guide provides everything needed to set up the Unity scenes correctly with proper manager references and UI configuration!
