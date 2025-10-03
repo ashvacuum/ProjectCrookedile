@@ -58,6 +58,8 @@ Development considerations, systems architecture, and implementation guidelines.
 ### Core Systems
 
 #### 1. Game State Manager
+
+```
 GameState
 ├── CurrentDay (1-45)
 ├── Resources (₱, L, U, H, Support)
@@ -68,9 +70,11 @@ GameState
 ├── ActiveEvents (Event[])
 ├── OpponentStates (Opponent[])
 └── UnlockedContent (Achievement[], Card[], Location[])
-
+```
 
 #### 2. Card Battle System
+
+```
 BattleManager
 ├── PlayerHand (Card[])
 ├── PlayerDeck (Card[])
@@ -82,8 +86,11 @@ BattleManager
 ├── OpponentConfidence (int)
 ├── TurnManager (who's turn, phase)
 └── EffectResolver (resolve card effects, combos)
+```
 
 #### 3. Map/Location System
+
+```
 MapManager
 ├── CurrentLocation (Location)
 ├── AvailableLocations (Location[])
@@ -91,16 +98,22 @@ MapManager
 ├── TravelPaths (Graph structure)
 ├── FastTravelUnlocks (Location[])
 └── RegionalModifiers (Region bonuses/penalties)
+```
 
 #### 4. Event System
+
+```
 EventManager
 ├── EventQueue (Event[])
 ├── EventHistory (CompletedEvent[])
 ├── TriggerConditions (check Heat, Day, U, etc.)
 ├── RandomEventPool (available events)
 └── EventResolver (handle player choices)
+```
 
 #### 5. Resource Manager
+
+```
 ResourceManager
 ├── CampaignFunds (₱)
 ├── Lagay (L)
@@ -110,24 +123,33 @@ ResourceManager
 ├── OriginCurrency (Fear/Clout/Faith/Influence)
 ├── ResourceHistory (transaction log)
 └── ResourceChangeNotifier (UI updates)
+```
 
 #### 6. NPC & Relationship System
+
+```
 RelationshipManager
 ├── NPCDatabase (NPC[])
 ├── RelationshipWeb (Graph<NPC, Relationship>)
 ├── UtangNaLoobLedger (Dictionary<NPC, int>)
 ├── QuestStates (Dictionary<NPC, QuestProgress>)
 └── ReputationCalculator (location reputation)
+```
 
 #### 7. Opponent AI
+
+```
 OpponentAI
 ├── OpponentDeck (Card[])
 ├── Strategy (Aggressive/Defensive/Balanced)
 ├── LocationTargets (where they'll go)
 ├── DecisionMaker (choose cards, locations)
 └── DifficultyScaling (gets harder over time)
+```
 
 #### 8. Meta Progression
+
+```
 ProgressionManager
 ├── PoliticalCapital (int)
 ├── UnlockedOrigins (Origin[])
@@ -136,6 +158,7 @@ ProgressionManager
 ├── Achievements (Achievement[])
 ├── Statistics (career stats)
 └── SaveData (persistent across runs)
+```
 
 ---
 
@@ -174,8 +197,10 @@ ProgressionManager
   "flavorText": "A direct threat.",
   "upgradeId": "intimidate_001_plus"
 }
+```
 
 ### Location Data
+
 ```json
 {
   "id": "barangay_hall_001",
@@ -208,8 +233,10 @@ ProgressionManager
     "multiplier": 1.2
   }
 }
+```
 
 ### Event Data
+
 ```json
 {
   "id": "troll_farm_offer",
@@ -243,10 +270,11 @@ ProgressionManager
     // ... more choices
   ]
 }
+```
 
 ### NPC Data
-```json
 
+```json
 {
   "id": "captain_001",
   "name": "Kapitan Rodriguez",
@@ -278,9 +306,15 @@ ProgressionManager
     "dislikesActions": ["corruption", "violence"]
   }
 }
+```
 
-### UI/UX Design Flow
+---
 
+## UI/UX Design Flow
+
+### Main Menu Flow
+
+```
 Main Menu
 ├── New Run → Origin Selection → Campaign Map
 ├── Continue Run → Campaign Map
@@ -288,33 +322,55 @@ Main Menu
 ├── Achievements → Achievement Gallery
 ├── Statistics → Stats Dashboard
 └── Settings → Options Menu
+```
 
+### Campaign Map Flow
+
+```
 Campaign Map
 ├── Location Select → Location Detail → Activity
 ├── Status Panel (always visible)
 ├── Event Popup → Event Resolution
 └── End Day → Next Day Transition
+```
 
+### Card Battle Flow
+
+```
 Card Battle
 ├── Battle Start → Turn Loop → Battle End
 ├── Hand Display
 ├── Deck/Discard Counters
 ├── Confidence Bars
 └── Effect Animations
+```
 
+### Event Screen Flow
+
+```
 Event Screen
 ├── Event Description
 ├── Choice Buttons
 ├── Consequence Preview (if unlocked perk)
 └── Result Animation
+```
 
-### Key UI Elements
-Status Bar (Always Visible)
+---
+
+## Key UI Elements
+
+### Status Bar (Always Visible)
+
+```
 ╔══════════════════════════════════════════╗
 ║ Day 23/45  ║  ₱4,500  ║  3L  ║  15U  ║
 ║ Support: 6,800/10,000  ║  Heat: 42 🔥  ║
 ╚══════════════════════════════════════════╝
+```
+
 ### Card Display
+
+```
 ┌─────────────────┐
 │ INTIMIDATE      │ ← Card Name
 ├─────────────────┤
@@ -328,7 +384,11 @@ Status Bar (Always Visible)
 ├─────────────────┤
 │ Cost: Free      │ ← Cost
 └─────────────────┘
+```
+
 ### Location Card
+
+```
 ┌───────────────────────┐
 │ BARANGAY HALL         │
 ├───────────────────────┤
@@ -342,16 +402,17 @@ Status Bar (Always Visible)
 │                       │
 │ [Visit] [View Details]│
 └───────────────────────┘
-### Color Coding
+```
 
-₱ (Campaign Funds): Green (#2ecc71)
-L (Lagay): Red (#e74c3c)
-U (Utang na Loob):
+---
 
-Positive: Blue
+## Color Coding
 
-### Color Coding (continued)
-- **U (Utang na Loob)**: 
+### Resource Colors
+
+- **₱ (Campaign Funds)**: Green (#2ecc71)
+- **L (Lagay)**: Red (#e74c3c)
+- **U (Utang na Loob)**:
   - Positive: Blue (#3498db)
   - Negative: Dark Red (#c0392b)
 - **H (Heat)**: 
@@ -361,12 +422,18 @@ Positive: Blue
   - 76-99: Red (#e74c3c)
   - 100+: Flashing Red (animated)
 - **Support**: Progress bar with gradient (green to gold)
+
+### Card Type Colors
+
 - **Card Types**:
   - Attack: Red (#e74c3c)
   - Defense: Blue (#3498db)
   - Charm: Pink (#e91e63)
   - Leverage: Purple (#9b59b6)
   - Power: Gold (#f39c12)
+
+### Card Rarity Colors
+
 - **Card Rarity**:
   - Common: White/Gray
   - Uncommon: Green (#2ecc71)
@@ -505,14 +572,17 @@ Positive: Blue
 - **Keep Filipino terms**: "Utang na Loob," "Lagay," etc. with explanations
 
 #### Technical Implementation
+
+```
 LocalizationManager
 ├── CurrentLanguage (string)
 ├── StringDatabase (Dictionary<string, Dictionary<string, string>>)
 ├── LoadLanguage(string languageCode)
 ├── GetString(string key, string fallback)
 └── GetFormattedString(string key, params object[] args)
+```
 
-### Text Storage
+### Text Storage Example
 ```json
 {
   "en": {
@@ -528,10 +598,15 @@ LocalizationManager
     "event_troll_farm_title": "Alok ng Troll Farm"
   }
 }
+```
 
-Performance Optimization
-Target Specifications
-Minimum Specs
+---
+
+## Performance Optimization
+
+### Target Specifications
+
+#### Minimum Specs
 
 CPU: Dual-core 2.0 GHz
 RAM: 4 GB
@@ -539,7 +614,7 @@ GPU: Integrated graphics (Intel HD 4000 or equivalent)
 Storage: 2 GB
 OS: Windows 10, macOS 10.14, Ubuntu 18.04
 
-Recommended Specs
+#### Recommended Specs
 
 CPU: Quad-core 2.5 GHz
 RAM: 8 GB
@@ -547,53 +622,58 @@ GPU: Dedicated graphics (GTX 750 or equivalent)
 Storage: 2 GB SSD
 OS: Windows 11, macOS 12, Ubuntu 20.04
 
-Optimization Strategies
-Asset Optimization
+### Optimization Strategies
+
+#### Asset Optimization
 
 Textures: Use texture atlases, compress appropriately
 Audio: MP3/OGG for music, WAV for short SFX
 Sprites: Sprite sheets for animations
 Fonts: Limit font families, use bitmap fonts for small text
 
-Code Optimization
+#### Code Optimization
 
 Object pooling: Reuse card objects instead of instantiating
 Lazy loading: Load location data only when needed
 Caching: Cache frequently accessed data (card stats, etc.)
 Async operations: Load assets asynchronously to prevent freezing
 
-Memory Management
+#### Memory Management
 
 Unload unused assets: Clear memory after location changes
 Texture streaming: Load high-res textures only when needed
 Garbage collection: Minimize allocations in hot paths (battle loops)
 
+---
 
-Testing Strategy
-Test Types
-Unit Tests
+## Testing Strategy
+
+### Test Types
+
+#### Unit Tests
 
 Card effects: Each card effect works correctly
 Resource calculations: ₱, L, U, H, Support math accurate
 Event triggers: Conditions trigger correctly
 AI decisions: Opponent AI makes valid moves
 
-Integration Tests
+#### Integration Tests
 
 Battle flow: Full battle from start to finish
 Campaign flow: Full 45-day run simulation
 Save/Load: Data persists correctly
 Event chains: Multi-part events resolve properly
 
-Playtesting
+#### Playtesting
 
 Balance testing: Is game too easy/hard?
 Fun factor: Are players engaged?
 Clarity: Do players understand mechanics?
 Bug hunting: Find edge cases
 
-Test Scenarios
-Critical Path Tests
+### Test Scenarios
+
+#### Critical Path Tests
 
 Full victory run: Play through entire campaign, win
 Full defeat run: Play through, intentionally lose
@@ -601,7 +681,7 @@ Scandal survival: Trigger scandal at 100H, survive
 All endings: Achieve each ending type
 All origins: Win with each origin
 
-Edge Case Tests
+#### Edge Case Tests
 
 Maximum resources: What happens at ₱999,999?
 Minimum resources: What happens at negative U?
@@ -609,17 +689,21 @@ Heat overflow: What if Heat goes above 100 during event?
 Support overflow: What happens above 30,000?
 Empty deck: What if player runs out of cards?
 
-Regression Tests
+#### Regression Tests
 
 After each update: Run automated test suite
 Before release: Full manual playthrough
 Beta testing: Community testing period
 
+---
 
-Development Phases
-Phase 1: Prototype (3-4 months)
-Goals: Prove core loop is fun
-Deliverables:
+## Development Phases
+
+### Phase 1: Prototype (3-4 months)
+
+**Goals:** Prove core loop is fun
+
+**Deliverables:**
 
 Basic card battle system
 2 origins (Strongman, Celebrity)
@@ -630,17 +714,18 @@ Resource management (₱, L, U, H)
 Simple event system
 One complete 45-day run possible
 
-Success Criteria:
+**Success Criteria:**
 
 Battle system feels good
 Deck building is engaging
 Players understand resources
 Core loop is replayable
 
+### Phase 2: Alpha (4-6 months)
 
-Phase 2: Alpha (4-6 months)
-Goals: Complete core content
-Deliverables:
+**Goals:** Complete core content
+
+**Deliverables:**
 
 All 4 origins fully implemented
 100+ cards
@@ -652,17 +737,18 @@ Opponent AI
 Multiple endings
 Basic UI polish
 
-Success Criteria:
+**Success Criteria:**
 
 All origins feel distinct
 Content variety sufficient for replayability
 Balance is reasonable
 No major bugs
 
+### Phase 3: Beta (3-4 months)
 
-Phase 3: Beta (3-4 months)
-Goals: Polish and balance
-Deliverables:
+**Goals:** Polish and balance
+
+**Deliverables:**
 
 Meta progression system
 Achievement system
@@ -675,17 +761,18 @@ UI/UX polish
 Audio implementation
 Localization (English + Filipino)
 
-Success Criteria:
+**Success Criteria:**
 
 Game is fun for 50+ hours
 Balance is good across origins
 Meta progression feels rewarding
 UI is clear and attractive
 
+### Phase 4: Release Candidate (2-3 months)
 
-Phase 4: Release Candidate (2-3 months)
-Goals: Bug fixing and final polish
-Deliverables:
+**Goals:** Bug fixing and final polish
+
+**Deliverables:**
 
 All content complete
 Full testing pass
@@ -695,16 +782,17 @@ Marketing materials
 Platform-specific builds
 Documentation
 
-Success Criteria:
+**Success Criteria:**
 
 No critical bugs
 Performance targets met
 Ready for public release
 
+### Phase 5: Post-Launch Support (Ongoing)
 
-Phase 5: Post-Launch Support (Ongoing)
-Goals: Maintain and expand
-Deliverables:
+**Goals:** Maintain and expand
+
+**Deliverables:**
 
 Bug fixes
 Balance patches
@@ -713,62 +801,69 @@ Regional expansions (DLC)
 Community features
 Quality of life improvements
 
+---
 
-Monetization Strategy
-Base Game Pricing
-Option 1: Premium
+## Monetization Strategy
+
+### Base Game Pricing
+
+#### Option 1: Premium
 
 Price: $14.99 - $19.99
 Model: Pay once, own forever
 Pros: Clean, no predatory practices
 Cons: Higher barrier to entry
 
-Option 2: Free-to-Play (NOT RECOMMENDED for this game)
+#### Option 2: Free-to-Play (NOT RECOMMENDED for this game)
 
 Price: Free
 Model: Cosmetic microtransactions
 Pros: Larger audience
 Cons: Can feel exploitative, harder to balance
 
-Recommendation: Premium pricing with fair DLC model
+**Recommendation:** Premium pricing with fair DLC model
 
-DLC Strategy
-Expansion Packs ($9.99 - $14.99 each)
+### DLC Strategy
+
+#### Expansion Packs ($9.99 - $14.99 each)
 
 Visayas Expansion: New region, 2 origins, 50 cards, 15 locations
 Mindanao Expansion: New region, 2 origins, 50 cards, 15 locations
 Presidential Campaign: Extended mode, new mechanics
 Origin Pack: 3 new origins (The Technocrat, The Activist, The Warlord)
 
-Cosmetic DLC ($2.99 - $4.99)
+#### Cosmetic DLC ($2.99 - $4.99)
 
 Card back designs
 UI themes
 Character portraits
 Location skins
 
-Support DLC ("Tip Jar") ($4.99)
+#### Support DLC ("Tip Jar") ($4.99)
 
 Optional support for developers
 Includes exclusive cosmetics
 All proceeds to development team
 
+---
 
-Platform Strategy
-Primary Platforms
+## Platform Strategy
+
+### Primary Platforms
 
 PC (Steam) - Primary market
 Mac - Via Steam
 Linux - Via Steam
 
-Secondary Platforms
+### Secondary Platforms
 
 Nintendo Switch - Great for turn-based games
 iOS/Android - Mobile port (later)
 PlayStation/Xbox - Console ports (if successful)
 
-Platform-Specific Considerations
-Steam Features:
+### Platform-Specific Considerations
+
+#### Steam Features
 
 Steam Achievements
 Steam Cloud saves
@@ -776,14 +871,14 @@ Steam Workshop (user-generated content)
 Trading cards (optional revenue)
 Leaderboards
 
-Switch Features:
+#### Switch Features
 
 Touch screen support
 Joy-Con controls
 Portable mode optimization
 Nintendo Online integration
 
-Mobile Features:
+#### Mobile Features
 
 Touch-optimized UI
 Portrait or landscape mode
@@ -791,76 +886,86 @@ Offline play essential
 Careful with battery usage
 No predatory monetization
 
+---
 
-Accessibility Features
-Essential Accessibility
-Visual
+## Accessibility Features
+
+### Essential Accessibility
+
+#### Visual
 
 Colorblind modes: Alternative color palettes
 High contrast mode: Increased readability
 Text scaling: Adjustable font sizes
 Screen reader support: Read UI elements aloud
 
-Audio
+#### Audio
 
 Subtitles: All dialogue and narration
 Visual cues: Replace audio cues with visual indicators
 Volume controls: Separate music, SFX, voice volumes
 
-Motor
+#### Motor
 
 Remappable controls: Customize all inputs
 One-handed mode: Can play with one hand
 Reduced animation: Skip/reduce animations
 Auto-play options: Assist modes for difficult sections
 
-Cognitive
+#### Cognitive
 
 Tutorial system: Comprehensive, replayable
 Glossary: In-game reference for all terms
 Difficulty options: Multiple difficulty levels
 Undo button: Allow taking back moves (in single-player)
 
+---
 
-Community Features
-In-Game Features
-Leaderboards
+## Community Features
+
+### In-Game Features
+
+#### Leaderboards
 
 Fastest victories
 Highest Support totals
 Cleanest victories (lowest Heat)
 Daily/Weekly challenges
 
-Sharing
+#### Sharing
 
 Share deck builds (export/import codes)
 Share run summaries (Twitter, Discord integration)
 Screenshot gallery of victories
 
-User-Generated Content (Future)
+#### User-Generated Content (Future)
 
 Custom card designs (balanced by developers)
 Custom events (moderated)
 Custom campaigns (Steam Workshop)
 
-External Community
-Social Media
+### External Community
+
+#### Social Media
 
 Twitter: Announcements, patch notes, community highlights
 Discord: Community hub, support, feedback
 Reddit: Subreddit for discussions
 YouTube: Trailers, dev diaries, gameplay
 
-Content Creators
+#### Content Creators
 
 Press keys: Provide keys to reviewers, streamers
 Creator program: Support fan content
 Tournaments: Sponsored competitive events (if multiplayer)
 
+---
 
-Analytics & Telemetry
-Data Collection (With User Consent)
-Gameplay Metrics
+## Analytics & Telemetry
+
+### Data Collection (With User Consent)
+
+#### Gameplay Metrics
 
 Win/loss rates by origin
 Card usage statistics
@@ -870,37 +975,39 @@ Resource spending patterns
 Location visit frequency
 Event choice distributions
 
-Technical Metrics
+#### Technical Metrics
 
 Crash reports
 Performance data (FPS, load times)
 Hardware specifications
 Platform distribution
 
-Retention Metrics
+#### Retention Metrics
 
 Daily/Weekly active users
 Session length
 Runs completed
 Drop-off points (where players quit)
 
-Privacy Considerations
+### Privacy Considerations
 
 Opt-in: Make telemetry optional
 Anonymous: No personally identifiable information
 Transparent: Explain what data is collected
 GDPR compliant: Follow data protection regulations
 
-Using Analytics
+### Using Analytics
 
 Balance patches: Identify overpowered/underpowered cards
 Difficulty tuning: Find where players struggle
 Content priorities: What content players engage with most
 Bug identification: Common crash points
 
+---
 
-Development Tools & Workflow
-Version Control
+## Development Tools & Workflow
+
+### Version Control
 
 Git: Standard version control
 GitHub/GitLab: Repository hosting, issue tracking
@@ -911,74 +1018,80 @@ develop: Active development
 feature/: Individual features
 hotfix/: Urgent bug fixes
 
-
-
-Project Management
+### Project Management
 
 Trello/Jira: Task tracking
 Agile sprints: 2-week development cycles
 Daily standups: Team sync (if team)
 Weekly reviews: Progress assessment
 
-Build Pipeline
+### Build Pipeline
 
 Automated builds: CI/CD for all platforms
 Testing automation: Run test suite on each commit
 Beta channels: Steam beta branch for testing
 Release checklist: Ensure all steps before release
 
-Documentation
+### Documentation
 
 Design docs: Keep updated (like this document)
 Code documentation: Comment complex systems
 API documentation: For modding support
 Player-facing docs: Manual, FAQ, troubleshooting
 
+---
 
-Risk Mitigation
-Technical Risks
-Risk: Performance issues on low-end hardware
+## Risk Mitigation
 
-Mitigation: Target minimum specs conservatively, optimize early
+### Technical Risks
 
-Risk: Save corruption
+**Risk:** Performance issues on low-end hardware
 
-Mitigation: Multiple backup saves, robust save system, version checking
+**Mitigation:** Target minimum specs conservatively, optimize early
 
-Risk: Balance issues
+**Risk:** Save corruption
 
-Mitigation: Extensive playtesting, analytics, rapid patching
+**Mitigation:** Multiple backup saves, robust save system, version checking
 
-Business Risks
-Risk: Low sales/visibility
+**Risk:** Balance issues
 
-Mitigation: Strong marketing, press outreach, demo release, content creator partnerships
+**Mitigation:** Extensive playtesting, analytics, rapid patching
 
-Risk: Negative reception to satire
+### Business Risks
 
-Mitigation: Clear content warnings, emphasize fictional nature, avoid real politician names
+**Risk:** Low sales/visibility
 
-Risk: Controversy over political content
+**Mitigation:** Strong marketing, press outreach, demo release, content creator partnerships
 
-Mitigation: Balance satire (criticize all sides equally), focus on systems not individuals
+**Risk:** Negative reception to satire
 
-Content Risks
-Risk: Cultural insensitivity
+**Mitigation:** Clear content warnings, emphasize fictional nature, avoid real politician names
 
-Mitigation: Filipino cultural consultants, sensitivity readers, community feedback
+**Risk:** Controversy over political content
 
-Risk: Content becomes dated
+**Mitigation:** Balance satire (criticize all sides equally), focus on systems not individuals
 
-Mitigation: Timeless satire of political archetypes rather than current events
+### Content Risks
 
-Risk: Scope creep
+**Risk:** Cultural insensitivity
 
-Mitigation: Strict feature prioritization, MVP mindset, post-launch content plan
+**Mitigation:** Filipino cultural consultants, sensitivity readers, community feedback
 
+**Risk:** Content becomes dated
 
-Quality Assurance Checklist
-Pre-Release QA
-Functionality
+**Mitigation:** Timeless satire of political archetypes rather than current events
+
+**Risk:** Scope creep
+
+**Mitigation:** Strict feature prioritization, MVP mindset, post-launch content plan
+
+---
+
+## Quality Assurance Checklist
+
+### Pre-Release QA
+
+#### Functionality
 
  All 4 origins playable start to finish
  All cards functional
@@ -988,7 +1101,7 @@ Functionality
  Save/Load works correctly
  No critical bugs
 
-Balance
+#### Balance
 
  All origins have ~45-55% win rate
  No obviously overpowered cards
@@ -996,7 +1109,7 @@ Balance
  Difficulty curve appropriate
  Late game is challenging but fair
 
-Polish
+#### Polish
 
  All UI elements functional
  All text proofread
@@ -1005,7 +1118,7 @@ Polish
  Performance targets met
  Accessibility features working
 
-Platforms
+#### Platforms
 
  Windows build tested
  Mac build tested
@@ -1013,16 +1126,18 @@ Platforms
  Steam integration working
  Achievements unlocking correctly
 
-Localization
+#### Localization
 
  English text complete and polished
  Filipino text complete and accurate
  All text displays correctly (no overflow)
  Cultural terms explained
 
+---
 
-Launch Checklist
-Pre-Launch (1 Month Before)
+## Launch Checklist
+
+### Pre-Launch (1 Month Before)
 
  Store page live (Steam)
  Press kit prepared
@@ -1032,7 +1147,7 @@ Pre-Launch (1 Month Before)
  Demo available (optional)
  Trailer released
 
-Launch Week
+### Launch Week
 
  Final build uploaded
  All platforms tested
@@ -1041,7 +1156,7 @@ Launch Week
  Marketing push (social media, ads)
  Streamer outreach
 
-Post-Launch (First Week)
+### Post-Launch (First Week)
 
  Monitor crash reports
  Gather community feedback
@@ -1050,9 +1165,11 @@ Post-Launch (First Week)
  Plan first content update
  Thank you message to community
 
+---
 
-Success Metrics
-Launch Targets (First Month)
+## Success Metrics
+
+### Launch Targets (First Month)
 
 Sales: 10,000 units (breakeven)
 Reviews: 80%+ positive on Steam
@@ -1060,7 +1177,7 @@ Engagement: Average 15+ hours played
 Retention: 40%+ return within week
 Community: 1,000+ Discord members
 
-Long-Term Targets (First Year)
+### Long-Term Targets (First Year)
 
 Sales: 100,000 units
 Reviews: 85%+ positive (Very Positive on Steam)
@@ -1068,9 +1185,11 @@ Engagement: Average 30+ hours played
 DLC: 2 expansions released
 Community: 10,000+ Discord members, active modding scene
 
+---
 
-Contingency Plans
-If Launch Fails
+## Contingency Plans
+
+### If Launch Fails
 
 Pivot to free demo + paid full game
 Heavy discounts during sales
@@ -1078,7 +1197,7 @@ Free content updates to rebuild goodwill
 Focus on community building
 Consider early access model for DLC
 
-If Launch Succeeds Beyond Expectations
+### If Launch Succeeds Beyond Expectations
 
 Hire additional developers for faster content
 Expand to more platforms quickly
@@ -1086,10 +1205,19 @@ Accelerate DLC timeline
 Consider multiplayer features
 Plan sequel or spin-offs
 
+---
 
-Technical implementation should prioritize: 1) Core gameplay feel, 2) Performance, 3) Replayability, 4) Polish
+## Implementation Priorities
 
-Final Notes
+Technical implementation should prioritize:
+1. **Core gameplay feel** - Card battles must be satisfying
+2. **Performance** - Run smoothly on minimum specs
+3. **Replayability** - Meta progression and variety
+4. **Polish** - Professional presentation
+
+---
+
+## Final Notes
 This technical document provides a roadmap for implementation. Adjust based on:
 
 Team size and expertise
@@ -1098,23 +1226,8 @@ Timeline requirements
 Platform priorities
 Market feedback
 
-Remember: Ship a small, polished game rather than a large, buggy one.
-Start with the core loop (card battles + map navigation + resources), make it fun, then expand.
+**Remember:** Ship a small, polished game rather than a large, buggy one. Start with the core loop (card battles + map navigation + resources), make it fun, then expand.
 
 ---
 
-# Documentation Complete
-
-All design documents are now complete:
-
-1. ✅ **README.md** - Overview and quick start
-2. ✅ **GAME_OVERVIEW.md** - Core mechanics and game loop
-3. ✅ **ORIGINS.md** - Four playable character classes
-4. ✅ **RESOURCES.md** - Resource management systems
-5. ✅ **CARDS.md** - Complete card system
-6. ✅ **LOCATIONS.md** - Map locations and mechanics
-7. ✅ **EVENTS.md** - Random events and special mechanics
-8. ✅ **PROGRESSION.md** - Roguelike and meta progression
-9. ✅ **TECHNICAL.md** - Implementation notes
-
-These documents provide a comprehensive design blueprint for your Philippine political card game. You can now use these with Claude Code or any development team to start building the game. Each document is modular and can be updated independently as the design evolves.
+**Navigation:** [🏠 Home](README.md) | [Game Overview](game_overview.md) | [All Design Docs](README.md#-game-design-documentation)
