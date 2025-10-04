@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
+  m_Name: 01
+  m_EditorClassIdentifier: 
+  _id: 7f92c27c-6a42-4453-87be-bd019b29c760
+  _cardName: 
+  _cardType: 0
+  _rarity: 0
+  _artwork: {fileID: 0}
+  _description: 
+  _flavorText: 
+  _costs:
+  - _costType: 0
+    _baseAmount: 0
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _effects:
+  - _category: 0
+    _target: 1
+    _damageType: 0
+    _damageAmount: 3
+    _randomDamageMax: 9
+    _resourceType: 0
+    _resourceAmount: 3
+    _cardManipulationType: 0
+    _cardAmount: 2
+    _statusEffectType: 0
+    _statusStacks: 2
+    _statusDuration: 0
+  _tier: 0
+  _isUpgraded: 0
+  _upgradedVersion: {fileID: 0}
+  _upgradeCost: 50
+  _tags: []
+  _isStarterCard: 0
+  _isUnlockable: 0

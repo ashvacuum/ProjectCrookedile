@@ -46,16 +46,6 @@ namespace Crookedile.Data.Cards
         }
 
         /// <summary>
-        /// Gets all cards of a specific tier.
-        /// </summary>
-        /// <param name="tier">Tier to filter by (Basic, Enhanced, Rare)</param>
-        /// <returns>List of cards matching the tier</returns>
-        public List<CardData> GetByTier(CardTier tier)
-        {
-            return FindAll(card => card.Tier == tier);
-        }
-
-        /// <summary>
         /// Gets all cards of a specific rarity.
         /// </summary>
         /// <param name="rarity">Rarity to filter by (Common, Uncommon, Rare, Legendary)</param>
@@ -161,11 +151,6 @@ namespace Crookedile.Data.Cards
                 results = results.Where(c => query.Rarities.Contains(c.Rarity)).ToList();
             }
 
-            if (query.Tiers != null && query.Tiers.Count > 0)
-            {
-                results = results.Where(c => query.Tiers.Contains(c.Tier)).ToList();
-            }
-
             if (query.Tags != null && query.Tags.Count > 0)
             {
                 if (query.RequireAllTags)
@@ -224,10 +209,9 @@ namespace Crookedile.Data.Cards
             {
                 float weight = card.Rarity switch
                 {
-                    CardRarity.Common => 60f,
-                    CardRarity.Uncommon => 30f,
+                    CardRarity.Basic => 60f,
+                    CardRarity.Enhanced => 30f,
                     CardRarity.Rare => 9f,
-                    CardRarity.Legendary => 1f,
                     _ => 1f
                 };
                 weights.Add(weight);
@@ -279,9 +263,6 @@ namespace Crookedile.Data.Cards
         [Tooltip("Filter by rarity. Cards matching ANY rarity will be included.")]
         public List<CardRarity> Rarities;
 
-        [Tooltip("Filter by tier (Basic, Enhanced, Rare). Cards matching ANY tier will be included.")]
-        public List<CardTier> Tiers;
-
         [Tooltip("Filter by tags. Use RequireAllTags to control AND vs OR logic.")]
         public List<string> Tags;
 
@@ -310,7 +291,6 @@ namespace Crookedile.Data.Cards
         {
             CardTypes = new List<CardType>();
             Rarities = new List<CardRarity>();
-            Tiers = new List<CardTier>();
             Tags = new List<string>();
         }
     }

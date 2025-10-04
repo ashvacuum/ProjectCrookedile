@@ -6,7 +6,9 @@
       "Bash(tree:*)",
       "Bash(dir:*)",
       "Bash(findstr:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "WebSearch",
+      "WebFetch(domain:potionomics.fandom.com)"
     ],
     "deny": [],
     "ask": []

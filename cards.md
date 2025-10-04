@@ -1,12 +1,12 @@
 # Card System
 
-[<� Home](README.md) | [=� Full Documentation](README.md#-game-design-documentation)
+[← Home](README.md) | [≡ Full Documentation](README.md#-game-design-documentation)
 
 **Related:** [Game Overview](game_overview.md) | [Origins](origins.md) | [Resources](resources.md) | [Locations](locations.md)
 
 ---
 
-Complete card system breakdown for the political deck-building game.
+Complete card system breakdown for the political deck-building game inspired by Griftlands.
 
 ## Table of Contents
 
@@ -22,45 +22,50 @@ Complete card system breakdown for the political deck-building game.
 
 ## Card Types
 
-### Attack Cards
-Deal confidence damage to opponents in card battles.
+**Three card types inspired by Griftlands negotiation system:**
+
+### Diplomacy Cards (Green)
+Peaceful persuasion tactics that build relationships and avoid conflict.
+
+**Mechanics:**
+- Deal Resolve damage (the "HP" in negotiations)
+- Build Composure (offensive buff)
+- Low/no Hostility generation
+- Focus on sustainable damage and alliances
 
 **Examples:**
-- **Intimidate** - Basic attack, +1 Heat
-- **Regulatory Pressure** - Bureaucratic attack
-- **Nanlaban** (Strongman) - Remove enemy card permanently, +50 Heat
+- **Find Common Ground** - Basic persuasion (3 Resolve damage)
+- **Blessing** - Convert Composure to burst damage (Faith Leader)
+- **Family Name** - Leverage family reputation (Nepo Baby)
 
-### Defense Cards
-Block or mitigate incoming attacks and effects.
+### Hostility Cards (Red)
+Aggressive tactics using threats, pressure, and confrontation.
 
-**Examples:**
-- **Plausible Deniability** - Block damage with excuses
-- **Blessing** (Religious Leader) - Defend with moral authority
-- **Privilege** (Nepo Baby) - Ignore criticism
-
-### Charm Cards
-Win over supporters and NPCs through charisma and persuasion.
+**Mechanics:**
+- Deal higher Resolve damage
+- Build Hostility (self-inflicted debuff)
+- Risk/reward: stronger effects but opponent hits harder
+- Creates enemies when used heavily
 
 **Examples:**
-- **Photogenic Smile** (Celebrity) - Highly effective charm
-- **Sermon** (Religious Leader) - Powerful persuasion
-- **Small Gift** - Basic bribery
+- **Accusation** - Direct attack (4 Resolve damage, gain 1 Hostility)
+- **Bold Accusation** - Aggressive pressure (5 damage, gain 2 Hostility)
+- **Spotlight Hog** - Vain aggression (6 damage, gain Composure, gain Hostility)
 
-### Leverage Cards
-Manipulate situations, gather information, and create advantages.
+### Manipulate Cards (Purple)
+Utility cards for resource advantage, card draw, and tactical plays.
+
+**Mechanics:**
+- Card draw/discard
+- Action Point manipulation
+- Composure building
+- Hostility management
+- Hand/deck manipulation
 
 **Examples:**
-- **Tsismis Network** - See enemy hand
-- **Dynasty Network** (Nepo Baby) - Call in favors
-- **Prophecy** (Religious Leader) - See opponent's next 3 cards
-
-### Power Cards
-Game-changing effects with significant consequences.
-
-**Examples:**
-- **Tokhang** (Strongman) - Massive attack, huge Heat gain
-- **Crusade** (Religious Leader) - Convert all Charm to Support
-- **Helicopter Money** (Nepo Baby) - Convert � to Support instantly
+- **Call in Favor** - Draw 2 cards
+- **Gather Thoughts** - Gain 4 Composure
+- **High Stakes** - Discard hand, draw 3 cards (Actor risk card)
 
 ---
 
@@ -70,6 +75,7 @@ Game-changing effects with significant consequences.
 - Basic cards found frequently
 - Foundation of most decks
 - Lower power but reliable
+- Most starter deck cards are Common
 
 ### Uncommon (Green)
 - Enhanced effects or situational power
@@ -91,130 +97,155 @@ Game-changing effects with significant consequences.
 
 ## Card Mechanics
 
+### Battle Resources
+
+**IMPORTANT: In battle, cards interact with three resources:**
+
+#### Resolve (HP)
+- Both you and opponent have Resolve (~20 starting)
+- Reduce to 0 = Win/Lose
+- Primary target of card damage
+- Can be healed by certain cards
+
+#### Composure (Offensive Buff)
+- Build Composure with Manipulate/Diplomacy cards
+- Each stack = +1 damage on next attack
+- Consumed when dealing damage
+- Faith Leader specialty: Convert all Composure → burst damage
+
+#### Hostility (Self-Inflicted Debuff)
+- Gained from playing aggressive red cards
+- Higher Hostility = Opponent deals MORE damage to your Resolve
+- Formula: Opponent damage × (1 + Hostility × 0.5)
+- Actor specialty: Convert Hostility → Composure
+
 ### Cost Types
 
-**IMPORTANT: In battle, cards ONLY cost Action Points (or are free). Other resources are meta-game only.**
+**In battle, cards ONLY cost Action Points (or are free).**
 
 #### Battle Costs (Playing Cards)
 - **Free (0 AP)** - No Action Points required
-- **Fixed Cost (1-3 AP)** - Costs specific amount
-- **X Cost** - Costs ALL remaining Action Points
-- **Dynamic Cost** - Changes per turn:
-  - Delayed Power: Starts expensive, gets cheaper each turn held
-  - Urgency: Starts cheap, gets more expensive each turn held
+- **Fixed Cost (1-2 AP)** - Costs specific amount
 
 #### Meta Resources (Outside Battle)
 - **Funds** - Buy cards at shops, pay for events
-- **Heat (H)** - Scandal meter (lose condition)
+- **Heat** - Scandal meter (lose condition)
 - **Influence** - Political power (win condition)
-- **Fear/Clout/Faith** - Origin-specific abilities (not card costs)
 
 ### Card Effects
 
 #### Battle Effects (In-Combat)
-- **Confidence Damage** - Reduce opponent's shield (must break before Ego damage)
-- **Ego Damage** - Direct HP damage (only when Confidence is 0)
-- **Confidence Restore** - Rebuild your shield
-- **Ego Restore** - Direct healing
-- **Gain Block** - Temporary damage reduction (expires end of turn)
-- **Draw Cards** - Draw from your deck
-- **Discard Cards** - Force opponent to discard
-- **Gain Action Points** - Extra energy this turn
-- **Apply Buff/Debuff** - Status effects
+- **Resolve Damage** - Reduce opponent's Resolve (HP)
+- **Composure Gain** - Build offensive buff stacks
+- **Hostility Gain** - Self-inflicted risk (opponent deals more damage)
+- **Hostility Reduction** - Manage risk
+- **Card Draw** - Draw from deck
+- **Card Discard** - Hand manipulation
+- **Action Point Gain** - Extra energy
 
 #### Campaign Effects (Post-Battle)
 - **Gain/Lose Funds** - Economic impact
-- **Gain/Lose Heat (H)** - Scandal consequences
+- **Gain/Lose Heat** - Scandal consequences
 - **Gain/Lose Influence** - Political power shifts
+- **Create Ally/Enemy** - Relationship changes based on Hostility used
 - **Add/Remove Cards** - Deck building
 - **Unlock Content** - New locations, cards, events
 
-**Note:** Cards can have BOTH battle and campaign effects! Example: Deal damage AND gain Heat.
+**Note:** Battle outcome determines relationship changes:
+- Low Hostility = Diplomatic victory → Ally
+- High Hostility = Aggressive victory → Enemy, better rewards, +Heat
 
-### Combo Mechanics
-Cards can chain together for enhanced effects:
-- **Synergy Bonus** - Multiple cards of same type
-- **Origin Bonus** - Cards matching your origin
-- **Resource Threshold** - Bonus at certain resource levels
+### Special Mechanics
+
+#### Combo Cards
+- **Faith Leader's Blessing**: Deal damage = Composure, consume all Composure (build → burst)
+- **Actor's Ego Trip**: Gain Composure = Hostility, don't reduce Hostility (convert risk → power)
+
+#### Risk/Reward Cards (Actor specialty)
+- **Random effects**: Deal 3-9 damage (All or Nothing)
+- **Probability**: 50% chance to draw card (Charming Gambit)
+- **High Stakes**: Discard hand, draw 3 cards
 
 ---
 
 ## Starter Decks
 
-### Strongman Starting Deck (15 cards)
-- 4� Intimidate (Attack)
-- 3� Show of Force (Attack)
-- 2� Tough Guy (Defense)
-- 2� Law & Order Speech (Charm)
-- 2� Strongarm (Leverage)
-- 1� Tokhang (Power)
-- 1� Curfew (Power)
+Each origin starts with **10 cards total**, differentiated by card type distribution and one unique passive ability.
 
-### Celebrity Starting Deck (15 cards)
-- 2� Photogenic Smile (Charm)
-- 3� Viral Content (Charm)
-- 2� Celebrity Endorsement (Charm)
-- 2� Pretty Face (Defense)
-- 2� Social Media Clap Back (Attack)
-- 2� Influencer Network (Leverage)
-- 1� Scandal Pivot (Leverage)
-- 1� Concert Rally (Power)
+### Faith Leader - "The Peacemaker" (10 cards)
+- **Passive**: "Divine Grace" - Start each negotiation with +1 card draw (6 cards instead of 5)
+- **Deck**: 6 Diplomacy, 2 Hostility, 2 Manipulate
+- **Playstyle**: Composure combo specialist (build Composure → burst with Blessing)
 
-### Religious Leader Starting Deck (15 cards)
-- 4� Sermon (Charm)
-- 3� Blessing (Defense)
-- 2� Faith Healing (Defense)
-- 2� Divine Judgment (Attack)
-- 2� Prayer Circle (Leverage)
-- 1� Prophecy (Leverage)
-- 1� Crusade (Power)
+**Cards:**
+1-4. **Find Common Ground** (1 AP) x4 - Deal 3 Resolve damage
+5-6. **Blessing** (1 AP) x2 - Deal damage = Composure, consume all Composure
+7-8. **Accusation** (1 AP) x2 - Deal 4 damage, gain 1 Hostility
+9. **Deflect** (1 AP) x1 - Gain 3 Composure, reduce Hostility by 1
+10. **Gather Thoughts** (1 AP) x1 - Gain 4 Composure
 
-### Nepo Baby Starting Deck (15 cards)
-- 2� Family Name (Charm)
-- 2� Daddy's Money (Leverage)
-- 3� Dynasty Network (Leverage)
-- 2� Inherited Loyalty (Defense)
-- 2� Privilege (Defense)
-- 2� Tantrum (Attack)
-- 1� Trust Fund (Power)
-- 1� Political Machine (Power)
+### Nepo Baby - "The Operator" (10 cards)
+- **Passive**: "Family Connections" - Start with 4 AP instead of 3
+- **Deck**: 3 Diplomacy, 2 Hostility, 5 Manipulate
+- **Playstyle**: Card/AP advantage engine
+
+**Cards:**
+1-2. **Family Name** (1 AP) x2 - Deal 3 Resolve damage
+3. **Inherited Privilege** (2 AP) x1 - Deal 5 damage, draw 1 card
+4-5. **Pull Strings** (1 AP) x2 - Deal 4 damage, gain 1 Hostility
+6-7. **Call in Favor** (1 AP) x2 - Draw 2 cards
+8. **Backroom Deal** (2 AP) x1 - Draw 2 cards, gain 1 AP next turn
+9. **Dynasty Network** (1 AP) x1 - Discard 1, draw 2
+10. **Trust Fund** (0 AP) x1 - Gain 2 Composure, gain 1 AP this turn
+
+### Actor - "The Risk Taker" (10 cards)
+- **Passive**: "Stage Presence" - First card each turn costs 1 less AP
+- **Deck**: 3 Diplomacy, 4 Hostility, 3 Manipulate
+- **Playstyle**: Risk/reward specialist, Hostility → Composure conversion
+
+**Cards:**
+1-2. **Charming Gambit** (1 AP) x2 - Deal 3 damage, 50% chance: draw 1 card
+3. **All or Nothing** (2 AP) x1 - Deal 3-9 damage (random)
+4-5. **Bold Accusation** (1 AP) x2 - Deal 5 damage, gain 2 Hostility
+6-7. **Spotlight Hog** (2 AP) x2 - Deal 6 damage, gain 3 Composure, gain 2 Hostility
+8. **High Stakes** (0 AP) x1 - Discard hand, draw 3 cards
+9. **Ego Trip** (1 AP) x1 - Gain Composure = Hostility, don't reduce Hostility
+10. **Fan Favorite** (1 AP) x1 - Lose 3 Composure, reduce Hostility by 3
 
 ---
 
 ## Card Acquisition
 
-### During Runs
-- **Battle Rewards** - Win battles to choose from 3 random cards
-- **Shop Purchases** - Buy cards with � at locations
+### During Runs (Griftlands-inspired)
+- **Battle Rewards** - Win negotiations to choose from 3 random cards
+- **Ally Cards** - Allies give their signature card to your deck
+- **Shop Purchases** - Buy cards with Funds at locations
 - **Event Rewards** - Special cards from events
 - **Quest Completion** - Unique cards from NPC questlines
-- **Location Ownership** - Special cards for controlling areas
 
 ### Card Removal
-- **Church Confession** - Remove cards for �200, -10H
-- **Card Workshop** - Spend resources to remove unwanted cards
+- **Rest Sites** - Remove cards from deck (limit 1 per rest)
+- **Special Events** - Remove unwanted cards for cost
 
 ---
 
 ## Card Upgrade System
 
 ### Standard Upgrades
-- **+1 Version** - Enhanced effect (e.g., Intimidate � Intimidate+)
-- **Cost Reduction** - Lower resource requirements
-- **Reduced Drawback** - Less Heat or other penalties
+- **+ Version** - Enhanced effect (e.g., Find Common Ground → Find Common Ground+)
+- **Cost Reduction** - Lower AP requirements
+- **Increased Effect** - More damage, more Composure, etc.
+- **Added Effect** - Gain additional benefits
 
-### Card Fusion
-Combine two cards to create powerful hybrids:
-- **Requirements** - Both cards in deck, �500+
-- **Result** - Random fusion based on card types
-- **Rarity** - Usually one tier higher
+**Upgrade Examples:**
+- Find Common Ground: 3 damage → 5 damage
+- Blessing: Deal Composure damage → Deal Composure damage + don't consume
+- Accusation: 4 damage, 1 Hostility → 6 damage, 1 Hostility
 
-### Origin Upgrades
-Special upgrades only available to specific origins:
-- **Strongman** - Increased damage, Fear generation
-- **Celebrity** - Clout synergies, viral effects
-- **Religious Leader** - Faith bonuses, moral authority
-- **Nepo Baby** - Influence scaling, dynasty perks
+### Upgrade Opportunities
+- **Rest Sites** - Upgrade 1 card per rest (alternative to removal)
+- **Special Events** - Upgrade opportunities through story
+- **Shops** - Pay Funds to upgrade cards
 
 ---
 
@@ -222,34 +253,59 @@ Special upgrades only available to specific origins:
 
 ### Archetypes
 
-**Aggro (Fast Attack)**
-- Focus on Attack cards
-- Quick battles
-- High Heat risk
-- Best for: Strongman
+**Diplomatic Builder (Faith Leader)**
+- Focus on Diplomacy cards (green)
+- Build Composure → Blessing for burst
+- Low Hostility = create allies
+- Slower but safer victories
+- **Best for:** Faith Leader
 
-**Control (Defense & Leverage)**
-- Manipulation and information
-- Longer battles
-- Lower Heat
-- Best for: Nepo Baby
+**Resource Engine (Nepo Baby)**
+- Focus on Manipulate cards (purple)
+- Card advantage and AP manipulation
+- Flexible responses to any situation
+- Extra AP enables big turns
+- **Best for:** Nepo Baby
 
-**Charm Engine (Relationship Building)**
-- Focus on Charm cards
-- Win through persuasion
-- Build Utang na Loob
-- Best for: Celebrity, Religious Leader
+**Aggressive Gambler (Actor)**
+- Focus on Hostility cards (red)
+- High risk, high reward
+- Convert Hostility → Composure
+- Manage risk with Fan Favorite
+- **Best for:** Actor
 
 **Hybrid (Balanced)**
-- Mix of all types
+- Mix of all card types
 - Adaptable to situations
 - Moderate risk
-- Best for: Any origin
+- **Best for:** Any origin
 
 ### Deck Size Management
-- **Minimum:** 15 cards
+- **Starting:** 10 cards
+- **Minimum:** 10 cards (can't go below)
 - **Maximum:** 30 cards
-- **Optimal:** 18-22 cards (consistency vs. variety)
+- **Optimal:** 12-18 cards (consistency vs. variety)
+
+### Ally/Enemy Network Strategy
+
+**Creating Allies (Low Hostility):**
+- Play mostly Diplomacy/Manipulate cards
+- Avoid Hostility cards when possible
+- Ally gives signature card
+- Passive bonuses in future battles
+- Lower immediate rewards
+
+**Creating Enemies (High Hostility):**
+- Play Hostility cards aggressively
+- Higher Resolve damage, faster wins
+- Enemy opposes you in future battles
+- Better rewards (Funds, Influence)
+- Gain Heat (scandal)
+
+**Strategic Consideration:**
+- Early game: Create allies (build deck, get bonuses)
+- Late game: Can afford enemies (strong deck, need rewards)
+- Actor can handle high Hostility (convert to Composure)
 
 ---
 
@@ -257,6 +313,8 @@ Special upgrades only available to specific origins:
 
 *See [Technical Notes](technical.md#card-data) for data structure and implementation details.*
 
+*See [Battle System](BATTLE_SYSTEM.md) for complete battle mechanics and flow.*
+
 ---
 
-**Navigation:** [<� Home](README.md) | [Game Overview](game_overview.md) | [Origins](origins.md) | [Resources](resources.md)
+**Navigation:** [← Home](README.md) | [Game Overview](game_overview.md) | [Origins](origins.md) | [Resources](resources.md)

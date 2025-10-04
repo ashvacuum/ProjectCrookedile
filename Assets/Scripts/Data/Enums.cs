@@ -1,37 +1,25 @@
 namespace Crookedile.Data
 {
     /// <summary>
-    /// Card types following Slay the Spire model.
-    /// Attack = damage, Skill = utility/defense, Power = passive effects.
+    /// Card types following Griftlands negotiation model.
+    /// Diplomacy = peaceful persuasion, Hostility = aggressive tactics, Manipulate = utility/resources.
     /// </summary>
     public enum CardType
     {
-        Attack,     // Deals damage to Confidence or Ego
-        Skill,      // Utility: block, draw, healing, manipulation
-        Power       // Big effects, usually expensive or risky
+        Diplomacy,   // Green - Peaceful persuasion, build relationships
+        Hostility,   // Red - Aggressive tactics, threats, pressure
+        Manipulate   // Purple - Utility, card draw, resource manipulation
     }
 
     /// <summary>
-    /// Card rarity determines acquisition chance and power level.
+    /// Card rarity determines acquisition chance, power level, and visual frame.
     /// </summary>
     public enum CardRarity
     {
-        Common,
-        Uncommon,
-        Rare,
-        Legendary
-    }
-
-    /// <summary>
-    /// Card frame/tier following Slay the Spire model.
-    /// Each tier is separate - Basic upgrades to Basic+, Enhanced to Enhanced+, etc.
-    /// Higher tiers are acquired through gameplay (beating opponents, crises, thresholds).
-    /// </summary>
-    public enum CardTier
-    {
-        Basic,      // Common cards from shops and basic rewards
-        Enhanced,   // Gained from beating normal opponents
-        Rare        // Gained from crises, thresholds, special events
+        Basic,     // Basic cards from shops and starter decks
+        Enhanced,   // Enhanced effects, moderate acquisition difficulty
+        Rare,       // Powerful effects, harder to acquire
+        Legendary   // Game-changing abilities, very rare
     }
 
     /// <summary>
@@ -62,29 +50,56 @@ namespace Crookedile.Data
     /// </summary>
     public enum BattleEffectType
     {
-        // Damage Types
-        ConfidenceDamage,       // Damage opponent's Confidence (shield breaking)
-        EgoDamage,              // Damage opponent's Ego (amplified when Confidence is low)
+        // Core Damage/Healing
+        ResolveDamage,                  // Damage opponent's Resolve (HP)
+        ResolveHeal,                    // Restore your Resolve (HP)
+        RandomDamage,                   // Deal random damage (Actor All or Nothing)
 
-        // Healing Types
-        ConfidenceRestore,      // Restore your Confidence (rebuild shield)
-        EgoRestore,             // Restore your Ego (direct healing)
+        // Composure (Offensive Buff)
+        GainComposure,                  // Build Composure stacks (+damage)
+        LoseComposure,                  // Lose Composure stacks
+        ResolveDamageEqualToComposure,  // Deal damage = Composure (Faith Leader Blessing)
+        ConsumeAllComposure,            // Remove all Composure stacks
+
+        // Hostility (Self-Inflicted Debuff)
+        GainHostility,                  // Gain Hostility (opponent deals more damage)
+        ReduceHostility,                // Reduce Hostility stacks
+        ComposureEqualToHostility,      // Gain Composure = Hostility (Actor Ego Trip)
 
         // Resource Types
-        GainActionPoints,       // Gain extra action points this turn
-        DrawCards,              // Draw cards from deck
-        DiscardCards,           // Discard cards from hand (self or opponent)
+        GainActionPoints,               // Gain extra action points this turn
+        GainActionPointsNextTurn,       // Gain AP next turn (Nepo Baby Backroom Deal)
+        DrawCards,                      // Draw cards from deck
+        DiscardCards,                   // Discard cards from hand (self or opponent)
 
-        // Defense Types
-        GainBlock,              // Temporary damage reduction this turn
+        // Status Effects - Debuffs
+        ApplyWeakened,                  // Deal X less damage
+        ApplyVulnerable,                // Take 50% more damage
+        ApplyFrail,                     // Gain 25% less Composure
+        ApplyEntangled,                 // Cards cost +1 AP
+        ApplyExposed,                   // Next attack deals double damage
+        ApplyScandal,                   // Take X damage at end of turn
+        ApplyConfused,                  // Random card costs +1 AP each turn
+        ApplySilenced,                  // Cannot play Manipulate cards
 
-        // Status Effects
-        ApplyBuff,              // Positive status effect (increases stats)
-        ApplyDebuff,            // Negative status effect (decreases stats)
+        // Status Effects - Buffs
+        ApplyStrength,                  // Deal X more damage
+        ApplyDexterity,                 // Gain X more Composure per card
+        ApplyFocus,                     // Cards cost X less AP (this turn only)
+        ApplyEnergized,                 // Draw X extra cards next turn
+        ApplyPlated,                    // Reduce incoming damage by X
+        ApplyRegeneration,              // Heal X Resolve at end of turn
+        ApplyIntangible,                // Take only 1 damage from attacks
+        ApplyThorns,                    // Deal X damage back when attacked
+
+        // Status Effects - Special
+        ApplyBlock,                     // Temporary damage reduction
+        ApplyRitual,                    // Gain X Composure at start of turn
+        ApplyMomentum,                  // Gain X damage per card played this turn
+        ApplyEcho,                      // Next card is played twice
 
         // Special
-        DestroyCard,            // Remove a card from play permanently
-        ExhaustCard             // Remove card from deck until end of battle
+        ExhaustCard                     // Remove card from deck until end of battle
     }
 
     /// <summary>
@@ -135,13 +150,14 @@ namespace Crookedile.Data
 
     /// <summary>
     /// Battle-specific resources that exist only during card battles.
+    /// Griftlands-inspired negotiation resources.
     /// </summary>
     public enum BattleResourceType
     {
-        Ego,            // True HP - lose battle if this reaches 0
-        Confidence,     // Shield/multiplier - protects Ego, affects Ego damage vulnerability
-        ActionPoints,   // Energy to play cards each turn
-        Block           // Temporary damage reduction (expires end of turn)
+        Resolve,        // HP - Both player and opponent have this (reduce to 0 = win/lose)
+        Composure,      // Offensive buff - Each stack = +1 damage (consumed on attack)
+        Hostility,      // Self-inflicted debuff - Opponent deals more damage based on this
+        ActionPoints    // Energy to play cards each turn (3-4 depending on origin)
     }
 
     public enum GamePhase

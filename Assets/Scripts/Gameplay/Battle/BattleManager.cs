@@ -109,8 +109,8 @@ namespace Crookedile.Gameplay.Battle
             OriginBattleStats opponentStats = setup.GetOpponentStats();
 
             // Initialize combatant stats
-            _playerStats = new BattleStats(playerStats.maxEgo, playerStats.maxConfidence, playerStats.maxActionPoints);
-            _opponentStats = new BattleStats(opponentStats.maxEgo, opponentStats.maxConfidence, opponentStats.maxActionPoints);
+            _playerStats = new BattleStats(playerStats.maxResolve, playerStats.maxActionPoints);
+            _opponentStats = new BattleStats(opponentStats.maxResolve, opponentStats.maxActionPoints);
             _playerOrigin = setup.playerOrigin;
             _opponentOrigin = setup.opponentOrigin;
 
@@ -251,8 +251,9 @@ namespace Crookedile.Gameplay.Battle
                 {
                     isVictory = opponentDefeated,
                     turnsToWin = _currentTurn,
-                    finalPlayerEgo = _playerStats.CurrentEgo,
-                    finalPlayerConfidence = _playerStats.CurrentConfidence
+                    finalPlayerResolve = _playerStats.CurrentResolve,
+                    finalPlayerComposure = _playerStats.CurrentComposure,
+                    finalPlayerHostility = _playerStats.CurrentHostility
                 };
 
                 GameLogger.LogInfo("BattleManager", $"Battle ended: {(_battleResult.isVictory ? "Victory" : "Defeat")} in {_currentTurn} turns");
@@ -535,7 +536,7 @@ namespace Crookedile.Gameplay.Battle
         {
             return originStats != null
                 ? originStats.GetStatsForOrigin(playerOrigin)
-                : new OriginBattleStats { maxEgo = 100, maxConfidence = 100, maxActionPoints = 3 };
+                : new OriginBattleStats { maxResolve = 20, maxActionPoints = 3 };
         }
 
         /// <summary>
@@ -545,7 +546,7 @@ namespace Crookedile.Gameplay.Battle
         {
             return originStats != null
                 ? originStats.GetStatsForOrigin(opponentOrigin)
-                : new OriginBattleStats { maxEgo = 100, maxConfidence = 100, maxActionPoints = 3 };
+                : new OriginBattleStats { maxResolve = 20, maxActionPoints = 3 };
         }
     }
 
@@ -557,8 +558,9 @@ namespace Crookedile.Gameplay.Battle
     {
         public bool isVictory;
         public int turnsToWin;
-        public int finalPlayerEgo;
-        public int finalPlayerConfidence;
+        public int finalPlayerResolve;
+        public int finalPlayerComposure;
+        public int finalPlayerHostility;
 
         // TODO: Add rewards when reward system exists
     }

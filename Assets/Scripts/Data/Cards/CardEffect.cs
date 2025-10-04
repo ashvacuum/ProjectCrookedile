@@ -1,226 +1,325 @@
 using System;
 using UnityEngine;
+using Sirenix.OdinInspector;
+using Crookedile.Gameplay.Battle;
 
 namespace Crookedile.Data.Cards
 {
     /// <summary>
-    /// Represents a single effect that occurs when a card is played.
-    /// Effects can be battle-specific (damage Ego/Confidence, draw cards) or
-    /// campaign-specific (gain resources, modify Heat, unlock content).
+    /// Simplified card effect system for battle effects only.
+    /// Uses Odin Inspector for clean, contextual dropdowns.
     /// </summary>
     [Serializable]
     public class CardEffect
     {
-        [Tooltip("Type of battle effect (ConfidenceDamage, EgoDamage, DrawCards, etc.)")]
-        [SerializeField] private BattleEffectType _battleEffectType;
+        [Title("Effect Type")]
+        [EnumToggleButtons]
+        [SerializeField] private EffectCategory _category;
 
-        [Tooltip("Type of campaign effect (GainCampaignFunds, ModifyHeat, AddCardToDeck, etc.)")]
-        [SerializeField] private CampaignEffectType _campaignEffectType;
+        [Title("Target")]
+        [ShowIf("ShowTarget")]
+        [EnumToggleButtons]
+        [SerializeField] private TargetType _target = TargetType.Opponent;
 
-        [Tooltip("Is this a battle effect or campaign effect?")]
-        [SerializeField] private EffectContext _effectContext;
+        [Title("Damage")]
+        [ShowIf("_category", EffectCategory.Damage)]
+        [ValueDropdown("GetDamageTypes")]
+        [SerializeField] private DamageType _damageType;
 
-        [Tooltip("Who is affected by this effect (Self, Opponent, All, Random)")]
-        [SerializeField] private TargetType _targetType;
+        [ShowIf("ShowFixedDamage")]
+        [LabelText("Damage Amount")]
+        [MinValue(1)]
+        [SerializeField] private int _damageAmount = 3;
 
-        [Tooltip("Numerical value of the effect (e.g., 10 damage, 3 cards drawn, 200₱ gained)")]
-        [SerializeField] private int _amount;
+        [ShowIf("ShowRandomDamage")]
+        [LabelText("Random Damage Range")]
+        [MinMaxSlider(1, 15, true)]
+        [SerializeField] private Vector2Int _randomDamageRange = new Vector2Int(3, 9);
 
-        [Tooltip("Which campaign resource is affected (only for campaign effects)")]
-        [SerializeField] private CampaignResourceType _resourceType;
+        [Title("Resource")]
+        [ShowIf("_category", EffectCategory.Resource)]
+        [ValueDropdown("GetResourceTypes")]
+        [SerializeField] private ResourceEffectType _resourceType;
 
-        /// <summary>
-        /// Battle effect type (ConfidenceDamage, EgoDamage, etc.).
-        /// </summary>
-        public BattleEffectType BattleEffectType => _battleEffectType;
+        [ShowIf("ShowResourceAmount")]
+        [LabelText("Amount")]
+        [MinValue(1)]
+        [SerializeField] private int _resourceAmount = 3;
 
-        /// <summary>
-        /// Campaign effect type (GainCampaignFunds, ModifyHeat, etc.).
-        /// </summary>
-        public CampaignEffectType CampaignEffectType => _campaignEffectType;
+        [Title("Card Manipulation")]
+        [ShowIf("_category", EffectCategory.CardManipulation)]
+        [ValueDropdown("GetCardManipulationTypes")]
+        [SerializeField] private CardManipulationType _cardManipulationType;
 
-        /// <summary>
-        /// Is this a battle or campaign effect?
-        /// </summary>
-        public EffectContext EffectContext => _effectContext;
+        [ShowIf("ShowCardAmount")]
+        [LabelText("Number of Cards")]
+        [MinValue(1)]
+        [SerializeField] private int _cardAmount = 2;
 
-        /// <summary>
-        /// Who this effect targets (Self, Opponent, All, Random).
-        /// </summary>
-        public TargetType TargetType => _targetType;
+        [Title("Status Effect")]
+        [ShowIf("_category", EffectCategory.StatusEffect)]
+        [ValueDropdown("GetStatusEffectTypes")]
+        [SerializeField] private StatusEffectType _statusEffectType;
 
-        /// <summary>
-        /// Numerical value of the effect.
-        /// </summary>
-        public int Amount => _amount;
+        [ShowIf("_category", EffectCategory.StatusEffect)]
+        [LabelText("Stacks")]
+        [MinValue(1)]
+        [SerializeField] private int _statusStacks = 2;
 
-        /// <summary>
-        /// Which campaign resource is affected (for campaign effects).
-        /// </summary>
-        public CampaignResourceType ResourceType => _resourceType;
+        [ShowIf("_category", EffectCategory.StatusEffect)]
+        [SerializeField] private StatusDurationType _statusDuration = StatusDurationType.DecreasePerTurn;
 
-        /// <summary>
-        /// Default constructor for serialization.
-        /// </summary>
-        public CardEffect() { }
+        #region Odin Dropdowns
 
-        /// <summary>
-        /// Creates a new battle effect.
-        /// </summary>
-        public CardEffect(BattleEffectType battleEffectType, TargetType targetType, int amount)
+        private static ValueDropdownList<DamageType> GetDamageTypes()
         {
-            _effectContext = EffectContext.Battle;
-            _battleEffectType = battleEffectType;
-            _targetType = targetType;
-            _amount = amount;
+            return new ValueDropdownList<DamageType>
+            {
+                { "Fixed Damage", DamageType.FixedDamage },
+                { "Random Damage (Actor)", DamageType.RandomDamage },
+                { "Damage = Composure (Faith Leader)", DamageType.DamageEqualToComposure },
+            };
         }
 
-        /// <summary>
-        /// Creates a new campaign effect.
-        /// </summary>
-        public CardEffect(CampaignEffectType campaignEffectType, int amount, CampaignResourceType resourceType = CampaignResourceType.Funds)
+        private static ValueDropdownList<ResourceEffectType> GetResourceTypes()
         {
-            _effectContext = EffectContext.Campaign;
-            _campaignEffectType = campaignEffectType;
-            _targetType = TargetType.Self; // Campaign effects always affect the player
-            _amount = amount;
-            _resourceType = resourceType;
+            return new ValueDropdownList<ResourceEffectType>
+            {
+                { "Composure/Gain Composure", ResourceEffectType.GainComposure },
+                { "Composure/Lose Composure", ResourceEffectType.LoseComposure },
+                { "Composure/Consume All Composure", ResourceEffectType.ConsumeAllComposure },
+                { "Composure/Composure = Hostility (Actor)", ResourceEffectType.ComposureEqualToHostility },
+                { "Hostility/Gain Hostility", ResourceEffectType.GainHostility },
+                { "Hostility/Reduce Hostility", ResourceEffectType.ReduceHostility },
+                { "Action Points/Gain AP (This Turn)", ResourceEffectType.GainActionPoints },
+                { "Action Points/Gain AP (Next Turn)", ResourceEffectType.GainActionPointsNextTurn },
+                { "Resolve/Heal Resolve", ResourceEffectType.HealResolve },
+            };
         }
+
+        private static ValueDropdownList<CardManipulationType> GetCardManipulationTypes()
+        {
+            return new ValueDropdownList<CardManipulationType>
+            {
+                { "Draw Cards", CardManipulationType.DrawCards },
+                { "Discard Cards", CardManipulationType.DiscardCards },
+                { "Exhaust This Card", CardManipulationType.ExhaustThisCard },
+            };
+        }
+
+        private static ValueDropdownList<StatusEffectType> GetStatusEffectTypes()
+        {
+            return new ValueDropdownList<StatusEffectType>
+            {
+                { "Debuffs/Weakened (Deal X less damage)", StatusEffectType.Weakened },
+                { "Debuffs/Vulnerable (Take 50% more damage)", StatusEffectType.Vulnerable },
+                { "Debuffs/Frail (Gain 25% less Composure)", StatusEffectType.Frail },
+                { "Debuffs/Entangled (Cards cost +1 AP)", StatusEffectType.Entangled },
+                { "Debuffs/Exposed (Next attack double damage)", StatusEffectType.Exposed },
+                { "Debuffs/Scandal (Take X damage per turn)", StatusEffectType.Scandal },
+                { "Debuffs/Confused (Random card +1 AP)", StatusEffectType.Confused },
+                { "Debuffs/Silenced (Can't play Manipulate)", StatusEffectType.Silenced },
+
+                { "Buffs/Strength (Deal X more damage)", StatusEffectType.Strength },
+                { "Buffs/Dexterity (Gain X more Composure)", StatusEffectType.Dexterity },
+                { "Buffs/Focus (Cards cost X less AP)", StatusEffectType.Focus },
+                { "Buffs/Energized (Draw X cards next turn)", StatusEffectType.Energized },
+                { "Buffs/Plated (Reduce damage by X)", StatusEffectType.Plated },
+                { "Buffs/Regeneration (Heal X per turn)", StatusEffectType.Regeneration },
+                { "Buffs/Intangible (Take 1 damage only)", StatusEffectType.Intangible },
+                { "Buffs/Thorns (Deal X back when hit)", StatusEffectType.Thorns },
+
+                { "Special/Block (Temporary damage reduction)", StatusEffectType.Block },
+                { "Special/Ritual (Gain X Composure per turn)", StatusEffectType.Ritual },
+                { "Special/Momentum (X damage per card)", StatusEffectType.Momentum },
+                { "Special/Echo (Next card plays twice)", StatusEffectType.Echo },
+            };
+        }
+
+        #endregion
+
+        #region Odin Conditionals
+
+        private bool ShowTarget()
+        {
+            return _category == EffectCategory.Damage || _category == EffectCategory.StatusEffect;
+        }
+
+        private bool ShowFixedDamage()
+        {
+            return _category == EffectCategory.Damage && _damageType == DamageType.FixedDamage;
+        }
+
+        private bool ShowRandomDamage()
+        {
+            return _category == EffectCategory.Damage && _damageType == DamageType.RandomDamage;
+        }
+
+        private bool ShowResourceAmount()
+        {
+            return _category == EffectCategory.Resource &&
+                   (_resourceType == ResourceEffectType.GainComposure ||
+                    _resourceType == ResourceEffectType.LoseComposure ||
+                    _resourceType == ResourceEffectType.GainHostility ||
+                    _resourceType == ResourceEffectType.ReduceHostility ||
+                    _resourceType == ResourceEffectType.GainActionPoints ||
+                    _resourceType == ResourceEffectType.GainActionPointsNextTurn ||
+                    _resourceType == ResourceEffectType.HealResolve);
+        }
+
+        private bool ShowCardAmount()
+        {
+            return _category == EffectCategory.CardManipulation &&
+                   (_cardManipulationType == CardManipulationType.DrawCards ||
+                    _cardManipulationType == CardManipulationType.DiscardCards);
+        }
+
+        #endregion
+
+        #region Properties
+
+        public EffectCategory Category => _category;
+        public TargetType Target => _target;
+        public DamageType DamageType => _damageType;
+        public int DamageAmount => _damageAmount;
+        public int RandomDamageMin => _randomDamageRange.x;
+        public int RandomDamageMax => _randomDamageRange.y;
+        public ResourceEffectType ResourceType => _resourceType;
+        public int ResourceAmount => _resourceAmount;
+        public CardManipulationType CardManipulationType => _cardManipulationType;
+        public int CardAmount => _cardAmount;
+        public StatusEffectType StatusEffectType => _statusEffectType;
+        public int StatusStacks => _statusStacks;
+        public StatusDurationType StatusDuration => _statusDuration;
+
+        #endregion
+
+        #region Description
+
+        [Title("Preview")]
+        [ShowInInspector, DisplayAsString, HideLabel]
+        private string Preview => GetDescription();
 
         /// <summary>
         /// Gets a human-readable description of this effect.
         /// </summary>
-        /// <returns>String like "Deal 10 Confidence damage to Opponent" or "Gain 200₱"</returns>
         public string GetDescription()
         {
-            if (_effectContext == EffectContext.Battle)
+            switch (_category)
             {
-                return GetBattleEffectDescription();
-            }
-            else
-            {
-                return GetCampaignEffectDescription();
+                case EffectCategory.Damage:
+                    return GetDamageDescription();
+
+                case EffectCategory.Resource:
+                    return GetResourceDescription();
+
+                case EffectCategory.CardManipulation:
+                    return GetCardManipulationDescription();
+
+                case EffectCategory.StatusEffect:
+                    return GetStatusEffectDescription();
+
+                default:
+                    return "Unknown effect";
             }
         }
 
-        private string GetBattleEffectDescription()
+        private string GetDamageDescription()
         {
-            string action = _battleEffectType switch
-            {
-                BattleEffectType.ConfidenceDamage => "Deal",
-                BattleEffectType.EgoDamage => "Deal",
-                BattleEffectType.ConfidenceRestore => "Restore",
-                BattleEffectType.EgoRestore => "Restore",
-                BattleEffectType.DrawCards => "Draw",
-                BattleEffectType.DiscardCards => "Discard",
-                BattleEffectType.GainActionPoints => "Gain",
-                BattleEffectType.GainBlock => "Gain",
-                BattleEffectType.ApplyBuff => "Apply",
-                BattleEffectType.ApplyDebuff => "Apply",
-                BattleEffectType.DestroyCard => "Destroy",
-                BattleEffectType.ExhaustCard => "Exhaust",
-                _ => "Unknown"
-            };
+            string targetStr = _target != TargetType.Self ? $" to {_target}" : "";
 
-            string effectName = _battleEffectType switch
+            return _damageType switch
             {
-                BattleEffectType.ConfidenceDamage => "Confidence damage",
-                BattleEffectType.EgoDamage => "Ego damage",
-                BattleEffectType.ConfidenceRestore => "Confidence",
-                BattleEffectType.EgoRestore => "Ego",
-                BattleEffectType.DrawCards => "cards",
-                BattleEffectType.DiscardCards => "cards",
-                BattleEffectType.GainActionPoints => "Action Points",
-                BattleEffectType.GainBlock => "Block",
-                BattleEffectType.ApplyBuff => "buff",
-                BattleEffectType.ApplyDebuff => "debuff",
-                BattleEffectType.DestroyCard => "card",
-                BattleEffectType.ExhaustCard => "card",
-                _ => ""
+                DamageType.FixedDamage => $"Deal {_damageAmount} Resolve damage{targetStr}",
+                DamageType.RandomDamage => $"Deal {_randomDamageRange.x}-{_randomDamageRange.y} random damage{targetStr}",
+                DamageType.DamageEqualToComposure => $"Deal damage = Composure{targetStr}",
+                _ => "Unknown damage"
             };
-
-            string target = _targetType != TargetType.Self ? $" to {_targetType}" : "";
-            return $"{action} {_amount} {effectName}{target}";
         }
 
-        private string GetCampaignEffectDescription()
-        {
-            string action = _campaignEffectType switch
-            {
-                CampaignEffectType.GainFunds => "Gain",
-                CampaignEffectType.LoseFunds => "Lose",
-                CampaignEffectType.GainHeat => "Gain",
-                CampaignEffectType.LoseHeat => "Reduce",
-                CampaignEffectType.GainInfluence => "Gain",
-                CampaignEffectType.LoseInfluence => "Lose",
-                CampaignEffectType.AddCardToDeck => "Add card to deck",
-                CampaignEffectType.RemoveCardFromDeck => "Remove card from deck",
-                CampaignEffectType.UpgradeCard => "Upgrade card",
-                CampaignEffectType.TransformCard => "Transform card",
-                CampaignEffectType.UnlockLocation => "Unlock location",
-                CampaignEffectType.UnlockCard => "Unlock card",
-                CampaignEffectType.TriggerEvent => "Trigger event",
-                CampaignEffectType.AdvanceDay => "Advance day",
-                _ => "Unknown"
-            };
-
-            string resourceSymbol = GetCampaignResourceSymbol();
-
-            // Special cases that don't use amount
-            if (_campaignEffectType == CampaignEffectType.AddCardToDeck ||
-                _campaignEffectType == CampaignEffectType.RemoveCardFromDeck ||
-                _campaignEffectType == CampaignEffectType.UpgradeCard ||
-                _campaignEffectType == CampaignEffectType.TransformCard ||
-                _campaignEffectType == CampaignEffectType.UnlockLocation ||
-                _campaignEffectType == CampaignEffectType.UnlockCard ||
-                _campaignEffectType == CampaignEffectType.TriggerEvent)
-            {
-                return action;
-            }
-
-            return $"{action} {_amount}{resourceSymbol}";
-        }
-
-        /// <summary>
-        /// Gets the symbol for campaign resources.
-        /// </summary>
-        /// <returns>Resource symbol (₱, H, I) or empty string</returns>
-        private string GetCampaignResourceSymbol()
+        private string GetResourceDescription()
         {
             return _resourceType switch
             {
-                CampaignResourceType.Funds => "₱",
-                CampaignResourceType.Heat => "H",
-                CampaignResourceType.Influence => " Influence",
-                _ => ""
+                ResourceEffectType.GainComposure => $"Gain {_resourceAmount} Composure",
+                ResourceEffectType.LoseComposure => $"Lose {_resourceAmount} Composure",
+                ResourceEffectType.ConsumeAllComposure => "Consume all Composure",
+                ResourceEffectType.ComposureEqualToHostility => "Gain Composure = Hostility",
+                ResourceEffectType.GainHostility => $"Gain {_resourceAmount} Hostility",
+                ResourceEffectType.ReduceHostility => $"Reduce {_resourceAmount} Hostility",
+                ResourceEffectType.GainActionPoints => $"Gain {_resourceAmount} AP",
+                ResourceEffectType.GainActionPointsNextTurn => $"Gain {_resourceAmount} AP next turn",
+                ResourceEffectType.HealResolve => $"Heal {_resourceAmount} Resolve",
+                _ => "Unknown resource"
             };
         }
 
-        /// <summary>
-        /// Creates a copy of this effect with modified values.
-        /// Useful for applying origin bonuses or other modifiers.
-        /// </summary>
-        /// <param name="amountModifier">Amount to add to the effect value</param>
-        /// <returns>New CardEffect instance with modified amount</returns>
-        public CardEffect WithModifiedAmount(int amountModifier)
+        private string GetCardManipulationDescription()
         {
-            if (_effectContext == EffectContext.Battle)
+            return _cardManipulationType switch
             {
-                return new CardEffect(_battleEffectType, _targetType, _amount + amountModifier);
-            }
-            else
-            {
-                return new CardEffect(_campaignEffectType, _amount + amountModifier, _resourceType);
-            }
+                CardManipulationType.DrawCards => $"Draw {_cardAmount} cards",
+                CardManipulationType.DiscardCards => $"Discard {_cardAmount} cards",
+                CardManipulationType.ExhaustThisCard => "Exhaust",
+                _ => "Unknown card manipulation"
+            };
         }
+
+        private string GetStatusEffectDescription()
+        {
+            string targetStr = _target != TargetType.Self ? $" to {_target}" : "";
+            string durationStr = _statusDuration == StatusDurationType.RemoveEndOfTurn ? " (this turn)" :
+                                _statusDuration == StatusDurationType.Permanent ? " (permanent)" : "";
+
+            return $"Apply {_statusStacks} {_statusEffectType}{durationStr}{targetStr}";
+        }
+
+        #endregion
     }
 
-    /// <summary>
-    /// Defines whether an effect applies during battle or to the campaign.
-    /// </summary>
-    public enum EffectContext
+    #region Enums
+
+    public enum EffectCategory
     {
-        Battle,     // Effect applies during card battle (damage Ego, draw cards, etc.)
-        Campaign    // Effect applies to campaign state (gain resources, modify Heat, etc.)
+        [LabelText("💥 Damage")]
+        Damage,
+
+        [LabelText("⚡ Resource")]
+        Resource,
+
+        [LabelText("🎴 Card Manipulation")]
+        CardManipulation,
+
+        [LabelText("✨ Status Effect")]
+        StatusEffect
     }
+
+    public enum DamageType
+    {
+        FixedDamage,
+        RandomDamage,
+        DamageEqualToComposure
+    }
+
+    public enum ResourceEffectType
+    {
+        GainComposure,
+        LoseComposure,
+        ConsumeAllComposure,
+        ComposureEqualToHostility,
+        GainHostility,
+        ReduceHostility,
+        GainActionPoints,
+        GainActionPointsNextTurn,
+        HealResolve
+    }
+
+    public enum CardManipulationType
+    {
+        DrawCards,
+        DiscardCards,
+        ExhaustThisCard
+    }
+
+    #endregion
 }

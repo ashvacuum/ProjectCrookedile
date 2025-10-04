@@ -97,32 +97,31 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published when damage is dealt.
+    /// Published when Resolve damage is dealt.
     /// </summary>
     public struct DamageDealtEvent : IGameEvent
     {
         public int Amount;
-        public bool IsConfidenceDamage;
         public bool IsToPlayer;
     }
 
     /// <summary>
-    /// Published when healing is applied.
+    /// Published when Resolve healing is applied.
     /// </summary>
     public struct HealingAppliedEvent : IGameEvent
     {
         public int Amount;
-        public bool IsConfidenceHeal;
         public bool IsToPlayer;
     }
 
     /// <summary>
-    /// Published when block is gained.
+    /// Published when a status effect is applied.
     /// </summary>
-    public struct BlockGainedEvent : IGameEvent
+    public struct StatusEffectAppliedEvent : IGameEvent
     {
-        public int Amount;
-        public bool IsPlayer;
+        public StatusEffectType StatusType;
+        public int Stacks;
+        public bool IsToPlayer;
     }
 
     #endregion
@@ -140,9 +139,9 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published when Confidence changes.
+    /// Published when Resolve changes.
     /// </summary>
-    public struct ConfidenceChangedEvent : IGameEvent
+    public struct ResolveChangedEvent : IGameEvent
     {
         public int OldValue;
         public int NewValue;
@@ -150,9 +149,19 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published when Ego changes.
+    /// Published when Composure changes.
     /// </summary>
-    public struct EgoChangedEvent : IGameEvent
+    public struct ComposureChangedEvent : IGameEvent
+    {
+        public int OldValue;
+        public int NewValue;
+        public bool IsPlayer;
+    }
+
+    /// <summary>
+    /// Published when Hostility changes.
+    /// </summary>
+    public struct HostilityChangedEvent : IGameEvent
     {
         public int OldValue;
         public int NewValue;

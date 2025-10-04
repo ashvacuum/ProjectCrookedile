@@ -9,7 +9,7 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
     /// Resolves card effects during battle.
-    /// Applies damage, healing, buffs, debuffs, and other battle effects to combatants.
+    /// Applies damage, healing, status effects, and other battle effects to combatants.
     /// </summary>
     public class EffectResolver
     {
@@ -17,6 +17,8 @@ namespace Crookedile.Gameplay.Battle
         private BattleStats _opponentStats;
         private DeckManager _playerDeck;
         private DeckManager _opponentDeck;
+        private StatusEffectManager _playerStatusEffects;
+        private StatusEffectManager _opponentStatusEffects;
 
         // Events for effect notifications
         public event Action<CardEffect, BattleStats> OnEffectApplied;
@@ -27,7 +29,12 @@ namespace Crookedile.Gameplay.Battle
             _opponentStats = opponentStats;
             _playerDeck = playerDeck;
             _opponentDeck = opponentDeck;
+            _playerStatusEffects = new StatusEffectManager("Player");
+            _opponentStatusEffects = new StatusEffectManager("Opponent");
         }
+
+        public StatusEffectManager PlayerStatusEffects => _playerStatusEffects;
+        public StatusEffectManager OpponentStatusEffects => _opponentStatusEffects;
 
         #region Effect Resolution
 
@@ -44,30 +51,23 @@ namespace Crookedile.Gameplay.Battle
 
             foreach (CardEffect effect in effects)
             {
-                if (effect.EffectContext == EffectContext.Battle)
-                {
-                    ResolveBattleEffect(effect, isPlayerCard);
-                }
-                else
-                {
-                    // Campaign effects are handled outside of battle
-                    GameLogger.LogInfo<EffectResolver>($"Skipping campaign effect: {effect.CampaignEffectType}");
-                }
+                ResolveBattleEffect(effect, isPlayerCard);
             }
         }
 
         /// <summary>
-        /// Resolves a single battle effect.
+        /// Resolves a single battle effect using the new simplified system.
         /// </summary>
         private void ResolveBattleEffect(CardEffect effect, bool isPlayerCard)
         {
             BattleStats casterStats = isPlayerCard ? _playerStats : _opponentStats;
             BattleStats targetStats = isPlayerCard ? _opponentStats : _playerStats;
             DeckManager casterDeck = isPlayerCard ? _playerDeck : _opponentDeck;
-            DeckManager targetDeck = isPlayerCard ? _opponentDeck : _playerDeck;
+            StatusEffectManager casterStatusEffects = isPlayerCard ? _playerStatusEffects : _opponentStatusEffects;
+            StatusEffectManager targetStatusEffects = isPlayerCard ? _opponentStatusEffects : _playerStatusEffects;
 
             // Determine actual target based on effect target type
-            BattleStats effectTarget = effect.TargetType switch
+            BattleStats effectTarget = effect.Target switch
             {
                 TargetType.Self => casterStats,
                 TargetType.Opponent => targetStats,
@@ -76,59 +76,33 @@ namespace Crookedile.Gameplay.Battle
                 _ => targetStats
             };
 
-            // Apply effect based on type
-            switch (effect.BattleEffectType)
+            StatusEffectManager effectTargetStatusMgr = effect.Target switch
             {
-                case BattleEffectType.ConfidenceDamage:
-                    ApplyConfidenceDamage(effectTarget, effect.Amount);
+                TargetType.Self => casterStatusEffects,
+                TargetType.Opponent => targetStatusEffects,
+                TargetType.All => null,
+                TargetType.Random => UnityEngine.Random.value > 0.5f ? casterStatusEffects : targetStatusEffects,
+                _ => targetStatusEffects
+            };
+
+            // Apply effect based on category
+            switch (effect.Category)
+            {
+                case EffectCategory.Damage:
+                    ResolveDamageEffect(effect, effectTarget, casterStats);
                     break;
 
-                case BattleEffectType.EgoDamage:
-                    ApplyEgoDamage(effectTarget, effect.Amount);
+                case EffectCategory.Resource:
+                    ResolveResourceEffect(effect, casterStats);
                     break;
 
-                case BattleEffectType.ConfidenceRestore:
-                    ApplyConfidenceRestore(effectTarget, effect.Amount);
+                case EffectCategory.CardManipulation:
+                    ResolveCardManipulationEffect(effect, casterDeck);
                     break;
 
-                case BattleEffectType.EgoRestore:
-                    ApplyEgoRestore(effectTarget, effect.Amount);
-                    break;
-
-                case BattleEffectType.GainActionPoints:
-                    ApplyGainActionPoints(casterStats, effect.Amount);
-                    break;
-
-                case BattleEffectType.DrawCards:
-                    ApplyDrawCards(casterDeck, effect.Amount);
-                    break;
-
-                case BattleEffectType.DiscardCards:
-                    ApplyDiscardCards(effect.TargetType == TargetType.Self ? casterDeck : targetDeck, effect.Amount);
-                    break;
-
-                case BattleEffectType.GainBlock:
-                    ApplyGainBlock(effectTarget, effect.Amount);
-                    break;
-
-                case BattleEffectType.ApplyBuff:
-                    ApplyBuff(effectTarget, effect.Amount);
-                    break;
-
-                case BattleEffectType.ApplyDebuff:
-                    ApplyDebuff(effectTarget, effect.Amount);
-                    break;
-
-                case BattleEffectType.DestroyCard:
-                    ApplyDestroyCard(targetDeck);
-                    break;
-
-                case BattleEffectType.ExhaustCard:
-                    ApplyExhaustCard(casterDeck);
-                    break;
-
-                default:
-                    GameLogger.LogWarning<EffectResolver>($"Unhandled battle effect type: {effect.BattleEffectType}");
+                case EffectCategory.StatusEffect:
+                    effectTargetStatusMgr.ApplyStatusEffect(effect.StatusEffectType, effect.StatusStacks, effect.StatusDuration);
+                    GameLogger.LogInfo<EffectResolver>($"Applied {effect.StatusStacks} {effect.StatusEffectType} ({effect.StatusDuration})");
                     break;
             }
 
@@ -136,49 +110,162 @@ namespace Crookedile.Gameplay.Battle
             OnEffectApplied?.Invoke(effect, effectTarget);
         }
 
-        #endregion
-
-        #region Damage Effects
-
-        private void ApplyConfidenceDamage(BattleStats target, int amount)
+        private void ResolveDamageEffect(CardEffect effect, BattleStats target, BattleStats attacker)
         {
-            int actualDamage = target.DamageConfidence(amount);
-            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Confidence damage");
-        }
+            switch (effect.DamageType)
+            {
+                case DamageType.FixedDamage:
+                    ApplyResolveDamage(target, attacker, effect.DamageAmount);
+                    break;
 
-        private void ApplyEgoDamage(BattleStats target, int amount)
-        {
-            if (target.CurrentConfidence > 0)
-            {
-                GameLogger.LogWarning<EffectResolver>("Cannot damage Ego while Confidence is above 0 - applying to Confidence instead");
-                ApplyConfidenceDamage(target, amount);
-            }
-            else
-            {
-                int actualDamage = target.DamageEgo(amount);
-                GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Ego damage");
+                case DamageType.RandomDamage:
+                    ApplyRandomDamage(target, attacker, effect.RandomDamageMin, effect.RandomDamageMax);
+                    break;
+
+                case DamageType.DamageEqualToComposure:
+                    ApplyResolveDamageEqualToComposure(target, attacker);
+                    break;
             }
         }
 
-        #endregion
-
-        #region Healing Effects
-
-        private void ApplyConfidenceRestore(BattleStats target, int amount)
+        private void ResolveResourceEffect(CardEffect effect, BattleStats caster)
         {
-            int actualHealing = target.RestoreConfidence(amount);
-            GameLogger.LogInfo<EffectResolver>($"Restored {actualHealing} Confidence");
+            switch (effect.ResourceType)
+            {
+                case ResourceEffectType.GainComposure:
+                    ApplyGainComposure(caster, effect.ResourceAmount);
+                    break;
+
+                case ResourceEffectType.LoseComposure:
+                    ApplyLoseComposure(caster, effect.ResourceAmount);
+                    break;
+
+                case ResourceEffectType.ConsumeAllComposure:
+                    ApplyConsumeAllComposure(caster);
+                    break;
+
+                case ResourceEffectType.ComposureEqualToHostility:
+                    ApplyComposureEqualToHostility(caster);
+                    break;
+
+                case ResourceEffectType.GainHostility:
+                    ApplyGainHostility(caster, effect.ResourceAmount);
+                    break;
+
+                case ResourceEffectType.ReduceHostility:
+                    ApplyReduceHostility(caster, effect.ResourceAmount);
+                    break;
+
+                case ResourceEffectType.GainActionPoints:
+                    ApplyGainActionPoints(caster, effect.ResourceAmount);
+                    break;
+
+                case ResourceEffectType.GainActionPointsNextTurn:
+                    ApplyGainActionPointsNextTurn(caster, effect.ResourceAmount);
+                    break;
+
+                case ResourceEffectType.HealResolve:
+                    ApplyResolveHeal(caster, effect.ResourceAmount);
+                    break;
+            }
         }
 
-        private void ApplyEgoRestore(BattleStats target, int amount)
+        private void ResolveCardManipulationEffect(CardEffect effect, DeckManager deck)
         {
-            int actualHealing = target.RestoreEgo(amount);
-            GameLogger.LogInfo<EffectResolver>($"Restored {actualHealing} Ego");
+            switch (effect.CardManipulationType)
+            {
+                case CardManipulationType.DrawCards:
+                    ApplyDrawCards(deck, effect.CardAmount);
+                    break;
+
+                case CardManipulationType.DiscardCards:
+                    ApplyDiscardCards(deck, effect.CardAmount);
+                    break;
+
+                case CardManipulationType.ExhaustThisCard:
+                    ApplyExhaustCard(deck);
+                    break;
+            }
         }
 
         #endregion
 
-        #region Resource Effects
+        #region Core Damage & Healing
+
+        private void ApplyResolveDamage(BattleStats target, BattleStats attacker, int baseDamage)
+        {
+            int actualDamage = target.DamageResolve(baseDamage, attacker.CurrentComposure);
+            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage (base: {baseDamage}, Composure: {attacker.CurrentComposure})");
+        }
+
+        private void ApplyResolveHeal(BattleStats target, int amount)
+        {
+            int actualHealing = target.RestoreResolve(amount);
+            GameLogger.LogInfo<EffectResolver>($"Restored {actualHealing} Resolve");
+        }
+
+        private void ApplyRandomDamage(BattleStats target, BattleStats attacker, int minDamage, int maxDamage)
+        {
+            int randomDamage = RandomHelper.Range(minDamage, maxDamage + 1);
+            int actualDamage = target.DamageResolve(randomDamage, attacker.CurrentComposure);
+            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} random Resolve damage (rolled {randomDamage} from {minDamage}-{maxDamage})");
+        }
+
+        #endregion
+
+        #region Composure
+
+        private void ApplyGainComposure(BattleStats target, int amount)
+        {
+            target.GainComposure(amount);
+            GameLogger.LogInfo<EffectResolver>($"Gained {amount} Composure");
+        }
+
+        private void ApplyLoseComposure(BattleStats target, int amount)
+        {
+            int actualLoss = target.LoseComposure(amount);
+            GameLogger.LogInfo<EffectResolver>($"Lost {actualLoss} Composure");
+        }
+
+        private void ApplyResolveDamageEqualToComposure(BattleStats target, BattleStats attacker)
+        {
+            int composure = attacker.CurrentComposure;
+            int actualDamage = target.DamageResolve(composure, 0); // Don't double-count Composure
+            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage equal to Composure ({composure})");
+        }
+
+        private void ApplyConsumeAllComposure(BattleStats caster)
+        {
+            int consumed = caster.ConsumeAllComposure();
+            GameLogger.LogInfo<EffectResolver>($"Consumed {consumed} Composure");
+        }
+
+        #endregion
+
+        #region Hostility
+
+        private void ApplyGainHostility(BattleStats caster, int amount)
+        {
+            caster.GainHostility(amount);
+            GameLogger.LogInfo<EffectResolver>($"Gained {amount} Hostility");
+        }
+
+        private void ApplyReduceHostility(BattleStats caster, int amount)
+        {
+            int actualReduction = caster.ReduceHostility(amount);
+            GameLogger.LogInfo<EffectResolver>($"Reduced {actualReduction} Hostility");
+        }
+
+        private void ApplyComposureEqualToHostility(BattleStats caster)
+        {
+            int hostility = caster.CurrentHostility;
+            caster.GainComposure(hostility);
+            GameLogger.LogInfo<EffectResolver>($"Gained {hostility} Composure equal to Hostility");
+        }
+
+        #endregion
+
+        #region Action Points
 
         private void ApplyGainActionPoints(BattleStats target, int amount)
         {
@@ -186,10 +273,10 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<EffectResolver>($"Gained {amount} Action Points");
         }
 
-        private void ApplyGainBlock(BattleStats target, int amount)
+        private void ApplyGainActionPointsNextTurn(BattleStats target, int amount)
         {
-            target.GainBlock(amount);
-            GameLogger.LogInfo<EffectResolver>($"Gained {amount} Block");
+            target.GainActionPointsNextTurn(amount);
+            GameLogger.LogInfo<EffectResolver>($"Will gain {amount} AP next turn");
         }
 
         #endregion
@@ -217,32 +304,10 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<EffectResolver>($"Discarded {cardsDiscarded} cards");
         }
 
-        private void ApplyDestroyCard(DeckManager targetDeck)
-        {
-            // TODO: Implement card destruction (permanent removal)
-            GameLogger.LogWarning<EffectResolver>("DestroyCard not yet implemented");
-        }
-
         private void ApplyExhaustCard(DeckManager deck)
         {
             // Exhaust the card that was just played (handled by DeckManager)
             GameLogger.LogInfo<EffectResolver>("Card will be exhausted after play");
-        }
-
-        #endregion
-
-        #region Status Effects
-
-        private void ApplyBuff(BattleStats target, int amount)
-        {
-            // TODO: Implement buff system
-            GameLogger.LogWarning<EffectResolver>($"Buff system not yet implemented (amount: {amount})");
-        }
-
-        private void ApplyDebuff(BattleStats target, int amount)
-        {
-            // TODO: Implement debuff system
-            GameLogger.LogWarning<EffectResolver>($"Debuff system not yet implemented (amount: {amount})");
         }
 
         #endregion
@@ -254,13 +319,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public bool CanApplyEffect(CardEffect effect, bool isPlayerCard)
         {
-            // Basic validation
-            if (effect.EffectContext != EffectContext.Battle)
-            {
-                return false;
-            }
-
-            // Add more complex validation as needed
+            // Basic validation - all effects are now battle effects
             return true;
         }
 

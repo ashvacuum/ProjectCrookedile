@@ -23,37 +23,27 @@ namespace Crookedile.Data.Cards
         [SerializeField] private Sprite _actorCardBack;
 
         [Header("Card Frames by Type")]
-        [Tooltip("Frame for Attack cards")]
-        [SerializeField] private Sprite _attackFrame;
+        [Tooltip("Frame for Diplomacy cards (Green - peaceful persuasion)")]
+        [SerializeField] private Sprite _diplomacyFrame;
 
-        [Tooltip("Frame for Skill cards")]
-        [SerializeField] private Sprite _skillFrame;
+        [Tooltip("Frame for Hostility cards (Red - aggressive tactics)")]
+        [SerializeField] private Sprite _hostilityFrame;
 
-        [Tooltip("Frame for Power cards")]
-        [SerializeField] private Sprite _powerFrame;
+        [Tooltip("Frame for Manipulate cards (Purple - utility/resources)")]
+        [SerializeField] private Sprite _manipulateFrame;
 
-        [Header("Card Frames by Tier")]
-        [Tooltip("Frame overlay for Basic tier cards")]
-        [SerializeField] private Sprite _basicTierFrame;
+        [Header("Card Frames by Rarity")]
+        [Tooltip("Frame overlay for Common rarity cards")]
+        [SerializeField] private Sprite _commonFrame;
 
-        [Tooltip("Frame overlay for Enhanced tier cards")]
-        [SerializeField] private Sprite _enhancedTierFrame;
+        [Tooltip("Frame overlay for Uncommon rarity cards")]
+        [SerializeField] private Sprite _uncommonFrame;
 
-        [Tooltip("Frame overlay for Rare tier cards")]
-        [SerializeField] private Sprite _rareTierFrame;
+        [Tooltip("Frame overlay for Rare rarity cards")]
+        [SerializeField] private Sprite _rareFrame;
 
-        [Header("Rarity Indicators")]
-        [Tooltip("Visual indicator for Common rarity")]
-        [SerializeField] private Sprite _commonIndicator;
-
-        [Tooltip("Visual indicator for Uncommon rarity")]
-        [SerializeField] private Sprite _uncommonIndicator;
-
-        [Tooltip("Visual indicator for Rare rarity")]
-        [SerializeField] private Sprite _rareIndicator;
-
-        [Tooltip("Visual indicator for Legendary rarity")]
-        [SerializeField] private Sprite _legendaryIndicator;
+        [Tooltip("Frame overlay for Legendary rarity cards")]
+        [SerializeField] private Sprite _legendaryFrame;
 
         #region Properties
 
@@ -109,42 +99,26 @@ namespace Crookedile.Data.Cards
         {
             return cardType switch
             {
-                CardType.Attack => _attackFrame,
-                CardType.Skill => _skillFrame,
-                CardType.Power => _powerFrame,
+                CardType.Diplomacy => _diplomacyFrame,
+                CardType.Hostility => _hostilityFrame,
+                CardType.Manipulate => _manipulateFrame,
                 _ => null
             };
         }
 
         /// <summary>
-        /// Gets the frame overlay sprite for a specific card tier.
+        /// Gets the frame overlay sprite for a specific rarity.
         /// </summary>
-        /// <param name="tier">Card tier to get frame for</param>
-        /// <returns>Tier frame overlay sprite</returns>
-        public Sprite GetFrameForTier(CardTier tier)
-        {
-            return tier switch
-            {
-                CardTier.Basic => _basicTierFrame,
-                CardTier.Enhanced => _enhancedTierFrame,
-                CardTier.Rare => _rareTierFrame,
-                _ => null
-            };
-        }
-
-        /// <summary>
-        /// Gets the rarity indicator sprite for a specific rarity.
-        /// </summary>
-        /// <param name="rarity">Rarity to get indicator for</param>
-        /// <returns>Rarity indicator sprite</returns>
-        public Sprite GetRarityIndicator(CardRarity rarity)
+        /// <param name="rarity">Rarity to get frame for</param>
+        /// <returns>Rarity frame overlay sprite</returns>
+        public Sprite GetFrameForRarity(CardRarity rarity)
         {
             return rarity switch
             {
-                CardRarity.Common => _commonIndicator,
-                CardRarity.Uncommon => _uncommonIndicator,
-                CardRarity.Rare => _rareIndicator,
-                CardRarity.Legendary => _legendaryIndicator,
+                CardRarity.Basic => _commonFrame,
+                CardRarity.Enhanced => _uncommonFrame,
+                CardRarity.Rare => _rareFrame,
+                CardRarity.Legendary => _legendaryFrame,
                 _ => null
             };
         }

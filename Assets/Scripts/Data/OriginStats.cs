@@ -5,36 +5,33 @@ namespace Crookedile.Data
 {
     /// <summary>
     /// Defines the battle statistics for each origin type.
-    /// Different origins have different Ego/Confidence/Action Point values to match their playstyle.
+    /// All origins have same Resolve (HP), differentiated by passives and starter decks.
     /// </summary>
     [CreateAssetMenu(fileName = "OriginStats", menuName = "Crookedile/Origin Stats")]
     public class OriginStats : ScriptableObject
     {
         [Header("Faith Leader (Religious)")]
-        [Tooltip("Religious Leader - High defense, high confidence")]
+        [Tooltip("Faith Leader - Composure combo specialist, +1 card draw at start")]
         public OriginBattleStats faithLeaderStats = new OriginBattleStats
         {
-            maxEgo = 80,            // Lower Ego (defensive playstyle)
-            maxConfidence = 120,     // High Confidence (moral authority, strong faith)
-            maxActionPoints = 3
+            maxResolve = 20,        // Standard Resolve (HP)
+            maxActionPoints = 3     // Standard AP
         };
 
         [Header("Nepo Baby")]
-        [Tooltip("Nepo Baby - Balanced but privileged, extra action points")]
+        [Tooltip("Nepo Baby - Resource manipulation, starts with 4 AP instead of 3")]
         public OriginBattleStats nepoBabyStats = new OriginBattleStats
         {
-            maxEgo = 100,           // Average Ego
-            maxConfidence = 100,     // Average Confidence
-            maxActionPoints = 4      // Extra action point (money buys options)
+            maxResolve = 20,        // Standard Resolve (HP)
+            maxActionPoints = 4     // Extra action point (Family Connections passive)
         };
 
         [Header("Actor (Celebrity)")]
-        [Tooltip("Actor/Celebrity - Glass cannon, high damage but fragile")]
+        [Tooltip("Actor - Risk/reward specialist, first card each turn costs 1 less AP")]
         public OriginBattleStats actorStats = new OriginBattleStats
         {
-            maxEgo = 120,           // High Ego (charismatic, high energy)
-            maxConfidence = 80,      // Lower Confidence (fragile to criticism, scandal-prone)
-            maxActionPoints = 3
+            maxResolve = 20,        // Standard Resolve (HP)
+            maxActionPoints = 3     // Standard AP
         };
 
         /// <summary>
@@ -47,7 +44,7 @@ namespace Crookedile.Data
                 OriginType.FaithLeader => faithLeaderStats,
                 OriginType.NepoBaby => nepoBabyStats,
                 OriginType.Actor => actorStats,
-                _ => new OriginBattleStats { maxEgo = 100, maxConfidence = 100, maxActionPoints = 3 }
+                _ => new OriginBattleStats { maxResolve = 20, maxActionPoints = 3 }
             };
         }
     }
@@ -58,11 +55,8 @@ namespace Crookedile.Data
     [Serializable]
     public class OriginBattleStats
     {
-        [Tooltip("Maximum Ego (true HP)")]
-        public int maxEgo = 100;
-
-        [Tooltip("Maximum Confidence (shield/multiplier)")]
-        public int maxConfidence = 100;
+        [Tooltip("Maximum Resolve (HP in negotiations)")]
+        public int maxResolve = 20;
 
         [Tooltip("Maximum Action Points per turn")]
         public int maxActionPoints = 3;
@@ -72,7 +66,7 @@ namespace Crookedile.Data
         /// </summary>
         public string GetDescription()
         {
-            return $"Ego: {maxEgo} | Confidence: {maxConfidence} | AP: {maxActionPoints}";
+            return $"Resolve: {maxResolve} | AP: {maxActionPoints}";
         }
     }
 }

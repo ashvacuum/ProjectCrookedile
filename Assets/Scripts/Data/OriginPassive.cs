@@ -74,10 +74,10 @@ namespace Crookedile.Data
         TurnStart,          // At the start of your turn
         TurnEnd,            // At the end of your turn
         OnCardPlayed,       // When you play a card (can filter by type)
-        OnDamageTaken,      // When you take damage
-        OnDamageDealt,      // When you deal damage
-        OnConfidenceLost,   // When you lose Confidence
-        OnEgoLost,          // When you lose Ego
+        OnDamageTaken,      // When you take Resolve damage
+        OnDamageDealt,      // When you deal Resolve damage
+        OnComposureLost,    // When you lose Composure
+        OnResolveLost,      // When you lose Resolve
         OnCardDrawn,        // When you draw a card
         BattleEnd,          // At the end of battle (before rewards)
         Always              // Passive effect (no trigger, always active)
@@ -89,12 +89,12 @@ namespace Crookedile.Data
     public enum PassiveEffectType
     {
         // Battle Effects
-        GainConfidence,
-        GainEgo,
+        GainResolve,
+        GainComposure,
         GainActionPoints,
-        GainBlock,
         DrawCards,
         DealBonusDamage,
+        ReduceHostility,
 
         // Campaign Effects
         GainInfluence,
@@ -102,9 +102,10 @@ namespace Crookedile.Data
         ReduceHeat,
 
         // Modifiers
-        ReduceCardCost,         // Next card costs less
+        ReduceCardCost,         // Next card costs less (Faith Leader, Actor)
         IncreaseCardEffect,     // Next card effect is stronger
         ExtraCardReward,        // Gain extra card after battle
+        ExtraCardDraw,          // Draw extra cards at start (Faith Leader)
 
         // Special
         Custom                  // Requires custom logic implementation

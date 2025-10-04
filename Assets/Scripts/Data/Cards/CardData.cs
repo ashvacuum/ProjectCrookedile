@@ -22,7 +22,7 @@ namespace Crookedile.Data.Cards
         [Tooltip("Display name of the card shown to players")]
         [SerializeField] private string _cardName;
 
-        [Tooltip("Card type determines general behavior (Attack, Defense, Charm, Leverage, Power)")]
+        [Tooltip("Card type determines general behavior (Diplomacy, Hostility, Manipulate)")]
         [SerializeField] private CardType _cardType;
 
         [Tooltip("Rarity affects card acquisition chance and power level")]
@@ -48,19 +48,12 @@ namespace Crookedile.Data.Cards
         [Tooltip("List of effects that trigger when this card is played")]
         [SerializeField] private List<CardEffect> _effects = new List<CardEffect>();
 
-        [Header("Card Tier")]
-        [Tooltip("Card tier (Basic, Enhanced, Rare) - separate pools, each upgrades independently")]
-        [SerializeField] private CardTier _tier = CardTier.Basic;
-
+        [Header("Upgrade")]
         [Tooltip("Is this the upgraded (+) version?")]
         [SerializeField] private bool _isUpgraded = false;
 
-        [Header("Upgrade")]
         [Tooltip("Reference to the upgraded (+) version of this card (if it exists)")]
         [SerializeField] private CardData _upgradedVersion;
-
-        [Tooltip("Upgrade cost in Funds (₱)")]
-        [SerializeField] private int _upgradeCost = 50;
 
         [Header("Metadata")]
         [Tooltip("Tags for searching/filtering (e.g., 'violence', 'corruption', 'persuasion')")]
@@ -85,7 +78,7 @@ namespace Crookedile.Data.Cards
         public string CardName => _cardName;
 
         /// <summary>
-        /// Type of card (Attack, Defense, Charm, Leverage, Power).
+        /// Type of card (Diplomacy, Hostility, Manipulate).
         /// </summary>
         public CardType CardType => _cardType;
 
@@ -120,11 +113,6 @@ namespace Crookedile.Data.Cards
         public List<CardEffect> Effects => _effects;
 
         /// <summary>
-        /// Card tier (Basic, Enhanced, Rare).
-        /// </summary>
-        public CardTier Tier => _tier;
-
-        /// <summary>
         /// Is this the upgraded (+) version?
         /// </summary>
         public bool IsUpgraded => _isUpgraded;
@@ -139,11 +127,6 @@ namespace Crookedile.Data.Cards
         /// Can this card be upgraded? (Has an upgraded version and is not already upgraded)
         /// </summary>
         public bool CanUpgrade => !_isUpgraded && _upgradedVersion != null;
-
-        /// <summary>
-        /// Cost in Funds (₱) to upgrade this card.
-        /// </summary>
-        public int UpgradeCost => _upgradeCost;
 
         /// <summary>
         /// Tags for searching and filtering.
@@ -227,13 +210,6 @@ namespace Crookedile.Data.Cards
             return _isUpgraded ? $"{_cardName}+" : _cardName;
         }
 
-        /// <summary>
-        /// Gets tier display text (e.g., "Basic", "Enhanced", "Rare").
-        /// </summary>
-        public string GetTierDisplayText()
-        {
-            return _tier.ToString();
-        }
 
         /// <summary>
         /// Gets the current card to use (returns upgraded version if this is base and has upgrade).
