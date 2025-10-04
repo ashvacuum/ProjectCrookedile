@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
+  m_Name: 01 Attack
+  m_EditorClassIdentifier: 
+  _id: 1a0a836c-9f59-427c-8e8b-e0d9aaa44fee
+  _cardName: Attack
+  _cardType: 0
+  _rarity: 0
+  _artwork: {fileID: 0}
+  _description: 
+  _flavorText: 
+  _costs:
+  - _costType: 0
+    _amount: 0
+  _effects:
+  - _effectType: 8
+    _targetType: 0
+    _amount: 0
+    _resourceType: 6
+  _originBonus:
+    _requiredOrigin: 0
+    _bonusEffect:
+      _effectType: 0
+      _targetType: 0
+      _amount: 0
+      _resourceType: 0
+    _bonusDescription: 
+  _upgradeVersion: {fileID: 0}
+  _isUpgraded: 0
+  _tags: []
+  _isStarterCard: 0
+  _isUnlockable: 0

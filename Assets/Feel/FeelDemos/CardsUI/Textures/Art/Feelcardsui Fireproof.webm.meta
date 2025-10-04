@@ -1,5 +1,12 @@
 fileFormatVersion: 2
 guid: d75d25af9cf30d64a970b0b330cca4ca
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183370
+  packageName: Feel
+  packageVersion: 5.7
+  assetPath: Assets/Feel/FeelDemos/CardsUI/Textures/Art/Feelcardsui Fireproof.webm
+  uploadId: 779587
 VideoClipImporter:
   externalObjects: {}
   serializedVersion: 3
@@ -16,10 +23,3 @@ VideoClipImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 183370
-  packageName: Feel
-  packageVersion: 5.7
-  assetPath: Assets/Feel/FeelDemos/CardsUI/Textures/Art/Feelcardsui Fireproof.webm
-  uploadId: 779587
