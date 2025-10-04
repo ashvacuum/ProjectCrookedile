@@ -74,19 +74,55 @@ GameState
 
 #### 2. Card Battle System
 
+**IMPLEMENTED** - Uses state machine pattern with EventBus communication
+
 ```
-BattleManager
-├── PlayerHand (Card[])
-├── PlayerDeck (Card[])
-├── PlayerDiscard (Card[])
-├── OpponentHand (Card[])
-├── OpponentDeck (Card[])
-├── OpponentDiscard (Card[])
-├── PlayerConfidence (int, HP analog)
-├── OpponentConfidence (int)
-├── TurnManager (who's turn, phase)
-└── EffectResolver (resolve card effects, combos)
+BattleManager (State Machine Orchestrator)
+├── BattleStats (Player)
+│   ├── Ego (true HP, 0 = defeat)
+│   ├── Confidence (shield, must break before Ego damage)
+│   ├── Action Points (energy to play cards, refreshes each turn)
+│   └── Block (temporary damage reduction, clears each turn)
+├── BattleStats (Opponent)
+├── DeckManager (Player)
+│   ├── Deck (draw pile)
+│   ├── Hand (cards available to play)
+│   ├── Discard (played/discarded cards)
+│   └── Exhaust (removed from battle)
+├── DeckManager (Opponent)
+├── EffectResolver (resolves card effects)
+└── State Machine
+    ├── Initialize → Draw initial hands
+    ├── TurnStart → Draw cards, refresh AP
+    ├── PlayerTurn → Player plays cards (waits for EndTurnRequestedEvent)
+    ├── OpponentTurn → AI plays cards
+    ├── TurnEnd → Clear block, check victory
+    └── BattleEnd → Calculate rewards
 ```
+
+**Battle Resources** (per-battle, managed by BattleStats):
+- **Ego** - True HP (varies by origin: 80-120)
+- **Confidence** - Shield (varies by origin: 80-120)
+- **Action Points** - Card cost (varies by origin: 3-4)
+- **Block** - Temporary damage reduction
+
+**Origin Battle Stats**:
+- **Faith Leader**: 80 Ego, 120 Confidence, 3 AP (defensive tank)
+- **Nepo Baby**: 100 Ego, 100 Confidence, 4 AP (flexible, extra AP)
+- **Actor**: 120 Ego, 80 Confidence, 3 AP (glass cannon, fragile)
+
+**Card Costs**:
+- Cards ONLY cost Action Points in battle
+- Free (0 AP), Fixed (1-3 AP), or X cost (all remaining AP)
+- Dynamic costs: Can change per turn in hand (+1/-1 per turn)
+- Runtime modifiers: Buffs/debuffs can affect costs
+
+**EventBus Communication**:
+- `BattleStartedEvent`, `BattleEndedEvent`
+- `TurnStartedEvent`, `TurnEndedEvent`
+- `CardPlayedEvent`, `CardDrawnEvent`, `CardDiscardedEvent`
+- `EffectAppliedEvent`, `DamageDealtEvent`, `HealingAppliedEvent`
+- `EndTurnRequestedEvent`, `PlayCardRequestedEvent` (player input)
 
 #### 3. Map/Location System
 
@@ -165,39 +201,57 @@ ProgressionManager
 ## Data Structures
 
 ### Card Data
+
+**IMPORTANT: Cards only cost Action Points in battle. Funds/Influence are meta resources used outside of battle (shops, events).**
+
 ```json
 {
   "id": "intimidate_001",
   "name": "Intimidate",
   "type": "Attack",
   "rarity": "Common",
+  "tier": "Basic",
   "cost": {
-    "type": "none",
-    "amount": 0
+    "costType": "ActionPoints",
+    "baseAmount": 1,
+    "isXCost": false,
+    "costChangePerTurn": 0,
+    "minimumCost": 0,
+    "maximumCost": 99
   },
   "effects": [
     {
-      "type": "damage",
-      "amount": 10,
-      "target": "opponent"
-    },
-    {
-      "type": "heat",
-      "amount": 1
+      "effectContext": "Battle",
+      "battleEffectType": "ConfidenceDamage",
+      "targetType": "Opponent",
+      "amount": 10
     }
   ],
-  "originBonus": {
-    "origin": "Strongman",
-    "effect": {
-      "type": "damage_bonus",
-      "amount": 2
-    }
-  },
-  "description": "Deal 10 confidence damage. +1 Heat.",
+  "description": "Deal 10 Confidence damage.",
   "flavorText": "A direct threat.",
   "upgradeId": "intimidate_001_plus"
 }
 ```
+
+#### Cost Types
+- **Free** - `costType: "None"` - No AP required
+- **Fixed Cost** - `baseAmount: 2` - Costs 2 AP
+- **X Cost** - `isXCost: true` - Costs all remaining AP
+- **Dynamic Cost** - `costChangePerTurn: -1` - Gets 1 AP cheaper each turn in hand
+
+#### Cost Modifiers
+- **Per-Turn Changes** - Cards can get cheaper/more expensive each turn held
+  - `-1` = Gets 1 AP cheaper per turn (delayed power cards)
+  - `+1` = Gets 1 AP more expensive per turn (urgency/momentum cards)
+- **Runtime Modifiers** - Buffs/debuffs can affect card costs temporarily
+- **Min/Max Limits** - Costs are clamped between `minimumCost` and `maximumCost`
+
+#### Battle vs Campaign Effects
+- **Battle Effects** - Apply during card battles (damage, block, draw cards, etc.)
+  - `ConfidenceDamage`, `EgoDamage`, `GainBlock`, `DrawCards`, etc.
+- **Campaign Effects** - Apply to meta-game state (gain funds, increase heat, unlock cards)
+  - `GainFunds`, `GainHeat`, `AddCardToDeck`, `UnlockLocation`, etc.
+- Cards can have both battle AND campaign effects
 
 ### Location Data
 
