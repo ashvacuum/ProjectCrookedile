@@ -122,12 +122,15 @@ namespace Crookedile.Data
         Random
     }
 
+    /// <summary>
+    /// Cost types for playing cards.
+    /// NOTE: In battle, cards ONLY cost Action Points (or are free).
+    /// Funds/Influence are meta resources used outside battle (shops, events, etc.)
+    /// </summary>
     public enum CostType
     {
-        None,
-        ActionPoints,       // Battle resource - energy to play cards
-        Funds,              // Campaign resource ₱
-        Influence           // Campaign resource - political power/favors
+        None,           // Free to play
+        ActionPoints    // Battle resource - energy to play cards (THE ONLY CARD COST IN BATTLE)
     }
 
     /// <summary>

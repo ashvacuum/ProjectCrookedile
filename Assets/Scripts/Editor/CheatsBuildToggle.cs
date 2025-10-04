@@ -1,4 +1,5 @@
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEngine;
 
 namespace Crookedile.Editor
@@ -14,8 +15,8 @@ namespace Crookedile.Editor
         [MenuItem("Crookedile/Toggle Cheats Build %#C")] // Ctrl+Shift+C
         public static void ToggleCheatsEnabled()
         {
-            BuildTargetGroup buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
-            string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup);
+            NamedBuildTarget buildTarget = NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            string defines = PlayerSettings.GetScriptingDefineSymbols(buildTarget);
 
             bool isEnabled = defines.Contains(CHEATS_DEFINE);
 
@@ -23,8 +24,8 @@ namespace Crookedile.Editor
             {
                 // Remove the define
                 defines = defines.Replace(CHEATS_DEFINE, "").Replace(";;", ";").Trim(';');
-                PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, defines);
-                Debug.Log($"<color=red>Cheats DISABLED</color> for {buildTargetGroup}");
+                PlayerSettings.SetScriptingDefineSymbols(buildTarget, defines);
+                Debug.Log($"<color=red>Cheats DISABLED</color> for {buildTarget}");
             }
             else
             {
@@ -34,8 +35,8 @@ namespace Crookedile.Editor
                     defines += ";";
                 }
                 defines += CHEATS_DEFINE;
-                PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, defines);
-                Debug.Log($"<color=green>Cheats ENABLED</color> for {buildTargetGroup}");
+                PlayerSettings.SetScriptingDefineSymbols(buildTarget, defines);
+                Debug.Log($"<color=green>Cheats ENABLED</color> for {buildTarget}");
             }
 
             // Refresh to recompile
@@ -45,8 +46,8 @@ namespace Crookedile.Editor
         [MenuItem("Crookedile/Toggle Cheats Build %#C", true)]
         public static bool ToggleCheatsEnabledValidate()
         {
-            BuildTargetGroup buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
-            string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup);
+            NamedBuildTarget buildTarget = NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            string defines = PlayerSettings.GetScriptingDefineSymbols(buildTarget);
             bool isEnabled = defines.Contains(CHEATS_DEFINE);
 
             Menu.SetChecked("Crookedile/Toggle Cheats Build", isEnabled);
@@ -63,7 +64,8 @@ namespace Crookedile.Editor
 
                 try
                 {
-                    string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(group);
+                    NamedBuildTarget namedTarget = NamedBuildTarget.FromBuildTargetGroup(group);
+                    string defines = PlayerSettings.GetScriptingDefineSymbols(namedTarget);
                     if (!defines.Contains(CHEATS_DEFINE))
                     {
                         if (!string.IsNullOrEmpty(defines))
@@ -71,7 +73,7 @@ namespace Crookedile.Editor
                             defines += ";";
                         }
                         defines += CHEATS_DEFINE;
-                        PlayerSettings.SetScriptingDefineSymbolsForGroup(group, defines);
+                        PlayerSettings.SetScriptingDefineSymbols(namedTarget, defines);
                     }
                 }
                 catch
@@ -94,11 +96,12 @@ namespace Crookedile.Editor
 
                 try
                 {
-                    string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(group);
+                    NamedBuildTarget namedTarget = NamedBuildTarget.FromBuildTargetGroup(group);
+                    string defines = PlayerSettings.GetScriptingDefineSymbols(namedTarget);
                     if (defines.Contains(CHEATS_DEFINE))
                     {
                         defines = defines.Replace(CHEATS_DEFINE, "").Replace(";;", ";").Trim(';');
-                        PlayerSettings.SetScriptingDefineSymbolsForGroup(group, defines);
+                        PlayerSettings.SetScriptingDefineSymbols(namedTarget, defines);
                     }
                 }
                 catch

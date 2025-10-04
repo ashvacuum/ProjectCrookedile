@@ -104,9 +104,13 @@ namespace Crookedile.Gameplay.Battle
         {
             GameLogger.LogInfo<BattleManager>($"Starting battle: {setup.playerOrigin} vs {setup.opponentOrigin}");
 
+            // Get origin-specific stats
+            OriginBattleStats playerStats = setup.GetPlayerStats();
+            OriginBattleStats opponentStats = setup.GetOpponentStats();
+
             // Initialize combatant stats
-            _playerStats = new BattleStats(setup.playerMaxEgo, setup.playerMaxConfidence, setup.playerMaxActionPoints);
-            _opponentStats = new BattleStats(setup.opponentMaxEgo, setup.opponentMaxConfidence, setup.opponentMaxActionPoints);
+            _playerStats = new BattleStats(playerStats.maxEgo, playerStats.maxConfidence, playerStats.maxActionPoints);
+            _opponentStats = new BattleStats(opponentStats.maxEgo, opponentStats.maxConfidence, opponentStats.maxActionPoints);
             _playerOrigin = setup.playerOrigin;
             _opponentOrigin = setup.opponentOrigin;
 
@@ -207,12 +211,11 @@ namespace Crookedile.Gameplay.Battle
             {
                 if (cost.CostType == CostType.ActionPoints)
                 {
-                    if (stats.CurrentActionPoints < cost.Amount)
+                    if (!cost.CanAfford(stats.CurrentActionPoints))
                     {
                         return false;
                     }
                 }
-                // TODO: Check other cost types when implemented
             }
 
             return true;
@@ -224,9 +227,9 @@ namespace Crookedile.Gameplay.Battle
             {
                 if (cost.CostType == CostType.ActionPoints)
                 {
-                    stats.SpendActionPoints(cost.Amount);
+                    int actualCost = cost.GetActualCost(stats.CurrentActionPoints);
+                    stats.SpendActionPoints(actualCost);
                 }
-                // TODO: Pay other cost types when implemented
             }
         }
 
@@ -520,16 +523,30 @@ namespace Crookedile.Gameplay.Battle
         public OriginType playerOrigin;
         public OriginType opponentOrigin;
 
-        public int playerMaxEgo = 100;
-        public int playerMaxConfidence = 100;
-        public int playerMaxActionPoints = 3;
-
-        public int opponentMaxEgo = 100;
-        public int opponentMaxConfidence = 100;
-        public int opponentMaxActionPoints = 3;
+        public OriginStats originStats;
 
         public List<CardData> playerDeck = new List<CardData>();
         public List<CardData> opponentDeck = new List<CardData>();
+
+        /// <summary>
+        /// Gets the player's battle stats based on their origin.
+        /// </summary>
+        public OriginBattleStats GetPlayerStats()
+        {
+            return originStats != null
+                ? originStats.GetStatsForOrigin(playerOrigin)
+                : new OriginBattleStats { maxEgo = 100, maxConfidence = 100, maxActionPoints = 3 };
+        }
+
+        /// <summary>
+        /// Gets the opponent's battle stats based on their origin.
+        /// </summary>
+        public OriginBattleStats GetOpponentStats()
+        {
+            return originStats != null
+                ? originStats.GetStatsForOrigin(opponentOrigin)
+                : new OriginBattleStats { maxEgo = 100, maxConfidence = 100, maxActionPoints = 3 };
+        }
     }
 
     /// <summary>
