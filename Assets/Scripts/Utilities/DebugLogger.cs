@@ -179,6 +179,33 @@ namespace Crookedile.Utilities
     // Static helper class for easier access
     public static class GameLogger
     {
+        // Generic type-based logging - automatically uses the type name as category
+        public static void Log<T>(string message, LogLevel logLevel = LogLevel.Info, Object context = null)
+        {
+            DebugLogger.Instance?.Log(typeof(T).Name, message, logLevel, context);
+        }
+
+        public static void LogError<T>(string message, Object context = null)
+        {
+            DebugLogger.Instance?.LogError(typeof(T).Name, message, context);
+        }
+
+        public static void LogWarning<T>(string message, Object context = null)
+        {
+            DebugLogger.Instance?.LogWarning(typeof(T).Name, message, context);
+        }
+
+        public static void LogInfo<T>(string message, Object context = null)
+        {
+            DebugLogger.Instance?.LogInfo(typeof(T).Name, message, context);
+        }
+
+        public static void LogVerbose<T>(string message, Object context = null)
+        {
+            DebugLogger.Instance?.LogVerbose(typeof(T).Name, message, context);
+        }
+
+        // Legacy string-based logging (kept for backwards compatibility)
         public static void Log(string category, string message, LogLevel logLevel = LogLevel.Info, Object context = null)
         {
             DebugLogger.Instance?.Log(category, message, logLevel, context);
