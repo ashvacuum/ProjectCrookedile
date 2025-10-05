@@ -13,9 +13,9 @@ namespace Crookedile.UI
     {
         [Header("Card Data")]
         [SerializeField] private MeshRenderer cardRenderer;
-        [SerializeField] private TextMeshPro cardNameText;
-        [SerializeField] private TextMeshPro cardCostText;
-        [SerializeField] private TextMeshPro cardDescriptionText;
+        [SerializeField] private TMP_Text cardNameText;
+        [SerializeField] private TMP_Text cardCostText;
+        [SerializeField] private TMP_Text cardDescriptionText;
 
         [Header("MMFeedbacks")]
         public MMFeedbacks drawFeedback;
@@ -59,7 +59,40 @@ namespace Crookedile.UI
             if (cardDescriptionText != null)
                 cardDescriptionText.text = cardData.Description;
 
-            // TODO: Set card art on material
+            UpdateCardArt();
+        }
+
+        private void UpdateCardArt()
+        {
+            if (cardRenderer == null || cardData == null) return;
+
+            // Get the card's artwork sprite
+            Sprite artwork = cardData.GetArtwork();
+            if (artwork != null && artwork.texture != null)
+            {
+                // Use MaterialPropertyBlock to set texture without creating material instances
+                MaterialPropertyBlock props = new MaterialPropertyBlock();
+                cardRenderer.GetPropertyBlock(props);
+                props.SetTexture("_MainTex", artwork.texture);
+
+                // If using an atlas, set the UV tiling/offset
+                if (artwork.rect.width != artwork.texture.width || artwork.rect.height != artwork.texture.height)
+                {
+                    // This is from an atlas - calculate UV scale/offset
+                    Vector2 scale = new Vector2(
+                        artwork.rect.width / artwork.texture.width,
+                        artwork.rect.height / artwork.texture.height
+                    );
+                    Vector2 offset = new Vector2(
+                        artwork.rect.x / artwork.texture.width,
+                        artwork.rect.y / artwork.texture.height
+                    );
+
+                    props.SetVector("_MainTex_ST", new Vector4(scale.x, scale.y, offset.x, offset.y));
+                }
+
+                cardRenderer.SetPropertyBlock(props);
+            }
         }
 
         private string GetCostDisplayText()

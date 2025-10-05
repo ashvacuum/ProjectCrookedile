@@ -34,7 +34,7 @@ namespace Crookedile.UI
 
             // Get renderer and setup material
             MeshRenderer quadRenderer = cardQuad.GetComponent<MeshRenderer>();
-            Material cardMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            Material cardMaterial = new Material(Shader.Find("Standard"));
             cardMaterial.name = "CardMaterial";
             cardMaterial.color = Color.white;
             quadRenderer.material = cardMaterial;
@@ -59,13 +59,13 @@ namespace Crookedile.UI
             nameTMP.sortingOrder = 1;
 
             // Create TextMeshPro for card cost
-            GameObject costObj = new GameObject("CardCost");
+            var costObj = new GameObject("CardCost");
             costObj.transform.SetParent(cardRoot.transform);
             costObj.transform.localPosition = new Vector3(-0.8f, 1.2f, -0.01f);
             costObj.transform.localRotation = Quaternion.identity;
             costObj.transform.localScale = Vector3.one;
 
-            TextMeshPro costTMP = costObj.AddComponent<TextMeshPro>();
+            var costTMP = costObj.AddComponent<TextMeshPro>();
             costTMP.text = "0";
             costTMP.fontSize = 0.6f;
             costTMP.alignment = TextAlignmentOptions.Center;
@@ -73,13 +73,13 @@ namespace Crookedile.UI
             costTMP.sortingOrder = 1;
 
             // Create TextMeshPro for card description
-            GameObject descObj = new GameObject("CardDescription");
+            var descObj = new GameObject("CardDescription");
             descObj.transform.SetParent(cardRoot.transform);
             descObj.transform.localPosition = new Vector3(0, -0.5f, -0.01f);
             descObj.transform.localRotation = Quaternion.identity;
             descObj.transform.localScale = Vector3.one;
 
-            TextMeshPro descTMP = descObj.AddComponent<TextMeshPro>();
+            var descTMP = descObj.AddComponent<TextMeshPro>();
             descTMP.text = "Card description goes here.";
             descTMP.fontSize = 0.3f;
             descTMP.alignment = TextAlignmentOptions.Center;
@@ -91,27 +91,27 @@ namespace Crookedile.UI
             // Create MMFeedbacks components
             GameObject drawFeedbackObj = new GameObject("DrawFeedback");
             drawFeedbackObj.transform.SetParent(cardRoot.transform);
-            MMFeedbacks drawFeedback = drawFeedbackObj.AddComponent<MMFeedbacks>();
+            MMFeedbacks drawFeedback = drawFeedbackObj.AddComponent<MMF_Player>();
             drawFeedback.InitializationMode = MMFeedbacks.InitializationModes.Awake;
 
             GameObject hoverEnterFeedbackObj = new GameObject("HoverEnterFeedback");
             hoverEnterFeedbackObj.transform.SetParent(cardRoot.transform);
-            MMFeedbacks hoverEnterFeedback = hoverEnterFeedbackObj.AddComponent<MMFeedbacks>();
+            MMFeedbacks hoverEnterFeedback = hoverEnterFeedbackObj.AddComponent<MMF_Player>();
             hoverEnterFeedback.InitializationMode = MMFeedbacks.InitializationModes.Awake;
 
             GameObject hoverExitFeedbackObj = new GameObject("HoverExitFeedback");
             hoverExitFeedbackObj.transform.SetParent(cardRoot.transform);
-            MMFeedbacks hoverExitFeedback = hoverExitFeedbackObj.AddComponent<MMFeedbacks>();
+            MMFeedbacks hoverExitFeedback = hoverExitFeedbackObj.AddComponent<MMF_Player>();
             hoverExitFeedback.InitializationMode = MMFeedbacks.InitializationModes.Awake;
 
             GameObject selectFeedbackObj = new GameObject("SelectFeedback");
             selectFeedbackObj.transform.SetParent(cardRoot.transform);
-            MMFeedbacks selectFeedback = selectFeedbackObj.AddComponent<MMFeedbacks>();
+            MMFeedbacks selectFeedback = selectFeedbackObj.AddComponent<MMF_Player>();
             selectFeedback.InitializationMode = MMFeedbacks.InitializationModes.Awake;
 
             GameObject discardFeedbackObj = new GameObject("DiscardFeedback");
             discardFeedbackObj.transform.SetParent(cardRoot.transform);
-            MMFeedbacks discardFeedback = discardFeedbackObj.AddComponent<MMFeedbacks>();
+            MMFeedbacks discardFeedback = discardFeedbackObj.AddComponent<MMF_Player>();
             discardFeedback.InitializationMode = MMFeedbacks.InitializationModes.Awake;
 
             // Assign references via SerializedObject (proper way to set private serialized fields)

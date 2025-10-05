@@ -34,47 +34,7 @@ namespace Crookedile.UI
 
         public List<Card3DView> CardsInHand => cardsInHand;
 
-        private void Update()
-        {
-            HandleMouseInput();
-        }
-
-        private void HandleMouseInput()
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit))
-            {
-                Card3DView card = hit.collider.GetComponent<Card3DView>();
-
-                if (card != null && cardsInHand.Contains(card))
-                {
-                    // Hover
-                    if (hoveredCard != card)
-                    {
-                        hoveredCard?.OnHoverExit();
-                        hoveredCard = card;
-                        hoveredCard.OnHoverEnter();
-                    }
-
-                    // Select on click
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        SelectCard(card);
-                    }
-                }
-            }
-            else
-            {
-                // Clear hover if not hovering any card
-                if (hoveredCard != null)
-                {
-                    hoveredCard.OnHoverExit();
-                    hoveredCard = null;
-                }
-            }
-        }
+        // Input handling moved to CardInputHandler for New Input System support
 
         public void DrawCard(CardData cardData = null)
         {
