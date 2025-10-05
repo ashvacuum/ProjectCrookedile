@@ -33,17 +33,14 @@ namespace Crookedile.Data.Cards
         [SerializeField] private Sprite _manipulateFrame;
 
         [Header("Card Frames by Rarity")]
-        [Tooltip("Frame overlay for Common rarity cards")]
-        [SerializeField] private Sprite _commonFrame;
+        [Tooltip("Frame overlay for Basic rarity cards")]
+        [SerializeField] private Sprite _basicFrame;
 
-        [Tooltip("Frame overlay for Uncommon rarity cards")]
-        [SerializeField] private Sprite _uncommonFrame;
+        [Tooltip("Frame overlay for Enhanced rarity cards")]
+        [SerializeField] private Sprite _enhancedFrame;
 
         [Tooltip("Frame overlay for Rare rarity cards")]
         [SerializeField] private Sprite _rareFrame;
-
-        [Tooltip("Frame overlay for Legendary rarity cards")]
-        [SerializeField] private Sprite _legendaryFrame;
 
         #region Properties
 
@@ -115,10 +112,9 @@ namespace Crookedile.Data.Cards
         {
             return rarity switch
             {
-                CardRarity.Basic => _commonFrame,
-                CardRarity.Enhanced => _uncommonFrame,
+                CardRarity.Basic => _basicFrame,
+                CardRarity.Enhanced => _enhancedFrame,
                 CardRarity.Rare => _rareFrame,
-                CardRarity.Legendary => _legendaryFrame,
                 _ => null
             };
         }

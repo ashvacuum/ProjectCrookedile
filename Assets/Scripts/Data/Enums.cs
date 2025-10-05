@@ -16,10 +16,9 @@ namespace Crookedile.Data
     /// </summary>
     public enum CardRarity
     {
-        Basic,     // Basic cards from shops and starter decks
+        Basic,      // Basic cards from shops and starter decks
         Enhanced,   // Enhanced effects, moderate acquisition difficulty
-        Rare,       // Powerful effects, harder to acquire
-        Legendary   // Game-changing abilities, very rare
+        Rare        // Powerful effects, harder to acquire
     }
 
     /// <summary>

@@ -12,13 +12,13 @@ namespace Crookedile.Data.Cards
     /// Auto-populates from all CardData assets using the "Refresh Database" button in the inspector.
     /// </summary>
     /// <example>
-    /// // Get all Attack cards
-    /// List<CardData> attacks = cardDatabase.GetByType(CardType.Attack);
+    /// // Get all Diplomacy cards
+    /// List<CardData> diplomacy = cardDatabase.GetByType(CardType.Diplomacy);
     ///
     /// // Complex search query
     /// CardSearchQuery query = new CardSearchQuery();
-    /// query.CardTypes.Add(CardType.Charm);
-    /// query.Rarities.Add(CardRarity.Rare);
+    /// query.CardTypes.Add(CardType.Hostility);
+    /// query.Rarities.Add(CardRarity.Enhanced);
     /// List<CardData> results = cardDatabase.Search(query);
     /// </example>
     [CreateAssetMenu(fileName = "CardDatabase", menuName = "Crookedile/Database/Card Database")]
@@ -38,7 +38,7 @@ namespace Crookedile.Data.Cards
         /// <summary>
         /// Gets all cards of a specific type.
         /// </summary>
-        /// <param name="cardType">Type to filter by (Attack, Skill, Power)</param>
+        /// <param name="cardType">Type to filter by (Diplomacy, Hostility, Manipulate)</param>
         /// <returns>List of cards matching the type</returns>
         public List<CardData> GetByType(CardType cardType)
         {
@@ -48,7 +48,7 @@ namespace Crookedile.Data.Cards
         /// <summary>
         /// Gets all cards of a specific rarity.
         /// </summary>
-        /// <param name="rarity">Rarity to filter by (Common, Uncommon, Rare, Legendary)</param>
+        /// <param name="rarity">Rarity to filter by (Basic, Enhanced, Rare)</param>
         /// <returns>List of cards matching the rarity</returns>
         public List<CardData> GetByRarity(CardRarity rarity)
         {
@@ -131,9 +131,9 @@ namespace Crookedile.Data.Cards
         /// <returns>List of cards matching all specified criteria</returns>
         /// <example>
         /// CardSearchQuery query = new CardSearchQuery();
-        /// query.CardTypes.Add(CardType.Attack);
-        /// query.CardTypes.Add(CardType.Power);
-        /// query.Rarities.Add(CardRarity.Legendary);
+        /// query.CardTypes.Add(CardType.Diplomacy);
+        /// query.CardTypes.Add(CardType.Hostility);
+        /// query.Rarities.Add(CardRarity.Rare);
         /// query.Tags.Add("violence");
         /// List<CardData> results = database.Search(query);
         /// </example>
@@ -197,7 +197,7 @@ namespace Crookedile.Data.Cards
 
         /// <summary>
         /// Gets a random card weighted by rarity.
-        /// Common: 60% chance, Uncommon: 30%, Rare: 9%, Legendary: 1%
+        /// Basic: 70% chance, Enhanced: 25%, Rare: 5%
         /// </summary>
         /// <returns>Randomly selected card based on rarity weights</returns>
         public CardData GetRandomByRarityWeight()
@@ -209,9 +209,9 @@ namespace Crookedile.Data.Cards
             {
                 float weight = card.Rarity switch
                 {
-                    CardRarity.Basic => 60f,
-                    CardRarity.Enhanced => 30f,
-                    CardRarity.Rare => 9f,
+                    CardRarity.Basic => 70f,
+                    CardRarity.Enhanced => 25f,
+                    CardRarity.Rare => 5f,
                     _ => 1f
                 };
                 weights.Add(weight);
@@ -246,18 +246,18 @@ namespace Crookedile.Data.Cards
     /// All criteria are AND-ed together. Empty lists are ignored.
     /// </summary>
     /// <example>
-    /// // Find all Legendary Attack or Power cards with the "violence" tag
+    /// // Find all Rare Diplomacy or Hostility cards with the "violence" tag
     /// CardSearchQuery query = new CardSearchQuery();
-    /// query.CardTypes.Add(CardType.Attack);
-    /// query.CardTypes.Add(CardType.Power);
-    /// query.Rarities.Add(CardRarity.Legendary);
+    /// query.CardTypes.Add(CardType.Diplomacy);
+    /// query.CardTypes.Add(CardType.Hostility);
+    /// query.Rarities.Add(CardRarity.Rare);
     /// query.Tags.Add("violence");
     /// List<CardData> results = database.Search(query);
     /// </example>
     [System.Serializable]
     public class CardSearchQuery
     {
-        [Tooltip("Filter by card types (Attack, Skill, Power). Cards matching ANY type will be included.")]
+        [Tooltip("Filter by card types (Diplomacy, Hostility, Manipulate). Cards matching ANY type will be included.")]
         public List<CardType> CardTypes;
 
         [Tooltip("Filter by rarity. Cards matching ANY rarity will be included.")]
