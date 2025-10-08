@@ -206,12 +206,21 @@ namespace Crookedile.Gameplay.Battle
 
         private bool CanPlayCard(CardData card, BattleStats stats)
         {
+            // Get status effect manager for cost modifiers
+            StatusEffectManager statusMgr = (stats == _playerStats)
+                ? _effectResolver.PlayerStatusEffects
+                : _effectResolver.OpponentStatusEffects;
+
             // Check costs
             foreach (var cost in card.Costs)
             {
                 if (cost.CostType == CostType.ActionPoints)
                 {
-                    if (!cost.CanAfford(stats.CurrentActionPoints))
+                    int baseCost = cost.CurrentAmount;
+                    // Apply status effect modifiers (Focus, Entangled)
+                    int modifiedCost = statusMgr.ModifyCardCost(baseCost);
+
+                    if (stats.CurrentActionPoints < modifiedCost)
                     {
                         return false;
                     }
@@ -223,12 +232,21 @@ namespace Crookedile.Gameplay.Battle
 
         private void PayCardCosts(CardData card, BattleStats stats)
         {
+            // Get status effect manager for cost modifiers
+            StatusEffectManager statusMgr = (stats == _playerStats)
+                ? _effectResolver.PlayerStatusEffects
+                : _effectResolver.OpponentStatusEffects;
+
             foreach (var cost in card.Costs)
             {
                 if (cost.CostType == CostType.ActionPoints)
                 {
-                    int actualCost = cost.GetActualCost(stats.CurrentActionPoints);
-                    stats.SpendActionPoints(actualCost);
+                    int baseCost = cost.GetActualCost(stats.CurrentActionPoints);
+                    // Apply status effect modifiers (Focus, Entangled)
+                    int modifiedCost = statusMgr.ModifyCardCost(baseCost);
+
+                    stats.SpendActionPoints(modifiedCost);
+                    GameLogger.LogInfo<BattleManager>($"Paid {modifiedCost} AP (base: {baseCost})");
                 }
             }
         }
@@ -293,10 +311,12 @@ namespace Crookedile.Gameplay.Battle
             if (_isPlayerTurn)
             {
                 _playerStats.StartTurn();
+                _effectResolver.PlayerStatusEffects.OnTurnStart(_playerStats);
             }
             else
             {
                 _opponentStats.StartTurn();
+                _effectResolver.OpponentStatusEffects.OnTurnStart(_opponentStats);
             }
         }
 
@@ -308,10 +328,12 @@ namespace Crookedile.Gameplay.Battle
             if (_isPlayerTurn)
             {
                 _playerStats.EndTurn();
+                _effectResolver.PlayerStatusEffects.OnTurnEnd(_playerStats);
             }
             else
             {
                 _opponentStats.EndTurn();
+                _effectResolver.OpponentStatusEffects.OnTurnEnd(_opponentStats);
             }
         }
 

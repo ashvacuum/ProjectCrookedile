@@ -194,8 +194,19 @@ namespace Crookedile.Gameplay.Battle
 
         private void ApplyResolveDamage(BattleStats target, BattleStats attacker, int baseDamage)
         {
-            int actualDamage = target.DamageResolve(baseDamage, attacker.CurrentComposure);
-            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage (base: {baseDamage}, Composure: {attacker.CurrentComposure})");
+            // Get attacker and target status effect managers
+            StatusEffectManager attackerStatusMgr = GetStatusEffectManager(attacker);
+            StatusEffectManager targetStatusMgr = GetStatusEffectManager(target);
+
+            // Apply attacker's damage modifiers (Strength, Weakened, Exposed)
+            int modifiedDamage = attackerStatusMgr.ModifyDamageDealt(baseDamage);
+
+            // Apply target's damage taken modifiers (Vulnerable, Plated, Intangible, Thorns)
+            modifiedDamage = targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker);
+
+            // Apply damage with Composure bonus
+            int actualDamage = target.DamageResolve(modifiedDamage, attacker.CurrentComposure);
+            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage (base: {baseDamage}, modified: {modifiedDamage}, Composure: {attacker.CurrentComposure})");
         }
 
         private void ApplyResolveHeal(BattleStats target, int amount)
@@ -207,8 +218,20 @@ namespace Crookedile.Gameplay.Battle
         private void ApplyRandomDamage(BattleStats target, BattleStats attacker, int minDamage, int maxDamage)
         {
             int randomDamage = RandomHelper.Range(minDamage, maxDamage + 1);
-            int actualDamage = target.DamageResolve(randomDamage, attacker.CurrentComposure);
-            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} random Resolve damage (rolled {randomDamage} from {minDamage}-{maxDamage})");
+
+            // Get attacker and target status effect managers
+            StatusEffectManager attackerStatusMgr = GetStatusEffectManager(attacker);
+            StatusEffectManager targetStatusMgr = GetStatusEffectManager(target);
+
+            // Apply attacker's damage modifiers (Strength, Weakened, Exposed)
+            int modifiedDamage = attackerStatusMgr.ModifyDamageDealt(randomDamage);
+
+            // Apply target's damage taken modifiers (Vulnerable, Plated, Intangible, Thorns)
+            modifiedDamage = targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker);
+
+            // Apply damage with Composure bonus
+            int actualDamage = target.DamageResolve(modifiedDamage, attacker.CurrentComposure);
+            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} random Resolve damage (rolled {randomDamage} from {minDamage}-{maxDamage}, modified: {modifiedDamage})");
         }
 
         #endregion
@@ -217,8 +240,12 @@ namespace Crookedile.Gameplay.Battle
 
         private void ApplyGainComposure(BattleStats target, int amount)
         {
-            target.GainComposure(amount);
-            GameLogger.LogInfo<EffectResolver>($"Gained {amount} Composure");
+            // Apply Composure gain modifiers (Dexterity, Frail)
+            StatusEffectManager targetStatusMgr = GetStatusEffectManager(target);
+            int modifiedAmount = targetStatusMgr.ModifyComposureGained(amount);
+
+            target.GainComposure(modifiedAmount);
+            GameLogger.LogInfo<EffectResolver>($"Gained {modifiedAmount} Composure (base: {amount})");
         }
 
         private void ApplyLoseComposure(BattleStats target, int amount)
@@ -230,8 +257,20 @@ namespace Crookedile.Gameplay.Battle
         private void ApplyResolveDamageEqualToComposure(BattleStats target, BattleStats attacker)
         {
             int composure = attacker.CurrentComposure;
-            int actualDamage = target.DamageResolve(composure, 0); // Don't double-count Composure
-            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage equal to Composure ({composure})");
+
+            // Get attacker and target status effect managers
+            StatusEffectManager attackerStatusMgr = GetStatusEffectManager(attacker);
+            StatusEffectManager targetStatusMgr = GetStatusEffectManager(target);
+
+            // Apply attacker's damage modifiers (Strength, Weakened, Exposed)
+            int modifiedDamage = attackerStatusMgr.ModifyDamageDealt(composure);
+
+            // Apply target's damage taken modifiers (Vulnerable, Plated, Intangible, Thorns)
+            modifiedDamage = targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker);
+
+            // Apply damage (don't add Composure bonus since damage IS equal to Composure)
+            int actualDamage = target.DamageResolve(modifiedDamage, 0);
+            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage equal to Composure ({composure}, modified: {modifiedDamage})");
         }
 
         private void ApplyConsumeAllComposure(BattleStats caster)
@@ -321,6 +360,19 @@ namespace Crookedile.Gameplay.Battle
         {
             // Basic validation - all effects are now battle effects
             return true;
+        }
+
+        /// <summary>
+        /// Gets the StatusEffectManager for the given BattleStats.
+        /// </summary>
+        private StatusEffectManager GetStatusEffectManager(BattleStats stats)
+        {
+            if (stats == _playerStats)
+                return _playerStatusEffects;
+            else if (stats == _opponentStats)
+                return _opponentStatusEffects;
+            else
+                return null; // This shouldn't happen
         }
 
         #endregion

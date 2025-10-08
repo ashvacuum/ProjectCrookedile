@@ -84,17 +84,20 @@ namespace Crookedile.UI
             if (card != null && handManager.CardsInHand.Contains(card))
             {
                 handManager.SelectCard(card);
-
-                // TODO: Implement drag functionality
-                // draggedCard = card;
+                draggedCard = card;
                 // dragOffset = CalculateDragOffset(card, screenPosition);
             }
         }
 
         private void HandlePointerUp(Vector2 screenPosition)
         {
-            // TODO: Implement drag release functionality
-            draggedCard = null;
+            if (draggedCard != null)
+            {
+                // Check if card was dragged far enough to play
+                // For now, just play the card on click (simple implementation)
+                handManager.PlayCard(draggedCard);
+                draggedCard = null;
+            }
         }
 
         private Card3DView GetCardAtPosition(Vector2 screenPosition)

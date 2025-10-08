@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Crookedile.Data.Cards;
+using Crookedile.Core;
+using Crookedile.Gameplay.Battle;
 using MoreMountains.Feedbacks;
 
 namespace Crookedile.UI
@@ -88,6 +90,27 @@ namespace Crookedile.UI
             {
                 DiscardCard(selectedCard);
             }
+        }
+
+        /// <summary>
+        /// Attempts to play a card from hand (publishes event to BattleManager).
+        /// </summary>
+        public void PlayCard(Card3DView card)
+        {
+            if (!cardsInHand.Contains(card)) return;
+
+            // Find the index in the hand
+            int handIndex = cardsInHand.IndexOf(card);
+            if (handIndex < 0) return;
+
+            // Publish event for BattleManager to handle
+            EventBus.Publish(new PlayCardRequestedEvent
+            {
+                Card = card.CardData,
+                HandIndex = handIndex
+            });
+
+            // Note: Card will be removed from hand by DeckManager after BattleManager processes it
         }
 
         private void ReorganizeHand()
