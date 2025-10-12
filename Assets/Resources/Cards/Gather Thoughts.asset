@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
+  m_Name: Gather Thoughts
+  m_EditorClassIdentifier: 
+  _id: 3d51a0dc-4c34-4d78-a376-0079e7bbe324
+  _cardName: Gather Thoughts
+  _cardType: 2
+  _rarity: 0
+  _artwork: {fileID: 0}
+  _description: 
+  _flavorText: 
+  _costs:
+  - _costType: 1
+    _baseAmount: 1
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _effects:
+  - _category: 1
+    _target: 1
+    _damageType: 0
+    _damageAmount: 3
+    _randomDamageRange: {x: 3, y: 9}
+    _resourceType: 0
+    _resourceAmount: 4
+    _cardManipulationType: 0
+    _cardAmount: 2
+    _statusEffectType: 0
+    _statusStacks: 2
+    _statusDuration: 0
+  _isUpgraded: 0
+  _upgradedVersion: {fileID: 0}
+  _tags: []
+  _isStarterCard: 0
+  _isUnlockable: 0
