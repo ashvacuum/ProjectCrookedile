@@ -56,6 +56,15 @@ namespace Crookedile.Data.Cards
         [MinValue(1)]
         [SerializeField] private int _cardAmount = 2;
 
+        [ShowIf("ShowCardToAdd")]
+        [LabelText("Card to Add")]
+        [SerializeField] private CardData _cardToAdd;
+
+        [ShowIf("ShowCostReduction")]
+        [LabelText("Cost Reduction")]
+        [MinValue(1)]
+        [SerializeField] private int _costReduction = 1;
+
         [Title("Status Effect")]
         [ShowIf("_category", EffectCategory.StatusEffect)]
         [ValueDropdown("GetStatusEffectTypes")]
@@ -101,9 +110,24 @@ namespace Crookedile.Data.Cards
         {
             return new ValueDropdownList<CardManipulationType>
             {
-                { "Draw Cards", CardManipulationType.DrawCards },
-                { "Discard Cards", CardManipulationType.DiscardCards },
-                { "Exhaust This Card", CardManipulationType.ExhaustThisCard },
+                { "Draw/Draw Cards", CardManipulationType.DrawCards },
+                { "Draw/Choose from Discard to Hand", CardManipulationType.ChooseFromDiscardToHand },
+                { "Draw/Choose from Discard to Deck", CardManipulationType.ChooseFromDiscardToDeck },
+
+                { "Discard/Discard Cards", CardManipulationType.DiscardCards },
+                { "Discard/Exhaust This Card", CardManipulationType.ExhaustThisCard },
+
+                { "Create/Add Card to Deck", CardManipulationType.AddCardToDeck },
+                { "Create/Add Card to Hand", CardManipulationType.AddCardToHand },
+
+                { "Upgrade/Upgrade Card This Battle", CardManipulationType.UpgradeCardThisBattle },
+                { "Upgrade/Upgrade All Cards in Hand", CardManipulationType.UpgradeAllCardsInHand },
+
+                { "Retain/Make Card Permanent (Retain)", CardManipulationType.MakeCardRetain },
+                { "Retain/Make All Cards Retain", CardManipulationType.MakeAllCardsRetain },
+
+                { "Cost/Reduce Card Cost This Battle", CardManipulationType.ReduceCardCost },
+                { "Cost/Make Card Cost 0 This Turn", CardManipulationType.MakeCardFree },
             };
         }
 
@@ -171,7 +195,24 @@ namespace Crookedile.Data.Cards
         {
             return _category == EffectCategory.CardManipulation &&
                    (_cardManipulationType == CardManipulationType.DrawCards ||
-                    _cardManipulationType == CardManipulationType.DiscardCards);
+                    _cardManipulationType == CardManipulationType.DiscardCards ||
+                    _cardManipulationType == CardManipulationType.ChooseFromDiscardToHand ||
+                    _cardManipulationType == CardManipulationType.ChooseFromDiscardToDeck ||
+                    _cardManipulationType == CardManipulationType.AddCardToDeck ||
+                    _cardManipulationType == CardManipulationType.AddCardToHand);
+        }
+
+        private bool ShowCardToAdd()
+        {
+            return _category == EffectCategory.CardManipulation &&
+                   (_cardManipulationType == CardManipulationType.AddCardToDeck ||
+                    _cardManipulationType == CardManipulationType.AddCardToHand);
+        }
+
+        private bool ShowCostReduction()
+        {
+            return _category == EffectCategory.CardManipulation &&
+                   _cardManipulationType == CardManipulationType.ReduceCardCost;
         }
 
         #endregion
@@ -188,6 +229,8 @@ namespace Crookedile.Data.Cards
         public int ResourceAmount => _resourceAmount;
         public CardManipulationType CardManipulationType => _cardManipulationType;
         public int CardAmount => _cardAmount;
+        public CardData CardToAdd => _cardToAdd;
+        public int CostReduction => _costReduction;
         public StatusEffectType StatusEffectType => _statusEffectType;
         public int StatusStacks => _statusStacks;
         public StatusDurationType StatusDuration => _statusDuration;
@@ -256,11 +299,29 @@ namespace Crookedile.Data.Cards
 
         private string GetCardManipulationDescription()
         {
+            string cardName = _cardToAdd != null ? _cardToAdd.CardName : "[No Card]";
+
             return _cardManipulationType switch
             {
-                CardManipulationType.DrawCards => $"Draw {_cardAmount} cards",
-                CardManipulationType.DiscardCards => $"Discard {_cardAmount} cards",
-                CardManipulationType.ExhaustThisCard => "Exhaust",
+                CardManipulationType.DrawCards => $"Draw {_cardAmount} card(s)",
+                CardManipulationType.ChooseFromDiscardToHand => $"Choose {_cardAmount} card(s) from discard pile to hand",
+                CardManipulationType.ChooseFromDiscardToDeck => $"Choose {_cardAmount} card(s) from discard pile to deck",
+
+                CardManipulationType.DiscardCards => $"Discard {_cardAmount} card(s)",
+                CardManipulationType.ExhaustThisCard => "Exhaust this card",
+
+                CardManipulationType.AddCardToDeck => $"Add {_cardAmount} {cardName} to deck",
+                CardManipulationType.AddCardToHand => $"Add {_cardAmount} {cardName} to hand",
+
+                CardManipulationType.UpgradeCardThisBattle => "Upgrade a card this battle",
+                CardManipulationType.UpgradeAllCardsInHand => "Upgrade all cards in hand",
+
+                CardManipulationType.MakeCardRetain => "Make a card retain (permanent)",
+                CardManipulationType.MakeAllCardsRetain => "Make all cards retain",
+
+                CardManipulationType.ReduceCardCost => $"Reduce a card's cost by {_costReduction} this battle",
+                CardManipulationType.MakeCardFree => "Make a card cost 0 this turn",
+
                 _ => "Unknown card manipulation"
             };
         }
@@ -316,9 +377,30 @@ namespace Crookedile.Data.Cards
 
     public enum CardManipulationType
     {
+        // Draw effects
         DrawCards,
+        ChooseFromDiscardToHand,
+        ChooseFromDiscardToDeck,
+
+        // Discard effects
         DiscardCards,
-        ExhaustThisCard
+        ExhaustThisCard,
+
+        // Card creation effects
+        AddCardToDeck,
+        AddCardToHand,
+
+        // Upgrade effects
+        UpgradeCardThisBattle,
+        UpgradeAllCardsInHand,
+
+        // Retain effects (cards don't discard at end of turn)
+        MakeCardRetain,
+        MakeAllCardsRetain,
+
+        // Cost modification effects
+        ReduceCardCost,
+        MakeCardFree
     }
 
     #endregion
