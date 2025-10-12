@@ -396,18 +396,7 @@ namespace Crookedile.Gameplay.Battle
 
         private void ApplyDiscardHand(DeckManager deck)
         {
-            int cardsDiscarded = 0;
-            int handSize = deck.HandCount;
-
-            // Discard all cards from hand
-            for (int i = handSize - 1; i >= 0; i--)
-            {
-                if (deck.DiscardCard(deck.Hand[i]))
-                {
-                    cardsDiscarded++;
-                }
-            }
-
+            int cardsDiscarded = deck.DiscardHand();
             GameLogger.LogInfo<EffectResolver>($"Discarded entire hand ({cardsDiscarded} cards)");
         }
 
@@ -439,7 +428,7 @@ namespace Crookedile.Gameplay.Battle
             }
             else
             {
-                GameLogger.LogInfo<EffectResolver>("Choose from discard to deck: Discard pile is empty");
+                GameLogger.LogInfo<EffectResolver>("Choose from discard to deck: Discard pthile is empty");
             }
         }
 
@@ -451,7 +440,7 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
 
-            // TODO: Implement method to add card to deck
+            deck.AddCardsToDeck(card, amount);
             GameLogger.LogInfo<EffectResolver>($"Added {amount}x {card.CardName} to deck");
         }
 
@@ -463,8 +452,8 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
 
-            // TODO: Implement method to add card to hand
-            GameLogger.LogInfo<EffectResolver>($"Added {amount}x {card.CardName} to hand");
+            int cardsAdded = deck.AddCardsToHand(card, amount);
+            GameLogger.LogInfo<EffectResolver>($"Added {cardsAdded}/{amount}x {card.CardName} to hand");
         }
 
         private void ApplyUpgradeCardThisBattle(DeckManager deck)

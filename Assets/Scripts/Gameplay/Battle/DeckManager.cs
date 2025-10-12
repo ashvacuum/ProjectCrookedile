@@ -394,6 +394,89 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
+        #region Card Generation
+
+        /// <summary>
+        /// Adds a card to the draw pile and shuffles.
+        /// </summary>
+        public void AddCardToDeck(CardData card)
+        {
+            if (card == null)
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to deck");
+                return;
+            }
+
+            _deck.Add(card);
+            Shuffle();
+            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {card.CardName} to deck");
+        }
+
+        /// <summary>
+        /// Adds multiple copies of a card to the draw pile and shuffles.
+        /// </summary>
+        public void AddCardsToDeck(CardData card, int count)
+        {
+            if (card == null)
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to deck");
+                return;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                _deck.Add(card);
+            }
+            Shuffle();
+            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {count}x {card.CardName} to deck");
+        }
+
+        /// <summary>
+        /// Adds a card directly to hand (if space available).
+        /// </summary>
+        public bool AddCardToHand(CardData card)
+        {
+            if (card == null)
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to hand");
+                return false;
+            }
+
+            if (IsHandFull)
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add card to hand - hand is full");
+                return false;
+            }
+
+            _hand.Add(card);
+            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {card.CardName} to hand");
+            return true;
+        }
+
+        /// <summary>
+        /// Adds multiple copies of a card directly to hand (up to hand limit).
+        /// </summary>
+        public int AddCardsToHand(CardData card, int count)
+        {
+            if (card == null)
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to hand");
+                return 0;
+            }
+
+            int cardsAdded = 0;
+            for (int i = 0; i < count && !IsHandFull; i++)
+            {
+                _hand.Add(card);
+                cardsAdded++;
+            }
+
+            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {cardsAdded}x {card.CardName} to hand");
+            return cardsAdded;
+        }
+
+        #endregion
+
         #region Debugging
 
         /// <summary>
