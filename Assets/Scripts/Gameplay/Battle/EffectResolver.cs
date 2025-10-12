@@ -413,42 +413,34 @@ namespace Crookedile.Gameplay.Battle
 
         private void ApplyChooseFromDiscardToHand(DeckManager deck, int amount)
         {
-            // TODO: This requires player choice UI
-            // For now, just take the first N cards from discard pile
-            int cardsRetrieved = 0;
-            int toRetrieve = Mathf.Min(amount, deck.DiscardPileCount);
+            // TODO: This requires player choice UI and DeckManager method to move cards from discard to hand
+            int availableCards = deck.DiscardCount;
+            int cardsToRetrieve = Mathf.Min(amount, availableCards);
 
-            for (int i = 0; i < toRetrieve; i++)
+            if (cardsToRetrieve > 0)
             {
-                if (deck.DiscardPileCount > 0)
-                {
-                    CardData card = deck.DiscardPile[0];
-                    // TODO: Implement method to move card from discard to hand
-                    cardsRetrieved++;
-                }
+                GameLogger.LogWarning<EffectResolver>($"Choose from discard to hand: Requires UI implementation (would retrieve {cardsToRetrieve}/{amount} cards from {availableCards} in discard)");
             }
-
-            GameLogger.LogWarning<EffectResolver>($"Choose from discard to hand: Requires UI implementation (would retrieve {amount} cards)");
+            else
+            {
+                GameLogger.LogInfo<EffectResolver>("Choose from discard to hand: Discard pile is empty");
+            }
         }
 
         private void ApplyChooseFromDiscardToDeck(DeckManager deck, int amount)
         {
-            // TODO: This requires player choice UI
-            // For now, just take the first N cards from discard pile
-            int cardsRetrieved = 0;
-            int toRetrieve = Mathf.Min(amount, deck.DiscardPileCount);
+            // TODO: This requires player choice UI and DeckManager method to move cards from discard to deck
+            int availableCards = deck.DiscardCount;
+            int cardsToRetrieve = Mathf.Min(amount, availableCards);
 
-            for (int i = 0; i < toRetrieve; i++)
+            if (cardsToRetrieve > 0)
             {
-                if (deck.DiscardPileCount > 0)
-                {
-                    CardData card = deck.DiscardPile[0];
-                    // TODO: Implement method to move card from discard to deck
-                    cardsRetrieved++;
-                }
+                GameLogger.LogWarning<EffectResolver>($"Choose from discard to deck: Requires UI implementation (would retrieve {cardsToRetrieve}/{amount} cards from {availableCards} in discard)");
             }
-
-            GameLogger.LogWarning<EffectResolver>($"Choose from discard to deck: Requires UI implementation (would retrieve {amount} cards)");
+            else
+            {
+                GameLogger.LogInfo<EffectResolver>("Choose from discard to deck: Discard pile is empty");
+            }
         }
 
         private void ApplyAddCardToDeck(DeckManager deck, CardData card, int amount)
