@@ -57,3 +57,8 @@ MonoBehaviour:
     logLevel: 3
     scripts:
     - BattleManager
+  - categoryName: EffectResolver
+    enabled: 1
+    logLevel: 3
+    scripts:
+    - EffectResolver

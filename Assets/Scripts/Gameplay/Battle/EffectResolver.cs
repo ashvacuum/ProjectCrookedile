@@ -11,6 +11,7 @@ namespace Crookedile.Gameplay.Battle
     /// Resolves card effects during battle.
     /// Applies damage, healing, status effects, and other battle effects to combatants.
     /// </summary>
+    [Debuggable("EffectResolver", LogLevel.Info)]
     public class EffectResolver
     {
         private BattleStats _playerStats;
