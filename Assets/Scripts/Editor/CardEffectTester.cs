@@ -161,17 +161,31 @@ namespace Crookedile.Editor
             Debug.Log("");
 
             // Setup battle stats
-            BattleStats playerStats = CreateBattleStats(_playerMaxResolve, 3);
-            playerStats.CurrentResolve = _playerResolve;
-            playerStats.CurrentActionPoints = _playerActionPoints;
-            playerStats.CurrentComposure = _playerComposure;
-            playerStats.CurrentHostility = _playerHostility;
+            BattleStats playerStats = CreateBattleStats(_playerMaxResolve, _playerActionPoints);
 
-            BattleStats opponentStats = CreateBattleStats(_opponentMaxResolve, 3);
-            opponentStats.CurrentResolve = _opponentResolve;
-            opponentStats.CurrentActionPoints = _opponentActionPoints;
-            opponentStats.CurrentComposure = _opponentComposure;
-            opponentStats.CurrentHostility = _opponentHostility;
+            // Set resolve by damage if needed
+            if (_playerResolve < _playerMaxResolve)
+            {
+                int damageNeeded = _playerMaxResolve - _playerResolve;
+                playerStats.DamageResolve(damageNeeded);
+            }
+
+            // Set composure and hostility
+            if (_playerComposure > 0) playerStats.GainComposure(_playerComposure);
+            if (_playerHostility > 0) playerStats.GainHostility(_playerHostility);
+
+            BattleStats opponentStats = CreateBattleStats(_opponentMaxResolve, _opponentActionPoints);
+
+            // Set resolve by damage if needed
+            if (_opponentResolve < _opponentMaxResolve)
+            {
+                int damageNeeded = _opponentMaxResolve - _opponentResolve;
+                opponentStats.DamageResolve(damageNeeded);
+            }
+
+            // Set composure and hostility
+            if (_opponentComposure > 0) opponentStats.GainComposure(_opponentComposure);
+            if (_opponentHostility > 0) opponentStats.GainHostility(_opponentHostility);
 
             // Create dummy decks
             DeckManager playerDeck = CreateDummyDeck("Player", _playerHandSize, _playerDrawPileSize, _playerDiscardPileSize);
@@ -289,7 +303,7 @@ namespace Crookedile.Editor
             Debug.Log($"  Resolve: {stats.CurrentResolve}/{stats.MaxResolve}");
             Debug.Log($"  Action Points: {stats.CurrentActionPoints}/{stats.MaxActionPoints}");
             Debug.Log($"  Composure: {stats.CurrentComposure} | Hostility: {stats.CurrentHostility}");
-            Debug.Log($"  Hand: {deck.HandCount} | Draw: {deck.DrawPileCount} | Discard: {deck.DiscardPileCount}");
+            Debug.Log($"  Hand: {deck.HandCount} | Draw: {deck.DeckCount} | Discard: {deck.DiscardCount}");
         }
 
         #endregion
