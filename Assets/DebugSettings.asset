@@ -47,3 +47,13 @@ MonoBehaviour:
     logLevel: 3
     scripts:
     - LocalizationManager
+  - categoryName: SaveManager
+    enabled: 1
+    logLevel: 3
+    scripts:
+    - SaveManager
+  - categoryName: BattleManager
+    enabled: 1
+    logLevel: 3
+    scripts:
+    - BattleManager
