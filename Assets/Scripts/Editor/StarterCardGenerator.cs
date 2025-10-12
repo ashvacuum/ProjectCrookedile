@@ -50,7 +50,7 @@ namespace Crookedile.Editor
                     path: $"{path}/FindCommonGround_{i}.asset",
                     name: "Find Common Ground",
                     type: CardType.Diplomacy,
-                    rarity: CardRarity.Common,
+                    rarity: CardRarity.Basic,
                     description: "Basic persuasion technique.",
                     cost: 1,
                     effects: new CardEffect[]
@@ -67,7 +67,7 @@ namespace Crookedile.Editor
                     path: $"{path}/Blessing_{i}.asset",
                     name: "Blessing",
                     type: CardType.Diplomacy,
-                    rarity: CardRarity.Common,
+                    rarity: CardRarity.Basic,
                     description: "Convert all Composure into a powerful burst of conviction.",
                     cost: 1,
                     effects: new CardEffect[]
@@ -85,7 +85,7 @@ namespace Crookedile.Editor
                     path: $"{path}/Accusation_{i}.asset",
                     name: "Accusation",
                     type: CardType.Hostility,
-                    rarity: CardRarity.Common,
+                    rarity: CardRarity.Basic,
                     description: "Direct confrontation. Creates tension.",
                     cost: 1,
                     effects: new CardEffect[]
@@ -101,7 +101,7 @@ namespace Crookedile.Editor
                 path: $"{path}/Deflect.asset",
                 name: "Deflect",
                 type: CardType.Manipulate,
-                rarity: CardRarity.Common,
+                rarity: CardRarity.Basic,
                 description: "Redirect aggression into grace.",
                 cost: 1,
                 effects: new CardEffect[]
@@ -116,7 +116,7 @@ namespace Crookedile.Editor
                 path: $"{path}/GatherThoughts.asset",
                 name: "Gather Thoughts",
                 type: CardType.Manipulate,
-                rarity: CardRarity.Common,
+                rarity: CardRarity.Basic,
                 description: "Center yourself and build inner strength.",
                 cost: 1,
                 effects: new CardEffect[]
@@ -143,7 +143,7 @@ namespace Crookedile.Editor
                     path: $"{path}/FamilyName_{i}.asset",
                     name: "Family Name",
                     type: CardType.Diplomacy,
-                    rarity: CardRarity.Common,
+                    rarity: CardRarity.Basic,
                     description: "Leverage your family's reputation.",
                     cost: 1,
                     effects: new CardEffect[]
@@ -158,7 +158,7 @@ namespace Crookedile.Editor
                 path: $"{path}/InheritedPrivilege.asset",
                 name: "Inherited Privilege",
                 type: CardType.Diplomacy,
-                rarity: CardRarity.Uncommon,
+                rarity: CardRarity.Basic,
                 description: "Your advantages open doors.",
                 cost: 2,
                 effects: new CardEffect[]
@@ -175,7 +175,7 @@ namespace Crookedile.Editor
                     path: $"{path}/PullStrings_{i}.asset",
                     name: "Pull Strings",
                     type: CardType.Hostility,
-                    rarity: CardRarity.Common,
+                    rarity: CardRarity.Basic,
                     description: "Use connections to apply pressure.",
                     cost: 1,
                     effects: new CardEffect[]
@@ -193,7 +193,7 @@ namespace Crookedile.Editor
                     path: $"{path}/CallInFavor_{i}.asset",
                     name: "Call in Favor",
                     type: CardType.Manipulate,
-                    rarity: CardRarity.Common,
+                    rarity: CardRarity.Basic,
                     description: "You know people.",
                     cost: 1,
                     effects: new CardEffect[]
@@ -208,7 +208,7 @@ namespace Crookedile.Editor
                 path: $"{path}/BackroomDeal.asset",
                 name: "Backroom Deal",
                 type: CardType.Manipulate,
-                rarity: CardRarity.Uncommon,
+                rarity: CardRarity.Basic,
                 description: "Negotiate for future advantage.",
                 cost: 2,
                 effects: new CardEffect[]
@@ -223,7 +223,7 @@ namespace Crookedile.Editor
                 path: $"{path}/DynastyNetwork.asset",
                 name: "Dynasty Network",
                 type: CardType.Manipulate,
-                rarity: CardRarity.Common,
+                rarity: CardRarity.Basic,
                 description: "Cycle through your connections.",
                 cost: 1,
                 effects: new CardEffect[]
@@ -238,7 +238,7 @@ namespace Crookedile.Editor
                 path: $"{path}/TrustFund.asset",
                 name: "Trust Fund",
                 type: CardType.Manipulate,
-                rarity: CardRarity.Common,
+                rarity: CardRarity.Basic,
                 description: "Money solves problems instantly.",
                 cost: 0,
                 effects: new CardEffect[]
@@ -266,7 +266,7 @@ namespace Crookedile.Editor
                     path: $"{path}/CharmingGambit_{i}.asset",
                     name: "Charming Gambit",
                     type: CardType.Diplomacy,
-                    rarity: CardRarity.Common,
+                    rarity: CardRarity.Basic,
                     description: "Charisma with a chance of deeper connection.",
                     cost: 1,
                     effects: new CardEffect[]
@@ -282,7 +282,7 @@ namespace Crookedile.Editor
                 path: $"{path}/AllOrNothing.asset",
                 name: "All or Nothing",
                 type: CardType.Hostility,
-                rarity: CardRarity.Uncommon,
+                rarity: CardRarity.Basic,
                 description: "High risk, high reward aggression.",
                 cost: 2,
                 effects: new CardEffect[]
@@ -298,7 +298,7 @@ namespace Crookedile.Editor
                     path: $"{path}/BoldAccusation_{i}.asset",
                     name: "Bold Accusation",
                     type: CardType.Hostility,
-                    rarity: CardRarity.Common,
+                    rarity: CardRarity.Basic,
                     description: "Aggressive confrontation.",
                     cost: 1,
                     effects: new CardEffect[]
@@ -316,7 +316,7 @@ namespace Crookedile.Editor
                     path: $"{path}/SpotlightHog_{i}.asset",
                     name: "Spotlight Hog",
                     type: CardType.Hostility,
-                    rarity: CardRarity.Uncommon,
+                    rarity: CardRarity.Basic,
                     description: "All eyes on you - for better or worse.",
                     cost: 2,
                     effects: new CardEffect[]
@@ -348,7 +348,7 @@ namespace Crookedile.Editor
                 path: $"{path}/EgoTrip.asset",
                 name: "Ego Trip",
                 type: CardType.Manipulate,
-                rarity: CardRarity.Uncommon,
+                rarity: CardRarity.Basic,
                 description: "Convert your bad reputation into confidence.",
                 cost: 1,
                 effects: new CardEffect[]
@@ -362,7 +362,7 @@ namespace Crookedile.Editor
                 path: $"{path}/FanFavorite.asset",
                 name: "Fan Favorite",
                 type: CardType.Manipulate,
-                rarity: CardRarity.Common,
+                rarity: CardRarity.Basic,
                 description: "Trade popularity for damage reduction.",
                 cost: 1,
                 effects: new CardEffect[]
