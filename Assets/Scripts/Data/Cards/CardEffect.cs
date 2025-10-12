@@ -115,6 +115,7 @@ namespace Crookedile.Data.Cards
                 { "Draw/Choose from Discard to Deck", CardManipulationType.ChooseFromDiscardToDeck },
 
                 { "Discard/Discard Cards", CardManipulationType.DiscardCards },
+                { "Discard/Discard Hand", CardManipulationType.DiscardHand },
                 { "Discard/Exhaust This Card", CardManipulationType.ExhaustThisCard },
 
                 { "Create/Add Card to Deck", CardManipulationType.AddCardToDeck },
@@ -308,6 +309,7 @@ namespace Crookedile.Data.Cards
                 CardManipulationType.ChooseFromDiscardToDeck => $"Choose {_cardAmount} card(s) from discard pile to deck",
 
                 CardManipulationType.DiscardCards => $"Discard {_cardAmount} card(s)",
+                CardManipulationType.DiscardHand => "Discard your entire hand",
                 CardManipulationType.ExhaustThisCard => "Exhaust this card",
 
                 CardManipulationType.AddCardToDeck => $"Add {_cardAmount} {cardName} to deck",
@@ -384,6 +386,7 @@ namespace Crookedile.Data.Cards
 
         // Discard effects
         DiscardCards,
+        DiscardHand,
         ExhaustThisCard,
 
         // Card creation effects
