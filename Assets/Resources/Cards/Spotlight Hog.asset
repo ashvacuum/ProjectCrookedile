@@ -13,14 +13,62 @@ MonoBehaviour:
   m_Name: Spotlight Hog
   m_EditorClassIdentifier: 
   _id: 424688dd-c50c-497b-b5e2-b097a3e0a661
-  _cardName: 
-  _cardType: 0
+  _cardName: Spotlight Hog
+  _cardType: 1
   _rarity: 0
   _artwork: {fileID: 0}
   _description: 
   _flavorText: 
-  _costs: []
-  _effects: []
+  _costs:
+  - _costType: 1
+    _baseAmount: 2
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _effects:
+  - _category: 0
+    _target: 1
+    _damageType: 0
+    _damageAmount: 6
+    _randomDamageRange: {x: 3, y: 9}
+    _resourceType: 0
+    _resourceAmount: 3
+    _cardManipulationType: 0
+    _cardAmount: 2
+    _cardToAdd: {fileID: 0}
+    _costReduction: 1
+    _statusEffectType: 0
+    _statusStacks: 2
+    _statusDuration: 0
+  - _category: 1
+    _target: 1
+    _damageType: 0
+    _damageAmount: 3
+    _randomDamageRange: {x: 3, y: 9}
+    _resourceType: 0
+    _resourceAmount: 3
+    _cardManipulationType: 0
+    _cardAmount: 2
+    _cardToAdd: {fileID: 0}
+    _costReduction: 1
+    _statusEffectType: 0
+    _statusStacks: 2
+    _statusDuration: 0
+  - _category: 1
+    _target: 1
+    _damageType: 0
+    _damageAmount: 3
+    _randomDamageRange: {x: 3, y: 9}
+    _resourceType: 4
+    _resourceAmount: 2
+    _cardManipulationType: 0
+    _cardAmount: 2
+    _cardToAdd: {fileID: 0}
+    _costReduction: 1
+    _statusEffectType: 0
+    _statusStacks: 2
+    _statusDuration: 0
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
   _tags: []
