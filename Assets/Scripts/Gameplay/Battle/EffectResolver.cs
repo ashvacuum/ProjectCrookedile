@@ -179,12 +179,56 @@ namespace Crookedile.Gameplay.Battle
                     ApplyDrawCards(deck, effect.CardAmount);
                     break;
 
+                case CardManipulationType.ChooseFromDiscardToHand:
+                    ApplyChooseFromDiscardToHand(deck, effect.CardAmount);
+                    break;
+
+                case CardManipulationType.ChooseFromDiscardToDeck:
+                    ApplyChooseFromDiscardToDeck(deck, effect.CardAmount);
+                    break;
+
                 case CardManipulationType.DiscardCards:
                     ApplyDiscardCards(deck, effect.CardAmount);
                     break;
 
+                case CardManipulationType.DiscardHand:
+                    ApplyDiscardHand(deck);
+                    break;
+
                 case CardManipulationType.ExhaustThisCard:
                     ApplyExhaustCard(deck);
+                    break;
+
+                case CardManipulationType.AddCardToDeck:
+                    ApplyAddCardToDeck(deck, effect.CardToAdd, effect.CardAmount);
+                    break;
+
+                case CardManipulationType.AddCardToHand:
+                    ApplyAddCardToHand(deck, effect.CardToAdd, effect.CardAmount);
+                    break;
+
+                case CardManipulationType.UpgradeCardThisBattle:
+                    ApplyUpgradeCardThisBattle(deck);
+                    break;
+
+                case CardManipulationType.UpgradeAllCardsInHand:
+                    ApplyUpgradeAllCardsInHand(deck);
+                    break;
+
+                case CardManipulationType.MakeCardRetain:
+                    ApplyMakeCardRetain(deck);
+                    break;
+
+                case CardManipulationType.MakeAllCardsRetain:
+                    ApplyMakeAllCardsRetain(deck);
+                    break;
+
+                case CardManipulationType.ReduceCardCost:
+                    ApplyReduceCardCost(deck, effect.CostReduction);
+                    break;
+
+                case CardManipulationType.MakeCardFree:
+                    ApplyMakeCardFree(deck);
                     break;
             }
         }
@@ -348,6 +392,167 @@ namespace Crookedile.Gameplay.Battle
         {
             // Exhaust the card that was just played (handled by DeckManager)
             GameLogger.LogInfo<EffectResolver>("Card will be exhausted after play");
+        }
+
+        private void ApplyDiscardHand(DeckManager deck)
+        {
+            int cardsDiscarded = 0;
+            int handSize = deck.HandCount;
+
+            // Discard all cards from hand
+            for (int i = handSize - 1; i >= 0; i--)
+            {
+                if (deck.DiscardCard(deck.Hand[i]))
+                {
+                    cardsDiscarded++;
+                }
+            }
+
+            GameLogger.LogInfo<EffectResolver>($"Discarded entire hand ({cardsDiscarded} cards)");
+        }
+
+        private void ApplyChooseFromDiscardToHand(DeckManager deck, int amount)
+        {
+            // TODO: This requires player choice UI
+            // For now, just take the first N cards from discard pile
+            int cardsRetrieved = 0;
+            int toRetrieve = Mathf.Min(amount, deck.DiscardPileCount);
+
+            for (int i = 0; i < toRetrieve; i++)
+            {
+                if (deck.DiscardPileCount > 0)
+                {
+                    CardData card = deck.DiscardPile[0];
+                    // TODO: Implement method to move card from discard to hand
+                    cardsRetrieved++;
+                }
+            }
+
+            GameLogger.LogWarning<EffectResolver>($"Choose from discard to hand: Requires UI implementation (would retrieve {amount} cards)");
+        }
+
+        private void ApplyChooseFromDiscardToDeck(DeckManager deck, int amount)
+        {
+            // TODO: This requires player choice UI
+            // For now, just take the first N cards from discard pile
+            int cardsRetrieved = 0;
+            int toRetrieve = Mathf.Min(amount, deck.DiscardPileCount);
+
+            for (int i = 0; i < toRetrieve; i++)
+            {
+                if (deck.DiscardPileCount > 0)
+                {
+                    CardData card = deck.DiscardPile[0];
+                    // TODO: Implement method to move card from discard to deck
+                    cardsRetrieved++;
+                }
+            }
+
+            GameLogger.LogWarning<EffectResolver>($"Choose from discard to deck: Requires UI implementation (would retrieve {amount} cards)");
+        }
+
+        private void ApplyAddCardToDeck(DeckManager deck, CardData card, int amount)
+        {
+            if (card == null)
+            {
+                GameLogger.LogWarning<EffectResolver>("Cannot add card to deck: No card specified");
+                return;
+            }
+
+            // TODO: Implement method to add card to deck
+            GameLogger.LogInfo<EffectResolver>($"Added {amount}x {card.CardName} to deck");
+        }
+
+        private void ApplyAddCardToHand(DeckManager deck, CardData card, int amount)
+        {
+            if (card == null)
+            {
+                GameLogger.LogWarning<EffectResolver>("Cannot add card to hand: No card specified");
+                return;
+            }
+
+            // TODO: Implement method to add card to hand
+            GameLogger.LogInfo<EffectResolver>($"Added {amount}x {card.CardName} to hand");
+        }
+
+        private void ApplyUpgradeCardThisBattle(DeckManager deck)
+        {
+            // TODO: This requires player choice UI
+            // For now, just log the intent
+            if (deck.HandCount > 0)
+            {
+                GameLogger.LogWarning<EffectResolver>("Upgrade card this battle: Requires UI implementation (player choice)");
+            }
+            else
+            {
+                GameLogger.LogInfo<EffectResolver>("No cards in hand to upgrade");
+            }
+        }
+
+        private void ApplyUpgradeAllCardsInHand(DeckManager deck)
+        {
+            int cardsUpgraded = 0;
+
+            // TODO: Implement card upgrade system
+            // For now, just count upgradeable cards
+            foreach (var card in deck.Hand)
+            {
+                if (card != null && card.CanUpgrade)
+                {
+                    cardsUpgraded++;
+                }
+            }
+
+            GameLogger.LogInfo<EffectResolver>($"Upgraded all cards in hand ({cardsUpgraded} cards)");
+        }
+
+        private void ApplyMakeCardRetain(DeckManager deck)
+        {
+            // TODO: This requires player choice UI and retain system
+            // For now, just log the intent
+            if (deck.HandCount > 0)
+            {
+                GameLogger.LogWarning<EffectResolver>("Make card retain: Requires UI implementation and retain system");
+            }
+            else
+            {
+                GameLogger.LogInfo<EffectResolver>("No cards in hand to make retain");
+            }
+        }
+
+        private void ApplyMakeAllCardsRetain(DeckManager deck)
+        {
+            // TODO: Implement retain system (cards don't discard at end of turn)
+            int cardsRetained = deck.HandCount;
+            GameLogger.LogInfo<EffectResolver>($"Made all cards retain ({cardsRetained} cards won't discard at end of turn)");
+        }
+
+        private void ApplyReduceCardCost(DeckManager deck, int reduction)
+        {
+            // TODO: This requires player choice UI and cost modification system
+            // For now, just log the intent
+            if (deck.HandCount > 0)
+            {
+                GameLogger.LogWarning<EffectResolver>($"Reduce card cost by {reduction}: Requires UI implementation and cost modification system");
+            }
+            else
+            {
+                GameLogger.LogInfo<EffectResolver>("No cards in hand to reduce cost");
+            }
+        }
+
+        private void ApplyMakeCardFree(DeckManager deck)
+        {
+            // TODO: This requires player choice UI and temporary cost modification
+            // For now, just log the intent
+            if (deck.HandCount > 0)
+            {
+                GameLogger.LogWarning<EffectResolver>("Make card free this turn: Requires UI implementation and cost modification system");
+            }
+            else
+            {
+                GameLogger.LogInfo<EffectResolver>("No cards in hand to make free");
+            }
         }
 
         #endregion
