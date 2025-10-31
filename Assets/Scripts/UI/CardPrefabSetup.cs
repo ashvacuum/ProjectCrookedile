@@ -115,7 +115,7 @@ namespace Crookedile.UI
             discardFeedback.InitializationMode = MMFeedbacks.InitializationModes.Awake;
 
             // Assign references via SerializedObject (proper way to set private serialized fields)
-            SerializedObject serializedCard = new SerializedObject(cardView);
+            SerializedObject serializedCard = new SerializedObject(cardView);3
             serializedCard.FindProperty("cardRenderer").objectReferenceValue = quadRenderer;
             serializedCard.FindProperty("cardNameText").objectReferenceValue = nameTMP;
             serializedCard.FindProperty("cardCostText").objectReferenceValue = costTMP;
