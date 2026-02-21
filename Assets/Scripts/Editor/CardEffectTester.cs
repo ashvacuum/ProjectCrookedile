@@ -197,7 +197,7 @@ namespace Crookedile.Editor
             Debug.Log("");
 
             // Create effect resolver
-            EffectResolver resolver = new EffectResolver(playerStats, opponentStats, playerDeck, opponentDeck);
+            EffectResolver resolver = new EffectResolver(playerStats, opponentStats, playerDeck);
 
             // Apply status effects
             ApplyStatusEffects(resolver.PlayerStatusEffects, _playerStatusEffects);

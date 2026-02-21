@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Crookedile.Core;
 using Crookedile.Gameplay.Battle;
 using Crookedile.Data.Cards;
+using Crookedile.Data.Enemy;
 
 namespace Crookedile.UI.Battle
 {
@@ -20,11 +21,11 @@ namespace Crookedile.UI.Battle
         [SerializeField] private TMP_Text playerHostilityText;
         [SerializeField] private TMP_Text playerAPText;
 
-        [Header("Opponent Stats")]
+        [Header("Opponent / Enemy Stats")]
         [SerializeField] private TMP_Text opponentResolveText;
         [SerializeField] private TMP_Text opponentComposureText;
         [SerializeField] private TMP_Text opponentHostilityText;
-        [SerializeField] private TMP_Text opponentAPText;
+        // Note: opponents are scripted enemies with no AP — AP display intentionally removed
 
         [Header("Battle Info")]
         [SerializeField] private TMP_Text turnNumberText;
@@ -87,6 +88,7 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<TurnEndedEvent>(OnTurnEnded);
             EventBus.Subscribe<CardPlayedEvent>(OnCardPlayed);
             EventBus.Subscribe<BattleEndedEvent>(OnBattleEnded);
+            EventBus.Subscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
         }
 
         private void UnsubscribeFromEvents()
@@ -96,6 +98,7 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<TurnEndedEvent>(OnTurnEnded);
             EventBus.Unsubscribe<CardPlayedEvent>(OnCardPlayed);
             EventBus.Unsubscribe<BattleEndedEvent>(OnBattleEnded);
+            EventBus.Unsubscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
         }
 
         /// <summary>
@@ -134,6 +137,12 @@ namespace Crookedile.UI.Battle
             string player = evt.IsPlayer ? "Player" : "Opponent";
             AddLogEntry($"{player} played: {evt.Card.CardName}");
             RefreshUI();
+        }
+
+        private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
+        {
+            if (evt.Move != null)
+                AddLogEntry($"Enemy intends: {evt.Move.IntentDescription}");
         }
 
         private void OnBattleEnded(BattleEndedEvent evt)
@@ -192,8 +201,7 @@ namespace Crookedile.UI.Battle
                 opponentComposureText.text = $"Composure: {opponentStats.CurrentComposure}";
             if (opponentHostilityText != null)
                 opponentHostilityText.text = $"Hostility: {opponentStats.CurrentHostility} ({opponentStats.HostilityDamageMultiplier:F1}x)";
-            if (opponentAPText != null)
-                opponentAPText.text = $"AP: {opponentStats.CurrentActionPoints}/{opponentStats.MaxActionPoints}";
+            // opponentAPText removed — enemies have no Action Points
         }
 
         private void UpdateBattleInfo()
@@ -244,6 +252,10 @@ namespace Crookedile.UI.Battle
                     activeCardButtons.Add(cardButton);
                 }
             }
+
+            // Apply arc fan layout if CardHandLayout is on the container.
+            // Remove the Horizontal Layout Group from the container if using this.
+            cardButtonContainer.GetComponent<CardHandLayout>()?.ArrangeCards(activeCardButtons);
         }
 
         /// <summary>

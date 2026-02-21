@@ -34,7 +34,7 @@ MonoBehaviour:
     _randomDamageRange: {x: 3, y: 9}
     _resourceType: 0
     _resourceAmount: 3
-    _cardManipulationType: 1
+    _cardManipulationType: 3
     _cardAmount: 1
     _cardToAdd: {fileID: 0}
     _costReduction: 1

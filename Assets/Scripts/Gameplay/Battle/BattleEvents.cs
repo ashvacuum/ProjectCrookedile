@@ -1,5 +1,6 @@
 using Crookedile.Core;
 using Crookedile.Data.Cards;
+using Crookedile.Data.Enemy;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -166,6 +167,21 @@ namespace Crookedile.Gameplay.Battle
         public int OldValue;
         public int NewValue;
         public bool IsPlayer;
+    }
+
+    #endregion
+
+    #region Enemy Events
+
+    /// <summary>
+    /// Published when the enemy selects and reveals their next move (intent).
+    /// Raised at the start of the player's turn so the UI can show the threat
+    /// before the player decides which cards to play — matching Slay the Spire timing.
+    /// </summary>
+    public struct EnemyIntentDeclaredEvent : IGameEvent
+    {
+        /// <summary>The move the enemy intends to execute on their upcoming turn.</summary>
+        public EnemyMoveData Move;
     }
 
     #endregion
