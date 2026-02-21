@@ -1,0 +1,289 @@
+#if UNITY_EDITOR
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
+using Crookedile.Data;
+using Crookedile.Data.Cards;
+
+namespace Crookedile.Editor
+{
+    /// <summary>
+    /// One-click tool to stamp all 19 starter card assets with:
+    ///   • IsStarterCard = true
+    ///   • Correct origin tag  (used by CardDatabase.GetStarterDeck)
+    ///   • Mechanical description text
+    ///
+    /// Open via: Tools → Crookedile → Fix Starter Card Data
+    /// </summary>
+    public class CardDataFixer : EditorWindow
+    {
+        // ─── Card Metadata ────────────────────────────────────────────────────────
+        // Keyed by asset name (matches filename in Resources/Cards/).
+        // originTag must match OriginType.ToString().ToLower() used in CardDatabase.GetStarterDeck().
+
+        private static readonly Dictionary<string, CardMeta> CardMetadata = new()
+        {
+            // ── Faith Leader ─────────────────────────────────────────────────────
+            ["Find Common Ground"] = new("faithleader",
+                "Deal 3 Resolve damage.",
+                "Sometimes all it takes is a smile."),
+
+            ["Blessing"] = new("faithleader",
+                "Deal damage equal to your Composure. Consume all Composure.",
+                "The congregation holds its breath."),
+
+            ["Accusation"] = new("faithleader",
+                "Deal 4 Resolve damage. Gain 1 Hostility.",
+                "Righteous anger, barely contained."),
+
+            ["Deflect"] = new("faithleader",
+                "Gain 3 Composure. Reduce Hostility by 1.",
+                "Grace under fire."),
+
+            ["Gather Thoughts"] = new("faithleader",
+                "Gain 4 Composure.",
+                "A moment of quiet before the storm."),
+
+            // ── Nepo Baby ─────────────────────────────────────────────────────────
+            ["Family Name"] = new("nepobaby",
+                "Deal 3 Resolve damage.",
+                "Do you know who my father is?"),
+
+            ["Inherited Privelege"] = new("nepobaby",   // asset typo — keep as-is
+                "Deal 5 Resolve damage. Draw 1 card.",
+                "Some doors open themselves."),
+
+            ["Pull Strings"] = new("nepobaby",
+                "Deal 4 Resolve damage. Gain 1 Hostility.",
+                "Everyone has a price. Yours is just lower."),
+
+            ["Call In Favor"] = new("nepobaby",
+                "Draw 2 cards.",
+                "The account was always in the black."),
+
+            ["Backroom Deal"] = new("nepobaby",
+                "Draw 2 cards. Gain 1 Action Point next turn.",
+                "Nothing illegal about a private meeting."),
+
+            ["Dynasty Network"] = new("nepobaby",
+                "Discard 1 card. Draw 2 cards.",
+                "One call, a hundred doors."),
+
+            ["Trust Fund"] = new("nepobaby",
+                "Gain 2 Composure. Gain 1 Action Point this turn.",
+                "Family always provides."),
+
+            // ── Actor ─────────────────────────────────────────────────────────────
+            ["Charming Gambit"] = new("actor",
+                "Deal 3 Resolve damage. 50% chance: Draw 1 card.",
+                "High risk, higher cheekbones."),
+
+            ["All or Nothing"] = new("actor",
+                "Deal 3–9 Resolve damage (random).",
+                "Every performance is a gamble."),
+
+            ["Bold Accusation"] = new("actor",
+                "Deal 5 Resolve damage. Gain 2 Hostility.",
+                "Critics said it was too much. It worked."),
+
+            ["Spotlight Hog"] = new("actor",
+                "Deal 6 Resolve damage. Gain 3 Composure. Gain 2 Hostility.",
+                "They can't look away. Neither can you."),
+
+            ["High Stakes"] = new("actor",
+                "Discard your hand. Draw 3 cards.",
+                "Burn it down and start over."),
+
+            ["Ego Trip"] = new("actor",
+                "Gain Composure equal to your Hostility. (Hostility is not reduced.)",
+                "Turn the wounds into weapons."),
+
+            ["Fan Favorite"] = new("actor",
+                "Lose 3 Composure. Reduce Hostility by 3.",
+                "They love you. Remind yourself of that."),
+        };
+
+        // ─── Editor Window ────────────────────────────────────────────────────────
+
+        [MenuItem("Tools/Crookedile/Fix Starter Card Data")]
+        public static void ShowWindow()
+        {
+            GetWindow<CardDataFixer>("Card Data Fixer");
+        }
+
+        private Vector2 _scroll;
+
+        private void OnGUI()
+        {
+            GUILayout.Label("Starter Card Data Fixer", EditorStyles.boldLabel);
+            EditorGUILayout.Space();
+
+            EditorGUILayout.HelpBox(
+                "This tool stamps all 19 starter card assets with:\n" +
+                "  • IsStarterCard = true\n" +
+                "  • Origin tag (faithleader / nepobaby / actor)\n" +
+                "  • Mechanical description\n" +
+                "  • Flavor text\n\n" +
+                "Cards are loaded from Assets/Resources/Cards/.\n" +
+                "Safe to run multiple times — idempotent.",
+                MessageType.Info);
+
+            EditorGUILayout.Space();
+
+            if (GUILayout.Button("Fix All Starter Cards", GUILayout.Height(40)))
+                FixAllCards();
+
+            EditorGUILayout.Space();
+
+            if (GUILayout.Button("Log Card Status (dry run)", GUILayout.Height(30)))
+                LogCardStatus();
+        }
+
+        // ─── Fix Logic ────────────────────────────────────────────────────────────
+
+        private static void FixAllCards()
+        {
+            int fixed_count = 0;
+            int missing = 0;
+
+            foreach (var kvp in CardMetadata)
+            {
+                string assetName = kvp.Key;
+                CardMeta meta    = kvp.Value;
+
+                string path = $"Assets/Resources/Cards/{assetName}.asset";
+                CardData card = AssetDatabase.LoadAssetAtPath<CardData>(path);
+
+                if (card == null)
+                {
+                    Debug.LogWarning($"[CardDataFixer] Not found at '{path}' — skipping.");
+                    missing++;
+                    continue;
+                }
+
+                bool changed = false;
+
+                // IsStarterCard
+                if (!card.IsStarterCard)
+                {
+                    SetField(card, "_isStarterCard", true);
+                    changed = true;
+                }
+
+                // Description
+                if (card.Description != meta.description)
+                {
+                    SetField(card, "_description", meta.description);
+                    changed = true;
+                }
+
+                // FlavorText
+                if (card.FlavorText != meta.flavorText)
+                {
+                    SetField(card, "_flavorText", meta.flavorText);
+                    changed = true;
+                }
+
+                // Tags — add origin tag if missing
+                var so = new SerializedObject(card);
+                var tagsProp = so.FindProperty("_tags");
+                bool hasTag = false;
+                for (int i = 0; i < tagsProp.arraySize; i++)
+                {
+                    if (tagsProp.GetArrayElementAtIndex(i).stringValue == meta.originTag)
+                    {
+                        hasTag = true;
+                        break;
+                    }
+                }
+
+                if (!hasTag)
+                {
+                    tagsProp.InsertArrayElementAtIndex(tagsProp.arraySize);
+                    tagsProp.GetArrayElementAtIndex(tagsProp.arraySize - 1).stringValue = meta.originTag;
+                    so.ApplyModifiedProperties();
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    EditorUtility.SetDirty(card);
+                    fixed_count++;
+                    Debug.Log($"[CardDataFixer] Fixed: {assetName} ({meta.originTag})");
+                }
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            Debug.Log($"[CardDataFixer] Done. Fixed {fixed_count} cards. Missing: {missing}.");
+            EditorUtility.DisplayDialog("Card Data Fixer",
+                $"Fixed {fixed_count} card(s).\nMissing: {missing} (check Console).",
+                "OK");
+        }
+
+        private static void LogCardStatus()
+        {
+            Debug.Log("[CardDataFixer] === Card Status Report ===");
+            foreach (var kvp in CardMetadata)
+            {
+                string path = $"Assets/Resources/Cards/{kvp.Key}.asset";
+                CardData card = AssetDatabase.LoadAssetAtPath<CardData>(path);
+
+                if (card == null)
+                {
+                    Debug.LogWarning($"  MISSING: {kvp.Key}");
+                    continue;
+                }
+
+                string status = $"  {kvp.Key}: " +
+                                $"IsStarter={card.IsStarterCard}, " +
+                                $"Tags=[{string.Join(",", card.Tags)}], " +
+                                $"Desc={(string.IsNullOrEmpty(card.Description) ? "EMPTY" : "OK")}";
+                Debug.Log(status);
+            }
+        }
+
+        // ─── Helpers ──────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Sets a private serialized field on a ScriptableObject using SerializedObject.
+        /// </summary>
+        private static void SetField(ScriptableObject obj, string fieldName, object value)
+        {
+            var so   = new SerializedObject(obj);
+            var prop = so.FindProperty(fieldName);
+            if (prop == null)
+            {
+                Debug.LogWarning($"[CardDataFixer] Field '{fieldName}' not found on {obj.name}");
+                return;
+            }
+
+            switch (value)
+            {
+                case bool b:   prop.boolValue   = b; break;
+                case string s: prop.stringValue = s; break;
+                case int i:    prop.intValue    = i; break;
+            }
+
+            so.ApplyModifiedProperties();
+        }
+
+        // ─── Data ─────────────────────────────────────────────────────────────────
+
+        private readonly struct CardMeta
+        {
+            public readonly string originTag;
+            public readonly string description;
+            public readonly string flavorText;
+
+            public CardMeta(string originTag, string description, string flavorText)
+            {
+                this.originTag   = originTag;
+                this.description = description;
+                this.flavorText  = flavorText;
+            }
+        }
+    }
+}
+#endif
