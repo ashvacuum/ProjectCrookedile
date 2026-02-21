@@ -59,10 +59,9 @@ namespace Crookedile.Tests
             // Initialize deck managers with empty decks
             List<CardData> emptyDeck = new List<CardData>();
             playerDeck = new DeckManager(emptyDeck, "TestPlayer", 10);
-            opponentDeck = new DeckManager(emptyDeck, "TestOpponent", 10);
 
             // Initialize effect resolver
-            effectResolver = new EffectResolver(playerStats, opponentStats, playerDeck, opponentDeck);
+            effectResolver = new EffectResolver(playerStats, opponentStats, playerDeck);
 
             Debug.Log($"Player: {playerStats.GetStatusString()}");
             Debug.Log($"Opponent: {opponentStats.GetStatusString()}");

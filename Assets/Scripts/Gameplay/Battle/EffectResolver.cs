@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
+using Crookedile.Data.Enemy;
 using Crookedile.Utilities;
 
 namespace Crookedile.Gameplay.Battle
@@ -17,19 +18,19 @@ namespace Crookedile.Gameplay.Battle
         private BattleStats _playerStats;
         private BattleStats _opponentStats;
         private DeckManager _playerDeck;
-        private DeckManager _opponentDeck;
+        // Note: enemies have no deck — _opponentDeck was removed when the system switched
+        // from player-vs-player to player-vs-scripted-enemy.
         private StatusEffectManager _playerStatusEffects;
         private StatusEffectManager _opponentStatusEffects;
 
         // Events for effect notifications
         public event Action<CardEffect, BattleStats> OnEffectApplied;
 
-        public EffectResolver(BattleStats playerStats, BattleStats opponentStats, DeckManager playerDeck, DeckManager opponentDeck)
+        public EffectResolver(BattleStats playerStats, BattleStats opponentStats, DeckManager playerDeck)
         {
             _playerStats = playerStats;
             _opponentStats = opponentStats;
             _playerDeck = playerDeck;
-            _opponentDeck = opponentDeck;
             _playerStatusEffects = new StatusEffectManager("Player");
             _opponentStatusEffects = new StatusEffectManager("Opponent");
         }
@@ -57,13 +58,33 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
+        /// Resolves all effects from a scripted enemy move.
+        /// Uses the same CardEffect pipeline as player cards with isPlayerCard=false
+        /// (enemy is caster, player is the default target).
+        /// CardManipulation effects are silently skipped — enemies have no deck.
+        /// </summary>
+        public void ResolveEnemyMoveEffects(EnemyMoveData move)
+        {
+            if (move == null) return;
+
+            GameLogger.LogInfo<EffectResolver>($"Resolving enemy move: {move.MoveName}");
+
+            foreach (CardEffect effect in move.Effects)
+            {
+                ResolveBattleEffect(effect, isPlayerCard: false);
+            }
+        }
+
+        /// <summary>
         /// Resolves a single battle effect using the new simplified system.
         /// </summary>
         private void ResolveBattleEffect(CardEffect effect, bool isPlayerCard)
         {
             BattleStats casterStats = isPlayerCard ? _playerStats : _opponentStats;
             BattleStats targetStats = isPlayerCard ? _opponentStats : _playerStats;
-            DeckManager casterDeck = isPlayerCard ? _playerDeck : _opponentDeck;
+            // Enemies have no deck — casterDeck is null when isPlayerCard == false.
+            // The CardManipulation branch guards against this below.
+            DeckManager casterDeck = isPlayerCard ? _playerDeck : null;
             StatusEffectManager casterStatusEffects = isPlayerCard ? _playerStatusEffects : _opponentStatusEffects;
             StatusEffectManager targetStatusEffects = isPlayerCard ? _opponentStatusEffects : _playerStatusEffects;
 
@@ -98,7 +119,10 @@ namespace Crookedile.Gameplay.Battle
                     break;
 
                 case EffectCategory.CardManipulation:
-                    ResolveCardManipulationEffect(effect, casterDeck);
+                    // Enemies have no deck (casterDeck == null) — skip silently.
+                    // Designers should not author CardManipulation effects on EnemyMoveData.
+                    if (casterDeck != null)
+                        ResolveCardManipulationEffect(effect, casterDeck);
                     break;
 
                 case EffectCategory.StatusEffect:

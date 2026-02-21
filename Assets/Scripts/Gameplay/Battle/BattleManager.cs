@@ -4,13 +4,15 @@ using UnityEngine;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
+using Crookedile.Data.Enemy;
 using Crookedile.Utilities;
 
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
     /// Manages the flow of card battles using a state machine.
-    /// Orchestrates combat between player and opponent, handling turns, card plays, and victory conditions.
+    /// The player uses a card deck; the opponent is a scripted enemy with preset moves.
+    /// Orchestrates turns, card plays, enemy move execution, and victory conditions.
     /// Instantiated per-battle, not a singleton.
     /// </summary>
     [Debuggable("BattleManager", LogLevel.Info)]
@@ -27,11 +29,12 @@ namespace Crookedile.Gameplay.Battle
         private BattleStats _playerStats;
         private BattleStats _opponentStats;
         private OriginType _playerOrigin;
-        private OriginType _opponentOrigin;
 
-        // Deck Managers
+        // Player deck
         private DeckManager _playerDeck;
-        private DeckManager _opponentDeck;
+
+        // Enemy (replaces opponent deck + origin)
+        private EnemyController _enemyController;
 
         // Effect Resolver
         private EffectResolver _effectResolver;
@@ -46,11 +49,11 @@ namespace Crookedile.Gameplay.Battle
         #region Properties
 
         public BattleState CurrentState => _stateMachine?.CurrentStateType ?? BattleState.Initialize;
-        public BattleStats PlayerStats => _playerStats;
+        public BattleStats PlayerStats   => _playerStats;
         public BattleStats OpponentStats => _opponentStats;
-        public DeckManager PlayerDeck => _playerDeck;
-        public DeckManager OpponentDeck => _opponentDeck;
-        public int CurrentTurn => _currentTurn;
+        public DeckManager PlayerDeck    => _playerDeck;
+        public EnemyController EnemyController => _enemyController;
+        public int  CurrentTurn  => _currentTurn;
         public bool IsPlayerTurn => _isPlayerTurn;
 
         #endregion
@@ -84,13 +87,12 @@ namespace Crookedile.Gameplay.Battle
         {
             _stateMachine = new StateMachine<BattleState>();
 
-            // Register battle states
-            _stateMachine.RegisterState(BattleState.Initialize, new InitializeState(this));
-            _stateMachine.RegisterState(BattleState.TurnStart, new TurnStartState(this));
-            _stateMachine.RegisterState(BattleState.PlayerTurn, new PlayerTurnState(this));
-            _stateMachine.RegisterState(BattleState.OpponentTurn, new OpponentTurnState(this));
-            _stateMachine.RegisterState(BattleState.TurnEnd, new TurnEndState(this));
-            _stateMachine.RegisterState(BattleState.BattleEnd, new BattleEndState(this));
+            _stateMachine.RegisterState(BattleState.Initialize,   new InitializeState(this));
+            _stateMachine.RegisterState(BattleState.TurnStart,     new TurnStartState(this));
+            _stateMachine.RegisterState(BattleState.PlayerTurn,    new PlayerTurnState(this));
+            _stateMachine.RegisterState(BattleState.OpponentTurn,  new OpponentTurnState(this));
+            _stateMachine.RegisterState(BattleState.TurnEnd,       new TurnEndState(this));
+            _stateMachine.RegisterState(BattleState.BattleEnd,     new BattleEndState(this));
         }
 
         #endregion
@@ -98,43 +100,39 @@ namespace Crookedile.Gameplay.Battle
         #region Battle Control
 
         /// <summary>
-        /// Starts a new battle with specified combatants.
+        /// Starts a new battle. The player brings a card deck; the enemy is defined by EnemyData.
         /// </summary>
         public void StartBattle(BattleSetup setup)
         {
-            GameLogger.LogInfo<BattleManager>($"Starting battle: {setup.playerOrigin} vs {setup.opponentOrigin}");
+            GameLogger.LogInfo<BattleManager>($"Starting battle: {setup.playerOrigin} vs {setup.enemyData?.EnemyName ?? "Unknown Enemy"}");
 
-            // Get origin-specific stats
-            OriginBattleStats playerStats = setup.GetPlayerStats();
-            OriginBattleStats opponentStats = setup.GetOpponentStats();
-
-            // Initialize combatant stats
-            _playerStats = new BattleStats(playerStats.maxResolve, playerStats.maxActionPoints);
-            _opponentStats = new BattleStats(opponentStats.maxResolve, opponentStats.maxActionPoints);
+            // Player stats from origin
+            OriginBattleStats playerOriginStats = setup.GetPlayerStats();
+            _playerStats  = new BattleStats(playerOriginStats.maxResolve, playerOriginStats.maxActionPoints);
             _playerOrigin = setup.playerOrigin;
-            _opponentOrigin = setup.opponentOrigin;
 
-            // Initialize deck managers
+            // Enemy stats come directly from EnemyData (no OriginStats lookup)
+            // Enemies have 0 AP — they don't spend action points to play cards
+            _opponentStats = new BattleStats(setup.enemyData.MaxResolve, maxActionPoints: 0);
+
+            // Player deck
             _playerDeck = new DeckManager(setup.playerDeck, "Player", 10);
-            _opponentDeck = new DeckManager(setup.opponentDeck, "Opponent", 10);
 
-            // Initialize effect resolver
-            _effectResolver = new EffectResolver(_playerStats, _opponentStats, _playerDeck, _opponentDeck);
+            // Enemy controller (handles move selection, intent tracking)
+            _enemyController = new EnemyController(setup.enemyData);
 
-            // Reset turn counter
+            // Effect resolver — player deck only; enemies have no deck
+            _effectResolver = new EffectResolver(_playerStats, _opponentStats, _playerDeck);
+
+            // Reset counters
             _currentTurn = 0;
             _isPlayerTurn = true;
 
-            // Publish battle started event
             EventBus.Publish(new BattleStartedEvent { Setup = setup });
-
-            // Start state machine
             _stateMachine.ChangeState(BattleState.Initialize);
         }
 
-        /// <summary>
-        /// Transitions to the next state in the battle flow.
-        /// </summary>
+        /// <summary>Transitions to the next state in the battle flow.</summary>
         public void TransitionToState(BattleState newState)
         {
             _stateMachine.ChangeState(newState);
@@ -148,10 +146,9 @@ namespace Crookedile.Gameplay.Battle
         {
             if (!_isPlayerTurn || CurrentState != BattleState.PlayerTurn)
             {
-                GameLogger.LogWarning<BattleManager>("Cannot end player turn - not player's turn!");
+                GameLogger.LogWarning<BattleManager>("Cannot end player turn — not player's turn!");
                 return;
             }
-
             _stateMachine.ChangeState(BattleState.TurnEnd);
         }
 
@@ -159,92 +156,68 @@ namespace Crookedile.Gameplay.Battle
         {
             if (!_isPlayerTurn || CurrentState != BattleState.PlayerTurn)
             {
-                GameLogger.LogWarning<BattleManager>("Cannot play card - not player's turn!");
+                GameLogger.LogWarning<BattleManager>("Cannot play card — not player's turn!");
                 return;
             }
-
-            PlayCard(evt.Card, evt.HandIndex, true);
+            PlayCard(evt.Card, evt.HandIndex, isPlayer: true);
         }
 
         #endregion
 
         #region Card Playing
 
-        /// <summary>
-        /// Plays a card from hand.
-        /// </summary>
+        /// <summary>Plays a card from the player's hand.</summary>
         private void PlayCard(CardData card, int handIndex, bool isPlayer)
         {
-            DeckManager deck = isPlayer ? _playerDeck : _opponentDeck;
-            BattleStats stats = isPlayer ? _playerStats : _opponentStats;
+            // Only the player plays cards; enemies use scripted moves via EnemyController
+            BattleStats stats = _playerStats;
 
-            // Check if card can be played (costs, etc.)
             if (!CanPlayCard(card, stats))
             {
                 GameLogger.LogWarning<BattleManager>($"Cannot play card: {card.CardName}");
                 return;
             }
 
-            // Pay costs
             PayCardCosts(card, stats);
 
-            // Play card (move to discard)
-            if (!deck.PlayCardAtIndex(handIndex))
+            if (!_playerDeck.PlayCardAtIndex(handIndex))
             {
                 GameLogger.LogError<BattleManager>("Failed to play card from hand");
                 return;
             }
 
-            // Publish card played event
-            EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = isPlayer });
+            EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
+            _effectResolver.ResolveCardEffects(card, isPlayerCard: true);
 
-            // Resolve effects
-            _effectResolver.ResolveCardEffects(card, isPlayer);
-
-            GameLogger.LogInfo<BattleManager>($"{(isPlayer ? "Player" : "Opponent")} played: {card.CardName}");
+            GameLogger.LogInfo<BattleManager>($"Player played: {card.CardName}");
         }
 
         private bool CanPlayCard(CardData card, BattleStats stats)
         {
-            // Get status effect manager for cost modifiers
-            StatusEffectManager statusMgr = (stats == _playerStats)
-                ? _effectResolver.PlayerStatusEffects
-                : _effectResolver.OpponentStatusEffects;
+            StatusEffectManager statusMgr = _effectResolver.PlayerStatusEffects;
 
-            // Check costs
             foreach (var cost in card.Costs)
             {
                 if (cost.CostType == CostType.ActionPoints)
                 {
-                    int baseCost = cost.CurrentAmount;
-                    // Apply status effect modifiers (Focus, Entangled)
-                    int modifiedCost = statusMgr.ModifyCardCost(baseCost);
-
+                    int modifiedCost = statusMgr.ModifyCardCost(cost.CurrentAmount);
                     if (stats.CurrentActionPoints < modifiedCost)
-                    {
                         return false;
-                    }
                 }
             }
-
             return true;
         }
 
         private void PayCardCosts(CardData card, BattleStats stats)
         {
-            // Get status effect manager for cost modifiers
-            StatusEffectManager statusMgr = (stats == _playerStats)
-                ? _effectResolver.PlayerStatusEffects
-                : _effectResolver.OpponentStatusEffects;
+            StatusEffectManager statusMgr = _effectResolver.PlayerStatusEffects;
 
             foreach (var cost in card.Costs)
             {
                 if (cost.CostType == CostType.ActionPoints)
                 {
-                    int baseCost = cost.GetActualCost(stats.CurrentActionPoints);
-                    // Apply status effect modifiers (Focus, Entangled)
+                    int baseCost     = cost.GetActualCost(stats.CurrentActionPoints);
                     int modifiedCost = statusMgr.ModifyCardCost(baseCost);
-
                     stats.SpendActionPoints(modifiedCost);
                     GameLogger.LogInfo<BattleManager>($"Paid {modifiedCost} AP (base: {baseCost})");
                 }
@@ -255,57 +228,45 @@ namespace Crookedile.Gameplay.Battle
 
         #region Victory Conditions
 
-        /// <summary>
-        /// Checks if battle has ended and determines winner.
-        /// </summary>
+        /// <summary>Checks if the battle has ended and caches the result.</summary>
         public bool CheckVictoryConditions()
         {
-            bool playerDefeated = _playerStats.IsDefeated;
+            bool playerDefeated   = _playerStats.IsDefeated;
             bool opponentDefeated = _opponentStats.IsDefeated;
 
             if (playerDefeated || opponentDefeated)
             {
                 _battleResult = new BattleResult
                 {
-                    isVictory = opponentDefeated,
-                    turnsToWin = _currentTurn,
-                    finalPlayerResolve = _playerStats.CurrentResolve,
-                    finalPlayerComposure = _playerStats.CurrentComposure,
-                    finalPlayerHostility = _playerStats.CurrentHostility
+                    isVictory             = opponentDefeated,
+                    turnsToWin            = _currentTurn,
+                    finalPlayerResolve    = _playerStats.CurrentResolve,
+                    finalPlayerComposure  = _playerStats.CurrentComposure,
+                    finalPlayerHostility  = _playerStats.CurrentHostility
                 };
 
                 GameLogger.LogInfo("BattleManager", $"Battle ended: {(_battleResult.isVictory ? "Victory" : "Defeat")} in {_currentTurn} turns");
                 return true;
             }
-
             return false;
         }
 
-        /// <summary>
-        /// Gets the battle result.
-        /// </summary>
-        public BattleResult GetBattleResult()
-        {
-            return _battleResult;
-        }
+        /// <summary>Returns the cached battle result.</summary>
+        public BattleResult GetBattleResult() => _battleResult;
 
         #endregion
 
         #region Turn Management
 
-        /// <summary>
-        /// Advances to the next turn.
-        /// </summary>
+        /// <summary>Advances the turn counter and toggles whose turn it is.</summary>
         public void NextTurn()
         {
             _currentTurn++;
             _isPlayerTurn = !_isPlayerTurn;
-            GameLogger.LogInfo<BattleManager>($"Turn {_currentTurn} - {(_isPlayerTurn ? "Player" : "Opponent")}");
+            GameLogger.LogInfo<BattleManager>($"Turn {_currentTurn} — {(_isPlayerTurn ? "Player" : "Enemy")}");
         }
 
-        /// <summary>
-        /// Starts a new turn for the current combatant.
-        /// </summary>
+        /// <summary>Runs start-of-turn effects for the current combatant.</summary>
         public void StartTurn()
         {
             if (_isPlayerTurn)
@@ -320,9 +281,7 @@ namespace Crookedile.Gameplay.Battle
             }
         }
 
-        /// <summary>
-        /// Ends the current turn.
-        /// </summary>
+        /// <summary>Runs end-of-turn effects for the current combatant.</summary>
         public void EndTurn()
         {
             if (_isPlayerTurn)
@@ -346,42 +305,32 @@ namespace Crookedile.Gameplay.Battle
 
         #region Battle States
 
-        /// <summary>
-        /// Initialize State - Sets up the battle.
-        /// </summary>
+        /// <summary>Initialize State — draws the player's opening hand.</summary>
         private class InitializeState : State
         {
             private BattleManager _manager;
-
-            public InitializeState(BattleManager manager)
-            {
-                _manager = manager;
-            }
+            public InitializeState(BattleManager manager) { _manager = manager; }
 
             public override void OnEnter()
             {
                 GameLogger.LogInfo<BattleManager>("Initializing battle...");
 
-                // Draw initial hands
+                // Draw player's opening hand; enemies have no deck
                 _manager._playerDeck.StartBattle(_manager._startingHandSize);
-                _manager._opponentDeck.StartBattle(_manager._startingHandSize);
 
-                // Move to turn start
                 _manager.TransitionToState(BattleState.TurnStart);
             }
         }
 
         /// <summary>
-        /// Turn Start State - Begins a new turn.
+        /// Turn Start State — draws cards for the player and, on player turns,
+        /// has the enemy declare their intent (Slay the Spire timing: player sees
+        /// the threat BEFORE deciding which cards to play).
         /// </summary>
         private class TurnStartState : State
         {
             private BattleManager _manager;
-
-            public TurnStartState(BattleManager manager)
-            {
-                _manager = manager;
-            }
+            public TurnStartState(BattleManager manager) { _manager = manager; }
 
             public override void OnEnter()
             {
@@ -390,146 +339,111 @@ namespace Crookedile.Gameplay.Battle
 
                 GameLogger.LogInfo<BattleManager>($"Starting turn {_manager.CurrentTurn}");
 
-                // Draw cards
                 if (_manager.IsPlayerTurn)
                 {
+                    // Draw cards for the player
                     _manager._playerDeck.StartTurn(_manager._cardsPerTurn);
-                }
-                else
-                {
-                    _manager._opponentDeck.StartTurn(_manager._cardsPerTurn);
-                }
 
-                // Publish turn start event
+                    // Enemy declares their intent now so the player can plan around it
+                    EnemyMoveData intent = _manager._enemyController.SelectNextMove();
+                    if (intent != null)
+                    {
+                        EventBus.Publish(new EnemyIntentDeclaredEvent { Move = intent });
+                        GameLogger.LogInfo<BattleManager>($"Enemy declares intent: {intent.MoveName}");
+                    }
+                }
+                // Enemy turn: no card draw; intent was already declared during the previous player turn
+
                 EventBus.Publish(new TurnStartedEvent
                 {
-                    TurnNumber = _manager.CurrentTurn,
+                    TurnNumber   = _manager.CurrentTurn,
                     IsPlayerTurn = _manager.IsPlayerTurn
                 });
 
-                // Transition to appropriate turn state
-                if (_manager.IsPlayerTurn)
-                {
-                    _manager.TransitionToState(BattleState.PlayerTurn);
-                }
-                else
-                {
-                    _manager.TransitionToState(BattleState.OpponentTurn);
-                }
+                _manager.TransitionToState(_manager.IsPlayerTurn
+                    ? BattleState.PlayerTurn
+                    : BattleState.OpponentTurn);
             }
         }
 
-        /// <summary>
-        /// Player Turn State - Player is choosing and playing cards.
-        /// </summary>
+        /// <summary>Player Turn State — waits for EndTurnRequestedEvent from the UI.</summary>
         private class PlayerTurnState : State
         {
             private BattleManager _manager;
+            public PlayerTurnState(BattleManager manager) { _manager = manager; }
 
-            public PlayerTurnState(BattleManager manager)
-            {
-                _manager = manager;
-            }
-
-            public override void OnEnter()
-            {
-                GameLogger.LogInfo<BattleManager>("Player's turn started");
-                // Player controls are handled through UI via events
-            }
+            public override void OnEnter() => GameLogger.LogInfo<BattleManager>("Player's turn started");
+            public override void OnExit()  => GameLogger.LogInfo<BattleManager>("Player's turn ended");
 
             public override void OnUpdate()
             {
-                // Player controls are handled through UI
-                // This state waits for player to publish EndTurnRequestedEvent
-            }
-
-            public override void OnExit()
-            {
-                GameLogger.LogInfo<BattleManager>("Player's turn ended");
+                // Waits for player to publish EndTurnRequestedEvent via the UI
             }
         }
 
         /// <summary>
-        /// Opponent Turn State - AI is making decisions.
+        /// Opponent Turn State — executes the enemy's declared move then immediately ends.
+        /// Enemy turns are instant (no waiting for input).
         /// </summary>
         private class OpponentTurnState : State
         {
             private BattleManager _manager;
-
-            public OpponentTurnState(BattleManager manager)
-            {
-                _manager = manager;
-            }
+            public OpponentTurnState(BattleManager manager) { _manager = manager; }
 
             public override void OnEnter()
             {
-                GameLogger.LogInfo<BattleManager>("Opponent's turn started");
-                // TODO: AI decision making
-                // TODO: Play opponent cards
-            }
+                GameLogger.LogInfo<BattleManager>("Enemy's turn started");
 
-            public override void OnUpdate()
-            {
-                // TODO: Process AI actions
-                // For now, immediately end turn
+                EnemyMoveData move = _manager._enemyController.CurrentIntent;
+                if (move != null)
+                {
+                    GameLogger.LogInfo<BattleManager>($"Enemy executes: {move.MoveName}");
+                    _manager._effectResolver.ResolveEnemyMoveEffects(move);
+                }
+                else
+                {
+                    GameLogger.LogWarning<BattleManager>("Enemy has no intent — skipping move");
+                }
+
+                // Enemy turn is instant — transition immediately after effects resolve
                 _manager.TransitionToState(BattleState.TurnEnd);
             }
         }
 
-        /// <summary>
-        /// Turn End State - Cleanup turn effects.
-        /// </summary>
+        /// <summary>Turn End State — cleanup effects, check victory, advance.</summary>
         private class TurnEndState : State
         {
             private BattleManager _manager;
-
-            public TurnEndState(BattleManager manager)
-            {
-                _manager = manager;
-            }
+            public TurnEndState(BattleManager manager) { _manager = manager; }
 
             public override void OnEnter()
             {
                 _manager.EndTurn();
                 GameLogger.LogInfo<BattleManager>("Ending turn");
 
-                // Publish turn end event
                 EventBus.Publish(new TurnEndedEvent
                 {
-                    TurnNumber = _manager.CurrentTurn,
-                    WasPlayerTurn = _manager.IsPlayerTurn
+                    TurnNumber     = _manager.CurrentTurn,
+                    WasPlayerTurn  = _manager.IsPlayerTurn
                 });
 
-                // Check victory conditions
                 if (_manager.CheckVictoryConditions())
-                {
                     _manager.TransitionToState(BattleState.BattleEnd);
-                }
                 else
-                {
                     _manager.TransitionToState(BattleState.TurnStart);
-                }
             }
         }
 
-        /// <summary>
-        /// Battle End State - Battle is over.
-        /// </summary>
+        /// <summary>Battle End State — publishes the result event.</summary>
         private class BattleEndState : State
         {
             private BattleManager _manager;
-
-            public BattleEndState(BattleManager manager)
-            {
-                _manager = manager;
-            }
+            public BattleEndState(BattleManager manager) { _manager = manager; }
 
             public override void OnEnter()
             {
                 BattleResult result = _manager.GetBattleResult();
-                GameLogger.LogInfo<BattleManager>($"Battle ended - {(result.isVictory ? "VICTORY" : "DEFEAT")}");
-
-                // Publish battle ended event
+                GameLogger.LogInfo<BattleManager>($"Battle ended — {(result.isVictory ? "VICTORY" : "DEFEAT")}");
                 EventBus.Publish(new BattleEndedEvent { Result = result });
             }
         }
@@ -539,50 +453,36 @@ namespace Crookedile.Gameplay.Battle
 
     /// <summary>
     /// Setup data for initializing a battle.
+    /// Player brings a card deck and origin; opponent is defined by EnemyData.
     /// </summary>
     [Serializable]
     public class BattleSetup
     {
         public OriginType playerOrigin;
-        public OriginType opponentOrigin;
-
         public OriginStats originStats;
-
         public List<CardData> playerDeck = new List<CardData>();
-        public List<CardData> opponentDeck = new List<CardData>();
 
-        /// <summary>
-        /// Gets the player's battle stats based on their origin.
-        /// </summary>
+        /// <summary>The scripted enemy the player will fight.</summary>
+        public EnemyData enemyData;
+
+        /// <summary>Gets the player's battle stats based on their origin.</summary>
         public OriginBattleStats GetPlayerStats()
         {
             return originStats != null
                 ? originStats.GetStatsForOrigin(playerOrigin)
                 : new OriginBattleStats { maxResolve = 20, maxActionPoints = 3 };
         }
-
-        /// <summary>
-        /// Gets the opponent's battle stats based on their origin.
-        /// </summary>
-        public OriginBattleStats GetOpponentStats()
-        {
-            return originStats != null
-                ? originStats.GetStatsForOrigin(opponentOrigin)
-                : new OriginBattleStats { maxResolve = 20, maxActionPoints = 3 };
-        }
     }
 
-    /// <summary>
-    /// Result data from a completed battle.
-    /// </summary>
+    /// <summary>Result data from a completed battle.</summary>
     [Serializable]
     public class BattleResult
     {
         public bool isVictory;
-        public int turnsToWin;
-        public int finalPlayerResolve;
-        public int finalPlayerComposure;
-        public int finalPlayerHostility;
+        public int  turnsToWin;
+        public int  finalPlayerResolve;
+        public int  finalPlayerComposure;
+        public int  finalPlayerHostility;
 
         // TODO: Add rewards when reward system exists
     }

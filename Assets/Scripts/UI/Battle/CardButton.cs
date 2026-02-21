@@ -139,6 +139,21 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
+        /// Updates the card's resting position after arc layout is applied.
+        /// Called by CardHandLayout after it positions each card so hover-lift
+        /// knows where to return the card when the mouse leaves.
+        /// </summary>
+        public void SetBasePosition(Vector3 position)
+        {
+            basePosition = position;
+
+            // Only update the target if we're not mid-hover; otherwise the card
+            // would snap back to the new base while the player is still mousing over it.
+            if (!isHovered)
+                targetPosition = position;
+        }
+
+        /// <summary>
         /// Plays the draw feedback. Call from BattleUI when this card enters hand.
         /// </summary>
         public void PlayDrawAnimation()
@@ -163,6 +178,10 @@ namespace Crookedile.UI.Battle
 
             targetScale    = baseScale * hoverScale;
             targetPosition = basePosition + new Vector3(0f, hoverLiftPixels, 0f);
+
+            // Bring this card in front of all its neighbours while hovered.
+            // CardHandLayout.SetSiblingOrder() restores natural z-order on the next hand rebuild.
+            transform.SetAsLastSibling();
 
             hoverEnterFeedback?.PlayFeedbacks();
         }

@@ -41,7 +41,7 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
-  - _category: 1
+  - _category: 2
     _target: 1
     _damageType: 0
     _damageAmount: 3

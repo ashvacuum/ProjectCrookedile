@@ -17,7 +17,7 @@ MonoBehaviour:
   _cardType: 0
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: "Deal 3\u20139 Resolve damage (random)."
+  _description: "Deal 1\u20139 Resolve damage (random)."
   _flavorText: Every performance is a gamble.
   _costs:
   - _costType: 1
@@ -31,7 +31,7 @@ MonoBehaviour:
     _target: 1
     _damageType: 1
     _damageAmount: 3
-    _randomDamageRange: {x: 3, y: 9}
+    _randomDamageRange: {x: 1, y: 9}
     _resourceType: 0
     _resourceAmount: 3
     _cardManipulationType: 0

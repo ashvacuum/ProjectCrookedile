@@ -2,42 +2,46 @@ using System.Collections.Generic;
 using UnityEngine;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
+using Crookedile.Data.Enemy;
 using Crookedile.UI.Battle;
 
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
     /// Quick-start script for testing battles in the editor.
-    /// Loads CardData assets from Resources/Cards/, assembles starter decks,
+    /// Loads CardData assets from Resources/Cards/, assembles the player's starter deck,
     /// and fires BattleManager.StartBattle() — no manual deck setup needed.
     ///
-    /// Drop this on a GameObject in your battle test scene alongside
-    /// BattleManager and BattleUI.
+    /// Drop this on a GameObject in your battle test scene alongside BattleManager and BattleUI.
+    /// Assign an EnemyData ScriptableObject to enemyData to choose who to fight.
+    ///
+    /// Create enemy assets via: Right-click → Crookedile / Enemy / Enemy Data
     /// </summary>
     public class BattleTestStarter : MonoBehaviour
     {
-        [Header("Combatants")]
+        [Header("Player")]
         [Tooltip("Origin the player will use in this test")]
         [SerializeField] private OriginType playerOrigin = OriginType.FaithLeader;
 
-        [Tooltip("Origin the opponent AI will use in this test")]
-        [SerializeField] private OriginType opponentOrigin = OriginType.Actor;
+        [Tooltip("OriginStats ScriptableObject — controls player Resolve/AP per origin. " +
+                 "If null, defaults to 20 Resolve / 3 AP.")]
+        [SerializeField] private OriginStats originStats;
+
+        [Header("Enemy")]
+        [Tooltip("The EnemyData ScriptableObject defining who the player will fight. " +
+                 "Create via: Right-click → Crookedile / Enemy / Enemy Data")]
+        [SerializeField] private EnemyData enemyData;
 
         [Header("Scene References")]
         [SerializeField] private BattleManager battleManager;
         [SerializeField] private BattleUI battleUI;
-
-        [Tooltip("OriginStats ScriptableObject — controls Resolve/AP per origin. " +
-                 "If null, defaults to 20 Resolve / 3 AP for both sides.")]
-        [SerializeField] private OriginStats originStats;
 
         [Header("Settings")]
         [Tooltip("Automatically start the battle when the scene loads")]
         [SerializeField] private bool startOnAwake = true;
 
         // ─── Deck Definitions ─────────────────────────────────────────────────────
-        // Each entry is (assetName, count). Asset name must match the file in Resources/Cards/.
-        // Multiple entries with count > 1 add duplicates of the same CardData reference.
+        // Each entry is (assetName, count). Name must match the .asset filename in Resources/Cards/.
 
         private static readonly (string name, int count)[] FaithLeaderDeck =
         {
@@ -81,11 +85,19 @@ namespace Crookedile.Gameplay.Battle
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Builds decks from Resources and starts the battle.
+        /// Builds the player deck from Resources and starts the battle against the assigned enemy.
         /// Can also be called from a UI button or other test harness.
         /// </summary>
         public void StartTestBattle()
         {
+            if (enemyData == null)
+            {
+                Debug.LogError("[BattleTestStarter] No EnemyData assigned. " +
+                               "Create one via Right-click → Crookedile / Enemy / Enemy Data " +
+                               "and assign it to the enemyData field.");
+                return;
+            }
+
             // Load every CardData asset from Resources/Cards/
             CardData[] allCards = Resources.LoadAll<CardData>("Cards");
 
@@ -98,28 +110,26 @@ namespace Crookedile.Gameplay.Battle
 
             Debug.Log($"[BattleTestStarter] Loaded {allCards.Length} card assets.");
 
-            // Build decks
-            List<CardData> playerDeck   = BuildDeck(playerOrigin,   allCards);
-            List<CardData> opponentDeck = BuildDeck(opponentOrigin, allCards);
+            // Build the player deck
+            List<CardData> playerDeck = BuildDeck(playerOrigin, allCards);
 
-            if (playerDeck.Count == 0 || opponentDeck.Count == 0)
+            if (playerDeck.Count == 0)
             {
-                Debug.LogError("[BattleTestStarter] One or both decks could not be built. " +
+                Debug.LogError("[BattleTestStarter] Player deck could not be built. " +
                                "Check the warnings above for missing card names.");
                 return;
             }
 
             Debug.Log($"[BattleTestStarter] Player ({playerOrigin}): {playerDeck.Count} cards | " +
-                      $"Opponent ({opponentOrigin}): {opponentDeck.Count} cards");
+                      $"Enemy: {enemyData.EnemyName} ({enemyData.Moves.Count} moves, {enemyData.MaxResolve} Resolve)");
 
             // Assemble BattleSetup
             var setup = new BattleSetup
             {
-                playerOrigin   = playerOrigin,
-                opponentOrigin = opponentOrigin,
-                originStats    = originStats,   // null → BattleManager defaults to 20 Resolve / 3 AP
-                playerDeck     = playerDeck,
-                opponentDeck   = opponentDeck,
+                playerOrigin = playerOrigin,
+                originStats  = originStats,   // null → BattleManager defaults to 20 Resolve / 3 AP
+                playerDeck   = playerDeck,
+                enemyData    = enemyData,
             };
 
             // Wire BattleUI before starting (BattleUI needs BattleManager reference)
