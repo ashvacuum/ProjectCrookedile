@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 0
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: 
-  _flavorText: 
+  _description: 'Deal 3 Resolve damage. 50% chance: Draw 1 card.'
+  _flavorText: High risk, higher cheekbones.
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -57,6 +57,7 @@ MonoBehaviour:
     _statusDuration: 0
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
-  _tags: []
-  _isStarterCard: 0
+  _tags:
+  - actor
+  _isStarterCard: 1
   _isUnlockable: 0

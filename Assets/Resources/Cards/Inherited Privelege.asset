@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 0
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: 
-  _flavorText: 
+  _description: Deal 5 Resolve damage. Draw 1 card.
+  _flavorText: Some doors open themselves.
   _costs:
   - _costType: 1
     _baseAmount: 2
@@ -36,6 +36,8 @@ MonoBehaviour:
     _resourceAmount: 3
     _cardManipulationType: 0
     _cardAmount: 2
+    _cardToAdd: {fileID: 0}
+    _costReduction: 1
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
@@ -48,11 +50,14 @@ MonoBehaviour:
     _resourceAmount: 3
     _cardManipulationType: 0
     _cardAmount: 1
+    _cardToAdd: {fileID: 0}
+    _costReduction: 1
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
-  _tags: []
-  _isStarterCard: 0
+  _tags:
+  - nepobaby
+  _isStarterCard: 1
   _isUnlockable: 0

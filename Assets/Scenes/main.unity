@@ -222,6 +222,8 @@ GameObject:
   - component: {fileID: 507472320}
   - component: {fileID: 507472318}
   - component: {fileID: 507472317}
+  - component: {fileID: 507472322}
+  - component: {fileID: 507472321}
   m_Layer: 0
   m_Name: Tester
   m_TagString: Untagged
@@ -372,6 +374,57 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &507472321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 507472315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fed93ac59e396c42bb32b341b894bcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.BattleUI
+  playerResolveText: {fileID: 0}
+  playerComposureText: {fileID: 0}
+  playerHostilityText: {fileID: 0}
+  playerAPText: {fileID: 0}
+  opponentResolveText: {fileID: 0}
+  opponentComposureText: {fileID: 0}
+  opponentHostilityText: {fileID: 0}
+  opponentAPText: {fileID: 0}
+  turnNumberText: {fileID: 0}
+  phaseText: {fileID: 0}
+  cardButtonContainer: {fileID: 0}
+  cardButtonPrefab: {fileID: 0}
+  endTurnButton: {fileID: 0}
+  battleLogText: {fileID: 0}
+  battleLogScrollRect: {fileID: 0}
+  maxLogLines: 20
+  playerStatusContainer: {fileID: 0}
+  opponentStatusContainer: {fileID: 0}
+  statusEffectPrefab: {fileID: 0}
+  victoryPanel: {fileID: 0}
+  defeatPanel: {fileID: 0}
+--- !u!114 &507472322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 507472315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96b42666ba6a7c24ba7dd75c561ad7a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Gameplay.Battle.BattleTestStarter
+  playerOrigin: 0
+  opponentOrigin: 2
+  battleManager: {fileID: 507472318}
+  battleUI: {fileID: 0}
+  originStats: {fileID: 0}
+  startOnAwake: 1
 --- !u!1 &761825947
 GameObject:
   m_ObjectHideFlags: 0
@@ -705,7 +758,7 @@ GameObject:
   - component: {fileID: 1494022351}
   - component: {fileID: 1494022350}
   m_Layer: 0
-  m_Name: GameObject (3)
+  m_Name: Card
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1139,12 +1192,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96

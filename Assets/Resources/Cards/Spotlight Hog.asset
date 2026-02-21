@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: 
-  _flavorText: 
+  _description: Deal 6 Resolve damage. Gain 3 Composure. Gain 2 Hostility.
+  _flavorText: They can't look away. Neither can you.
   _costs:
   - _costType: 1
     _baseAmount: 2
@@ -71,6 +71,7 @@ MonoBehaviour:
     _statusDuration: 0
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
-  _tags: []
-  _isStarterCard: 0
+  _tags:
+  - actor
+  _isStarterCard: 1
   _isUnlockable: 0

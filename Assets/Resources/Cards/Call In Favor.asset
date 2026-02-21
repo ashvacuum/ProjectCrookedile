@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 2
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: 
-  _flavorText: 
+  _description: Draw 2 cards.
+  _flavorText: The account was always in the black.
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -36,11 +36,14 @@ MonoBehaviour:
     _resourceAmount: 3
     _cardManipulationType: 0
     _cardAmount: 2
+    _cardToAdd: {fileID: 0}
+    _costReduction: 1
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
-  _tags: []
-  _isStarterCard: 0
+  _tags:
+  - nepobaby
+  _isStarterCard: 1
   _isUnlockable: 0
