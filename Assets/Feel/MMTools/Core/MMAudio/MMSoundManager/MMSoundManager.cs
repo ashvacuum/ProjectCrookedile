@@ -138,7 +138,7 @@ namespace MoreMountains.Tools
 				options.DoNotAutoRecycleIfNotDonePlaying, options.PlaybackTime, options.PlaybackDuration, options.AttachToTransform,
 				options.UseSpreadCurve, options.SpreadCurve, options.UseCustomRolloffCurve, options.CustomRolloffCurve,
 				options.UseSpatialBlendCurve, options.SpatialBlendCurve, options.UseReverbZoneMixCurve, options.ReverbZoneMixCurve, 
-				options.AudioResourceToPlay
+				options.AudioResourceToPlay, options.InitialDelay
 			);
 		}
 
@@ -187,7 +187,7 @@ namespace MoreMountains.Tools
 			bool doNotAutoRecycleIfNotDonePlaying = false, float playbackTime = 0f, float playbackDuration = 0f, Transform attachToTransform = null,
 			bool useSpreadCurve = false, AnimationCurve spreadCurve = null, bool useCustomRolloffCurve = false, AnimationCurve customRolloffCurve = null,
 			bool useSpatialBlendCurve = false, AnimationCurve spatialBlendCurve = null, bool useReverbZoneMixCurve = false, AnimationCurve reverbZoneMixCurve = null, 
-			AudioResource audioResourceToPlay = null
+			AudioResource audioResourceToPlay = null, float initialDelay = 0f
 		)
 		{
 			if (this == null) { return null; }
@@ -202,6 +202,11 @@ namespace MoreMountains.Tools
 			{
 				// we pick an idle audio source from the pool if possible
 				audioSource = _pool.GetAvailableAudioSource(PoolCanExpand, this.transform);
+				if (!audioSource)
+				{
+					Debug.LogError("There are no available audiosources, this sound won't play. You should probably consider a bigger pool size, or let your pool expand by setting PoolCanExpand to true on your MM Sound Manager.");
+					return null;
+				}
 				audioSource.clip = audioClip;
 				if ((audioSource) && (!loop))
 				{
@@ -298,7 +303,14 @@ namespace MoreMountains.Tools
 			audioSource.volume = volume;  
             
 			// we start playing the sound
-			audioSource.Play();
+			if (initialDelay > 0f)
+			{
+				audioSource.PlayDelayed(initialDelay);	
+			}
+			else
+			{
+				audioSource.Play();	
+			}
             
 			// we destroy the host after the clip has played if it was a one time AS.
 			if (!loop && !recycleAudioSource)
@@ -1003,13 +1015,31 @@ namespace MoreMountains.Tools
 		{
 			foreach (MMSoundManagerSound sound in _sounds)
 			{
-				if (sound.Source.clip == clip)
+				if ((sound.Source != null) && (sound.Source.clip == clip))
 				{
 					return sound.Source;
 				}
 			}
 
 			return null;
+		}
+
+		/// <summary>
+		/// Returns the amount of audiosources currently playing the specified clip on this sound manager
+		/// </summary>
+		/// <param name="clip"></param>
+		/// <returns></returns>
+		public virtual int CurrentlyPlayingCount(AudioClip clip)
+		{
+			int count = 0;
+			foreach (MMSoundManagerSound sound in _sounds)
+			{
+				if ((sound.Source != null) && (sound.Source.clip == clip) && (sound.Source.isPlaying))
+				{
+					count++;
+				}
+			}
+			return count;
 		}
 
 		#endregion

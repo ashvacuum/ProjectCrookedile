@@ -227,8 +227,9 @@ namespace Crookedile.UI.Battle
             // Only show hand during player's turn
             if (!battleManager.IsPlayerTurn) return;
 
-            // Create button for each card in hand
+            int currentAP = battleManager.PlayerStats.CurrentActionPoints;
             var hand = battleManager.PlayerDeck.Hand;
+
             for (int i = 0; i < hand.Count; i++)
             {
                 CardData card = hand[i];
@@ -238,9 +239,24 @@ namespace Crookedile.UI.Battle
                 if (cardButton != null)
                 {
                     int handIndex = i; // Capture for closure
-                    cardButton.Initialize(card, handIndex, () => OnCardButtonClicked(card, handIndex));
+                    cardButton.Initialize(card, handIndex, currentAP, () => OnCardButtonClicked(card, handIndex));
+                    cardButton.PlayDrawAnimation();
                     activeCardButtons.Add(cardButton);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Refreshes card affordability dimming when AP changes mid-turn without rebuilding the hand.
+        /// </summary>
+        private void RefreshCardAffordability()
+        {
+            if (!battleManager.IsPlayerTurn) return;
+            int currentAP = battleManager.PlayerStats.CurrentActionPoints;
+            foreach (var cardButton in activeCardButtons)
+            {
+                if (cardButton != null)
+                    cardButton.RefreshVisuals(currentAP);
             }
         }
 

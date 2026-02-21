@@ -1,6 +1,6 @@
 # Battle System Implementation Tasks
 
-**Last Updated:** 2025-10-08
+**Last Updated:** 2026-02-21
 
 ---
 
@@ -52,35 +52,40 @@ Create a functional card battle system where player vs opponent battles can be t
 
 ---
 
-## 📦 Phase 3: Battle Setup & Content (NEXT)
+## 📦 Phase 3: Battle Setup & Content
 
 ### Starter Deck Creation
-- [ ] **StarterDeckData.cs** - ScriptableObject for origin starter decks
-- [ ] Create CardData assets for Faith Leader starter cards (10 cards)
-- [ ] Create CardData assets for Nepo Baby starter cards (10 cards)
-- [ ] Create CardData assets for Actor starter cards (10 cards)
+- [x] **CardData assets exist** — all 19 unique cards in `Assets/Resources/Cards/`
+  - [x] Faith Leader cards: Find Common Ground, Blessing, Accusation, Deflect, Gather Thoughts
+  - [x] Nepo Baby cards: Family Name, Inherited Privelege, Pull Strings, Call In Favor, Backroom Deal, Dynasty Network, Trust Fund
+  - [x] Actor cards: Charming Gambit, All or Nothing, Bold Accusation, Spotlight Hog, High Stakes, Ego Trip, Fan Favorite
+- [x] **CardDatabase.asset** — all 19 cards registered
+- [x] **BattleTestStarter.cs** — loads cards by name, builds decks, fires StartBattle() — no Unity Editor work needed to test
+- [ ] **Run CardDataFixer** — `Tools → Crookedile → Fix Starter Card Data` to stamp IsStarterCard, origin tags, and descriptions on all 19 assets (one click in Unity Editor)
+  - Note: typo in asset — "Inherited Privelege" (double e). Fix filename later after fixer runs.
 
 ### Origin Integration
-- [ ] **OriginStats.cs** - Update/verify origin-specific battle stats
-  - [ ] Faith Leader: 20 Resolve, 3 AP, +1 card draw passive
-  - [ ] Nepo Baby: 20 Resolve, 4 AP passive
-  - [ ] Actor: 20 Resolve, 3 AP, first card -1 AP passive
+- [x] **OriginStats.cs** — Faith Leader (20R/3AP), Nepo Baby (20R/4AP), Actor (20R/3AP) — stats confirmed
 - [ ] Implement origin passive abilities in BattleManager
   - [ ] Faith Leader: Draw 6 cards instead of 5 at battle start
-  - [ ] Nepo Baby: Start with 4 AP instead of 3
+  - [ ] Nepo Baby: Start with 4 AP instead of 3 ← OriginStats sets this, but BattleManager ignores it currently
   - [ ] Actor: First card each turn costs -1 AP
 
 ### Battle Setup
-- [ ] **BattleSetupData.cs** - ScriptableObject for configuring battles
-- [ ] Create test battle setups (player vs opponent with starter decks)
+- [x] **BattleSetup (inline class in BattleManager)** — accepts playerDeck, opponentDeck, originStats, origin types
+- [x] **BattleTestStarter.cs** — replaces need for BattleSetupData ScriptableObject for testing
 
-**Priority:** High - Needed to test battles with real content.
+**Priority:** High — Cards exist, BattleTestStarter bypasses remaining gaps.
 
-**Estimated Complexity:** Medium (3-4 hours)
+**Immediate next step:** Add BattleTestStarter to your test scene → Press Play → Battle runs.
 
 ---
 
-## 🎨 Phase 4: Minimal Battle UI (COMPLETED)
+## 🎨 Phase 4: Battle UI — 2D System (COMPLETED)
+
+> **Note:** Switched from 3D card system to 2D sprite/Canvas system.
+> Removed: Card3DView, CardHandManager, CardInputHandler, CardPrefabSetup, BattleCardHandBridge, Card.prefab
+> See **[CARD_2D_SETUP.md](CARD_2D_SETUP.md)** for Unity Editor prefab setup instructions.
 
 ### Core Battle Display
 - [x] **BattleUI.cs** - Main battle UI controller
@@ -89,22 +94,31 @@ Create a functional card battle system where player vs opponent battles can be t
   - [x] Show current turn number and phase
   - [x] End Turn button
   - [x] Connected to BattleManager via EventBus
-- [x] **CardButton.cs** - Display cards in hand as buttons
-  - [x] Show card name, cost, description
-  - [x] Click to play card
-  - [x] Card type color coding (Diplomacy/Hostility/Manipulate)
+  - [x] Passes current AP to cards on hand refresh
+  - [x] Calls PlayDrawAnimation() on each card when hand is built
+- [x] **CardButton.cs** - Full 2D card component (upgraded)
+  - [x] Show card name, cost, description, flavor text
+  - [x] Show card artwork (Image component)
+  - [x] Show type frame (from CardVisualSettings)
+  - [x] Show rarity overlay (from CardVisualSettings)
+  - [x] Card type color strip (Diplomacy/Hostility/Manipulate)
+  - [x] Click to play card (IPointerClickHandler)
+  - [x] Hover scale + lift animation (IPointerEnterHandler/ExitHandler)
+  - [x] Affordability dimming (CanvasGroup alpha, grays out if not enough AP)
+  - [x] MMFeedbacks hooks (draw, hoverEnter, hoverExit, select, discard)
+  - [x] RefreshVisuals(int ap) — updates affordability mid-turn without rebuilding
 - [x] **Battle Log** - Text-based combat log
   - [x] Shows turn changes, cards played, battle events
   - [x] Auto-scrolls to latest entry
 
 ### Battle Flow UI
 - [x] Victory/defeat panels
+- [ ] CardButton prefab built in Unity Editor (see CARD_2D_SETUP.md)
 - [ ] Battle start screen (optional for testing)
-- [ ] Card play feedback animations (optional for testing)
 
 **Priority:** High - Needed to actually play battles.
 
-**Status:** ✅ Core UI Complete - Ready for Unity setup
+**Status:** ✅ Code complete — Unity prefab setup remaining (see CARD_2D_SETUP.md)
 
 ---
 
@@ -161,20 +175,22 @@ Create a functional card battle system where player vs opponent battles can be t
 
 ### Completion Summary
 - **Phase 1 (Core Systems):** ✅ 100% Complete (15/15 tasks)
-- **Phase 2 (Opponent AI):** ⏸️ Skipped for now (opponent auto-passes turn)
-- **Phase 3 (Battle Setup):** ⏳ 0% Complete (0/8 tasks)
-- **Phase 4 (Battle UI):** ✅ 100% Complete (7/7 core tasks)
+- **Phase 2 (Opponent AI):** 🔥 0% Complete — **CURRENT CRITICAL BLOCKER**
+- **Phase 3 (Battle Setup):** ✅ ~85% Complete — Cards exist + BattleTestStarter ready; only Editor one-click + origin passives remain
+- **Phase 4 (Battle UI):** ✅ Code 100% Complete — Unity prefab setup remaining (CARD_2D_SETUP.md)
 - **Phase 5 (Testing):** ⏳ 0% Complete (0/5 tasks)
 - **Phase 6 (Meta-Game):** ⏳ 0% Complete (0/8 tasks)
 
-**Overall Progress:** 22/46 tasks complete (48%)
+**Overall Progress:** ~30/46 tasks complete (~65%)**
 
 ### Next Immediate Tasks
 1. ✅ ~~EffectResolver integration~~ (DONE)
-2. ✅ ~~Basic battle UI~~ (DONE)
-3. 📦 **Starter deck content creation** (CURRENT - blocking playable battles)
-4. 🎨 Unity scene setup with BattleUI prefab
-5. 🔥 OpponentAI implementation (can test vs passing opponent first)
+2. ✅ ~~Basic battle UI (2D system)~~ (DONE — CardButton.cs fully upgraded)
+3. ✅ ~~Starter deck content~~ (DONE — 19 assets confirmed, BattleTestStarter.cs ready)
+4. ✅ ~~CardDataFixer editor tool~~ (DONE — `Tools → Crookedile → Fix Starter Card Data`)
+5. 🎨 **Unity prefab setup** — Build CardButton prefab per CARD_2D_SETUP.md; add BattleTestStarter to test scene; press Play
+6. 🔥 **OpponentAI.cs** — Implement card evaluation + turn loop (blocking real battles)
+7. ⚙️ **Origin passives** — Faith Leader +1 draw, Nepo Baby 4AP, Actor first card -1AP
 
 ---
 
@@ -191,9 +207,9 @@ We can move to Phase 3 when:
 ## 🎯 Definition of Done: Playable Battle
 
 We can test battles end-to-end when:
-- [ ] OpponentAI works (Phase 2)
-- [ ] All 3 starter decks created (Phase 3)
-- [ ] Basic battle UI works (Phase 4)
+- [ ] OpponentAI works (Phase 2) ← **only remaining code blocker**
+- [x] All 3 starter decks created (Phase 3) ← BattleTestStarter bypasses tagging gap
+- [x] Basic battle UI works (Phase 4) ← Code complete; prefab wiring is Unity Editor work
 - [ ] Can start battle, play cards, see AI respond, win/lose
 
 ---

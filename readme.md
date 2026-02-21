@@ -18,20 +18,20 @@ Navigate a Potionomics-style town map, build relationships through card battles,
 
 ---
 
-## 📚 Game Design Documentation
+## 📚 Documentation
 
-### Core Systems
+### Start Here
+- **[GAME_WIKI.md](GAME_WIKI.md)** — Single consolidated reference: all game systems, mechanics, origins, cards, resources, progression
+- **[SYSTEMS_STUDY.md](SYSTEMS_STUDY.md)** — Architecture analysis, system interdependencies, implementation status, blockers, inconsistencies
+
+### Source Design Documents
 - **[Game Overview](game_overview.md)** - Core mechanics, game loop, and victory conditions
 - **[Origins](origins.md)** - Four playable character classes with unique abilities
 - **[Resources](resources.md)** - Currency and stat management systems
 - **[Cards](cards.md)** - Complete card system and deck building
-
-### World & Content
 - **[Locations](locations.md)** - Map navigation, venues, and location mechanics
 - **[Events](events.md)** - Random events, special mechanics, and milestone encounters
 - **[Progression](progression.md)** - Roguelike elements, unlocks, and meta progression
-
-### Development
 - **[Technical Notes](technical.md)** - Implementation details and architecture
 
 ## Design Pillars

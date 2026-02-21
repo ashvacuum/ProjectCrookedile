@@ -1,0 +1,173 @@
+using System.Collections.Generic;
+using UnityEngine;
+using Crookedile.Data;
+using Crookedile.Data.Cards;
+using Crookedile.UI.Battle;
+
+namespace Crookedile.Gameplay.Battle
+{
+    /// <summary>
+    /// Quick-start script for testing battles in the editor.
+    /// Loads CardData assets from Resources/Cards/, assembles starter decks,
+    /// and fires BattleManager.StartBattle() — no manual deck setup needed.
+    ///
+    /// Drop this on a GameObject in your battle test scene alongside
+    /// BattleManager and BattleUI.
+    /// </summary>
+    public class BattleTestStarter : MonoBehaviour
+    {
+        [Header("Combatants")]
+        [Tooltip("Origin the player will use in this test")]
+        [SerializeField] private OriginType playerOrigin = OriginType.FaithLeader;
+
+        [Tooltip("Origin the opponent AI will use in this test")]
+        [SerializeField] private OriginType opponentOrigin = OriginType.Actor;
+
+        [Header("Scene References")]
+        [SerializeField] private BattleManager battleManager;
+        [SerializeField] private BattleUI battleUI;
+
+        [Tooltip("OriginStats ScriptableObject — controls Resolve/AP per origin. " +
+                 "If null, defaults to 20 Resolve / 3 AP for both sides.")]
+        [SerializeField] private OriginStats originStats;
+
+        [Header("Settings")]
+        [Tooltip("Automatically start the battle when the scene loads")]
+        [SerializeField] private bool startOnAwake = true;
+
+        // ─── Deck Definitions ─────────────────────────────────────────────────────
+        // Each entry is (assetName, count). Asset name must match the file in Resources/Cards/.
+        // Multiple entries with count > 1 add duplicates of the same CardData reference.
+
+        private static readonly (string name, int count)[] FaithLeaderDeck =
+        {
+            ("Find Common Ground", 4),
+            ("Blessing",           2),
+            ("Accusation",         2),
+            ("Deflect",            1),
+            ("Gather Thoughts",    1),
+        };
+
+        private static readonly (string name, int count)[] NepoBabyDeck =
+        {
+            ("Family Name",         2),
+            ("Inherited Privelege", 1),  // Note: typo matches the asset filename
+            ("Pull Strings",        2),
+            ("Call In Favor",       2),
+            ("Backroom Deal",       1),
+            ("Dynasty Network",     1),
+            ("Trust Fund",          1),
+        };
+
+        private static readonly (string name, int count)[] ActorDeck =
+        {
+            ("Charming Gambit", 2),
+            ("All or Nothing",  1),
+            ("Bold Accusation", 2),
+            ("Spotlight Hog",   2),
+            ("High Stakes",     1),
+            ("Ego Trip",        1),
+            ("Fan Favorite",    1),
+        };
+
+        // ─── Unity Lifecycle ──────────────────────────────────────────────────────
+
+        private void Start()
+        {
+            if (startOnAwake)
+                StartTestBattle();
+        }
+
+        // ─── Public API ───────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Builds decks from Resources and starts the battle.
+        /// Can also be called from a UI button or other test harness.
+        /// </summary>
+        public void StartTestBattle()
+        {
+            // Load every CardData asset from Resources/Cards/
+            CardData[] allCards = Resources.LoadAll<CardData>("Cards");
+
+            if (allCards == null || allCards.Length == 0)
+            {
+                Debug.LogError("[BattleTestStarter] No CardData assets found in Resources/Cards/. " +
+                               "Make sure all card .asset files are in Assets/Resources/Cards/.");
+                return;
+            }
+
+            Debug.Log($"[BattleTestStarter] Loaded {allCards.Length} card assets.");
+
+            // Build decks
+            List<CardData> playerDeck   = BuildDeck(playerOrigin,   allCards);
+            List<CardData> opponentDeck = BuildDeck(opponentOrigin, allCards);
+
+            if (playerDeck.Count == 0 || opponentDeck.Count == 0)
+            {
+                Debug.LogError("[BattleTestStarter] One or both decks could not be built. " +
+                               "Check the warnings above for missing card names.");
+                return;
+            }
+
+            Debug.Log($"[BattleTestStarter] Player ({playerOrigin}): {playerDeck.Count} cards | " +
+                      $"Opponent ({opponentOrigin}): {opponentDeck.Count} cards");
+
+            // Assemble BattleSetup
+            var setup = new BattleSetup
+            {
+                playerOrigin   = playerOrigin,
+                opponentOrigin = opponentOrigin,
+                originStats    = originStats,   // null → BattleManager defaults to 20 Resolve / 3 AP
+                playerDeck     = playerDeck,
+                opponentDeck   = opponentDeck,
+            };
+
+            // Wire BattleUI before starting (BattleUI needs BattleManager reference)
+            if (battleUI != null)
+                battleUI.Initialize(battleManager);
+
+            // Fire!
+            battleManager.StartBattle(setup);
+        }
+
+        // ─── Deck Builder ─────────────────────────────────────────────────────────
+
+        private List<CardData> BuildDeck(OriginType origin, CardData[] allCards)
+        {
+            (string name, int count)[] template = origin switch
+            {
+                OriginType.FaithLeader => FaithLeaderDeck,
+                OriginType.NepoBaby    => NepoBabyDeck,
+                OriginType.Actor       => ActorDeck,
+                _                      => System.Array.Empty<(string, int)>()
+            };
+
+            if (template.Length == 0)
+            {
+                Debug.LogError($"[BattleTestStarter] No deck template defined for origin: {origin}");
+                return new List<CardData>();
+            }
+
+            var deck = new List<CardData>();
+
+            foreach (var (cardName, count) in template)
+            {
+                // Match by asset filename (c.name) first, then by CardData.CardName field
+                CardData found = System.Array.Find(allCards,
+                    c => c.name == cardName || c.CardName == cardName);
+
+                if (found == null)
+                {
+                    Debug.LogWarning($"[BattleTestStarter] Card not found: '{cardName}' " +
+                                     $"(origin: {origin}). Skipping.");
+                    continue;
+                }
+
+                for (int i = 0; i < count; i++)
+                    deck.Add(found);
+            }
+
+            return deck;
+        }
+    }
+}

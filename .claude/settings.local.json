@@ -13,7 +13,8 @@
       "Bash(git commit -m \"$(cat <<''EOF''\nAdd enhanced card database editor with validation and browser\n\nUpgrade CardDatabaseEditor with Odin Inspector-based UI featuring:\n\nValidation System:\n- Check for empty card names, costs, and effects\n- Detailed validation reports with issue summaries\n- Dialog and console output for easy navigation\n\nStatistics View:\n- Visual progress bars for card type distribution\n- Rarity breakdown with percentages\n- Notable cards section highlighting highest damage, composure,\n  most effects, and cheapest cards\n- Clickable card names for quick navigation\n\nCard Browser View:\n- Search filter by card name\n- Filter by card type (Diplomacy, Hostility, Manipulate)\n- Filter by rarity (Basic, Enhanced, Rare)\n- Multi-criteria sorting:\n  - Name, Damage, Composure, Effects count, Cost, Type, Rarity\n  - Toggle ascending/descending order\n- Scrollable card list with alternating row colors\n- Color-coded type and rarity badges\n- At-a-glance stats (AP cost, effect count, damage, composure)\n- Click any card to select and ping in project\n\nTechnical improvements:\n- Pure Rect-based drawing to prevent GUI stack errors\n- Pre-calculated values to avoid conditional GUI calls\n- Proper Event.current.type checking for repaint operations\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(git commit:*)",
       "Bash(find:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(__NEW_LINE_8e06e3a9ccab1e3d__ echo \"\")"
     ],
     "deny": [],
     "ask": []
