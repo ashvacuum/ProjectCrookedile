@@ -871,7 +871,6 @@ MonoBehaviour:
   opponentResolveText: {fileID: 2143654615}
   opponentComposureText: {fileID: 1968228675}
   opponentHostilityText: {fileID: 397342870}
-  opponentAPText: {fileID: 1621116833}
   turnNumberText: {fileID: 734630775}
   phaseText: {fileID: 448978346}
   cardButtonContainer: {fileID: 0}
@@ -898,10 +897,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Gameplay.Battle.BattleTestStarter
   playerOrigin: 0
-  opponentOrigin: 2
+  originStats: {fileID: 0}
+  enemyData: {fileID: 0}
   battleManager: {fileID: 507472318}
   battleUI: {fileID: 507472321}
-  originStats: {fileID: 0}
   startOnAwake: 1
 --- !u!1 &605813721
 GameObject:
@@ -2118,6 +2117,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1436815757}
+  - component: {fileID: 1436815758}
   m_Layer: 5
   m_Name: Card Container
   m_TagString: Untagged
@@ -2144,6 +2144,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -364}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1436815758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1436815756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59ac6d1d410063b4dbe62c261513d456, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.CardHandLayout
+  cardSpacingPx: 65
+  arcRadius: 750
+  arcAngleDegrees: 25
+  maxAngleStepDegrees: 7
 --- !u!1 &1468479632
 GameObject:
   m_ObjectHideFlags: 0
