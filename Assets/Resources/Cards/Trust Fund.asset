@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 2
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: 
-  _flavorText: 
+  _description: Gain 2 Composure. Gain 1 Action Point this turn.
+  _flavorText: Family always provides.
   _costs:
   - _costType: 1
     _baseAmount: 0
@@ -36,6 +36,8 @@ MonoBehaviour:
     _resourceAmount: 2
     _cardManipulationType: 0
     _cardAmount: 2
+    _cardToAdd: {fileID: 0}
+    _costReduction: 1
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
@@ -48,11 +50,14 @@ MonoBehaviour:
     _resourceAmount: 1
     _cardManipulationType: 0
     _cardAmount: 2
+    _cardToAdd: {fileID: 0}
+    _costReduction: 1
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
-  _tags: []
-  _isStarterCard: 0
+  _tags:
+  - nepobaby
+  _isStarterCard: 1
   _isUnlockable: 0
