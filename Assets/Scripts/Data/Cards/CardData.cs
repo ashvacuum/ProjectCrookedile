@@ -65,6 +65,11 @@ namespace Crookedile.Data.Cards
         [Tooltip("Must this card be unlocked through progression?")]
         [SerializeField] private bool _isUnlockable = false;
 
+        [Header("Sentiment Tags")]
+        [Tooltip("Tags that shift enemy hostility on the number line when this card is played. " +
+                 "Aggressive +1 | Empathetic -1 | Evasive/Authoritative/Populist shift via enemy sensitivity.")]
+        [SerializeField] private List<CardTag> _sentimentTags = new List<CardTag>();
+
         #region Properties
 
         /// <summary>
@@ -142,6 +147,11 @@ namespace Crookedile.Data.Cards
         /// Whether this card must be unlocked.
         /// </summary>
         public bool IsUnlockable => _isUnlockable;
+
+        /// <summary>
+        /// Sentiment tags that shift enemy hostility when this card is played.
+        /// </summary>
+        public IReadOnlyList<CardTag> SentimentTags => _sentimentTags;
 
         #endregion
 

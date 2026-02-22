@@ -191,26 +191,34 @@ namespace Crookedile.Gameplay
         #region Hostility Management
 
         /// <summary>
-        /// Gains Hostility (self-inflicted debuff).
+        /// Shifts hostility up (makes enemy more hostile). Clamped at +10.
         /// </summary>
-        /// <param name="amount">Hostility to gain</param>
         public void GainHostility(int amount)
         {
             _currentHostility += amount;
-            Debug.Log($"Gained {amount} Hostility. Current: {_currentHostility} (Damage multiplier: {HostilityDamageMultiplier:F2}x)");
+            _currentHostility = Mathf.Min(10, _currentHostility);
+            Debug.Log($"Gained {amount} Hostility. Current: {_currentHostility}");
         }
 
         /// <summary>
-        /// Reduces Hostility.
+        /// Shifts hostility down (makes enemy more receptive). Clamped at -10.
         /// </summary>
-        /// <param name="amount">Hostility to reduce</param>
-        /// <returns>Actual amount reduced</returns>
+        /// <returns>The amount passed in (hostility may have been clamped internally).</returns>
         public int ReduceHostility(int amount)
         {
-            int reduceAmount = Mathf.Min(amount, _currentHostility);
-            _currentHostility -= reduceAmount;
-            Debug.Log($"Reduced {reduceAmount} Hostility. Current: {_currentHostility} (Damage multiplier: {HostilityDamageMultiplier:F2}x)");
-            return reduceAmount;
+            _currentHostility -= amount;
+            _currentHostility = Mathf.Max(-10, _currentHostility);
+            Debug.Log($"Reduced {amount} Hostility. Current: {_currentHostility}");
+            return amount;
+        }
+
+        /// <summary>
+        /// Sets hostility to an exact value. Used to initialize enemy starting hostility.
+        /// </summary>
+        public void SetHostility(int value)
+        {
+            _currentHostility = Mathf.Clamp(value, -10, 10);
+            Debug.Log($"Hostility set to: {_currentHostility}");
         }
 
         #endregion

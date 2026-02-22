@@ -27,14 +27,14 @@ namespace Crookedile.Gameplay.Battle
 
         // Combatants
         private BattleStats _playerStats;
-        private BattleStats _opponentStats;
-        private OriginType _playerOrigin;
+        private OriginType  _playerOrigin;
 
         // Player deck
         private DeckManager _playerDeck;
 
-        // Enemy (replaces opponent deck + origin)
-        private EnemyController _enemyController;
+        // Enemies — all active enemies; index 0 = first enemy in room
+        private List<EnemyController> _enemies = new List<EnemyController>();
+        private int _focusedEnemyIndex = 0;
 
         // Effect Resolver
         private EffectResolver _effectResolver;
@@ -48,13 +48,19 @@ namespace Crookedile.Gameplay.Battle
 
         #region Properties
 
-        public BattleState CurrentState => _stateMachine?.CurrentStateType ?? BattleState.Initialize;
+        public BattleState CurrentState  => _stateMachine?.CurrentStateType ?? BattleState.Initialize;
         public BattleStats PlayerStats   => _playerStats;
-        public BattleStats OpponentStats => _opponentStats;
         public DeckManager PlayerDeck    => _playerDeck;
-        public EnemyController EnemyController => _enemyController;
-        public int  CurrentTurn  => _currentTurn;
-        public bool IsPlayerTurn => _isPlayerTurn;
+        public OriginType  PlayerOrigin  => _playerOrigin;
+        public int         CurrentTurn   => _currentTurn;
+        public bool        IsPlayerTurn  => _isPlayerTurn;
+
+        // Multi-enemy
+        public IReadOnlyList<EnemyController> Enemies    => _enemies;
+        public EnemyController FocusedEnemy              => _enemies.Count > 0 ? _enemies[_focusedEnemyIndex] : null;
+        public BattleStats     OpponentStats             => FocusedEnemy?.Stats;
+        public EnemyController EnemyController           => FocusedEnemy;   // backward compat
+        public int             FocusedEnemyIndex         => _focusedEnemyIndex;
 
         #endregion
 
@@ -104,25 +110,27 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void StartBattle(BattleSetup setup)
         {
-            GameLogger.LogInfo<BattleManager>($"Starting battle: {setup.playerOrigin} vs {setup.enemyData?.EnemyName ?? "Unknown Enemy"}");
+            GameLogger.LogInfo<BattleManager>($"Starting battle: {setup.playerOrigin} vs {setup.enemies.Count} enemies");
 
             // Player stats from origin
             OriginBattleStats playerOriginStats = setup.GetPlayerStats();
             _playerStats  = new BattleStats(playerOriginStats.maxResolve, playerOriginStats.maxActionPoints);
             _playerOrigin = setup.playerOrigin;
 
-            // Enemy stats come directly from EnemyData (no OriginStats lookup)
-            // Enemies have 0 AP — they don't spend action points to play cards
-            _opponentStats = new BattleStats(setup.enemyData.MaxResolve, maxActionPoints: 0);
+            // Build enemy controllers — each owns its own BattleStats + StatusEffectManager
+            _enemies.Clear();
+            foreach (var enemyData in setup.enemies)
+            {
+                if (enemyData != null)
+                    _enemies.Add(new EnemyController(enemyData));
+            }
+            _focusedEnemyIndex = 0;
 
             // Player deck
             _playerDeck = new DeckManager(setup.playerDeck, "Player", 10);
 
-            // Enemy controller (handles move selection, intent tracking)
-            _enemyController = new EnemyController(setup.enemyData);
-
-            // Effect resolver — player deck only; enemies have no deck
-            _effectResolver = new EffectResolver(_playerStats, _opponentStats, _playerDeck);
+            // Effect resolver — initially targets the first enemy
+            _effectResolver = new EffectResolver(_playerStats, FocusedEnemy.Stats, _playerDeck);
 
             // Reset counters
             _currentTurn = 0;
@@ -130,6 +138,19 @@ namespace Crookedile.Gameplay.Battle
 
             EventBus.Publish(new BattleStartedEvent { Setup = setup });
             _stateMachine.ChangeState(BattleState.Initialize);
+        }
+
+        /// <summary>
+        /// Sets the player's focused target to the enemy at <paramref name="index"/>.
+        /// All subsequent card damage and hostility effects will apply to that enemy.
+        /// Silently ignored if the index is out of range or the enemy is already defeated.
+        /// </summary>
+        public void SetFocusedEnemy(int index)
+        {
+            if (index < 0 || index >= _enemies.Count || _enemies[index].IsDefeated) return;
+            _focusedEnemyIndex = index;
+            _effectResolver.SetFocusedOpponent(FocusedEnemy.Stats, FocusedEnemy.StatusEffects);
+            GameLogger.LogInfo<BattleManager>($"Focused enemy: [{index}] {FocusedEnemy.EnemyData.EnemyName}");
         }
 
         /// <summary>Transitions to the next state in the battle flow.</summary>
@@ -188,6 +209,8 @@ namespace Crookedile.Gameplay.Battle
 
             EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
             _effectResolver.ResolveCardEffects(card, isPlayerCard: true);
+            ApplyCardTagHostilityShifts(card);
+            CheckAndAdvanceFocusAfterCardPlay();
 
             GameLogger.LogInfo<BattleManager>($"Player played: {card.CardName}");
         }
@@ -224,6 +247,82 @@ namespace Crookedile.Gameplay.Battle
             }
         }
 
+        /// <summary>
+        /// Shifts the focused enemy's hostility based on the sentiment tags on a played card.
+        /// Publishes EnemyHostilityChangedEvent if the value actually changed.
+        /// </summary>
+        private void ApplyCardTagHostilityShifts(CardData card)
+        {
+            if (FocusedEnemy == null) return;
+            if (card.SentimentTags == null || card.SentimentTags.Count == 0) return;
+
+            EnemyData enemy      = FocusedEnemy.EnemyData;
+            int oldHostility     = FocusedEnemy.Stats.CurrentHostility;
+            int totalShift       = 0;
+
+            foreach (CardTag tag in card.SentimentTags)
+            {
+                int baseShift = tag switch
+                {
+                    CardTag.Aggressive    => +1,
+                    CardTag.Empathetic    => -1,
+                    CardTag.Evasive       =>  0,
+                    CardTag.Authoritative =>  0,
+                    CardTag.Populist      =>  0,
+                    _                     =>  0
+                };
+
+                // Enemy sensitivity: +1 extra raise or -1 extra lower
+                if (tag == enemy.SensitiveRaiseTag) baseShift += 1;
+                if (tag == enemy.SensitiveLowerTag) baseShift -= 1;
+
+                totalShift += baseShift;
+            }
+
+            if (totalShift == 0) return;
+
+            if (totalShift > 0) FocusedEnemy.Stats.GainHostility(totalShift);
+            else                FocusedEnemy.Stats.ReduceHostility(-totalShift);
+
+            int newHostility = FocusedEnemy.Stats.CurrentHostility;
+            if (newHostility != oldHostility)
+            {
+                EventBus.Publish(new EnemyHostilityChangedEvent
+                {
+                    OldValue   = oldHostility,
+                    NewValue   = newHostility,
+                    EnemyIndex = _focusedEnemyIndex
+                });
+            }
+        }
+
+        /// <summary>
+        /// Called after each card resolves. If the focused enemy just died, publishes
+        /// EnemyDefeatedEvent and auto-advances focus to the next living enemy.
+        /// </summary>
+        private void CheckAndAdvanceFocusAfterCardPlay()
+        {
+            if (FocusedEnemy == null || !FocusedEnemy.IsDefeated) return;
+
+            EventBus.Publish(new EnemyDefeatedEvent
+            {
+                EnemyIndex = _focusedEnemyIndex,
+                EnemyName  = FocusedEnemy.EnemyData.EnemyName
+            });
+
+            GameLogger.LogInfo<BattleManager>($"Enemy [{_focusedEnemyIndex}] {FocusedEnemy.EnemyData.EnemyName} defeated — seeking next target");
+
+            for (int i = 0; i < _enemies.Count; i++)
+            {
+                if (!_enemies[i].IsDefeated)
+                {
+                    SetFocusedEnemy(i);
+                    return;
+                }
+            }
+            // All defeated — TurnEnd victory check will catch it
+        }
+
         #endregion
 
         #region Victory Conditions
@@ -231,14 +330,14 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Checks if the battle has ended and caches the result.</summary>
         public bool CheckVictoryConditions()
         {
-            bool playerDefeated   = _playerStats.IsDefeated;
-            bool opponentDefeated = _opponentStats.IsDefeated;
+            bool playerDefeated    = _playerStats.IsDefeated;
+            bool allEnemiesDefeated = _enemies.Count > 0 && _enemies.TrueForAll(e => e.IsDefeated);
 
-            if (playerDefeated || opponentDefeated)
+            if (playerDefeated || allEnemiesDefeated)
             {
                 _battleResult = new BattleResult
                 {
-                    isVictory             = opponentDefeated,
+                    isVictory             = allEnemiesDefeated,
                     turnsToWin            = _currentTurn,
                     finalPlayerResolve    = _playerStats.CurrentResolve,
                     finalPlayerComposure  = _playerStats.CurrentComposure,
@@ -266,7 +365,7 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<BattleManager>($"Turn {_currentTurn} — {(_isPlayerTurn ? "Player" : "Enemy")}");
         }
 
-        /// <summary>Runs start-of-turn effects for the current combatant.</summary>
+        /// <summary>Runs start-of-turn effects for the current combatant(s).</summary>
         public void StartTurn()
         {
             if (_isPlayerTurn)
@@ -276,12 +375,16 @@ namespace Crookedile.Gameplay.Battle
             }
             else
             {
-                _opponentStats.StartTurn();
-                _effectResolver.OpponentStatusEffects.OnTurnStart(_opponentStats);
+                foreach (var enemy in _enemies)
+                {
+                    if (enemy.IsDefeated) continue;
+                    enemy.Stats.StartTurn();
+                    enemy.StatusEffects.OnTurnStart(enemy.Stats);
+                }
             }
         }
 
-        /// <summary>Runs end-of-turn effects for the current combatant.</summary>
+        /// <summary>Runs end-of-turn effects for the current combatant(s).</summary>
         public void EndTurn()
         {
             if (_isPlayerTurn)
@@ -291,8 +394,12 @@ namespace Crookedile.Gameplay.Battle
             }
             else
             {
-                _opponentStats.EndTurn();
-                _effectResolver.OpponentStatusEffects.OnTurnEnd(_opponentStats);
+                foreach (var enemy in _enemies)
+                {
+                    if (enemy.IsDefeated) continue;
+                    enemy.Stats.EndTurn();
+                    enemy.StatusEffects.OnTurnEnd(enemy.Stats);
+                }
             }
         }
 
@@ -344,12 +451,17 @@ namespace Crookedile.Gameplay.Battle
                     // Draw cards for the player
                     _manager._playerDeck.StartTurn(_manager._cardsPerTurn);
 
-                    // Enemy declares their intent now so the player can plan around it
-                    EnemyMoveData intent = _manager._enemyController.SelectNextMove();
-                    if (intent != null)
+                    // Every living enemy declares their intent (Slay the Spire timing)
+                    for (int i = 0; i < _manager._enemies.Count; i++)
                     {
-                        EventBus.Publish(new EnemyIntentDeclaredEvent { Move = intent });
-                        GameLogger.LogInfo<BattleManager>($"Enemy declares intent: {intent.MoveName}");
+                        var enemy = _manager._enemies[i];
+                        if (enemy.IsDefeated) continue;
+                        EnemyMoveData intent = enemy.SelectNextMove();
+                        if (intent != null)
+                        {
+                            EventBus.Publish(new EnemyIntentDeclaredEvent { Move = intent, EnemyIndex = i });
+                            GameLogger.LogInfo<BattleManager>($"Enemy [{i}] {enemy.EnemyData.EnemyName} declares: {intent.MoveName}");
+                        }
                     }
                 }
                 // Enemy turn: no card draw; intent was already declared during the previous player turn
@@ -392,20 +504,26 @@ namespace Crookedile.Gameplay.Battle
 
             public override void OnEnter()
             {
-                GameLogger.LogInfo<BattleManager>("Enemy's turn started");
+                GameLogger.LogInfo<BattleManager>("Enemy turn started — all living enemies act");
 
-                EnemyMoveData move = _manager._enemyController.CurrentIntent;
-                if (move != null)
+                for (int i = 0; i < _manager._enemies.Count; i++)
                 {
-                    GameLogger.LogInfo<BattleManager>($"Enemy executes: {move.MoveName}");
-                    _manager._effectResolver.ResolveEnemyMoveEffects(move);
-                }
-                else
-                {
-                    GameLogger.LogWarning<BattleManager>("Enemy has no intent — skipping move");
+                    var enemy = _manager._enemies[i];
+                    if (enemy.IsDefeated || enemy.CurrentIntent == null) continue;
+
+                    GameLogger.LogInfo<BattleManager>($"Enemy [{i}] {enemy.EnemyData.EnemyName} executes: {enemy.CurrentIntent.MoveName}");
+
+                    // Temporarily point EffectResolver at this enemy as the caster
+                    _manager._effectResolver.SetFocusedOpponent(enemy.Stats, enemy.StatusEffects);
+                    _manager._effectResolver.ResolveEnemyMoveEffects(enemy.CurrentIntent);
                 }
 
-                // Enemy turn is instant — transition immediately after effects resolve
+                // Restore resolver to the player's current focused target
+                if (_manager.FocusedEnemy != null)
+                    _manager._effectResolver.SetFocusedOpponent(
+                        _manager.FocusedEnemy.Stats, _manager.FocusedEnemy.StatusEffects);
+
+                // Enemy turn is instant — transition immediately after all effects resolve
                 _manager.TransitionToState(BattleState.TurnEnd);
             }
         }
@@ -453,17 +571,17 @@ namespace Crookedile.Gameplay.Battle
 
     /// <summary>
     /// Setup data for initializing a battle.
-    /// Player brings a card deck and origin; opponent is defined by EnemyData.
+    /// Player brings a card deck and origin; opponents are one or more scripted enemies.
     /// </summary>
     [Serializable]
     public class BattleSetup
     {
-        public OriginType playerOrigin;
-        public OriginStats originStats;
+        public OriginType     playerOrigin;
+        public OriginStats    originStats;
         public List<CardData> playerDeck = new List<CardData>();
 
-        /// <summary>The scripted enemy the player will fight.</summary>
-        public EnemyData enemyData;
+        /// <summary>All enemies present in this room (1–5). Order = display order.</summary>
+        public List<EnemyData> enemies = new List<EnemyData>();
 
         /// <summary>Gets the player's battle stats based on their origin.</summary>
         public OriginBattleStats GetPlayerStats()

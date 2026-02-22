@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
@@ -27,10 +28,10 @@ namespace Crookedile.Gameplay.Battle
                  "If null, defaults to 20 Resolve / 3 AP.")]
         [SerializeField] private OriginStats originStats;
 
-        [Header("Enemy")]
-        [Tooltip("The EnemyData ScriptableObject defining who the player will fight. " +
+        [Header("Enemies")]
+        [Tooltip("The enemies present in this room (1–5). " +
                  "Create via: Right-click → Crookedile / Enemy / Enemy Data")]
-        [SerializeField] private EnemyData enemyData;
+        [SerializeField] private List<EnemyData> enemies = new List<EnemyData>();
 
         [Header("Scene References")]
         [SerializeField] private BattleManager battleManager;
@@ -90,11 +91,11 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void StartTestBattle()
         {
-            if (enemyData == null)
+            if (enemies == null || enemies.Count == 0 || enemies.All(e => e == null))
             {
-                Debug.LogError("[BattleTestStarter] No EnemyData assigned. " +
+                Debug.LogError("[BattleTestStarter] No enemies assigned. " +
                                "Create one via Right-click → Crookedile / Enemy / Enemy Data " +
-                               "and assign it to the enemyData field.");
+                               "and assign it to the enemies list.");
                 return;
             }
 
@@ -120,8 +121,9 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
 
+            var validEnemies = enemies.Where(e => e != null).ToList();
             Debug.Log($"[BattleTestStarter] Player ({playerOrigin}): {playerDeck.Count} cards | " +
-                      $"Enemy: {enemyData.EnemyName} ({enemyData.Moves.Count} moves, {enemyData.MaxResolve} Resolve)");
+                      $"Enemies: {string.Join(", ", validEnemies.Select(e => e.EnemyName))}");
 
             // Assemble BattleSetup
             var setup = new BattleSetup
@@ -129,7 +131,7 @@ namespace Crookedile.Gameplay.Battle
                 playerOrigin = playerOrigin,
                 originStats  = originStats,   // null → BattleManager defaults to 20 Resolve / 3 AP
                 playerDeck   = playerDeck,
-                enemyData    = enemyData,
+                enemies      = enemies.Where(e => e != null).ToList(),
             };
 
             // Wire BattleUI before starting (BattleUI needs BattleManager reference)
