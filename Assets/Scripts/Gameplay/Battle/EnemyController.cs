@@ -1,5 +1,6 @@
 using UnityEngine;
 using Crookedile.Data.Enemy;
+using Crookedile.Gameplay;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -30,12 +31,24 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>The enemy definition this controller operates on.</summary>
         public EnemyData EnemyData => _enemyData;
 
+        /// <summary>Battle stats for this enemy (Resolve, Composure, Hostility).</summary>
+        public BattleStats Stats { get; }
+
+        /// <summary>Status effect manager for this enemy.</summary>
+        public StatusEffectManager StatusEffects { get; }
+
+        /// <summary>True when this enemy's Resolve has reached zero.</summary>
+        public bool IsDefeated => Stats.IsDefeated;
+
         // ─── Constructor ──────────────────────────────────────────────────────────
 
         public EnemyController(EnemyData enemyData)
         {
-            _enemyData = enemyData;
-            _moveIndex = 0;
+            _enemyData   = enemyData;
+            _moveIndex   = 0;
+            Stats        = new BattleStats(enemyData.MaxResolve, maxActionPoints: 0);
+            Stats.SetHostility(enemyData.StartingHostility);
+            StatusEffects = new StatusEffectManager(enemyData.EnemyName);
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────

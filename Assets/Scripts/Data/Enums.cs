@@ -179,4 +179,18 @@ namespace Crookedile.Data
         Victory,
         Defeat
     }
+
+    /// <summary>
+    /// Sentiment tags on cards that shift enemy hostility on the number line.
+    /// Negative hostility = receptive, zero = neutral/guarded, positive = hostile.
+    /// </summary>
+    public enum CardTag
+    {
+        None,
+        Aggressive,    // +1 base enemy hostility
+        Evasive,       // 0 base; +1 extra on SensitiveRaiseTag enemies
+        Empathetic,    // -1 base enemy hostility
+        Authoritative, // 0 base hostility
+        Populist       // 0 base; shifts via enemy sensitivity
+    }
 }

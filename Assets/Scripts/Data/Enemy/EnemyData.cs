@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Crookedile.Data;
 
 namespace Crookedile.Data.Enemy
 {
@@ -42,6 +43,21 @@ namespace Crookedile.Data.Enemy
 
         // Note: Enemies have no Action Points or deck — those systems are player-only.
 
+        // ─── Hostility ────────────────────────────────────────────────────────────
+
+        [Header("Hostility")]
+        [Tooltip("Starting position on the hostility number line. " +
+                 "Negative = receptive (open to persuasion), 0 = neutral/guarded, positive = hostile.")]
+        [SerializeField] private int _startingHostility = 0;
+
+        [Tooltip("Card tag that raises this enemy's hostility by +1 extra (on top of the tag's base shift). " +
+                 "Use CardTag.None for no sensitivity.")]
+        [SerializeField] private CardTag _sensitiveRaiseTag = CardTag.None;
+
+        [Tooltip("Card tag that lowers this enemy's hostility by -1 extra (on top of the tag's base shift). " +
+                 "Use CardTag.None for no sensitivity.")]
+        [SerializeField] private CardTag _sensitiveLowerTag = CardTag.None;
+
         // ─── Move Set ─────────────────────────────────────────────────────────────
 
         [Header("Move Set")]
@@ -54,10 +70,13 @@ namespace Crookedile.Data.Enemy
 
         // ─── Properties ───────────────────────────────────────────────────────────
 
-        public string      EnemyName   => _enemyName;
-        public Sprite      Portrait    => _portrait;
-        public int         MaxResolve  => _maxResolve;
-        public EnemyMovePattern MovePattern => _movePattern;
+        public string      EnemyName         => _enemyName;
+        public Sprite      Portrait           => _portrait;
+        public int         MaxResolve         => _maxResolve;
+        public int         StartingHostility  => _startingHostility;
+        public CardTag     SensitiveRaiseTag  => _sensitiveRaiseTag;
+        public CardTag     SensitiveLowerTag  => _sensitiveLowerTag;
+        public EnemyMovePattern MovePattern   => _movePattern;
         public IReadOnlyList<EnemyMoveData> Moves => _moves;
     }
 }

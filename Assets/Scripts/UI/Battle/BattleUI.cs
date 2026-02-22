@@ -1,8 +1,10 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Collections.Generic;
 using Crookedile.Core;
+using Crookedile.Data;
 using Crookedile.Gameplay.Battle;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
@@ -21,11 +23,14 @@ namespace Crookedile.UI.Battle
         [SerializeField] private TMP_Text playerHostilityText;
         [SerializeField] private TMP_Text playerAPText;
 
-        [Header("Opponent / Enemy Stats")]
-        [SerializeField] private TMP_Text opponentResolveText;
-        [SerializeField] private TMP_Text opponentComposureText;
-        [SerializeField] private TMP_Text opponentHostilityText;
-        // Note: opponents are scripted enemies with no AP — AP display intentionally removed
+        [Header("Enemy Slots")]
+        [Tooltip("Parent transform that enemy slot panels are spawned into")]
+        [SerializeField] private Transform  enemySlotContainer;
+        [Tooltip("Prefab with an EnemySlotUI component — instantiated once per enemy")]
+        [SerializeField] private GameObject enemySlotPrefab;
+
+        // Runtime list of spawned enemy slot UIs (one per enemy in the battle)
+        private List<EnemySlotUI> _enemySlots = new List<EnemySlotUI>();
 
         [Header("Battle Info")]
         [SerializeField] private TMP_Text turnNumberText;
@@ -42,11 +47,6 @@ namespace Crookedile.UI.Battle
         [SerializeField] private TMP_Text battleLogText;
         [SerializeField] private ScrollRect battleLogScrollRect;
         [SerializeField] private int maxLogLines = 20;
-
-        [Header("Status Effects")]
-        [SerializeField] private Transform playerStatusContainer;
-        [SerializeField] private Transform opponentStatusContainer;
-        [SerializeField] private GameObject statusEffectPrefab;
 
         [Header("Battle Result")]
         [SerializeField] private GameObject victoryPanel;
@@ -89,6 +89,8 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<CardPlayedEvent>(OnCardPlayed);
             EventBus.Subscribe<BattleEndedEvent>(OnBattleEnded);
             EventBus.Subscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
+            EventBus.Subscribe<EnemyHostilityChangedEvent>(OnEnemyHostilityChanged);
+            EventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
         }
 
         private void UnsubscribeFromEvents()
@@ -99,6 +101,8 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<CardPlayedEvent>(OnCardPlayed);
             EventBus.Unsubscribe<BattleEndedEvent>(OnBattleEnded);
             EventBus.Unsubscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
+            EventBus.Unsubscribe<EnemyHostilityChangedEvent>(OnEnemyHostilityChanged);
+            EventBus.Unsubscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
         }
 
         /// <summary>
@@ -117,7 +121,29 @@ namespace Crookedile.UI.Battle
         private void OnBattleStarted(BattleStartedEvent evt)
         {
             AddLogEntry("=== Battle Started ===");
+            BuildEnemySlots();
             RefreshUI();
+        }
+
+        private void BuildEnemySlots()
+        {
+            // Destroy any slots from a previous battle
+            foreach (var slot in _enemySlots)
+                if (slot != null) Destroy(slot.gameObject);
+            _enemySlots.Clear();
+
+            if (enemySlotContainer == null || enemySlotPrefab == null || battleManager == null) return;
+
+            for (int i = 0; i < battleManager.Enemies.Count; i++)
+            {
+                var go   = Instantiate(enemySlotPrefab, enemySlotContainer);
+                var slot = go.GetComponent<EnemySlotUI>();
+                if (slot != null)
+                {
+                    slot.Initialize(i, battleManager, battleManager.PlayerOrigin);
+                    _enemySlots.Add(slot);
+                }
+            }
         }
 
         private void OnTurnStarted(TurnStartedEvent evt)
@@ -142,7 +168,25 @@ namespace Crookedile.UI.Battle
         private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
         {
             if (evt.Move != null)
-                AddLogEntry($"Enemy intends: {evt.Move.IntentDescription}");
+                AddLogEntry($"Enemy [{evt.EnemyIndex}] intends: {evt.Move.IntentDescription}");
+            if (evt.EnemyIndex < _enemySlots.Count)
+                _enemySlots[evt.EnemyIndex]?.UpdateIntent(evt.Move);
+        }
+
+        private void OnEnemyHostilityChanged(EnemyHostilityChangedEvent evt)
+        {
+            if (evt.EnemyIndex < _enemySlots.Count)
+            {
+                _enemySlots[evt.EnemyIndex]?.Refresh();
+                _enemySlots[evt.EnemyIndex]?.PulseHostility();
+            }
+        }
+
+        private void OnEnemyDefeated(EnemyDefeatedEvent evt)
+        {
+            AddLogEntry($"{evt.EnemyName} defeated!");
+            if (evt.EnemyIndex < _enemySlots.Count)
+                _enemySlots[evt.EnemyIndex]?.MarkDefeated();
         }
 
         private void OnBattleEnded(BattleEndedEvent evt)
@@ -188,20 +232,16 @@ namespace Crookedile.UI.Battle
                 playerResolveText.text = $"Resolve: {playerStats.CurrentResolve}/{playerStats.MaxResolve}";
             if (playerComposureText != null)
                 playerComposureText.text = $"Composure: {playerStats.CurrentComposure}";
-            if (playerHostilityText != null)
-                playerHostilityText.text = $"Hostility: {playerStats.CurrentHostility} ({playerStats.HostilityDamageMultiplier:F1}x)";
+            // playerHostilityText intentionally not updated — player hostility stays 0; enemy owns the number line
             if (playerAPText != null)
                 playerAPText.text = $"AP: {playerStats.CurrentActionPoints}/{playerStats.MaxActionPoints}";
 
-            // Opponent stats
-            var opponentStats = battleManager.OpponentStats;
-            if (opponentResolveText != null)
-                opponentResolveText.text = $"Resolve: {opponentStats.CurrentResolve}/{opponentStats.MaxResolve}";
-            if (opponentComposureText != null)
-                opponentComposureText.text = $"Composure: {opponentStats.CurrentComposure}";
-            if (opponentHostilityText != null)
-                opponentHostilityText.text = $"Hostility: {opponentStats.CurrentHostility} ({opponentStats.HostilityDamageMultiplier:F1}x)";
-            // opponentAPText removed — enemies have no Action Points
+            // Enemy slots — refresh each and update focus highlight
+            for (int i = 0; i < _enemySlots.Count; i++)
+            {
+                _enemySlots[i]?.Refresh();
+                _enemySlots[i]?.SetSelected(i == battleManager.FocusedEnemyIndex);
+            }
         }
 
         private void UpdateBattleInfo()
@@ -286,6 +326,17 @@ namespace Crookedile.UI.Battle
                     Destroy(button.gameObject);
             }
             activeCardButtons.Clear();
+        }
+
+        /// <summary>
+        /// Briefly scales a text element up then back to normal to signal a change.
+        /// </summary>
+        private IEnumerator PulseText(TMP_Text text)
+        {
+            Vector3 original = text.transform.localScale;
+            text.transform.localScale = original * 1.2f;
+            yield return new WaitForSeconds(0.15f);
+            text.transform.localScale = original;
         }
 
         #endregion

@@ -35,8 +35,21 @@ namespace Crookedile.Gameplay.Battle
             _opponentStatusEffects = new StatusEffectManager("Opponent");
         }
 
-        public StatusEffectManager PlayerStatusEffects => _playerStatusEffects;
+        public StatusEffectManager PlayerStatusEffects   => _playerStatusEffects;
         public StatusEffectManager OpponentStatusEffects => _opponentStatusEffects;
+
+        /// <summary>
+        /// Retargets the resolver to a different enemy.
+        /// Call this before resolving any effect that should apply to a specific enemy
+        /// (e.g. before each enemy acts during the opponent turn, or when the player
+        /// changes their focused target).
+        /// Both stats AND status effects must be swapped together.
+        /// </summary>
+        public void SetFocusedOpponent(BattleStats stats, StatusEffectManager statusEffects)
+        {
+            _opponentStats         = stats;
+            _opponentStatusEffects = statusEffects;
+        }
 
         #region Effect Resolution
 
@@ -174,11 +187,12 @@ namespace Crookedile.Gameplay.Battle
                     break;
 
                 case ResourceEffectType.GainHostility:
-                    ApplyGainHostility(caster, effect.ResourceAmount);
+                    // Hostility is the enemy's number line — always shifts opponent, never caster
+                    ApplyGainHostility(_opponentStats, effect.ResourceAmount);
                     break;
 
                 case ResourceEffectType.ReduceHostility:
-                    ApplyReduceHostility(caster, effect.ResourceAmount);
+                    ApplyReduceHostility(_opponentStats, effect.ResourceAmount);
                     break;
 
                 case ResourceEffectType.GainActionPoints:

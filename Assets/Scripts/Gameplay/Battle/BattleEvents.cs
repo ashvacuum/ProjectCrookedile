@@ -182,6 +182,29 @@ namespace Crookedile.Gameplay.Battle
     {
         /// <summary>The move the enemy intends to execute on their upcoming turn.</summary>
         public EnemyMoveData Move;
+        /// <summary>Index into BattleManager.Enemies that declared this intent.</summary>
+        public int EnemyIndex;
+    }
+
+    /// <summary>
+    /// Published when an enemy's hostility number shifts due to a card played.
+    /// Negative = receptive, zero = neutral, positive = hostile.
+    /// </summary>
+    public struct EnemyHostilityChangedEvent : IGameEvent
+    {
+        public int OldValue;
+        public int NewValue;
+        /// <summary>Index into BattleManager.Enemies whose hostility changed.</summary>
+        public int EnemyIndex;
+    }
+
+    /// <summary>
+    /// Published when an enemy's Resolve reaches zero.
+    /// </summary>
+    public struct EnemyDefeatedEvent : IGameEvent
+    {
+        public int    EnemyIndex;
+        public string EnemyName;
     }
 
     #endregion
