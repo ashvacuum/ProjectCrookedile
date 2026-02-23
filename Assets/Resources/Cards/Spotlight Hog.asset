@@ -75,3 +75,4 @@ MonoBehaviour:
   - actor
   _isStarterCard: 1
   _isUnlockable: 0
+  _sentimentTags: 01000000

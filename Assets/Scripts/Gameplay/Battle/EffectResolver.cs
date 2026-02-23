@@ -16,22 +16,26 @@ namespace Crookedile.Gameplay.Battle
     public class EffectResolver
     {
         private BattleStats _playerStats;
-        private BattleStats _opponentStats;
+        private BattleStats _opponentStats;           // focused enemy (for single-target effects)
         private DeckManager _playerDeck;
         // Note: enemies have no deck — _opponentDeck was removed when the system switched
         // from player-vs-player to player-vs-scripted-enemy.
+        private IReadOnlyList<EnemyController> _allEnemies; // all enemies — used for multi-target effects
         private StatusEffectManager _playerStatusEffects;
-        private StatusEffectManager _opponentStatusEffects;
+        private StatusEffectManager _opponentStatusEffects; // focused enemy's status mgr
 
         // Events for effect notifications
         public event Action<CardEffect, BattleStats> OnEffectApplied;
 
-        public EffectResolver(BattleStats playerStats, BattleStats opponentStats, DeckManager playerDeck)
+        public EffectResolver(BattleStats playerStats, BattleStats opponentStats,
+                              DeckManager playerDeck,
+                              IReadOnlyList<EnemyController> allEnemies = null)
         {
-            _playerStats = playerStats;
-            _opponentStats = opponentStats;
-            _playerDeck = playerDeck;
-            _playerStatusEffects = new StatusEffectManager("Player");
+            _playerStats           = playerStats;
+            _opponentStats         = opponentStats;
+            _playerDeck            = playerDeck;
+            _allEnemies            = allEnemies;
+            _playerStatusEffects   = new StatusEffectManager("Player");
             _opponentStatusEffects = new StatusEffectManager("Opponent");
         }
 
@@ -89,63 +93,132 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Resolves a single battle effect using the new simplified system.
+        /// Resolves a single battle effect.
+        /// Resource and CardManipulation effects are always caster-scoped and applied once.
+        /// Damage and StatusEffect effects are target-scoped and applied to every pair
+        /// returned by ResolveTargetPairs (supports multi-target TargetTypes).
         /// </summary>
         private void ResolveBattleEffect(CardEffect effect, bool isPlayerCard)
         {
-            BattleStats casterStats = isPlayerCard ? _playerStats : _opponentStats;
-            BattleStats targetStats = isPlayerCard ? _opponentStats : _playerStats;
-            // Enemies have no deck — casterDeck is null when isPlayerCard == false.
-            // The CardManipulation branch guards against this below.
-            DeckManager casterDeck = isPlayerCard ? _playerDeck : null;
-            StatusEffectManager casterStatusEffects = isPlayerCard ? _playerStatusEffects : _opponentStatusEffects;
+            BattleStats         casterStats         = isPlayerCard ? _playerStats          : _opponentStats;
+            BattleStats         targetStats         = isPlayerCard ? _opponentStats         : _playerStats;
+            DeckManager         casterDeck          = isPlayerCard ? _playerDeck            : null;
+            StatusEffectManager casterStatusEffects = isPlayerCard ? _playerStatusEffects   : _opponentStatusEffects;
             StatusEffectManager targetStatusEffects = isPlayerCard ? _opponentStatusEffects : _playerStatusEffects;
 
-            // Determine actual target based on effect target type
-            BattleStats effectTarget = effect.Target switch
+            // Resource and CardManipulation are always caster-scoped — apply once and return
+            if (effect.Category == EffectCategory.Resource)
             {
-                TargetType.Self => casterStats,
-                TargetType.Opponent => targetStats,
-                TargetType.All => null, // Special handling for All
-                TargetType.Random => UnityEngine.Random.value > 0.5f ? casterStats : targetStats,
-                _ => targetStats
-            };
+                ResolveResourceEffect(effect, casterStats);
+                OnEffectApplied?.Invoke(effect, casterStats);
+                return;
+            }
+            if (effect.Category == EffectCategory.CardManipulation)
+            {
+                // Enemies have no deck (casterDeck == null) — skip silently.
+                if (casterDeck != null)
+                    ResolveCardManipulationEffect(effect, casterDeck);
+                OnEffectApplied?.Invoke(effect, casterStats);
+                return;
+            }
 
-            StatusEffectManager effectTargetStatusMgr = effect.Target switch
-            {
-                TargetType.Self => casterStatusEffects,
-                TargetType.Opponent => targetStatusEffects,
-                TargetType.All => null,
-                TargetType.Random => UnityEngine.Random.value > 0.5f ? casterStatusEffects : targetStatusEffects,
-                _ => targetStatusEffects
-            };
+            // Damage and StatusEffect are target-scoped — resolve the full target list and iterate
+            var targets = ResolveTargetPairs(effect.Target, isPlayerCard,
+                casterStats, casterStatusEffects, targetStats, targetStatusEffects);
 
-            // Apply effect based on category
-            switch (effect.Category)
+            foreach (var (effectTarget, effectTargetStatusMgr) in targets)
             {
-                case EffectCategory.Damage:
-                    ResolveDamageEffect(effect, effectTarget, casterStats);
+                switch (effect.Category)
+                {
+                    case EffectCategory.Damage:
+                        ResolveDamageEffect(effect, effectTarget, casterStats);
+                        break;
+
+                    case EffectCategory.StatusEffect:
+                        effectTargetStatusMgr?.ApplyStatusEffect(
+                            effect.StatusEffectType, effect.StatusStacks, effect.StatusDuration);
+                        GameLogger.LogInfo<EffectResolver>(
+                            $"Applied {effect.StatusStacks} {effect.StatusEffectType} ({effect.StatusDuration})");
+                        break;
+                }
+                OnEffectApplied?.Invoke(effect, effectTarget);
+            }
+        }
+
+        /// <summary>
+        /// Resolves a TargetType into a list of (BattleStats, StatusEffectManager) pairs.
+        /// Single-target types return 1 element; multi-target types return N (one per living combatant).
+        /// </summary>
+        private List<(BattleStats stats, StatusEffectManager statusMgr)> ResolveTargetPairs(
+            TargetType targetType, bool isPlayerCard,
+            BattleStats casterStats,   StatusEffectManager casterStatusMgr,
+            BattleStats targetStats,   StatusEffectManager targetStatusMgr)
+        {
+            var pairs = new List<(BattleStats, StatusEffectManager)>();
+
+            switch (targetType)
+            {
+                case TargetType.Self:
+                    pairs.Add((casterStats, casterStatusMgr));
                     break;
 
-                case EffectCategory.Resource:
-                    ResolveResourceEffect(effect, casterStats);
+                case TargetType.Opponent:
+                    pairs.Add((targetStats, targetStatusMgr));
                     break;
 
-                case EffectCategory.CardManipulation:
-                    // Enemies have no deck (casterDeck == null) — skip silently.
-                    // Designers should not author CardManipulation effects on EnemyMoveData.
-                    if (casterDeck != null)
-                        ResolveCardManipulationEffect(effect, casterDeck);
+                case TargetType.Random:
+                    // Single coin-flip for both stats AND status mgr (fixes original double-roll bug)
+                    if (UnityEngine.Random.value > 0.5f)
+                        pairs.Add((casterStats, casterStatusMgr));
+                    else
+                        pairs.Add((targetStats, targetStatusMgr));
                     break;
 
-                case EffectCategory.StatusEffect:
-                    effectTargetStatusMgr.ApplyStatusEffect(effect.StatusEffectType, effect.StatusStacks, effect.StatusDuration);
-                    GameLogger.LogInfo<EffectResolver>($"Applied {effect.StatusStacks} {effect.StatusEffectType} ({effect.StatusDuration})");
+                case TargetType.All:
+                    // Player + every living enemy
+                    pairs.Add((_playerStats, _playerStatusEffects));
+                    if (_allEnemies != null)
+                        foreach (var e in _allEnemies)
+                            if (!e.IsDefeated) pairs.Add((e.Stats, e.StatusEffects));
+                    break;
+
+                case TargetType.AllOpponents:
+                    if (isPlayerCard)
+                    {
+                        // Hit all living enemies
+                        if (_allEnemies != null)
+                            foreach (var e in _allEnemies)
+                                if (!e.IsDefeated) pairs.Add((e.Stats, e.StatusEffects));
+                    }
+                    else
+                    {
+                        // Enemy card — only one player to target
+                        pairs.Add((_playerStats, _playerStatusEffects));
+                    }
+                    break;
+
+                case TargetType.AllAllies:
+                    if (!isPlayerCard)
+                    {
+                        // Buff all living enemies
+                        if (_allEnemies != null)
+                            foreach (var e in _allEnemies)
+                                if (!e.IsDefeated) pairs.Add((e.Stats, e.StatusEffects));
+                    }
+                    else
+                    {
+                        // Player has no other allies — same as Self
+                        pairs.Add((_playerStats, _playerStatusEffects));
+                    }
+                    break;
+
+                default:
+                    GameLogger.LogWarning<EffectResolver>($"Unhandled TargetType {targetType} — falling back to Opponent");
+                    pairs.Add((targetStats, targetStatusMgr));
                     break;
             }
 
-            // Notify listeners
-            OnEffectApplied?.Invoke(effect, effectTarget);
+            return pairs;
         }
 
         private void ResolveDamageEffect(CardEffect effect, BattleStats target, BattleStats attacker)
@@ -589,15 +662,19 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>
         /// Gets the StatusEffectManager for the given BattleStats.
+        /// Searches the full enemy list so multi-target effects (AllOpponents, All)
+        /// can look up the correct manager for each enemy, not just the focused one.
         /// </summary>
         private StatusEffectManager GetStatusEffectManager(BattleStats stats)
         {
-            if (stats == _playerStats)
-                return _playerStatusEffects;
-            else if (stats == _opponentStats)
-                return _opponentStatusEffects;
-            else
-                return null; // This shouldn't happen
+            if (stats == _playerStats) return _playerStatusEffects;
+
+            if (_allEnemies != null)
+                foreach (var enemy in _allEnemies)
+                    if (enemy.Stats == stats) return enemy.StatusEffects;
+
+            GameLogger.LogWarning<EffectResolver>("GetStatusEffectManager: unknown BattleStats — returning null");
+            return null;
         }
 
         #endregion

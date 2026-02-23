@@ -131,9 +131,11 @@ namespace Crookedile.Data
     public enum TargetType
     {
         Self,
-        Opponent,
-        All,
-        Random
+        Opponent,       // Single focused enemy (player) or the player (enemy)
+        All,            // Player + ALL living enemies
+        Random,         // Random single opponent
+        AllOpponents,   // Player card → all living enemies | Enemy card → the player
+        AllAllies       // Enemy card → all living enemies  | Player card → self
     }
 
     /// <summary>

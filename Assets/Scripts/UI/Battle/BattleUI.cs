@@ -8,6 +8,7 @@ using Crookedile.Data;
 using Crookedile.Gameplay.Battle;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
+using Crookedile.Utilities;
 
 namespace Crookedile.UI.Battle
 {
@@ -54,6 +55,7 @@ namespace Crookedile.UI.Battle
 
         private BattleManager battleManager;
         private List<CardButton> activeCardButtons = new List<CardButton>();
+        private ObjectPool<CardButton> _cardPool;
         private List<string> battleLogLines = new List<string>();
 
         #region Initialization
@@ -69,6 +71,21 @@ namespace Crookedile.UI.Battle
             // Hide result panels
             if (victoryPanel != null) victoryPanel.SetActive(false);
             if (defeatPanel != null) defeatPanel.SetActive(false);
+        }
+
+        private void Start()
+        {
+            if (cardButtonPrefab != null)
+            {
+                var prefabComponent = cardButtonPrefab.GetComponent<CardButton>();
+                if (prefabComponent != null)
+                    _cardPool = new ObjectPool<CardButton>(prefabComponent, initialSize: 7, parent: cardButtonContainer);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            _cardPool?.Clear();
         }
 
         private void OnEnable()
@@ -228,6 +245,7 @@ namespace Crookedile.UI.Battle
         {
             // Player stats
             var playerStats = battleManager.PlayerStats;
+            if (playerStats == null) return; // Battle not yet initialized — wait for BattleStartedEvent
             if (playerResolveText != null)
                 playerResolveText.text = $"Resolve: {playerStats.CurrentResolve}/{playerStats.MaxResolve}";
             if (playerComposureText != null)
@@ -267,7 +285,7 @@ namespace Crookedile.UI.Battle
 
         private void UpdateHandDisplay()
         {
-            if (cardButtonContainer == null || cardButtonPrefab == null) return;
+            if (cardButtonContainer == null || cardButtonPrefab == null || battleManager.PlayerStats == null) return;
 
             // Clear existing buttons
             ClearCardButtons();
@@ -281,8 +299,9 @@ namespace Crookedile.UI.Battle
             for (int i = 0; i < hand.Count; i++)
             {
                 CardData card = hand[i];
-                GameObject buttonObj = Instantiate(cardButtonPrefab, cardButtonContainer);
-                CardButton cardButton = buttonObj.GetComponent<CardButton>();
+                CardButton cardButton = _cardPool != null
+                    ? _cardPool.Get()
+                    : Instantiate(cardButtonPrefab, cardButtonContainer).GetComponent<CardButton>();
 
                 if (cardButton != null)
                 {
@@ -322,7 +341,10 @@ namespace Crookedile.UI.Battle
         {
             foreach (var button in activeCardButtons)
             {
-                if (button != null && button.gameObject != null)
+                if (button == null) continue;
+                if (_cardPool != null)
+                    _cardPool.Return(button);
+                else
                     Destroy(button.gameObject);
             }
             activeCardButtons.Clear();

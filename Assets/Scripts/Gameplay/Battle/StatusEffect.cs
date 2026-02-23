@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Sirenix.OdinInspector;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -11,8 +12,13 @@ namespace Crookedile.Gameplay.Battle
     [Serializable]
     public class StatusEffect
     {
+        [InfoBox("@GetEffectDescription()")]
         [SerializeField] private StatusEffectType _type;
+
+        [Tooltip("Number of stacks. Most effects scale linearly with stacks.")]
         [SerializeField] private int _stacks;
+
+        [Tooltip("DecreasePerTurn: loses 1 stack each turn.\nRemoveEndOfTurn: gone entirely at end of turn.\nPermanent: never expires.")]
         [SerializeField] private StatusDurationType _durationType;
 
         public StatusEffectType Type => _type;
@@ -53,6 +59,36 @@ namespace Crookedile.Gameplay.Battle
             _stacks -= amount;
             return _stacks <= 0;
         }
+
+        // ─── Editor Helpers ───────────────────────────────────────────────────────
+
+        private string GetEffectDescription() => _type switch
+        {
+            // Debuffs
+            StatusEffectType.Weakened       => "Deal X less damage.",
+            StatusEffectType.Vulnerable     => "Take 50% more damage.",
+            StatusEffectType.Frail          => "Gain 25% less Composure.",
+            StatusEffectType.Entangled      => "All cards cost +1 AP.",
+            StatusEffectType.Exposed        => "Next attack against this target deals double damage.",
+            StatusEffectType.Scandal        => "Take X damage at end of turn (like Poison).",
+            StatusEffectType.Confused       => "A random card costs +1 AP each turn.",
+            StatusEffectType.Silenced       => "Cannot play Manipulate cards.",
+            // Buffs
+            StatusEffectType.Strength       => "Deal X more damage.",
+            StatusEffectType.Dexterity      => "Gain X more Composure per card played.",
+            StatusEffectType.Focus          => "Cards cost X less AP (this turn only).",
+            StatusEffectType.Energized      => "Draw X extra cards next turn.",
+            StatusEffectType.Plated         => "Reduce incoming damage by X.",
+            StatusEffectType.Regeneration   => "Heal X Resolve at end of turn.",
+            StatusEffectType.Intangible     => "Take only 1 damage from all attacks.",
+            StatusEffectType.Thorns         => "Deal X damage back to attackers.",
+            // Special
+            StatusEffectType.Block          => "Absorb up to X incoming damage this turn.",
+            StatusEffectType.Ritual         => "Gain X Composure at the start of each turn.",
+            StatusEffectType.Momentum       => "Gain X bonus damage per card played this turn.",
+            StatusEffectType.Echo           => "The next card played is resolved twice.",
+            _                               => ""
+        };
     }
 
     /// <summary>

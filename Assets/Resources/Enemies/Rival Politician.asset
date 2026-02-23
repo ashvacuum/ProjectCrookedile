@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Rival Politician
+  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Enemy.EnemyData
+  _enemyName: Rival Politician
+  _portrait: {fileID: 0}
+  _maxResolve: 20
+  _startingHostility: 10
+  _sensitiveRaiseTag: 5
+  _sensitiveLowerTag: 3
+  _startingEffects:
+  - _type: 12
+    _stacks: 3
+    _durationType: 2
+  _movePattern: 1
+  _moves:
+  - {fileID: 11400000, guid: 840cb7f1c3234024d8c13dcb7b49b315, type: 2}
+  - {fileID: 11400000, guid: 0a5b34cfda1589c42bf66d489c2c55bc, type: 2}
