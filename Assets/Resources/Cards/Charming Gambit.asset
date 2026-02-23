@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Charming Gambit
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 6eb789db89a8dfd478a4894286cfca3e, type: 3}
   _description: 'Deal 3 Resolve damage. 50% chance: Draw 1 card.'
   _flavorText: High risk, higher cheekbones.
   _costs:
@@ -61,3 +61,4 @@ MonoBehaviour:
   - actor
   _isStarterCard: 1
   _isUnlockable: 0
+  _sentimentTags: 

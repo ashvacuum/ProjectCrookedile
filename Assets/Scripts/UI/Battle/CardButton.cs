@@ -90,6 +90,7 @@ namespace Crookedile.UI.Battle
         private Vector3 basePosition;
         private Vector3 targetScale;
         private Vector3 targetPosition;
+        private int baseSiblingIndex;
 
         // ─── Unity Lifecycle ──────────────────────────────────────────────────────
 
@@ -154,6 +155,15 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
+        /// Records the canonical sibling index assigned by CardHandLayout.
+        /// Called immediately after SetSiblingIndex so OnPointerExit can restore it.
+        /// </summary>
+        public void SetBaseSiblingIndex(int index)
+        {
+            baseSiblingIndex = index;
+        }
+
+        /// <summary>
         /// Plays the draw feedback. Call from BattleUI when this card enters hand.
         /// </summary>
         public void PlayDrawAnimation()
@@ -193,6 +203,7 @@ namespace Crookedile.UI.Battle
 
             targetScale    = baseScale;
             targetPosition = basePosition;
+            transform.SetSiblingIndex(baseSiblingIndex);
 
             hoverExitFeedback?.PlayFeedbacks();
         }

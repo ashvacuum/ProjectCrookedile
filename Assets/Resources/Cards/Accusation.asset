@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Accusation
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: fa7d33163b9e2ad4aabee506efedf0ff, type: 3}
   _description: Deal 4 Resolve damage. Gain 1 Hostility.
   _flavorText: Righteous anger, barely contained.
   _costs:
@@ -61,3 +61,4 @@ MonoBehaviour:
   - faithleader
   _isStarterCard: 1
   _isUnlockable: 0
+  _sentimentTags: 

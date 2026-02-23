@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Ego Trip
   _cardType: 2
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 22e65533b737ce849adc0b903a353c96, type: 3}
   _description: Gain Composure equal to your Hostility. (Hostility is not reduced.)
   _flavorText: Turn the wounds into weapons.
   _costs:
@@ -47,3 +47,4 @@ MonoBehaviour:
   - actor
   _isStarterCard: 1
   _isUnlockable: 0
+  _sentimentTags: 

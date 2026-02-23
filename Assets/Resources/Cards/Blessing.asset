@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Blessing
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: a8633d1b76af37f43b7d847f2df103fd, type: 3}
   _description: Deal damage equal to your Composure. Consume all Composure.
   _flavorText: The congregation holds its breath.
   _costs:
@@ -47,3 +47,4 @@ MonoBehaviour:
   - faithleader
   _isStarterCard: 1
   _isUnlockable: 0
+  _sentimentTags: 

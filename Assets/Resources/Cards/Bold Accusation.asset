@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Bold Accusation
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: dd0829e9a778e6b4eb75f3f5df21849b, type: 3}
   _description: Deal 5 Resolve damage. Gain 2 Hostility.
   _flavorText: Critics said it was too much. It worked.
   _costs:
@@ -61,3 +61,4 @@ MonoBehaviour:
   - actor
   _isStarterCard: 1
   _isUnlockable: 0
+  _sentimentTags: 
