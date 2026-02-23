@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Crookedile.Data;
+using Crookedile.Gameplay.Battle;
 
 namespace Crookedile.Data.Enemy
 {
@@ -58,6 +59,12 @@ namespace Crookedile.Data.Enemy
                  "Use CardTag.None for no sensitivity.")]
         [SerializeField] private CardTag _sensitiveLowerTag = CardTag.None;
 
+        // ─── Starting Status Effects ───────────────────────────────────────────────
+
+        [Header("Starting Effects")]
+        [Tooltip("Status effects (buffs or debuffs) applied to this enemy at the start of every battle.")]
+        [SerializeField] private List<StatusEffect> _startingEffects = new List<StatusEffect>();
+
         // ─── Move Set ─────────────────────────────────────────────────────────────
 
         [Header("Move Set")]
@@ -78,5 +85,6 @@ namespace Crookedile.Data.Enemy
         public CardTag     SensitiveLowerTag  => _sensitiveLowerTag;
         public EnemyMovePattern MovePattern   => _movePattern;
         public IReadOnlyList<EnemyMoveData> Moves => _moves;
+        public IReadOnlyList<StatusEffect> StartingEffects => _startingEffects;
     }
 }

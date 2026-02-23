@@ -4,16 +4,17 @@ using System.Collections.Generic;
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Arranges CardButtons in an overlapping fan, like cards held in a hand.
+    /// Arranges CardButtons in a true circular arc fan, like cards held in a hand.
+    ///
+    ///   Each card is positioned on a circle of radius <see cref="arcRadius"/>:
+    ///     x = R · sin(angle)        — horizontal position from centre
+    ///     y = R · (cos(angle) − 1)  — vertical dip (0 at centre, negative at edges)
+    ///   Both X and Y come from the same angle, so cards actually sit on the circle.
     ///
     ///   Tuning quick-reference:
-    ///     cardSpacingPx   — horizontal gap between card centres. Less = more overlap.
-    ///                       Card width 120 px → 65 px spacing = ~46% overlap.
-    ///     arcRadius       — size of the imaginary circle whose edge cards sit on.
-    ///                       Controls how much edge cards dip below the centre card.
-    ///                       Larger = flatter; 600-900 is a natural hand feel.
-    ///     arcAngleDegrees — total rotation spread across all cards. Controls tilt.
-    ///                       20-35° is realistic. 0 = all cards perfectly upright.
+    ///     angleStepDegrees   — degrees added per card left-to-right. 4–7° feels natural.
+    ///     arcRadius          — circle size. Larger = flatter arc. 600–900 is a good range.
+    ///     maxAngleStepDegrees — per-card tilt clamp; prevents extreme lean with small hands.
     ///
     ///   Sibling / z order:
     ///     Cards are reordered so the centre card renders on top of its neighbours.
@@ -24,22 +25,20 @@ namespace Crookedile.UI.Battle
     /// </summary>
     public class CardHandLayout : MonoBehaviour
     {
-        [Header("Overlap & Spacing")]
-        [Tooltip("Horizontal distance between card centres in pixels. " +
-                 "Less than card width = overlap. 65 gives ~46% overlap on a 120 px card.")]
-        [SerializeField] private float cardSpacingPx = 65f;
-
         [Header("Arc Shape")]
-        [Tooltip("Radius of the imaginary circle the cards sit on. " +
-                 "Controls how much edge cards dip below centre. Try 600–900.")]
-        [SerializeField] private float arcRadius = 750f;
+        [Tooltip("Degrees added per card stepping left-to-right. 4–7° feels natural. 0 = all upright.")]
+        [SerializeField] private float angleStepDegrees = 5f;
 
-        [Tooltip("Total rotation spread across the whole hand in degrees. " +
-                 "Controls how much edge cards tilt. Try 20–35.")]
-        [SerializeField] private float arcAngleDegrees = 25f;
+        [Tooltip("Radius of the imaginary circle cards sit on. " +
+                 "Controls how much edge cards dip below centre. Larger = flatter. Try 600–900.")]
+        [SerializeField] private float arcRadius = 750f;
 
         [Tooltip("Maximum per-card tilt in degrees. Prevents extreme lean with a tiny hand.")]
         [SerializeField] private float maxAngleStepDegrees = 7f;
+
+        [Header("Card Size")]
+        [Tooltip("Width of a single card in canvas pixels. Used to compute visible area per card when the hand is crowded.")]
+        [SerializeField] private float cardWidth = 120f;
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
@@ -58,22 +57,32 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
-            // Per-card angle step, clamped to prevent absurd tilting with small hands
-            float angleStep  = Mathf.Min(arcAngleDegrees / (count - 1), maxAngleStepDegrees);
-            float totalAngle = angleStep * (count - 1);
-            float startAngle = -totalAngle * 0.5f;
+            // Start with the designer-set step, clamped to the per-card tilt limit
+            float effectiveStep = Mathf.Min(angleStepDegrees, maxAngleStepDegrees);
+
+            // Crowding guard: shrink the step further if the arc would overflow the container.
+            // The arc's half-width = arcRadius * sin(totalAngle / 2).
+            // We want that to stay inside 45% of the container width on each side (90% total).
+            RectTransform containerRt = GetComponent<RectTransform>();
+            if (containerRt != null && arcRadius > 0f)
+            {
+                float maxSin        = Mathf.Clamp01(containerRt.rect.width * 0.45f / arcRadius);
+                float maxStepForFit = 2f * Mathf.Asin(maxSin) * Mathf.Rad2Deg / (count - 1);
+                effectiveStep       = Mathf.Min(effectiveStep, maxStepForFit);
+            }
+
+            // Card 0 starts at -half, card count-1 ends at +half → hand is always centred
+            float startAngle = -(count - 1) * effectiveStep * 0.5f;
 
             for (int i = 0; i < count; i++)
             {
-                float angleDeg = startAngle + angleStep * i;
+                float angleDeg = startAngle + effectiveStep * i;
                 float angleRad = angleDeg * Mathf.Deg2Rad;
 
-                // X: evenly spaced — controls overlap directly and intuitively
-                float x = (i - (count - 1) * 0.5f) * cardSpacingPx;
-
-                // Y: arc dip — edge cards sit lower than centre card
-                // cos(0) = 1  →  centre card y = 0
-                // cos grows smaller at edges  →  edge cards dip (negative y)
+                // Both X and Y come from the same angle — cards sit on a true circle.
+                // x: left-to-right spread along the arc.
+                // y: 0 at centre, negative at edges (edge cards dip below the centre card).
+                float x = arcRadius * Mathf.Sin(angleRad);
                 float y = arcRadius * (Mathf.Cos(angleRad) - 1f);
 
                 ApplyToCard(cards[i], new Vector3(x, y, 0f), angleDeg);

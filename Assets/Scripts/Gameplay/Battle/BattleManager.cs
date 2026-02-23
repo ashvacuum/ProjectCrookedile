@@ -129,8 +129,8 @@ namespace Crookedile.Gameplay.Battle
             // Player deck
             _playerDeck = new DeckManager(setup.playerDeck, "Player", 10);
 
-            // Effect resolver — initially targets the first enemy
-            _effectResolver = new EffectResolver(_playerStats, FocusedEnemy.Stats, _playerDeck);
+            // Effect resolver — initially targets the first enemy; receives full enemy list for multi-target effects
+            _effectResolver = new EffectResolver(_playerStats, FocusedEnemy.Stats, _playerDeck, _enemies);
 
             // Reset counters
             _currentTurn = 0;
@@ -391,6 +391,7 @@ namespace Crookedile.Gameplay.Battle
             {
                 _playerStats.EndTurn();
                 _effectResolver.PlayerStatusEffects.OnTurnEnd(_playerStats);
+                _playerDeck.EndTurn();
             }
             else
             {
