@@ -55,7 +55,7 @@ namespace Crookedile.Core
                     }
                     catch (Exception ex)
                     {
-                        UnityEngine.Debug.LogError($"Error invoking event handler for {eventType.Name}: {ex.Message}");
+                        UnityEngine.Debug.LogError($"Error invoking event handler for {eventType.Name}: {ex}");
                     }
                 }
                 else
