@@ -12,8 +12,8 @@ namespace Crookedile.UI.Battle
     ///   Both X and Y come from the same angle, so cards actually sit on the circle.
     ///
     ///   Tuning quick-reference:
-    ///     angleStepDegrees   — degrees added per card left-to-right. 4–7° feels natural.
-    ///     arcRadius          — circle size. Larger = flatter arc. 600–900 is a good range.
+    ///     angleStepDegrees    — degrees added per card left-to-right. 4–7° feels natural.
+    ///     arcRadius           — circle size. Larger = flatter arc. 600–900 is a good range.
     ///     maxAngleStepDegrees — per-card tilt clamp; prevents extreme lean with small hands.
     ///
     ///   Sibling / z order:
@@ -40,6 +40,28 @@ namespace Crookedile.UI.Battle
         [Tooltip("Width of a single card in canvas pixels. Used to compute visible area per card when the hand is crowded.")]
         [SerializeField] private float cardWidth = 120f;
 
+        [Header("Debug Preview")]
+        [Tooltip("Draw ghost card outlines in the Scene view to preview arc layout without needing real cards in the hand.")]
+        [SerializeField] private bool showDebugLayout = false;
+
+        [Tooltip("Number of card slots to preview.")]
+        [SerializeField, Range(1, 10)] private int debugPreviewCount = 5;
+
+        [Tooltip("Card height in canvas pixels used only for the ghost outline (width comes from Card Size above).")]
+        [SerializeField] private float debugCardHeight = 168f;
+
+        [Tooltip("Outline colour for regular ghost card slots.")]
+        [SerializeField] private Color debugCardColor = new Color(0.35f, 0.75f, 1f, 0.85f);
+
+        [Tooltip("Outline colour for the centre card slot.")]
+        [SerializeField] private Color debugCentreColor = new Color(1f, 0.9f, 0.2f, 0.95f);
+
+        [Tooltip("Draw the arc curve the cards sit on.")]
+        [SerializeField] private bool debugShowArc = true;
+
+        [Tooltip("Colour of the arc curve.")]
+        [SerializeField] private Color debugArcColor = new Color(1f, 1f, 1f, 0.2f);
+
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
@@ -57,38 +79,15 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
-            // Start with the designer-set step, clamped to the per-card tilt limit
-            float effectiveStep = Mathf.Min(angleStepDegrees, maxAngleStepDegrees);
-
-            // Crowding guard: shrink the step further if the arc would overflow the container.
-            // The arc's half-width = arcRadius * sin(totalAngle / 2).
-            // We want that to stay inside 45% of the container width on each side (90% total).
-            RectTransform containerRt = GetComponent<RectTransform>();
-            if (containerRt != null && arcRadius > 0f)
-            {
-                float maxSin        = Mathf.Clamp01(containerRt.rect.width * 0.45f / arcRadius);
-                float maxStepForFit = 2f * Mathf.Asin(maxSin) * Mathf.Rad2Deg / (count - 1);
-                effectiveStep       = Mathf.Min(effectiveStep, maxStepForFit);
-            }
-
-            // Card 0 starts at -half, card count-1 ends at +half → hand is always centred
-            float startAngle = -(count - 1) * effectiveStep * 0.5f;
+            float effectiveStep = ComputeEffectiveStep(count);
+            float startAngle    = -(count - 1) * effectiveStep * 0.5f;
 
             for (int i = 0; i < count; i++)
             {
                 float angleDeg = startAngle + effectiveStep * i;
-                float angleRad = angleDeg * Mathf.Deg2Rad;
-
-                // Both X and Y come from the same angle — cards sit on a true circle.
-                // x: left-to-right spread along the arc.
-                // y: 0 at centre, negative at edges (edge cards dip below the centre card).
-                float x = arcRadius * Mathf.Sin(angleRad);
-                float y = arcRadius * (Mathf.Cos(angleRad) - 1f);
-
-                ApplyToCard(cards[i], new Vector3(x, y, 0f), angleDeg);
+                ApplyToCard(cards[i], ComputeLocalPosition(angleDeg), angleDeg);
             }
 
-            // Put centre card on top, edges behind — like a real held hand
             SetSiblingOrder(cards);
         }
 
@@ -132,7 +131,108 @@ namespace Crookedile.UI.Battle
             // Unity renumbers siblings on each SetSiblingIndex call,
             // so we process from slot 0 upward.
             for (int slot = 0; slot < count; slot++)
+            {
                 cards[sortedIndices[slot]].transform.SetSiblingIndex(slot);
+                cards[sortedIndices[slot]].SetBaseSiblingIndex(slot);
+            }
         }
+
+        // ─── Arc Math (shared by ArrangeCards and OnDrawGizmos) ──────────────────
+
+        /// <summary>
+        /// Returns the effective angle step for <paramref name="count"/> cards,
+        /// honouring the inspector limits and the crowding guard.
+        /// </summary>
+        private float ComputeEffectiveStep(int count)
+        {
+            if (count <= 1) return 0f;
+
+            float step = Mathf.Min(angleStepDegrees, maxAngleStepDegrees);
+
+            RectTransform rt = GetComponent<RectTransform>();
+            if (rt != null && arcRadius > 0f)
+            {
+                float maxSin  = Mathf.Clamp01(rt.rect.width * 0.45f / arcRadius);
+                float maxStep = 2f * Mathf.Asin(maxSin) * Mathf.Rad2Deg / (count - 1);
+                step = Mathf.Min(step, maxStep);
+            }
+
+            return step;
+        }
+
+        /// <summary>
+        /// Returns the local-space position for a card sitting at <paramref name="angleDeg"/>
+        /// on the arc circle.
+        /// </summary>
+        private Vector3 ComputeLocalPosition(float angleDeg)
+        {
+            float rad = angleDeg * Mathf.Deg2Rad;
+            return new Vector3(
+                arcRadius * Mathf.Sin(rad),
+                arcRadius * (Mathf.Cos(rad) - 1f),
+                0f);
+        }
+
+        // ─── Scene-View Debug Preview ─────────────────────────────────────────────
+
+#if UNITY_EDITOR
+        private void OnDrawGizmos()
+        {
+            if (!showDebugLayout || debugPreviewCount <= 0) return;
+
+            int   count        = debugPreviewCount;
+            float effectiveStep = ComputeEffectiveStep(count);
+            float startAngle   = count == 1 ? 0f : -(count - 1) * effectiveStep * 0.5f;
+            float centreIndex  = (count - 1) * 0.5f;
+
+            Matrix4x4 containerMatrix = transform.localToWorldMatrix;
+
+            // ── Ghost card outlines ──────────────────────────────────────────────
+            for (int i = 0; i < count; i++)
+            {
+                float angleDeg = startAngle + effectiveStep * i;
+                Vector3 localPos = ComputeLocalPosition(angleDeg);
+
+                // Card matrix: container → local card position + rotation
+                Matrix4x4 cardMatrix = containerMatrix
+                    * Matrix4x4.TRS(localPos, Quaternion.Euler(0f, 0f, -angleDeg), Vector3.one);
+
+                Gizmos.matrix = cardMatrix;
+                Gizmos.color  = Mathf.Abs(i - centreIndex) < 0.01f ? debugCentreColor : debugCardColor;
+
+                // Draw the card outline as a flat wire cube (z-depth 1 so it's visible in scene view)
+                Gizmos.DrawWireCube(Vector3.zero, new Vector3(cardWidth, debugCardHeight, 1f));
+
+                // Small dot at card pivot
+                Gizmos.DrawSphere(Vector3.zero, cardWidth * 0.04f);
+            }
+
+            // ── Arc curve ────────────────────────────────────────────────────────
+            if (debugShowArc && count > 1 && arcRadius > 0f)
+            {
+                Gizmos.matrix = containerMatrix;
+                Gizmos.color  = debugArcColor;
+
+                float firstAngle = startAngle;
+                float lastAngle  = startAngle + effectiveStep * (count - 1);
+
+                // Draw the arc as 32 line segments between the first and last card angle
+                const int segments = 32;
+                Vector3 prev = ComputeLocalPosition(firstAngle);
+                for (int s = 1; s <= segments; s++)
+                {
+                    float t    = s / (float)segments;
+                    float ang  = Mathf.Lerp(firstAngle, lastAngle, t);
+                    Vector3 pt = ComputeLocalPosition(ang);
+                    Gizmos.DrawLine(prev, pt);
+                    prev = pt;
+                }
+            }
+
+            // Reset so other gizmos aren't affected
+            Gizmos.matrix = Matrix4x4.identity;
+            Gizmos.color  = Color.white;
+        }
+#endif
     }
 }

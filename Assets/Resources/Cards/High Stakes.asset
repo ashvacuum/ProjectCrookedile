@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: High Stakes
   _cardType: 2
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: b5969b88dc0f9ba4489e2813b16a5334, type: 3}
   _description: Discard your hand. Draw 3 cards.
   _flavorText: Burn it down and start over.
   _costs:
@@ -61,3 +61,4 @@ MonoBehaviour:
   - actor
   _isStarterCard: 1
   _isUnlockable: 0
+  _sentimentTags: 

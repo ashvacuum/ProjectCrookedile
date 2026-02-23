@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Find Common Ground
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 51e1600d4bd02454fb3ee59d3a003d33, type: 3}
   _description: Deal 3 Resolve damage.
   _flavorText: Sometimes all it takes is a smile.
   _costs:
@@ -47,3 +47,4 @@ MonoBehaviour:
   - faithleader
   _isStarterCard: 1
   _isUnlockable: 0
+  _sentimentTags: 

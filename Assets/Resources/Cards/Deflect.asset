@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Deflect
   _cardType: 2
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 83288bcd78413154bb4a2927058b9782, type: 3}
   _description: Gain 3 Composure. Reduce Hostility by 1.
   _flavorText: Grace under fire.
   _costs:
@@ -61,3 +61,4 @@ MonoBehaviour:
   - faithleader
   _isStarterCard: 1
   _isUnlockable: 0
+  _sentimentTags: 

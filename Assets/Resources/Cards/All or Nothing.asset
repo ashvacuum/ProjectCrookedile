@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: All or Nothing
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: f7c7293d407295640953341fb7c07d4d, type: 3}
   _description: "Deal 1\u20139 Resolve damage (random)."
   _flavorText: Every performance is a gamble.
   _costs:
@@ -47,3 +47,4 @@ MonoBehaviour:
   - actor
   _isStarterCard: 1
   _isUnlockable: 0
+  _sentimentTags: 

@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Call In Favor
   _cardType: 2
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: cf4f7530eee81824f86d9b3280bb6783, type: 3}
   _description: Draw 2 cards.
   _flavorText: The account was always in the black.
   _costs:
@@ -47,3 +47,4 @@ MonoBehaviour:
   - nepobaby
   _isStarterCard: 1
   _isUnlockable: 0
+  _sentimentTags: 

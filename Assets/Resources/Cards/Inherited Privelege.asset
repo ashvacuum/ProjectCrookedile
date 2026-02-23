@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Inherited Privelege
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: cb0153d2dafe2d3479ce9fde7c0624ed, type: 3}
   _description: Deal 5 Resolve damage. Draw 1 card.
   _flavorText: Some doors open themselves.
   _costs:
@@ -61,3 +61,4 @@ MonoBehaviour:
   - nepobaby
   _isStarterCard: 1
   _isUnlockable: 0
+  _sentimentTags: 
