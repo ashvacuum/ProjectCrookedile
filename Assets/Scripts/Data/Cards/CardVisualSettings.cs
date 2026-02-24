@@ -23,14 +23,14 @@ namespace Crookedile.Data.Cards
         [SerializeField] private Sprite _actorCardBack;
 
         [Header("Card Frames by Type")]
-        [Tooltip("Frame for Diplomacy cards (Green - peaceful persuasion)")]
-        [SerializeField] private Sprite _diplomacyFrame;
+        [Tooltip("Frame for Pressure cards (Green - persuasion, de-escalation)")]
+        [SerializeField] private Sprite _pressureFrame;
 
-        [Tooltip("Frame for Hostility cards (Red - aggressive tactics)")]
-        [SerializeField] private Sprite _hostilityFrame;
+        [Tooltip("Frame for Rhetoric cards (Red - aggressive framing, pressure tactics)")]
+        [SerializeField] private Sprite _rhetoricFrame;
 
-        [Tooltip("Frame for Manipulate cards (Purple - utility/resources)")]
-        [SerializeField] private Sprite _manipulateFrame;
+        [Tooltip("Frame for Policy cards (Blue - policy positions with lean)")]
+        [SerializeField] private Sprite _policyFrame;
 
         [Header("Card Frames by Rarity")]
         [Tooltip("Frame overlay for Basic rarity cards")]
@@ -96,10 +96,10 @@ namespace Crookedile.Data.Cards
         {
             return cardType switch
             {
-                CardType.Diplomacy => _diplomacyFrame,
-                CardType.Hostility => _hostilityFrame,
-                CardType.Manipulate => _manipulateFrame,
-                _ => null
+                CardType.Pressure => _pressureFrame,
+                CardType.Rhetoric => _rhetoricFrame,
+                CardType.Policy   => _policyFrame,
+                _                 => null
             };
         }
 

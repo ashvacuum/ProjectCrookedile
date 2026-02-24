@@ -131,6 +131,24 @@ namespace Crookedile.Gameplay.Battle
             return _activeEffects.Where(e => !IsDebuff(e.Type));
         }
 
+        /// <summary>
+        /// Returns true if the combatant has at least one active debuff.
+        /// Used by TriggeredEffect condition checks (IfTargetHasDebuff).
+        /// </summary>
+        public bool HasAnyDebuff()
+        {
+            return _activeEffects.Any(e => IsDebuff(e.Type));
+        }
+
+        /// <summary>
+        /// Returns true if the combatant has at least one active buff.
+        /// Used by TriggeredEffect condition checks (IfTargetHasBuff).
+        /// </summary>
+        public bool HasAnyBuff()
+        {
+            return _activeEffects.Any(e => !IsDebuff(e.Type));
+        }
+
         #endregion
 
         #region Trigger Effects

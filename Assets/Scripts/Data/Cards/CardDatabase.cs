@@ -12,12 +12,12 @@ namespace Crookedile.Data.Cards
     /// Auto-populates from all CardData assets using the "Refresh Database" button in the inspector.
     /// </summary>
     /// <example>
-    /// // Get all Diplomacy cards
-    /// List<CardData> diplomacy = cardDatabase.GetByType(CardType.Diplomacy);
+    /// // Get all Pressure cards
+    /// List<CardData> pressure = cardDatabase.GetByType(CardType.Pressure);
     ///
     /// // Complex search query
     /// CardSearchQuery query = new CardSearchQuery();
-    /// query.CardTypes.Add(CardType.Hostility);
+    /// query.CardTypes.Add(CardType.Rhetoric);
     /// query.Rarities.Add(CardRarity.Enhanced);
     /// List<CardData> results = cardDatabase.Search(query);
     /// </example>
@@ -38,7 +38,7 @@ namespace Crookedile.Data.Cards
         /// <summary>
         /// Gets all cards of a specific type.
         /// </summary>
-        /// <param name="cardType">Type to filter by (Diplomacy, Hostility, Manipulate)</param>
+        /// <param name="cardType">Type to filter by (Pressure, Rhetoric, Policy)</param>
         /// <returns>List of cards matching the type</returns>
         public List<CardData> GetByType(CardType cardType)
         {
@@ -131,8 +131,8 @@ namespace Crookedile.Data.Cards
         /// <returns>List of cards matching all specified criteria</returns>
         /// <example>
         /// CardSearchQuery query = new CardSearchQuery();
-        /// query.CardTypes.Add(CardType.Diplomacy);
-        /// query.CardTypes.Add(CardType.Hostility);
+        /// query.CardTypes.Add(CardType.Pressure);
+        /// query.CardTypes.Add(CardType.Rhetoric);
         /// query.Rarities.Add(CardRarity.Rare);
         /// query.Tags.Add("violence");
         /// List<CardData> results = database.Search(query);
@@ -246,10 +246,10 @@ namespace Crookedile.Data.Cards
     /// All criteria are AND-ed together. Empty lists are ignored.
     /// </summary>
     /// <example>
-    /// // Find all Rare Diplomacy or Hostility cards with the "violence" tag
+    /// // Find all Rare Pressure or Rhetoric cards with the "violence" tag
     /// CardSearchQuery query = new CardSearchQuery();
-    /// query.CardTypes.Add(CardType.Diplomacy);
-    /// query.CardTypes.Add(CardType.Hostility);
+    /// query.CardTypes.Add(CardType.Pressure);
+    /// query.CardTypes.Add(CardType.Rhetoric);
     /// query.Rarities.Add(CardRarity.Rare);
     /// query.Tags.Add("violence");
     /// List<CardData> results = database.Search(query);
@@ -257,7 +257,7 @@ namespace Crookedile.Data.Cards
     [System.Serializable]
     public class CardSearchQuery
     {
-        [Tooltip("Filter by card types (Diplomacy, Hostility, Manipulate). Cards matching ANY type will be included.")]
+        [Tooltip("Filter by card types (Pressure, Rhetoric, Policy). Cards matching ANY type will be included.")]
         public List<CardType> CardTypes;
 
         [Tooltip("Filter by rarity. Cards matching ANY rarity will be included.")]

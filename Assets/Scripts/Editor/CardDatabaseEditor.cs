@@ -616,9 +616,9 @@ namespace Crookedile.Editor
         {
             return type switch
             {
-                CardType.Diplomacy => new Color(0.3f, 0.8f, 0.3f),
-                CardType.Hostility => new Color(0.9f, 0.3f, 0.3f),
-                CardType.Manipulate => new Color(0.7f, 0.4f, 0.9f),
+                CardType.Pressure => new Color(0.3f, 0.8f, 0.3f),
+                CardType.Rhetoric => new Color(0.9f, 0.3f, 0.3f),
+                CardType.Policy   => new Color(0.3f, 0.5f, 0.9f),
                 _ => Color.grey
             };
         }

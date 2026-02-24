@@ -12,6 +12,10 @@ namespace Crookedile.Data.Cards
     [Serializable]
     public class CardEffect
     {
+        [Title("Name (optional)")]
+        [Tooltip("Human-readable label for this effect. Shown in triggered-effect inspector entries.")]
+        [SerializeField] private string _name = "";
+
         [Title("Effect Type")]
         [EnumToggleButtons]
         [SerializeField] private EffectCategory _category;
@@ -77,6 +81,14 @@ namespace Crookedile.Data.Cards
 
         [ShowIf("_category", EffectCategory.StatusEffect)]
         [SerializeField] private StatusDurationType _statusDuration = StatusDurationType.DecreasePerTurn;
+
+        [ShowIf("ShowAmountSource")]
+        [Title("Amount Source")]
+        [Tooltip("Where to read the numeric amount at runtime.\n" +
+                 "FixedAmount = use the authored value above (default).\n" +
+                 "None = always 0 (hides the fixed amount field).\n" +
+                 "Other values = read from EffectContext at resolve time (e.g. LastDamageDealt for lifesteal).")]
+        [SerializeField] private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
 
         #region Odin Dropdowns
 
@@ -172,7 +184,9 @@ namespace Crookedile.Data.Cards
 
         private bool ShowFixedDamage()
         {
-            return _category == EffectCategory.Damage && _damageType == DamageType.FixedDamage;
+            return _category == EffectCategory.Damage
+                   && _damageType == DamageType.FixedDamage
+                   && _amountSource == EffectContextValue.FixedAmount;
         }
 
         private bool ShowRandomDamage()
@@ -189,7 +203,30 @@ namespace Crookedile.Data.Cards
                     _resourceType == ResourceEffectType.ReduceHostility ||
                     _resourceType == ResourceEffectType.GainActionPoints ||
                     _resourceType == ResourceEffectType.GainActionPointsNextTurn ||
-                    _resourceType == ResourceEffectType.HealResolve);
+                    _resourceType == ResourceEffectType.HealResolve) &&
+                   _amountSource == EffectContextValue.FixedAmount;
+        }
+
+        /// <summary>
+        /// AmountSource is only meaningful for effect types that have a single authored numeric amount.
+        /// Hides for RandomDamage (min/max ranges), DamageEqualToComposure, ConsumeAllComposure,
+        /// ComposureEqualToHostility, and all CardManipulation / StatusEffect types.
+        /// </summary>
+        private bool ShowAmountSource()
+        {
+            if (_category == EffectCategory.Damage)
+                return _damageType == DamageType.FixedDamage;
+            if (_category == EffectCategory.Resource)
+            {
+                return _resourceType == ResourceEffectType.GainComposure   ||
+                       _resourceType == ResourceEffectType.LoseComposure   ||
+                       _resourceType == ResourceEffectType.GainHostility   ||
+                       _resourceType == ResourceEffectType.ReduceHostility ||
+                       _resourceType == ResourceEffectType.GainActionPoints ||
+                       _resourceType == ResourceEffectType.GainActionPointsNextTurn ||
+                       _resourceType == ResourceEffectType.HealResolve;
+            }
+            return false;
         }
 
         private bool ShowCardAmount()
@@ -220,7 +257,8 @@ namespace Crookedile.Data.Cards
 
         #region Properties
 
-        public EffectCategory Category => _category;
+        public string             EffectName   => _name;
+        public EffectCategory     Category     => _category;
         public TargetType Target => _target;
         public DamageType DamageType => _damageType;
         public int DamageAmount => _damageAmount;
@@ -232,9 +270,47 @@ namespace Crookedile.Data.Cards
         public int CardAmount => _cardAmount;
         public CardData CardToAdd => _cardToAdd;
         public int CostReduction => _costReduction;
-        public StatusEffectType StatusEffectType => _statusEffectType;
-        public int StatusStacks => _statusStacks;
-        public StatusDurationType StatusDuration => _statusDuration;
+        public StatusEffectType   StatusEffectType => _statusEffectType;
+        public int                StatusStacks     => _statusStacks;
+        public StatusDurationType StatusDuration   => _statusDuration;
+        public EffectContextValue AmountSource     => _amountSource;
+
+        #endregion
+
+        #region Amount Resolution
+
+        /// <summary>
+        /// Returns the numeric amount to use for this effect at runtime.
+        /// If <see cref="AmountSource"/> is <see cref="EffectContextValue.FixedAmount"/> (the default),
+        /// returns the authored inspector value. Otherwise reads the live value from
+        /// <paramref name="ctx"/>, enabling triggered effects like lifesteal.
+        /// </summary>
+        /// <param name="ctx">The EffectContext accumulated during the current card resolution.
+        /// Pass null to always use the authored value (safe for base effects).</param>
+        public int GetEffectiveAmount(EffectContext ctx)
+        {
+            if (_amountSource == EffectContextValue.FixedAmount)
+                return GetBaseAmount();
+            if (_amountSource == EffectContextValue.None || ctx == null)
+                return 0;
+            return ctx.GetValue(_amountSource);
+        }
+
+        /// <summary>
+        /// Returns the authored (inspector-set) numeric amount for this effect,
+        /// selecting the appropriate field based on effect category.
+        /// </summary>
+        private int GetBaseAmount()
+        {
+            return _category switch
+            {
+                EffectCategory.Damage           => _damageAmount,
+                EffectCategory.Resource         => _resourceAmount,
+                EffectCategory.StatusEffect     => _statusStacks,
+                EffectCategory.CardManipulation => _cardAmount,
+                _                               => 0
+            };
+        }
 
         #endregion
 

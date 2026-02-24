@@ -72,7 +72,7 @@ namespace Crookedile.Gameplay.Battle
             StatusEffectType.Exposed        => "Next attack against this target deals double damage.",
             StatusEffectType.Scandal        => "Take X damage at end of turn (like Poison).",
             StatusEffectType.Confused       => "A random card costs +1 AP each turn.",
-            StatusEffectType.Silenced       => "Cannot play Manipulate cards.",
+            StatusEffectType.Silenced       => "Cannot play Policy cards.",
             // Buffs
             StatusEffectType.Strength       => "Deal X more damage.",
             StatusEffectType.Dexterity      => "Gain X more Composure per card played.",
@@ -115,7 +115,7 @@ namespace Crookedile.Gameplay.Battle
         Exposed,        // Next attack deals double damage
         Scandal,        // Take X damage at end of turn (like Poison)
         Confused,       // Random card costs +1 AP each turn
-        Silenced,       // Cannot play Manipulate cards
+        Silenced,       // Cannot play Policy cards
 
         // BUFFS (Positive)
         Strength,       // Deal X more damage

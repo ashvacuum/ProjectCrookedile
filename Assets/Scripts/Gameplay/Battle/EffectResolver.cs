@@ -58,7 +58,8 @@ namespace Crookedile.Gameplay.Battle
         #region Effect Resolution
 
         /// <summary>
-        /// Resolves all effects from a played card.
+        /// Resolves all effects from a played card, then fires any triggered effects
+        /// whose trigger/condition match what happened during base-effect resolution.
         /// </summary>
         /// <param name="card">The card being played</param>
         /// <param name="isPlayerCard">Is this card played by the player?</param>
@@ -66,13 +67,74 @@ namespace Crookedile.Gameplay.Battle
         {
             GameLogger.LogInfo<EffectResolver>($"Resolving effects for: {card.CardName} (Player: {isPlayerCard})");
 
-            List<CardEffect> effects = card.Effects;
-
-            foreach (CardEffect effect in effects)
+            // Create a fresh context for this card's resolution
+            var ctx = new EffectContext
             {
-                ResolveBattleEffect(effect, isPlayerCard);
+                Caster = isPlayerCard ? _playerStats : _opponentStats,
+                Target = isPlayerCard ? _opponentStats : _playerStats
+            };
+
+            foreach (CardEffect effect in card.Effects)
+            {
+                ResolveBattleEffect(effect, isPlayerCard, ctx);
+            }
+
+            // Fire any triggered effects that reacted to what happened above
+            if (card.TriggeredEffects != null && card.TriggeredEffects.Count > 0)
+                ResolveTriggeredEffects(card.TriggeredEffects, ctx, isPlayerCard);
+        }
+
+        /// <summary>
+        /// Evaluates each TriggeredEffect in the list against the accumulated EffectContext,
+        /// and resolves those whose trigger occurred and whose condition is satisfied.
+        /// Called automatically at the end of <see cref="ResolveCardEffects"/> when the card
+        /// has triggered effects defined.
+        /// </summary>
+        private void ResolveTriggeredEffects(
+            IReadOnlyList<TriggeredEffect> triggered, EffectContext ctx, bool isPlayerCard)
+        {
+            StatusEffectManager targetStatusMgr =
+                isPlayerCard ? _opponentStatusEffects : _playerStatusEffects;
+
+            foreach (var te in triggered)
+            {
+                if (!TriggerOccurred(te.Trigger, ctx))            continue;
+                if (!EvaluateCondition(te.Condition, te.ConditionThreshold, ctx, targetStatusMgr)) continue;
+
+                GameLogger.LogInfo<EffectResolver>($"Triggered effect fired: '{te.Name}'");
+                // Share the same ctx so the response can also read context values
+                ResolveBattleEffect(te.ResponseEffect, isPlayerCard, ctx);
             }
         }
+
+        /// <summary>Returns true if the given trigger event occurred during the card's resolution.</summary>
+        private static bool TriggerOccurred(EffectTrigger trigger, EffectContext ctx) => trigger switch
+        {
+            EffectTrigger.OnDamageDealt     => ctx.LastDamageDealt > 0,
+            EffectTrigger.OnKill            => ctx.LastTargetDied,
+            EffectTrigger.OnComposureGained => ctx.LastComposureGained > 0,
+            EffectTrigger.OnHeal            => ctx.LastHealAmount > 0,
+            EffectTrigger.OnStatusApplied   => true,   // conservative: trust the card authored this correctly
+            EffectTrigger.OnDamageTaken     => false,  // reserved — not fired from player cards yet
+            _                               => false
+        };
+
+        /// <summary>
+        /// Returns true if the extra condition on the triggered effect is satisfied.
+        /// </summary>
+        private static bool EvaluateCondition(
+            EffectCondition condition, int threshold, EffectContext ctx,
+            StatusEffectManager targetStatusMgr) => condition switch
+        {
+            EffectCondition.Always                 => true,
+            EffectCondition.IfDamageDealt          => ctx.LastDamageDealt > 0,
+            EffectCondition.IfTargetDied           => ctx.LastTargetDied,
+            EffectCondition.IfTargetHasBuff        => targetStatusMgr?.HasAnyBuff()   ?? false,
+            EffectCondition.IfTargetHasDebuff      => targetStatusMgr?.HasAnyDebuff() ?? false,
+            EffectCondition.IfAmountAboveThreshold =>
+                ctx.LastDamageDealt > threshold || ctx.LastHealAmount > threshold || ctx.LastComposureGained > threshold,
+            _                                      => true
+        };
 
         /// <summary>
         /// Resolves all effects from a scripted enemy move.
@@ -98,7 +160,12 @@ namespace Crookedile.Gameplay.Battle
         /// Damage and StatusEffect effects are target-scoped and applied to every pair
         /// returned by ResolveTargetPairs (supports multi-target TargetTypes).
         /// </summary>
-        private void ResolveBattleEffect(CardEffect effect, bool isPlayerCard)
+        /// <param name="ctx">
+        /// Optional EffectContext from the enclosing card resolution. When provided,
+        /// damage/heal/composure amounts are written to it so triggered effects can react.
+        /// Pass null for enemy move effects (no triggered-effect evaluation needed).
+        /// </param>
+        private void ResolveBattleEffect(CardEffect effect, bool isPlayerCard, EffectContext ctx = null)
         {
             BattleStats         casterStats         = isPlayerCard ? _playerStats          : _opponentStats;
             BattleStats         targetStats         = isPlayerCard ? _opponentStats         : _playerStats;
@@ -109,7 +176,7 @@ namespace Crookedile.Gameplay.Battle
             // Resource and CardManipulation are always caster-scoped — apply once and return
             if (effect.Category == EffectCategory.Resource)
             {
-                ResolveResourceEffect(effect, casterStats);
+                ResolveResourceEffect(effect, casterStats, ctx);
                 OnEffectApplied?.Invoke(effect, casterStats);
                 return;
             }
@@ -131,7 +198,7 @@ namespace Crookedile.Gameplay.Battle
                 switch (effect.Category)
                 {
                     case EffectCategory.Damage:
-                        ResolveDamageEffect(effect, effectTarget, casterStats);
+                        ResolveDamageEffect(effect, effectTarget, casterStats, ctx);
                         break;
 
                     case EffectCategory.StatusEffect:
@@ -221,34 +288,34 @@ namespace Crookedile.Gameplay.Battle
             return pairs;
         }
 
-        private void ResolveDamageEffect(CardEffect effect, BattleStats target, BattleStats attacker)
+        private void ResolveDamageEffect(CardEffect effect, BattleStats target, BattleStats attacker, EffectContext ctx = null)
         {
             switch (effect.DamageType)
             {
                 case DamageType.FixedDamage:
-                    ApplyResolveDamage(target, attacker, effect.DamageAmount);
+                    ApplyResolveDamage(target, attacker, effect.GetEffectiveAmount(ctx), ctx);
                     break;
 
                 case DamageType.RandomDamage:
-                    ApplyRandomDamage(target, attacker, effect.RandomDamageMin, effect.RandomDamageMax);
+                    ApplyRandomDamage(target, attacker, effect.RandomDamageMin, effect.RandomDamageMax, ctx);
                     break;
 
                 case DamageType.DamageEqualToComposure:
-                    ApplyResolveDamageEqualToComposure(target, attacker);
+                    ApplyResolveDamageEqualToComposure(target, attacker, ctx);
                     break;
             }
         }
 
-        private void ResolveResourceEffect(CardEffect effect, BattleStats caster)
+        private void ResolveResourceEffect(CardEffect effect, BattleStats caster, EffectContext ctx = null)
         {
             switch (effect.ResourceType)
             {
                 case ResourceEffectType.GainComposure:
-                    ApplyGainComposure(caster, effect.ResourceAmount);
+                    ApplyGainComposure(caster, effect.GetEffectiveAmount(ctx), ctx);
                     break;
 
                 case ResourceEffectType.LoseComposure:
-                    ApplyLoseComposure(caster, effect.ResourceAmount);
+                    ApplyLoseComposure(caster, effect.GetEffectiveAmount(ctx));
                     break;
 
                 case ResourceEffectType.ConsumeAllComposure:
@@ -261,23 +328,23 @@ namespace Crookedile.Gameplay.Battle
 
                 case ResourceEffectType.GainHostility:
                     // Hostility is the enemy's number line — always shifts opponent, never caster
-                    ApplyGainHostility(_opponentStats, effect.ResourceAmount);
+                    ApplyGainHostility(_opponentStats, effect.GetEffectiveAmount(ctx));
                     break;
 
                 case ResourceEffectType.ReduceHostility:
-                    ApplyReduceHostility(_opponentStats, effect.ResourceAmount);
+                    ApplyReduceHostility(_opponentStats, effect.GetEffectiveAmount(ctx));
                     break;
 
                 case ResourceEffectType.GainActionPoints:
-                    ApplyGainActionPoints(caster, effect.ResourceAmount);
+                    ApplyGainActionPoints(caster, effect.GetEffectiveAmount(ctx));
                     break;
 
                 case ResourceEffectType.GainActionPointsNextTurn:
-                    ApplyGainActionPointsNextTurn(caster, effect.ResourceAmount);
+                    ApplyGainActionPointsNextTurn(caster, effect.GetEffectiveAmount(ctx));
                     break;
 
                 case ResourceEffectType.HealResolve:
-                    ApplyResolveHeal(caster, effect.ResourceAmount);
+                    ApplyResolveHeal(caster, effect.GetEffectiveAmount(ctx), ctx);
                     break;
             }
         }
@@ -348,7 +415,7 @@ namespace Crookedile.Gameplay.Battle
 
         #region Core Damage & Healing
 
-        private void ApplyResolveDamage(BattleStats target, BattleStats attacker, int baseDamage)
+        private void ApplyResolveDamage(BattleStats target, BattleStats attacker, int baseDamage, EffectContext ctx = null)
         {
             // Get attacker and target status effect managers
             StatusEffectManager attackerStatusMgr = GetStatusEffectManager(attacker);
@@ -360,18 +427,34 @@ namespace Crookedile.Gameplay.Battle
             // Apply target's damage taken modifiers (Vulnerable, Plated, Intangible, Thorns)
             modifiedDamage = targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker);
 
+            // Hostile enemies (positive hostility) deal amplified damage; neutral and receptive don't
+            if (attacker != _playerStats && attacker.CurrentHostility > 0)
+            {
+                float hostilityMult = Mathf.Max(0.1f, attacker.HostilityDamageMultiplier);
+                modifiedDamage = Mathf.RoundToInt(modifiedDamage * hostilityMult);
+            }
+
             // Apply damage with Composure bonus
             int actualDamage = target.DamageResolve(modifiedDamage, attacker.CurrentComposure);
-            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage (base: {baseDamage}, modified: {modifiedDamage}, Composure: {attacker.CurrentComposure})");
+            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage (base: {baseDamage}, modified: {modifiedDamage}, Composure: {attacker.CurrentComposure}, HostilityMult: {(attacker != _playerStats && attacker.CurrentHostility > 0 ? attacker.HostilityDamageMultiplier.ToString("F2") : "1.00")})");
+
+            // Accumulate into context so triggered effects can react (e.g. lifesteal)
+            if (ctx != null)
+            {
+                ctx.LastDamageDealt += actualDamage;
+                if (target.CurrentResolve <= 0) ctx.LastTargetDied = true;
+            }
         }
 
-        private void ApplyResolveHeal(BattleStats target, int amount)
+        private void ApplyResolveHeal(BattleStats target, int amount, EffectContext ctx = null)
         {
             int actualHealing = target.RestoreResolve(amount);
             GameLogger.LogInfo<EffectResolver>($"Restored {actualHealing} Resolve");
+
+            if (ctx != null) ctx.LastHealAmount += actualHealing;
         }
 
-        private void ApplyRandomDamage(BattleStats target, BattleStats attacker, int minDamage, int maxDamage)
+        private void ApplyRandomDamage(BattleStats target, BattleStats attacker, int minDamage, int maxDamage, EffectContext ctx = null)
         {
             int randomDamage = RandomHelper.Range(minDamage, maxDamage + 1);
 
@@ -385,16 +468,29 @@ namespace Crookedile.Gameplay.Battle
             // Apply target's damage taken modifiers (Vulnerable, Plated, Intangible, Thorns)
             modifiedDamage = targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker);
 
+            // Hostile enemies (positive hostility) deal amplified damage; neutral and receptive don't
+            if (attacker != _playerStats && attacker.CurrentHostility > 0)
+            {
+                float hostilityMult = Mathf.Max(0.1f, attacker.HostilityDamageMultiplier);
+                modifiedDamage = Mathf.RoundToInt(modifiedDamage * hostilityMult);
+            }
+
             // Apply damage with Composure bonus
             int actualDamage = target.DamageResolve(modifiedDamage, attacker.CurrentComposure);
             GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} random Resolve damage (rolled {randomDamage} from {minDamage}-{maxDamage}, modified: {modifiedDamage})");
+
+            if (ctx != null)
+            {
+                ctx.LastDamageDealt += actualDamage;
+                if (target.CurrentResolve <= 0) ctx.LastTargetDied = true;
+            }
         }
 
         #endregion
 
         #region Composure
 
-        private void ApplyGainComposure(BattleStats target, int amount)
+        private void ApplyGainComposure(BattleStats target, int amount, EffectContext ctx = null)
         {
             // Apply Composure gain modifiers (Dexterity, Frail)
             StatusEffectManager targetStatusMgr = GetStatusEffectManager(target);
@@ -402,6 +498,8 @@ namespace Crookedile.Gameplay.Battle
 
             target.GainComposure(modifiedAmount);
             GameLogger.LogInfo<EffectResolver>($"Gained {modifiedAmount} Composure (base: {amount})");
+
+            if (ctx != null) ctx.LastComposureGained += modifiedAmount;
         }
 
         private void ApplyLoseComposure(BattleStats target, int amount)
@@ -410,7 +508,7 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<EffectResolver>($"Lost {actualLoss} Composure");
         }
 
-        private void ApplyResolveDamageEqualToComposure(BattleStats target, BattleStats attacker)
+        private void ApplyResolveDamageEqualToComposure(BattleStats target, BattleStats attacker, EffectContext ctx = null)
         {
             int composure = attacker.CurrentComposure;
 
@@ -424,9 +522,22 @@ namespace Crookedile.Gameplay.Battle
             // Apply target's damage taken modifiers (Vulnerable, Plated, Intangible, Thorns)
             modifiedDamage = targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker);
 
+            // Hostile enemies (positive hostility) deal amplified damage; neutral and receptive don't
+            if (attacker != _playerStats && attacker.CurrentHostility > 0)
+            {
+                float hostilityMult = Mathf.Max(0.1f, attacker.HostilityDamageMultiplier);
+                modifiedDamage = Mathf.RoundToInt(modifiedDamage * hostilityMult);
+            }
+
             // Apply damage (don't add Composure bonus since damage IS equal to Composure)
             int actualDamage = target.DamageResolve(modifiedDamage, 0);
             GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage equal to Composure ({composure}, modified: {modifiedDamage})");
+
+            if (ctx != null)
+            {
+                ctx.LastDamageDealt += actualDamage;
+                if (target.CurrentResolve <= 0) ctx.LastTargetDied = true;
+            }
         }
 
         private void ApplyConsumeAllComposure(BattleStats caster)
