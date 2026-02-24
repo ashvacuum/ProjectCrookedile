@@ -63,6 +63,21 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public bool IsDeckEmpty => _deck.Count == 0;
 
+        /// <summary>
+        /// Cards currently in the discard pile (read-only). Ordered oldest-to-newest.
+        /// </summary>
+        public IReadOnlyList<CardData> DiscardPile => _discard.AsReadOnly();
+
+        /// <summary>
+        /// Cards currently in the exhaust pile (read-only). Ordered oldest-to-newest.
+        /// </summary>
+        public IReadOnlyList<CardData> ExhaustPile => _exhaust.AsReadOnly();
+
+        /// <summary>
+        /// Cards currently in the draw pile (read-only). Order reflects the live shuffle.
+        /// </summary>
+        public IReadOnlyList<CardData> DrawPile => _deck.AsReadOnly();
+
         #endregion
 
         #region Initialization

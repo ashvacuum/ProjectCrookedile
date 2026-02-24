@@ -17,7 +17,9 @@ namespace Crookedile.UI.Battle
     public class CardButton : MonoBehaviour,
         IPointerEnterHandler,
         IPointerExitHandler,
-        IPointerClickHandler
+        IBeginDragHandler,
+        IDragHandler,
+        IEndDragHandler
     {
         // ─── UI Structure References ──────────────────────────────────────────────
 
@@ -63,6 +65,12 @@ namespace Crookedile.UI.Battle
         [Tooltip("Extra vertical lift on hover (in pixels)")]
         [SerializeField] private float hoverLiftPixels = 20f;
 
+        // ─── Drag to Play ─────────────────────────────────────────────────────────
+
+        [Header("Drag to Play")]
+        [Tooltip("How many pixels upward the card must travel to trigger a play when not dropped on an enemy.")]
+        [SerializeField] private float dragUpThreshold = 100f;
+
         // ─── MMFeedbacks ──────────────────────────────────────────────────────────
 
         [Header("Feedbacks")]
@@ -92,14 +100,30 @@ namespace Crookedile.UI.Battle
         private Vector3 targetPosition;
         private int baseSiblingIndex;
 
+        // Drag state
+        private bool      _isDragging;
+        private Vector2   _dragStartScreenPos;
+        private bool      _dropWasHandled;
+        private Transform _originalParent;
+        private Canvas    _rootCanvas;
+
+        /// <summary>The card currently being dragged, or null. Used by EnemySlotUI to show drop highlights.</summary>
+        public static CardButton DraggedCard { get; private set; }
+
+        /// <summary>Whether this card can currently be played (enough AP).</summary>
+        public bool IsPlayable => isPlayable;
+
         // ─── Unity Lifecycle ──────────────────────────────────────────────────────
 
         private void Awake()
         {
-            baseScale    = transform.localScale;
-            basePosition = transform.localPosition;
-            targetScale  = baseScale;
+            baseScale      = transform.localScale;
+            basePosition   = transform.localPosition;
+            targetScale    = baseScale;
             targetPosition = basePosition;
+
+            Canvas c = GetComponentInParent<Canvas>();
+            _rootCanvas = c != null ? c.rootCanvas : null;
         }
 
         private void Update()
@@ -183,7 +207,7 @@ namespace Crookedile.UI.Battle
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (isHovered) return;
+            if (isHovered || _isDragging) return;
             isHovered = true;
 
             targetScale    = baseScale * hoverScale;
@@ -208,9 +232,85 @@ namespace Crookedile.UI.Battle
             hoverExitFeedback?.PlayFeedbacks();
         }
 
-        public void OnPointerClick(PointerEventData eventData)
+        // ─── Drag Handlers ────────────────────────────────────────────────────────
+
+        public void OnBeginDrag(PointerEventData eventData)
         {
             if (!isPlayable) return;
+
+            _isDragging         = true;
+            _dropWasHandled     = false;
+            _dragStartScreenPos = eventData.position;
+            DraggedCard         = this;
+
+            // Clear any active hover state so the card returns to its rest scale
+            isHovered    = false;
+            targetScale  = baseScale;
+
+            // Re-parent to the root canvas so the card can travel anywhere on screen
+            _originalParent = transform.parent;
+            if (_rootCanvas != null)
+            {
+                transform.SetParent(_rootCanvas.transform, worldPositionStays: true);
+                transform.SetAsLastSibling();
+            }
+
+            // Disable raycasts on the card so enemy slots behind it can receive pointer events
+            CanvasGroup cg = GetComponent<CanvasGroup>();
+            if (cg != null) cg.blocksRaycasts = false;
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            if (!_isDragging) return;
+
+            RectTransform canvasRt = _rootCanvas != null
+                ? (RectTransform)_rootCanvas.transform
+                : (RectTransform)transform.parent;
+
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    canvasRt, eventData.position, eventData.pressEventCamera, out Vector2 local))
+                transform.localPosition = local;
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            if (!_isDragging) return;
+            _isDragging = false;
+            DraggedCard = null;
+
+            // Restore raycast blocking
+            CanvasGroup cg = GetComponent<CanvasGroup>();
+            if (cg != null) cg.blocksRaycasts = true;
+
+            // Re-parent back to the card hand container
+            transform.SetParent(_originalParent, worldPositionStays: true);
+            transform.SetSiblingIndex(baseSiblingIndex);
+
+            if (_dropWasHandled) return; // EnemySlotUI handled everything; BattleUI will remove card
+
+            float yDelta = eventData.position.y - _dragStartScreenPos.y;
+            if (yDelta >= dragUpThreshold)
+            {
+                selectFeedback?.PlayFeedbacks();
+                onClickCallback?.Invoke();   // upward swipe → play
+            }
+            else
+            {
+                // Drag cancelled — snap card back to its resting position in the hand
+                targetPosition = basePosition;
+                targetScale    = baseScale;
+            }
+        }
+
+        // ─── Drop API (called by EnemySlotUI) ────────────────────────────────────
+
+        /// <summary>Called by EnemySlotUI.OnDrop before invoking PlayFromDrop, to suppress the upward-swipe check in OnEndDrag.</summary>
+        public void NotifyDropHandled() => _dropWasHandled = true;
+
+        /// <summary>Plays the card from a successful drop onto an enemy slot.</summary>
+        public void PlayFromDrop()
+        {
             selectFeedback?.PlayFeedbacks();
             onClickCallback?.Invoke();
         }
@@ -327,6 +427,7 @@ namespace Crookedile.UI.Battle
 
         private void OnDestroy()
         {
+            if (DraggedCard == this) DraggedCard = null;
             onClickCallback = null;
         }
     }

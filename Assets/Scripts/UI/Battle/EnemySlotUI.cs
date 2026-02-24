@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 using Crookedile.Data;
 using Crookedile.Data.Enemy;
@@ -16,7 +17,10 @@ namespace Crookedile.UI.Battle
     /// Spawned at runtime by BattleUI.BuildEnemySlots() for each enemy in the battle.
     /// Designed to be used as a prefab: assign text/button/image references in the Inspector.
     /// </summary>
-    public class EnemySlotUI : MonoBehaviour
+    public class EnemySlotUI : MonoBehaviour,
+        IDropHandler,
+        IPointerEnterHandler,
+        IPointerExitHandler
     {
         [Header("Display")]
         [SerializeField] private TMP_Text nameText;
@@ -27,6 +31,7 @@ namespace Crookedile.UI.Battle
         [Header("Interaction")]
         [SerializeField] private Button     selectButton;
         [SerializeField] private Image      selectionHighlight;
+        [SerializeField] private Image      dragDropHighlight;
         [SerializeField] private GameObject defeatedOverlay;
 
         private int            _enemyIndex;
@@ -44,9 +49,11 @@ namespace Crookedile.UI.Battle
             _battleManager = manager;
             _playerOrigin  = playerOrigin;
 
-            if (selectButton  != null) selectButton.onClick.AddListener(OnClicked);
-            if (defeatedOverlay != null) defeatedOverlay.SetActive(false);
+            // Click-to-focus removed; focus is now set implicitly by drag-to-enemy
+            if (selectButton       != null) selectButton.interactable = false;
+            if (defeatedOverlay    != null) defeatedOverlay.SetActive(false);
             if (selectionHighlight != null) selectionHighlight.enabled = false;
+            if (dragDropHighlight  != null) dragDropHighlight.enabled  = false;
 
             Refresh();
         }
@@ -116,12 +123,42 @@ namespace Crookedile.UI.Battle
                 StartCoroutine(PulseText(hostilityText));
         }
 
-        // ─── Private ──────────────────────────────────────────────────────────────
+        // ─── Drop / Drag Handlers ─────────────────────────────────────────────────
 
-        private void OnClicked()
+        /// <summary>
+        /// Fires when a dragged CardButton is released over this slot.
+        /// Silently focuses this enemy then plays the card.
+        /// </summary>
+        public void OnDrop(PointerEventData eventData)
         {
-            _battleManager?.SetFocusedEnemy(_enemyIndex);
+            if (_battleManager == null) return;
+
+            CardButton card = eventData.pointerDrag?.GetComponent<CardButton>();
+            if (card == null || !card.IsPlayable) return;
+
+            if (_enemyIndex < _battleManager.Enemies.Count &&
+                _battleManager.Enemies[_enemyIndex].IsDefeated) return;
+
+            _battleManager.SetFocusedEnemy(_enemyIndex);
+            card.NotifyDropHandled();
+            card.PlayFromDrop();
         }
+
+        /// <summary>Shows the drag-drop highlight when a card is being dragged over this slot.</summary>
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (CardButton.DraggedCard != null && dragDropHighlight != null)
+                dragDropHighlight.enabled = true;
+        }
+
+        /// <summary>Hides the drag-drop highlight when the cursor leaves this slot.</summary>
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (dragDropHighlight != null)
+                dragDropHighlight.enabled = false;
+        }
+
+        // ─── Private ──────────────────────────────────────────────────────────────
 
         private IEnumerator PulseText(TMP_Text text)
         {
