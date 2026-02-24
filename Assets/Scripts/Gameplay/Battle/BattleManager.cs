@@ -209,7 +209,7 @@ namespace Crookedile.Gameplay.Battle
 
             EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
             _effectResolver.ResolveCardEffects(card, isPlayerCard: true);
-            ApplyCardTagHostilityShifts(card);
+            ApplyPolicyHostilityShifts(card);
             CheckAndAdvanceFocusAfterCardPlay();
 
             GameLogger.LogInfo<BattleManager>($"Player played: {card.CardName}");
@@ -248,52 +248,57 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Shifts the focused enemy's hostility based on the sentiment tags on a played card.
-        /// Publishes EnemyHostilityChangedEvent if the value actually changed.
+        /// If the played card is a Policy card, shifts EVERY living enemy's hostility
+        /// based on how their DemographicValues aligns with the card's PolicyLean.
+        ///
+        /// Alignment table (PolicyLean × DemographicValues):
+        ///   Left   + Progressive  → −1  (agreement — they like it)
+        ///   Left   + Moderate     →  0
+        ///   Left   + Traditional  → +1  (disagreement — they dislike it)
+        ///   Center + Progressive  →  0
+        ///   Center + Moderate     → −1  (agreement)
+        ///   Center + Traditional  →  0
+        ///   Right  + Progressive  → +1  (disagreement)
+        ///   Right  + Moderate     →  0
+        ///   Right  + Traditional  → −1  (agreement)
         /// </summary>
-        private void ApplyCardTagHostilityShifts(CardData card)
+        private void ApplyPolicyHostilityShifts(CardData card)
         {
-            if (FocusedEnemy == null) return;
-            if (card.SentimentTags == null || card.SentimentTags.Count == 0) return;
+            if (card.CardType != CardType.Policy) return;
 
-            EnemyData enemy      = FocusedEnemy.EnemyData;
-            int oldHostility     = FocusedEnemy.Stats.CurrentHostility;
-            int totalShift       = 0;
-
-            foreach (CardTag tag in card.SentimentTags)
+            for (int i = 0; i < _enemies.Count; i++)
             {
-                int baseShift = tag switch
-                {
-                    CardTag.Aggressive    => +1,
-                    CardTag.Empathetic    => -1,
-                    CardTag.Evasive       =>  0,
-                    CardTag.Authoritative =>  0,
-                    CardTag.Populist      =>  0,
-                    _                     =>  0
-                };
+                var enemy = _enemies[i];
+                if (enemy.IsDefeated) continue;
 
-                // Enemy sensitivity: +1 extra raise or -1 extra lower
-                if (tag == enemy.SensitiveRaiseTag) baseShift += 1;
-                if (tag == enemy.SensitiveLowerTag) baseShift -= 1;
+                int shift = GetPolicyHostilityShift(card.PolicyLean, enemy.EnemyData.DemographicValues);
+                if (shift == 0) continue;
 
-                totalShift += baseShift;
+                int old = enemy.Stats.CurrentHostility;
+                if (shift > 0) enemy.Stats.GainHostility(shift);
+                else           enemy.Stats.ReduceHostility(-shift);
+
+                if (enemy.Stats.CurrentHostility != old)
+                    EventBus.Publish(new EnemyHostilityChangedEvent
+                    {
+                        OldValue   = old,
+                        NewValue   = enemy.Stats.CurrentHostility,
+                        EnemyIndex = i
+                    });
             }
+        }
 
-            if (totalShift == 0) return;
-
-            if (totalShift > 0) FocusedEnemy.Stats.GainHostility(totalShift);
-            else                FocusedEnemy.Stats.ReduceHostility(-totalShift);
-
-            int newHostility = FocusedEnemy.Stats.CurrentHostility;
-            if (newHostility != oldHostility)
+        private static int GetPolicyHostilityShift(PolicyLean lean, DemographicValues values)
+        {
+            return (lean, values) switch
             {
-                EventBus.Publish(new EnemyHostilityChangedEvent
-                {
-                    OldValue   = oldHostility,
-                    NewValue   = newHostility,
-                    EnemyIndex = _focusedEnemyIndex
-                });
-            }
+                (PolicyLean.Left,   DemographicValues.Progressive)  => -1,
+                (PolicyLean.Left,   DemographicValues.Traditional)  => +1,
+                (PolicyLean.Right,  DemographicValues.Traditional)  => -1,
+                (PolicyLean.Right,  DemographicValues.Progressive)  => +1,
+                (PolicyLean.Center, DemographicValues.Moderate)     => -1,
+                _                                                    =>  0
+            };
         }
 
         /// <summary>

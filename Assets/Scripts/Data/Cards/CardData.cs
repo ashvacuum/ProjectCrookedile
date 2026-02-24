@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
+using Crookedile.Data;
 
 namespace Crookedile.Data.Cards
 {
@@ -22,7 +23,7 @@ namespace Crookedile.Data.Cards
         [Tooltip("Display name of the card shown to players")]
         [SerializeField] private string _cardName;
 
-        [Tooltip("Card type determines general behavior (Diplomacy, Hostility, Manipulate)")]
+        [Tooltip("Card type determines general behavior (Pressure, Rhetoric, Policy)")]
         [SerializeField] private CardType _cardType;
 
         [Tooltip("Rarity affects card acquisition chance and power level")]
@@ -65,10 +66,21 @@ namespace Crookedile.Data.Cards
         [Tooltip("Must this card be unlocked through progression?")]
         [SerializeField] private bool _isUnlockable = false;
 
-        [Header("Sentiment Tags")]
-        [Tooltip("Tags that shift enemy hostility on the number line when this card is played. " +
-                 "Aggressive +1 | Empathetic -1 | Evasive/Authoritative/Populist shift via enemy sensitivity.")]
-        [SerializeField] private List<CardTag> _sentimentTags = new List<CardTag>();
+        [Header("Policy")]
+        [ShowIf("_cardType", CardType.Policy)]
+        [Tooltip("The political lean of this Policy card.\n" +
+                 "Left: Progressives −1 hostility, Traditionals +1 hostility\n" +
+                 "Center: Moderates −1 hostility\n" +
+                 "Right: Traditionals −1 hostility, Progressives +1 hostility\n" +
+                 "None: No demographic hostility shift when played")]
+        [SerializeField] private PolicyLean _policyLean = PolicyLean.None;
+
+        [Header("Triggered Effects")]
+        [Tooltip("Named effects that fire automatically after this card's base effects resolve, " +
+                 "conditioned on runtime events (damage dealt, kills, status applied, etc.).\n\n" +
+                 "Example — Lifesteal: Trigger=OnDamageDealt, Condition=Always, " +
+                 "Response=HealResolve with AmountSource=LastDamageDealt.")]
+        [SerializeField] private List<TriggeredEffect> _triggeredEffects = new List<TriggeredEffect>();
 
         #region Properties
 
@@ -83,7 +95,7 @@ namespace Crookedile.Data.Cards
         public string CardName => _cardName;
 
         /// <summary>
-        /// Type of card (Diplomacy, Hostility, Manipulate).
+        /// Type of card (Pressure, Rhetoric, Policy).
         /// </summary>
         public CardType CardType => _cardType;
 
@@ -149,9 +161,16 @@ namespace Crookedile.Data.Cards
         public bool IsUnlockable => _isUnlockable;
 
         /// <summary>
-        /// Sentiment tags that shift enemy hostility when this card is played.
+        /// Political lean of this card. Only relevant for CardType.Policy.
+        /// Determines which demographics become more or less hostile when played.
         /// </summary>
-        public IReadOnlyList<CardTag> SentimentTags => _sentimentTags;
+        public PolicyLean PolicyLean => _policyLean;
+
+        /// <summary>
+        /// Named reactive effects that fire after this card's base effects resolve,
+        /// conditioned on runtime events such as damage dealt, kills, or status applied.
+        /// </summary>
+        public IReadOnlyList<TriggeredEffect> TriggeredEffects => _triggeredEffects;
 
         #endregion
 

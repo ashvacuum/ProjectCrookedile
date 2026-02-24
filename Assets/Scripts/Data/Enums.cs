@@ -1,14 +1,15 @@
 namespace Crookedile.Data
 {
     /// <summary>
-    /// Card types following Griftlands negotiation model.
-    /// Diplomacy = peaceful persuasion, Hostility = aggressive tactics, Manipulate = utility/resources.
+    /// Card types for political negotiation.
+    /// Pressure = persuasion / de-escalation, Rhetoric = aggressive framing,
+    /// Policy = policy positions with a left/center/right lean that shifts demographics.
     /// </summary>
     public enum CardType
     {
-        Diplomacy,   // Green - Peaceful persuasion, build relationships
-        Hostility,   // Red - Aggressive tactics, threats, pressure
-        Manipulate   // Purple - Utility, card draw, resource manipulation
+        Pressure,    // Green - Persuasion, de-escalation, relationship building
+        Rhetoric,    // Red   - Aggressive framing, attacks, pressure tactics
+        Policy       // Blue  - Policy positions; lean shifts all enemy hostility by demographic
     }
 
     /// <summary>
@@ -79,7 +80,7 @@ namespace Crookedile.Data
         ApplyExposed,                   // Next attack deals double damage
         ApplyScandal,                   // Take X damage at end of turn
         ApplyConfused,                  // Random card costs +1 AP each turn
-        ApplySilenced,                  // Cannot play Manipulate cards
+        ApplySilenced,                  // Cannot play Policy cards
 
         // Status Effects - Buffs
         ApplyStrength,                  // Deal X more damage
@@ -183,16 +184,80 @@ namespace Crookedile.Data
     }
 
     /// <summary>
-    /// Sentiment tags on cards that shift enemy hostility on the number line.
-    /// Negative hostility = receptive, zero = neutral/guarded, positive = hostile.
+    /// Political lean of a Policy card.
+    /// Determines which demographics become more or less hostile when the card is played.
+    /// None = not a Policy card (or Policy card with no lean effect).
     /// </summary>
-    public enum CardTag
+    public enum PolicyLean
     {
-        None,
-        Aggressive,    // +1 base enemy hostility
-        Evasive,       // 0 base; +1 extra on SensitiveRaiseTag enemies
-        Empathetic,    // -1 base enemy hostility
-        Authoritative, // 0 base hostility
-        Populist       // 0 base; shifts via enemy sensitivity
+        Left,
+        Center,
+        Right,
+        None    // Default for Pressure/Rhetoric cards — no hostility shift applied
+    }
+
+    /// <summary>
+    /// Socioeconomic class of an enemy demographic.
+    /// Used for card targeting and thematic identification.
+    /// </summary>
+    public enum DemographicClass
+    {
+        Upper,
+        Middle,
+        Lower
+    }
+
+    /// <summary>
+    /// Political values of an enemy demographic.
+    /// Determines how they react to Policy cards based on lean alignment.
+    /// </summary>
+    public enum DemographicValues
+    {
+        Progressive,
+        Moderate,
+        Traditional
+    }
+
+    /// <summary>
+    /// The event during card resolution that can fire a TriggeredEffect.
+    /// </summary>
+    public enum EffectTrigger
+    {
+        OnDamageDealt,      // Any Resolve damage was dealt by this card's base effects
+        OnDamageTaken,      // Reserved for enemy reactions (not used for player cards yet)
+        OnKill,             // An enemy's Resolve hit 0 during this card's resolution
+        OnStatusApplied,    // A status effect was applied by this card
+        OnComposureGained,  // Composure was gained by this card
+        OnHeal              // Resolve healing was applied by this card
+    }
+
+    /// <summary>
+    /// Extra condition that must be satisfied before a TriggeredEffect fires.
+    /// AND-ed with the trigger — both must be true for the response to execute.
+    /// </summary>
+    public enum EffectCondition
+    {
+        Always,                  // No restriction — always fires when trigger occurs
+        IfDamageDealt,           // ctx.LastDamageDealt > 0
+        IfTargetDied,            // ctx.LastTargetDied == true
+        IfTargetHasBuff,         // focused target has at least one buff status effect
+        IfTargetHasDebuff,       // focused target has at least one debuff status effect
+        IfAmountAboveThreshold   // the relevant ctx amount > conditionThreshold
+    }
+
+    /// <summary>
+    /// Determines where a CardEffect reads its numeric amount at runtime.
+    /// Used on TriggeredEffect response effects to mirror values from EffectContext
+    /// (e.g. heal for the damage you just dealt = LastDamageDealt).
+    /// </summary>
+    public enum EffectContextValue
+    {
+        FixedAmount,            // 0 — use the inspector-authored value (shows fixed amount fields)
+        LastDamageDealt,        // 1 — ctx.LastDamageDealt  — e.g. lifesteal
+        LastHealAmount,         // 2 — ctx.LastHealAmount
+        LastComposureGained,    // 3 — ctx.LastComposureGained
+        CurrentComposure,       // 4 — caster.CurrentComposure at time of trigger
+        CurrentHostility,       // 5 — focused target.CurrentHostility at time of trigger
+        None                    // 6 — return 0; hides fixed amount fields (use when amount is irrelevant)
     }
 }

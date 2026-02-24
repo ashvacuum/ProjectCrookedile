@@ -51,13 +51,17 @@ namespace Crookedile.Data.Enemy
                  "Negative = receptive (open to persuasion), 0 = neutral/guarded, positive = hostile.")]
         [SerializeField] private int _startingHostility = 0;
 
-        [Tooltip("Card tag that raises this enemy's hostility by +1 extra (on top of the tag's base shift). " +
-                 "Use CardTag.None for no sensitivity.")]
-        [SerializeField] private CardTag _sensitiveRaiseTag = CardTag.None;
+        // ─── Demographics ─────────────────────────────────────────────────────────
 
-        [Tooltip("Card tag that lowers this enemy's hostility by -1 extra (on top of the tag's base shift). " +
-                 "Use CardTag.None for no sensitivity.")]
-        [SerializeField] private CardTag _sensitiveLowerTag = CardTag.None;
+        [Header("Demographics")]
+        [Tooltip("Socioeconomic class of this NPC. Used for demographic targeting by Policy cards.")]
+        [SerializeField] private DemographicClass _demographicClass = DemographicClass.Middle;
+
+        [Tooltip("Political values of this NPC. Determines how Policy card leans affect their hostility.\n" +
+                 "Left cards: Progressive −1, Traditional +1\n" +
+                 "Center cards: Moderate −1\n" +
+                 "Right cards: Traditional −1, Progressive +1")]
+        [SerializeField] private DemographicValues _demographicValues = DemographicValues.Moderate;
 
         // ─── Starting Status Effects ───────────────────────────────────────────────
 
@@ -77,14 +81,14 @@ namespace Crookedile.Data.Enemy
 
         // ─── Properties ───────────────────────────────────────────────────────────
 
-        public string      EnemyName         => _enemyName;
-        public Sprite      Portrait           => _portrait;
-        public int         MaxResolve         => _maxResolve;
-        public int         StartingHostility  => _startingHostility;
-        public CardTag     SensitiveRaiseTag  => _sensitiveRaiseTag;
-        public CardTag     SensitiveLowerTag  => _sensitiveLowerTag;
-        public EnemyMovePattern MovePattern   => _movePattern;
-        public IReadOnlyList<EnemyMoveData> Moves => _moves;
+        public string           EnemyName         => _enemyName;
+        public Sprite           Portrait           => _portrait;
+        public int              MaxResolve         => _maxResolve;
+        public int              StartingHostility  => _startingHostility;
+        public DemographicClass  DemographicClass  => _demographicClass;
+        public DemographicValues DemographicValues => _demographicValues;
+        public EnemyMovePattern MovePattern        => _movePattern;
+        public IReadOnlyList<EnemyMoveData> Moves  => _moves;
         public IReadOnlyList<StatusEffect> StartingEffects => _startingEffects;
     }
 }

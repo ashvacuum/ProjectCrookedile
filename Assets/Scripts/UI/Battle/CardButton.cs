@@ -50,9 +50,9 @@ namespace Crookedile.UI.Battle
         [SerializeField] private CardVisualSettings visualSettings;
 
         [Header("Card Type Colors")]
-        [SerializeField] private Color diplomacyColor = new Color(0.2f, 0.8f, 0.2f);   // Green
-        [SerializeField] private Color hostilityColor = new Color(0.8f, 0.2f, 0.2f);   // Red
-        [SerializeField] private Color manipulateColor = new Color(0.6f, 0.2f, 0.8f);  // Purple
+        [SerializeField] private Color pressureColor = new Color(0.2f, 0.8f, 0.2f);   // Green
+        [SerializeField] private Color rhetoricColor = new Color(0.8f, 0.2f, 0.2f);   // Red
+        [SerializeField] private Color policyColor   = new Color(0.2f, 0.5f, 0.9f);   // Blue
         [SerializeField] private Color unaffordableColor = new Color(0.4f, 0.4f, 0.4f, 0.6f);
 
         // ─── Hover / Scale ────────────────────────────────────────────────────────
@@ -416,10 +416,10 @@ namespace Crookedile.UI.Battle
         {
             return type switch
             {
-                CardType.Diplomacy  => diplomacyColor,
-                CardType.Hostility  => hostilityColor,
-                CardType.Manipulate => manipulateColor,
-                _                   => Color.white
+                CardType.Pressure => pressureColor,
+                CardType.Rhetoric => rhetoricColor,
+                CardType.Policy   => policyColor,
+                _                 => Color.white
             };
         }
 
