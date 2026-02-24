@@ -9,6 +9,7 @@ using Crookedile.Gameplay.Battle;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 using Crookedile.Utilities;
+using Random = UnityEngine.Random;
 
 namespace Crookedile.UI.Battle
 {
@@ -52,6 +53,17 @@ namespace Crookedile.UI.Battle
         [Header("Battle Result")]
         [SerializeField] private GameObject victoryPanel;
         [SerializeField] private GameObject defeatPanel;
+
+        [Header("Card Zone Buttons")]
+        [SerializeField] private Button   discardZoneButton;
+        [SerializeField] private Button   exhaustZoneButton;
+        [SerializeField] private Button   deckZoneButton;
+        [SerializeField] private TMP_Text discardCountText;
+        [SerializeField] private TMP_Text exhaustCountText;
+        [SerializeField] private TMP_Text deckCountText;
+
+        [Header("Card Zone Panel")]
+        [SerializeField] private CardZonePanel cardZonePanel;
 
         private BattleManager battleManager;
         private List<CardButton> activeCardButtons = new List<CardButton>();
@@ -128,6 +140,11 @@ namespace Crookedile.UI.Battle
         public void Initialize(BattleManager manager)
         {
             battleManager = manager;
+
+            discardZoneButton?.onClick.AddListener(ShowDiscardZone);
+            exhaustZoneButton?.onClick.AddListener(ShowExhaustZone);
+            deckZoneButton?.onClick.AddListener(ShowDeckZone);
+
             RefreshUI();
         }
 
@@ -259,6 +276,15 @@ namespace Crookedile.UI.Battle
             {
                 _enemySlots[i]?.Refresh();
                 _enemySlots[i]?.SetSelected(i == battleManager.FocusedEnemyIndex);
+            }
+
+            // Card zone counts
+            DeckManager deck = battleManager.PlayerDeck;
+            if (deck != null)
+            {
+                if (discardCountText != null) discardCountText.text = deck.DiscardCount.ToString();
+                if (exhaustCountText != null) exhaustCountText.text = deck.ExhaustCount.ToString();
+                if (deckCountText    != null) deckCountText.text    = deck.DeckCount.ToString();
             }
         }
 
@@ -415,6 +441,36 @@ namespace Crookedile.UI.Battle
                     HandIndex = handIndex
                 });
             }
+        }
+
+        #endregion
+
+        #region Card Zone Viewers
+
+        private void ShowDiscardZone()
+        {
+            if (cardZonePanel == null || battleManager?.PlayerDeck == null) return;
+            cardZonePanel.Open("Discard Pile", battleManager.PlayerDeck.DiscardPile);
+        }
+
+        private void ShowExhaustZone()
+        {
+            if (cardZonePanel == null || battleManager?.PlayerDeck == null) return;
+            cardZonePanel.Open("Exhaust Pile", battleManager.PlayerDeck.ExhaustPile);
+        }
+
+        private void ShowDeckZone()
+        {
+            if (cardZonePanel == null || battleManager?.PlayerDeck == null) return;
+
+            // Build a shuffled display copy — revealing the real draw order would be cheating.
+            var display = new List<CardData>(battleManager.PlayerDeck.DrawPile);
+            for (int i = display.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                (display[i], display[j]) = (display[j], display[i]);
+            }
+            cardZonePanel.Open("Draw Pile", display);
         }
 
         #endregion
