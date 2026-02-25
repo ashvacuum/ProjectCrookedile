@@ -16,9 +16,9 @@ MonoBehaviour:
   _faithLeaderCardBack: {fileID: 21300000, guid: a0e51c749187cfb4383284e0a5d6725e, type: 3}
   _nepoBabyCardBack: {fileID: 21300000, guid: 9bb65edd49322274c8bb670f251bf5c4, type: 3}
   _actorCardBack: {fileID: 21300000, guid: 60e08d6205752cd4d80e7ea0d06e7f1f, type: 3}
-  _diplomacyFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
-  _hostilityFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
-  _manipulateFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
-  _basicFrame: {fileID: 0}
-  _enhancedFrame: {fileID: 0}
-  _rareFrame: {fileID: 0}
+  _pressureFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
+  _rhetoricFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
+  _policyFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
+  _basicFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
+  _enhancedFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
+  _rareFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
