@@ -8,165 +8,136 @@ using Crookedile.Data.Cards;
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Reusable multi-select card picker panel with a two-zone reparenting UX.
+    /// Panel that floats above the existing hand and shows cards queued for discard.
     ///
-    /// Cards start in the <b>Keep</b> zone. Clicking a card moves it to the <b>Discard</b> zone;
-    /// clicking it again moves it back. Physical position is the selection state — no outline needed.
+    /// The actual hand (CardHandLayout) remains visible below and is the source.
+    /// BattleUI calls <see cref="AddToDiscard"/> when a hand card is clicked in improvise mode.
+    /// Clicking a card in the discard zone fires <see cref="OnCardReturnedToHand"/> so
+    /// BattleUI can rebuild the hand to show the card again.
     ///
     /// Usage:
-    ///   cardSelectionPanel.Open(title, instruction, cards, minSelect, maxSelect, onConfirm);
+    ///   panel.Open("Improvise", OnImproviseConfirmed);
+    ///   // Then wire hand card callbacks to: panel.AddToDiscard(card)
     ///
-    /// No cancel button — the panel closes only via Confirm. Pass minSelect: 0 to allow
-    /// confirming with no cards selected (treated as a skip by the caller).
-    ///
-    /// Attach to a full-screen Panel in the Canvas. Starts inactive (hidden).
-    /// Both handContainer and discardContainer should use HorizontalLayoutGroup.
+    /// Attach to a Panel anchored above the hand area. Starts inactive (hidden).
+    /// discardContainer should use HorizontalLayoutGroup.
     /// </summary>
     public class CardSelectionPanel : MonoBehaviour
     {
         [SerializeField] private TMP_Text   titleText;
-        [SerializeField] private TMP_Text   instructionText;
         [SerializeField] private TMP_Text   selectionCountText;  // e.g. "2 to discard"
-        [SerializeField] private Transform  handContainer;       // cards to keep — all cards spawn here
-        [SerializeField] private Transform  discardContainer;    // cards to discard — starts empty
+        [SerializeField] private Transform  discardContainer;    // cards queued for discard
         [SerializeField] private CardButton cardPrefab;
-        [SerializeField] private Button     confirmButton;
+        [SerializeField] private Button     discardButton;       // executes the discard
 
-        // Optional cosmetic zone labels — wire to header TMP_Text objects in Inspector
-        [SerializeField] private TMP_Text   handLabel;           // e.g. "Keep"
-        [SerializeField] private TMP_Text   discardLabel;        // e.g. "Discard"
+        // ─── Events ───────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Fired when the player clicks a card in the discard zone to return it to hand.
+        /// BattleUI should respond by calling RefreshImproviseHand() to show the card again.
+        /// </summary>
+        public event Action<CardData> OnCardReturnedToHand;
 
         // ─── Per-session state ────────────────────────────────────────────────────
 
-        private readonly List<CardData>                   _selectedCards  = new List<CardData>();
-        private readonly List<CardButton>                 _spawnedButtons = new List<CardButton>();
-        private readonly Dictionary<CardButton, CardData> _cardButtonMap  = new Dictionary<CardButton, CardData>();
+        private readonly List<CardData>   _selectedCards  = new List<CardData>();
+        private readonly List<CardButton> _spawnedButtons = new List<CardButton>();
 
-        private int                    _minSelect;
-        private int                    _maxSelect;
-        private Action<List<CardData>> _onConfirm;
+        private Action<List<CardData>> _onDiscard;
 
         // ─── Lifecycle ────────────────────────────────────────────────────────────
 
         private void Awake()
         {
-            confirmButton?.onClick.AddListener(OnConfirmClicked);
+            discardButton?.onClick.AddListener(OnDiscardClicked);
             gameObject.SetActive(false);
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Opens the panel and populates the Keep zone with the given cards.
+        /// Opens the panel with an empty discard zone.
+        /// BattleUI is responsible for rebuilding the hand with AddToDiscard callbacks.
         /// </summary>
-        /// <param name="title">Panel header (e.g. "Improvise").</param>
-        /// <param name="instruction">Subtitle instruction shown under the title.</param>
-        /// <param name="cards">Cards to display — all start in the Keep zone.</param>
-        /// <param name="minSelect">Minimum cards that must be in the Discard zone to confirm. 0 = always confirmable (skip).</param>
-        /// <param name="maxSelect">Maximum cards that can be moved to the Discard zone at once.</param>
-        /// <param name="onConfirm">Called with the discard-zone card list when confirmed. Empty list = player skipped.</param>
-        public void Open(
-            string                  title,
-            string                  instruction,
-            IReadOnlyList<CardData> cards,
-            int                     minSelect,
-            int                     maxSelect,
-            Action<List<CardData>>  onConfirm)
+        /// <param name="title">Panel header shown above the discard zone (e.g. "Improvise").</param>
+        /// <param name="onDiscard">Called with the queued card list when the player presses Discard. Empty list = skip.</param>
+        public void Open(string title, Action<List<CardData>> onDiscard)
         {
-            _minSelect = minSelect;
-            _maxSelect = maxSelect;
-            _onConfirm = onConfirm;
+            _onDiscard = onDiscard;
 
-            if (titleText       != null) titleText.text       = title;
-            if (instructionText != null) instructionText.text = instruction;
+            if (titleText != null) titleText.text = title;
 
-            ClearSpawnedCards();
-
-            // All cards spawn into handContainer (Keep zone)
-            for (int i = 0; i < cards.Count; i++)
-            {
-                CardData   card   = cards[i];
-                CardButton button = Instantiate(cardPrefab, handContainer);
-
-                // int.MaxValue AP → all cards display as affordable (no grey tint)
-                // Callback → move card between zones on click
-                int capturedIndex = i;
-                button.Initialize(card, capturedIndex, int.MaxValue, () => ToggleCard(button, card));
-
-                _spawnedButtons.Add(button);
-                _cardButtonMap[button] = card;
-            }
-
+            ClearDiscardZone();
             RefreshUI();
             gameObject.SetActive(true);
         }
 
+        /// <summary>
+        /// Called by BattleUI when a hand card is clicked in improvise mode.
+        /// Spawns a CardButton in the discard zone; clicking it fires OnCardReturnedToHand.
+        /// </summary>
+        public void AddToDiscard(CardData card)
+        {
+            if (card == null) return;
+
+            _selectedCards.Add(card);
+
+            CardButton button = Instantiate(cardPrefab, discardContainer);
+            // int.MaxValue AP → card displays as affordable (no grey tint)
+            // Callback → return this card to hand when clicked
+            button.Initialize(card, _spawnedButtons.Count, int.MaxValue,
+                () => ReturnToHand(button, card));
+
+            _spawnedButtons.Add(button);
+            RefreshUI();
+        }
+
+        /// <summary>Cards currently queued for discard. Read by BattleUI to exclude them from the hand display.</summary>
+        public IReadOnlyList<CardData> SelectedForDiscard => _selectedCards;
+
         public void Close()
         {
-            ClearSpawnedCards();
+            ClearDiscardZone();
             gameObject.SetActive(false);
         }
 
-        // ─── Selection Logic ──────────────────────────────────────────────────────
+        // ─── Internal ─────────────────────────────────────────────────────────────
 
-        private void ToggleCard(CardButton button, CardData card)
+        private void ReturnToHand(CardButton button, CardData card)
         {
-            if (_selectedCards.Contains(card))
-            {
-                // Card is in discardContainer — move it back to handContainer (Keep)
-                _selectedCards.Remove(card);
-                button.transform.SetParent(handContainer, false);
-            }
-            else if (_selectedCards.Count < _maxSelect)
-            {
-                // Card is in handContainer — move it to discardContainer (Discard)
-                _selectedCards.Add(card);
-                button.transform.SetParent(discardContainer, false);
-            }
-            // If already at maxSelect, clicking an unselected card does nothing
-
-            // worldPositionStays: false — both containers have layout groups,
-            // so Unity reflows immediately. 'true' would fight the layout and cause jitter.
-
+            _selectedCards.Remove(card);
+            _spawnedButtons.Remove(button);
+            Destroy(button.gameObject);
+            OnCardReturnedToHand?.Invoke(card);
             RefreshUI();
+        }
+
+        private void OnDiscardClicked()
+        {
+            var toDiscard = new List<CardData>(_selectedCards);
+            var callback  = _onDiscard;
+            Close();
+            callback?.Invoke(toDiscard);
         }
 
         private void RefreshUI()
         {
             if (selectionCountText != null)
                 selectionCountText.text = $"{_selectedCards.Count} to discard";
-
-            if (confirmButton != null)
-                confirmButton.interactable = _selectedCards.Count >= _minSelect;
         }
 
-        // ─── Button Handlers ──────────────────────────────────────────────────────
-
-        private void OnConfirmClicked()
-        {
-            if (_selectedCards.Count < _minSelect) return;
-
-            var confirmed = new List<CardData>(_selectedCards);
-            var callback  = _onConfirm;
-            Close();
-            callback?.Invoke(confirmed);
-        }
-
-        // ─── Helpers ──────────────────────────────────────────────────────────────
-
-        private void ClearSpawnedCards()
+        private void ClearDiscardZone()
         {
             foreach (var button in _spawnedButtons)
                 if (button != null) Destroy(button.gameObject);
 
             _spawnedButtons.Clear();
-            _cardButtonMap.Clear();
             _selectedCards.Clear();
 
-            // Defensive pass: destroy any children that survived edge cases
-            // (e.g. panel reused mid-battle while cards were mid-drag)
-            if (handContainer    != null) foreach (Transform child in handContainer)    Destroy(child.gameObject);
-            if (discardContainer != null) foreach (Transform child in discardContainer) Destroy(child.gameObject);
+            // Defensive pass in case any children survived
+            if (discardContainer != null)
+                foreach (Transform child in discardContainer)
+                    Destroy(child.gameObject);
         }
     }
 }

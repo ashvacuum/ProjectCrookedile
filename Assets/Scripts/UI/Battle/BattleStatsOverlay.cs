@@ -7,8 +7,13 @@ using Crookedile.Gameplay.Battle;
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Displays battle stats as a simple overlay on top of the 3D card view.
-    /// Shows Resolve, Composure, Hostility, and AP for both combatants.
+    /// Pure stats reader — displays Resolve, Composure, Hostility, and AP for both
+    /// combatants as a lightweight overlay.
+    ///
+    /// This component is intentionally limited to stat display.  End-turn input,
+    /// improvise controls, and battle result panels are owned by <c>BattleUI</c> and its
+    /// FSM states.  If the scene needs a result display on this overlay, assign the
+    /// shared <c>BattleResultPanel</c> component to the <c>resultPanel</c> field.
     /// </summary>
     public class BattleStatsOverlay : MonoBehaviour
     {
@@ -28,27 +33,13 @@ namespace Crookedile.UI.Battle
         [SerializeField] private TMP_Text turnInfoText;
         [SerializeField] private TMP_Text phaseText;
 
-        [Header("Controls")]
-        [SerializeField] private Button endTurnButton;
-
-        [Header("Battle Result")]
-        [SerializeField] private GameObject victoryPanel;
-        [SerializeField] private GameObject defeatPanel;
+        [Header("Result (optional)")]
+        [Tooltip("Assign the shared BattleResultPanel if this overlay needs to show victory/defeat.")]
+        [SerializeField] private BattleResultPanel resultPanel;
 
         private BattleManager battleManager;
 
         #region Initialization
-
-        private void Awake()
-        {
-            if (endTurnButton != null)
-            {
-                endTurnButton.onClick.AddListener(OnEndTurnClicked);
-            }
-
-            if (victoryPanel != null) victoryPanel.SetActive(false);
-            if (defeatPanel != null) defeatPanel.SetActive(false);
-        }
 
         private void OnEnable()
         {
@@ -78,38 +69,14 @@ namespace Crookedile.UI.Battle
 
         #region Event Handlers
 
-        private void OnBattleStarted(BattleStartedEvent evt)
-        {
-            RefreshStats();
-        }
-
-        private void OnTurnStarted(TurnStartedEvent evt)
-        {
-            RefreshStats();
-        }
-
-        private void OnTurnEnded(TurnEndedEvent evt)
-        {
-            RefreshStats();
-        }
-
-        private void OnCardPlayed(CardPlayedEvent evt)
-        {
-            RefreshStats();
-        }
+        private void OnBattleStarted(BattleStartedEvent evt) => RefreshStats();
+        private void OnTurnStarted(TurnStartedEvent evt)     => RefreshStats();
+        private void OnTurnEnded(TurnEndedEvent evt)         => RefreshStats();
+        private void OnCardPlayed(CardPlayedEvent evt)       => RefreshStats();
 
         private void OnBattleEnded(BattleEndedEvent evt)
         {
-            if (evt.Result.isVictory)
-            {
-                if (victoryPanel != null) victoryPanel.SetActive(true);
-            }
-            else
-            {
-                if (defeatPanel != null) defeatPanel.SetActive(true);
-            }
-
-            if (endTurnButton != null) endTurnButton.interactable = false;
+            resultPanel?.Show(evt.Result.isVictory);
             RefreshStats();
         }
 
@@ -120,7 +87,6 @@ namespace Crookedile.UI.Battle
         public void RefreshStats()
         {
             if (battleManager == null) return;
-
             UpdatePlayerStats();
             UpdateOpponentStats();
             UpdateBattleInfo();
@@ -129,35 +95,23 @@ namespace Crookedile.UI.Battle
         private void UpdatePlayerStats()
         {
             var stats = battleManager.PlayerStats;
+            if (stats == null) return;
 
-            if (playerResolveText != null)
-                playerResolveText.text = $"HP: {stats.CurrentResolve}/{stats.MaxResolve}";
-
-            if (playerComposureText != null)
-                playerComposureText.text = $"Composure: {stats.CurrentComposure}";
-
-            if (playerHostilityText != null)
-                playerHostilityText.text = $"Hostility: {stats.CurrentHostility} ({stats.HostilityDamageMultiplier:F1}x)";
-
-            if (playerAPText != null)
-                playerAPText.text = $"AP: {stats.CurrentActionPoints}/{stats.MaxActionPoints}";
+            if (playerResolveText   != null) playerResolveText.text   = $"HP: {stats.CurrentResolve}/{stats.MaxResolve}";
+            if (playerComposureText != null) playerComposureText.text = $"Composure: {stats.CurrentComposure}";
+            if (playerHostilityText != null) playerHostilityText.text = $"Hostility: {stats.CurrentHostility} ({stats.HostilityDamageMultiplier:F1}x)";
+            if (playerAPText        != null) playerAPText.text        = $"AP: {stats.CurrentActionPoints}/{stats.MaxActionPoints}";
         }
 
         private void UpdateOpponentStats()
         {
             var stats = battleManager.OpponentStats;
+            if (stats == null) return;
 
-            if (opponentResolveText != null)
-                opponentResolveText.text = $"HP: {stats.CurrentResolve}/{stats.MaxResolve}";
-
-            if (opponentComposureText != null)
-                opponentComposureText.text = $"Composure: {stats.CurrentComposure}";
-
-            if (opponentHostilityText != null)
-                opponentHostilityText.text = $"Hostility: {stats.CurrentHostility}";
-
-            if (opponentAPText != null)
-                opponentAPText.text = $"AP: {stats.CurrentActionPoints}/{stats.MaxActionPoints}";
+            if (opponentResolveText   != null) opponentResolveText.text   = $"HP: {stats.CurrentResolve}/{stats.MaxResolve}";
+            if (opponentComposureText != null) opponentComposureText.text = $"Composure: {stats.CurrentComposure}";
+            if (opponentHostilityText != null) opponentHostilityText.text = $"Hostility: {stats.CurrentHostility}";
+            if (opponentAPText        != null) opponentAPText.text        = $"AP: {stats.CurrentActionPoints}/{stats.MaxActionPoints}";
         }
 
         private void UpdateBattleInfo()
@@ -169,28 +123,7 @@ namespace Crookedile.UI.Battle
             }
 
             if (phaseText != null)
-            {
                 phaseText.text = battleManager.CurrentState.ToString();
-            }
-
-            if (endTurnButton != null)
-            {
-                bool canEndTurn = battleManager.IsPlayerTurn &&
-                                  battleManager.CurrentState == BattleState.PlayerTurn;
-                endTurnButton.interactable = canEndTurn;
-            }
-        }
-
-        #endregion
-
-        #region Input Handlers
-
-        private void OnEndTurnClicked()
-        {
-            if (battleManager != null && battleManager.IsPlayerTurn)
-            {
-                EventBus.Publish(new EndTurnRequestedEvent());
-            }
         }
 
         #endregion

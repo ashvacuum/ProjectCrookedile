@@ -1,0 +1,35 @@
+namespace Crookedile.UI.Battle
+{
+    /// <summary>
+    /// FSM states for the Battle UI layer.
+    /// BattleUI holds a <c>StateMachine&lt;BattleUIState&gt;</c> and transitions between
+    /// these states in response to EventBus events and player input.
+    /// </summary>
+    public enum BattleUIState
+    {
+        /// <summary>
+        /// Opponent's turn, or TurnStart/TurnEnd processing.
+        /// Hand is hidden and all player controls are disabled.
+        /// </summary>
+        Idle,
+
+        /// <summary>
+        /// Player's normal turn.
+        /// Hand is shown with play-card callbacks; EndTurn enabled; Improvise button
+        /// visible if <c>BattleManager.IsImproviseAvailable</c>.
+        /// </summary>
+        PlayerTurn,
+
+        /// <summary>
+        /// Improvise passive modal is open.
+        /// Hand cards use AddToDiscard callbacks; <c>CardSelectionPanel</c> floats above the hand.
+        /// </summary>
+        Improvise,
+
+        /// <summary>
+        /// Battle is over (victory or defeat).
+        /// Result panel is shown; hand is cleared; all controls disabled.
+        /// </summary>
+        BattleEnd,
+    }
+}

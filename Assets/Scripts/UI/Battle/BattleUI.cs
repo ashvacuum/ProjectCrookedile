@@ -14,34 +14,49 @@ using Random = UnityEngine.Random;
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Main UI controller for battle screen.
-    /// Displays player/opponent stats, hand, and battle controls.
+    /// Thin FSM coordinator for the battle screen UI.
+    ///
+    /// Responsibilities:
+    ///  - Holds references to all panel components and the BattleManager.
+    ///  - Subscribes to EventBus events and translates them into FSM state transitions.
+    ///  - Manages enemy slot instantiation and card zone viewer overlays.
+    ///  - Owns stats / battle-info text updates (small, centralised).
+    ///
+    /// Hand display, battle log, and result panels are delegated to their own
+    /// MonoBehaviour components (HandPanel, BattleLogPanel, BattleResultPanel).
+    /// Each BattleUIState inner class owns the show/hide/enable logic for one state.
     /// </summary>
     public class BattleUI : MonoBehaviour
     {
+        // ── Panels (extracted subsystems) ─────────────────────────────────────
+        [Header("Panels")]
+        [Tooltip("Manages card hand display and object pool.")]
+        [SerializeField] private HandPanel         handPanel;
+        [Tooltip("Battle log text + auto-scroll.")]
+        [SerializeField] private BattleLogPanel    logPanel;
+        [Tooltip("Victory / defeat result panels.")]
+        [SerializeField] private BattleResultPanel resultPanel;
+
+        // ── Player Stats ──────────────────────────────────────────────────────
         [Header("Player Stats")]
         [SerializeField] private TMP_Text playerResolveText;
         [SerializeField] private TMP_Text playerComposureText;
         [SerializeField] private TMP_Text playerHostilityText;
         [SerializeField] private TMP_Text playerAPText;
 
+        // ── Enemy Slots ───────────────────────────────────────────────────────
         [Header("Enemy Slots")]
-        [Tooltip("Parent transform that enemy slot panels are spawned into")]
+        [Tooltip("Parent transform that enemy slot panels are spawned into.")]
         [SerializeField] private Transform  enemySlotContainer;
-        [Tooltip("Prefab with an EnemySlotUI component — instantiated once per enemy")]
+        [Tooltip("Prefab with an EnemySlotUI component — instantiated once per enemy.")]
         [SerializeField] private GameObject enemySlotPrefab;
 
-        // Runtime list of spawned enemy slot UIs (one per enemy in the battle)
-        private List<EnemySlotUI> _enemySlots = new List<EnemySlotUI>();
-
+        // ── Battle Info ───────────────────────────────────────────────────────
         [Header("Battle Info")]
         [SerializeField] private TMP_Text turnNumberText;
         [SerializeField] private TMP_Text phaseText;
 
-        [Header("Hand Display")]
-        [SerializeField] private Transform cardButtonContainer;
-        [SerializeField] private GameObject cardButtonPrefab;
-
+        // ── Controls ──────────────────────────────────────────────────────────
         [Header("Controls")]
         [SerializeField] private Button endTurnButton;
         [Tooltip("Actor passive — shown on the Actor's first player turn only.")]
@@ -49,15 +64,7 @@ namespace Crookedile.UI.Battle
         [Tooltip("Card selection modal shared by Improvise and ChooseFromDiscard effects.")]
         [SerializeField] private CardSelectionPanel cardSelectionPanel;
 
-        [Header("Battle Log")]
-        [SerializeField] private TMP_Text battleLogText;
-        [SerializeField] private ScrollRect battleLogScrollRect;
-        [SerializeField] private int maxLogLines = 20;
-
-        [Header("Battle Result")]
-        [SerializeField] private GameObject victoryPanel;
-        [SerializeField] private GameObject defeatPanel;
-
+        // ── Card Zone Buttons ─────────────────────────────────────────────────
         [Header("Card Zone Buttons")]
         [SerializeField] private Button   discardZoneButton;
         [SerializeField] private Button   exhaustZoneButton;
@@ -69,51 +76,28 @@ namespace Crookedile.UI.Battle
         [Header("Card Zone Panel")]
         [SerializeField] private CardZonePanel cardZonePanel;
 
-        private BattleManager battleManager;
-        private List<CardButton> activeCardButtons = new List<CardButton>();
-        private ObjectPool<CardButton> _cardPool;
-        private List<string> battleLogLines = new List<string>();
+        // ── Runtime ───────────────────────────────────────────────────────────
+        private BattleManager             battleManager;
+        private StateMachine<BattleUIState> _fsm;
+        private BattleResult              _lastBattleResult;
+        private List<EnemySlotUI>         _enemySlots = new List<EnemySlotUI>();
 
         #region Initialization
 
         private void Awake()
         {
-            // Setup button listeners
             if (endTurnButton != null)
                 endTurnButton.onClick.AddListener(OnEndTurnClicked);
 
-            improviseButton?.onClick.AddListener(OnImproviseClicked);
-            if (improviseButton != null) improviseButton.gameObject.SetActive(false);
-
-            // Hide result panels
-            if (victoryPanel != null) victoryPanel.SetActive(false);
-            if (defeatPanel != null) defeatPanel.SetActive(false);
-        }
-
-        private void Start()
-        {
-            if (cardButtonPrefab != null)
+            if (improviseButton != null)
             {
-                var prefabComponent = cardButtonPrefab.GetComponent<CardButton>();
-                if (prefabComponent != null)
-                    _cardPool = new ObjectPool<CardButton>(prefabComponent, initialSize: 7, parent: cardButtonContainer);
+                improviseButton.onClick.AddListener(OnImproviseClicked);
+                improviseButton.gameObject.SetActive(false);
             }
         }
 
-        private void OnDestroy()
-        {
-            _cardPool?.Clear();
-        }
-
-        private void OnEnable()
-        {
-            SubscribeToEvents();
-        }
-
-        private void OnDisable()
-        {
-            UnsubscribeFromEvents();
-        }
+        private void OnEnable()  => SubscribeToEvents();
+        private void OnDisable() => UnsubscribeFromEvents();
 
         private void SubscribeToEvents()
         {
@@ -140,7 +124,8 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
-        /// Initialize with BattleManager reference.
+        /// Called by BattleManager (or a scene initializer) once the battle is ready.
+        /// Sets up zone viewers, builds the FSM, and enters the Idle state.
         /// </summary>
         public void Initialize(BattleManager manager)
         {
@@ -150,7 +135,15 @@ namespace Crookedile.UI.Battle
             exhaustZoneButton?.onClick.AddListener(ShowExhaustZone);
             deckZoneButton?.onClick.AddListener(ShowDeckZone);
 
-            RefreshUI();
+            // Build FSM — state classes are inner private classes below.
+            _fsm = new StateMachine<BattleUIState>();
+            _fsm.RegisterState(BattleUIState.Idle,       new IdleBattleUIState(this));
+            _fsm.RegisterState(BattleUIState.PlayerTurn, new PlayerTurnBattleUIState(this));
+            _fsm.RegisterState(BattleUIState.Improvise,  new ImproviseBattleUIState(this));
+            _fsm.RegisterState(BattleUIState.BattleEnd,  new BattleEndBattleUIState(this));
+            _fsm.ChangeState(BattleUIState.Idle);
+
+            UpdateStatsDisplay();
         }
 
         #endregion
@@ -159,14 +152,121 @@ namespace Crookedile.UI.Battle
 
         private void OnBattleStarted(BattleStartedEvent evt)
         {
-            AddLogEntry("=== Battle Started ===");
+            logPanel?.AddEntry("=== Battle Started ===");
             BuildEnemySlots();
-            RefreshUI();
+            UpdateStatsDisplay();
+            _fsm?.ChangeState(BattleUIState.Idle);
         }
+
+        private void OnTurnStarted(TurnStartedEvent evt)
+        {
+            string owner = evt.IsPlayerTurn ? "Player" : "Opponent";
+            logPanel?.AddEntry($"--- Turn {evt.TurnNumber}: {owner} ---");
+            UpdateStatsDisplay();
+            UpdateBattleInfo();
+            _fsm?.ChangeState(evt.IsPlayerTurn ? BattleUIState.PlayerTurn : BattleUIState.Idle);
+        }
+
+        private void OnTurnEnded(TurnEndedEvent evt)
+        {
+            UpdateStatsDisplay();
+            _fsm?.ChangeState(BattleUIState.Idle);
+        }
+
+        private void OnCardPlayed(CardPlayedEvent evt)
+        {
+            string player = evt.IsPlayer ? "Player" : "Opponent";
+            logPanel?.AddEntry($"{player} played: {evt.Card.CardName}");
+            UpdateStatsDisplay();
+            // Only refresh affordability — don't rebuild hand (card is still being resolved).
+            if (battleManager?.PlayerStats != null)
+                handPanel?.RefreshAffordability(battleManager.PlayerStats.CurrentActionPoints);
+        }
+
+        private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
+        {
+            if (evt.Move != null)
+                logPanel?.AddEntry($"Enemy [{evt.EnemyIndex}] intends: {evt.Move.IntentDescription}");
+            if (evt.EnemyIndex < _enemySlots.Count)
+                _enemySlots[evt.EnemyIndex]?.UpdateIntent(evt.Move);
+        }
+
+        private void OnEnemyHostilityChanged(EnemyHostilityChangedEvent evt)
+        {
+            if (evt.EnemyIndex < _enemySlots.Count)
+            {
+                _enemySlots[evt.EnemyIndex]?.Refresh();
+                _enemySlots[evt.EnemyIndex]?.PulseHostility();
+            }
+        }
+
+        private void OnEnemyDefeated(EnemyDefeatedEvent evt)
+        {
+            logPanel?.AddEntry($"{evt.EnemyName} defeated!");
+            if (evt.EnemyIndex < _enemySlots.Count)
+                _enemySlots[evt.EnemyIndex]?.MarkDefeated();
+        }
+
+        private void OnBattleEnded(BattleEndedEvent evt)
+        {
+            string outcome = evt.Result.isVictory ? "=== VICTORY ===" : "=== DEFEAT ===";
+            logPanel?.AddEntry(outcome);
+            _lastBattleResult = evt.Result;
+            _fsm?.ChangeState(BattleUIState.BattleEnd);
+        }
+
+        #endregion
+
+        #region UI Updates (stats + battle-info text; kept in BattleUI for direct field access)
+
+        internal void UpdateStatsDisplay()
+        {
+            if (battleManager == null) return;
+
+            var playerStats = battleManager.PlayerStats;
+            if (playerStats == null) return;
+
+            if (playerResolveText  != null) playerResolveText.text  = $"Resolve: {playerStats.CurrentResolve}/{playerStats.MaxResolve}";
+            if (playerComposureText != null) playerComposureText.text = $"Composure: {playerStats.CurrentComposure}";
+            if (playerAPText       != null) playerAPText.text       = $"AP: {playerStats.CurrentActionPoints}/{playerStats.MaxActionPoints}";
+
+            // Enemy slots — refresh + focus highlight
+            for (int i = 0; i < _enemySlots.Count; i++)
+            {
+                _enemySlots[i]?.Refresh();
+                _enemySlots[i]?.SetSelected(i == battleManager.FocusedEnemyIndex);
+            }
+
+            // Card zone counts
+            DeckManager deck = battleManager.PlayerDeck;
+            if (deck != null)
+            {
+                if (discardCountText != null) discardCountText.text = deck.DiscardCount.ToString();
+                if (exhaustCountText != null) exhaustCountText.text = deck.ExhaustCount.ToString();
+                if (deckCountText    != null) deckCountText.text    = deck.DeckCount.ToString();
+            }
+        }
+
+        internal void UpdateBattleInfo()
+        {
+            if (battleManager == null) return;
+
+            if (turnNumberText != null)
+                turnNumberText.text = $"Turn: {battleManager.CurrentTurn}";
+
+            if (phaseText != null)
+            {
+                string turnOwner = battleManager.IsPlayerTurn ? "Player" : "Opponent";
+                phaseText.text = $"{battleManager.CurrentState} ({turnOwner})";
+            }
+        }
+
+        #endregion
+
+        #region Enemy Slots
 
         private void BuildEnemySlots()
         {
-            // Destroy any slots from a previous battle
             foreach (var slot in _enemySlots)
                 if (slot != null) Destroy(slot.gameObject);
             _enemySlots.Clear();
@@ -185,253 +285,6 @@ namespace Crookedile.UI.Battle
             }
         }
 
-        private void OnTurnStarted(TurnStartedEvent evt)
-        {
-            string turnOwner = evt.IsPlayerTurn ? "Player" : "Opponent";
-            AddLogEntry($"--- Turn {evt.TurnNumber}: {turnOwner} ---");
-            RefreshUI();
-        }
-
-        private void OnTurnEnded(TurnEndedEvent evt)
-        {
-            RefreshUI();
-        }
-
-        private void OnCardPlayed(CardPlayedEvent evt)
-        {
-            string player = evt.IsPlayer ? "Player" : "Opponent";
-            AddLogEntry($"{player} played: {evt.Card.CardName}");
-            RefreshUI();
-        }
-
-        private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
-        {
-            if (evt.Move != null)
-                AddLogEntry($"Enemy [{evt.EnemyIndex}] intends: {evt.Move.IntentDescription}");
-            if (evt.EnemyIndex < _enemySlots.Count)
-                _enemySlots[evt.EnemyIndex]?.UpdateIntent(evt.Move);
-        }
-
-        private void OnEnemyHostilityChanged(EnemyHostilityChangedEvent evt)
-        {
-            if (evt.EnemyIndex < _enemySlots.Count)
-            {
-                _enemySlots[evt.EnemyIndex]?.Refresh();
-                _enemySlots[evt.EnemyIndex]?.PulseHostility();
-            }
-        }
-
-        private void OnEnemyDefeated(EnemyDefeatedEvent evt)
-        {
-            AddLogEntry($"{evt.EnemyName} defeated!");
-            if (evt.EnemyIndex < _enemySlots.Count)
-                _enemySlots[evt.EnemyIndex]?.MarkDefeated();
-        }
-
-        private void OnBattleEnded(BattleEndedEvent evt)
-        {
-            if (evt.Result.isVictory)
-            {
-                AddLogEntry("=== VICTORY ===");
-                if (victoryPanel != null) victoryPanel.SetActive(true);
-            }
-            else
-            {
-                AddLogEntry("=== DEFEAT ===");
-                if (defeatPanel != null) defeatPanel.SetActive(true);
-            }
-
-            // Disable controls
-            if (endTurnButton != null) endTurnButton.interactable = false;
-            ClearCardButtons();
-        }
-
-        #endregion
-
-        #region UI Updates
-
-        /// <summary>
-        /// Refreshes all UI elements to match current battle state.
-        /// </summary>
-        public void RefreshUI()
-        {
-            if (battleManager == null) return;
-
-            UpdateStatsDisplay();
-            UpdateBattleInfo();
-            UpdateHandDisplay();
-            UpdateStatusEffects();
-        }
-
-        private void UpdateStatsDisplay()
-        {
-            // Player stats
-            var playerStats = battleManager.PlayerStats;
-            if (playerStats == null) return; // Battle not yet initialized — wait for BattleStartedEvent
-            if (playerResolveText != null)
-                playerResolveText.text = $"Resolve: {playerStats.CurrentResolve}/{playerStats.MaxResolve}";
-            if (playerComposureText != null)
-                playerComposureText.text = $"Composure: {playerStats.CurrentComposure}";
-            // playerHostilityText intentionally not updated — player hostility stays 0; enemy owns the number line
-            if (playerAPText != null)
-                playerAPText.text = $"AP: {playerStats.CurrentActionPoints}/{playerStats.MaxActionPoints}";
-
-            // Enemy slots — refresh each and update focus highlight
-            for (int i = 0; i < _enemySlots.Count; i++)
-            {
-                _enemySlots[i]?.Refresh();
-                _enemySlots[i]?.SetSelected(i == battleManager.FocusedEnemyIndex);
-            }
-
-            // Card zone counts
-            DeckManager deck = battleManager.PlayerDeck;
-            if (deck != null)
-            {
-                if (discardCountText != null) discardCountText.text = deck.DiscardCount.ToString();
-                if (exhaustCountText != null) exhaustCountText.text = deck.ExhaustCount.ToString();
-                if (deckCountText    != null) deckCountText.text    = deck.DeckCount.ToString();
-            }
-        }
-
-        private void UpdateBattleInfo()
-        {
-            if (turnNumberText != null)
-                turnNumberText.text = $"Turn: {battleManager.CurrentTurn}";
-
-            if (phaseText != null)
-            {
-                string phase = battleManager.CurrentState.ToString();
-                string turnOwner = battleManager.IsPlayerTurn ? "Player" : "Opponent";
-                phaseText.text = $"{phase} ({turnOwner})";
-            }
-
-            // Enable/disable end turn button
-            if (endTurnButton != null)
-            {
-                bool canEndTurn = battleManager.IsPlayerTurn &&
-                                  battleManager.CurrentState == BattleState.PlayerTurn;
-                endTurnButton.interactable = canEndTurn;
-            }
-
-            // Show/hide Improvise button (Actor passive — first player turn only)
-            if (improviseButton != null)
-            {
-                bool showImprovise = battleManager.IsPlayerTurn
-                                  && battleManager.CurrentState == BattleState.PlayerTurn
-                                  && battleManager.IsImproviseAvailable;
-                improviseButton.gameObject.SetActive(showImprovise);
-            }
-        }
-
-        private void UpdateHandDisplay()
-        {
-            if (cardButtonContainer == null || cardButtonPrefab == null || battleManager.PlayerStats == null) return;
-
-            // Clear existing buttons
-            ClearCardButtons();
-
-            // Only show hand during player's turn
-            if (!battleManager.IsPlayerTurn) return;
-
-            int currentAP = battleManager.PlayerStats.CurrentActionPoints;
-            var hand = battleManager.PlayerDeck.Hand;
-
-            for (int i = 0; i < hand.Count; i++)
-            {
-                CardData card = hand[i];
-                CardButton cardButton = _cardPool != null
-                    ? _cardPool.Get()
-                    : Instantiate(cardButtonPrefab, cardButtonContainer).GetComponent<CardButton>();
-
-                if (cardButton != null)
-                {
-                    int handIndex = i; // Capture for closure
-                    cardButton.Initialize(card, handIndex, currentAP, () => OnCardButtonClicked(card, handIndex));
-                    cardButton.PlayDrawAnimation();
-                    activeCardButtons.Add(cardButton);
-                }
-            }
-
-            // Apply arc fan layout if CardHandLayout is on the container.
-            // Remove the Horizontal Layout Group from the container if using this.
-            cardButtonContainer.GetComponent<CardHandLayout>()?.ArrangeCards(activeCardButtons);
-        }
-
-        /// <summary>
-        /// Refreshes card affordability dimming when AP changes mid-turn without rebuilding the hand.
-        /// </summary>
-        private void RefreshCardAffordability()
-        {
-            if (!battleManager.IsPlayerTurn) return;
-            int currentAP = battleManager.PlayerStats.CurrentActionPoints;
-            foreach (var cardButton in activeCardButtons)
-            {
-                if (cardButton != null)
-                    cardButton.RefreshVisuals(currentAP);
-            }
-        }
-
-        private void UpdateStatusEffects()
-        {
-            // TODO: Display active status effects
-            // For now, this is placeholder - will implement when we add status effect icons
-        }
-
-        private void ClearCardButtons()
-        {
-            foreach (var button in activeCardButtons)
-            {
-                if (button == null) continue;
-                if (_cardPool != null)
-                    _cardPool.Return(button);
-                else
-                    Destroy(button.gameObject);
-            }
-            activeCardButtons.Clear();
-        }
-
-        /// <summary>
-        /// Briefly scales a text element up then back to normal to signal a change.
-        /// </summary>
-        private IEnumerator PulseText(TMP_Text text)
-        {
-            Vector3 original = text.transform.localScale;
-            text.transform.localScale = original * 1.2f;
-            yield return new WaitForSeconds(0.15f);
-            text.transform.localScale = original;
-        }
-
-        #endregion
-
-        #region Battle Log
-
-        private void AddLogEntry(string message)
-        {
-            battleLogLines.Add(message);
-
-            // Trim log if too long
-            if (battleLogLines.Count > maxLogLines)
-            {
-                battleLogLines.RemoveAt(0);
-            }
-
-            UpdateBattleLog();
-        }
-
-        private void UpdateBattleLog()
-        {
-            if (battleLogText == null) return;
-
-            battleLogText.text = string.Join("\n", battleLogLines);
-
-            // Auto-scroll to bottom
-            if (battleLogScrollRect != null)
-            {
-                Canvas.ForceUpdateCanvases();
-                battleLogScrollRect.verticalNormalizedPosition = 0f;
-            }
-        }
-
         #endregion
 
         #region Input Handlers
@@ -440,8 +293,8 @@ namespace Crookedile.UI.Battle
         {
             if (battleManager != null && battleManager.IsPlayerTurn)
             {
+                logPanel?.AddEntry("Player ended turn");
                 EventBus.Publish(new EndTurnRequestedEvent());
-                AddLogEntry("Player ended turn");
             }
         }
 
@@ -449,31 +302,23 @@ namespace Crookedile.UI.Battle
         {
             if (battleManager != null && battleManager.IsPlayerTurn)
             {
-                EventBus.Publish(new PlayCardRequestedEvent
-                {
-                    Card = card,
-                    HandIndex = handIndex
-                });
+                EventBus.Publish(new PlayCardRequestedEvent { Card = card, HandIndex = handIndex });
             }
         }
 
         private void OnImproviseClicked()
         {
-            if (cardSelectionPanel == null || battleManager == null) return;
+            _fsm?.ChangeState(BattleUIState.Improvise);
+        }
 
-            var hand = new List<CardData>(battleManager.PlayerDeck.Hand);
-            cardSelectionPanel.Open(
-                title:       "Improvise",
-                instruction: "Select cards to discard and redraw, or confirm to skip",
-                cards:       hand,
-                minSelect:   0,          // confirm always enabled; empty selection = skip
-                maxSelect:   hand.Count,
-                onConfirm:   selectedCards =>
-                {
-                    battleManager.TryPlayerImprovise(selectedCards);
-                    RefreshUI();   // rebuilds hand (if cards were swapped); hides Improvise button either way
-                }
-            );
+        /// <summary>
+        /// Called by <c>ImproviseBattleUIState</c> via <c>CardSelectionPanel.Open</c> callback
+        /// when the player presses Discard.
+        /// </summary>
+        internal void OnImproviseConfirmed(List<CardData> selectedCards)
+        {
+            battleManager.TryPlayerImprovise(selectedCards);
+            _fsm?.ChangeState(BattleUIState.PlayerTurn);
         }
 
         #endregion
@@ -496,7 +341,7 @@ namespace Crookedile.UI.Battle
         {
             if (cardZonePanel == null || battleManager?.PlayerDeck == null) return;
 
-            // Build a shuffled display copy — revealing the real draw order would be cheating.
+            // Shuffle display copy — don't reveal the real draw order.
             var display = new List<CardData>(battleManager.PlayerDeck.DrawPile);
             for (int i = display.Count - 1; i > 0; i--)
             {
@@ -504,6 +349,109 @@ namespace Crookedile.UI.Battle
                 (display[i], display[j]) = (display[j], display[i]);
             }
             cardZonePanel.Open("Draw Pile", display);
+        }
+
+        #endregion
+
+        // ══════════════════════════════════════════════════════════════════════
+        // FSM State Classes
+        // Pattern mirrors BattleManager's inner state classes.
+        // Each receives `this` (the BattleUI) in its constructor so it can
+        // access all panels and the BattleManager without extra coupling.
+        // ══════════════════════════════════════════════════════════════════════
+
+        #region State: Idle
+
+        private sealed class IdleBattleUIState : State
+        {
+            private readonly BattleUI _ui;
+            public IdleBattleUIState(BattleUI ui) => _ui = ui;
+
+            public override void OnEnter()
+            {
+                _ui.handPanel?.ClearHand();
+                if (_ui.endTurnButton  != null) _ui.endTurnButton.interactable = false;
+                if (_ui.improviseButton != null) _ui.improviseButton.gameObject.SetActive(false);
+                _ui.UpdateStatsDisplay();
+            }
+        }
+
+        #endregion
+
+        #region State: PlayerTurn
+
+        private sealed class PlayerTurnBattleUIState : State
+        {
+            private readonly BattleUI _ui;
+            public PlayerTurnBattleUIState(BattleUI ui) => _ui = ui;
+
+            public override void OnEnter()
+            {
+                _ui.handPanel?.RefreshNormalHand(_ui.battleManager, _ui.OnCardButtonClicked);
+                if (_ui.endTurnButton != null) _ui.endTurnButton.interactable = true;
+
+                bool showImprovise = _ui.battleManager?.IsImproviseAvailable ?? false;
+                if (_ui.improviseButton != null)
+                    _ui.improviseButton.gameObject.SetActive(showImprovise);
+
+                _ui.UpdateStatsDisplay();
+                _ui.UpdateBattleInfo();
+            }
+        }
+
+        #endregion
+
+        #region State: Improvise
+
+        private sealed class ImproviseBattleUIState : State
+        {
+            private readonly BattleUI _ui;
+            public ImproviseBattleUIState(BattleUI ui) => _ui = ui;
+
+            public override void OnEnter()
+            {
+                if (_ui.cardSelectionPanel == null) return;
+
+                _ui.cardSelectionPanel.OnCardReturnedToHand += OnCardReturned;
+                _ui.cardSelectionPanel.Open("Improvise", _ui.OnImproviseConfirmed);
+                _ui.handPanel?.RefreshImproviseHand(_ui.battleManager, _ui.cardSelectionPanel);
+
+                // Hide the Improvise button while the modal is open
+                if (_ui.improviseButton != null)
+                    _ui.improviseButton.gameObject.SetActive(false);
+            }
+
+            public override void OnExit()
+            {
+                if (_ui.cardSelectionPanel != null)
+                    _ui.cardSelectionPanel.OnCardReturnedToHand -= OnCardReturned;
+                // Panel closes itself via OnDiscardClicked → OnImproviseConfirmed
+            }
+
+            private void OnCardReturned(CardData card)
+            {
+                // A card was sent back from the discard zone — rebuild the hand to show it again.
+                _ui.handPanel?.RefreshImproviseHand(_ui.battleManager, _ui.cardSelectionPanel);
+            }
+        }
+
+        #endregion
+
+        #region State: BattleEnd
+
+        private sealed class BattleEndBattleUIState : State
+        {
+            private readonly BattleUI _ui;
+            public BattleEndBattleUIState(BattleUI ui) => _ui = ui;
+
+            public override void OnEnter()
+            {
+                _ui.resultPanel?.Show(_ui._lastBattleResult.isVictory);
+                _ui.handPanel?.ClearHand();
+                if (_ui.endTurnButton   != null) _ui.endTurnButton.interactable = false;
+                if (_ui.improviseButton != null) _ui.improviseButton.gameObject.SetActive(false);
+                _ui.UpdateStatsDisplay();
+            }
         }
 
         #endregion
