@@ -91,7 +91,7 @@ namespace Crookedile.Editor
                     effects: new CardEffect[]
                     {
                         CreateDamageEffect(4),
-                        CreateGainHostilityEffect(1)
+                        CreateReduceHostilityEffect(1)
                     }
                 );
             }
@@ -181,7 +181,7 @@ namespace Crookedile.Editor
                     effects: new CardEffect[]
                     {
                         CreateDamageEffect(4),
-                        CreateGainHostilityEffect(1)
+                        CreateReduceHostilityEffect(1)
                     }
                 );
             }
@@ -304,7 +304,7 @@ namespace Crookedile.Editor
                     effects: new CardEffect[]
                     {
                         CreateDamageEffect(5),
-                        CreateGainHostilityEffect(2)
+                        CreateReduceHostilityEffect(2)
                     }
                 );
             }
@@ -323,7 +323,7 @@ namespace Crookedile.Editor
                     {
                         CreateDamageEffect(6),
                         CreateGainComposureEffect(3),
-                        CreateGainHostilityEffect(2)
+                        CreateReduceHostilityEffect(2)
                     }
                 );
             }
@@ -447,11 +447,6 @@ namespace Crookedile.Editor
         private static CardEffect CreateComposureEqualToHostilityEffect()
         {
             return CreateEffect(EffectCategory.Resource, TargetType.Self, resourceType: ResourceEffectType.ComposureEqualToHostility);
-        }
-
-        private static CardEffect CreateGainHostilityEffect(int amount)
-        {
-            return CreateEffect(EffectCategory.Resource, TargetType.Self, resourceType: ResourceEffectType.GainHostility, resourceAmount: amount);
         }
 
         private static CardEffect CreateReduceHostilityEffect(int amount)

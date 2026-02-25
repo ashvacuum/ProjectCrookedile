@@ -17,7 +17,7 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: 6d0a4f17c76454c48b66176d60d04bdb, type: 3}
-  _description: Deal 4 Resolve damage. Gain 1 Hostility.
+  _description: Deal 4 Resolve damage. Reduce 1 Hostility.
   _flavorText: Everyone has a price. Yours is just lower.
   _costs:
   - _costType: 1
@@ -46,7 +46,7 @@ MonoBehaviour:
     _damageType: 0
     _damageAmount: 3
     _randomDamageRange: {x: 3, y: 9}
-    _resourceType: 4
+    _resourceType: 5
     _resourceAmount: 1
     _cardManipulationType: 0
     _cardAmount: 2

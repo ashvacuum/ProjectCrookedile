@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: 150a8429-bca3-475b-abf9-330381a6e252
   _cardName: Dynasty Network
-  _cardType: 2
+  _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: d37888b5dc7798c469d7f9c2789f24e7, type: 3}
   _description: Discard 1 card. Draw 2 cards.
@@ -27,7 +27,8 @@ MonoBehaviour:
     _minimumCost: 0
     _maximumCost: 99
   _effects:
-  - _category: 2
+  - _name: 
+    _category: 2
     _target: 1
     _damageType: 0
     _damageAmount: 3
@@ -41,7 +42,9 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
-  - _category: 2
+    _amountSource: 0
+  - _name: 
+    _category: 2
     _target: 1
     _damageType: 0
     _damageAmount: 3
@@ -55,10 +58,12 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
+    _amountSource: 0
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
   _tags:
   - nepobaby
   _isStarterCard: 1
   _isUnlockable: 0
-  _sentimentTags: 
+  _policyLean: 3
+  _triggeredEffects: []

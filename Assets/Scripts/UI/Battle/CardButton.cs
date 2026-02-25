@@ -85,6 +85,12 @@ namespace Crookedile.UI.Battle
         [Tooltip("Plays when the card is discarded from hand")]
         public MMFeedbacks discardFeedback;
 
+        // ─── Selection (CardSelectionPanel) ───────────────────────────────────────
+
+        [Header("Selection")]
+        [Tooltip("Overlay Image shown when this card is selected in a CardSelectionPanel. Assign a colored border child.")]
+        [SerializeField] private Image _selectionOutline;
+
         // ─── Runtime State ────────────────────────────────────────────────────────
 
         private CardData cardData;
@@ -161,6 +167,16 @@ namespace Crookedile.UI.Battle
             if (cardData == null) return;
             isPlayable = CanAfford(currentActionPoints);
             UpdateDisplay();
+        }
+
+        /// <summary>
+        /// Shows or hides the selection outline overlay.
+        /// Called by CardSelectionPanel to indicate whether this card is currently selected.
+        /// </summary>
+        public void SetSelected(bool selected)
+        {
+            if (_selectionOutline != null)
+                _selectionOutline.enabled = selected;
         }
 
         /// <summary>

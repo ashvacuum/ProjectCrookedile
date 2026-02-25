@@ -1326,7 +1326,7 @@ MonoBehaviour:
   discardCountText: {fileID: 1197015673}
   exhaustCountText: {fileID: 74581882}
   deckCountText: {fileID: 898089908}
-  cardZonePanel: {fileID: 0}
+  cardZonePanel: {fileID: 392446031}
 --- !u!114 &507472322
 MonoBehaviour:
   m_ObjectHideFlags: 0

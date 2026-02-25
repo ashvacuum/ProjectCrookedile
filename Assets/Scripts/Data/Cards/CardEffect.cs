@@ -110,7 +110,6 @@ namespace Crookedile.Data.Cards
                 { "Composure/Lose Composure", ResourceEffectType.LoseComposure },
                 { "Composure/Consume All Composure", ResourceEffectType.ConsumeAllComposure },
                 { "Composure/Composure = Hostility (Actor)", ResourceEffectType.ComposureEqualToHostility },
-                { "Hostility/Gain Hostility", ResourceEffectType.GainHostility },
                 { "Hostility/Reduce Hostility", ResourceEffectType.ReduceHostility },
                 { "Action Points/Gain AP (This Turn)", ResourceEffectType.GainActionPoints },
                 { "Action Points/Gain AP (Next Turn)", ResourceEffectType.GainActionPointsNextTurn },
@@ -199,7 +198,6 @@ namespace Crookedile.Data.Cards
             return _category == EffectCategory.Resource &&
                    (_resourceType == ResourceEffectType.GainComposure ||
                     _resourceType == ResourceEffectType.LoseComposure ||
-                    _resourceType == ResourceEffectType.GainHostility ||
                     _resourceType == ResourceEffectType.ReduceHostility ||
                     _resourceType == ResourceEffectType.GainActionPoints ||
                     _resourceType == ResourceEffectType.GainActionPointsNextTurn ||
@@ -220,7 +218,6 @@ namespace Crookedile.Data.Cards
             {
                 return _resourceType == ResourceEffectType.GainComposure   ||
                        _resourceType == ResourceEffectType.LoseComposure   ||
-                       _resourceType == ResourceEffectType.GainHostility   ||
                        _resourceType == ResourceEffectType.ReduceHostility ||
                        _resourceType == ResourceEffectType.GainActionPoints ||
                        _resourceType == ResourceEffectType.GainActionPointsNextTurn ||
@@ -365,7 +362,6 @@ namespace Crookedile.Data.Cards
                 ResourceEffectType.LoseComposure => $"Lose {_resourceAmount} Composure",
                 ResourceEffectType.ConsumeAllComposure => "Consume all Composure",
                 ResourceEffectType.ComposureEqualToHostility => "Gain Composure = Hostility",
-                ResourceEffectType.GainHostility => $"Gain {_resourceAmount} Hostility",
                 ResourceEffectType.ReduceHostility => $"Reduce {_resourceAmount} Hostility",
                 ResourceEffectType.GainActionPoints => $"Gain {_resourceAmount} AP",
                 ResourceEffectType.GainActionPointsNextTurn => $"Gain {_resourceAmount} AP next turn",
@@ -442,15 +438,15 @@ namespace Crookedile.Data.Cards
 
     public enum ResourceEffectType
     {
-        GainComposure,
-        LoseComposure,
-        ConsumeAllComposure,
-        ComposureEqualToHostility,
-        GainHostility,
-        ReduceHostility,
-        GainActionPoints,
-        GainActionPointsNextTurn,
-        HealResolve
+        GainComposure             = 0,
+        LoseComposure             = 1,
+        ConsumeAllComposure       = 2,
+        ComposureEqualToHostility = 3,
+        // 4 intentionally skipped — GainHostility was here; removed to preserve .asset serialization
+        ReduceHostility           = 5,
+        GainActionPoints          = 6,
+        GainActionPointsNextTurn  = 7,
+        HealResolve               = 8,
     }
 
     public enum CardManipulationType

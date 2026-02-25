@@ -22,6 +22,10 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField] private int _startingHandSize = 5;
         [SerializeField] private int _cardsPerTurn = 1;
 
+        [Header("Origin Passives")]
+        [Tooltip("Assign all three OriginPassive assets here (FaithLeader, NepoBaby, Actor).")]
+        [SerializeField] private OriginPassive[] _originPassives;
+
         // State Machine
         private StateMachine<BattleState> _stateMachine;
 
@@ -39,8 +43,12 @@ namespace Crookedile.Gameplay.Battle
         // Effect Resolver
         private EffectResolver _effectResolver;
 
+        // Passive ability resolver — one per battle, origin-specific
+        private PassiveResolver _passiveResolver;
+
         // Turn tracking
         private int _currentTurn = 0;
+        private int _playerTurnNumber = 0;   // counts only the player's turns (for Actor Improvise)
         private bool _isPlayerTurn = true;
 
         // Battle result
@@ -54,6 +62,14 @@ namespace Crookedile.Gameplay.Battle
         public OriginType  PlayerOrigin  => _playerOrigin;
         public int         CurrentTurn   => _currentTurn;
         public bool        IsPlayerTurn  => _isPlayerTurn;
+
+        // Phase B — Improvise (Actor passive)
+        /// <summary>True when the Actor's Improvise window is open this turn.</summary>
+        public bool IsImproviseAvailable => _passiveResolver?.ImproviseAvailable ?? false;
+
+        /// <summary>Phase B: UI calls this after the player selects cards to discard.</summary>
+        public bool TryPlayerImprovise(List<CardData> cardsToDiscard)
+            => _passiveResolver?.TryImprovise(_playerDeck, cardsToDiscard) ?? false;
 
         // Multi-enemy
         public IReadOnlyList<EnemyController> Enemies    => _enemies;
@@ -132,8 +148,16 @@ namespace Crookedile.Gameplay.Battle
             // Effect resolver — initially targets the first enemy; receives full enemy list for multi-target effects
             _effectResolver = new EffectResolver(_playerStats, FocusedEnemy.Stats, _playerDeck, _enemies);
 
+            // Passive resolver — find the asset matching this run's origin (null-safe: no passive if asset missing)
+            var passive = _originPassives != null
+                ? System.Array.Find(_originPassives, p => p != null && p.Origin == _playerOrigin)
+                : null;
+            _passiveResolver = new PassiveResolver(passive);
+            _effectResolver.OnPlayerDamageTaken += dmg => _passiveResolver.FireOnDamageTaken(_playerStats, dmg);
+
             // Reset counters
             _currentTurn = 0;
+            _playerTurnNumber = 0;
             _isPlayerTurn = true;
 
             EventBus.Publish(new BattleStartedEvent { Setup = setup });
@@ -209,6 +233,7 @@ namespace Crookedile.Gameplay.Battle
 
             EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
             _effectResolver.ResolveCardEffects(card, isPlayerCard: true);
+            _passiveResolver?.FireOnCardPlayed(_playerStats);
             ApplyPolicyHostilityShifts(card);
             CheckAndAdvanceFocusAfterCardPlay();
 
@@ -431,6 +456,10 @@ namespace Crookedile.Gameplay.Battle
                 // Draw player's opening hand; enemies have no deck
                 _manager._playerDeck.StartBattle(_manager._startingHandSize);
 
+                // Fire battle-start passive AFTER the opening hand is dealt
+                // (e.g. Faith Leader's Opening Prayer draws 1 extra card on top of the base hand)
+                _manager._passiveResolver?.FireBattleStart(_manager._playerDeck);
+
                 _manager.TransitionToState(BattleState.TurnStart);
             }
         }
@@ -454,6 +483,10 @@ namespace Crookedile.Gameplay.Battle
 
                 if (_manager.IsPlayerTurn)
                 {
+                    // Track the player's personal turn count and fire per-player-turn passives
+                    _manager._playerTurnNumber++;
+                    _manager._passiveResolver?.FireTurnStart(_manager._playerTurnNumber, _manager._playerStats);
+
                     // Draw cards for the player
                     _manager._playerDeck.StartTurn(_manager._cardsPerTurn);
 

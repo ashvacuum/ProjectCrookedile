@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using Crookedile.Data.Enemy;
 using Crookedile.Gameplay;
@@ -47,6 +48,7 @@ namespace Crookedile.Gameplay.Battle
             _enemyData   = enemyData;
             _moveIndex   = 0;
             Stats        = new BattleStats(enemyData.MaxResolve, maxActionPoints: 0);
+            Stats.SetHostilityLimits(enemyData.MinHostility, enemyData.MaxHostility);
             Stats.SetHostility(enemyData.StartingHostility);
             StatusEffects = new StatusEffectManager(enemyData.EnemyName);
 
@@ -69,6 +71,21 @@ namespace Crookedile.Gameplay.Battle
             {
                 CurrentIntent = null;
                 return null;
+            }
+
+            // When receptive (negative hostility), prefer non-attack moves (composure/defend)
+            if (Stats.IsReceptive)
+            {
+                var defensiveMoves = moves
+                    .Where(m => m.MoveType != EnemyMoveType.Attack)
+                    .ToList();
+
+                if (defensiveMoves.Count > 0)
+                {
+                    CurrentIntent = defensiveMoves[Random.Range(0, defensiveMoves.Count)];
+                    return CurrentIntent;
+                }
+                // No non-attack moves available — fall through to normal selection
             }
 
             switch (_enemyData.MovePattern)

@@ -51,6 +51,12 @@ namespace Crookedile.Data.Enemy
                  "Negative = receptive (open to persuasion), 0 = neutral/guarded, positive = hostile.")]
         [SerializeField] private int _startingHostility = 0;
 
+        [Tooltip("Maximum hostile level this enemy can reach (positive). Default 5.")]
+        [SerializeField] private int _maxHostility = 5;
+
+        [Tooltip("Maximum receptive level this enemy can reach (negative). Default -3.")]
+        [SerializeField] private int _minHostility = -3;
+
         // ─── Demographics ─────────────────────────────────────────────────────────
 
         [Header("Demographics")]
@@ -85,6 +91,8 @@ namespace Crookedile.Data.Enemy
         public Sprite           Portrait           => _portrait;
         public int              MaxResolve         => _maxResolve;
         public int              StartingHostility  => _startingHostility;
+        public int              MaxHostility       => _maxHostility;
+        public int              MinHostility       => _minHostility;
         public DemographicClass  DemographicClass  => _demographicClass;
         public DemographicValues DemographicValues => _demographicValues;
         public EnemyMovePattern MovePattern        => _movePattern;

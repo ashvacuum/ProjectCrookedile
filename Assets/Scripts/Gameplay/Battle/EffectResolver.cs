@@ -24,8 +24,23 @@ namespace Crookedile.Gameplay.Battle
         private StatusEffectManager _playerStatusEffects;
         private StatusEffectManager _opponentStatusEffects; // focused enemy's status mgr
 
-        // Events for effect notifications
+        // ── C# events — subscribe via += in StartBattle(); unsubscribe in cleanup ──────
+
+        /// <summary>
+        /// Fired once per <see cref="CardEffect"/> after it resolves, regardless of target or type.
+        /// Useful for analytics, achievement tracking, and triggered card effects that react
+        /// to specific effect types (e.g. "whenever you deal damage, gain 1 Composure").
+        /// Parameters: the CardEffect resolved; the BattleStats of the target it was applied to.
+        /// </summary>
         public event Action<CardEffect, BattleStats> OnEffectApplied;
+
+        /// <summary>
+        /// Fired after all modifiers whenever the player takes actual Resolve damage (amount &gt; 0).
+        /// Modifiers applied before this fires: Composure reduction, Hostility multiplier, damage caps.
+        /// Subscribed by <c>PassiveResolver</c> to trigger <see cref="Data.PassiveTrigger.OnDamageTaken"/> passives.
+        /// Parameter: actual damage dealt to the player's Resolve.
+        /// </summary>
+        public event Action<int> OnPlayerDamageTaken;
 
         public EffectResolver(BattleStats playerStats, BattleStats opponentStats,
                               DeckManager playerDeck,
@@ -326,11 +341,6 @@ namespace Crookedile.Gameplay.Battle
                     ApplyComposureEqualToHostility(caster);
                     break;
 
-                case ResourceEffectType.GainHostility:
-                    // Hostility is the enemy's number line — always shifts opponent, never caster
-                    ApplyGainHostility(_opponentStats, effect.GetEffectiveAmount(ctx));
-                    break;
-
                 case ResourceEffectType.ReduceHostility:
                     ApplyReduceHostility(_opponentStats, effect.GetEffectiveAmount(ctx));
                     break;
@@ -438,6 +448,10 @@ namespace Crookedile.Gameplay.Battle
             int actualDamage = target.DamageResolve(modifiedDamage, attacker.CurrentComposure);
             GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage (base: {baseDamage}, modified: {modifiedDamage}, Composure: {attacker.CurrentComposure}, HostilityMult: {(attacker != _playerStats && attacker.CurrentHostility > 0 ? attacker.HostilityDamageMultiplier.ToString("F2") : "1.00")})");
 
+            // Notify passive system when the player is the one taking damage
+            if (target == _playerStats && actualDamage > 0)
+                OnPlayerDamageTaken?.Invoke(actualDamage);
+
             // Accumulate into context so triggered effects can react (e.g. lifesteal)
             if (ctx != null)
             {
@@ -478,6 +492,10 @@ namespace Crookedile.Gameplay.Battle
             // Apply damage with Composure bonus
             int actualDamage = target.DamageResolve(modifiedDamage, attacker.CurrentComposure);
             GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} random Resolve damage (rolled {randomDamage} from {minDamage}-{maxDamage}, modified: {modifiedDamage})");
+
+            // Notify passive system when the player is the one taking damage
+            if (target == _playerStats && actualDamage > 0)
+                OnPlayerDamageTaken?.Invoke(actualDamage);
 
             if (ctx != null)
             {
@@ -533,6 +551,10 @@ namespace Crookedile.Gameplay.Battle
             int actualDamage = target.DamageResolve(modifiedDamage, 0);
             GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage equal to Composure ({composure}, modified: {modifiedDamage})");
 
+            // Notify passive system when the player is the one taking damage
+            if (target == _playerStats && actualDamage > 0)
+                OnPlayerDamageTaken?.Invoke(actualDamage);
+
             if (ctx != null)
             {
                 ctx.LastDamageDealt += actualDamage;
@@ -549,12 +571,6 @@ namespace Crookedile.Gameplay.Battle
         #endregion
 
         #region Hostility
-
-        private void ApplyGainHostility(BattleStats caster, int amount)
-        {
-            caster.GainHostility(amount);
-            GameLogger.LogInfo<EffectResolver>($"Gained {amount} Hostility");
-        }
 
         private void ApplyReduceHostility(BattleStats caster, int amount)
         {

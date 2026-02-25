@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Policeman
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Enemy.EnemyData
   _enemyName: Policeman
-  _portrait: {fileID: 0}
+  _portrait: {fileID: 21300000, guid: ed6edc11b3f49794d99c71d6e00cf075, type: 3}
   _maxResolve: 12
   _startingHostility: -5
-  _sensitiveRaiseTag: 1
-  _sensitiveLowerTag: 4
+  _demographicClass: 1
+  _demographicValues: 2
   _startingEffects:
   - _type: 15
     _stacks: 3
