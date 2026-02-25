@@ -44,6 +44,10 @@ namespace Crookedile.UI.Battle
 
         [Header("Controls")]
         [SerializeField] private Button endTurnButton;
+        [Tooltip("Actor passive — shown on the Actor's first player turn only.")]
+        [SerializeField] private Button             improviseButton;
+        [Tooltip("Card selection modal shared by Improvise and ChooseFromDiscard effects.")]
+        [SerializeField] private CardSelectionPanel cardSelectionPanel;
 
         [Header("Battle Log")]
         [SerializeField] private TMP_Text battleLogText;
@@ -76,9 +80,10 @@ namespace Crookedile.UI.Battle
         {
             // Setup button listeners
             if (endTurnButton != null)
-            {
                 endTurnButton.onClick.AddListener(OnEndTurnClicked);
-            }
+
+            improviseButton?.onClick.AddListener(OnImproviseClicked);
+            if (improviseButton != null) improviseButton.gameObject.SetActive(false);
 
             // Hide result panels
             if (victoryPanel != null) victoryPanel.SetActive(false);
@@ -307,6 +312,15 @@ namespace Crookedile.UI.Battle
                                   battleManager.CurrentState == BattleState.PlayerTurn;
                 endTurnButton.interactable = canEndTurn;
             }
+
+            // Show/hide Improvise button (Actor passive — first player turn only)
+            if (improviseButton != null)
+            {
+                bool showImprovise = battleManager.IsPlayerTurn
+                                  && battleManager.CurrentState == BattleState.PlayerTurn
+                                  && battleManager.IsImproviseAvailable;
+                improviseButton.gameObject.SetActive(showImprovise);
+            }
         }
 
         private void UpdateHandDisplay()
@@ -441,6 +455,25 @@ namespace Crookedile.UI.Battle
                     HandIndex = handIndex
                 });
             }
+        }
+
+        private void OnImproviseClicked()
+        {
+            if (cardSelectionPanel == null || battleManager == null) return;
+
+            var hand = new List<CardData>(battleManager.PlayerDeck.Hand);
+            cardSelectionPanel.Open(
+                title:       "Improvise",
+                instruction: "Select cards to discard and redraw, or confirm to skip",
+                cards:       hand,
+                minSelect:   0,          // confirm always enabled; empty selection = skip
+                maxSelect:   hand.Count,
+                onConfirm:   selectedCards =>
+                {
+                    battleManager.TryPlayerImprovise(selectedCards);
+                    RefreshUI();   // rebuilds hand (if cards were swapped); hides Improvise button either way
+                }
+            );
         }
 
         #endregion

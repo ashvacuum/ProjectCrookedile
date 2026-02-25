@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: e96f0b67-3e5b-42c1-8b23-ca2776503bf0
   _cardName: Fan Favorite
-  _cardType: 2
+  _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: ac0547cfc01ed294c86ba8f9c61a11a8, type: 3}
-  _description: Lose 3 Composure. Reduce Hostility by 3.
+  _description: Lose All Composure. Reduce Hostility by Lost Composure.
   _flavorText: They love you. Remind yourself of that.
   _costs:
   - _costType: 1
@@ -27,12 +27,13 @@ MonoBehaviour:
     _minimumCost: 0
     _maximumCost: 99
   _effects:
-  - _category: 1
+  - _name: 
+    _category: 1
     _target: 1
     _damageType: 0
     _damageAmount: 3
     _randomDamageRange: {x: 3, y: 9}
-    _resourceType: 1
+    _resourceType: 2
     _resourceAmount: 3
     _cardManipulationType: 0
     _cardAmount: 2
@@ -41,7 +42,9 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
-  - _category: 1
+    _amountSource: 0
+  - _name: 
+    _category: 1
     _target: 1
     _damageType: 0
     _damageAmount: 3
@@ -55,10 +58,12 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
+    _amountSource: 3
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
   _tags:
   - actor
   _isStarterCard: 1
   _isUnlockable: 0
-  _sentimentTags: 
+  _policyLean: 3
+  _triggeredEffects: []

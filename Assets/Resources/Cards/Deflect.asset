@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: 8334ba55-7a25-499c-ac58-7ffb1561d1ef
   _cardName: Deflect
-  _cardType: 2
+  _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: 83288bcd78413154bb4a2927058b9782, type: 3}
   _description: Gain 3 Composure. Reduce Hostility by 1.
@@ -27,7 +27,8 @@ MonoBehaviour:
     _minimumCost: 0
     _maximumCost: 99
   _effects:
-  - _category: 1
+  - _name: 
+    _category: 1
     _target: 1
     _damageType: 0
     _damageAmount: 3
@@ -41,24 +42,28 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
-  - _category: 1
-    _target: 1
+    _amountSource: 0
+  - _name: 
+    _category: 1
+    _target: 0
     _damageType: 0
     _damageAmount: 3
     _randomDamageRange: {x: 3, y: 9}
     _resourceType: 5
     _resourceAmount: 1
-    _cardManipulationType: 0
+    _cardManipulationType: 1
     _cardAmount: 2
     _cardToAdd: {fileID: 0}
     _costReduction: 1
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
+    _amountSource: 1
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
   _tags:
   - faithleader
   _isStarterCard: 1
   _isUnlockable: 0
-  _sentimentTags: 
+  _policyLean: 3
+  _triggeredEffects: []

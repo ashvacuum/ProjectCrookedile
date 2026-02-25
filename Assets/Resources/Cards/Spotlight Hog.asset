@@ -17,7 +17,7 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: 412cfd2df8c5ca74b837c99a165f6a8b, type: 3}
-  _description: Deal 6 Resolve damage. Gain 3 Composure. Gain 2 Hostility.
+  _description: Deal 6 Resolve damage. Gain 3 Composure. Reduce 2 Hostility.
   _flavorText: They can't look away. Neither can you.
   _costs:
   - _costType: 1
@@ -60,7 +60,7 @@ MonoBehaviour:
     _damageType: 0
     _damageAmount: 3
     _randomDamageRange: {x: 3, y: 9}
-    _resourceType: 4
+    _resourceType: 5
     _resourceAmount: 2
     _cardManipulationType: 0
     _cardAmount: 2

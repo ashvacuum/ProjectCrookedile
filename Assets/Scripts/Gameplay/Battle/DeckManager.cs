@@ -291,6 +291,29 @@ namespace Crookedile.Gameplay.Battle
             return true;
         }
 
+        /// <summary>
+        /// Moves a specific card from the discard pile directly into the hand.
+        /// Used by ChooseFromDiscardToHand effects and CardSelectionPanel confirm callbacks.
+        /// Returns false if the card is not in discard or the hand is full.
+        /// </summary>
+        public bool MoveFromDiscardToHand(CardData card)
+        {
+            if (card == null || !_discard.Contains(card))
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToHand — card not in discard");
+                return false;
+            }
+            if (IsHandFull)
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToHand — hand is full");
+                return false;
+            }
+            _discard.Remove(card);
+            _hand.Add(card);
+            GameLogger.LogInfo<DeckManager>($"{_ownerName}: Moved {card.CardName} from discard to hand");
+            return true;
+        }
+
         #endregion
 
         #region Shuffling

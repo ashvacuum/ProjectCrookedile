@@ -27,6 +27,9 @@ namespace Crookedile.Gameplay
         [Tooltip("Hostility - Self-inflicted debuff (opponent deals more damage based on this)")]
         [SerializeField] private int _currentHostility;
 
+        private int _maxHostility = 10;   // overridden per-enemy by SetHostilityLimits
+        private int _minHostility = -10;  // overridden per-enemy by SetHostilityLimits
+
         [Header("Turn Resources")]
         [Tooltip("Action Points available this turn to play cards")]
         [SerializeField] private int _currentActionPoints;
@@ -52,6 +55,18 @@ namespace Crookedile.Gameplay
         /// Is this combatant defeated? (Resolve <= 0)
         /// </summary>
         public bool IsDefeated => _currentResolve <= 0;
+
+        /// <summary>
+        /// True when the enemy is actively hostile (positive hostility).
+        /// Damage multiplier applies. Reducing to 0 removes the bonus but does NOT unlock receptive behavior.
+        /// </summary>
+        public bool IsHostile => _currentHostility > 0;
+
+        /// <summary>
+        /// True when the enemy is in a receptive/de-escalated state (negative hostility).
+        /// Requires pushing past 0 into negative territory — neutral (0) still attacks normally.
+        /// </summary>
+        public bool IsReceptive => _currentHostility < 0;
 
         /// <summary>
         /// Percentage of Resolve remaining (0.0 to 1.0)
@@ -191,23 +206,33 @@ namespace Crookedile.Gameplay
         #region Hostility Management
 
         /// <summary>
-        /// Shifts hostility up (makes enemy more hostile). Clamped at +10.
+        /// Sets per-enemy hostility clamps. Called by EnemyController after construction.
+        /// Player stats keep the default ±10 fallback (hostility is enemy-only).
+        /// </summary>
+        public void SetHostilityLimits(int min, int max)
+        {
+            _minHostility = min;
+            _maxHostility = max;
+        }
+
+        /// <summary>
+        /// Shifts hostility up (makes enemy more hostile). Clamped at per-enemy max.
         /// </summary>
         public void GainHostility(int amount)
         {
             _currentHostility += amount;
-            _currentHostility = Mathf.Min(10, _currentHostility);
+            _currentHostility = Mathf.Min(_maxHostility, _currentHostility);
             Debug.Log($"Gained {amount} Hostility. Current: {_currentHostility}");
         }
 
         /// <summary>
-        /// Shifts hostility down (makes enemy more receptive). Clamped at -10.
+        /// Shifts hostility down (makes enemy more receptive). Clamped at per-enemy min.
         /// </summary>
         /// <returns>The amount passed in (hostility may have been clamped internally).</returns>
         public int ReduceHostility(int amount)
         {
             _currentHostility -= amount;
-            _currentHostility = Mathf.Max(-10, _currentHostility);
+            _currentHostility = Mathf.Max(_minHostility, _currentHostility);
             Debug.Log($"Reduced {amount} Hostility. Current: {_currentHostility}");
             return amount;
         }
@@ -217,7 +242,7 @@ namespace Crookedile.Gameplay
         /// </summary>
         public void SetHostility(int value)
         {
-            _currentHostility = Mathf.Clamp(value, -10, 10);
+            _currentHostility = Mathf.Clamp(value, _minHostility, _maxHostility);
             Debug.Log($"Hostility set to: {_currentHostility}");
         }
 

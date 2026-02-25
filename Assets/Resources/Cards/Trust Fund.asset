@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: a750964b-0576-48f4-b809-b6ec75e7ef9f
   _cardName: Trust Fund
-  _cardType: 2
+  _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: ba2fe25ba33df794a9b1a7dd348aeb0b, type: 3}
   _description: Gain 2 Composure. Gain 1 Action Point this turn.
@@ -27,7 +27,8 @@ MonoBehaviour:
     _minimumCost: 0
     _maximumCost: 99
   _effects:
-  - _category: 1
+  - _name: 
+    _category: 1
     _target: 1
     _damageType: 0
     _damageAmount: 3
@@ -41,7 +42,9 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
-  - _category: 1
+    _amountSource: 0
+  - _name: 
+    _category: 1
     _target: 1
     _damageType: 0
     _damageAmount: 3
@@ -55,10 +58,12 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
+    _amountSource: 0
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
   _tags:
   - nepobaby
   _isStarterCard: 1
   _isUnlockable: 0
-  _sentimentTags: 
+  _policyLean: 1
+  _triggeredEffects: []
