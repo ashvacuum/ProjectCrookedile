@@ -100,11 +100,16 @@ namespace Crookedile.UI.Battle
         private bool isHovered;
         private bool isPlayable;
 
-        private Vector3 baseScale;
-        private Vector3 basePosition;
-        private Vector3 targetScale;
-        private Vector3 targetPosition;
-        private int baseSiblingIndex;
+        private Vector3    baseScale;
+        private Vector3    basePosition;
+        private Vector3    targetScale;
+        private Vector3    targetPosition;
+        private Quaternion baseRotation;
+        private Quaternion targetRotation;
+        private int        baseSiblingIndex;
+        // True once SetBasePosition() has been called explicitly. Prevents Update() from
+        // lerping cards toward (0,0) before a layout group has had a chance to position them.
+        private bool       _basePositionSet;
 
         // Drag state
         private bool      _isDragging;
@@ -127,6 +132,8 @@ namespace Crookedile.UI.Battle
             basePosition   = transform.localPosition;
             targetScale    = baseScale;
             targetPosition = basePosition;
+            baseRotation   = transform.localRotation;
+            targetRotation = baseRotation;
 
             Canvas c = GetComponentInParent<Canvas>();
             _rootCanvas = c != null ? c.rootCanvas : null;
@@ -134,9 +141,16 @@ namespace Crookedile.UI.Battle
 
         private void Update()
         {
-            // Smooth hover scale & lift
-            transform.localScale    = Vector3.Lerp(transform.localScale,    targetScale,    Time.deltaTime * hoverLerpSpeed);
-            transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, Time.deltaTime * hoverLerpSpeed);
+            // Smooth hover scale, lift, and rotation.
+            // Position and rotation lerps are skipped until SetBasePosition() has been called —
+            // this prevents cards spawned inside layout groups from animating before the layout
+            // pass has assigned their real slot positions and arc-tilt angles.
+            transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * hoverLerpSpeed);
+            if (_basePositionSet)
+            {
+                transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, Time.deltaTime * hoverLerpSpeed);
+                transform.localRotation = Quaternion.Lerp(transform.localRotation, targetRotation, Time.deltaTime * hoverLerpSpeed);
+            }
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
@@ -151,10 +165,13 @@ namespace Crookedile.UI.Battle
             onClickCallback = onClick;
             isPlayable      = CanAfford(currentActionPoints);
 
-            baseScale      = transform.localScale;
-            basePosition   = transform.localPosition;
-            targetScale    = baseScale;
-            targetPosition = basePosition;
+            baseScale        = transform.localScale;
+            basePosition     = transform.localPosition;
+            targetScale      = baseScale;
+            targetPosition   = basePosition;
+            baseRotation     = transform.localRotation;
+            targetRotation   = baseRotation;
+            _basePositionSet = false;   // cleared until SetBasePosition() is called by the layout
 
             UpdateDisplay();
         }
@@ -186,12 +203,20 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void SetBasePosition(Vector3 position)
         {
-            basePosition = position;
+            _basePositionSet = true;
+            basePosition     = position;
 
-            // Only update the target if we're not mid-hover; otherwise the card
-            // would snap back to the new base while the player is still mousing over it.
+            // Capture the arc-tilt rotation that CardHandLayout wrote to localRotation
+            // immediately before calling this method. This is the card's canonical resting angle.
+            baseRotation = transform.localRotation;
+
+            // Only update targets if not mid-hover; otherwise the card would snap back
+            // to its new base values while the player is still mousing over it.
             if (!isHovered)
+            {
                 targetPosition = position;
+                targetRotation = baseRotation;
+            }
         }
 
         /// <summary>
@@ -228,6 +253,7 @@ namespace Crookedile.UI.Battle
 
             targetScale    = baseScale * hoverScale;
             targetPosition = basePosition + new Vector3(0f, hoverLiftPixels, 0f);
+            targetRotation = Quaternion.identity;   // straighten the arc tilt on hover
 
             // Bring this card in front of all its neighbours while hovered.
             // CardHandLayout.SetSiblingOrder() restores natural z-order on the next hand rebuild.
@@ -243,6 +269,7 @@ namespace Crookedile.UI.Battle
 
             targetScale    = baseScale;
             targetPosition = basePosition;
+            targetRotation = baseRotation;          // return to arc tilt
             transform.SetSiblingIndex(baseSiblingIndex);
 
             hoverExitFeedback?.PlayFeedbacks();
@@ -259,9 +286,11 @@ namespace Crookedile.UI.Battle
             _dragStartScreenPos = eventData.position;
             DraggedCard         = this;
 
-            // Clear any active hover state so the card returns to its rest scale
-            isHovered    = false;
-            targetScale  = baseScale;
+            // Clear any active hover state so the card returns to its rest state.
+            // Go upright while dragging — it's clearer when aiming at an enemy slot.
+            isHovered      = false;
+            targetScale    = baseScale;
+            targetRotation = Quaternion.identity;
 
             // Re-parent to the root canvas so the card can travel anywhere on screen
             _originalParent = transform.parent;
@@ -313,9 +342,10 @@ namespace Crookedile.UI.Battle
             }
             else
             {
-                // Drag cancelled — snap card back to its resting position in the hand
+                // Drag cancelled — return card to its resting position, scale, and arc tilt
                 targetPosition = basePosition;
                 targetScale    = baseScale;
+                targetRotation = baseRotation;
             }
         }
 
@@ -387,8 +417,7 @@ namespace Crookedile.UI.Battle
 
             if (flavorText != null)
             {
-                flavorText.text    = cardData.FlavorText;
-                flavorText.enabled = !string.IsNullOrEmpty(cardData.FlavorText);
+                flavorText.text = cardData.CardType.ToString();
             }
         }
 
@@ -401,7 +430,7 @@ namespace Crookedile.UI.Battle
         private void UpdateAffordability()
         {
             // Dim the whole card if it can't be played
-            CanvasGroup group = GetComponent<CanvasGroup>();
+            var group = GetComponent<CanvasGroup>();
             if (group != null)
                 group.alpha = isPlayable ? 1f : 0.5f;
         }

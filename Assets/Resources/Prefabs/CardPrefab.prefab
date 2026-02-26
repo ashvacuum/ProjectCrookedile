@@ -237,7 +237,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 180, y: 255}
+  m_SizeDelta: {x: 220, y: 330}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &4407586219784281703
 MonoBehaviour:
@@ -260,19 +260,20 @@ MonoBehaviour:
   flavorText: {fileID: 3251167615347165238}
   cardTypeStrip: {fileID: 2968150544537297758}
   visualSettings: {fileID: 11400000, guid: 414d4ac5ada461d4fa61cbf2f7bae212, type: 2}
-  diplomacyColor: {r: 0.2, g: 0.8, b: 0.2, a: 1}
-  hostilityColor: {r: 0.8, g: 0.2, b: 0.2, a: 1}
-  manipulateColor: {r: 0.6, g: 0.2, b: 0.8, a: 1}
+  pressureColor: {r: 0.2, g: 0.8, b: 0.2, a: 1}
+  rhetoricColor: {r: 0.8, g: 0.2, b: 0.2, a: 1}
+  policyColor: {r: 0.2, g: 0.5, b: 0.9, a: 1}
   unaffordableColor: {r: 0.4, g: 0.4, b: 0.4, a: 0.6}
-  hoverScale: 1.12
-  hoverLerpSpeed: 12
-  hoverLiftPixels: 20
+  hoverScale: 1.2
+  hoverLerpSpeed: 16
+  hoverLiftPixels: 45
   dragUpThreshold: 100
   drawFeedback: {fileID: 0}
   hoverEnterFeedback: {fileID: 0}
   hoverExitFeedback: {fileID: 0}
   selectFeedback: {fileID: 0}
   discardFeedback: {fileID: 0}
+  _selectionOutline: {fileID: 0}
 --- !u!225 &7146289679869686022
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -469,8 +470,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 10}
-  m_SizeDelta: {x: 94.82, y: 17.3}
+  m_AnchoredPosition: {x: 0, y: -10}
+  m_SizeDelta: {x: 150, y: 25}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &3474653383427653707
 CanvasRenderer:
@@ -527,11 +528,11 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 20.8
+  m_fontSizeBase: 19.9
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 12
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
@@ -668,7 +669,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -732,8 +733,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 13.099998, y: -17}
-  m_SizeDelta: {x: 24, y: 24}
+  m_AnchoredPosition: {x: 17.2, y: -25.7}
+  m_SizeDelta: {x: 30, y: 30}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &9161820685763409733
 CanvasRenderer:
@@ -882,7 +883,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 41.9}
+  m_AnchoredPosition: {x: 0, y: 57.1}
   m_SizeDelta: {x: 64, y: 8}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &6080665221589764716
@@ -940,8 +941,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 4
-  m_fontSizeBase: 4
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1077,8 +1078,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 12
-  m_fontSizeBase: 12
+  m_fontSize: 25.8
+  m_fontSizeBase: 25.8
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1156,8 +1157,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -0.8738, y: 14.199997}
-  m_SizeDelta: {x: 118.2523, y: 25.4274}
+  m_AnchoredPosition: {x: -0.8738, y: 6.899994}
+  m_SizeDelta: {x: 150, y: 50}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &8643114545782033505
 CanvasRenderer:
@@ -1214,8 +1215,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 8
-  m_fontSizeBase: 8
+  m_fontSize: 15
+  m_fontSizeBase: 15
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1293,8 +1294,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 25.4}
-  m_SizeDelta: {x: 180, y: 180}
+  m_AnchoredPosition: {x: 0, y: 58.2}
+  m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6110999790859884615
 CanvasRenderer:

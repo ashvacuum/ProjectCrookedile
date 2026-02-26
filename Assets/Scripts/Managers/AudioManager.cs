@@ -139,9 +139,11 @@ namespace Crookedile.Managers
             }
         }
 
-        public void PlaySfxOneShot(AudioClip clip, float volumeScale = 1f)
+        /// <param name="pitch">Pitch multiplier (1 = normal speed). Applies to the shared _sfxSource before the one-shot.</param>
+        public void PlaySfxOneShot(AudioClip clip, float volumeScale = 1f, float pitch = 1f)
         {
             if (clip == null) return;
+            _sfxSource.pitch = pitch;
             _sfxSource.PlayOneShot(clip, _sfxVolume * _masterVolume * volumeScale);
         }
 
