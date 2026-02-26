@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Crookedile.Core;
 using Crookedile.Utilities;
+using Crookedile.Data.Audio;
 
 namespace Crookedile.Managers
 {
@@ -17,6 +18,10 @@ namespace Crookedile.Managers
         [SerializeField] private float _masterVolume = 1f;
         [SerializeField] private float _musicVolume = 1f;
         [SerializeField] private float _sfxVolume = 1f;
+
+        [Header("Sound Library")]
+        [Tooltip("ScriptableObject database of named clips. Use 'Refresh Database' on the asset to auto-populate.")]
+        [SerializeField] private SoundLibrary _soundLibrary;
 
         private Queue<AudioSource> _sfxPool = new Queue<AudioSource>();
         private List<AudioSource> _activeSfxSources = new List<AudioSource>();
@@ -145,6 +150,63 @@ namespace Crookedile.Managers
             if (clip == null) return;
             _sfxSource.pitch = pitch;
             _sfxSource.PlayOneShot(clip, _sfxVolume * _masterVolume * volumeScale);
+        }
+
+        /// <summary>
+        /// Plays a clip from the SoundLibrary looked up by GUID.
+        /// Called by code that stores the auto-generated ID.
+        /// No-op if not found or library is unassigned.
+        /// </summary>
+        public void PlaySoundByID(string id)
+        {
+            var data = ResolveClip(id, byName: false);
+            if (data != null) PlaySfxOneShot(data.Clip, data.Volume, data.Pitch);
+        }
+
+        /// <summary>
+        /// Plays a clip from the SoundLibrary looked up by human-readable ClipName.
+        /// Called by code that stores the designer-set name.
+        /// No-op if not found or library is unassigned.
+        /// </summary>
+        public void PlaySoundByName(string clipName)
+        {
+            var data = ResolveClip(clipName, byName: true);
+            if (data != null) PlaySfxOneShot(data.Clip, data.Volume, data.Pitch);
+        }
+
+        /// <summary>
+        /// Plays a clip from the SoundLibrary. Tries GUID first, then ClipName as fallback.
+        /// Used by VFXAnimatedImage AnimationEvents where either format may be supplied.
+        /// </summary>
+        public void PlaySound(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return;
+            if (_soundLibrary == null)
+            {
+                GameLogger.LogWarning("Audio", "PlaySound: no SoundLibrary assigned on AudioManager.");
+                return;
+            }
+            var data = _soundLibrary.GetByIDOrName(value);
+            if (data == null)
+            {
+                GameLogger.LogWarning("Audio", $"PlaySound: '{value}' not found in SoundLibrary by ID or name.");
+                return;
+            }
+            PlaySfxOneShot(data.Clip, data.Volume, data.Pitch);
+        }
+
+        private Data.Audio.AudioClipData ResolveClip(string value, bool byName)
+        {
+            if (string.IsNullOrEmpty(value)) return null;
+            if (_soundLibrary == null)
+            {
+                GameLogger.LogWarning("Audio", "PlaySound: no SoundLibrary assigned on AudioManager.");
+                return null;
+            }
+            var data = byName ? _soundLibrary.GetByName(value) : _soundLibrary.GetByID(value);
+            if (data == null)
+                GameLogger.LogWarning("Audio", $"PlaySound: '{value}' not found in SoundLibrary.");
+            return data;
         }
 
         private AudioSource GetAvailableSfxSource()
