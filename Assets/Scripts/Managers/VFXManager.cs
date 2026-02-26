@@ -4,40 +4,43 @@ using UnityEngine;
 using Crookedile.Core;
 using Crookedile.Utilities;
 using Crookedile.Data.VFX;
+using Crookedile.UI;
 
 namespace Crookedile.Managers
 {
     /// <summary>
-    /// Centralised VFX service. Handles two types of visual effects:
+    /// Centralised VFX service for UI-space visual effects. Handles two types:
     ///
     ///   1. <b>Feel feedbacks</b> — delegates to <see cref="FeedbackManager"/> for shake,
-    ///      scale-punch, and tween animations on UI elements (RectTransform-aware).
+    ///      scale-punch, and tween animations on existing UI elements (RectTransform-aware).
     ///
-    ///   2. <b>Particle bursts</b> — spawns pooled particle prefabs in world space,
-    ///      converting UI RectTransform positions to world space automatically.
+    ///   2. <b>Animated Images</b> — spawns pooled UI prefabs (Image + Animator) onto
+    ///      <see cref="_vfxCanvas"/> at the target element's canvas position. Each prefab
+    ///      carries a <see cref="VFXAnimatedImage"/> component that self-deactivates (via
+    ///      AnimationEvent) when its clip ends, returning it to pool automatically.
     ///
     /// Entry points:
-    ///   <see cref="Play(VFXEvent, RectTransform)"/>   — UI element target (most common for battle UI).
-    ///   <see cref="Play(VFXEvent, Transform)"/>        — world-space Transform target.
-    ///   <see cref="PlayAtWorld(VFXEvent, Vector3)"/>   — explicit world-space position.
+    ///   <see cref="Play(VFXEvent, RectTransform)"/>  — UI element target (most common).
+    ///   <see cref="Play(VFXEvent, Transform)"/>       — generic Transform (auto-converts if RectTransform).
+    ///   <see cref="PlayAtWorld(VFXEvent, Vector3)"/>  — world-space point converted to canvas space.
     ///
-    /// Setup: add this component to the persistent Managers GameObject alongside AudioManager.
-    /// Assign <see cref="_uiCamera"/> to the camera that renders your UI canvas, or leave null
-    /// to use <c>Camera.main</c>.
+    /// Setup:
+    ///   • Add to the persistent Managers GameObject alongside AudioManager.
+    ///   • Assign <see cref="_vfxCanvas"/> to a Screen Space – Overlay canvas that sits above the game canvas.
     /// </summary>
     [Debuggable("VFX", LogLevel.Warning)]
     public class VFXManager : Singleton<VFXManager>
     {
         // ─── Inspector Fields ─────────────────────────────────────────────────
 
-        [Header("UI Camera")]
-        [Tooltip("Camera used to convert RectTransform positions to screen space.\n" +
-                 "Leave null to use Camera.main (correct for most setups).")]
-        [SerializeField] private Camera _uiCamera;
+        [Header("VFX Canvas")]
+        [Tooltip("Screen Space – Overlay canvas that animated VFX images are spawned into.\n" +
+                 "Must be sorted above the game UI canvas so effects render on top.")]
+        [SerializeField] private Canvas _vfxCanvas;
 
         // ─── Runtime State ────────────────────────────────────────────────────
 
-        /// <summary>Per-prefab object pool. Reuses inactive particle instances before instantiating new ones.</summary>
+        /// <summary>Per-prefab object pool. Reuses inactive instances before instantiating new ones.</summary>
         private readonly Dictionary<GameObject, Queue<GameObject>> _pools
             = new Dictionary<GameObject, Queue<GameObject>>();
 
@@ -45,57 +48,53 @@ namespace Crookedile.Managers
 
         protected override void OnAwake()
         {
-            // Pool is populated lazily as prefabs are first requested.
+            // Pool is populated lazily the first time each prefab is requested.
         }
 
         // ─── Public API ───────────────────────────────────────────────────────
 
         /// <summary>
         /// Plays a VFX event aimed at a UI element.
-        /// Feel feedback is passed as a RectTransform target; particle is spawned at the
-        /// element's screen-converted world position.
+        /// Feel feedback targets the element; animated image spawns at its canvas position.
         /// </summary>
         public void Play(VFXEvent evt, RectTransform target)
         {
             if (evt == null) return;
             PlayFeel(evt, target);
-            if (evt.ParticlePrefab != null)
-                SpawnParticleAtUI(evt.ParticlePrefab, target, evt.Offset);
+            if (evt.AnimatedPrefab != null)
+                SpawnAnimatedImageAt(evt.AnimatedPrefab, target, evt.Offset);
         }
 
         /// <summary>
-        /// Plays a VFX event aimed at a world-space Transform.
-        /// If <paramref name="target"/> is a RectTransform, delegates to
-        /// <see cref="Play(VFXEvent, RectTransform)"/> for correct canvas-space handling.
+        /// Plays a VFX event aimed at a generic Transform.
+        /// Automatically delegates to <see cref="Play(VFXEvent, RectTransform)"/> if target is a RectTransform.
         /// </summary>
         public void Play(VFXEvent evt, Transform target)
         {
             if (evt == null) return;
 
-            // Redirect to RectTransform overload if applicable — it handles UI-space conversion.
+            // Redirect to the RectTransform overload — it handles canvas-space placement correctly.
             if (target is RectTransform rt) { Play(evt, rt); return; }
 
+            // For non-UI transforms: play Feel (no position override) and spawn at canvas center.
             PlayFeel(evt, target);
-            if (evt.ParticlePrefab != null && target != null)
-                SpawnParticleAtWorld(evt.ParticlePrefab, target.position + evt.Offset);
-            else if (evt.ParticlePrefab != null)
-                SpawnParticleAtWorld(evt.ParticlePrefab, evt.Offset);
+            if (evt.AnimatedPrefab != null)
+                SpawnAnimatedImageAt(evt.AnimatedPrefab, null, evt.Offset);
         }
 
         /// <summary>
         /// Plays a VFX event at an explicit world-space position.
-        /// Feel plays without a transform target; particles spawn at <paramref name="worldPos"/>.
+        /// The world point is converted to canvas space; Feel plays without a transform target.
         /// </summary>
         public void PlayAtWorld(VFXEvent evt, Vector3 worldPos)
         {
             if (evt == null) return;
 
-            // Feel at default position (no transform override).
             if (!string.IsNullOrEmpty(evt.FeedbackId))
                 FeedbackManager.Instance?.Play(evt.FeedbackId);
 
-            if (evt.ParticlePrefab != null)
-                SpawnParticleAtWorld(evt.ParticlePrefab, worldPos + evt.Offset);
+            if (evt.AnimatedPrefab != null)
+                SpawnAnimatedImageAtWorld(evt.AnimatedPrefab, worldPos, evt.Offset);
         }
 
         // ─── Internal — Feel ──────────────────────────────────────────────────
@@ -110,48 +109,127 @@ namespace Crookedile.Managers
                 FeedbackManager.Instance.Play(evt.FeedbackId);
         }
 
-        // ─── Internal — Particles ─────────────────────────────────────────────
+        // ─── Internal — Animated Image Spawn ─────────────────────────────────
 
         /// <summary>
-        /// Converts a RectTransform's on-screen position to a world-space point just in front
-        /// of the camera, then spawns the particle there.
-        ///
-        /// Works for Screen Space – Overlay and Screen Space – Camera canvas modes.
-        /// For Overlay, the RectTransform position is already in screen pixels;
-        /// <c>RectTransformUtility.WorldToScreenPoint</c> with the camera handles both modes correctly.
+        /// Spawns an animated UI image instance on the VFX canvas, positioned at the target's canvas location.
         /// </summary>
-        private void SpawnParticleAtUI(GameObject prefab, RectTransform uiTarget, Vector3 offset)
+        private void SpawnAnimatedImageAt(GameObject prefab, RectTransform uiTarget, Vector2 pixelOffset)
         {
-            if (uiTarget == null) { SpawnParticleAtWorld(prefab, offset); return; }
+            if (_vfxCanvas == null)
+            {
+                GameLogger.LogWarning("VFX", "VFXManager: _vfxCanvas is not assigned — cannot spawn animated image.");
+                return;
+            }
 
-            Camera cam = _uiCamera != null ? _uiCamera : Camera.main;
-            if (cam == null) { SpawnParticleAtWorld(prefab, offset); return; }
+            GameObject instance = GetFromPool(prefab);
+            instance.transform.SetParent(_vfxCanvas.transform, worldPositionStays: false);
 
-            // Convert the RectTransform's world position to screen-space pixel coordinates.
-            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(cam, uiTarget.position);
+            RectTransform rt = instance.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                Vector2 canvasLocalPos = Vector2.zero;
 
-            // Project screen position to world space at a depth just in front of the camera.
-            Vector3 worldPos = cam.ScreenToWorldPoint(
-                new Vector3(screenPos.x, screenPos.y, cam.nearClipPlane + 1f));
+                if (uiTarget != null)
+                {
+                    // Convert the target's world position → screen space → VFX canvas local space.
+                    // Using null camera for Screen Space – Overlay; the canvas's worldCamera otherwise.
+                    Camera cam = _vfxCanvas.renderMode == RenderMode.ScreenSpaceOverlay
+                        ? null
+                        : _vfxCanvas.worldCamera;
 
-            SpawnParticleAtWorld(prefab, worldPos + offset);
+                    Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(cam, uiTarget.position);
+                    RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                        (RectTransform)_vfxCanvas.transform, screenPos, cam, out canvasLocalPos);
+                }
+
+                rt.anchoredPosition = canvasLocalPos + pixelOffset;
+            }
+
+            ActivateInstance(instance, prefab);
         }
 
-        private void SpawnParticleAtWorld(GameObject prefab, Vector3 worldPos)
+        /// <summary>
+        /// Spawns an animated image at a world-space position, converting it to canvas space first.
+        /// </summary>
+        private void SpawnAnimatedImageAtWorld(GameObject prefab, Vector3 worldPos, Vector2 pixelOffset)
         {
+            if (_vfxCanvas == null)
+            {
+                GameLogger.LogWarning("VFX", "VFXManager: _vfxCanvas is not assigned — cannot spawn animated image.");
+                return;
+            }
+
+            Camera cam = _vfxCanvas.renderMode == RenderMode.ScreenSpaceOverlay
+                ? null
+                : _vfxCanvas.worldCamera;
+
+            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(cam, worldPos);
+
             GameObject instance = GetFromPool(prefab);
-            instance.transform.position = worldPos;
+            instance.transform.SetParent(_vfxCanvas.transform, worldPositionStays: false);
+
+            RectTransform rt = instance.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    (RectTransform)_vfxCanvas.transform, screenPos, cam, out Vector2 localPos);
+                rt.anchoredPosition = localPos + pixelOffset;
+            }
+
+            ActivateInstance(instance, prefab);
+        }
+
+        /// <summary>
+        /// Activates a pooled instance and wires pool-return logic.
+        /// Prefers <see cref="VFXAnimatedImage.OnComplete"/> callback (driven by AnimationEvent).
+        /// Falls back to a timed coroutine reading the first clip's length from the Animator.
+        /// </summary>
+        private void ActivateInstance(GameObject instance, GameObject prefab)
+        {
+            // Wire the self-disabling callback if the prefab has VFXAnimatedImage.
+            var controller = instance.GetComponent<VFXAnimatedImage>();
+            if (controller != null)
+            {
+                controller.OnComplete = () => ReturnToPool(instance, prefab);
+            }
+
             instance.SetActive(true);
 
-            var ps = instance.GetComponent<ParticleSystem>();
-            float lifetime = ps != null
-                ? ps.main.duration + ps.main.startLifetime.constantMax
-                : 3f;
-
-            StartCoroutine(ReturnAfterDelay(instance, prefab, lifetime));
+            // Fallback: if no VFXAnimatedImage, use clip duration from the Animator.
+            if (controller == null)
+            {
+                float duration = GetClipDuration(instance.GetComponent<Animator>());
+                StartCoroutine(ReturnAfterDelay(instance, prefab, duration));
+            }
         }
 
-        // ─── Internal — Pool ──────────────────────────────────────────────────
+        // ─── Internal — Duration / Pool ───────────────────────────────────────
+
+        /// <summary>
+        /// Reads the length of the first animation clip in the Animator's controller.
+        /// Returns 1 second as a safe default if no clip is found.
+        /// </summary>
+        private static float GetClipDuration(Animator anim)
+        {
+            if (anim == null || anim.runtimeAnimatorController == null) return 1f;
+            var clips = anim.runtimeAnimatorController.animationClips;
+            return clips.Length > 0 ? clips[0].length : 1f;
+        }
+
+        private void ReturnToPool(GameObject instance, GameObject prefab)
+        {
+            if (instance == null) return;
+            instance.SetActive(false);
+            if (_pools.TryGetValue(prefab, out var queue))
+                queue.Enqueue(instance);
+        }
+
+        private IEnumerator ReturnAfterDelay(GameObject instance, GameObject prefab, float delay)
+        {
+            if (delay > 0f) yield return new WaitForSeconds(delay);
+            ReturnToPool(instance, prefab);
+        }
 
         private GameObject GetFromPool(GameObject prefab)
         {
@@ -161,7 +239,7 @@ namespace Crookedile.Managers
                 _pools[prefab] = queue;
             }
 
-            // Drain pool until we find a valid inactive instance.
+            // Drain until we find a valid inactive instance.
             while (queue.Count > 0)
             {
                 var candidate = queue.Dequeue();
@@ -169,21 +247,8 @@ namespace Crookedile.Managers
                     return candidate;
             }
 
-            // None available — instantiate a fresh one.
+            // Nothing available — instantiate a fresh one.
             return Instantiate(prefab);
-        }
-
-        private IEnumerator ReturnAfterDelay(GameObject instance, GameObject prefab, float delay)
-        {
-            if (delay > 0f) yield return new WaitForSeconds(delay);
-
-            if (instance != null)
-            {
-                instance.SetActive(false);
-
-                if (_pools.TryGetValue(prefab, out var queue))
-                    queue.Enqueue(instance);
-            }
         }
     }
 }
