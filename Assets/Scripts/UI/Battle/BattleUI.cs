@@ -51,6 +51,11 @@ namespace Crookedile.UI.Battle
         [Tooltip("Prefab with an EnemySlotUI component — instantiated once per enemy.")]
         [SerializeField] private GameObject enemySlotPrefab;
 
+        // ── VFX Anchors ───────────────────────────────────────────────────────
+        [Header("VFX Anchors")]
+        [Tooltip("RectTransform of the player stats panel — used by BattleFeedbackController as VFX target for player-targeted effects.")]
+        [field: SerializeField] public RectTransform PlayerStatsPanel { get; private set; }
+
         // ── Battle Info ───────────────────────────────────────────────────────
         [Header("Battle Info")]
         [SerializeField] private TMP_Text turnNumberText;
@@ -178,9 +183,10 @@ namespace Crookedile.UI.Battle
             string player = evt.IsPlayer ? "Player" : "Opponent";
             logPanel?.AddEntry($"{player} played: {evt.Card.CardName}");
             UpdateStatsDisplay();
-            // Only refresh affordability — don't rebuild hand (card is still being resolved).
-            if (battleManager?.PlayerStats != null)
-                handPanel?.RefreshAffordability(battleManager.PlayerStats.CurrentActionPoints);
+            // PlayCardAtIndex runs before CardPlayedEvent is published, so the card is already
+            // out of Hand when we arrive here. Rebuild the hand to remove its button and
+            // re-evaluate affordability for remaining cards in one pass.
+            handPanel?.RefreshNormalHand(battleManager, OnCardButtonClicked);
         }
 
         private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
@@ -283,6 +289,18 @@ namespace Crookedile.UI.Battle
                     _enemySlots.Add(slot);
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns the <see cref="RectTransform"/> of the enemy slot at the given index,
+        /// or null if the index is out of range or the slot has been destroyed.
+        /// Used by <see cref="BattleFeedbackController"/> to aim VFX at specific enemy panels.
+        /// </summary>
+        public RectTransform GetEnemySlotTransform(int index)
+        {
+            if (index < 0 || index >= _enemySlots.Count || _enemySlots[index] == null)
+                return null;
+            return _enemySlots[index].GetComponent<RectTransform>();
         }
 
         #endregion

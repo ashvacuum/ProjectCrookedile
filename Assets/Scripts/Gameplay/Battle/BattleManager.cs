@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Crookedile.Core;
@@ -19,8 +20,10 @@ namespace Crookedile.Gameplay.Battle
     public class BattleManager : MonoBehaviour
     {
         [Header("Battle Settings")]
-        [SerializeField] private int _startingHandSize = 5;
-        [SerializeField] private int _cardsPerTurn = 1;
+        [SerializeField] private int   _startingHandSize    = 5;
+        [SerializeField] private int   _cardsPerTurn        = 1;
+        [Tooltip("Seconds to wait after the opponent turn starts before enemies attack.")]
+        [SerializeField] private float _opponentTurnDelay   = 1.0f;
 
         [Header("Origin Passives")]
         [Tooltip("Assign all three OriginPassive assets here (FaithLeader, NepoBaby, Actor).")]
@@ -158,7 +161,10 @@ namespace Crookedile.Gameplay.Battle
             // Reset counters
             _currentTurn = 0;
             _playerTurnNumber = 0;
-            _isPlayerTurn = true;
+            // Start as false so the first NextTurn() call (in TurnStartState) flips it to
+            // true, making turn 1 the player's turn. Starting as true would give the opponent
+            // the first move.
+            _isPlayerTurn = false;
 
             EventBus.Publish(new BattleStartedEvent { Setup = setup });
             _stateMachine.ChangeState(BattleState.Initialize);
@@ -533,16 +539,24 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Opponent Turn State — executes the enemy's declared move then immediately ends.
-        /// Enemy turns are instant (no waiting for input).
+        /// Opponent Turn State — waits <c>_opponentTurnDelay</c> seconds, then resolves all
+        /// living enemies' declared moves and transitions to TurnEnd.
+        /// The delay gives the player a visible pause before damage lands.
         /// </summary>
         private class OpponentTurnState : State
         {
-            private BattleManager _manager;
+            private readonly BattleManager _manager;
             public OpponentTurnState(BattleManager manager) { _manager = manager; }
 
             public override void OnEnter()
             {
+                _manager.StartCoroutine(ExecuteAfterDelay());
+            }
+
+            private IEnumerator ExecuteAfterDelay()
+            {
+                yield return new WaitForSeconds(_manager._opponentTurnDelay);
+
                 GameLogger.LogInfo<BattleManager>("Enemy turn started — all living enemies act");
 
                 for (int i = 0; i < _manager._enemies.Count; i++)
@@ -550,7 +564,8 @@ namespace Crookedile.Gameplay.Battle
                     var enemy = _manager._enemies[i];
                     if (enemy.IsDefeated || enemy.CurrentIntent == null) continue;
 
-                    GameLogger.LogInfo<BattleManager>($"Enemy [{i}] {enemy.EnemyData.EnemyName} executes: {enemy.CurrentIntent.MoveName}");
+                    GameLogger.LogInfo<BattleManager>(
+                        $"Enemy [{i}] {enemy.EnemyData.EnemyName} executes: {enemy.CurrentIntent.MoveName}");
 
                     // Temporarily point EffectResolver at this enemy as the caster
                     _manager._effectResolver.SetFocusedOpponent(enemy.Stats, enemy.StatusEffects);
@@ -562,7 +577,6 @@ namespace Crookedile.Gameplay.Battle
                     _manager._effectResolver.SetFocusedOpponent(
                         _manager.FocusedEnemy.Stats, _manager.FocusedEnemy.StatusEffects);
 
-                // Enemy turn is instant — transition immediately after all effects resolve
                 _manager.TransitionToState(BattleState.TurnEnd);
             }
         }

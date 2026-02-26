@@ -305,10 +305,15 @@ namespace Crookedile.Gameplay
 
         /// <summary>
         /// Called at the start of a turn to refresh resources.
+        /// AP refresh is skipped for combatants with no AP (enemies use maxActionPoints: 0).
         /// </summary>
         public void StartTurn()
         {
-            RefreshActionPoints();
+            // Only refresh AP for combatants that actually have it.
+            // Enemies are created with maxActionPoints: 0 and never use the AP system —
+            // skipping this prevents a no-op RefreshActionPoints() Debug.Log per enemy per turn.
+            if (_maxActionPoints > 0)
+                RefreshActionPoints();
         }
 
         /// <summary>

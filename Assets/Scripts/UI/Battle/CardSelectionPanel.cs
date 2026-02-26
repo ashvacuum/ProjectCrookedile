@@ -89,6 +89,13 @@ namespace Crookedile.UI.Battle
                 () => ReturnToHand(button, card));
 
             _spawnedButtons.Add(button);
+
+            // Force the layout group to position this button immediately so
+            // SetBasePosition() receives the correct slot position (not 0,0).
+            // This is cheap — called once per card added, not per frame.
+            Canvas.ForceUpdateCanvases();
+            button.SetBasePosition(button.transform.localPosition);
+
             RefreshUI();
         }
 
