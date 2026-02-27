@@ -11,12 +11,15 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4cafe87c1348d646a71da0cf440dbd3, type: 3}
   m_Name: FaithLeaderPassive
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   _passiveName: Discipline
   _origin: 0
   _description: Gain 1 extra AP on your first turn.
   _icon: {fileID: 0}
   _trigger: 1
-  _triggerCardType: 0
+  _condition:
+    Type: 0
+    Value: 0
+  _oneShot: 0
   _effectType: 2
   _effectAmount: 1

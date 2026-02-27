@@ -11,12 +11,15 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4cafe87c1348d646a71da0cf440dbd3, type: 3}
   m_Name: NepoBabyPassive
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   _passiveName: Nepotism
   _origin: 1
   _description: Every 5th card you play costs 1 AP less.
   _icon: {fileID: 0}
   _trigger: 3
-  _triggerCardType: 0
-  _effectType: 2
+  _condition:
+    Type: 0
+    Value: 0
+  _oneShot: 0
+  _effectType: 9
   _effectAmount: 1

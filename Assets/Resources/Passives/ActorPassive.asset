@@ -11,12 +11,16 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4cafe87c1348d646a71da0cf440dbd3, type: 3}
   m_Name: ActorPassive
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   _passiveName: Improvise
   _origin: 2
-  _description: On every even player turn, you may discard any number of cards and draw the same number back.
+  _description: On every even player turn, you may discard any number of cards and
+    draw the same number back.
   _icon: {fileID: 0}
-  _trigger: 1
-  _triggerCardType: 0
+  _trigger: 0
+  _condition:
+    Type: 0
+    Value: 0
+  _oneShot: 0
   _effectType: 13
   _effectAmount: 0

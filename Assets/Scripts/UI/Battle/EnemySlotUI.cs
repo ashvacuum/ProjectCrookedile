@@ -23,10 +23,10 @@ namespace Crookedile.UI.Battle
         IPointerExitHandler
     {
         [Header("Display")]
-        [SerializeField] private TMP_Text nameText;
-        [SerializeField] private TMP_Text resolveText;
-        [SerializeField] private TMP_Text hostilityText;
-        [SerializeField] private TMP_Text intentText;
+        [SerializeField] private TMP_Text            nameText;
+        [SerializeField] private TMP_Text            resolveText;
+        [SerializeField] private TMP_Text            hostilityText;
+        [SerializeField] private EnemyIntentDisplay  _intentDisplay;
 
         [Header("Interaction")]
         [SerializeField] private Button     selectButton;
@@ -54,6 +54,8 @@ namespace Crookedile.UI.Battle
             if (defeatedOverlay    != null) defeatedOverlay.SetActive(false);
             if (selectionHighlight != null) selectionHighlight.enabled = false;
             if (dragDropHighlight  != null) dragDropHighlight.enabled  = false;
+
+            _intentDisplay?.ShowIntent(null); // hidden until intent is declared
 
             Refresh();
         }
@@ -87,12 +89,11 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
-        /// Updates the intent line when the enemy declares their next move.
+        /// Updates the intent display when the enemy declares their next move.
         /// </summary>
         public void UpdateIntent(EnemyMoveData move)
         {
-            if (intentText != null)
-                intentText.SetText(move != null ? move.IntentDescription : string.Empty);
+            _intentDisplay?.ShowIntent(move);
         }
 
         /// <summary>
