@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Aggressive
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Enemy.EnemyMoveData
   _moveName: Aggressive Attack
-  _moveType: 0
+  _moveType: 4
   _intentDescription: 
-  _intentIcon: {fileID: 0}
   _effects:
-  - _category: 3
+  - _name: 
+    _category: 3
     _target: 1
     _damageType: 0
     _damageAmount: 3
@@ -31,7 +31,9 @@ MonoBehaviour:
     _statusEffectType: 1
     _statusStacks: 1
     _statusDuration: 0
-  - _category: 0
+    _amountSource: 0
+  - _name: 
+    _category: 0
     _target: 1
     _damageType: 0
     _damageAmount: 1
@@ -45,3 +47,6 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
+    _amountSource: 0
+  _minionToSummon: {fileID: 0}
+  _minionCount: 1

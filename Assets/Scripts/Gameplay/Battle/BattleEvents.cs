@@ -73,6 +73,9 @@ using Crookedile.Data.Enemy;
 //   EnemyDefeatedEvent         Publisher: BattleManager
 //                              Subscribers: BattleUI, BattleManager (focus auto-advance)
 //
+//   EnemySummonedEvent         Publisher: BattleManager.SummonMinions
+//                              Subscribers: BattleUI (spawns new enemy slot)
+//
 // ── Player Input ─────────────────────────────────────────────────────────────
 //   EndTurnRequestedEvent    Publisher: BattleUI end-turn button
 //                            Subscribers: BattleManager
@@ -80,9 +83,6 @@ using Crookedile.Data.Enemy;
 //   PlayCardRequestedEvent   Publisher: BattleUI card button click
 //                            Subscribers: BattleManager
 //
-// ── C# events on EffectResolver — subscribe via += (not EventBus) ────────────
-//   OnPlayerDamageTaken   Action<int>                     — player takes resolve damage
-//   OnEffectApplied       Action<CardEffect, BattleStats> — fires per card effect resolved
 // ═══════════════════════════════════════════════════════════════════════════════
 
 namespace Crookedile.Gameplay.Battle
@@ -371,6 +371,20 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>Display name of the defeated enemy (for battle log and UI feedback).</summary>
         public string EnemyName;
+    }
+
+    /// <summary>
+    /// Published by <c>BattleManager.SummonMinions()</c> each time a new enemy is added
+    /// to the fight via a <c>SummonMinion</c> move. Subscribers should spawn a new enemy
+    /// slot UI for the given index.
+    /// </summary>
+    public struct EnemySummonedEvent : IGameEvent
+    {
+        /// <summary>The data asset describing the summoned enemy.</summary>
+        public EnemyData EnemyData;
+
+        /// <summary>Zero-based index of the new enemy in <c>BattleManager.Enemies</c>.</summary>
+        public int EnemyIndex;
     }
 
     #endregion

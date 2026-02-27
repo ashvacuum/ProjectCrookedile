@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
@@ -24,23 +25,8 @@ namespace Crookedile.Gameplay.Battle
         private StatusEffectManager _playerStatusEffects;
         private StatusEffectManager _opponentStatusEffects; // focused enemy's status mgr
 
-        // ── C# events — subscribe via += in StartBattle(); unsubscribe in cleanup ──────
-
-        /// <summary>
-        /// Fired once per <see cref="CardEffect"/> after it resolves, regardless of target or type.
-        /// Useful for analytics, achievement tracking, and triggered card effects that react
-        /// to specific effect types (e.g. "whenever you deal damage, gain 1 Composure").
-        /// Parameters: the CardEffect resolved; the BattleStats of the target it was applied to.
-        /// </summary>
-        public event Action<CardEffect, BattleStats> OnEffectApplied;
-
-        /// <summary>
-        /// Fired after all modifiers whenever the player takes actual Resolve damage (amount &gt; 0).
-        /// Modifiers applied before this fires: Composure reduction, Hostility multiplier, damage caps.
-        /// Subscribed by <c>PassiveResolver</c> to trigger <see cref="Data.PassiveTrigger.OnDamageTaken"/> passives.
-        /// Parameter: actual damage dealt to the player's Resolve.
-        /// </summary>
-        public event Action<int> OnPlayerDamageTaken;
+        // All battle events are published via EventBus — no C# event wiring required.
+        // See BattleEvents.cs for the full event catalogue.
 
         public EffectResolver(BattleStats playerStats, BattleStats opponentStats,
                               DeckManager playerDeck,
@@ -192,7 +178,7 @@ namespace Crookedile.Gameplay.Battle
             if (effect.Category == EffectCategory.Resource)
             {
                 ResolveResourceEffect(effect, casterStats, ctx);
-                OnEffectApplied?.Invoke(effect, casterStats);
+                EventBus.Publish(new EffectAppliedEvent { Effect = effect, IsPlayer = isPlayerCard });
                 return;
             }
             if (effect.Category == EffectCategory.CardManipulation)
@@ -200,7 +186,7 @@ namespace Crookedile.Gameplay.Battle
                 // Enemies have no deck (casterDeck == null) — skip silently.
                 if (casterDeck != null)
                     ResolveCardManipulationEffect(effect, casterDeck);
-                OnEffectApplied?.Invoke(effect, casterStats);
+                EventBus.Publish(new EffectAppliedEvent { Effect = effect, IsPlayer = isPlayerCard });
                 return;
             }
 
@@ -221,9 +207,15 @@ namespace Crookedile.Gameplay.Battle
                             effect.StatusEffectType, effect.StatusStacks, effect.StatusDuration);
                         GameLogger.LogInfo<EffectResolver>(
                             $"Applied {effect.StatusStacks} {effect.StatusEffectType} ({effect.StatusDuration})");
+                        EventBus.Publish(new StatusEffectAppliedEvent
+                        {
+                            StatusType = effect.StatusEffectType,
+                            Stacks     = effect.StatusStacks,
+                            IsToPlayer = effectTarget == _playerStats,
+                        });
                         break;
                 }
-                OnEffectApplied?.Invoke(effect, effectTarget);
+                EventBus.Publish(new EffectAppliedEvent { Effect = effect, IsPlayer = isPlayerCard });
             }
         }
 
@@ -448,9 +440,8 @@ namespace Crookedile.Gameplay.Battle
             int actualDamage = target.DamageResolve(modifiedDamage, attacker.CurrentComposure);
             GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage (base: {baseDamage}, modified: {modifiedDamage}, Composure: {attacker.CurrentComposure}, HostilityMult: {(attacker != _playerStats && attacker.CurrentHostility > 0 ? attacker.HostilityDamageMultiplier.ToString("F2") : "1.00")})");
 
-            // Notify passive system when the player is the one taking damage
-            if (target == _playerStats && actualDamage > 0)
-                OnPlayerDamageTaken?.Invoke(actualDamage);
+            if (actualDamage > 0)
+                EventBus.Publish(new DamageDealtEvent { Amount = actualDamage, IsToPlayer = target == _playerStats });
 
             // Accumulate into context so triggered effects can react (e.g. lifesteal)
             if (ctx != null)
@@ -464,6 +455,9 @@ namespace Crookedile.Gameplay.Battle
         {
             int actualHealing = target.RestoreResolve(amount);
             GameLogger.LogInfo<EffectResolver>($"Restored {actualHealing} Resolve");
+
+            if (actualHealing > 0)
+                EventBus.Publish(new HealingAppliedEvent { Amount = actualHealing, IsToPlayer = target == _playerStats });
 
             if (ctx != null) ctx.LastHealAmount += actualHealing;
         }
@@ -493,9 +487,8 @@ namespace Crookedile.Gameplay.Battle
             int actualDamage = target.DamageResolve(modifiedDamage, attacker.CurrentComposure);
             GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} random Resolve damage (rolled {randomDamage} from {minDamage}-{maxDamage}, modified: {modifiedDamage})");
 
-            // Notify passive system when the player is the one taking damage
-            if (target == _playerStats && actualDamage > 0)
-                OnPlayerDamageTaken?.Invoke(actualDamage);
+            if (actualDamage > 0)
+                EventBus.Publish(new DamageDealtEvent { Amount = actualDamage, IsToPlayer = target == _playerStats });
 
             if (ctx != null)
             {
@@ -551,9 +544,8 @@ namespace Crookedile.Gameplay.Battle
             int actualDamage = target.DamageResolve(modifiedDamage, 0);
             GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage equal to Composure ({composure}, modified: {modifiedDamage})");
 
-            // Notify passive system when the player is the one taking damage
-            if (target == _playerStats && actualDamage > 0)
-                OnPlayerDamageTaken?.Invoke(actualDamage);
+            if (actualDamage > 0)
+                EventBus.Publish(new DamageDealtEvent { Amount = actualDamage, IsToPlayer = target == _playerStats });
 
             if (ctx != null)
             {

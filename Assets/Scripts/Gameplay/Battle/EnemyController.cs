@@ -47,7 +47,7 @@ namespace Crookedile.Gameplay.Battle
         {
             _enemyData   = enemyData;
             _moveIndex   = 0;
-            Stats        = new BattleStats(enemyData.MaxResolve, maxActionPoints: 0);
+            Stats        = new BattleStats(enemyData.MaxResolve, maxActionPoints: 0, isPlayer: false);
             Stats.SetHostilityLimits(enemyData.MinHostility, enemyData.MaxHostility);
             Stats.SetHostility(enemyData.StartingHostility);
             StatusEffects = new StatusEffectManager(enemyData.EnemyName);
@@ -73,19 +73,23 @@ namespace Crookedile.Gameplay.Battle
                 return null;
             }
 
-            // When receptive (negative hostility), prefer non-attack moves (composure/defend)
+            // When receptive (negative hostility), prefer non-offensive moves.
+            // Attack, OffensiveBuff and DebuffAttack are all considered offensive;
+            // SummonMinion is neutral and stays in the eligible pool.
             if (Stats.IsReceptive)
             {
-                var defensiveMoves = moves
-                    .Where(m => m.MoveType != EnemyMoveType.Attack)
+                var nonOffensiveMoves = moves
+                    .Where(m => m.MoveType != EnemyMoveType.Attack
+                             && m.MoveType != EnemyMoveType.OffensiveBuff
+                             && m.MoveType != EnemyMoveType.DebuffAttack)
                     .ToList();
 
-                if (defensiveMoves.Count > 0)
+                if (nonOffensiveMoves.Count > 0)
                 {
-                    CurrentIntent = defensiveMoves[Random.Range(0, defensiveMoves.Count)];
+                    CurrentIntent = nonOffensiveMoves[Random.Range(0, nonOffensiveMoves.Count)];
                     return CurrentIntent;
                 }
-                // No non-attack moves available — fall through to normal selection
+                // No non-offensive moves available — fall through to normal selection
             }
 
             switch (_enemyData.MovePattern)

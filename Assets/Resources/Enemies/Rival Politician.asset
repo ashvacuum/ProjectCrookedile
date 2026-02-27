@@ -15,7 +15,9 @@ MonoBehaviour:
   _enemyName: Rival Politician
   _portrait: {fileID: 21300000, guid: 3fe3544bc87158f4f9fe376780ba1205, type: 3}
   _maxResolve: 20
-  _startingHostility: 10
+  _startingHostility: -1
+  _maxHostility: 5
+  _minHostility: -3
   _demographicClass: 1
   _demographicValues: 2
   _startingEffects: []

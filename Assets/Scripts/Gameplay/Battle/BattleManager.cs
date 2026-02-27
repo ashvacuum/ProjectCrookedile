@@ -94,6 +94,7 @@ namespace Crookedile.Gameplay.Battle
         private void OnDestroy()
         {
             UnsubscribeFromEvents();
+            _passiveResolver?.Dispose();
         }
 
         private void SubscribeToEvents()
@@ -155,8 +156,8 @@ namespace Crookedile.Gameplay.Battle
             var passive = _originPassives != null
                 ? System.Array.Find(_originPassives, p => p != null && p.Origin == _playerOrigin)
                 : null;
-            _passiveResolver = new PassiveResolver(passive);
-            _effectResolver.OnPlayerDamageTaken += dmg => _passiveResolver.FireOnDamageTaken(_playerStats, dmg);
+            _passiveResolver = new PassiveResolver(passive, _playerStats);
+            // Event subscriptions are managed internally by PassiveResolver via EventBus
 
             // Reset counters
             _currentTurn = 0;
@@ -187,6 +188,41 @@ namespace Crookedile.Gameplay.Battle
         public void TransitionToState(BattleState newState)
         {
             _stateMachine.ChangeState(newState);
+        }
+
+        /// <summary>
+        /// Adds up to <paramref name="count"/> copies of <paramref name="data"/> to the enemy list
+        /// (capped so total enemies never exceed 5). Called by OpponentTurnState when a SummonMinion
+        /// move resolves. Each new enemy immediately declares intent for the next turn.
+        /// </summary>
+        public void SummonMinions(EnemyData data, int count)
+        {
+            if (data == null || count <= 0) return;
+
+            int available = Mathf.Max(0, 5 - _enemies.Count);
+            if (available == 0)
+            {
+                GameLogger.LogWarning<BattleManager>("SummonMinion: enemy cap (5) already reached.");
+                return;
+            }
+
+            count = Mathf.Min(count, available);
+
+            for (int i = 0; i < count; i++)
+            {
+                var controller = new EnemyController(data);
+                int newIndex   = _enemies.Count;
+                _enemies.Add(controller);
+
+                EventBus.Publish(new EnemySummonedEvent { EnemyData = data, EnemyIndex = newIndex });
+
+                // Pre-declare intent so the player sees the threat on the next player turn
+                var intent = controller.SelectNextMove();
+                if (intent != null)
+                    EventBus.Publish(new EnemyIntentDeclaredEvent { Move = intent, EnemyIndex = newIndex });
+
+                GameLogger.LogInfo<BattleManager>($"Summoned enemy [{newIndex}]: {data.EnemyName}");
+            }
         }
 
         #endregion
@@ -239,7 +275,7 @@ namespace Crookedile.Gameplay.Battle
 
             EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
             _effectResolver.ResolveCardEffects(card, isPlayerCard: true);
-            _passiveResolver?.FireOnCardPlayed(_playerStats);
+            // PassiveResolver listens to CardPlayedEvent via EventBus — no direct call needed
             ApplyPolicyHostilityShifts(card);
             CheckAndAdvanceFocusAfterCardPlay();
 
@@ -491,7 +527,7 @@ namespace Crookedile.Gameplay.Battle
                 {
                     // Track the player's personal turn count and fire per-player-turn passives
                     _manager._playerTurnNumber++;
-                    _manager._passiveResolver?.FireTurnStart(_manager._playerTurnNumber, _manager._playerStats);
+                    _manager._passiveResolver?.FireTurnStart(_manager._playerTurnNumber);
 
                     // Draw cards for the player
                     _manager._playerDeck.StartTurn(_manager._cardsPerTurn);
@@ -559,7 +595,10 @@ namespace Crookedile.Gameplay.Battle
 
                 GameLogger.LogInfo<BattleManager>("Enemy turn started — all living enemies act");
 
-                for (int i = 0; i < _manager._enemies.Count; i++)
+                // Capture count before the loop so summoned enemies act next turn, not this one.
+                int enemyCount = _manager._enemies.Count;
+
+                for (int i = 0; i < enemyCount; i++)
                 {
                     var enemy = _manager._enemies[i];
                     if (enemy.IsDefeated || enemy.CurrentIntent == null) continue;
@@ -570,6 +609,14 @@ namespace Crookedile.Gameplay.Battle
                     // Temporarily point EffectResolver at this enemy as the caster
                     _manager._effectResolver.SetFocusedOpponent(enemy.Stats, enemy.StatusEffects);
                     _manager._effectResolver.ResolveEnemyMoveEffects(enemy.CurrentIntent);
+
+                    // Handle SummonMinion moves after normal effects resolve
+                    if (enemy.CurrentIntent.MoveType == EnemyMoveType.SummonMinion &&
+                        enemy.CurrentIntent.MinionToSummon != null)
+                    {
+                        _manager.SummonMinions(enemy.CurrentIntent.MinionToSummon,
+                                               enemy.CurrentIntent.MinionCount);
+                    }
                 }
 
                 // Restore resolver to the player's current focused target
