@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
-  m_Name: Rival Politician
+  m_Name: Student
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Enemy.EnemyData
-  _enemyName: Rival Politician
+  _enemyName: Student
   _portrait: {fileID: 21300000, guid: 3fe3544bc87158f4f9fe376780ba1205, type: 3}
-  _maxResolve: 20
-  _startingHostility: -1
-  _maxHostility: 5
-  _minHostility: -3
-  _demographicClass: 1
-  _demographicValues: 2
+  _maxResolve: 35
+  _startingHostility: 0
+  _maxHostility: 2
+  _minHostility: -4
+  _demographicClass: 2
+  _demographicValues: 0
   _startingEffects: []
   _movePattern: 1
   _moves:

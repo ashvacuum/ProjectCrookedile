@@ -1897,6 +1897,8 @@ MonoBehaviour:
   originStats: {fileID: 0}
   enemies:
   - {fileID: 11400000, guid: 479384f45f5279841992f7941bf13790, type: 2}
+  - {fileID: 11400000, guid: 2fa6b2b1bc5267e4f8052005db94e5a9, type: 2}
+  - {fileID: 11400000, guid: 2789037277794d042a5ec22391908f4c, type: 2}
   battleManager: {fileID: 507472318}
   battleUI: {fileID: 507472321}
   startOnAwake: 1

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Crookedile.Core;
 using Crookedile.Data;
 using UnityEngine;
 using Crookedile.Data.Cards;
@@ -25,6 +26,7 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField] private int _maxHandSize = 10;
 
         private string _ownerName; // For logging purposes
+        private bool   _isPlayer;  // True for the player's deck; false for enemies
 
         #region Properties
 
@@ -85,10 +87,11 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Creates a new DeckManager with an initial deck of cards.
         /// </summary>
-        public DeckManager(List<CardData> initialDeck, string ownerName = "Unknown", int maxHandSize = 10)
+        public DeckManager(List<CardData> initialDeck, string ownerName = "Unknown", int maxHandSize = 10, bool isPlayer = true)
         {
-            _ownerName = ownerName;
+            _ownerName   = ownerName;
             _maxHandSize = maxHandSize;
+            _isPlayer    = isPlayer;
             InitializeDeck(initialDeck);
         }
 
@@ -174,6 +177,7 @@ namespace Crookedile.Gameplay.Battle
             _deck.RemoveAt(0);
             _hand.Add(drawnCard);
 
+            EventBus.Publish(new CardDrawnEvent { Card = drawnCard, IsPlayer = _isPlayer });
             return true;
         }
 
@@ -234,6 +238,7 @@ namespace Crookedile.Gameplay.Battle
             _hand.Remove(card);
             _discard.Add(card);
 
+            EventBus.Publish(new CardDiscardedEvent { Card = card, IsPlayer = _isPlayer });
             GameLogger.LogInfo<DeckManager>($"{_ownerName} discarded card: {card.CardName}");
             return true;
         }
@@ -269,6 +274,7 @@ namespace Crookedile.Gameplay.Battle
             _hand.Remove(card);
             _exhaust.Add(card);
 
+            EventBus.Publish(new CardExhaustedEvent { Card = card, IsPlayer = _isPlayer });
             GameLogger.LogInfo<DeckManager>($"{_ownerName} exhausted card: {card.CardName}");
             return true;
         }

@@ -1,19 +1,24 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Sirenix.OdinInspector;
 using Crookedile.Data.Cards;
 
 namespace Crookedile.Data.Enemy
 {
     /// <summary>
-    /// The four broad categories of enemy intent, used to colour-code the intent display
-    /// and give the player a quick read on what the enemy is about to do.
+    /// Seven broad categories of enemy intent, used to drive the intent display
+    /// (icon and colour) and give the player a quick read on what the enemy is about to do.
+    /// Integer assignments are explicit to preserve existing .asset serialization.
     /// </summary>
     public enum EnemyMoveType
     {
-        Attack,  // Deals damage or applies debuffs to the player
-        Defend,  // Gains Composure or heals itself
-        Buff,    // Applies a buff to itself
-        Debuff   // Applies a debuff to the player without dealing direct damage
+        Attack        = 0,  // Pure damage or debuffs to the player
+        Defend        = 1,  // Gains Composure or heals itself
+        Buff          = 2,  // Applies a self-buff only
+        Debuff        = 3,  // Applies a debuff to the player without direct damage
+        OffensiveBuff = 4,  // Attacks AND buffs itself in the same move
+        DebuffAttack  = 5,  // Debuffs the player AND deals damage
+        SummonMinion  = 6   // Spawns a new enemy mid-battle (enemy-exclusive)
     }
 
     /// <summary>
@@ -43,10 +48,6 @@ namespace Crookedile.Data.Enemy
         [TextArea(2, 3)]
         [SerializeField] private string _intentDescription;
 
-        [Tooltip("Optional icon shown in the intent panel. " +
-                 "Leave null to show only text.")]
-        [SerializeField] private Sprite _intentIcon;
-
         // ─── Effects ──────────────────────────────────────────────────────────────
 
         [Header("Effects")]
@@ -55,12 +56,25 @@ namespace Crookedile.Data.Enemy
                  "Avoid CardManipulation effects — enemies have no deck.")]
         [SerializeField] private List<CardEffect> _effects = new List<CardEffect>();
 
+        // ─── Summon ───────────────────────────────────────────────────────────────
+
+        [Header("Summon")]
+        [ShowIf("_moveType", EnemyMoveType.SummonMinion)]
+        [Tooltip("The enemy definition to spawn when this move executes.")]
+        [SerializeField] private EnemyData _minionToSummon;
+
+        [ShowIf("_moveType", EnemyMoveType.SummonMinion)]
+        [MinValue(1)]
+        [Tooltip("How many copies of the minion to summon (capped to keep total enemies ≤ 5).")]
+        [SerializeField] private int _minionCount = 1;
+
         // ─── Properties ───────────────────────────────────────────────────────────
 
-        public string       MoveName           => _moveName;
-        public EnemyMoveType MoveType          => _moveType;
-        public string       IntentDescription  => _intentDescription;
-        public Sprite       IntentIcon         => _intentIcon;
-        public IReadOnlyList<CardEffect> Effects => _effects;
+        public string            MoveName          => _moveName;
+        public EnemyMoveType     MoveType          => _moveType;
+        public string            IntentDescription => _intentDescription;
+        public IReadOnlyList<CardEffect> Effects   => _effects;
+        public EnemyData         MinionToSummon    => _minionToSummon;
+        public int               MinionCount       => _minionCount;
     }
 }

@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Crookedile.Core;
+using Crookedile.Gameplay.Battle;
 
 namespace Crookedile.Gameplay
 {
@@ -40,6 +42,9 @@ namespace Crookedile.Gameplay
         [Header("Next Turn Buffs")]
         [Tooltip("Action Points to gain at start of next turn")]
         [SerializeField] private int _actionPointsNextTurn;
+
+        // Set in constructor — tells event publishers whose stats these are.
+        private bool _isPlayer;
 
         #region Properties
 
@@ -98,15 +103,16 @@ namespace Crookedile.Gameplay
         /// <summary>
         /// Creates battle stats with specified values.
         /// </summary>
-        public BattleStats(int maxResolve, int maxActionPoints = 3)
+        public BattleStats(int maxResolve, int maxActionPoints = 3, bool isPlayer = true)
         {
-            _maxResolve = maxResolve;
-            _currentResolve = maxResolve;
-            _maxActionPoints = maxActionPoints;
+            _maxResolve          = maxResolve;
+            _currentResolve      = maxResolve;
+            _maxActionPoints     = maxActionPoints;
             _currentActionPoints = maxActionPoints;
-            _currentComposure = 0;
-            _currentHostility = 0;
+            _currentComposure    = 0;
+            _currentHostility    = 0;
             _actionPointsNextTurn = 0;
+            _isPlayer            = isPlayer;
         }
 
         #endregion
@@ -126,10 +132,13 @@ namespace Crookedile.Gameplay
             int totalDamage = baseDamage + attackerComposure;
 
             // Apply damage to Resolve
+            int oldResolve  = _currentResolve;
             int finalDamage = Mathf.Min(totalDamage, _currentResolve);
             _currentResolve -= finalDamage;
 
             Debug.Log($"Resolve damaged: {baseDamage} base + {attackerComposure} Composure = {finalDamage} damage. Resolve: {_currentResolve}/{_maxResolve}");
+            if (finalDamage > 0)
+                EventBus.Publish(new ResolveChangedEvent { OldValue = oldResolve, NewValue = _currentResolve, IsPlayer = _isPlayer });
             return finalDamage;
         }
 
@@ -142,10 +151,13 @@ namespace Crookedile.Gameplay
         {
             // Apply Hostility multiplier
             float actualDamage = baseDamage * HostilityDamageMultiplier;
+            int oldResolve  = _currentResolve;
             int finalDamage = Mathf.Min(Mathf.RoundToInt(actualDamage), _currentResolve);
             _currentResolve -= finalDamage;
 
             Debug.Log($"Resolve damaged with Hostility: {baseDamage} base × {HostilityDamageMultiplier:F2}x = {finalDamage} damage. Resolve: {_currentResolve}/{_maxResolve}");
+            if (finalDamage > 0)
+                EventBus.Publish(new ResolveChangedEvent { OldValue = oldResolve, NewValue = _currentResolve, IsPlayer = _isPlayer });
             return finalDamage;
         }
 
@@ -156,9 +168,12 @@ namespace Crookedile.Gameplay
         /// <returns>Actual amount healed</returns>
         public int RestoreResolve(int amount)
         {
+            int oldResolve = _currentResolve;
             int healAmount = Mathf.Min(amount, _maxResolve - _currentResolve);
             _currentResolve += healAmount;
             Debug.Log($"Resolve restored: +{healAmount}. Resolve: {_currentResolve}/{_maxResolve}");
+            if (healAmount > 0)
+                EventBus.Publish(new ResolveChangedEvent { OldValue = oldResolve, NewValue = _currentResolve, IsPlayer = _isPlayer });
             return healAmount;
         }
 
@@ -172,8 +187,10 @@ namespace Crookedile.Gameplay
         /// <param name="amount">Composure to gain</param>
         public void GainComposure(int amount)
         {
+            int old = _currentComposure;
             _currentComposure += amount;
             Debug.Log($"Gained {amount} Composure. Current: {_currentComposure}");
+            EventBus.Publish(new ComposureChangedEvent { OldValue = old, NewValue = _currentComposure, IsPlayer = _isPlayer });
         }
 
         /// <summary>
@@ -183,9 +200,12 @@ namespace Crookedile.Gameplay
         /// <returns>Actual amount lost</returns>
         public int LoseComposure(int amount)
         {
+            int old        = _currentComposure;
             int loseAmount = Mathf.Min(amount, _currentComposure);
             _currentComposure -= loseAmount;
             Debug.Log($"Lost {loseAmount} Composure. Current: {_currentComposure}");
+            if (loseAmount > 0)
+                EventBus.Publish(new ComposureChangedEvent { OldValue = old, NewValue = _currentComposure, IsPlayer = _isPlayer });
             return loseAmount;
         }
 
@@ -198,6 +218,8 @@ namespace Crookedile.Gameplay
             int consumed = _currentComposure;
             _currentComposure = 0;
             Debug.Log($"Consumed all Composure: {consumed}");
+            if (consumed > 0)
+                EventBus.Publish(new ComposureChangedEvent { OldValue = consumed, NewValue = 0, IsPlayer = _isPlayer });
             return consumed;
         }
 
@@ -220,9 +242,11 @@ namespace Crookedile.Gameplay
         /// </summary>
         public void GainHostility(int amount)
         {
+            int old = _currentHostility;
             _currentHostility += amount;
             _currentHostility = Mathf.Min(_maxHostility, _currentHostility);
             Debug.Log($"Gained {amount} Hostility. Current: {_currentHostility}");
+            EventBus.Publish(new HostilityChangedEvent { OldValue = old, NewValue = _currentHostility, IsPlayer = _isPlayer });
         }
 
         /// <summary>
@@ -231,9 +255,11 @@ namespace Crookedile.Gameplay
         /// <returns>The amount passed in (hostility may have been clamped internally).</returns>
         public int ReduceHostility(int amount)
         {
+            int old = _currentHostility;
             _currentHostility -= amount;
             _currentHostility = Mathf.Max(_minHostility, _currentHostility);
             Debug.Log($"Reduced {amount} Hostility. Current: {_currentHostility}");
+            EventBus.Publish(new HostilityChangedEvent { OldValue = old, NewValue = _currentHostility, IsPlayer = _isPlayer });
             return amount;
         }
 
@@ -242,8 +268,11 @@ namespace Crookedile.Gameplay
         /// </summary>
         public void SetHostility(int value)
         {
+            int old = _currentHostility;
             _currentHostility = Mathf.Clamp(value, _minHostility, _maxHostility);
             Debug.Log($"Hostility set to: {_currentHostility}");
+            if (old != _currentHostility)
+                EventBus.Publish(new HostilityChangedEvent { OldValue = old, NewValue = _currentHostility, IsPlayer = _isPlayer });
         }
 
         #endregion
@@ -263,8 +292,10 @@ namespace Crookedile.Gameplay
                 return false;
             }
 
+            int old = _currentActionPoints;
             _currentActionPoints -= cost;
             Debug.Log($"Spent {cost} Action Points. Remaining: {_currentActionPoints}");
+            EventBus.Publish(new ActionPointsChangedEvent { OldValue = old, NewValue = _currentActionPoints, IsPlayer = _isPlayer });
             return true;
         }
 
@@ -274,8 +305,10 @@ namespace Crookedile.Gameplay
         /// <param name="amount">Amount to gain</param>
         public void GainActionPoints(int amount)
         {
+            int old = _currentActionPoints;
             _currentActionPoints += amount;
             Debug.Log($"Gained {amount} Action Points. Current: {_currentActionPoints}");
+            EventBus.Publish(new ActionPointsChangedEvent { OldValue = old, NewValue = _currentActionPoints, IsPlayer = _isPlayer });
         }
 
         /// <summary>
@@ -294,9 +327,11 @@ namespace Crookedile.Gameplay
         /// </summary>
         public void RefreshActionPoints()
         {
+            int old = _currentActionPoints;
             _currentActionPoints = _maxActionPoints + _actionPointsNextTurn;
             Debug.Log($"Action Points refreshed: {_maxActionPoints} + {_actionPointsNextTurn} banked = {_currentActionPoints}");
             _actionPointsNextTurn = 0; // Reset banked AP
+            EventBus.Publish(new ActionPointsChangedEvent { OldValue = old, NewValue = _currentActionPoints, IsPlayer = _isPlayer });
         }
 
         #endregion

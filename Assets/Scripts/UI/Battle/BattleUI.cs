@@ -114,6 +114,7 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
             EventBus.Subscribe<EnemyHostilityChangedEvent>(OnEnemyHostilityChanged);
             EventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
+            EventBus.Subscribe<EnemySummonedEvent>(OnEnemySummoned);
         }
 
         private void UnsubscribeFromEvents()
@@ -126,6 +127,7 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
             EventBus.Unsubscribe<EnemyHostilityChangedEvent>(OnEnemyHostilityChanged);
             EventBus.Unsubscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
+            EventBus.Unsubscribe<EnemySummonedEvent>(OnEnemySummoned);
         }
 
         /// <summary>
@@ -213,6 +215,13 @@ namespace Crookedile.UI.Battle
                 _enemySlots[evt.EnemyIndex]?.MarkDefeated();
         }
 
+        private void OnEnemySummoned(EnemySummonedEvent evt)
+        {
+            logPanel?.AddEntry($"{evt.EnemyData.EnemyName} was summoned!");
+            AddEnemySlot(evt.EnemyIndex);
+            UpdateStatsDisplay();
+        }
+
         private void OnBattleEnded(BattleEndedEvent evt)
         {
             string outcome = evt.Result.isVictory ? "=== VICTORY ===" : "=== DEFEAT ===";
@@ -288,6 +297,24 @@ namespace Crookedile.UI.Battle
                     slot.Initialize(i, battleManager, battleManager.PlayerOrigin);
                     _enemySlots.Add(slot);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Spawns a new enemy slot for the enemy at <paramref name="index"/> in
+        /// <c>BattleManager.Enemies</c>. Called when a <c>SummonMinion</c> move fires.
+        /// </summary>
+        private void AddEnemySlot(int index)
+        {
+            if (enemySlotContainer == null || enemySlotPrefab == null || battleManager == null) return;
+            if (index >= battleManager.Enemies.Count) return;
+
+            var go   = Instantiate(enemySlotPrefab, enemySlotContainer);
+            var slot = go.GetComponent<EnemySlotUI>();
+            if (slot != null)
+            {
+                slot.Initialize(index, battleManager, battleManager.PlayerOrigin);
+                _enemySlots.Add(slot);
             }
         }
 
