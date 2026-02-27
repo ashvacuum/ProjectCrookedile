@@ -62,8 +62,9 @@ namespace Crookedile.UI.Battle
         [SerializeField] private float hoverScale = 1.12f;
         [Tooltip("How fast the scale animates")]
         [SerializeField] private float hoverLerpSpeed = 12f;
-        [Tooltip("Extra vertical lift on hover (in pixels)")]
-        [SerializeField] private float hoverLiftPixels = 20f;
+        [Tooltip("Gap in pixels between the card's bottom edge and the screen bottom when hovered. " +
+                 "All cards share this height regardless of their arc position.")]
+        [SerializeField] private float hoverEdgePadding = 6f;
 
         // ─── Drag to Play ─────────────────────────────────────────────────────────
 
@@ -252,7 +253,7 @@ namespace Crookedile.UI.Battle
             isHovered = true;
 
             targetScale    = baseScale * hoverScale;
-            targetPosition = basePosition + new Vector3(0f, hoverLiftPixels, 0f);
+            targetPosition = new Vector3(basePosition.x, ComputeHoverY(), basePosition.z);
             targetRotation = Quaternion.identity;   // straighten the arc tilt on hover
 
             // Bring this card in front of all its neighbours while hovered.
@@ -273,6 +274,29 @@ namespace Crookedile.UI.Battle
             transform.SetSiblingIndex(baseSiblingIndex);
 
             hoverExitFeedback?.PlayFeedbacks();
+        }
+
+        /// <summary>
+        /// Returns the local Y position that places this card's bottom edge just above the
+        /// canvas bottom boundary by <see cref="hoverEdgePadding"/> pixels.
+        /// Uniform across all cards regardless of arc position.
+        /// Falls back to <see cref="basePosition"/>.y when no Canvas ancestor is found.
+        /// </summary>
+        private float ComputeHoverY()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) return basePosition.y;
+
+            var canvasRect = canvas.GetComponent<RectTransform>();
+            var myRect     = GetComponent<RectTransform>();
+
+            // Bottom edge of the canvas converted to this card's parent local space
+            Vector3 bottomWorld = canvas.transform.TransformPoint(
+                new Vector3(0f, canvasRect.rect.yMin, 0f));
+            float bottomLocal = transform.parent.InverseTransformPoint(bottomWorld).y;
+
+            // Position card centre so its bottom edge sits hoverEdgePadding above the canvas edge
+            return bottomLocal + myRect.rect.height * 0.5f + hoverEdgePadding;
         }
 
         // ─── Drag Handlers ────────────────────────────────────────────────────────
