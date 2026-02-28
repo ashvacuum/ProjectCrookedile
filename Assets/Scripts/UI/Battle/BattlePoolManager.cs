@@ -1,18 +1,21 @@
 using UnityEngine;
+using Crookedile.Core;
+using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
 
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Scene-level pool manager for the battle UI.
+    /// <summary>
+    /// Scene-level singleton pool manager for the battle UI.
     ///
     /// Owns one <see cref="ObjectPool{T}"/> per <see cref="CardType"/> (Pressure, Rhetoric, Policy)
     /// so each card type can use a wholly different prefab layout.
     /// Also owns a pool for <see cref="EnemySlotUI"/>.
     ///
-    /// Shared by HandPanel, CardZonePanel, CardSelectionPanel, CardChoicePanel, and RewardScreen.
-    /// BattleUI calls <c>SetPool</c> on each panel during <c>Initialize()</c>.
+    /// Accessible globally via <c>BattlePoolManager.Instance</c> — no injection required.
+    /// Survives scene reloads via <c>DontDestroyOnLoad</c>; duplicate instances are auto-destroyed.
     ///
     /// Borrow/return pattern:
     ///   1. <c>RentCard(cardType, parent)</c>  — activates the right button and re-parents it.
@@ -20,7 +23,7 @@ namespace Crookedile.UI.Battle
     ///   3. <c>ReturnCard(btn)</c>             — reads <c>btn.PooledCardType</c>, resets state,
     ///                                           re-parents to this transform, deactivates.
     /// </summary>
-    public class BattlePoolManager : MonoBehaviour
+    public class BattlePoolManager : Singleton<BattlePoolManager>
     {
         [Header("Card Prefabs — one per CardType")]
         [Tooltip("CardButton prefab used for Pressure cards.")]
@@ -48,7 +51,7 @@ namespace Crookedile.UI.Battle
         private ObjectPool<CardButton>  _policyPool;
         private ObjectPool<EnemySlotUI> _slotPool;
 
-        private void Awake()
+        protected override void OnAwake()
         {
             if (_pressureCardPrefab != null)
                 _pressurePool = new ObjectPool<CardButton>(_pressureCardPrefab, _pressurePoolSize, transform);

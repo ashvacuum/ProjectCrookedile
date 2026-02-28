@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Crookedile.Data;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -20,7 +21,7 @@ namespace Crookedile.UI.Battle
         [SerializeField] private Transform  cardContainer;  // Child Content with GridLayoutGroup
         [SerializeField] private Button     closeButton;
 
-        [Header("Fallback Prefabs (used only when BattlePoolManager is not injected)")]
+        [Header("Fallback Prefabs (used only when BattlePoolManager singleton is absent)")]
         [SerializeField] private CardButton _pressurePrefab;
         [SerializeField] private CardButton _rhetoricPrefab;
         [SerializeField] private CardButton _policyPrefab;
@@ -28,7 +29,6 @@ namespace Crookedile.UI.Battle
         // ─── Runtime ─────────────────────────────────────────────────────────────
 
         private readonly List<CardButton> _spawnedButtons = new List<CardButton>();
-        private BattlePoolManager         _pool;
 
         // ─── Lifecycle ────────────────────────────────────────────────────────────
 
@@ -37,11 +37,6 @@ namespace Crookedile.UI.Battle
             closeButton?.onClick.AddListener(Close);
             gameObject.SetActive(false);
         }
-
-        // ─── Public API ───────────────────────────────────────────────────────────
-
-        /// <summary>Sets the shared pool. Call from BattleUI.Initialize() before the first Open.</summary>
-        public void SetPool(BattlePoolManager pool) => _pool = pool;
 
         /// <summary>
         /// Populates and shows the panel for the given card list.
@@ -63,8 +58,8 @@ namespace Crookedile.UI.Battle
             for (int i = cards.Count - 1; i >= 0; i--)
             {
                 CardData cardData = cards[i];
-                CardButton card = _pool != null
-                    ? _pool.RentCard(cardData.CardType, cardContainer)
+                CardButton card = BattlePoolManager.Instance != null
+                    ? BattlePoolManager.Instance.RentCard(cardData.CardType, cardContainer)
                     : InstantiateFallback(cardData.CardType);
 
                 if (card == null) continue;
@@ -102,7 +97,7 @@ namespace Crookedile.UI.Battle
             foreach (var btn in _spawnedButtons)
             {
                 if (btn == null) continue;
-                if (_pool != null) _pool.ReturnCard(btn);   // pool resets CanvasGroup
+                if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnCard(btn);
                 else Destroy(btn.gameObject);
             }
             _spawnedButtons.Clear();

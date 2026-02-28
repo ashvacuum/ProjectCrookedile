@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Crookedile.Data;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -29,7 +30,7 @@ namespace Crookedile.UI.Battle
         [SerializeField] private Transform  discardContainer;    // cards queued for discard
         [SerializeField] private Button     discardButton;       // executes the discard
 
-        [Header("Fallback Prefabs (used only when BattlePoolManager is not injected)")]
+        [Header("Fallback Prefabs (used only when BattlePoolManager singleton is absent)")]
         [SerializeField] private CardButton _pressurePrefab;
         [SerializeField] private CardButton _rhetoricPrefab;
         [SerializeField] private CardButton _policyPrefab;
@@ -48,7 +49,6 @@ namespace Crookedile.UI.Battle
         private readonly List<CardButton> _spawnedButtons = new List<CardButton>();
 
         private Action<List<CardData>> _onDiscard;
-        private BattlePoolManager      _pool;
 
         // ─── Lifecycle ────────────────────────────────────────────────────────────
 
@@ -57,11 +57,6 @@ namespace Crookedile.UI.Battle
             discardButton?.onClick.AddListener(OnDiscardClicked);
             gameObject.SetActive(false);
         }
-
-        // ─── Public API ───────────────────────────────────────────────────────────
-
-        /// <summary>Sets the shared pool. Call from BattleUI.Initialize() before the first Open.</summary>
-        public void SetPool(BattlePoolManager pool) => _pool = pool;
 
         /// <summary>
         /// Opens the panel with an empty discard zone.
@@ -90,8 +85,8 @@ namespace Crookedile.UI.Battle
 
             _selectedCards.Add(card);
 
-            CardButton button = _pool != null
-                ? _pool.RentCard(card.CardType, discardContainer)
+            CardButton button = BattlePoolManager.Instance != null
+                ? BattlePoolManager.Instance.RentCard(card.CardType, discardContainer)
                 : InstantiateFallback(card.CardType);
             if (button == null) { _selectedCards.Remove(card); return; }
             // int.MaxValue AP → card displays as affordable (no grey tint)
@@ -126,7 +121,7 @@ namespace Crookedile.UI.Battle
         {
             _selectedCards.Remove(card);
             _spawnedButtons.Remove(button);
-            if (_pool != null) _pool.ReturnCard(button);
+            if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnCard(button);
             else Destroy(button.gameObject);
             OnCardReturnedToHand?.Invoke(card);
             RefreshUI();
@@ -151,7 +146,7 @@ namespace Crookedile.UI.Battle
             foreach (var button in _spawnedButtons)
             {
                 if (button == null) continue;
-                if (_pool != null) _pool.ReturnCard(button);
+                if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnCard(button);
                 else Destroy(button.gameObject);
             }
 

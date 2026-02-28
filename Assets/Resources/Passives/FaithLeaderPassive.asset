@@ -19,7 +19,7 @@ MonoBehaviour:
   _trigger: 1
   _condition:
     Type: 0
-    Value: 0
-  _oneShot: 0
+    Value: 1
+  _oneShot: 1
   _effectType: 2
   _effectAmount: 1
