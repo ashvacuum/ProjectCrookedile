@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEditor;
+using UnityEditor.Animations;
 using UnityEngine;
 
 namespace Crookedile.Editor
@@ -47,6 +48,12 @@ namespace Crookedile.Editor
         /// Must live somewhere inside the project's Assets folder.
         /// </summary>
         private const string TEMPLATE_CLIP_NAME = "Fireball";
+
+        /// <summary>
+        /// Project-relative path to the Animator Controller that every generated clip
+        /// should be registered into as a state.
+        /// </summary>
+        private const string VFX_CONTROLLER_PATH = "Assets/Resources/BaseAnimationVFX.controller";
 
         /// <summary>
         /// Texture filenames treated as generic — the parent folder name is used as the
@@ -218,6 +225,9 @@ namespace Crookedile.Editor
             // Import after writing both files so Unity picks up the .meta we wrote.
             AssetDatabase.ImportAsset(outputPath, ImportAssetOptions.ForceSynchronousImport);
 
+            // Register the clip as a state in the shared VFX Animator Controller.
+            RegisterInController(outputPath, animName);
+
             Debug.Log(
                 $"[AnimGen] Created: {outputPath}  ({sprites.Length} frames @ {DEFAULT_FRAME_RATE} fps)");
             return true;
@@ -302,6 +312,58 @@ namespace Crookedile.Editor
                     return Path.GetFileName(dir);
             }
             return fileNameWithoutExt;
+        }
+
+        /// <summary>
+        /// Adds a state for <paramref name="clipPath"/> to the base VFX Animator Controller.
+        /// Skips silently if the controller is not found or a state with the same name already exists,
+        /// so this is safe to call on every regeneration pass.
+        /// States are positioned in the same diagonal grid used by existing states (x+35, y+65).
+        /// </summary>
+        private static void RegisterInController(string clipPath, string stateName)
+        {
+            var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(VFX_CONTROLLER_PATH);
+            if (controller == null)
+            {
+                Debug.LogWarning(
+                    $"[AnimGen] VFX controller not found at '{VFX_CONTROLLER_PATH}' — " +
+                    "state not registered. Check the VFX_CONTROLLER_PATH constant.");
+                return;
+            }
+
+            AnimatorStateMachine sm = controller.layers[0].stateMachine;
+
+            // Skip if a state with this name already exists (regeneration guard).
+            foreach (ChildAnimatorState child in sm.states)
+            {
+                if (child.state.name.Equals(stateName, StringComparison.OrdinalIgnoreCase))
+                {
+                    Debug.Log($"[AnimGen] State '{stateName}' already in controller — skipped.");
+                    return;
+                }
+            }
+
+            var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(clipPath);
+            if (clip == null)
+            {
+                Debug.LogWarning(
+                    $"[AnimGen] Could not load clip at '{clipPath}' to register in controller.");
+                return;
+            }
+
+            // Continue the diagonal layout used by existing states (+35 x, +65 y per step).
+            Vector3 pos = sm.states.Length > 0
+                ? new Vector3(sm.states[sm.states.Length - 1].position.x + 35f,
+                              sm.states[sm.states.Length - 1].position.y + 65f, 0f)
+                : new Vector3(200f, 0f, 0f);
+
+            AnimatorState state = sm.AddState(stateName, pos);
+            state.motion = clip;
+
+            EditorUtility.SetDirty(controller);
+            AssetDatabase.SaveAssets();
+
+            Debug.Log($"[AnimGen] Registered state '{stateName}' in {VFX_CONTROLLER_PATH}");
         }
 
         /// <summary>
