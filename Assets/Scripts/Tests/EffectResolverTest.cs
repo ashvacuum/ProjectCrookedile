@@ -215,7 +215,7 @@ namespace Crookedile.Tests
             effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Regeneration, 2);
 
             // Damage player first to see regeneration
-            playerStats.DamageResolve(5, 0);
+            playerStats.DamageResolve(5);
 
             Debug.Log($"Before turn end: {playerStats.GetStatusString()}");
 

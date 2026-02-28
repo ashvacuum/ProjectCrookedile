@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using Crookedile.Data.Database;
 using Crookedile.Utilities;
+using Crookedile.Data;
 
 namespace Crookedile.Data.Cards
 {
@@ -236,6 +237,136 @@ namespace Crookedile.Data.Cards
             string originTag = origin.ToString().ToLower();
             return FindAll(card => card.IsStarterCard &&
                                  (card.Tags.Count == 0 || card.HasTag(originTag) || card.HasTag("universal")));
+        }
+
+        #endregion
+
+        #region Reward Offers
+
+        /// <summary>
+        /// Generates a randomised reward card offer for the post-battle card pick screen.
+        ///
+        /// Rules:
+        ///   - Policy cards are universal — no origin filter applied.
+        ///   - Pressure / Rhetoric cards must have the origin's tag or "universal".
+        ///   - Starter cards (<see cref="CardData.IsStarterCard"/>) are always excluded.
+        ///   - Upgraded cards are excluded so players receive base versions only.
+        ///   - <paramref name="typeFilter"/> restricts all picks to one <see cref="CardType"/>;
+        ///     pass <c>null</c> to draw from the full eligible pool.
+        ///   - The same card is never returned twice in one offer.
+        ///   - Weighted rarity draw: Basic 70 % / Enhanced 25 % / Rare 5 %.
+        ///     If the chosen rarity bucket is empty the method falls back to any non-empty bucket.
+        /// </summary>
+        /// <param name="origin">Player's current run origin (used to filter Pressure/Rhetoric cards).</param>
+        /// <param name="count">Number of cards to offer (default 3).</param>
+        /// <param name="typeFilter">Restrict to a single <see cref="CardType"/>; <c>null</c> = any type.</param>
+        /// <returns>
+        /// List of unique <see cref="CardData"/> offers. May be shorter than <paramref name="count"/>
+        /// if the eligible pool is exhausted.
+        /// </returns>
+        public List<CardData> GenerateRewardOffer(OriginType origin, int count = 3, CardType? typeFilter = null)
+        {
+            string originTag = origin.ToString().ToLower();
+
+            // Build the candidate pool ─────────────────────────────────────────────────
+            List<CardData> candidates = new List<CardData>();
+
+            bool includePolicy   = typeFilter == null || typeFilter == CardType.Policy;
+            bool includePressure = typeFilter == null || typeFilter == CardType.Pressure;
+            bool includeRhetoric = typeFilter == null || typeFilter == CardType.Rhetoric;
+
+            foreach (CardData card in GetAll())
+            {
+                if (card == null)          continue;
+                if (card.IsStarterCard)    continue;
+                if (card.IsUpgraded)       continue;   // offer base version only
+
+                switch (card.CardType)
+                {
+                    case CardType.Policy:
+                        if (includePolicy)
+                            candidates.Add(card);
+                        break;
+
+                    case CardType.Pressure:
+                        if (includePressure && (card.HasTag(originTag) || card.HasTag("universal")))
+                            candidates.Add(card);
+                        break;
+
+                    case CardType.Rhetoric:
+                        if (includeRhetoric && (card.HasTag(originTag) || card.HasTag("universal")))
+                            candidates.Add(card);
+                        break;
+                }
+            }
+
+            if (candidates.Count == 0) return new List<CardData>();
+
+            // Split into rarity buckets ────────────────────────────────────────────────
+            var basicBucket    = candidates.Where(c => c.Rarity == CardRarity.Basic).ToList();
+            var enhancedBucket = candidates.Where(c => c.Rarity == CardRarity.Enhanced).ToList();
+            var rareBucket     = candidates.Where(c => c.Rarity == CardRarity.Rare).ToList();
+
+            // Rarity weights: Basic 70 / Enhanced 25 / Rare 5
+            const float weightBasic    = 70f;
+            const float weightEnhanced = 25f;
+            const float weightRare     =  5f;
+
+            var result = new List<CardData>(count);
+
+            for (int i = 0; i < count; i++)
+            {
+                if (basicBucket.Count == 0 && enhancedBucket.Count == 0 && rareBucket.Count == 0)
+                    break;   // pool exhausted
+
+                // Weighted pick among non-empty buckets
+                List<CardData> bucket = PickWeightedBucket(
+                    basicBucket,    weightBasic,
+                    enhancedBucket, weightEnhanced,
+                    rareBucket,     weightRare);
+
+                if (bucket == null || bucket.Count == 0) break;
+
+                int idx  = UnityEngine.Random.Range(0, bucket.Count);
+                var pick = bucket[idx];
+                bucket.RemoveAt(idx);   // prevent duplicates
+
+                result.Add(pick);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Returns one of the three rarity buckets using weighted random selection.
+        /// Buckets with zero remaining cards are excluded from selection.
+        /// Returns <c>null</c> if all buckets are empty.
+        /// </summary>
+        private static List<CardData> PickWeightedBucket(
+            List<CardData> basic,    float wBasic,
+            List<CardData> enhanced, float wEnhanced,
+            List<CardData> rare,     float wRare)
+        {
+            float total = 0f;
+            if (basic.Count    > 0) total += wBasic;
+            if (enhanced.Count > 0) total += wEnhanced;
+            if (rare.Count     > 0) total += wRare;
+            if (total <= 0f) return null;
+
+            float roll = UnityEngine.Random.Range(0f, total);
+            float cursor = 0f;
+
+            if (basic.Count > 0)
+            {
+                cursor += wBasic;
+                if (roll < cursor) return basic;
+            }
+            if (enhanced.Count > 0)
+            {
+                cursor += wEnhanced;
+                if (roll < cursor) return enhanced;
+            }
+            return rare.Count > 0 ? rare : null;
         }
 
         #endregion

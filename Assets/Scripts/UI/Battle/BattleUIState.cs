@@ -27,6 +27,14 @@ namespace Crookedile.UI.Battle
         Improvise,
 
         /// <summary>
+        /// A card effect is requesting interactive player input (e.g. choose a card from discard,
+        /// upgrade a card, retain a card). Normal card play is disabled; <c>CardChoicePanel</c>
+        /// is open. Automatically transitions back to <c>PlayerTurn</c> when the player confirms
+        /// or cancels.
+        /// </summary>
+        WaitingForCardChoice,
+
+        /// <summary>
         /// Battle is over (victory or defeat).
         /// Result panel is shown; hand is cleared; all controls disabled.
         /// </summary>

@@ -18,14 +18,30 @@ namespace Crookedile.UI.Battle
         [SerializeField] private TMP_Text   countText;
         [SerializeField] private TMP_Text   emptyLabel;
         [SerializeField] private Transform  cardContainer;  // Child Content with GridLayoutGroup
-        [SerializeField] private CardButton cardPrefab;     // Assign CardPrefab in Inspector
         [SerializeField] private Button     closeButton;
+
+        [Header("Fallback Prefabs (used only when BattlePoolManager is not injected)")]
+        [SerializeField] private CardButton _pressurePrefab;
+        [SerializeField] private CardButton _rhetoricPrefab;
+        [SerializeField] private CardButton _policyPrefab;
+
+        // ─── Runtime ─────────────────────────────────────────────────────────────
+
+        private readonly List<CardButton> _spawnedButtons = new List<CardButton>();
+        private BattlePoolManager         _pool;
+
+        // ─── Lifecycle ────────────────────────────────────────────────────────────
 
         private void Awake()
         {
             closeButton?.onClick.AddListener(Close);
             gameObject.SetActive(false);
         }
+
+        // ─── Public API ───────────────────────────────────────────────────────────
+
+        /// <summary>Sets the shared pool. Call from BattleUI.Initialize() before the first Open.</summary>
+        public void SetPool(BattlePoolManager pool) => _pool = pool;
 
         /// <summary>
         /// Populates and shows the panel for the given card list.
@@ -37,9 +53,8 @@ namespace Crookedile.UI.Battle
             if (titleText != null) titleText.text = title;
             if (countText != null) countText.text = $"({cards.Count})";
 
-            // Clear previous cards
-            foreach (Transform child in cardContainer)
-                Destroy(child.gameObject);
+            // Return any previously displayed cards before spawning new ones
+            ClearCards();
 
             bool isEmpty = cards.Count == 0;
             if (emptyLabel != null) emptyLabel.gameObject.SetActive(isEmpty);
@@ -47,11 +62,18 @@ namespace Crookedile.UI.Battle
             // Newest-first: iterate backwards
             for (int i = cards.Count - 1; i >= 0; i--)
             {
-                CardButton card = Instantiate(cardPrefab, cardContainer);
+                CardData cardData = cards[i];
+                CardButton card = _pool != null
+                    ? _pool.RentCard(cardData.CardType, cardContainer)
+                    : InstantiateFallback(cardData.CardType);
+
+                if (card == null) continue;
 
                 // int.MaxValue AP → all cards show as "affordable" (no grey tint)
                 // null callback  → nothing fires if interaction somehow reaches the card
-                card.Initialize(cards[i], i, int.MaxValue, null);
+                int baseCost = cardData.Costs != null && cardData.Costs.Count > 0
+                    ? cardData.Costs[0].BaseAmount : 0;
+                card.Initialize(cardData, i, int.MaxValue, baseCost);
 
                 // Kill all interaction — hover scale, drag, click
                 CanvasGroup cg = card.GetComponent<CanvasGroup>();
@@ -60,11 +82,42 @@ namespace Crookedile.UI.Battle
                     cg.interactable   = false;
                     cg.blocksRaycasts = false;
                 }
+
+                _spawnedButtons.Add(card);
             }
 
             gameObject.SetActive(true);
         }
 
-        public void Close() => gameObject.SetActive(false);
+        public void Close()
+        {
+            ClearCards();
+            gameObject.SetActive(false);
+        }
+
+        // ─── Internal ─────────────────────────────────────────────────────────────
+
+        private void ClearCards()
+        {
+            foreach (var btn in _spawnedButtons)
+            {
+                if (btn == null) continue;
+                if (_pool != null) _pool.ReturnCard(btn);   // pool resets CanvasGroup
+                else Destroy(btn.gameObject);
+            }
+            _spawnedButtons.Clear();
+        }
+
+        private CardButton InstantiateFallback(CardType cardType)
+        {
+            CardButton prefab = cardType switch
+            {
+                CardType.Rhetoric => _rhetoricPrefab,
+                CardType.Policy   => _policyPrefab,
+                _                 => _pressurePrefab,
+            };
+            if (prefab == null) return null;
+            return Instantiate(prefab, cardContainer);
+        }
     }
 }

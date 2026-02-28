@@ -9,7 +9,7 @@ namespace Crookedile.Gameplay
     /// Tracks all battle-specific stats for a single combatant (player or opponent).
     /// Griftlands-inspired negotiation resources:
     /// - Resolve (HP) - Reduce to 0 = defeat
-    /// - Composure (Offensive buff) - Each stack = +1 damage
+    /// - Composure (Defensive shield) - Absorbs incoming damage before Resolve; reset each turn start
     /// - Hostility (Self-inflicted debuff) - Opponent deals more damage
     /// - Action Points - Energy to play cards
     /// </summary>
@@ -23,7 +23,7 @@ namespace Crookedile.Gameplay
         [Tooltip("Maximum Resolve value")]
         [SerializeField] private int _maxResolve;
 
-        [Tooltip("Composure - Offensive buff stacks (each stack = +1 damage, consumed on attack)")]
+        [Tooltip("Composure - Defensive shield (absorbs incoming damage before Resolve; reset each turn start)")]
         [SerializeField] private int _currentComposure;
 
         [Tooltip("Hostility - Self-inflicted debuff (opponent deals more damage based on this)")]
@@ -120,45 +120,57 @@ namespace Crookedile.Gameplay
         #region Resolve Management
 
         /// <summary>
-        /// Damages Resolve, applying Composure bonus for attacker.
-        /// If this is player attacking, apply player's Composure as bonus damage.
+        /// Damages this combatant. Composure acts as a shield — incoming damage depletes
+        /// Composure first; any remainder reduces Resolve.
         /// </summary>
-        /// <param name="baseDamage">Base Resolve damage</param>
-        /// <param name="attackerComposure">Attacker's Composure (adds to damage)</param>
-        /// <returns>Actual damage dealt</returns>
-        public int DamageResolve(int baseDamage, int attackerComposure = 0)
+        /// <param name="damage">Total incoming damage (after all external modifiers)</param>
+        /// <returns>Total damage actually absorbed (Composure absorbed + Resolve reduced)</returns>
+        public int DamageResolve(int damage)
         {
-            // Calculate total damage (base + Composure bonus)
-            int totalDamage = baseDamage + attackerComposure;
+            if (damage <= 0) return 0;
 
-            // Apply damage to Resolve
-            int oldResolve  = _currentResolve;
-            int finalDamage = Mathf.Min(totalDamage, _currentResolve);
-            _currentResolve -= finalDamage;
+            int totalAbsorbed = 0;
 
-            Debug.Log($"Resolve damaged: {baseDamage} base + {attackerComposure} Composure = {finalDamage} damage. Resolve: {_currentResolve}/{_maxResolve}");
-            if (finalDamage > 0)
-                EventBus.Publish(new ResolveChangedEvent { OldValue = oldResolve, NewValue = _currentResolve, IsPlayer = _isPlayer });
-            return finalDamage;
+            // Composure absorbs damage first (shield)
+            if (_currentComposure > 0)
+            {
+                int composureAbsorb = Mathf.Min(damage, _currentComposure);
+                int oldComposure    = _currentComposure;
+                _currentComposure  -= composureAbsorb;
+                damage             -= composureAbsorb;
+                totalAbsorbed      += composureAbsorb;
+                Debug.Log($"Composure absorbed {composureAbsorb} damage. Composure: {_currentComposure}");
+                EventBus.Publish(new ComposureChangedEvent { OldValue = oldComposure, NewValue = _currentComposure, IsPlayer = _isPlayer });
+            }
+
+            // Remaining damage hits Resolve
+            if (damage > 0)
+            {
+                int actual     = Mathf.Min(damage, _currentResolve);
+                if (actual > 0)
+                {
+                    int oldResolve  = _currentResolve;
+                    _currentResolve -= actual;
+                    totalAbsorbed   += actual;
+                    Debug.Log($"Resolve damaged: {actual}. Resolve: {_currentResolve}/{_maxResolve}");
+                    EventBus.Publish(new ResolveChangedEvent { OldValue = oldResolve, NewValue = _currentResolve, IsPlayer = _isPlayer });
+                }
+            }
+
+            return totalAbsorbed;
         }
 
         /// <summary>
         /// Damages Resolve with Hostility multiplier applied (for opponent attacking player).
+        /// Delegates to <see cref="DamageResolve"/> after applying the multiplier.
         /// </summary>
         /// <param name="baseDamage">Base Resolve damage from opponent</param>
-        /// <returns>Actual damage dealt after Hostility multiplier</returns>
+        /// <returns>Actual damage dealt after Hostility multiplier and Composure shield</returns>
         public int DamageResolveWithHostility(int baseDamage)
         {
-            // Apply Hostility multiplier
-            float actualDamage = baseDamage * HostilityDamageMultiplier;
-            int oldResolve  = _currentResolve;
-            int finalDamage = Mathf.Min(Mathf.RoundToInt(actualDamage), _currentResolve);
-            _currentResolve -= finalDamage;
-
-            Debug.Log($"Resolve damaged with Hostility: {baseDamage} base × {HostilityDamageMultiplier:F2}x = {finalDamage} damage. Resolve: {_currentResolve}/{_maxResolve}");
-            if (finalDamage > 0)
-                EventBus.Publish(new ResolveChangedEvent { OldValue = oldResolve, NewValue = _currentResolve, IsPlayer = _isPlayer });
-            return finalDamage;
+            float multiplied = baseDamage * HostilityDamageMultiplier;
+            Debug.Log($"DamageResolveWithHostility: {baseDamage} base × {HostilityDamageMultiplier:F2}x = {Mathf.RoundToInt(multiplied)} damage");
+            return DamageResolve(Mathf.RoundToInt(multiplied));
         }
 
         /// <summary>
@@ -356,9 +368,9 @@ namespace Crookedile.Gameplay
         /// </summary>
         public void EndTurn()
         {
-            // Composure persists between turns (unlike Block)
+            // Composure is reset at the START of the next turn (in BattleManager.StartTurn)
             // Hostility persists between turns (ongoing debuff)
-            // Only Action Points refresh
+            // Action Points refresh at start of next turn via StartTurn() → RefreshActionPoints()
         }
 
         #endregion
