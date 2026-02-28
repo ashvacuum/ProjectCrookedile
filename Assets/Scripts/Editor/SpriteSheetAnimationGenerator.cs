@@ -1,11 +1,13 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Crookedile.Editor
 {
@@ -14,42 +16,67 @@ namespace Crookedile.Editor
     /// for any selected sprite sheet texture (spriteMode = Multiple) or for every sprite sheet
     /// found inside a selected folder.
     ///
+    /// Works by treating <c>Fireball.anim</c> as a YAML template — all binding settings
+    /// (classID, component GUID, flags, loop, wrapMode, etc.) are inherited exactly from that
+    /// file. Only the clip name, keyframe sprite references, stop time, and pptrCurveMapping
+    /// are replaced with per-sheet values.
+    ///
     /// Usage:
     ///   1. In the Project window select one or more sprite-sheet textures OR a folder
     ///      containing sprite-sheet sub-folders.
     ///   2. Right-click → Crookedile → Generate Anim from Sprite Sheet.
     ///   3. A <c>.anim</c> file appears next to each sprite sheet, named after its parent folder
     ///      (or the texture itself when the filename is not generic).
-    ///
-    /// The generated clip targets <see cref="UnityEngine.UI.Image.sprite"/> on the root GameObject
-    /// (matching the Fireball.anim format — VFX prefabs are canvas Image-based) and loops by default.
+    ///   4. Drag the <c>.anim</c> into an Animator Controller state as normal.
     /// </summary>
     public static class SpriteSheetAnimationGenerator
     {
-        // ─── Tunable defaults ─────────────────────────────────────────────────────
+        // ─── Tunable constants ────────────────────────────────────────────────────
 
-        private const float DEFAULT_FRAME_RATE = 12f;   // frames per second
-        private const bool  DEFAULT_LOOP       = true;
+        /// <summary>Playback rate written into each generated clip. Matches the manual workflow (30fps keyframes, 60fps sample rate).</summary>
+        private const float DEFAULT_FRAME_RATE = 30f;
 
         /// <summary>
-        /// Texture filenames considered "generic" — the parent folder name is used instead.
-        /// Case-insensitive comparison.
+        /// Sample rate inherited from the Fireball.anim template (m_SampleRate: 60).
+        /// Used only to compute the clip stop time: last_keyframe + 1/SAMPLE_RATE.
         /// </summary>
-        private static readonly HashSet<string> GenericTextureNames = new HashSet<string>(
-            StringComparer.OrdinalIgnoreCase)
-        {
-            "spritesheet",
-            "sprites",
-            "atlas",
-            "sheet",
-            "texture",
-        };
+        private const float SAMPLE_RATE = 60f;
+
+        /// <summary>
+        /// Asset name (no extension) of the .anim that acts as the YAML template.
+        /// Must live somewhere inside the project's Assets folder.
+        /// </summary>
+        private const string TEMPLATE_CLIP_NAME = "Fireball";
+
+        /// <summary>
+        /// Texture filenames treated as generic — the parent folder name is used as the
+        /// animation name instead. Case-insensitive.
+        /// </summary>
+        private static readonly HashSet<string> GenericTextureNames =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "spritesheet", "sprites", "atlas", "sheet", "texture",
+            };
 
         // ─── Menu entry ───────────────────────────────────────────────────────────
 
         [MenuItem("Assets/Crookedile/Generate Anim from Sprite Sheet", false, 2000)]
         private static void GenerateAnimations()
         {
+            string templatePath = FindTemplatePath();
+            if (templatePath == null)
+            {
+                EditorUtility.DisplayDialog(
+                    "Template Not Found",
+                    $"Could not find '{TEMPLATE_CLIP_NAME}.anim' anywhere in the project.\n" +
+                    "Make sure Fireball.anim exists (e.g. Assets/Resources/VFXAnimations/Fireball.anim) " +
+                    "and try again.",
+                    "OK");
+                return;
+            }
+
+            string templateText = File.ReadAllText(templatePath);
+
             int generated = 0;
             int skipped   = 0;
 
@@ -60,22 +87,19 @@ namespace Crookedile.Editor
 
                 if (AssetDatabase.IsValidFolder(assetPath))
                 {
-                    // Batch: find all sliced textures under this folder (recursive).
+                    // Batch: process every Texture2D found recursively inside the folder.
                     string[] guids = AssetDatabase.FindAssets("t:Texture2D", new[] { assetPath });
                     foreach (string guid in guids)
                     {
                         string texPath = AssetDatabase.GUIDToAssetPath(guid);
-                        bool ok = TryGenerateAnim(texPath);
-                        if (ok) generated++;
-                        else    skipped++;
+                        if (TryGenerateAnim(texPath, templateText)) generated++;
+                        else                                         skipped++;
                     }
                 }
                 else
                 {
-                    // Single texture selected directly.
-                    bool ok = TryGenerateAnim(assetPath);
-                    if (ok) generated++;
-                    else    skipped++;
+                    if (TryGenerateAnim(assetPath, templateText)) generated++;
+                    else                                          skipped++;
                 }
             }
 
@@ -85,38 +109,37 @@ namespace Crookedile.Editor
             EditorUtility.DisplayDialog(
                 "Generate Anim from Sprite Sheet",
                 $"Generated {generated} animation{(generated == 1 ? "" : "s")}." +
-                (skipped > 0 ? $"\nSkipped {skipped} (not a sliced sprite sheet or no sprites found)." : ""),
+                (skipped > 0
+                    ? $"\nSkipped {skipped} (not a sliced sprite sheet, or no sprites found)."
+                    : ""),
                 "OK");
         }
 
-        // Validate: only show the menu item when at least one asset is selected.
         [MenuItem("Assets/Crookedile/Generate Anim from Sprite Sheet", true)]
-        private static bool ValidateGenerateAnimations()
-        {
-            return Selection.objects != null && Selection.objects.Length > 0;
-        }
+        private static bool ValidateGenerateAnimations() =>
+            Selection.objects != null && Selection.objects.Length > 0;
 
-        // ─── Core logic ───────────────────────────────────────────────────────────
+        // ─── Core generation ──────────────────────────────────────────────────────
 
         /// <summary>
-        /// Attempts to generate a <c>.anim</c> clip for the texture at <paramref name="texturePath"/>.
-        /// Returns <c>true</c> on success, <c>false</c> if the texture was skipped.
+        /// Patches the template YAML and writes a <c>.anim</c> next to <paramref name="texturePath"/>.
+        /// Returns <c>false</c> (and logs a warning) when the texture should be skipped.
         /// </summary>
-        private static bool TryGenerateAnim(string texturePath)
+        private static bool TryGenerateAnim(string texturePath, string templateText)
         {
-            // Load the texture importer so we can inspect spriteMode.
-            TextureImporter importer = AssetImporter.GetAtPath(texturePath) as TextureImporter;
+            // Only process sliced sprite sheets.
+            var importer = AssetImporter.GetAtPath(texturePath) as TextureImporter;
             if (importer == null) return false;
 
             if (importer.spriteImportMode != SpriteImportMode.Multiple)
             {
-                Debug.LogWarning($"[AnimGen] Skipped '{texturePath}' — spriteImportMode is not Multiple.");
+                Debug.LogWarning(
+                    $"[AnimGen] Skipped '{texturePath}' — spriteImportMode is not Multiple.");
                 return false;
             }
 
-            // Load all sub-assets and filter to Sprite type only.
-            UnityEngine.Object[] allAssets = AssetDatabase.LoadAllAssetsAtPath(texturePath);
-            Sprite[] sprites = allAssets
+            // Load and sort the sub-sprites (Unity names them Name_0, Name_1 … Name_N).
+            Sprite[] sprites = AssetDatabase.LoadAllAssetsAtPath(texturePath)
                 .OfType<Sprite>()
                 .OrderBy(s => s.name, StringComparer.OrdinalIgnoreCase)
                 .ToArray();
@@ -124,77 +147,190 @@ namespace Crookedile.Editor
             if (sprites.Length == 0)
             {
                 Debug.LogWarning(
-                    $"[AnimGen] Skipped '{texturePath}' — no sprites found (sheet may not be sliced yet).");
+                    $"[AnimGen] Skipped '{texturePath}' — no sprites found " +
+                    "(the sheet may not have been sliced in the importer yet).");
                 return false;
             }
 
-            // Determine the output animation name and path.
-            string animName = ResolveAnimationName(texturePath);
-            string outputDir = Path.GetDirectoryName(texturePath)?.Replace('\\', '/') ?? "Assets";
-            string outputPath = $"{outputDir}/{animName}.anim";
+            // Detect line ending used by the template so the patched sections match.
+            string nl = templateText.Contains("\r\n") ? "\r\n" : "\n";
 
-            // Overwrite an existing clip at this path.
-            if (AssetDatabase.LoadAssetAtPath<AnimationClip>(outputPath) != null)
-                AssetDatabase.DeleteAsset(outputPath);
+            // Build the two sprite-reference blocks that replace the template's sections.
+            var curveBlock   = new StringBuilder();
+            var mappingBlock = new StringBuilder();
 
-            // Build the AnimationClip.
-            AnimationClip clip = new AnimationClip
-            {
-                frameRate = DEFAULT_FRAME_RATE,
-            };
-
-            // One keyframe per sprite.
-            ObjectReferenceKeyframe[] keyframes = new ObjectReferenceKeyframe[sprites.Length];
             for (int i = 0; i < sprites.Length; i++)
             {
-                keyframes[i] = new ObjectReferenceKeyframe
+                if (!AssetDatabase.TryGetGUIDAndLocalFileIdentifier(
+                        sprites[i], out string guid, out long fileId))
                 {
-                    time = i / DEFAULT_FRAME_RATE,
-                    value = sprites[i],
-                };
+                    Debug.LogWarning(
+                        $"[AnimGen] Could not resolve file ID for sprite '{sprites[i].name}' — skipped.");
+                    continue;
+                }
+
+                string time = FloatToYaml(i / DEFAULT_FRAME_RATE);
+                curveBlock.Append($"    - time: {time}{nl}");
+                curveBlock.Append($"      value: {{fileID: {fileId}, guid: {guid}, type: 3}}{nl}");
+                mappingBlock.Append($"    - {{fileID: {fileId}, guid: {guid}, type: 3}}{nl}");
             }
 
-            // Bind to Image.sprite on the root GameObject (path = "").
-            // Matches Fireball.anim — VFX prefabs use a UI Image, not a SpriteRenderer.
-            EditorCurveBinding binding = EditorCurveBinding.PPtrCurve(
-                "",
-                typeof(Image),
-                "m_Sprite");
+            // Stop time = last keyframe time + one sample tick, matching Unity's convention.
+            // e.g. 31 sprites @ 30fps: (31-1)/30 + 1/60 = 1.0 + 0.01667 = 1.01667
+            float stopTimeValue = (sprites.Length - 1) / DEFAULT_FRAME_RATE + 1f / SAMPLE_RATE;
+            string stopTime = FloatToYaml(stopTimeValue);
+            string animName = ResolveAnimationName(texturePath);
 
-            AnimationUtility.SetObjectReferenceCurve(clip, binding, keyframes);
+            string yaml = PatchTemplate(
+                templateText, animName,
+                curveBlock.ToString(), mappingBlock.ToString(),
+                stopTime);
 
-            // Apply loop setting.
-            AnimationClipSettings settings = AnimationUtility.GetAnimationClipSettings(clip);
-            settings.loopTime = DEFAULT_LOOP;
-            AnimationUtility.SetAnimationClipSettings(clip, settings);
+            // Output path: same folder as the texture.
+            string outputDir      = Path.GetDirectoryName(texturePath)?.Replace('\\', '/') ?? "Assets";
+            string outputPath     = $"{outputDir}/{animName}.anim";
+            string fullAnimPath   = Path.GetFullPath(outputPath);
+            string fullMetaPath   = fullAnimPath + ".meta";
 
-            // Save the asset.
-            AssetDatabase.CreateAsset(clip, outputPath);
+            // Preserve the existing GUID when regenerating, so any Animator Controller
+            // references to this clip continue to resolve without manual rewiring.
+            string existingGuid = TryReadMetaGuid(fullMetaPath);
+            string metaGuid     = existingGuid ?? Guid.NewGuid().ToString("N");
 
-            Debug.Log($"[AnimGen] Created: {outputPath} ({sprites.Length} frames @ {DEFAULT_FRAME_RATE} fps)");
+            // Write the .anim YAML (overwrite in-place; no DeleteAsset so the old meta GUID survives).
+            File.WriteAllText(fullAnimPath, yaml,
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+
+            // Always write the .meta explicitly with mainObjectFileID: 7400000.
+            // Unity sometimes generates mainObjectFileID: 0 for files written via File.WriteAllText,
+            // which prevents the AnimationClip from being recognised as the main asset.
+            File.WriteAllText(fullMetaPath,
+                "fileFormatVersion: 2\n" +
+                $"guid: {metaGuid}\n" +
+                "NativeFormatImporter:\n" +
+                "  externalObjects: {}\n" +
+                "  mainObjectFileID: 7400000\n" +
+                "  userData: \n" +
+                "  assetBundleName: \n" +
+                "  assetBundleVariant: \n",
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+
+            // Import after writing both files so Unity picks up the .meta we wrote.
+            AssetDatabase.ImportAsset(outputPath, ImportAssetOptions.ForceSynchronousImport);
+
+            Debug.Log(
+                $"[AnimGen] Created: {outputPath}  ({sprites.Length} frames @ {DEFAULT_FRAME_RATE} fps)");
             return true;
+        }
+
+        // ─── Template patching ────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Performs the four targeted replacements on the template YAML text.
+        /// All other content (bindings, wrapMode, classID, loop settings, …) is kept
+        /// verbatim from the template so the output matches it exactly.
+        /// </summary>
+        private static string PatchTemplate(string template, string animName,
+                                            string curveBlock, string mappingBlock,
+                                            string stopTime)
+        {
+            // 1. Clip name  →  "  m_Name: <name>"
+            //    Use a MatchEvaluator lambda — never use "$1value" replacement strings
+            //    when value starts with a digit, since .NET regex parses "$12" as group 12.
+            template = Regex.Replace(
+                template,
+                @"(  m_Name: )[^\r\n]*",
+                m => m.Groups[1].Value + animName);
+
+            // 2. Sprite keyframes — the indented block sitting between "    curve:" and
+            //    the next "    attribute:" line.  Each entry is two lines:
+            //      "    - time: X"
+            //      "      value: {fileID: …, guid: …, type: 3}"
+            template = Regex.Replace(
+                template,
+                @"(    curve:\r?\n)(?:    - time: [^\r\n]*\r?\n      value: [^\r\n]*\r?\n)+",
+                m => m.Groups[1].Value + curveBlock);
+
+            // 3. Clip stop time inside m_AnimationClipSettings.
+            template = Regex.Replace(
+                template,
+                @"(    m_StopTime: )[^\r\n]*",
+                m => m.Groups[1].Value + stopTime);
+
+            // 4. pptrCurveMapping — one "{fileID: …}" entry per sprite.
+            template = Regex.Replace(
+                template,
+                @"(    pptrCurveMapping:\r?\n)(?:    - \{[^\r\n]*\r?\n)+",
+                m => m.Groups[1].Value + mappingBlock);
+
+            return template;
         }
 
         // ─── Helpers ──────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Returns the animation clip name for a given texture path.
-        /// Uses the parent folder name when the texture filename is generic (e.g. "spritesheet.png").
-        /// Otherwise uses the texture filename without extension.
+        /// Searches the entire project for an <see cref="AnimationClip"/> named
+        /// <see cref="TEMPLATE_CLIP_NAME"/> and returns its asset path, or <c>null</c>.
+        /// </summary>
+        private static string FindTemplatePath()
+        {
+            string[] guids = AssetDatabase.FindAssets(
+                $"{TEMPLATE_CLIP_NAME} t:AnimationClip");
+
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (Path.GetFileNameWithoutExtension(path)
+                        .Equals(TEMPLATE_CLIP_NAME, StringComparison.OrdinalIgnoreCase))
+                    return path;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the animation name for a texture.
+        /// Falls back to the parent folder name when the texture filename is generic
+        /// (e.g. "spritesheet.png" → folder name "fanfx2_wind_spell_small_yellow").
         /// </summary>
         private static string ResolveAnimationName(string texturePath)
         {
             string fileNameWithoutExt = Path.GetFileNameWithoutExtension(texturePath);
-
             if (GenericTextureNames.Contains(fileNameWithoutExt))
             {
-                // Use the parent folder name.
                 string dir = Path.GetDirectoryName(texturePath);
                 if (!string.IsNullOrEmpty(dir))
                     return Path.GetFileName(dir);
             }
-
             return fileNameWithoutExt;
+        }
+
+        /// <summary>
+        /// Reads the <c>guid:</c> field from an existing Unity <c>.meta</c> file.
+        /// Returns <c>null</c> if the file does not exist or has no guid line.
+        /// Used to preserve the asset GUID when regenerating an existing clip so that
+        /// Animator Controller references remain valid.
+        /// </summary>
+        private static string TryReadMetaGuid(string metaFullPath)
+        {
+            if (!File.Exists(metaFullPath)) return null;
+
+            const string prefix = "guid: ";
+            foreach (string line in File.ReadLines(metaFullPath))
+            {
+                if (line.StartsWith(prefix))
+                    return line.Substring(prefix.Length).Trim();
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Formats a float value the same way Unity writes it in .anim YAML:
+        /// round-trip precision, invariant culture, no trailing ".0" for whole numbers.
+        /// </summary>
+        private static string FloatToYaml(float value)
+        {
+            if (value == 0f) return "0";
+            return value.ToString("R", CultureInfo.InvariantCulture);
         }
     }
 }
