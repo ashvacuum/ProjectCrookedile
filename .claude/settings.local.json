@@ -17,7 +17,8 @@
       "Bash(__NEW_LINE_8e06e3a9ccab1e3d__ echo \"\")",
       "Bash(Remove-Item \"C:\\\\Users\\\\v-2jo\\\\UE\\\\ProjectCrookedile\\\\Assets\\\\Scripts\\\\UI\\\\Battle\\\\CardZoneRowUI.cs\" -Force)",
       "Bash(Remove-Item \"C:\\\\Users\\\\v-2jo\\\\UE\\\\ProjectCrookedile\\\\Assets\\\\Scripts\\\\UI\\\\Battle\\\\CardZoneRowUI.cs.meta\" -Force -ErrorAction SilentlyContinue)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

@@ -112,15 +112,16 @@ namespace Crookedile.UI.Battle
         // lerping cards toward (0,0) before a layout group has had a chance to position them.
         private bool       _basePositionSet;
 
-        // Drag state
-        private bool      _isDragging;
-        private Vector2   _dragStartScreenPos;
-        private bool      _dropWasHandled;
-        private Transform _originalParent;
-        private Canvas    _rootCanvas;
+        // Drag / targeting state
+        private bool    _isDragging;
+        private bool    _isTargeting;
+        private Vector2 _dragStartScreenPos;
 
-        /// <summary>The card currently being dragged, or null. Used by EnemySlotUI to show drop highlights.</summary>
+        /// <summary>The card currently being dragged, or null.</summary>
         public static CardButton DraggedCard { get; private set; }
+
+        /// <summary>True while a card drag has crossed the upward threshold and targeting mode is active.</summary>
+        public static bool IsTargeting { get; private set; }
 
         /// <summary>Whether this card can currently be played (enough AP).</summary>
         public bool IsPlayable => isPlayable;
@@ -135,9 +136,6 @@ namespace Crookedile.UI.Battle
             targetPosition = basePosition;
             baseRotation   = transform.localRotation;
             targetRotation = baseRotation;
-
-            Canvas c = GetComponentInParent<Canvas>();
-            _rootCanvas = c != null ? c.rootCanvas : null;
         }
 
         private void Update()
@@ -295,8 +293,10 @@ namespace Crookedile.UI.Battle
                 new Vector3(0f, canvasRect.rect.yMin, 0f));
             float bottomLocal = transform.parent.InverseTransformPoint(bottomWorld).y;
 
-            // Position card centre so its bottom edge sits hoverEdgePadding above the canvas edge
-            return bottomLocal + myRect.rect.height * 0.5f + hoverEdgePadding;
+            // Position card centre so its bottom edge sits hoverEdgePadding above the canvas edge.
+            // Multiply by baseScale.y * hoverScale because the card is scaled up on hover —
+            // rect.height alone is the unscaled size and would place the card too low.
+            return bottomLocal + myRect.rect.height * 0.5f * baseScale.y * hoverScale + hoverEdgePadding;
         }
 
         // ─── Drag Handlers ────────────────────────────────────────────────────────
@@ -306,25 +306,16 @@ namespace Crookedile.UI.Battle
             if (!isPlayable) return;
 
             _isDragging         = true;
-            _dropWasHandled     = false;
+            _isTargeting        = false;
             _dragStartScreenPos = eventData.position;
             DraggedCard         = this;
 
-            // Clear any active hover state so the card returns to its rest state.
-            // Go upright while dragging — it's clearer when aiming at an enemy slot.
+            // Clear hover state; card stays at its arc position (no re-parenting or cursor-follow).
             isHovered      = false;
             targetScale    = baseScale;
             targetRotation = Quaternion.identity;
 
-            // Re-parent to the root canvas so the card can travel anywhere on screen
-            _originalParent = transform.parent;
-            if (_rootCanvas != null)
-            {
-                transform.SetParent(_rootCanvas.transform, worldPositionStays: true);
-                transform.SetAsLastSibling();
-            }
-
-            // Disable raycasts on the card so enemy slots behind it can receive pointer events
+            // Disable raycasts so enemy slots above the hand can receive pointer events.
             CanvasGroup cg = GetComponent<CanvasGroup>();
             if (cg != null) cg.blocksRaycasts = false;
         }
@@ -333,56 +324,127 @@ namespace Crookedile.UI.Battle
         {
             if (!_isDragging) return;
 
-            RectTransform canvasRt = _rootCanvas != null
-                ? (RectTransform)_rootCanvas.transform
-                : (RectTransform)transform.parent;
+            float yDelta = eventData.position.y - _dragStartScreenPos.y;
 
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    canvasRt, eventData.position, eventData.pressEventCamera, out Vector2 local))
-                transform.localPosition = local;
+            if (yDelta >= dragUpThreshold && !_isTargeting)
+            {
+                Debug.Log($"[CardButton] Entering targeting mode (yDelta={yDelta:F0}, threshold={dragUpThreshold})");
+                EnterTargetingMode(eventData);
+            }
+            else if (yDelta < dragUpThreshold && _isTargeting)
+                ExitTargetingMode();
+
+            if (_isTargeting)
+                UpdateTargetingArrow(eventData);
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
             if (!_isDragging) return;
             _isDragging = false;
+
+            // Snapshot TargetedSlot BEFORE ExitTargetingMode, which calls ClearTargetedSlot
+            // and would wipe it before we get a chance to act on it.
+            EnemySlotUI targetedSlot = EnemySlotUI.TargetedSlot;
+            bool wasTargeting = _isTargeting;
+
+            Debug.Log($"[CardButton] OnEndDrag: wasTargeting={wasTargeting}  targetedSlot={targetedSlot?.name ?? "none"}  requiresTarget={RequiresSpecificTarget()}  callback={(onClickCallback != null ? "set" : "null")}");
+
+            if (_isTargeting)
+                ExitTargetingMode();
+
             DraggedCard = null;
 
-            // Restore raycast blocking
             CanvasGroup cg = GetComponent<CanvasGroup>();
             if (cg != null) cg.blocksRaycasts = true;
 
-            // Re-parent back to the card hand container
-            transform.SetParent(_originalParent, worldPositionStays: true);
-            transform.SetSiblingIndex(baseSiblingIndex);
-
-            if (_dropWasHandled) return; // EnemySlotUI handled everything; BattleUI will remove card
-
-            float yDelta = eventData.position.y - _dragStartScreenPos.y;
-            if (yDelta >= dragUpThreshold)
+            if (wasTargeting)
             {
-                selectFeedback?.PlayFeedbacks();
-                onClickCallback?.Invoke();   // upward swipe → play
+                if (targetedSlot != null)
+                {
+                    Debug.Log($"[CardButton] Playing on enemy slot: {targetedSlot.name}");
+                    targetedSlot.PlayCardOnEnemy(this);
+                }
+                else if (!RequiresSpecificTarget())
+                {
+                    Debug.Log("[CardButton] AOE/self card — playing on current focus");
+                    selectFeedback?.PlayFeedbacks();
+                    onClickCallback?.Invoke();
+                }
+                else
+                {
+                    Debug.Log("[CardButton] Single-target released in empty space — cancel");
+                    targetPosition = basePosition;
+                    targetScale    = baseScale;
+                    targetRotation = baseRotation;
+                }
             }
             else
             {
-                // Drag cancelled — return card to its resting position, scale, and arc tilt
+                Debug.Log("[CardButton] Drag ended without targeting mode — cancel");
                 targetPosition = basePosition;
                 targetScale    = baseScale;
                 targetRotation = baseRotation;
             }
         }
 
-        // ─── Drop API (called by EnemySlotUI) ────────────────────────────────────
+        // ─── Targeting API (called by EnemySlotUI) ───────────────────────────────
 
-        /// <summary>Called by EnemySlotUI.OnDrop before invoking PlayFromDrop, to suppress the upward-swipe check in OnEndDrag.</summary>
-        public void NotifyDropHandled() => _dropWasHandled = true;
-
-        /// <summary>Plays the card from a successful drop onto an enemy slot.</summary>
+        /// <summary>Plays the card after a successful targeting release onto an enemy slot.</summary>
         public void PlayFromDrop()
         {
             selectFeedback?.PlayFeedbacks();
             onClickCallback?.Invoke();
+        }
+
+        // ─── Targeting Helpers ────────────────────────────────────────────────────
+
+        private void EnterTargetingMode(PointerEventData eventData)
+        {
+            _isTargeting = true;
+            IsTargeting  = true;
+
+            targetScale    = baseScale * hoverScale;
+            targetRotation = Quaternion.identity;
+
+            var rt = GetComponent<RectTransform>();
+            CardTargetingArrow.Instance?.Show(rt, eventData.pressEventCamera);
+            CardTargetingArrow.Instance?.UpdateEndPoint(eventData.position);
+        }
+
+        private void ExitTargetingMode()
+        {
+            _isTargeting = false;
+            IsTargeting  = false;
+
+            targetScale = baseScale;
+
+            CardTargetingArrow.Instance?.Hide();
+            EnemySlotUI.ClearTargetedSlot();
+        }
+
+        private void UpdateTargetingArrow(PointerEventData eventData)
+        {
+            EnemySlotUI snap = EnemySlotUI.TargetedSlot;
+            if (snap != null)
+                CardTargetingArrow.Instance?.SnapTo(snap.GetComponent<RectTransform>());
+            else
+                CardTargetingArrow.Instance?.Unsnap();
+
+            CardTargetingArrow.Instance?.UpdateEndPoint(eventData.position);
+        }
+
+        /// <summary>
+        /// Returns true if any effect on this card requires aiming at a specific enemy
+        /// (i.e. has TargetType.Opponent). AOE and self-targeting cards return false.
+        /// </summary>
+        private bool RequiresSpecificTarget()
+        {
+            if (cardData?.Effects == null) return false;
+            foreach (CardEffect effect in cardData.Effects)
+                if (effect.Target == TargetType.Opponent)
+                    return true;
+            return false;
         }
 
         // ─── Internal Display ─────────────────────────────────────────────────────
@@ -497,6 +559,7 @@ namespace Crookedile.UI.Battle
         private void OnDestroy()
         {
             if (DraggedCard == this) DraggedCard = null;
+            if (_isTargeting) { IsTargeting = false; CardTargetingArrow.Instance?.Hide(); }
             onClickCallback = null;
         }
     }

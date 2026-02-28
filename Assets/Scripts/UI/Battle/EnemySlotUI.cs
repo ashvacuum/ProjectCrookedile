@@ -18,7 +18,6 @@ namespace Crookedile.UI.Battle
     /// Designed to be used as a prefab: assign text/button/image references in the Inspector.
     /// </summary>
     public class EnemySlotUI : MonoBehaviour,
-        IDropHandler,
         IPointerEnterHandler,
         IPointerExitHandler
     {
@@ -37,6 +36,20 @@ namespace Crookedile.UI.Battle
         private int            _enemyIndex;
         private BattleManager  _battleManager;
         private OriginType     _playerOrigin;
+
+        /// <summary>The enemy slot currently targeted by the card targeting arrow, or null.</summary>
+        public static EnemySlotUI TargetedSlot { get; private set; }
+
+        /// <summary>
+        /// Clears the targeted slot and removes its drag-drop highlight.
+        /// Called by <c>CardButton.ExitTargetingMode</c>.
+        /// </summary>
+        public static void ClearTargetedSlot()
+        {
+            if (TargetedSlot != null && TargetedSlot.dragDropHighlight != null)
+                TargetedSlot.dragDropHighlight.enabled = false;
+            TargetedSlot = null;
+        }
 
         // ─── Initialization ───────────────────────────────────────────────────────
 
@@ -124,39 +137,35 @@ namespace Crookedile.UI.Battle
                 StartCoroutine(PulseText(hostilityText));
         }
 
-        // ─── Drop / Drag Handlers ─────────────────────────────────────────────────
+        // ─── Targeting Handlers ───────────────────────────────────────────────────
 
         /// <summary>
-        /// Fires when a dragged CardButton is released over this slot.
-        /// Silently focuses this enemy then plays the card.
+        /// Sets this enemy as the focused target and plays the given card.
+        /// Called by <c>CardButton.OnEndDrag</c> when the targeting arrow is released over this slot.
         /// </summary>
-        public void OnDrop(PointerEventData eventData)
+        public void PlayCardOnEnemy(CardButton card)
         {
-            if (_battleManager == null) return;
-
-            CardButton card = eventData.pointerDrag?.GetComponent<CardButton>();
-            if (card == null || !card.IsPlayable) return;
-
+            if (_battleManager == null || card == null) return;
             if (_enemyIndex < _battleManager.Enemies.Count &&
                 _battleManager.Enemies[_enemyIndex].IsDefeated) return;
 
             _battleManager.SetFocusedEnemy(_enemyIndex);
-            card.NotifyDropHandled();
             card.PlayFromDrop();
         }
 
-        /// <summary>Shows the drag-drop highlight when a card is being dragged over this slot.</summary>
+        /// <summary>Shows the targeting highlight when the arrow enters this slot during targeting mode.</summary>
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (CardButton.DraggedCard != null && dragDropHighlight != null)
-                dragDropHighlight.enabled = true;
+            if (!CardButton.IsTargeting) return;
+            if (dragDropHighlight != null) dragDropHighlight.enabled = true;
+            TargetedSlot = this;
         }
 
-        /// <summary>Hides the drag-drop highlight when the cursor leaves this slot.</summary>
+        /// <summary>Hides the targeting highlight and clears this slot as the target when the cursor leaves.</summary>
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (dragDropHighlight != null)
-                dragDropHighlight.enabled = false;
+            if (dragDropHighlight != null) dragDropHighlight.enabled = false;
+            if (TargetedSlot == this) TargetedSlot = null;
         }
 
         // ─── Private ──────────────────────────────────────────────────────────────
