@@ -145,10 +145,11 @@ namespace Crookedile.Editor
                 return false;
             }
 
-            // Load and sort the sub-sprites (Unity names them Name_0, Name_1 … Name_N).
+            // Load and sort the sub-sprites using natural order so _2 comes before _10.
+            // Lexicographic sort gives _1, _10, _11 … _2 which produces wrong frame order.
             Sprite[] sprites = AssetDatabase.LoadAllAssetsAtPath(texturePath)
                 .OfType<Sprite>()
-                .OrderBy(s => s.name, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(s => s.name, NaturalStringComparer.Instance)
                 .ToArray();
 
             if (sprites.Length == 0)
@@ -393,6 +394,61 @@ namespace Crookedile.Editor
         {
             if (value == 0f) return "0";
             return value.ToString("R", CultureInfo.InvariantCulture);
+        }
+    }
+
+    /// <summary>
+    /// Compares strings so that embedded numeric runs are sorted numerically rather than
+    /// lexicographically. "sprite_2" &lt; "sprite_10" (natural) vs "sprite_10" &lt; "sprite_2" (lex).
+    ///
+    /// Algorithm: walk both strings in parallel, chunking into alternating runs of
+    /// digits and non-digits. Non-digit chunks compare case-insensitively by character;
+    /// digit chunks are parsed as <see cref="long"/> and compared numerically.
+    /// </summary>
+    internal sealed class NaturalStringComparer : IComparer<string>
+    {
+        public static readonly NaturalStringComparer Instance = new NaturalStringComparer();
+
+        private NaturalStringComparer() { }
+
+        public int Compare(string a, string b)
+        {
+            if (ReferenceEquals(a, b)) return 0;
+            if (a == null) return -1;
+            if (b == null) return  1;
+
+            int i = 0, j = 0;
+
+            while (i < a.Length && j < b.Length)
+            {
+                bool aDigit = char.IsDigit(a[i]);
+                bool bDigit = char.IsDigit(b[j]);
+
+                if (aDigit && bDigit)
+                {
+                    // Numeric chunk — parse and compare as long.
+                    int ai = i, bi = j;
+                    while (i < a.Length && char.IsDigit(a[i])) i++;
+                    while (j < b.Length && char.IsDigit(b[j])) j++;
+
+                    long numA = long.Parse(a.Substring(ai, i - ai));
+                    long numB = long.Parse(b.Substring(bi, j - bi));
+                    int cmp = numA.CompareTo(numB);
+                    if (cmp != 0) return cmp;
+                }
+                else
+                {
+                    // Non-digit chunk — compare single character, case-insensitive.
+                    int cmp = char.ToUpperInvariant(a[i])
+                                  .CompareTo(char.ToUpperInvariant(b[j]));
+                    if (cmp != 0) return cmp;
+                    i++;
+                    j++;
+                }
+            }
+
+            // Shorter string sorts first when one is a prefix of the other.
+            return a.Length.CompareTo(b.Length);
         }
     }
 }
