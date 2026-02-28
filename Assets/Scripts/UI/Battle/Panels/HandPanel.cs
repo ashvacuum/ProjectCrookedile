@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Crookedile.Core;
+using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Gameplay.Battle;
-using Crookedile.Utilities;
 
 namespace Crookedile.UI.Battle
 {
@@ -21,31 +21,22 @@ namespace Crookedile.UI.Battle
         [Header("Hand Container")]
         [Tooltip("Parent Transform that card buttons are placed inside.")]
         [SerializeField] private Transform  cardButtonContainer;
-        [Tooltip("Prefab with a CardButton component — used to seed the object pool.")]
-        [SerializeField] private GameObject cardButtonPrefab;
+
+        [Header("Fallback Prefabs (used only when BattlePoolManager is not injected)")]
+        [SerializeField] private CardButton _pressurePrefab;
+        [SerializeField] private CardButton _rhetoricPrefab;
+        [SerializeField] private CardButton _policyPrefab;
 
         // ── Runtime ──────────────────────────────────────────────────────────
-        private List<CardButton>       _activeButtons = new List<CardButton>();
-        private ObjectPool<CardButton> _cardPool;
-
-        // ── Lifecycle ─────────────────────────────────────────────────────────
-
-        private void Start()
-        {
-            if (cardButtonPrefab != null)
-            {
-                var prefabComp = cardButtonPrefab.GetComponent<CardButton>();
-                if (prefabComp != null)
-                    _cardPool = new ObjectPool<CardButton>(prefabComp, initialSize: 7, parent: cardButtonContainer);
-            }
-        }
-
-        private void OnDestroy()
-        {
-            _cardPool?.Clear();
-        }
+        private List<CardButton>  _activeButtons = new List<CardButton>();
+        private BattlePoolManager _pool;
 
         // ── Public API ────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Sets the shared pool. Call this from BattleUI.Initialize() before the first Refresh.
+        /// </summary>
+        public void SetPool(BattlePoolManager pool) => _pool = pool;
 
         /// <summary>
         /// Rebuilds the hand using normal play-card callbacks.
@@ -53,23 +44,28 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void RefreshNormalHand(BattleManager bm, System.Action<CardData, int> onCardClicked)
         {
-            if (cardButtonContainer == null || cardButtonPrefab == null || bm?.PlayerStats == null) return;
+            if (cardButtonContainer == null || bm?.PlayerStats == null) return;
+            if (!HasPrefabSource()) return;
 
             ClearHand();
 
             if (!bm.IsPlayerTurn) return;   // safety — Idle state should call ClearHand instead
 
-            int currentAP = bm.PlayerStats.CurrentActionPoints;
-            var hand      = bm.PlayerDeck.Hand;
+            int  currentAP  = bm.PlayerStats.CurrentActionPoints;
+            bool isSilenced = bm.PlayerStatusEffects?.HasEffect(StatusEffectType.Silenced) ?? false;
+            var  hand       = bm.PlayerDeck.Hand;
 
             for (int i = 0; i < hand.Count; i++)
             {
-                CardButton btn = GetOrCreate();
+                CardData captured = hand[i];
+                CardButton btn = GetOrCreate(captured.CardType);
                 if (btn == null) continue;
 
-                int       idx      = i;
-                CardData  captured = hand[i];
-                btn.Initialize(captured, idx, currentAP, () => onCardClicked(captured, idx));
+                int  idx          = i;
+                int  effectiveCost = bm.GetEffectiveCardCost(captured);
+                // Silenced prevents Rhetoric cards from being played
+                bool silencedBlock = isSilenced && captured.CardType == CardType.Rhetoric;
+                btn.Initialize(captured, idx, currentAP, effectiveCost, silencedBlock, () => onCardClicked(captured, idx));
                 btn.PlayDrawAnimation();
                 _activeButtons.Add(btn);
             }
@@ -84,24 +80,28 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void RefreshImproviseHand(BattleManager bm, CardSelectionPanel panel)
         {
-            if (cardButtonContainer == null || cardButtonPrefab == null || bm?.PlayerStats == null) return;
+            if (cardButtonContainer == null || bm?.PlayerStats == null) return;
+            if (!HasPrefabSource()) return;
 
             ClearHand();
 
-            var excluded  = panel.SelectedForDiscard;
-            int currentAP = bm.PlayerStats.CurrentActionPoints;
-            var hand      = bm.PlayerDeck.Hand;
+            var  excluded   = panel.SelectedForDiscard;
+            int  currentAP  = bm.PlayerStats.CurrentActionPoints;
+            bool isSilenced = bm.PlayerStatusEffects?.HasEffect(StatusEffectType.Silenced) ?? false;
+            var  hand       = bm.PlayerDeck.Hand;
 
             for (int i = 0; i < hand.Count; i++)
             {
                 CardData card = hand[i];
                 if (excluded.Contains(card)) continue;   // already queued — skip
 
-                CardButton btn = GetOrCreate();
+                CardButton btn = GetOrCreate(card.CardType);
                 if (btn == null) continue;
 
-                CardData captured = card;
-                btn.Initialize(card, i, currentAP,
+                CardData captured     = card;
+                int      effectiveCost = bm.GetEffectiveCardCost(captured);
+                bool     silencedBlock = isSilenced && captured.CardType == CardType.Rhetoric;
+                btn.Initialize(card, i, currentAP, effectiveCost, silencedBlock,
                     () => { panel.AddToDiscard(captured); RefreshImproviseHand(bm, panel); });
                 _activeButtons.Add(btn);
             }
@@ -123,14 +123,14 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
-        /// Returns all active card buttons to the pool and clears the list.
+        /// Returns all active card buttons to the shared pool and clears the list.
         /// </summary>
         public void ClearHand()
         {
             foreach (var btn in _activeButtons)
             {
                 if (btn == null) continue;
-                if (_cardPool != null) _cardPool.Return(btn);
+                if (_pool != null) _pool.ReturnCard(btn);
                 else Destroy(btn.gameObject);
             }
             _activeButtons.Clear();
@@ -138,18 +138,26 @@ namespace Crookedile.UI.Battle
 
         // ── Private helpers ───────────────────────────────────────────────────
 
-        private CardButton GetOrCreate()
+        private bool HasPrefabSource()
         {
-            if (_cardPool != null)
+            if (_pool != null) return true;
+            return _pressurePrefab != null || _rhetoricPrefab != null || _policyPrefab != null;
+        }
+
+        private CardButton GetOrCreate(CardType cardType)
+        {
+            if (_pool != null)
+                return _pool.RentCard(cardType, cardButtonContainer);
+
+            // Fallback: direct instantiate (standalone testing without a pool manager)
+            CardButton prefab = cardType switch
             {
-                CardButton btn = _cardPool.Get();
-                // Always re-parent to the hand container — pooled objects may have been
-                // left in a different parent if a previous drag or operation moved them.
-                btn.transform.SetParent(cardButtonContainer, false);
-                return btn;
-            }
-            if (cardButtonPrefab == null) return null;
-            return Instantiate(cardButtonPrefab, cardButtonContainer).GetComponent<CardButton>();
+                CardType.Rhetoric => _rhetoricPrefab,
+                CardType.Policy   => _policyPrefab,
+                _                 => _pressurePrefab,
+            };
+            if (prefab == null) return null;
+            return Instantiate(prefab, cardButtonContainer);
         }
 
         private void ArrangeCards()

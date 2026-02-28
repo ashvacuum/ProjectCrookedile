@@ -256,11 +256,11 @@ namespace Crookedile.Gameplay.Battle
                 RemoveStacks(StatusEffectType.Intangible, 1);
             }
 
-            // Apply Thorns (deal damage back to attacker)
+            // Apply Thorns (deal damage back to attacker; bypasses attacker's Composure shield since it is reflected)
             int thornsStacks = GetStacks(StatusEffectType.Thorns);
             if (thornsStacks > 0 && attackerStats != null)
             {
-                attackerStats.DamageResolve(thornsStacks, 0);
+                attackerStats.DamageResolve(thornsStacks);
                 GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Thorns dealt {thornsStacks} damage back!");
             }
 
@@ -293,8 +293,11 @@ namespace Crookedile.Gameplay.Battle
         {
             int finalCost = baseCost;
 
-            // Apply Focus (buff, reduce cost)
+            // Apply Focus (buff, reduce cost by stack count)
             finalCost -= GetStacks(StatusEffectType.Focus);
+
+            // Apply Energized (buff, reduce cost by stack count each turn)
+            finalCost -= GetStacks(StatusEffectType.Energized);
 
             // Apply Entangled (debuff, +1 cost)
             if (HasEffect(StatusEffectType.Entangled))
@@ -331,7 +334,7 @@ namespace Crookedile.Gameplay.Battle
             {
                 case StatusEffectType.Scandal:
                     // Take damage at end of turn
-                    ownerStats.DamageResolve(effect.Stacks, 0);
+                    ownerStats.DamageResolve(effect.Stacks);
                     GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Scandal dealt {effect.Stacks} damage");
                     break;
 

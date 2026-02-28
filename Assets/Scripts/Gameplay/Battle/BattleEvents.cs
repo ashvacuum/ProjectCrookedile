@@ -411,4 +411,48 @@ namespace Crookedile.Gameplay.Battle
     }
 
     #endregion
+
+    #region Card Choice Events
+
+    /// <summary>
+    /// Published by <c>EffectResolver</c> when a card effect requires the player to make an
+    /// interactive card selection (e.g. ChooseFromDiscardToHand, UpgradeCardThisBattle).
+    ///
+    /// <c>BattleUI</c> receives this, transitions to <c>WaitingForCardChoice</c>, and opens
+    /// <c>CardChoicePanel</c>. The panel invokes <see cref="OnConfirmed"/> with the player's
+    /// selection, which executes the actual deck manipulation.
+    ///
+    /// NOTE: This is a class (not struct) because it holds a delegate.
+    /// </summary>
+    public class CardChoiceRequestedEvent : IGameEvent
+    {
+        /// <summary>Header text shown in the panel (e.g. "Choose a card from Discard").</summary>
+        public string Title;
+
+        /// <summary>All cards available to pick from.</summary>
+        public System.Collections.Generic.IReadOnlyList<CardData> Choices;
+
+        /// <summary>Exact number of cards the player must select before Confirm activates.</summary>
+        public int RequiredCount;
+
+        /// <summary>
+        /// Invoked with the confirmed selection once the player presses Confirm.
+        /// An empty list means the player cancelled — all callbacks must treat an empty list as a no-op.
+        /// </summary>
+        public System.Action<System.Collections.Generic.List<CardData>> OnConfirmed;
+    }
+
+    /// <summary>
+    /// Published by <c>DeckManager.SwapCardInHand()</c> when a card is upgraded in-battle.
+    /// </summary>
+    public struct CardUpgradedEvent : IGameEvent
+    {
+        /// <summary>The original (non-upgraded) card that was swapped out.</summary>
+        public CardData OldCard;
+
+        /// <summary>The upgraded card that replaced it in hand.</summary>
+        public CardData NewCard;
+    }
+
+    #endregion
 }

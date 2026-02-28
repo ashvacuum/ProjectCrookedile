@@ -64,7 +64,12 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         /// <param name="card">The card being played</param>
         /// <param name="isPlayerCard">Is this card played by the player?</param>
-        public void ResolveCardEffects(CardData card, bool isPlayerCard)
+        /// <param name="amountOverrides">
+        /// Optional per-effect amount overrides (one int per CardEffect, indexed by position).
+        /// Used by the Confused status effect to randomise card values 0–3 this turn.
+        /// Pass null (default) for normal resolution.
+        /// </param>
+        public void ResolveCardEffects(CardData card, bool isPlayerCard, int[] amountOverrides = null)
         {
             GameLogger.LogInfo<EffectResolver>($"Resolving effects for: {card.CardName} (Player: {isPlayerCard})");
 
@@ -75,9 +80,11 @@ namespace Crookedile.Gameplay.Battle
                 Target = isPlayerCard ? _opponentStats : _playerStats
             };
 
-            foreach (CardEffect effect in card.Effects)
+            for (int j = 0; j < card.Effects.Count; j++)
             {
-                ResolveBattleEffect(effect, isPlayerCard, ctx);
+                int? overrideAmount = (amountOverrides != null && j < amountOverrides.Length)
+                    ? (int?)amountOverrides[j] : null;
+                ResolveBattleEffect(card.Effects[j], isPlayerCard, ctx, overrideAmount);
             }
 
             // Fire any triggered effects that reacted to what happened above
@@ -166,7 +173,10 @@ namespace Crookedile.Gameplay.Battle
         /// damage/heal/composure amounts are written to it so triggered effects can react.
         /// Pass null for enemy move effects (no triggered-effect evaluation needed).
         /// </param>
-        private void ResolveBattleEffect(CardEffect effect, bool isPlayerCard, EffectContext ctx = null)
+        /// <param name="amountOverride">
+        /// Optional override for the effect's amount. Used by Confused to randomise values.
+        /// </param>
+        private void ResolveBattleEffect(CardEffect effect, bool isPlayerCard, EffectContext ctx = null, int? amountOverride = null)
         {
             BattleStats         casterStats         = isPlayerCard ? _playerStats          : _opponentStats;
             BattleStats         targetStats         = isPlayerCard ? _opponentStats         : _playerStats;
@@ -177,7 +187,7 @@ namespace Crookedile.Gameplay.Battle
             // Resource and CardManipulation are always caster-scoped — apply once and return
             if (effect.Category == EffectCategory.Resource)
             {
-                ResolveResourceEffect(effect, casterStats, ctx);
+                ResolveResourceEffect(effect, casterStats, ctx, amountOverride);
                 EventBus.Publish(new EffectAppliedEvent { Effect = effect, IsPlayer = isPlayerCard });
                 return;
             }
@@ -199,7 +209,7 @@ namespace Crookedile.Gameplay.Battle
                 switch (effect.Category)
                 {
                     case EffectCategory.Damage:
-                        ResolveDamageEffect(effect, effectTarget, casterStats, ctx);
+                        ResolveDamageEffect(effect, effectTarget, casterStats, ctx, amountOverride);
                         break;
 
                     case EffectCategory.StatusEffect:
@@ -295,15 +305,17 @@ namespace Crookedile.Gameplay.Battle
             return pairs;
         }
 
-        private void ResolveDamageEffect(CardEffect effect, BattleStats target, BattleStats attacker, EffectContext ctx = null)
+        private void ResolveDamageEffect(CardEffect effect, BattleStats target, BattleStats attacker, EffectContext ctx = null, int? amountOverride = null)
         {
             switch (effect.DamageType)
             {
                 case DamageType.FixedDamage:
-                    ApplyResolveDamage(target, attacker, effect.GetEffectiveAmount(ctx), ctx);
+                    int baseAmount = amountOverride ?? effect.GetEffectiveAmount(ctx);
+                    ApplyResolveDamage(target, attacker, baseAmount, ctx);
                     break;
 
                 case DamageType.RandomDamage:
+                    // Confused randomises effect amounts but not random-damage min/max ranges
                     ApplyRandomDamage(target, attacker, effect.RandomDamageMin, effect.RandomDamageMax, ctx);
                     break;
 
@@ -313,16 +325,19 @@ namespace Crookedile.Gameplay.Battle
             }
         }
 
-        private void ResolveResourceEffect(CardEffect effect, BattleStats caster, EffectContext ctx = null)
+        private void ResolveResourceEffect(CardEffect effect, BattleStats caster, EffectContext ctx = null, int? amountOverride = null)
         {
+            // Local helper: returns the override amount when Confused is active, otherwise the normal effect amount
+            int GetAmount() => amountOverride ?? effect.GetEffectiveAmount(ctx);
+
             switch (effect.ResourceType)
             {
                 case ResourceEffectType.GainComposure:
-                    ApplyGainComposure(caster, effect.GetEffectiveAmount(ctx), ctx);
+                    ApplyGainComposure(caster, GetAmount(), ctx);
                     break;
 
                 case ResourceEffectType.LoseComposure:
-                    ApplyLoseComposure(caster, effect.GetEffectiveAmount(ctx));
+                    ApplyLoseComposure(caster, GetAmount());
                     break;
 
                 case ResourceEffectType.ConsumeAllComposure:
@@ -330,23 +345,23 @@ namespace Crookedile.Gameplay.Battle
                     break;
 
                 case ResourceEffectType.ComposureEqualToHostility:
-                    ApplyComposureEqualToHostility(caster);
+                    ApplyComposureEqualToHostility(caster, ctx);
                     break;
 
                 case ResourceEffectType.ReduceHostility:
-                    ApplyReduceHostility(_opponentStats, effect.GetEffectiveAmount(ctx));
+                    ApplyReduceHostility(_opponentStats, GetAmount());
                     break;
 
                 case ResourceEffectType.GainActionPoints:
-                    ApplyGainActionPoints(caster, effect.GetEffectiveAmount(ctx));
+                    ApplyGainActionPoints(caster, GetAmount());
                     break;
 
                 case ResourceEffectType.GainActionPointsNextTurn:
-                    ApplyGainActionPointsNextTurn(caster, effect.GetEffectiveAmount(ctx));
+                    ApplyGainActionPointsNextTurn(caster, GetAmount());
                     break;
 
                 case ResourceEffectType.HealResolve:
-                    ApplyResolveHeal(caster, effect.GetEffectiveAmount(ctx), ctx);
+                    ApplyResolveHeal(caster, GetAmount(), ctx);
                     break;
             }
         }
@@ -421,7 +436,7 @@ namespace Crookedile.Gameplay.Battle
         {
             // Get attacker and target status effect managers
             StatusEffectManager attackerStatusMgr = GetStatusEffectManager(attacker);
-            StatusEffectManager targetStatusMgr = GetStatusEffectManager(target);
+            StatusEffectManager targetStatusMgr   = GetStatusEffectManager(target);
 
             // Apply attacker's damage modifiers (Strength, Weakened, Exposed)
             int modifiedDamage = attackerStatusMgr.ModifyDamageDealt(baseDamage);
@@ -436,9 +451,9 @@ namespace Crookedile.Gameplay.Battle
                 modifiedDamage = Mathf.RoundToInt(modifiedDamage * hostilityMult);
             }
 
-            // Apply damage with Composure bonus
-            int actualDamage = target.DamageResolve(modifiedDamage, attacker.CurrentComposure);
-            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage (base: {baseDamage}, modified: {modifiedDamage}, Composure: {attacker.CurrentComposure}, HostilityMult: {(attacker != _playerStats && attacker.CurrentHostility > 0 ? attacker.HostilityDamageMultiplier.ToString("F2") : "1.00")})");
+            // Apply damage — target's Composure shield absorbs first, then Resolve takes the rest
+            int actualDamage = target.DamageResolve(modifiedDamage);
+            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} damage (base: {baseDamage}, modified: {modifiedDamage}, HostilityMult: {(attacker != _playerStats && attacker.CurrentHostility > 0 ? attacker.HostilityDamageMultiplier.ToString("F2") : "1.00")})");
 
             if (actualDamage > 0)
                 EventBus.Publish(new DamageDealtEvent { Amount = actualDamage, IsToPlayer = target == _playerStats });
@@ -483,9 +498,9 @@ namespace Crookedile.Gameplay.Battle
                 modifiedDamage = Mathf.RoundToInt(modifiedDamage * hostilityMult);
             }
 
-            // Apply damage with Composure bonus
-            int actualDamage = target.DamageResolve(modifiedDamage, attacker.CurrentComposure);
-            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} random Resolve damage (rolled {randomDamage} from {minDamage}-{maxDamage}, modified: {modifiedDamage})");
+            // Apply damage — target's Composure shield absorbs first, then Resolve takes the rest
+            int actualDamage = target.DamageResolve(modifiedDamage);
+            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} random damage (rolled {randomDamage} from {minDamage}-{maxDamage}, modified: {modifiedDamage})");
 
             if (actualDamage > 0)
                 EventBus.Publish(new DamageDealtEvent { Amount = actualDamage, IsToPlayer = target == _playerStats });
@@ -540,9 +555,9 @@ namespace Crookedile.Gameplay.Battle
                 modifiedDamage = Mathf.RoundToInt(modifiedDamage * hostilityMult);
             }
 
-            // Apply damage (don't add Composure bonus since damage IS equal to Composure)
-            int actualDamage = target.DamageResolve(modifiedDamage, 0);
-            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} Resolve damage equal to Composure ({composure}, modified: {modifiedDamage})");
+            // Apply damage (damage value equals caster's Composure; target's Composure shield still absorbs first)
+            int actualDamage = target.DamageResolve(modifiedDamage);
+            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} damage equal to Composure ({composure}, modified: {modifiedDamage})");
 
             if (actualDamage > 0)
                 EventBus.Publish(new DamageDealtEvent { Amount = actualDamage, IsToPlayer = target == _playerStats });
@@ -570,11 +585,12 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<EffectResolver>($"Reduced {actualReduction} Hostility");
         }
 
-        private void ApplyComposureEqualToHostility(BattleStats caster)
+        private void ApplyComposureEqualToHostility(BattleStats caster, EffectContext ctx = null)
         {
             int hostility = caster.CurrentHostility;
-            caster.GainComposure(hostility);
-            GameLogger.LogInfo<EffectResolver>($"Gained {hostility} Composure equal to Hostility");
+            // Route through ApplyGainComposure so Dexterity/Frail modifiers are respected
+            ApplyGainComposure(caster, hostility, ctx);
+            GameLogger.LogInfo<EffectResolver>($"Gained Composure equal to Hostility ({hostility})");
         }
 
         #endregion
@@ -632,34 +648,38 @@ namespace Crookedile.Gameplay.Battle
 
         private void ApplyChooseFromDiscardToHand(DeckManager deck, int amount)
         {
-            // TODO: This requires player choice UI and DeckManager method to move cards from discard to hand
-            int availableCards = deck.DiscardCount;
-            int cardsToRetrieve = Mathf.Min(amount, availableCards);
-
-            if (cardsToRetrieve > 0)
+            if (deck.DiscardCount == 0)
             {
-                GameLogger.LogWarning<EffectResolver>($"Choose from discard to hand: Requires UI implementation (would retrieve {cardsToRetrieve}/{amount} cards from {availableCards} in discard)");
+                GameLogger.LogInfo<EffectResolver>("ChooseFromDiscardToHand: discard is empty — no-op");
+                return;
             }
-            else
+            int count = Mathf.Min(amount, deck.DiscardCount);
+            string title = count == 1 ? "Choose a card from Discard" : $"Choose {count} cards from Discard";
+            EventBus.Publish(new CardChoiceRequestedEvent
             {
-                GameLogger.LogInfo<EffectResolver>("Choose from discard to hand: Discard pile is empty");
-            }
+                Title         = title,
+                Choices       = deck.DiscardPile,
+                RequiredCount = count,
+                OnConfirmed   = chosen => { foreach (var c in chosen) deck.MoveFromDiscardToHand(c); }
+            });
         }
 
         private void ApplyChooseFromDiscardToDeck(DeckManager deck, int amount)
         {
-            // TODO: This requires player choice UI and DeckManager method to move cards from discard to deck
-            int availableCards = deck.DiscardCount;
-            int cardsToRetrieve = Mathf.Min(amount, availableCards);
-
-            if (cardsToRetrieve > 0)
+            if (deck.DiscardCount == 0)
             {
-                GameLogger.LogWarning<EffectResolver>($"Choose from discard to deck: Requires UI implementation (would retrieve {cardsToRetrieve}/{amount} cards from {availableCards} in discard)");
+                GameLogger.LogInfo<EffectResolver>("ChooseFromDiscardToDeck: discard is empty — no-op");
+                return;
             }
-            else
+            int count = Mathf.Min(amount, deck.DiscardCount);
+            string title = count == 1 ? "Choose a card — return to Deck" : $"Choose {count} cards — return to Deck";
+            EventBus.Publish(new CardChoiceRequestedEvent
             {
-                GameLogger.LogInfo<EffectResolver>("Choose from discard to deck: Discard pthile is empty");
-            }
+                Title         = title,
+                Choices       = deck.DiscardPile,
+                RequiredCount = count,
+                OnConfirmed   = chosen => { foreach (var c in chosen) deck.MoveFromDiscardToDeck(c); }
+            });
         }
 
         private void ApplyAddCardToDeck(DeckManager deck, CardData card, int amount)
@@ -688,82 +708,102 @@ namespace Crookedile.Gameplay.Battle
 
         private void ApplyUpgradeCardThisBattle(DeckManager deck)
         {
-            // TODO: This requires player choice UI
-            // For now, just log the intent
-            if (deck.HandCount > 0)
+            var upgradeable = new List<CardData>();
+            foreach (var c in deck.Hand)
+                if (c != null && c.CanUpgrade) upgradeable.Add(c);
+
+            if (upgradeable.Count == 0)
             {
-                GameLogger.LogWarning<EffectResolver>("Upgrade card this battle: Requires UI implementation (player choice)");
+                GameLogger.LogInfo<EffectResolver>("UpgradeCardThisBattle: no upgradeable cards in hand — no-op");
+                return;
             }
-            else
+            EventBus.Publish(new CardChoiceRequestedEvent
             {
-                GameLogger.LogInfo<EffectResolver>("No cards in hand to upgrade");
-            }
+                Title         = "Choose a card to Upgrade",
+                Choices       = upgradeable,
+                RequiredCount = 1,
+                OnConfirmed   = chosen =>
+                {
+                    if (chosen.Count == 0) return;
+                    CardData old      = chosen[0];
+                    CardData upgraded = old.GetCurrentVersion();
+                    deck.SwapCardInHand(old, upgraded);
+                }
+            });
         }
 
         private void ApplyUpgradeAllCardsInHand(DeckManager deck)
         {
-            int cardsUpgraded = 0;
-
-            // TODO: Implement card upgrade system
-            // For now, just count upgradeable cards
+            // Collect (old, upgraded) pairs first — don't modify the list while iterating
+            var pairs = new List<(CardData old, CardData upgraded)>();
             foreach (var card in deck.Hand)
-            {
                 if (card != null && card.CanUpgrade)
-                {
-                    cardsUpgraded++;
-                }
-            }
+                    pairs.Add((card, card.GetCurrentVersion()));
 
-            GameLogger.LogInfo<EffectResolver>($"Upgraded all cards in hand ({cardsUpgraded} cards)");
+            foreach (var (old, upgraded) in pairs)
+                deck.SwapCardInHand(old, upgraded);
+
+            GameLogger.LogInfo<EffectResolver>($"Upgraded {pairs.Count} cards in hand");
         }
 
         private void ApplyMakeCardRetain(DeckManager deck)
         {
-            // TODO: This requires player choice UI and retain system
-            // For now, just log the intent
-            if (deck.HandCount > 0)
+            if (deck.HandCount == 0)
             {
-                GameLogger.LogWarning<EffectResolver>("Make card retain: Requires UI implementation and retain system");
+                GameLogger.LogInfo<EffectResolver>("MakeCardRetain: hand is empty — no-op");
+                return;
             }
-            else
+            EventBus.Publish(new CardChoiceRequestedEvent
             {
-                GameLogger.LogInfo<EffectResolver>("No cards in hand to make retain");
-            }
+                Title         = "Choose a card to Retain",
+                Choices       = deck.Hand,
+                RequiredCount = 1,
+                OnConfirmed   = chosen => { if (chosen.Count > 0) deck.RetainCard(chosen[0]); }
+            });
         }
 
         private void ApplyMakeAllCardsRetain(DeckManager deck)
         {
-            // TODO: Implement retain system (cards don't discard at end of turn)
-            int cardsRetained = deck.HandCount;
-            GameLogger.LogInfo<EffectResolver>($"Made all cards retain ({cardsRetained} cards won't discard at end of turn)");
+            // Snapshot the hand before iterating so we're not affected by any future
+            // structural changes to the collection.
+            var snapshot = new List<CardData>(deck.Hand);
+            int count = 0;
+            foreach (var card in snapshot)
+                if (card != null && deck.RetainCard(card)) count++;
+
+            GameLogger.LogInfo<EffectResolver>($"Retained all {count} cards in hand");
         }
 
         private void ApplyReduceCardCost(DeckManager deck, int reduction)
         {
-            // TODO: This requires player choice UI and cost modification system
-            // For now, just log the intent
-            if (deck.HandCount > 0)
+            if (deck.HandCount == 0)
             {
-                GameLogger.LogWarning<EffectResolver>($"Reduce card cost by {reduction}: Requires UI implementation and cost modification system");
+                GameLogger.LogInfo<EffectResolver>("ReduceCardCost: hand is empty — no-op");
+                return;
             }
-            else
+            EventBus.Publish(new CardChoiceRequestedEvent
             {
-                GameLogger.LogInfo<EffectResolver>("No cards in hand to reduce cost");
-            }
+                Title         = $"Choose a card — Reduce cost by {reduction}",
+                Choices       = deck.Hand,
+                RequiredCount = 1,
+                OnConfirmed   = chosen => { if (chosen.Count > 0) deck.ApplyCostReduction(chosen[0], reduction); }
+            });
         }
 
         private void ApplyMakeCardFree(DeckManager deck)
         {
-            // TODO: This requires player choice UI and temporary cost modification
-            // For now, just log the intent
-            if (deck.HandCount > 0)
+            if (deck.HandCount == 0)
             {
-                GameLogger.LogWarning<EffectResolver>("Make card free this turn: Requires UI implementation and cost modification system");
+                GameLogger.LogInfo<EffectResolver>("MakeCardFree: hand is empty — no-op");
+                return;
             }
-            else
+            EventBus.Publish(new CardChoiceRequestedEvent
             {
-                GameLogger.LogInfo<EffectResolver>("No cards in hand to make free");
-            }
+                Title         = "Choose a card — Make it Free",
+                Choices       = deck.Hand,
+                RequiredCount = 1,
+                OnConfirmed   = chosen => { if (chosen.Count > 0) deck.MakeCardFreeThisBattle(chosen[0]); }
+            });
         }
 
         #endregion

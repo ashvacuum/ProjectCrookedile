@@ -28,6 +28,13 @@ namespace Crookedile.Gameplay.Battle
         private string _ownerName; // For logging purposes
         private bool   _isPlayer;  // True for the player's deck; false for enemies
 
+        // Cards retained at end of turn (not discarded; cleared after each EndTurn).
+        private readonly HashSet<CardData> _retainedCards = new HashSet<CardData>();
+
+        // Per-card AP cost reductions applied this battle (individual card effects).
+        // int.MaxValue signals "free" (0 AP regardless of base cost).
+        private readonly Dictionary<CardData, int> _cardCostReductions = new Dictionary<CardData, int>();
+
         #region Properties
 
         /// <summary>
@@ -244,16 +251,27 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Discards entire hand.
+        /// Discards the hand at end of turn, skipping retained cards.
+        /// Retained cards stay in hand for the next turn; their retain flag is cleared so they
+        /// discard normally next end-of-turn unless retained again.
         /// </summary>
         public int DiscardHand()
         {
-            int count = _hand.Count;
-            _discard.AddRange(_hand);
-            _hand.Clear();
+            int discarded = 0;
+            for (int i = _hand.Count - 1; i >= 0; i--)
+            {
+                CardData card = _hand[i];
+                if (_retainedCards.Contains(card)) continue;   // skip — stays in hand
+                _hand.RemoveAt(i);
+                _discard.Add(card);
+                EventBus.Publish(new CardDiscardedEvent { Card = card, IsPlayer = _isPlayer });
+                discarded++;
+            }
+            _retainedCards.Clear();   // retain only lasts one turn
 
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} discarded entire hand ({count} cards)");
-            return count;
+            GameLogger.LogInfo<DeckManager>($"{_ownerName} discarded {discarded} card(s). " +
+                                             $"Hand retained: {_hand.Count}");
+            return discarded;
         }
 
         #endregion
@@ -318,6 +336,96 @@ namespace Crookedile.Gameplay.Battle
             _hand.Add(card);
             GameLogger.LogInfo<DeckManager>($"{_ownerName}: Moved {card.CardName} from discard to hand");
             return true;
+        }
+
+        /// <summary>
+        /// Moves a specific card from the discard pile to the TOP of the draw pile.
+        /// Top of deck = index 0 (DrawCard pulls from _deck[0]).
+        /// Returns false if the card is not in discard.
+        /// </summary>
+        public bool MoveFromDiscardToDeck(CardData card)
+        {
+            if (card == null || !_discard.Contains(card))
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToDeck — card not in discard");
+                return false;
+            }
+            _discard.Remove(card);
+            _deck.Insert(0, card);   // index 0 = top (DrawCard reads _deck[0])
+            GameLogger.LogInfo<DeckManager>($"{_ownerName}: Moved {card.CardName} from discard to top of draw pile");
+            return true;
+        }
+
+        /// <summary>
+        /// Swaps <paramref name="oldCard"/> for <paramref name="newCard"/> in hand in-place.
+        /// Used for UpgradeCardThisBattle to swap in the upgraded version.
+        /// Returns false if oldCard is not currently in hand.
+        /// </summary>
+        public bool SwapCardInHand(CardData oldCard, CardData newCard)
+        {
+            int idx = _hand.IndexOf(oldCard);
+            if (idx < 0 || newCard == null)
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName}: SwapCardInHand — card not found in hand or newCard is null");
+                return false;
+            }
+            _hand[idx] = newCard;
+            GameLogger.LogInfo<DeckManager>($"{_ownerName}: Upgraded {oldCard.CardName} → {newCard.CardName} in hand");
+            EventBus.Publish(new CardUpgradedEvent { OldCard = oldCard, NewCard = newCard });
+            return true;
+        }
+
+        /// <summary>
+        /// Marks a card currently in hand as retained.
+        /// Retained cards are not discarded at end of turn; the flag clears after EndTurn.
+        /// </summary>
+        public bool RetainCard(CardData card)
+        {
+            if (!_hand.Contains(card))
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName}: RetainCard — {card?.CardName} is not in hand");
+                return false;
+            }
+            _retainedCards.Add(card);
+            GameLogger.LogInfo<DeckManager>($"{_ownerName}: {card.CardName} marked as retained");
+            return true;
+        }
+
+        #endregion
+
+        #region Per-Card Cost Overrides
+
+        /// <summary>
+        /// Reduces this card's AP cost by <paramref name="reduction"/> for the rest of the battle.
+        /// Reductions stack additively; the floor applied at play time is 0.
+        /// </summary>
+        public void ApplyCostReduction(CardData card, int reduction)
+        {
+            if (card == null) return;
+            _cardCostReductions.TryGetValue(card, out int current);
+            _cardCostReductions[card] = current + reduction;
+            GameLogger.LogInfo<DeckManager>($"{_ownerName}: {card.CardName} cost −{reduction} (total reduction: {_cardCostReductions[card]})");
+        }
+
+        /// <summary>
+        /// Makes this card cost 0 AP for the rest of the battle.
+        /// Uses int.MaxValue as a sentinel so <see cref="GetCardCostReduction"/> can signal "free".
+        /// </summary>
+        public void MakeCardFreeThisBattle(CardData card)
+        {
+            if (card == null) return;
+            _cardCostReductions[card] = int.MaxValue;
+            GameLogger.LogInfo<DeckManager>($"{_ownerName}: {card.CardName} is now free (0 AP) this battle");
+        }
+
+        /// <summary>
+        /// Returns the AP cost reduction that has been applied to this specific card this battle.
+        /// Returns 0 if none was applied. Returns <see cref="int.MaxValue"/> if the card was made free.
+        /// </summary>
+        public int GetCardCostReduction(CardData card)
+        {
+            if (card == null) return 0;
+            return _cardCostReductions.TryGetValue(card, out int r) ? r : 0;
         }
 
         #endregion

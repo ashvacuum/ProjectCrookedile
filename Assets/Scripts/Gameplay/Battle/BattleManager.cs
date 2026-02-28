@@ -46,6 +46,9 @@ namespace Crookedile.Gameplay.Battle
         // Effect Resolver
         private EffectResolver _effectResolver;
 
+        // Confused status — maps hand index → randomized effect amounts (one per effect on the card)
+        private readonly Dictionary<int, int[]> _confusedOverrides = new Dictionary<int, int[]>();
+
         // Passive ability resolver — one per battle, origin-specific
         private PassiveResolver _passiveResolver;
 
@@ -80,6 +83,12 @@ namespace Crookedile.Gameplay.Battle
         public BattleStats     OpponentStats             => FocusedEnemy?.Stats;
         public EnemyController EnemyController           => FocusedEnemy;   // backward compat
         public int             FocusedEnemyIndex         => _focusedEnemyIndex;
+
+        /// <summary>The player's status effect manager. Used by HandPanel to compute effective card costs.</summary>
+        public StatusEffectManager PlayerStatusEffects => _effectResolver?.PlayerStatusEffects;
+
+        /// <summary>Maps hand index to randomized effect amounts while the player has Confused. Empty when not confused.</summary>
+        public IReadOnlyDictionary<int, int[]> ConfusedOverrides => _confusedOverrides;
 
         #endregion
 
@@ -267,49 +276,58 @@ namespace Crookedile.Gameplay.Battle
 
             PayCardCosts(card, stats);
 
+            // Capture Confused overrides before the card leaves the hand (indices are stable here)
+            _confusedOverrides.TryGetValue(handIndex, out int[] amountOverrides);
+
             if (!_playerDeck.PlayCardAtIndex(handIndex))
             {
                 GameLogger.LogError<BattleManager>("Failed to play card from hand");
                 return;
             }
 
+            // Shift Confused override indices — the played card is gone, so subsequent indices move down
+            ShiftConfusedOverridesAfterPlay(handIndex);
+
             EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
-            _effectResolver.ResolveCardEffects(card, isPlayerCard: true);
+            _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides: amountOverrides);
             // PassiveResolver listens to CardPlayedEvent via EventBus — no direct call needed
             ApplyPolicyHostilityShifts(card);
             CheckAndAdvanceFocusAfterCardPlay();
+
+            // Echo — replay the card a second time; consume the stack BEFORE the replay to
+            // prevent a second Echo stack (if any) from triggering an infinite chain.
+            int echoStacks = _effectResolver.PlayerStatusEffects.GetStacks(StatusEffectType.Echo);
+            if (echoStacks > 0)
+            {
+                _effectResolver.PlayerStatusEffects.RemoveStacks(StatusEffectType.Echo, 1);
+                GameLogger.LogInfo<BattleManager>($"Echo triggered — replaying {card.CardName}");
+                _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides: null);
+                CheckAndAdvanceFocusAfterCardPlay();
+            }
 
             GameLogger.LogInfo<BattleManager>($"Player played: {card.CardName}");
         }
 
         private bool CanPlayCard(CardData card, BattleStats stats)
         {
-            StatusEffectManager statusMgr = _effectResolver.PlayerStatusEffects;
-
             foreach (var cost in card.Costs)
             {
                 if (cost.CostType == CostType.ActionPoints)
-                {
-                    int modifiedCost = statusMgr.ModifyCardCost(cost.CurrentAmount);
-                    if (stats.CurrentActionPoints < modifiedCost)
+                    if (stats.CurrentActionPoints < GetEffectiveCardCost(card))
                         return false;
-                }
             }
             return true;
         }
 
         private void PayCardCosts(CardData card, BattleStats stats)
         {
-            StatusEffectManager statusMgr = _effectResolver.PlayerStatusEffects;
-
             foreach (var cost in card.Costs)
             {
                 if (cost.CostType == CostType.ActionPoints)
                 {
-                    int baseCost     = cost.GetActualCost(stats.CurrentActionPoints);
-                    int modifiedCost = statusMgr.ModifyCardCost(baseCost);
-                    stats.SpendActionPoints(modifiedCost);
-                    GameLogger.LogInfo<BattleManager>($"Paid {modifiedCost} AP (base: {baseCost})");
+                    int effective = GetEffectiveCardCost(card);
+                    stats.SpendActionPoints(effective);
+                    GameLogger.LogInfo<BattleManager>($"Paid {effective} AP for {card.CardName}");
                 }
             }
         }
@@ -395,6 +413,68 @@ namespace Crookedile.Gameplay.Battle
             // All defeated — TurnEnd victory check will catch it
         }
 
+        /// <summary>
+        /// Single source of truth for the effective AP cost of a card this battle.
+        /// Applies (in order): status effect modifiers (Focus, Energized, Entangled),
+        /// then per-card battle overrides (ReduceCardCost / MakeCardFree effects).
+        /// Result is floored at 0.
+        /// </summary>
+        public int GetEffectiveCardCost(CardData card)
+        {
+            if (card?.Costs == null || card.Costs.Count == 0) return 0;
+            var cost = card.Costs[0];
+            if (cost.CostType != CostType.ActionPoints) return 0;
+
+            StatusEffectManager statusMgr = _effectResolver?.PlayerStatusEffects;
+            int baseCost = statusMgr != null
+                ? statusMgr.ModifyCardCost(cost.CurrentAmount)
+                : cost.CurrentAmount;
+
+            // Per-card battle override (ReduceCardCost / MakeCardFree)
+            int reduction = _playerDeck?.GetCardCostReduction(card) ?? 0;
+            if (reduction == int.MaxValue) return 0;   // MakeCardFree sentinel
+            return Mathf.Max(0, baseCost - reduction);
+        }
+
+        /// <summary>
+        /// Randomizes the displayed/resolved amounts for each card currently in the player's hand.
+        /// Called at turn start while the player has the Confused status. Values are [0, 3] inclusive.
+        /// </summary>
+        private void ApplyConfusedOverrides()
+        {
+            _confusedOverrides.Clear();
+            var hand = _playerDeck.Hand;
+            for (int i = 0; i < hand.Count; i++)
+            {
+                var effects = hand[i].Effects;
+                if (effects == null || effects.Count == 0) continue;
+                var overrides = new int[effects.Count];
+                for (int j = 0; j < effects.Count; j++)
+                    overrides[j] = UnityEngine.Random.Range(0, 4);  // [0, 3] inclusive
+                _confusedOverrides[i] = overrides;
+            }
+            GameLogger.LogInfo<BattleManager>($"Confused: randomized amounts for {_confusedOverrides.Count} cards in hand");
+        }
+
+        /// <summary>
+        /// After a card is removed from the hand, all hand indices above the played index shift
+        /// down by 1. This keeps _confusedOverrides aligned with the updated hand layout.
+        /// </summary>
+        private void ShiftConfusedOverridesAfterPlay(int playedIndex)
+        {
+            if (_confusedOverrides.Count == 0) return;
+            var shifted = new Dictionary<int, int[]>(_confusedOverrides.Count);
+            foreach (var kvp in _confusedOverrides)
+            {
+                if (kvp.Key == playedIndex) continue;   // this entry is now gone
+                int newKey = kvp.Key > playedIndex ? kvp.Key - 1 : kvp.Key;
+                shifted[newKey] = kvp.Value;
+            }
+            _confusedOverrides.Clear();
+            foreach (var kvp in shifted)
+                _confusedOverrides[kvp.Key] = kvp.Value;
+        }
+
         #endregion
 
         #region Victory Conditions
@@ -442,14 +522,25 @@ namespace Crookedile.Gameplay.Battle
         {
             if (_isPlayerTurn)
             {
+                // Composure decays at the start of each turn before anything else fires.
+                // Ritual (OnTurnStart: gain Composure) then grants fresh Composure on top of the cleared slate.
+                // A future relic could check a flag here and skip ConsumeAllComposure().
+                _playerStats.ConsumeAllComposure();
                 _playerStats.StartTurn();
                 _effectResolver.PlayerStatusEffects.OnTurnStart(_playerStats);
+
+                // Confused: randomize card effect amounts for this turn
+                if (_effectResolver.PlayerStatusEffects.HasEffect(StatusEffectType.Confused))
+                    ApplyConfusedOverrides();
+                else
+                    _confusedOverrides.Clear();
             }
             else
             {
                 foreach (var enemy in _enemies)
                 {
                     if (enemy.IsDefeated) continue;
+                    enemy.Stats.ConsumeAllComposure();
                     enemy.Stats.StartTurn();
                     enemy.StatusEffects.OnTurnStart(enemy.Stats);
                 }

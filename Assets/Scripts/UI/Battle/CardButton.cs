@@ -86,6 +86,16 @@ namespace Crookedile.UI.Battle
         [Tooltip("Plays when the card is discarded from hand")]
         public MMFeedbacks discardFeedback;
 
+        // ─── Policy-Only Elements ─────────────────────────────────────────────────
+
+        [Header("Policy-Only Elements")]
+        [Tooltip("Icon shown when this Policy card leans Left. Leave null on Pressure/Rhetoric prefabs.")]
+        [SerializeField] private Image _policyLeanLeftIcon;
+        [Tooltip("Icon shown when this Policy card leans Center. Leave null on Pressure/Rhetoric prefabs.")]
+        [SerializeField] private Image _policyLeanCenterIcon;
+        [Tooltip("Icon shown when this Policy card leans Right. Leave null on Pressure/Rhetoric prefabs.")]
+        [SerializeField] private Image _policyLeanRightIcon;
+
         // ─── Selection (CardSelectionPanel) ───────────────────────────────────────
 
         [Header("Selection")]
@@ -100,6 +110,11 @@ namespace Crookedile.UI.Battle
 
         private bool isHovered;
         private bool isPlayable;
+
+        // Cached cost values from Initialize so CanAfford and RefreshVisuals use the same numbers
+        // as the AP-spend validation in BattleManager (status effect modifiers applied).
+        private int  _effectiveCost;
+        private bool _forceUnplayable;  // true when Silenced blocks a Rhetoric card, etc.
 
         private Vector3    baseScale;
         private Vector3    basePosition;
@@ -125,6 +140,13 @@ namespace Crookedile.UI.Battle
 
         /// <summary>Whether this card can currently be played (enough AP).</summary>
         public bool IsPlayable => isPlayable;
+
+        /// <summary>
+        /// Set by <see cref="Initialize"/>. <see cref="BattlePoolManager"/> reads this in
+        /// <c>ReturnCard</c> to route the button back to the correct pool without callers
+        /// needing to track which pool a button was rented from.
+        /// </summary>
+        public CardType PooledCardType { get; private set; }
 
         // ─── Unity Lifecycle ──────────────────────────────────────────────────────
 
@@ -155,14 +177,19 @@ namespace Crookedile.UI.Battle
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Initialize the card with data, current AP (to set affordability), and a click callback.
+        /// Initialize the card with data, current AP, pre-computed effective cost, an optional
+        /// force-unplayable flag (e.g. Silenced blocking Rhetoric), and a click callback.
         /// </summary>
-        public void Initialize(CardData card, int index, int currentActionPoints, Action onClick)
+        public void Initialize(CardData card, int index, int currentActionPoints,
+                               int effectiveCost, bool forceUnplayable = false, Action onClick = null)
         {
-            cardData        = card;
-            handIndex       = index;
-            onClickCallback = onClick;
-            isPlayable      = CanAfford(currentActionPoints);
+            PooledCardType   = card.CardType;
+            cardData         = card;
+            handIndex        = index;
+            onClickCallback  = onClick;
+            _effectiveCost   = effectiveCost;
+            _forceUnplayable = forceUnplayable;
+            isPlayable       = !forceUnplayable && CanAfford(currentActionPoints);
 
             baseScale        = transform.localScale;
             basePosition     = transform.localPosition;
@@ -177,11 +204,12 @@ namespace Crookedile.UI.Battle
 
         /// <summary>
         /// Refreshes all visuals — call when AP changes mid-turn so affordability updates.
+        /// Uses cached _effectiveCost and _forceUnplayable from Initialize.
         /// </summary>
         public void RefreshVisuals(int currentActionPoints)
         {
             if (cardData == null) return;
-            isPlayable = CanAfford(currentActionPoints);
+            isPlayable = !_forceUnplayable && CanAfford(currentActionPoints);
             UpdateDisplay();
         }
 
@@ -458,6 +486,7 @@ namespace Crookedile.UI.Battle
             UpdateText();
             UpdateTypeColor();
             UpdateAffordability();
+            UpdatePolicyLean();
         }
 
         private void UpdateArtwork()
@@ -531,8 +560,23 @@ namespace Crookedile.UI.Battle
             if (cost.CostType == CostType.None) return "Free";
             if (cost.IsXCost)                   return "X";
 
-            int amount = cost.CurrentAmount;
-            return amount <= 0 ? "0" : amount.ToString();
+            // Use the effective cost (post status-effect modifiers) so Focus/Energized/Entangled
+            // are reflected in the cost display on the card.
+            return _effectiveCost <= 0 ? "0" : _effectiveCost.ToString();
+        }
+
+        /// <summary>
+        /// Shows only the lean icon that matches this Policy card's <see cref="PolicyLean"/>.
+        /// All three image references are optional — Pressure/Rhetoric prefabs leave them null
+        /// and nothing breaks.
+        /// </summary>
+        private void UpdatePolicyLean()
+        {
+            bool isPolicy = cardData?.CardType == CardType.Policy;
+
+            if (_policyLeanLeftIcon   != null) _policyLeanLeftIcon.enabled   = isPolicy && cardData.PolicyLean == PolicyLean.Left;
+            if (_policyLeanCenterIcon != null) _policyLeanCenterIcon.enabled = isPolicy && cardData.PolicyLean == PolicyLean.Center;
+            if (_policyLeanRightIcon  != null) _policyLeanRightIcon.enabled  = isPolicy && cardData.PolicyLean == PolicyLean.Right;
         }
 
         private bool CanAfford(int currentAP)
@@ -540,7 +584,9 @@ namespace Crookedile.UI.Battle
             if (cardData.Costs == null || cardData.Costs.Count == 0) return true;
             var cost = cardData.Costs[0];
             if (cost.CostType == CostType.None) return true;
-            return currentAP >= cost.CurrentAmount;
+            // Compare against _effectiveCost (pre-computed from BattleManager.GetEffectiveCardCost)
+            // so Focus/Energized/Entangled modifiers are respected.
+            return currentAP >= _effectiveCost;
         }
 
         private Color GetCardTypeColor(CardType type)
