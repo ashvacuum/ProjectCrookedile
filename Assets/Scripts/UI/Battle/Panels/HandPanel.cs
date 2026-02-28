@@ -140,7 +140,14 @@ namespace Crookedile.UI.Battle
 
         private CardButton GetOrCreate()
         {
-            if (_cardPool != null) return _cardPool.Get();
+            if (_cardPool != null)
+            {
+                CardButton btn = _cardPool.Get();
+                // Always re-parent to the hand container — pooled objects may have been
+                // left in a different parent if a previous drag or operation moved them.
+                btn.transform.SetParent(cardButtonContainer, false);
+                return btn;
+            }
             if (cardButtonPrefab == null) return null;
             return Instantiate(cardButtonPrefab, cardButtonContainer).GetComponent<CardButton>();
         }
