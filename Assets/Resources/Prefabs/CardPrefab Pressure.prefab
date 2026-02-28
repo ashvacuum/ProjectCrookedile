@@ -211,7 +211,7 @@ GameObject:
   - component: {fileID: 4407586219784281703}
   - component: {fileID: 7146289679869686022}
   m_Layer: 5
-  m_Name: CardPrefab
+  m_Name: CardPrefab Pressure
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -43,10 +43,6 @@ namespace Crookedile.UI.Reward
         [Tooltip("Button that skips the reward (calls onPick with null).")]
         [SerializeField] private Button _skipButton;
 
-        [Header("Pool")]
-        [Tooltip("Shared pool manager — same instance used by battle panels.")]
-        [SerializeField] private BattlePoolManager _pool;
-
         // ─── Per-session state ────────────────────────────────────────────────
 
         private readonly List<CardButton> _spawnedButtons = new List<CardButton>();
@@ -112,13 +108,13 @@ namespace Crookedile.UI.Reward
                 CardData card = offers[i];
                 if (card == null) continue;
 
-                CardButton btn = _pool != null
-                    ? _pool.RentCard(card.CardType, _cardContainer)
+                CardButton btn = BattlePoolManager.Instance != null
+                    ? BattlePoolManager.Instance.RentCard(card.CardType, _cardContainer)
                     : null;
 
                 if (btn == null)
                 {
-                    Debug.LogWarning("[RewardScreen] BattlePoolManager not assigned or pool is empty. Card offer skipped.");
+                    Debug.LogWarning("[RewardScreen] BattlePoolManager.Instance is null or pool is empty. Card offer skipped.");
                     continue;
                 }
 
@@ -175,7 +171,7 @@ namespace Crookedile.UI.Reward
             foreach (var btn in _spawnedButtons)
             {
                 if (btn == null) continue;
-                if (_pool != null) _pool.ReturnCard(btn);
+                if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnCard(btn);
                 else Destroy(btn.gameObject);
             }
             _spawnedButtons.Clear();

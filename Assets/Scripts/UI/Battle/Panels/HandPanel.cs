@@ -22,21 +22,13 @@ namespace Crookedile.UI.Battle
         [Tooltip("Parent Transform that card buttons are placed inside.")]
         [SerializeField] private Transform  cardButtonContainer;
 
-        [Header("Fallback Prefabs (used only when BattlePoolManager is not injected)")]
+        [Header("Fallback Prefabs (used only when BattlePoolManager singleton is absent)")]
         [SerializeField] private CardButton _pressurePrefab;
         [SerializeField] private CardButton _rhetoricPrefab;
         [SerializeField] private CardButton _policyPrefab;
 
         // ── Runtime ──────────────────────────────────────────────────────────
-        private List<CardButton>  _activeButtons = new List<CardButton>();
-        private BattlePoolManager _pool;
-
-        // ── Public API ────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Sets the shared pool. Call this from BattleUI.Initialize() before the first Refresh.
-        /// </summary>
-        public void SetPool(BattlePoolManager pool) => _pool = pool;
+        private List<CardButton> _activeButtons = new List<CardButton>();
 
         /// <summary>
         /// Rebuilds the hand using normal play-card callbacks.
@@ -130,7 +122,7 @@ namespace Crookedile.UI.Battle
             foreach (var btn in _activeButtons)
             {
                 if (btn == null) continue;
-                if (_pool != null) _pool.ReturnCard(btn);
+                if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnCard(btn);
                 else Destroy(btn.gameObject);
             }
             _activeButtons.Clear();
@@ -140,14 +132,14 @@ namespace Crookedile.UI.Battle
 
         private bool HasPrefabSource()
         {
-            if (_pool != null) return true;
+            if (BattlePoolManager.Instance != null) return true;
             return _pressurePrefab != null || _rhetoricPrefab != null || _policyPrefab != null;
         }
 
         private CardButton GetOrCreate(CardType cardType)
         {
-            if (_pool != null)
-                return _pool.RentCard(cardType, cardButtonContainer);
+            if (BattlePoolManager.Instance != null)
+                return BattlePoolManager.Instance.RentCard(cardType, cardButtonContainer);
 
             // Fallback: direct instantiate (standalone testing without a pool manager)
             CardButton prefab = cardType switch

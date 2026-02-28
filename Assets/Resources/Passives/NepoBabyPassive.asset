@@ -16,10 +16,10 @@ MonoBehaviour:
   _origin: 1
   _description: Every 5th card you play costs 1 AP less.
   _icon: {fileID: 0}
-  _trigger: 3
+  _trigger: 1
   _condition:
     Type: 0
     Value: 0
-  _oneShot: 0
+  _oneShot: 1
   _effectType: 9
   _effectAmount: 1

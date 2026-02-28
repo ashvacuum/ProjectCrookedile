@@ -84,10 +84,6 @@ namespace Crookedile.UI.Battle
         [Header("Card Zone Panel")]
         [SerializeField] private CardZonePanel cardZonePanel;
 
-        [Header("Pool Manager")]
-        [Tooltip("Shared object pool for CardButton and EnemySlotUI instances. Assign the BattlePoolManager on the canvas root.")]
-        [SerializeField] private BattlePoolManager _poolManager;
-
         [Header("Reward")]
         [Tooltip("CardDatabase ScriptableObject used to generate post-battle card offers.")]
         [SerializeField] private CardDatabase  _cardDatabase;
@@ -153,12 +149,6 @@ namespace Crookedile.UI.Battle
         public void Initialize(BattleManager manager)
         {
             battleManager = manager;
-
-            // Inject shared pool into every panel that spawns CardButtons or EnemySlots.
-            handPanel?.SetPool(_poolManager);
-            cardZonePanel?.SetPool(_poolManager);
-            cardSelectionPanel?.SetPool(_poolManager);
-            cardChoicePanel?.SetPool(_poolManager);
 
             discardZoneButton?.onClick.AddListener(ShowDiscardZone);
             exhaustZoneButton?.onClick.AddListener(ShowExhaustZone);
@@ -318,18 +308,18 @@ namespace Crookedile.UI.Battle
             foreach (var slot in _enemySlots)
             {
                 if (slot == null) continue;
-                if (_poolManager != null) _poolManager.ReturnSlot(slot);
+                if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnSlot(slot);
                 else Destroy(slot.gameObject);
             }
             _enemySlots.Clear();
 
             if (enemySlotContainer == null || battleManager == null) return;
-            if (_poolManager == null && enemySlotPrefab == null) return;
+            if (BattlePoolManager.Instance == null && enemySlotPrefab == null) return;
 
             for (int i = 0; i < battleManager.Enemies.Count; i++)
             {
-                EnemySlotUI slot = _poolManager != null
-                    ? _poolManager.RentSlot(enemySlotContainer)
+                EnemySlotUI slot = BattlePoolManager.Instance != null
+                    ? BattlePoolManager.Instance.RentSlot(enemySlotContainer)
                     : Instantiate(enemySlotPrefab, enemySlotContainer).GetComponent<EnemySlotUI>();
 
                 if (slot != null)
@@ -347,11 +337,11 @@ namespace Crookedile.UI.Battle
         private void AddEnemySlot(int index)
         {
             if (enemySlotContainer == null || battleManager == null) return;
-            if (_poolManager == null && enemySlotPrefab == null) return;
+            if (BattlePoolManager.Instance == null && enemySlotPrefab == null) return;
             if (index >= battleManager.Enemies.Count) return;
 
-            EnemySlotUI slot = _poolManager != null
-                ? _poolManager.RentSlot(enemySlotContainer)
+            EnemySlotUI slot = BattlePoolManager.Instance != null
+                ? BattlePoolManager.Instance.RentSlot(enemySlotContainer)
                 : Instantiate(enemySlotPrefab, enemySlotContainer).GetComponent<EnemySlotUI>();
 
             if (slot != null)

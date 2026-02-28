@@ -21,6 +21,6 @@ MonoBehaviour:
   _condition:
     Type: 0
     Value: 0
-  _oneShot: 0
+  _oneShot: 1
   _effectType: 13
   _effectAmount: 0
