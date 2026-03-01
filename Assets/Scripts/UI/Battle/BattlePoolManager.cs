@@ -111,7 +111,8 @@ namespace Crookedile.UI.Battle
                 cg.blocksRaycasts = true;
                 cg.alpha          = 1f;
             }
-
+            
+            btn.transform.localScale = Vector3.one;
             btn.transform.SetParent(transform, false);
             pool.Return(btn);
         }

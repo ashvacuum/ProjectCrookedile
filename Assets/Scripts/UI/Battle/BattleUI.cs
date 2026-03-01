@@ -126,6 +126,8 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             EventBus.Subscribe<EnemySummonedEvent>(OnEnemySummoned);
             EventBus.Subscribe<CardChoiceRequestedEvent>(OnCardChoiceRequested);
+            EventBus.Subscribe<ResolveChangedEvent>(OnResolveChanged);
+            EventBus.Subscribe<ComposureChangedEvent>(OnComposureChanged);
         }
 
         private void UnsubscribeFromEvents()
@@ -140,6 +142,8 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             EventBus.Unsubscribe<EnemySummonedEvent>(OnEnemySummoned);
             EventBus.Unsubscribe<CardChoiceRequestedEvent>(OnCardChoiceRequested);
+            EventBus.Unsubscribe<ResolveChangedEvent>(OnResolveChanged);
+            EventBus.Unsubscribe<ComposureChangedEvent>(OnComposureChanged);
         }
 
         /// <summary>
@@ -251,6 +255,9 @@ namespace Crookedile.UI.Battle
             _pendingCardChoice = evt;
             _fsm?.ChangeState(BattleUIState.WaitingForCardChoice);
         }
+
+        private void OnResolveChanged(ResolveChangedEvent evt)    => UpdateStatsDisplay();
+        private void OnComposureChanged(ComposureChangedEvent evt) => UpdateStatsDisplay();
 
         #endregion
 

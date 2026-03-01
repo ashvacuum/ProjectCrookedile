@@ -71,21 +71,20 @@ namespace Crookedile.Gameplay.Battle
             StatusEffectType.Entangled      => "All cards cost +1 AP.",
             StatusEffectType.Exposed        => "Next attack against this target deals double damage.",
             StatusEffectType.Scandal        => "Take X damage at end of turn (like Poison).",
-            StatusEffectType.Confused       => "A random card costs +1 AP each turn.",
-            StatusEffectType.Silenced       => "Cannot play Policy cards.",
+            StatusEffectType.Confused       => "Effect values are randomised each turn.",
+            StatusEffectType.Silenced       => "Cannot play Rhetoric cards.",
             // Buffs
             StatusEffectType.Strength       => "Deal X more damage.",
             StatusEffectType.Dexterity      => "Gain X more Composure per card played.",
             StatusEffectType.Focus          => "Cards cost X less AP (this turn only).",
-            StatusEffectType.Energized      => "Draw X extra cards next turn.",
+            StatusEffectType.Energized      => "Cards cost X less AP this turn.",
             StatusEffectType.Plated         => "Reduce incoming damage by X.",
             StatusEffectType.Regeneration   => "Heal X Resolve at end of turn.",
             StatusEffectType.Intangible     => "Take only 1 damage from all attacks.",
             StatusEffectType.Thorns         => "Deal X damage back to attackers.",
             // Special
-            StatusEffectType.Block          => "Absorb up to X incoming damage this turn.",
             StatusEffectType.Ritual         => "Gain X Composure at the start of each turn.",
-            StatusEffectType.Momentum       => "Gain X bonus damage per card played this turn.",
+            StatusEffectType.Momentum       => "Deal X damage to a random enemy per card played this turn.",
             StatusEffectType.Echo           => "The next card played is resolved twice.",
             _                               => ""
         };
@@ -114,23 +113,22 @@ namespace Crookedile.Gameplay.Battle
         Entangled,      // Cards cost +1 AP
         Exposed,        // Next attack deals double damage
         Scandal,        // Take X damage at end of turn (like Poison)
-        Confused,       // Random card costs +1 AP each turn
-        Silenced,       // Cannot play Policy cards
+        Confused,       // Effect values are randomised each turn
+        Silenced,       // Cannot play Rhetoric cards
 
         // BUFFS (Positive)
         Strength,       // Deal X more damage
         Dexterity,      // Gain X more Composure per card
         Focus,          // Cards cost X less AP (this turn only)
-        Energized,      // Draw X extra cards next turn
+        Energized,      // Cards cost X less AP this turn
         Plated,         // Reduce incoming damage by X
         Regeneration,   // Heal X Resolve at end of turn
         Intangible,     // Take only 1 damage from attacks (duration-based)
         Thorns,         // Deal X damage back when attacked
 
         // SPECIAL
-        Block,          // Temporary damage reduction (Slay the Spire style)
         Ritual,         // Gain X Composure at start of turn
-        Momentum,       // Gain X damage per card played this turn
+        Momentum,       // Deal X damage to a random enemy per card played this turn
         Echo,           // Next card is played twice
     }
 

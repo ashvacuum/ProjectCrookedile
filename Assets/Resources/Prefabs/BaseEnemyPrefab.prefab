@@ -668,7 +668,7 @@ MonoBehaviour:
   nameText: {fileID: 601732261641305008}
   resolveText: {fileID: 3112324191419297179}
   hostilityText: {fileID: 5704651871046358289}
-  _intentDisplay: {fileID: 0}
+  _intentDisplay: {fileID: 6888796589589481908}
   selectButton: {fileID: 5891997321289279186}
   selectionHighlight: {fileID: 5818194391219280397}
   dragDropHighlight: {fileID: 3678169182946379061}
