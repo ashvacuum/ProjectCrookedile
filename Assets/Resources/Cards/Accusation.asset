@@ -17,17 +17,18 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: fa7d33163b9e2ad4aabee506efedf0ff, type: 3}
-  _description: Deal 4 Resolve damage. Reduce 1 Hostility.
+  _description: Deal 5 Resolve damage. Draw 2 Cards
   _flavorText: Righteous anger, barely contained.
   _costs:
   - _costType: 1
-    _baseAmount: 1
+    _baseAmount: 2
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
   _effects:
-  - _category: 0
+  - _name: 
+    _category: 0
     _target: 1
     _damageType: 0
     _damageAmount: 4
@@ -41,7 +42,9 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
-  - _category: 2
+    _amountSource: 0
+  - _name: 
+    _category: 2
     _target: 1
     _damageType: 0
     _damageAmount: 3
@@ -55,10 +58,12 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
+    _amountSource: 0
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
   _tags:
   - faithleader
   _isStarterCard: 1
   _isUnlockable: 0
-  _sentimentTags: 
+  _policyLean: 3
+  _triggeredEffects: []

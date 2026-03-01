@@ -44,6 +44,15 @@ namespace Crookedile.Editor
         private const float SAMPLE_RATE = 60f;
 
         /// <summary>
+        /// Multiplier applied to each sprite's native pixel dimensions when baking the
+        /// RectTransform size into the generated clip.
+        /// 1 = native pixel size  |  2 = double size  |  0.5 = half size, etc.
+        /// Change this constant to globally adjust how large all generated VFX appear
+        /// without touching the prefab or pixels-per-unit on any texture.
+        /// </summary>
+        private const float DISPLAY_SCALE = 1f;
+
+        /// <summary>
         /// Asset name (no extension) of the .anim that acts as the YAML template.
         /// Must live somewhere inside the project's Assets folder.
         /// </summary>
@@ -225,6 +234,24 @@ namespace Crookedile.Editor
 
             // Import after writing both files so Unity picks up the .meta we wrote.
             AssetDatabase.ImportAsset(outputPath, ImportAssetOptions.ForceSynchronousImport);
+
+            // Bake the correct RectTransform size into the clip so the VFX prefab resizes
+            // automatically when the animation starts, regardless of which sprite sheet is playing.
+            // Uses the first sprite's native pixel dimensions × DISPLAY_SCALE.
+            // AnimationCurve.Constant produces a flat curve (same value for the whole clip length),
+            // which is exactly what we need — the size is set on frame 0 and never changes.
+            var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(outputPath);
+            if (clip != null)
+            {
+                float w = sprites[0].rect.width  * DISPLAY_SCALE;
+                float h = sprites[0].rect.height * DISPLAY_SCALE;
+                clip.SetCurve("", typeof(RectTransform), "m_SizeDelta.x",
+                    AnimationCurve.Constant(0f, stopTimeValue, w));
+                clip.SetCurve("", typeof(RectTransform), "m_SizeDelta.y",
+                    AnimationCurve.Constant(0f, stopTimeValue, h));
+                EditorUtility.SetDirty(clip);
+                AssetDatabase.SaveAssets();
+            }
 
             // Register the clip as a state in the shared VFX Animator Controller.
             RegisterInController(outputPath, animName);

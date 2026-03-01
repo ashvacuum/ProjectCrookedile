@@ -226,6 +226,13 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>True = player is the damage target; false = an enemy is the target.</summary>
         public bool IsToPlayer;
+
+        /// <summary>Display name of the attacker ("Player" or the enemy's name).</summary>
+        public string AttackerName;
+
+        /// <summary>Zero-based index of the attacking enemy in BattleManager.Enemies.
+        /// -1 when the player is the attacker.</summary>
+        public int SourceEnemyIndex;
     }
 
     /// <summary>
@@ -384,6 +391,17 @@ namespace Crookedile.Gameplay.Battle
         public EnemyData EnemyData;
 
         /// <summary>Zero-based index of the new enemy in <c>BattleManager.Enemies</c>.</summary>
+        public int EnemyIndex;
+    }
+
+    /// <summary>
+    /// Published by <c>BattleManager.OpponentTurnState</c> just before an enemy resolves
+    /// its declared move. Used by the UI to shake that enemy's intent panel and signal
+    /// which enemy is about to attack.
+    /// </summary>
+    public struct EnemyActingEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that is about to act.</summary>
         public int EnemyIndex;
     }
 

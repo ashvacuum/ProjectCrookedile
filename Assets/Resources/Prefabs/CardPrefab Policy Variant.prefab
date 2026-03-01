@@ -283,12 +283,24 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1645467906189408384, guid: d21cd7a1c65a6be428dc22f98b8bbb7e, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 110.9
+      value: -46.9
       objectReference: {fileID: 0}
     - target: {fileID: 1701446309925926733, guid: d21cd7a1c65a6be428dc22f98b8bbb7e, type: 3}
       propertyPath: m_Name
       value: CardPrefab Policy Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 4407586219784281703, guid: d21cd7a1c65a6be428dc22f98b8bbb7e, type: 3}
+      propertyPath: _policyLeanLeftIcon
+      value: 
+      objectReference: {fileID: 8690878766529925735}
+    - target: {fileID: 4407586219784281703, guid: d21cd7a1c65a6be428dc22f98b8bbb7e, type: 3}
+      propertyPath: _policyLeanRightIcon
+      value: 
+      objectReference: {fileID: 4551442463936843626}
+    - target: {fileID: 4407586219784281703, guid: d21cd7a1c65a6be428dc22f98b8bbb7e, type: 3}
+      propertyPath: _policyLeanCenterIcon
+      value: 
+      objectReference: {fileID: 1211583371361086482}
     - target: {fileID: 5606471812467873176, guid: d21cd7a1c65a6be428dc22f98b8bbb7e, type: 3}
       propertyPath: m_AnchorMax.x
       value: 1
@@ -317,6 +329,10 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 25322d8af2aefbf47b6829c9b7d7bdf2, type: 3}
+    - target: {fileID: 7265146301101566910, guid: d21cd7a1c65a6be428dc22f98b8bbb7e, type: 3}
+      propertyPath: m_fontSize
+      value: 51.9
+      objectReference: {fileID: 0}
     - target: {fileID: 7559446461499607623, guid: d21cd7a1c65a6be428dc22f98b8bbb7e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

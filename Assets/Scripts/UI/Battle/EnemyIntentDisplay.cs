@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
+using Crookedile.Gameplay.Battle;
 
 namespace Crookedile.UI.Battle
 {
@@ -50,7 +52,7 @@ namespace Crookedile.UI.Battle
 
         // ─── Display ──────────────────────────────────────────────────────────────
 
-        public void ShowIntent(EnemyMoveData move)
+        public void ShowIntent(EnemyMoveData move, StatusEffectManager attackerStatus = null)
         {
             if (move == null)
             {
@@ -77,11 +79,68 @@ namespace Crookedile.UI.Battle
                 intentNameText.text = move.MoveName;
 
             if (intentDescText != null)
-                intentDescText.text = move.IntentDescription;
+            {
+                bool isOffensive = move.MoveType == EnemyMoveType.Attack
+                                || move.MoveType == EnemyMoveType.OffensiveBuff
+                                || move.MoveType == EnemyMoveType.DebuffAttack;
+                intentDescText.text = isOffensive ? BuildDamagePreview(move, attackerStatus) : string.Empty;
+            }
 
             // Colour badge by move type
             if (intentTypeBadge != null)
                 intentTypeBadge.color = color;
+        }
+
+        /// <summary>
+        /// Sums all damage effects in the move, applies attacker status modifiers (Weakened, Strength),
+        /// and returns a display string. Fixed damage → total number. Random damage → "min-max".
+        /// DamageEqualToComposure → "?". Returns empty string if no damage effects are present.
+        /// </summary>
+        private static string BuildDamagePreview(EnemyMoveData move, StatusEffectManager attackerStatus)
+        {
+            int fixedTotal = 0;
+            int randMin = 0, randMax = 0;
+            bool hasFixed = false, hasRandom = false, hasComposure = false;
+
+            foreach (var effect in move.Effects)
+            {
+                if (effect.Category != EffectCategory.Damage) continue;
+                switch (effect.DamageType)
+                {
+                    case DamageType.FixedDamage:
+                        fixedTotal += effect.DamageAmount;
+                        hasFixed = true;
+                        break;
+                    case DamageType.RandomDamage:
+                        randMin += effect.RandomDamageMin;
+                        randMax += effect.RandomDamageMax;
+                        hasRandom = true;
+                        break;
+                    case DamageType.DamageEqualToComposure:
+                        hasComposure = true;
+                        break;
+                }
+            }
+
+            if (!hasFixed && !hasRandom && !hasComposure) return string.Empty;
+            if (hasComposure) return hasFixed ? $"{fixedTotal}+" : "?";
+
+            // Apply attacker status modifiers (Weakened reduces, Strength increases)
+            if (hasRandom)
+            {
+                int adjMin = Mathf.Max(0, attackerStatus != null
+                    ? attackerStatus.ModifyDamageDealt(randMin + fixedTotal)
+                    : randMin + fixedTotal);
+                int adjMax = Mathf.Max(0, attackerStatus != null
+                    ? attackerStatus.ModifyDamageDealt(randMax + fixedTotal)
+                    : randMax + fixedTotal);
+                return $"{adjMin}-{adjMax}";
+            }
+
+            int adj = Mathf.Max(0, attackerStatus != null
+                ? attackerStatus.ModifyDamageDealt(fixedTotal)
+                : fixedTotal);
+            return adj > 0 ? adj.ToString() : string.Empty;
         }
 
         private void SetPanelVisible(bool visible)

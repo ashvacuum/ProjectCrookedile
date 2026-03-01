@@ -24,6 +24,8 @@ namespace Crookedile.Gameplay.Battle
         private IReadOnlyList<EnemyController> _allEnemies; // all enemies — used for multi-target effects
         private StatusEffectManager _playerStatusEffects;
         private StatusEffectManager _opponentStatusEffects; // focused enemy's status mgr
+        private string _attackerName       = "Player";
+        private int    _attackerEnemyIndex = -1;            // -1 = player is the attacker
 
         // All battle events are published via EventBus — no C# event wiring required.
         // See BattleEvents.cs for the full event catalogue.
@@ -50,10 +52,13 @@ namespace Crookedile.Gameplay.Battle
         /// changes their focused target).
         /// Both stats AND status effects must be swapped together.
         /// </summary>
-        public void SetFocusedOpponent(BattleStats stats, StatusEffectManager statusEffects)
+        public void SetFocusedOpponent(BattleStats stats, StatusEffectManager statusEffects,
+                                        int enemyIndex = -1, string enemyName = "Opponent")
         {
             _opponentStats         = stats;
             _opponentStatusEffects = statusEffects;
+            _attackerEnemyIndex    = enemyIndex;
+            _attackerName          = enemyName;
         }
 
         #region Effect Resolution
@@ -456,7 +461,16 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} damage (base: {baseDamage}, modified: {modifiedDamage}, HostilityMult: {(attacker != _playerStats && attacker.CurrentHostility > 0 ? attacker.HostilityDamageMultiplier.ToString("F2") : "1.00")})");
 
             if (actualDamage > 0)
-                EventBus.Publish(new DamageDealtEvent { Amount = actualDamage, IsToPlayer = target == _playerStats });
+            {
+                bool isPlayerAttacking = attacker == _playerStats;
+                EventBus.Publish(new DamageDealtEvent
+                {
+                    Amount           = actualDamage,
+                    IsToPlayer       = target == _playerStats,
+                    AttackerName     = isPlayerAttacking ? "Player" : _attackerName,
+                    SourceEnemyIndex = isPlayerAttacking ? -1 : _attackerEnemyIndex,
+                });
+            }
 
             // Accumulate into context so triggered effects can react (e.g. lifesteal)
             if (ctx != null)
@@ -503,7 +517,16 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} random damage (rolled {randomDamage} from {minDamage}-{maxDamage}, modified: {modifiedDamage})");
 
             if (actualDamage > 0)
-                EventBus.Publish(new DamageDealtEvent { Amount = actualDamage, IsToPlayer = target == _playerStats });
+            {
+                bool isPlayerAttacking = attacker == _playerStats;
+                EventBus.Publish(new DamageDealtEvent
+                {
+                    Amount           = actualDamage,
+                    IsToPlayer       = target == _playerStats,
+                    AttackerName     = isPlayerAttacking ? "Player" : _attackerName,
+                    SourceEnemyIndex = isPlayerAttacking ? -1 : _attackerEnemyIndex,
+                });
+            }
 
             if (ctx != null)
             {
@@ -560,7 +583,16 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} damage equal to Composure ({composure}, modified: {modifiedDamage})");
 
             if (actualDamage > 0)
-                EventBus.Publish(new DamageDealtEvent { Amount = actualDamage, IsToPlayer = target == _playerStats });
+            {
+                bool isPlayerAttacking = attacker == _playerStats;
+                EventBus.Publish(new DamageDealtEvent
+                {
+                    Amount           = actualDamage,
+                    IsToPlayer       = target == _playerStats,
+                    AttackerName     = isPlayerAttacking ? "Player" : _attackerName,
+                    SourceEnemyIndex = isPlayerAttacking ? -1 : _attackerEnemyIndex,
+                });
+            }
 
             if (ctx != null)
             {

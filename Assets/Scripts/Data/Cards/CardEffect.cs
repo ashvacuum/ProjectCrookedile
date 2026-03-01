@@ -164,8 +164,6 @@ namespace Crookedile.Data.Cards
                 { "Buffs/Regeneration (Heal X per turn)", StatusEffectType.Regeneration },
                 { "Buffs/Intangible (Take 1 damage only)", StatusEffectType.Intangible },
                 { "Buffs/Thorns (Deal X back when hit)", StatusEffectType.Thorns },
-
-                { "Special/Block (Temporary damage reduction)", StatusEffectType.Block },
                 { "Special/Ritual (Gain X Composure per turn)", StatusEffectType.Ritual },
                 { "Special/Momentum (X damage per card)", StatusEffectType.Momentum },
                 { "Special/Echo (Next card plays twice)", StatusEffectType.Echo },
