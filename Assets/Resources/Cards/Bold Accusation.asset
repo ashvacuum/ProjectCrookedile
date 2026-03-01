@@ -17,7 +17,7 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: dd0829e9a778e6b4eb75f3f5df21849b, type: 3}
-  _description: Deal 5 Resolve damage. Reduce 2 Hostility.
+  _description: Deal 5 Resolve damage. Increase 2 Hostility.
   _flavorText: Critics said it was too much. It worked.
   _costs:
   - _costType: 1
@@ -27,7 +27,8 @@ MonoBehaviour:
     _minimumCost: 0
     _maximumCost: 99
   _effects:
-  - _category: 0
+  - _name: 
+    _category: 0
     _target: 1
     _damageType: 0
     _damageAmount: 5
@@ -41,7 +42,9 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
-  - _category: 1
+    _amountSource: 0
+  - _name: 
+    _category: 1
     _target: 1
     _damageType: 0
     _damageAmount: 3
@@ -55,10 +58,12 @@ MonoBehaviour:
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
+    _amountSource: 0
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
   _tags:
   - actor
   _isStarterCard: 1
   _isUnlockable: 0
-  _sentimentTags: 
+  _policyLean: 3
+  _triggeredEffects: []

@@ -266,13 +266,16 @@ MonoBehaviour:
   unaffordableColor: {r: 0.4, g: 0.4, b: 0.4, a: 0.6}
   hoverScale: 1.2
   hoverLerpSpeed: 16
-  hoverLiftPixels: 45
+  hoverEdgePadding: 6
   dragUpThreshold: 100
   drawFeedback: {fileID: 0}
   hoverEnterFeedback: {fileID: 0}
   hoverExitFeedback: {fileID: 0}
   selectFeedback: {fileID: 0}
   discardFeedback: {fileID: 0}
+  _policyLeanLeftIcon: {fileID: 0}
+  _policyLeanCenterIcon: {fileID: 0}
+  _policyLeanRightIcon: {fileID: 0}
   _selectionOutline: {fileID: 0}
 --- !u!225 &7146289679869686022
 CanvasGroup:
@@ -317,10 +320,10 @@ RectTransform:
   - {fileID: 1645467906189408384}
   m_Father: {fileID: 8712440504798830888}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 150, y: 150}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2384261693080892331
 GameObject:
@@ -468,11 +471,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 5606471812467873176}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: -10}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -69.39}
   m_SizeDelta: {x: 150, y: 25}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3474653383427653707
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -883,7 +886,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 57.1}
+  m_AnchoredPosition: {x: 0, y: 62.82}
   m_SizeDelta: {x: 64, y: 8}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &6080665221589764716
@@ -1215,11 +1218,11 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 15
+  m_fontSize: 41.65
   m_fontSizeBase: 15
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 8
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2

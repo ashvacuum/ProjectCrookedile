@@ -128,6 +128,8 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<CardChoiceRequestedEvent>(OnCardChoiceRequested);
             EventBus.Subscribe<ResolveChangedEvent>(OnResolveChanged);
             EventBus.Subscribe<ComposureChangedEvent>(OnComposureChanged);
+            EventBus.Subscribe<DamageDealtEvent>(OnDamageDealt);
+            EventBus.Subscribe<EnemyActingEvent>(OnEnemyActing);
         }
 
         private void UnsubscribeFromEvents()
@@ -144,6 +146,8 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<CardChoiceRequestedEvent>(OnCardChoiceRequested);
             EventBus.Unsubscribe<ResolveChangedEvent>(OnResolveChanged);
             EventBus.Unsubscribe<ComposureChangedEvent>(OnComposureChanged);
+            EventBus.Unsubscribe<DamageDealtEvent>(OnDamageDealt);
+            EventBus.Unsubscribe<EnemyActingEvent>(OnEnemyActing);
         }
 
         /// <summary>
@@ -231,8 +235,15 @@ namespace Crookedile.UI.Battle
         private void OnEnemyDefeated(EnemyDefeatedEvent evt)
         {
             logPanel?.AddEntry($"{evt.EnemyName} defeated!");
-            if (evt.EnemyIndex < _enemySlots.Count)
-                _enemySlots[evt.EnemyIndex]?.MarkDefeated();
+            if (evt.EnemyIndex >= _enemySlots.Count) return;
+
+            var slot = _enemySlots[evt.EnemyIndex];
+            if (slot == null) return;
+
+            if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnSlot(slot);
+            else Destroy(slot.gameObject);
+
+            _enemySlots[evt.EnemyIndex] = null;
         }
 
         private void OnEnemySummoned(EnemySummonedEvent evt)
@@ -258,6 +269,19 @@ namespace Crookedile.UI.Battle
 
         private void OnResolveChanged(ResolveChangedEvent evt)    => UpdateStatsDisplay();
         private void OnComposureChanged(ComposureChangedEvent evt) => UpdateStatsDisplay();
+
+        private void OnDamageDealt(DamageDealtEvent evt)
+        {
+            if (!evt.IsToPlayer) return;
+            logPanel?.AddEntry($"{evt.AttackerName} dealt {evt.Amount} damage");
+        }
+
+        private void OnEnemyActing(EnemyActingEvent evt)
+        {
+            if (evt.EnemyIndex >= _enemySlots.Count) return;
+            _enemySlots[evt.EnemyIndex]?.PulseIntent();
+            _enemySlots[evt.EnemyIndex]?.ClearIntent();
+        }
 
         #endregion
 

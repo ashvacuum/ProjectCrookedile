@@ -23,7 +23,9 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField] private int   _startingHandSize    = 5;
         [SerializeField] private int   _cardsPerTurn        = 1;
         [Tooltip("Seconds to wait after the opponent turn starts before enemies attack.")]
-        [SerializeField] private float _opponentTurnDelay   = 1.0f;
+        [SerializeField] private float _opponentTurnDelay      = 1.0f;
+        [Tooltip("Seconds to wait between each individual enemy's attack.")]
+        [SerializeField] private float _perEnemyAttackDelay    = 0.5f;
 
         [Header("Origin Passives")]
         [Tooltip("Assign all three OriginPassive assets here (FaithLeader, NepoBaby, Actor).")]
@@ -189,7 +191,9 @@ namespace Crookedile.Gameplay.Battle
         {
             if (index < 0 || index >= _enemies.Count || _enemies[index].IsDefeated) return;
             _focusedEnemyIndex = index;
-            _effectResolver.SetFocusedOpponent(FocusedEnemy.Stats, FocusedEnemy.StatusEffects);
+            _effectResolver.SetFocusedOpponent(
+                FocusedEnemy.Stats, FocusedEnemy.StatusEffects,
+                index, FocusedEnemy.EnemyData.EnemyName);
             GameLogger.LogInfo<BattleManager>($"Focused enemy: [{index}] {FocusedEnemy.EnemyData.EnemyName}");
         }
 
@@ -714,11 +718,18 @@ namespace Crookedile.Gameplay.Battle
                     var enemy = _manager._enemies[i];
                     if (enemy.IsDefeated || enemy.CurrentIntent == null) continue;
 
+                    // Signal the UI: this enemy is about to act (shake + highlight intent panel)
+                    EventBus.Publish(new EnemyActingEvent { EnemyIndex = i });
+
+                    // Brief pause so the player sees the signal before damage lands
+                    yield return new WaitForSeconds(_manager._perEnemyAttackDelay);
+
                     GameLogger.LogInfo<BattleManager>(
                         $"Enemy [{i}] {enemy.EnemyData.EnemyName} executes: {enemy.CurrentIntent.MoveName}");
 
                     // Temporarily point EffectResolver at this enemy as the caster
-                    _manager._effectResolver.SetFocusedOpponent(enemy.Stats, enemy.StatusEffects);
+                    _manager._effectResolver.SetFocusedOpponent(
+                        enemy.Stats, enemy.StatusEffects, i, enemy.EnemyData.EnemyName);
                     _manager._effectResolver.ResolveEnemyMoveEffects(enemy.CurrentIntent);
 
                     // Handle SummonMinion moves after normal effects resolve
@@ -733,7 +744,8 @@ namespace Crookedile.Gameplay.Battle
                 // Restore resolver to the player's current focused target
                 if (_manager.FocusedEnemy != null)
                     _manager._effectResolver.SetFocusedOpponent(
-                        _manager.FocusedEnemy.Stats, _manager.FocusedEnemy.StatusEffects);
+                        _manager.FocusedEnemy.Stats, _manager.FocusedEnemy.StatusEffects,
+                        _manager.FocusedEnemyIndex, _manager.FocusedEnemy.EnemyData.EnemyName);
 
                 _manager.TransitionToState(BattleState.TurnEnd);
             }

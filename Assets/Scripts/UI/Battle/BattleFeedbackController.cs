@@ -103,13 +103,12 @@ namespace Crookedile.UI.Battle
             var trigger = evt.IsToPlayer ? BattleAudioTrigger.DamageDealtToPlayer
                                          : BattleAudioTrigger.DamageDealtToEnemy;
 
-            // Use the player stats panel as target for player damage;
-            // for enemy damage, use the first enemy slot as a best-effort target.
-            // (DamageDealtEvent does not carry an EnemyIndex — add one to the event if
-            //  precise per-enemy targeting becomes important.)
+            // Enemy → player: show VFX at the attacking enemy's slot so the player
+            //   sees which enemy hit them.
+            // Player → enemy: show VFX at the player stats panel (source of the attack).
             var target = evt.IsToPlayer
-                ? _battleUI?.PlayerStatsPanel
-                : _battleUI?.GetEnemySlotTransform(0);
+                ? _battleUI?.GetEnemySlotTransform(evt.SourceEnemyIndex)
+                : _battleUI?.PlayerStatsPanel;
 
             Play(trigger, target);
         }
