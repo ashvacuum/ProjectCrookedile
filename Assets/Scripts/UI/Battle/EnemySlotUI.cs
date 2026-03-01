@@ -21,21 +21,23 @@ namespace Crookedile.UI.Battle
         IPointerEnterHandler,
         IPointerExitHandler
     {
-        [Header("Display")]
-        [SerializeField] private TMP_Text            nameText;
-        [SerializeField] private TMP_Text            resolveText;
-        [SerializeField] private TMP_Text            hostilityText;
-        [SerializeField] private EnemyIntentDisplay  _intentDisplay;
+        [Header("Display")] [SerializeField] private TMP_Text nameText;
+        [SerializeField] private TMP_Text resolveText;
+        [SerializeField] private TMP_Text hostilityText;
+        [SerializeField] private TMP_Text composureText;
+        [SerializeField] private Image composureImage;
+        [SerializeField] private EnemyIntentDisplay _intentDisplay;
 
-        [Header("Interaction")]
-        [SerializeField] private Button     selectButton;
-        [SerializeField] private Image      selectionHighlight;
-        [SerializeField] private Image      dragDropHighlight;
+        [Header("Interaction")] [SerializeField]
+        private Button selectButton;
+
+        [SerializeField] private Image selectionHighlight;
+        [SerializeField] private Image dragDropHighlight;
         [SerializeField] private GameObject defeatedOverlay;
 
-        private int            _enemyIndex;
-        private BattleManager  _battleManager;
-        private OriginType     _playerOrigin;
+        private int _enemyIndex;
+        private BattleManager _battleManager;
+        private OriginType _playerOrigin;
 
         /// <summary>The enemy slot currently targeted by the card targeting arrow, or null.</summary>
         public static EnemySlotUI TargetedSlot { get; private set; }
@@ -58,15 +60,15 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void Initialize(int index, BattleManager manager, OriginType playerOrigin)
         {
-            _enemyIndex    = index;
+            _enemyIndex = index;
             _battleManager = manager;
-            _playerOrigin  = playerOrigin;
+            _playerOrigin = playerOrigin;
 
             // Click-to-focus removed; focus is now set implicitly by drag-to-enemy
-            if (selectButton       != null) selectButton.interactable = false;
-            if (defeatedOverlay    != null) defeatedOverlay.SetActive(false);
+            if (selectButton != null) selectButton.interactable = false;
+            if (defeatedOverlay != null) defeatedOverlay.SetActive(false);
             if (selectionHighlight != null) selectionHighlight.enabled = false;
-            if (dragDropHighlight  != null) dragDropHighlight.enabled  = false;
+            if (dragDropHighlight != null) dragDropHighlight.enabled = false;
 
             _intentDisplay?.ShowIntent(null); // hidden until intent is declared
 
@@ -82,23 +84,33 @@ namespace Crookedile.UI.Battle
         {
             if (_battleManager == null || _enemyIndex >= _battleManager.Enemies.Count) return;
             var enemy = _battleManager.Enemies[_enemyIndex];
+            if (enemy.IsDefeated) return;
 
-            if (nameText    != null) nameText.SetText(enemy.EnemyData.EnemyName);
-            if (resolveText != null) resolveText.SetText($"Resolve: {enemy.Stats.CurrentResolve}/{enemy.Stats.MaxResolve}");
+            if (nameText != null) nameText.SetText(enemy.EnemyData.EnemyName);
+            if (resolveText != null)
+                resolveText.SetText($"Resolve: {enemy.Stats.CurrentResolve}/{enemy.Stats.MaxResolve}");
+            
+            if(composureText != null)
+                composureText.SetText(enemy.Stats.CurrentComposure > 0 ? $"Composure: {enemy.Stats.CurrentComposure}" : string.Empty);
+            
+            if(composureImage != null)
+                composureImage.gameObject.SetActive(enemy.Stats.CurrentComposure > 0);
 
-            if (hostilityText != null)
-            {
-                bool showExact = _playerOrigin == OriginType.Actor;
-                int  h         = enemy.Stats.CurrentHostility;
+            if (hostilityText == null) return;
+            var showExact = _playerOrigin == OriginType.Actor;
+            var h = enemy.Stats.CurrentHostility;
 
-                hostilityText.text  = showExact
-                    ? $"Hostility: {h:+0;-0;0}"
-                    : h < 0 ? "Receptive" : h > 0 ? "Hostile" : "Guarded";
+            hostilityText.text = showExact
+                ? $"Hostility: {h:+0;-0;0}"
+                : h < 0
+                    ? "Receptive"
+                    : h > 0
+                        ? "Hostile"
+                        : "Guarded";
 
-                hostilityText.color = h < 0 ? new Color(0.2f, 0.8f, 0.2f)   // green  = receptive
-                                    : h > 0 ? new Color(0.8f, 0.2f, 0.2f)   // red    = hostile
-                                    :         Color.white;                    // white  = neutral
-            }
+            hostilityText.color = h < 0 ? new Color(0.2f, 0.8f, 0.2f) // green  = receptive
+                : h > 0 ? new Color(0.8f, 0.2f, 0.2f) // red    = hostile
+                : Color.white; // white  = neutral
         }
 
         /// <summary>
@@ -124,8 +136,19 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void MarkDefeated()
         {
+            // Hide all live display elements
+            if (nameText       != null) nameText.gameObject.SetActive(false);
+            if (resolveText    != null) resolveText.gameObject.SetActive(false);
+            if (hostilityText  != null) hostilityText.gameObject.SetActive(false);
+            if (composureText  != null) composureText.gameObject.SetActive(false);
+            if (composureImage != null) composureImage.gameObject.SetActive(false);
+            if (_intentDisplay != null) _intentDisplay.gameObject.SetActive(false);
+            if (selectionHighlight != null) selectionHighlight.enabled = false;
+            if (dragDropHighlight  != null) dragDropHighlight.enabled  = false;
+            if (selectButton       != null) selectButton.interactable  = false;
+
+            // Show defeated state
             if (defeatedOverlay != null) defeatedOverlay.SetActive(true);
-            if (selectButton    != null) selectButton.interactable = false;
         }
 
         /// <summary>
@@ -166,7 +189,7 @@ namespace Crookedile.UI.Battle
         {
             if (dragDropHighlight != null) dragDropHighlight.enabled = false;
             if (TargetedSlot == this) TargetedSlot = null;
-        }
+        } 
 
         // ─── Private ──────────────────────────────────────────────────────────────
 

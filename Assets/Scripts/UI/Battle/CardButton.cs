@@ -470,7 +470,7 @@ namespace Crookedile.UI.Battle
         {
             if (cardData?.Effects == null) return false;
             foreach (CardEffect effect in cardData.Effects)
-                if (effect.Target == TargetType.Opponent)
+                if (effect.Category == EffectCategory.Damage && effect.Target == TargetType.Opponent)
                     return true;
             return false;
         }

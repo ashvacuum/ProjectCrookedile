@@ -293,6 +293,7 @@ namespace Crookedile.Gameplay.Battle
             // PassiveResolver listens to CardPlayedEvent via EventBus — no direct call needed
             ApplyPolicyHostilityShifts(card);
             CheckAndAdvanceFocusAfterCardPlay();
+            TriggerMomentum();
 
             // Echo — replay the card a second time; consume the stack BEFORE the replay to
             // prevent a second Echo stack (if any) from triggering an infinite chain.
@@ -454,6 +455,25 @@ namespace Crookedile.Gameplay.Battle
                 _confusedOverrides[i] = overrides;
             }
             GameLogger.LogInfo<BattleManager>($"Confused: randomized amounts for {_confusedOverrides.Count} cards in hand");
+        }
+
+        /// <summary>
+        /// If the player has Momentum stacks, deals stacks damage to a random living enemy.
+        /// Called once per card play (before Echo replay).
+        /// </summary>
+        private void TriggerMomentum()
+        {
+            int stacks = _effectResolver?.PlayerStatusEffects?.GetStacks(StatusEffectType.Momentum) ?? 0;
+            if (stacks <= 0) return;
+
+            var living = new List<EnemyController>();
+            foreach (var e in _enemies)
+                if (!e.IsDefeated) living.Add(e);
+            if (living.Count == 0) return;
+
+            var target = living[UnityEngine.Random.Range(0, living.Count)];
+            target.Stats.DamageResolve(stacks);
+            GameLogger.LogInfo<BattleManager>($"Momentum dealt {stacks} damage to {target.EnemyData.EnemyName}");
         }
 
         /// <summary>
