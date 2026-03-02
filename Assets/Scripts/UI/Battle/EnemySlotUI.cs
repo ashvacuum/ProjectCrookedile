@@ -28,6 +28,7 @@ namespace Crookedile.UI.Battle
         [SerializeField] private TMP_Text hostilityText;
         [SerializeField] private TMP_Text composureText;
         [SerializeField] private Image composureImage;
+        [SerializeField] private Image enemySprite;
         [SerializeField] private EnemyIntentDisplay _intentDisplay;
 
         [Header("HP Bar")]
@@ -65,7 +66,7 @@ namespace Crookedile.UI.Battle
         /// <summary>
         /// Called by BattleUI when spawning this slot. Must be called before the first frame.
         /// </summary>
-        public void Initialize(int index, BattleManager manager, OriginType playerOrigin)
+        public void Initialize(int index, BattleManager manager, OriginType playerOrigin, EnemyData enemyData)
         {
             _enemyIndex = index;
             _battleManager = manager;
@@ -83,6 +84,8 @@ namespace Crookedile.UI.Battle
 
             // Snap bar to full on spawn — no lerp animation on first appearance
             if (resolveBarFill != null) resolveBarFill.fillAmount = _targetFill;
+
+            if (enemySprite != null) enemySprite.sprite = enemyData.Portrait;
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────

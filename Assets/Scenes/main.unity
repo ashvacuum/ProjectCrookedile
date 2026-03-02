@@ -1879,6 +1879,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: VFX Base
       objectReference: {fileID: 0}
+    - target: {fileID: 2203926534931137747, guid: c34a0954deff0df4e8dd5d91b8de12b7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6843800541601877207, guid: c34a0954deff0df4e8dd5d91b8de12b7, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -2255,7 +2259,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5159938429348400508, guid: 8fd2e4a762179aa4487070e009ffeec2, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000011062833
+      value: 0.0010437513
       objectReference: {fileID: 0}
     - target: {fileID: 5474083764418676698, guid: 8fd2e4a762179aa4487070e009ffeec2, type: 3}
       propertyPath: m_AnchorMax.x

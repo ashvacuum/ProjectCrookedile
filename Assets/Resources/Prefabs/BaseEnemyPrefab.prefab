@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5818194391219280397}
   - component: {fileID: 5891997321289279186}
   m_Layer: 5
-  m_Name: Button
+  m_Name: Character
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -581,8 +581,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 84.5, y: -7.5}
-  m_SizeDelta: {x: 155, y: -17}
+  m_AnchoredPosition: {x: 84.5, y: 0.0000019073486}
+  m_SizeDelta: {x: 155, y: -31.999996}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3339578434246842902
 CanvasRenderer:
@@ -943,11 +943,12 @@ MonoBehaviour:
   resolveBarFill: {fileID: 8825016854489755981}
   hostilityText: {fileID: 5704651871046358289}
   composureText: {fileID: 6302795171995539173}
-  composureImage: {fileID: 0}
+  composureImage: {fileID: 6361171311528156909}
+  enemySprite: {fileID: 5818194391219280397}
   _intentDisplay: {fileID: 6888796589589481908}
   barLerpSpeed: 8
   selectButton: {fileID: 5891997321289279186}
-  selectionHighlight: {fileID: 5818194391219280397}
+  selectionHighlight: {fileID: 3678169182946379061}
   dragDropHighlight: {fileID: 3678169182946379061}
   defeatedOverlay: {fileID: 4275792517163833537}
 --- !u!1 &6645248140901601960
