@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: AudioHit
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Audio.AudioClipData
   _id: 05081215-a38b-4cbb-a5fa-8229b0488901
-  _clip: {fileID: 0}
+  _clipName: AudioHit
+  _clip: {fileID: 8300000, guid: 922a7e9865850034bab3efdc33d0aeeb, type: 3}
   _volume: 1
   _pitch: 1
   _category: 

@@ -879,6 +879,7 @@ MonoBehaviour:
   _startingHandSize: 0
   _cardsPerTurn: 5
   _opponentTurnDelay: 1
+  _perEnemyAttackDelay: 0.5
   _originPassives:
   - {fileID: 11400000, guid: 1c444f8d41faab941946d3b7ac62f5f8, type: 2}
   - {fileID: 11400000, guid: 9fe225578fe293c4ba31c366dd76670b, type: 2}
@@ -1351,6 +1352,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Managers.VFXManager
   _vfxCanvas: {fileID: 1961816019}
+  _vfxPrefab: {fileID: 3840268409752979012}
+  _initialPoolSize: 5
 --- !u!114 &1351107092
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1961,6 +1964,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c34a0954deff0df4e8dd5d91b8de12b7, type: 3}
+--- !u!1 &3840268409752979012 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2203926534931137747, guid: c34a0954deff0df4e8dd5d91b8de12b7, type: 3}
+  m_PrefabInstance: {fileID: 3840268409752979011}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3907894397237959661
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2247,7 +2255,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5159938429348400508, guid: 8fd2e4a762179aa4487070e009ffeec2, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00096152246
+      value: 0.000011062833
       objectReference: {fileID: 0}
     - target: {fileID: 5474083764418676698, guid: 8fd2e4a762179aa4487070e009ffeec2, type: 3}
       propertyPath: m_AnchorMax.x

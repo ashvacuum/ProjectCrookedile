@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Data;
+using Crookedile.Data.VFX;
 
 namespace Crookedile.Data.Cards
 {
@@ -81,6 +82,11 @@ namespace Crookedile.Data.Cards
                  "Example — Lifesteal: Trigger=OnDamageDealt, Condition=Always, " +
                  "Response=HealResolve with AmountSource=LastDamageDealt.")]
         [SerializeField] private List<TriggeredEffect> _triggeredEffects = new List<TriggeredEffect>();
+
+        [Header("VFX")]
+        [Tooltip("VFX played when this card is used. Leave null for no card VFX.\n" +
+                 "Add an 'ApplyEffects' AnimationEvent at the hit frame to resolve damage in sync with the animation.")]
+        [SerializeField] private VFXEvent _cardVFX;
 
         #region Properties
 
@@ -171,6 +177,13 @@ namespace Crookedile.Data.Cards
         /// conditioned on runtime events such as damage dealt, kills, or status applied.
         /// </summary>
         public IReadOnlyList<TriggeredEffect> TriggeredEffects => _triggeredEffects;
+
+        /// <summary>
+        /// VFX played when this card is used. Null means effects resolve immediately (no regression).
+        /// When set, card effects are deferred to the 'ApplyEffects' Animation Event in the clip,
+        /// or to <see cref="Crookedile.UI.VFXAnimatedImage.OnAnimationComplete"/> as a safety net.
+        /// </summary>
+        public VFXEvent CardVFX => _cardVFX;
 
         #endregion
 

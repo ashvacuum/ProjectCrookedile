@@ -14,19 +14,24 @@ namespace Crookedile.Managers
     ///   1. <b>Feel feedbacks</b> — delegates to <see cref="FeedbackManager"/> for shake,
     ///      scale-punch, and tween animations on existing UI elements (RectTransform-aware).
     ///
-    ///   2. <b>Animated Images</b> — spawns pooled UI prefabs (Image + Animator) onto
-    ///      <see cref="_vfxCanvas"/> at the target element's canvas position. Each prefab
-    ///      carries a <see cref="VFXAnimatedImage"/> component that self-deactivates (via
-    ///      AnimationEvent) when its clip ends, returning it to pool automatically.
+    ///   2. <b>Animated Images</b> — spawns pooled instances of a single shared VFX prefab
+    ///      onto <see cref="_vfxCanvas"/> at the target element's canvas position, then plays
+    ///      the Animator state specified by <see cref="VFXEvent.AnimationStateName"/>.
+    ///      Each instance carries a <see cref="VFXAnimatedImage"/> that self-deactivates (via
+    ///      an <c>OnAnimationComplete</c> AnimationEvent on the clip's last frame), returning
+    ///      it to pool automatically.
     ///
     /// Entry points:
     ///   <see cref="Play(VFXEvent, RectTransform)"/>  — UI element target (most common).
     ///   <see cref="Play(VFXEvent, Transform)"/>       — generic Transform (auto-converts if RectTransform).
     ///   <see cref="PlayAtWorld(VFXEvent, Vector3)"/>  — world-space point converted to canvas space.
+    ///   <see cref="PlayAndGetInstance(VFXEvent, RectTransform)"/> — returns spawned VFXAnimatedImage
+    ///      so callers can inject a <see cref="BattleVFXContext"/> for animation-event-driven timing.
     ///
     /// Setup:
     ///   • Add to the persistent Managers GameObject alongside AudioManager.
-    ///   • Assign <see cref="_vfxCanvas"/> to a Screen Space – Overlay canvas that sits above the game canvas.
+    ///   • Assign <see cref="_vfxCanvas"/> to a Screen Space – Overlay canvas above the game canvas.
+    ///   • Assign <see cref="_vfxPrefab"/> to the shared VFX Base prefab (Image + Animator with all clips).
     /// </summary>
     [Debuggable("VFX", LogLevel.Warning)]
     public class VFXManager : Singleton<VFXManager>
@@ -38,17 +43,33 @@ namespace Crookedile.Managers
                  "Must be sorted above the game UI canvas so effects render on top.")]
         [SerializeField] private Canvas _vfxCanvas;
 
+        [Header("VFX Prefab")]
+        [Tooltip("Single shared VFX prefab (Image + Animator) pooled by this manager.\n" +
+                 "The Animator Controller must contain all animation clips; each VFXEvent\n" +
+                 "specifies which state to play by name.")]
+        [SerializeField] private GameObject _vfxPrefab;
+
+        [Header("Pooling")]
+        [Tooltip("Instances to pre-instantiate at startup. " +
+                 "Avoids Instantiate spikes on the first VFX play during gameplay.")]
+        [SerializeField] private int _initialPoolSize = 5;
+
         // ─── Runtime State ────────────────────────────────────────────────────
 
-        /// <summary>Per-prefab object pool. Reuses inactive instances before instantiating new ones.</summary>
-        private readonly Dictionary<GameObject, Queue<GameObject>> _pools
-            = new Dictionary<GameObject, Queue<GameObject>>();
+        /// <summary>Pool of inactive VFX instances. All instances share the same <see cref="_vfxPrefab"/>.</summary>
+        private readonly Queue<GameObject> _pool = new Queue<GameObject>();
 
         // ─── Lifecycle ────────────────────────────────────────────────────────
 
         protected override void OnAwake()
         {
-            // Pool is populated lazily the first time each prefab is requested.
+            if (_vfxPrefab == null) return;
+            for (int i = 0; i < _initialPoolSize; i++)
+            {
+                var instance = Instantiate(_vfxPrefab);
+                instance.SetActive(false);
+                _pool.Enqueue(instance);
+            }
         }
 
         // ─── Public API ───────────────────────────────────────────────────────
@@ -61,8 +82,8 @@ namespace Crookedile.Managers
         {
             if (evt == null) return;
             PlayFeel(evt, target);
-            if (evt.AnimatedPrefab != null)
-                SpawnAnimatedImageAt(evt.AnimatedPrefab, target, evt.Offset);
+            if (!string.IsNullOrEmpty(evt.AnimationStateName))
+                SpawnAnimatedImageAt(evt.AnimationStateName, target, evt.Offset);
         }
 
         /// <summary>
@@ -78,8 +99,8 @@ namespace Crookedile.Managers
 
             // For non-UI transforms: play Feel (no position override) and spawn at canvas center.
             PlayFeel(evt, target);
-            if (evt.AnimatedPrefab != null)
-                SpawnAnimatedImageAt(evt.AnimatedPrefab, null, evt.Offset);
+            if (!string.IsNullOrEmpty(evt.AnimationStateName))
+                SpawnAnimatedImageAt(evt.AnimationStateName, null, evt.Offset);
         }
 
         /// <summary>
@@ -93,8 +114,22 @@ namespace Crookedile.Managers
             if (!string.IsNullOrEmpty(evt.FeedbackId))
                 FeedbackManager.Instance?.Play(evt.FeedbackId);
 
-            if (evt.AnimatedPrefab != null)
-                SpawnAnimatedImageAtWorld(evt.AnimatedPrefab, worldPos, evt.Offset);
+            if (!string.IsNullOrEmpty(evt.AnimationStateName))
+                SpawnAnimatedImageAtWorld(evt.AnimationStateName, worldPos, evt.Offset);
+        }
+
+        /// <summary>
+        /// Plays a VFX event and returns the spawned <see cref="VFXAnimatedImage"/> so the caller
+        /// can inject a <see cref="BattleVFXContext"/> for animation-event-driven effect timing
+        /// (e.g. damage lands at the hit frame rather than immediately on card play).
+        /// Returns null if <paramref name="evt"/> has no <see cref="VFXEvent.AnimationStateName"/>.
+        /// </summary>
+        public VFXAnimatedImage PlayAndGetInstance(VFXEvent evt, RectTransform target)
+        {
+            if (evt == null) return null;
+            PlayFeel(evt, target);
+            if (string.IsNullOrEmpty(evt.AnimationStateName)) return null;
+            return SpawnAnimatedImageAt(evt.AnimationStateName, target, evt.Offset);
         }
 
         // ─── Internal — Feel ──────────────────────────────────────────────────
@@ -112,17 +147,20 @@ namespace Crookedile.Managers
         // ─── Internal — Animated Image Spawn ─────────────────────────────────
 
         /// <summary>
-        /// Spawns an animated UI image instance on the VFX canvas, positioned at the target's canvas location.
+        /// Spawns an animated UI image instance on the VFX canvas, positioned at the target's canvas location,
+        /// and plays the specified Animator state. Returns the spawned <see cref="VFXAnimatedImage"/>, or null.
         /// </summary>
-        private void SpawnAnimatedImageAt(GameObject prefab, RectTransform uiTarget, Vector2 pixelOffset)
+        private VFXAnimatedImage SpawnAnimatedImageAt(string stateName, RectTransform uiTarget, Vector2 pixelOffset)
         {
             if (_vfxCanvas == null)
             {
                 GameLogger.LogWarning("VFX", "VFXManager: _vfxCanvas is not assigned — cannot spawn animated image.");
-                return;
+                return null;
             }
 
-            GameObject instance = GetFromPool(prefab);
+            GameObject instance = GetFromPool();
+            if (instance == null) return null;
+
             instance.transform.SetParent(_vfxCanvas.transform, worldPositionStays: false);
 
             RectTransform rt = instance.GetComponent<RectTransform>();
@@ -146,18 +184,18 @@ namespace Crookedile.Managers
                 rt.anchoredPosition = canvasLocalPos + pixelOffset;
             }
 
-            ActivateInstance(instance, prefab);
+            return ActivateInstance(instance, stateName);
         }
 
         /// <summary>
         /// Spawns an animated image at a world-space position, converting it to canvas space first.
         /// </summary>
-        private void SpawnAnimatedImageAtWorld(GameObject prefab, Vector3 worldPos, Vector2 pixelOffset)
+        private VFXAnimatedImage SpawnAnimatedImageAtWorld(string stateName, Vector3 worldPos, Vector2 pixelOffset)
         {
             if (_vfxCanvas == null)
             {
                 GameLogger.LogWarning("VFX", "VFXManager: _vfxCanvas is not assigned — cannot spawn animated image.");
-                return;
+                return null;
             }
 
             Camera cam = _vfxCanvas.renderMode == RenderMode.ScreenSpaceOverlay
@@ -166,7 +204,9 @@ namespace Crookedile.Managers
 
             Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(cam, worldPos);
 
-            GameObject instance = GetFromPool(prefab);
+            GameObject instance = GetFromPool();
+            if (instance == null) return null;
+
             instance.transform.SetParent(_vfxCanvas.transform, worldPositionStays: false);
 
             RectTransform rt = instance.GetComponent<RectTransform>();
@@ -177,78 +217,80 @@ namespace Crookedile.Managers
                 rt.anchoredPosition = localPos + pixelOffset;
             }
 
-            ActivateInstance(instance, prefab);
+            return ActivateInstance(instance, stateName);
         }
 
         /// <summary>
-        /// Activates a pooled instance and wires pool-return logic.
-        /// Prefers <see cref="VFXAnimatedImage.OnComplete"/> callback (driven by AnimationEvent).
-        /// Falls back to a timed coroutine reading the first clip's length from the Animator.
+        /// Activates a pooled instance, wires the pool-return callback, and plays the named animation state.
+        /// Falls back to a timed coroutine if the instance has no <see cref="VFXAnimatedImage"/> component.
         /// </summary>
-        private void ActivateInstance(GameObject instance, GameObject prefab)
+        private VFXAnimatedImage ActivateInstance(GameObject instance, string stateName)
         {
-            // Wire the self-disabling callback if the prefab has VFXAnimatedImage.
             var controller = instance.GetComponent<VFXAnimatedImage>();
             if (controller != null)
             {
-                controller.OnComplete = () => ReturnToPool(instance, prefab);
+                controller.OnComplete = () => ReturnToPool(instance);
             }
 
             instance.SetActive(true);
 
-            // Fallback: if no VFXAnimatedImage, use clip duration from the Animator.
+            // Play the specific animation state from time 0 (after SetActive so the Animator is awake).
+            controller?.PlayAnimation(stateName);
+
+            // Fallback: if no VFXAnimatedImage, estimate duration from the Animator and use a coroutine.
             if (controller == null)
             {
-                float duration = GetClipDuration(instance.GetComponent<Animator>());
-                StartCoroutine(ReturnAfterDelay(instance, prefab, duration));
+                float duration = GetStateDuration(instance.GetComponent<Animator>(), stateName);
+                StartCoroutine(ReturnAfterDelay(instance, duration));
             }
+
+            return controller;
         }
 
         // ─── Internal — Duration / Pool ───────────────────────────────────────
 
         /// <summary>
-        /// Reads the length of the first animation clip in the Animator's controller.
-        /// Returns 1 second as a safe default if no clip is found.
+        /// Finds the length of the clip matching <paramref name="stateName"/> in the Animator's controller.
+        /// Returns 1 second as a safe default if the clip is not found.
         /// </summary>
-        private static float GetClipDuration(Animator anim)
+        private static float GetStateDuration(Animator anim, string stateName)
         {
             if (anim == null || anim.runtimeAnimatorController == null) return 1f;
-            var clips = anim.runtimeAnimatorController.animationClips;
-            return clips.Length > 0 ? clips[0].length : 1f;
+            foreach (var clip in anim.runtimeAnimatorController.animationClips)
+                if (clip.name == stateName) return clip.length;
+            return 1f;
         }
 
-        private void ReturnToPool(GameObject instance, GameObject prefab)
+        private void ReturnToPool(GameObject instance)
         {
             if (instance == null) return;
             instance.SetActive(false);
-            if (_pools.TryGetValue(prefab, out var queue))
-                queue.Enqueue(instance);
+            _pool.Enqueue(instance);
         }
 
-        private IEnumerator ReturnAfterDelay(GameObject instance, GameObject prefab, float delay)
+        private IEnumerator ReturnAfterDelay(GameObject instance, float delay)
         {
             if (delay > 0f) yield return new WaitForSeconds(delay);
-            ReturnToPool(instance, prefab);
+            ReturnToPool(instance);
         }
 
-        private GameObject GetFromPool(GameObject prefab)
+        private GameObject GetFromPool()
         {
-            if (!_pools.TryGetValue(prefab, out var queue))
+            // Drain stale (destroyed) or already-active entries before returning a candidate.
+            while (_pool.Count > 0)
             {
-                queue = new Queue<GameObject>();
-                _pools[prefab] = queue;
-            }
-
-            // Drain until we find a valid inactive instance.
-            while (queue.Count > 0)
-            {
-                var candidate = queue.Dequeue();
+                var candidate = _pool.Dequeue();
                 if (candidate != null && !candidate.activeSelf)
                     return candidate;
             }
 
-            // Nothing available — instantiate a fresh one.
-            return Instantiate(prefab);
+            // Nothing available — instantiate a fresh instance from the shared prefab.
+            if (_vfxPrefab == null)
+            {
+                GameLogger.LogWarning("VFX", "VFXManager: _vfxPrefab is not assigned — cannot spawn VFX.");
+                return null;
+            }
+            return Instantiate(_vfxPrefab);
         }
     }
 }

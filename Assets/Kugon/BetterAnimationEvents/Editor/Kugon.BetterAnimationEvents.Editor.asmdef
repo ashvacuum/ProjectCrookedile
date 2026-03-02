@@ -1,0 +1,18 @@
+{
+    "name": "Kugon.BetterAnimationEvents.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:9f2db7e48f5dc8f448c94c7057414f10"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

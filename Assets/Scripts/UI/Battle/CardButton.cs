@@ -138,6 +138,13 @@ namespace Crookedile.UI.Battle
         /// <summary>True while a card drag has crossed the upward threshold and targeting mode is active.</summary>
         public static bool IsTargeting { get; private set; }
 
+        /// <summary>
+        /// The RectTransform of the most recently played card. Set just before the play callback
+        /// fires so <c>BattleManager</c> can use it as the VFX spawn origin without the event
+        /// needing to carry UI references.
+        /// </summary>
+        public static RectTransform LastPlayedRect { get; private set; }
+
         /// <summary>Whether this card can currently be played (enough AP).</summary>
         public bool IsPlayable => isPlayable;
 
@@ -396,6 +403,7 @@ namespace Crookedile.UI.Battle
                 else if (!RequiresSpecificTarget())
                 {
                     Debug.Log("[CardButton] AOE/self card — playing on current focus");
+                    LastPlayedRect = GetComponent<RectTransform>();
                     selectFeedback?.PlayFeedbacks();
                     onClickCallback?.Invoke();
                 }
@@ -421,6 +429,7 @@ namespace Crookedile.UI.Battle
         /// <summary>Plays the card after a successful targeting release onto an enemy slot.</summary>
         public void PlayFromDrop()
         {
+            LastPlayedRect = GetComponent<RectTransform>();
             selectFeedback?.PlayFeedbacks();
             onClickCallback?.Invoke();
         }
