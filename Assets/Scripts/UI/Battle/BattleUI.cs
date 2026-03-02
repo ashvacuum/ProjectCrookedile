@@ -355,7 +355,7 @@ namespace Crookedile.UI.Battle
 
                 if (slot != null)
                 {
-                    slot.Initialize(i, battleManager, battleManager.PlayerOrigin);
+                    slot.Initialize(i, battleManager, battleManager.PlayerOrigin, battleManager.Enemies[i].EnemyData);
                     _enemySlots.Add(slot);
                 }
             }
@@ -377,7 +377,7 @@ namespace Crookedile.UI.Battle
 
             if (slot != null)
             {
-                slot.Initialize(index, battleManager, battleManager.PlayerOrigin);
+                slot.Initialize(index, battleManager, battleManager.PlayerOrigin, battleManager.Enemies[index].EnemyData);
                 _enemySlots.Add(slot);
             }
         }

@@ -26,7 +26,7 @@ MonoBehaviour:
         rgba: 4282137660
     useCurveAnimationSpeed: 0
     applyRootMotion: 1
-    autoApplyColor: 1
+    autoApplyColor: 0
     animationSpeedCurve:
       serializedVersion: 2
       m_Curve:
@@ -52,7 +52,7 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   ChannelLayouts: []
-  undoSelected: {fileID: 7400000, guid: 46cc1c354fdf0274687abdba2784b3c1, type: 2}
+  undoSelected: {fileID: 7400000, guid: dc1ddcda289e409ebdd07c024366ba85, type: 2}
   undoMethod:
     ID: 
     Component: {fileID: 0}
