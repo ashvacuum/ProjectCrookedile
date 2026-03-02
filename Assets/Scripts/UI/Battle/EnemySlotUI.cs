@@ -27,16 +27,13 @@ namespace Crookedile.UI.Battle
         [SerializeField] private Image resolveBarFill;
         [SerializeField] private TMP_Text hostilityText;
         [SerializeField] private TMP_Text composureText;
-        [SerializeField] private Image composureImage;
+        [SerializeField] private GameObject composureObject;
         [SerializeField] private Image enemySprite;
         [SerializeField] private EnemyIntentDisplay _intentDisplay;
 
         [Header("HP Bar")]
         [Tooltip("How fast the HP bar lerps toward the target fill. Higher = snappier.")]
         [SerializeField] private float barLerpSpeed = 8f;
-
-        [Header("Interaction")] [SerializeField]
-        private Button selectButton;
 
         [SerializeField] private Image selectionHighlight;
         [SerializeField] private Image dragDropHighlight;
@@ -72,8 +69,6 @@ namespace Crookedile.UI.Battle
             _battleManager = manager;
             _playerOrigin = playerOrigin;
 
-            // Click-to-focus removed; focus is now set implicitly by drag-to-enemy
-            if (selectButton != null) selectButton.interactable = false;
             if (defeatedOverlay != null) defeatedOverlay.SetActive(false);
             if (selectionHighlight != null) selectionHighlight.enabled = false;
             if (dragDropHighlight != null) dragDropHighlight.enabled = false;
@@ -112,8 +107,8 @@ namespace Crookedile.UI.Battle
             if(composureText != null)
                 composureText.SetText(enemy.Stats.CurrentComposure > 0 ? $"{enemy.Stats.CurrentComposure}" : string.Empty);
             
-            if(composureImage != null)
-                composureImage.gameObject.SetActive(enemy.Stats.CurrentComposure > 0);
+            if(composureObject != null)
+                composureObject.SetActive(enemy.Stats.CurrentComposure > 0);
 
             if (hostilityText == null) return;
             var showExact = _playerOrigin == OriginType.Actor;
@@ -164,11 +159,10 @@ namespace Crookedile.UI.Battle
             if (resolveText    != null) resolveText.gameObject.SetActive(false);
             if (hostilityText  != null) hostilityText.gameObject.SetActive(false);
             if (composureText  != null) composureText.gameObject.SetActive(false);
-            if (composureImage != null) composureImage.gameObject.SetActive(false);
+            if (composureObject != null) composureObject.SetActive(false);
             if (_intentDisplay != null) _intentDisplay.gameObject.SetActive(false);
             if (selectionHighlight != null) selectionHighlight.enabled = false;
             if (dragDropHighlight  != null) dragDropHighlight.enabled  = false;
-            if (selectButton       != null) selectButton.interactable  = false;
 
             // Show defeated state
             if (defeatedOverlay != null) defeatedOverlay.SetActive(true);
