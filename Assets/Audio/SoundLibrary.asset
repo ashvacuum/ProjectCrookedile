@@ -13,4 +13,11 @@ MonoBehaviour:
   m_Name: SoundLibrary
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Audio.SoundLibrary
   _items:
-  - {fileID: 11400000, guid: 8067ea29cfbe1e9458109c010a9a92ef, type: 2}
+  - {fileID: 11400000, guid: f8503e1680f946242a582b49058282a1, type: 2}
+  - {fileID: 11400000, guid: e3b5108b24c647b4eadb37f1f086b997, type: 2}
+  - {fileID: 11400000, guid: 8139e846c1b82e445bc1e4cb54647053, type: 2}
+  - {fileID: 11400000, guid: a83578252a8c41c4db54b35e825a5e2e, type: 2}
+  - {fileID: 11400000, guid: f07e0f9c1a3d55949b74a9ec81a61404, type: 2}
+  - {fileID: 11400000, guid: 091ba13dd52ef184a9ec6481ae932f0d, type: 2}
+  - {fileID: 11400000, guid: f68533ef1295d9f43a4f59910e30149f, type: 2}
+  - {fileID: 11400000, guid: 088106b2264032347bc75799dafc1d92, type: 2}

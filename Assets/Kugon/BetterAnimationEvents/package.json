@@ -1,0 +1,19 @@
+{
+  "name": "com.kugon.betteranimationevents",
+  "version": "1.0.0",
+  "displayName": "Better Animation Events",
+  "description": "This is a high-performance tool for editing Animation Events, designed for speed, scalability, and flexibility\n\nGetting Started\n\r\n1. Open the Editor:\n    - Window \u2192 Animation \u2192 Animation Event\r\n    - Select Animator\r\n    - Select the AnimationClip you want to edit.\r\n2. Timeline Overview:\n    - The main timeline works like Unity\u2019s native Animation window.\r\n    - Frames are displayed horizontally; channels (event layers) are vertical.\r\n3. Navigating:\n    - Zoom: Scroll the mouse wheel over the timeline to zoom in/out.\r\n    - Pan: Middle-click and drag to move the timeline horizontally.\r\n    - Snap: Events snap to frames by default for precision.\r\n    - Fit to Screen (F):\n        - Press F to automatically fit the entire animation clip to the visible timeline.\r\n        - If events are selected, pressing F will zoom to fit only the selected events, making them easier to edit.\r\n    - Locate AnimationClip in Project:\n        - Click the O-shaped icon next to the AnimationClip name to instantly highlight the clip in your Project folder.",
+  "documentationUrl": "https://cliff-wineberry-c8f.notion.site/Documentation-256761a76509808c95d5d8dccb779d69?source=copy_link",
+  "changelogUrl": "https://cliff-wineberry-c8f.notion.site/Changelog-256761a7650980799147f2fbe2da4aa2?source=copy_link",
+  "licensesUrl": "https://cliff-wineberry-c8f.notion.site/Licenses-256761a7650980e39970f524493471fe?source=copy_link",
+  "keywords": [
+    "Animation",
+    "Event",
+    "Animation Event"
+  ],
+  "author": {
+    "name": "Kugon",
+    "email": "kugonus02@gmail.com",
+    "url": ""
+  }
+}

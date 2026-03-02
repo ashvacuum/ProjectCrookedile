@@ -6,6 +6,10 @@ using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
+using Crookedile.Data.VFX;
+using Crookedile.Managers;
+using Crookedile.UI;
+using Crookedile.UI.Battle;
 using Crookedile.Utilities;
 
 namespace Crookedile.Gameplay.Battle
@@ -61,6 +65,9 @@ namespace Crookedile.Gameplay.Battle
 
         // Battle result
         private BattleResult _battleResult;
+
+        // VFX — true while a card's VFX animation is in flight; blocks card plays and End Turn
+        private bool _vfxInFlight;
 
         #region Properties
 
@@ -244,6 +251,7 @@ namespace Crookedile.Gameplay.Battle
 
         private void OnEndTurnRequested(EndTurnRequestedEvent evt)
         {
+            if (_vfxInFlight) return;
             if (!_isPlayerTurn || CurrentState != BattleState.PlayerTurn)
             {
                 GameLogger.LogWarning<BattleManager>("Cannot end player turn — not player's turn!");
@@ -254,12 +262,13 @@ namespace Crookedile.Gameplay.Battle
 
         private void OnPlayCardRequested(PlayCardRequestedEvent evt)
         {
+            if (_vfxInFlight) return;
             if (!_isPlayerTurn || CurrentState != BattleState.PlayerTurn)
             {
                 GameLogger.LogWarning<BattleManager>("Cannot play card — not player's turn!");
                 return;
             }
-            PlayCard(evt.Card, evt.HandIndex, isPlayer: true);
+            PlayCard(evt.Card, evt.HandIndex, CardButton.LastPlayedRect);
         }
 
         #endregion
@@ -267,9 +276,9 @@ namespace Crookedile.Gameplay.Battle
         #region Card Playing
 
         /// <summary>Plays a card from the player's hand.</summary>
-        private void PlayCard(CardData card, int handIndex, bool isPlayer)
+        /// <param name="sourceRect">The card button's RectTransform — used as the VFX spawn origin.</param>
+        private void PlayCard(CardData card, int handIndex, RectTransform sourceRect)
         {
-            // Only the player plays cards; enemies use scripted moves via EnemyController
             BattleStats stats = _playerStats;
 
             if (!CanPlayCard(card, stats))
@@ -293,8 +302,44 @@ namespace Crookedile.Gameplay.Battle
             ShiftConfusedOverridesAfterPlay(handIndex);
 
             EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
-            _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides: amountOverrides);
             // PassiveResolver listens to CardPlayedEvent via EventBus — no direct call needed
+
+            if (card.CardVFX != null)
+            {
+                // VFX path: spawn the animation and defer effect resolution to the hit-frame event.
+                _vfxInFlight = true;
+                VFXAnimatedImage vfx = VFXManager.Instance?.PlayAndGetInstance(card.CardVFX, sourceRect);
+                if (vfx != null)
+                {
+                    vfx.SetBattleContext(new BattleVFXContext
+                    {
+                        OnApplyEffects = () => ApplyCardEffects(card, amountOverrides),
+                        OnComplete     = () => _vfxInFlight = false
+                    });
+                }
+                else
+                {
+                    // VFX spawn failed — resolve immediately so the card isn't lost.
+                    _vfxInFlight = false;
+                    ApplyCardEffects(card, amountOverrides);
+                }
+            }
+            else
+            {
+                // No VFX — resolve effects immediately (backwards-compatible behaviour).
+                ApplyCardEffects(card, amountOverrides);
+            }
+
+            GameLogger.LogInfo<BattleManager>($"Player played: {card.CardName}");
+        }
+
+        /// <summary>
+        /// Resolves all gameplay effects for a played card — damage, policy shifts, Momentum, Echo.
+        /// Called either immediately (no VFX) or from the VFX animation's ApplyEffects event (with VFX).
+        /// </summary>
+        private void ApplyCardEffects(CardData card, int[] amountOverrides)
+        {
+            _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides: amountOverrides);
             ApplyPolicyHostilityShifts(card);
             CheckAndAdvanceFocusAfterCardPlay();
             TriggerMomentum();
@@ -309,8 +354,6 @@ namespace Crookedile.Gameplay.Battle
                 _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides: null);
                 CheckAndAdvanceFocusAfterCardPlay();
             }
-
-            GameLogger.LogInfo<BattleManager>($"Player played: {card.CardName}");
         }
 
         private bool CanPlayCard(CardData card, BattleStats stats)

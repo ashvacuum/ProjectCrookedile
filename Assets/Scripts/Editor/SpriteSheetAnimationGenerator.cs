@@ -391,6 +391,10 @@ namespace Crookedile.Editor
             EditorUtility.SetDirty(controller);
             AssetDatabase.SaveAssets();
 
+            // Keep the VFXAnimationState enum in sync so the new state is immediately
+            // available as a dropdown in VFXEvent assets without a manual regeneration step.
+            VFXAnimationEnumGenerator.Regenerate();
+
             Debug.Log($"[AnimGen] Registered state '{stateName}' in {VFX_CONTROLLER_PATH}");
         }
 

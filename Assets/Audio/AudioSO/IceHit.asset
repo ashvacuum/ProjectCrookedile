@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7446ea84aa896548ace896f45da685b, type: 3}
+  m_Name: IceHit
+  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Audio.AudioClipData
+  _id: ab2ca5ad-6965-4730-a841-16e8b009a30a
+  _clipName: IceHit
+  _clip: {fileID: 8300000, guid: c8392a62bade4f041b5fc2f7e5cdb8ad, type: 3}
+  _volume: 1
+  _pitch: 1
+  _category: 

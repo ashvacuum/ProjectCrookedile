@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 17aa7c8f656c7aa48b9766a5dabb1e9e
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329232
+  packageName: Better Animation Events
+  packageVersion: 1.19
+  assetPath: Assets/Kugon/BetterAnimationEvents/Editor/Kugon.BetterAnimationEvents.Editor.asmdef
+  uploadId: 854932

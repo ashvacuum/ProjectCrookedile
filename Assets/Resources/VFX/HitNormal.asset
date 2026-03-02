@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0d91c4a10bf535c44ac99fad46b2cef1, type: 3}
-  m_Name: NewVFXEvent
+  m_Name: HitNormal
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.VFX.VFXEvent
-  _feedbackId: 
-  _particlePrefab: {fileID: 0}
-  _offset: {x: 0, y: 0, z: 0}
+  _feedbackId: HitNormal
+  _animationState: 8
+  _offset: {x: 0, y: 0}

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ef81749f82f4d2c4980d0e672962057f
+PackageManifestImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329232
+  packageName: Better Animation Events
+  packageVersion: 1.19
+  assetPath: Assets/Kugon/BetterAnimationEvents/package.json
+  uploadId: 854932
