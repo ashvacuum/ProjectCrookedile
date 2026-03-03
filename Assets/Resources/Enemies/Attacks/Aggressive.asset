@@ -48,5 +48,6 @@ MonoBehaviour:
     _statusStacks: 2
     _statusDuration: 0
     _amountSource: 0
+  _moveVFX: {fileID: 11400000, guid: c30a0880977bcf848bcee8173deef6e8, type: 2}
   _minionToSummon: {fileID: 0}
   _minionCount: 1

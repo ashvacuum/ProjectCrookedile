@@ -76,6 +76,7 @@ namespace Crookedile.UI.Battle
 
             _intentDisplay?.ShowIntent(null); // hidden until intent is declared
 
+            _statusEffectPanel?.Clear(); // reset any icons left over from a previously pooled slot
             Refresh();
 
             // Snap bar to full on spawn — no lerp animation on first appearance
