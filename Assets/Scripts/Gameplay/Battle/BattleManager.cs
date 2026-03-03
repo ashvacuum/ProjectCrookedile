@@ -762,7 +762,7 @@ namespace Crookedile.Gameplay.Battle
                     if (enemy.IsDefeated || enemy.CurrentIntent == null) continue;
 
                     // Signal the UI: this enemy is about to act (shake + highlight intent panel)
-                    EventBus.Publish(new EnemyActingEvent { EnemyIndex = i });
+                    EventBus.Publish(new EnemyActingEvent { EnemyIndex = i, Move = enemy.CurrentIntent });
 
                     // Brief pause so the player sees the signal before damage lands
                     yield return new WaitForSeconds(_manager._perEnemyAttackDelay);

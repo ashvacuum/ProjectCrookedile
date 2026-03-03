@@ -120,6 +120,93 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &1074163038927188530
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1624491701605836522}
+  - component: {fileID: 3558622356627339857}
+  - component: {fileID: 2025183054822338141}
+  - component: {fileID: 1536427791691868524}
+  m_Layer: 5
+  m_Name: Hostility (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1624491701605836522
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074163038927188530}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1557616992328502191}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: -75}
+  m_SizeDelta: {x: 200, y: 25}
+  m_Pivot: {x: 0.5, y: 0}
+--- !u!222 &3558622356627339857
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074163038927188530}
+  m_CullTransparentMesh: 1
+--- !u!114 &2025183054822338141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074163038927188530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 1
+  m_Spacing: 5
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
+--- !u!114 &1536427791691868524
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074163038927188530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ab2bfac1a548b74f97abbfaf99bdf5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.StatusEffectPanelUI
+  _iconMap: {fileID: 0}
+  _iconPrefab: {fileID: 8550396782278976253, guid: 0d37b3ae6ab682c41a72d91daa47d3b0, type: 3}
+  _container: {fileID: 1624491701605836522}
 --- !u!1 &1110113178335294695
 GameObject:
   m_ObjectHideFlags: 0
@@ -747,6 +834,7 @@ RectTransform:
   - {fileID: 8607595274209748900}
   - {fileID: 7292584140289947529}
   - {fileID: 3339867592139548573}
+  - {fileID: 1624491701605836522}
   - {fileID: 6073185930629007656}
   - {fileID: 7775267353813513133}
   - {fileID: 2607283970205689482}
@@ -777,6 +865,7 @@ MonoBehaviour:
   composureObject: {fileID: 4380771465406978076}
   enemySprite: {fileID: 5818194391219280397}
   _intentDisplay: {fileID: 6888796589589481908}
+  _statusEffectPanel: {fileID: 0}
   barLerpSpeed: 8
   selectionHighlight: {fileID: 3678169182946379061}
   dragDropHighlight: {fileID: 3678169182946379061}

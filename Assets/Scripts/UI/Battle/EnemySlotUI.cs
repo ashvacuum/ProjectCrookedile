@@ -30,6 +30,7 @@ namespace Crookedile.UI.Battle
         [SerializeField] private GameObject composureObject;
         [SerializeField] private Image enemySprite;
         [SerializeField] private EnemyIntentDisplay _intentDisplay;
+        [SerializeField] private StatusEffectPanelUI _statusEffectPanel;
 
         [Header("HP Bar")]
         [Tooltip("How fast the HP bar lerps toward the target fill. Higher = snappier.")]
@@ -125,6 +126,10 @@ namespace Crookedile.UI.Battle
             hostilityText.color = h < 0 ? new Color(0.2f, 0.8f, 0.2f) // green  = receptive
                 : h > 0 ? new Color(0.8f, 0.2f, 0.2f) // red    = hostile
                 : Color.white; // white  = neutral
+
+            // Buff/debuff icons
+            var effects = _battleManager?.Enemies[_enemyIndex]?.StatusEffects;
+            if (effects != null) _statusEffectPanel?.Refresh(effects);
         }
 
         /// <summary>
