@@ -1328,7 +1328,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Managers.VFXManager
   _vfxCanvas: {fileID: 1961816019}
-  _vfxPrefab: {fileID: 0}
+  _vfxPrefab: {fileID: 2203926534931137747, guid: c34a0954deff0df4e8dd5d91b8de12b7, type: 3}
   _initialPoolSize: 5
 --- !u!114 &1351107092
 MonoBehaviour:
@@ -1469,6 +1469,7 @@ RectTransform:
   - {fileID: 2137863399}
   - {fileID: 170161651}
   - {fileID: 398085186}
+  - {fileID: 6430115861513654553}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2276,6 +2277,112 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8fd2e4a762179aa4487070e009ffeec2, type: 3}
+--- !u!1001 &6430115861513654552
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1961816016}
+    m_Modifications:
+    - target: {fileID: 3586976291875323377, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_Name
+      value: Panel
+      objectReference: {fileID: 0}
+    - target: {fileID: 4344233920513926587, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: _canvas
+      value: 
+      objectReference: {fileID: 1961816019}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_Pivot.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+--- !u!224 &6430115861513654553 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8438644318422970726, guid: 020724e1e9b083e4891265afff5f8034, type: 3}
+  m_PrefabInstance: {fileID: 6430115861513654552}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &7925704348922541647 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 219402514322184016, guid: 273ae325d52ff8b498aeb86a50c93051, type: 3}
@@ -2448,6 +2555,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1961816016}
     m_Modifications:
+    - target: {fileID: 232680388058893544, guid: 273ae325d52ff8b498aeb86a50c93051, type: 3}
+      propertyPath: _iconMap
+      value: 
+      objectReference: {fileID: 11400000, guid: bdd496b695a5d36468f769b25dd3f0f2, type: 2}
     - target: {fileID: 2173959488089690362, guid: 273ae325d52ff8b498aeb86a50c93051, type: 3}
       propertyPath: m_SizeDelta.x
       value: 150

@@ -67,3 +67,4 @@ MonoBehaviour:
   _isUnlockable: 0
   _policyLean: 3
   _triggeredEffects: []
+  _cardVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}

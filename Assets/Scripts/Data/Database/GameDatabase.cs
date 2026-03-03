@@ -20,7 +20,10 @@ namespace Crookedile.Data.Database
 
         protected virtual void Initialize()
         {
-            if (_isInitialized) return;
+            // Guard against both the normal "already done" case AND the edge case where
+            // _isInitialized is true but _itemDictionary was cleared by a domain reload
+            // (non-serialized fields are reset between Editor play sessions).
+            if (_isInitialized && _itemDictionary != null) return;
 
             _itemDictionary = new Dictionary<string, T>();
 
@@ -43,8 +46,9 @@ namespace Crookedile.Data.Database
 
         public virtual T GetByID(string id)
         {
-            if (!_isInitialized) Initialize();
+            if (!_isInitialized || _itemDictionary == null) Initialize();
 
+            if (_itemDictionary == null) return null;
             if (_itemDictionary.TryGetValue(id, out T item))
             {
                 return item;
@@ -60,8 +64,8 @@ namespace Crookedile.Data.Database
 
         public virtual bool Contains(string id)
         {
-            if (!_isInitialized) Initialize();
-            return _itemDictionary.ContainsKey(id);
+            if (!_isInitialized || _itemDictionary == null) Initialize();
+            return _itemDictionary != null && _itemDictionary.ContainsKey(id);
         }
 
         public virtual List<T> FindAll(System.Predicate<T> predicate)

@@ -773,7 +773,8 @@ namespace Crookedile.Gameplay.Battle
                     // Temporarily point EffectResolver at this enemy as the caster
                     _manager._effectResolver.SetFocusedOpponent(
                         enemy.Stats, enemy.StatusEffects, i, enemy.EnemyData.EnemyName);
-                    _manager._effectResolver.ResolveEnemyMoveEffects(enemy.CurrentIntent);
+                    yield return _manager.StartCoroutine(
+                        _manager._effectResolver.ResolveEnemyMoveEffects(enemy.CurrentIntent));
 
                     // Handle SummonMinion moves after normal effects resolve
                     if (enemy.CurrentIntent.MoveType == EnemyMoveType.SummonMinion &&

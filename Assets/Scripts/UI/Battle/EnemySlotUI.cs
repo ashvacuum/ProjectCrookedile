@@ -142,7 +142,8 @@ namespace Crookedile.UI.Battle
             var statusEffects = (_battleManager != null && _enemyIndex < _battleManager.Enemies.Count)
                 ? _battleManager.Enemies[_enemyIndex].StatusEffects
                 : null;
-            _intentDisplay?.ShowIntent(move, statusEffects);
+            var targetStatus = _battleManager?.PlayerStatusEffects;
+            _intentDisplay?.ShowIntent(move, statusEffects, targetStatus);
         }
 
         /// <summary>

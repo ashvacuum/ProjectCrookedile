@@ -170,18 +170,33 @@ namespace Crookedile.Managers
 
                 if (uiTarget != null)
                 {
-                    // Convert the target's world position → screen space → VFX canvas local space.
-                    // Using null camera for Screen Space – Overlay; the canvas's worldCamera otherwise.
-                    Camera cam = _vfxCanvas.renderMode == RenderMode.ScreenSpaceOverlay
+                    // Use the SOURCE element's root canvas camera for WorldToScreenPoint.
+                    // The game canvas and VFX canvas can have different render modes/cameras
+                    // (e.g. game canvas = Screen Space – Camera, VFX canvas = Screen Space – Overlay),
+                    // so using the VFX canvas camera here would give wrong screen coordinates.
+                    Canvas sourceCanvas = uiTarget.GetComponentInParent<Canvas>();
+                    if (sourceCanvas != null) sourceCanvas = sourceCanvas.rootCanvas;
+                    Camera sourceCam = (sourceCanvas != null
+                                       && sourceCanvas.renderMode == RenderMode.ScreenSpaceCamera)
+                        ? sourceCanvas.worldCamera
+                        : null;
+
+                    // VFX canvas camera is only needed for ScreenPointToLocalPointInRectangle.
+                    Camera vfxCam = _vfxCanvas.renderMode == RenderMode.ScreenSpaceOverlay
                         ? null
                         : _vfxCanvas.worldCamera;
 
-                    Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(cam, uiTarget.position);
+                    Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(sourceCam, uiTarget.position);
                     RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                        (RectTransform)_vfxCanvas.transform, screenPos, cam, out canvasLocalPos);
+                        (RectTransform)_vfxCanvas.transform, screenPos, vfxCam, out canvasLocalPos);
                 }
 
-                rt.anchoredPosition = canvasLocalPos + pixelOffset;
+                // Use localPosition rather than anchoredPosition — anchoredPosition depends on
+                // the prefab's anchor setup and will be offset when the anchor is not (0.5, 0.5).
+                // localPosition is always relative to the parent's pivot, matching the output of
+                // ScreenPointToLocalPointInRectangle which returns a point in parent local space.
+                rt.localPosition = new Vector3(canvasLocalPos.x + pixelOffset.x,
+                                               canvasLocalPos.y + pixelOffset.y, 0f);
             }
 
             return ActivateInstance(instance, stateName);

@@ -268,6 +268,35 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
+        /// Preview version of ModifyDamageDealt — applies Strength/Weakened/Exposed math
+        /// WITHOUT consuming Exposed. Safe to call repeatedly for UI display.
+        /// </summary>
+        public int PreviewDamageDealt(int baseDamage)
+        {
+            int final = baseDamage;
+            final += GetStacks(StatusEffectType.Strength);
+            final -= GetStacks(StatusEffectType.Weakened);
+            if (HasEffect(StatusEffectType.Exposed))
+                final *= 2;                     // show doubled — Exposed will fire on the actual hit
+            return Mathf.Max(0, final);
+        }
+
+        /// <summary>
+        /// Preview version of ModifyDamageTaken — applies Vulnerable/Plated/Intangible math
+        /// WITHOUT consuming Intangible stacks or triggering Thorns. Safe to call for UI display.
+        /// </summary>
+        public int PreviewDamageTaken(int incomingDamage)
+        {
+            float final = incomingDamage;
+            if (HasEffect(StatusEffectType.Vulnerable))
+                final *= 1.5f;
+            final -= GetStacks(StatusEffectType.Plated);
+            if (HasEffect(StatusEffectType.Intangible))
+                final = 1;                      // show 1 — Intangible stack consumed on actual hit
+            return Mathf.Max(0, Mathf.RoundToInt(final));
+        }
+
+        /// <summary>
         /// Modifies Composure gained based on active effects.
         /// </summary>
         public int ModifyComposureGained(int baseComposure)

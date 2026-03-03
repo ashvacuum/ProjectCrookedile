@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Crookedile.Core;
@@ -150,20 +151,35 @@ namespace Crookedile.Gameplay.Battle
         };
 
         /// <summary>
-        /// Resolves all effects from a scripted enemy move.
+        /// Delay (in seconds) yielded between each effect in a multi-effect enemy move,
+        /// so that floating damage texts appear sequentially rather than all at once.
+        /// Configurable from BattleManager (or set directly).
+        /// </summary>
+        public float EffectStepDelay = 0.15f;
+
+        /// <summary>
+        /// Resolves all effects from a scripted enemy move sequentially, yielding
+        /// <see cref="EffectStepDelay"/> seconds between each effect so that visual
+        /// feedback (floating numbers, VFX) appears one at a time.
+        ///
+        /// Returns an IEnumerator — must be run via MonoBehaviour.StartCoroutine.
         /// Uses the same CardEffect pipeline as player cards with isPlayerCard=false
         /// (enemy is caster, player is the default target).
         /// CardManipulation effects are silently skipped — enemies have no deck.
         /// </summary>
-        public void ResolveEnemyMoveEffects(EnemyMoveData move)
+        public IEnumerator ResolveEnemyMoveEffects(EnemyMoveData move)
         {
-            if (move == null) return;
+            if (move == null) yield break;
 
             GameLogger.LogInfo<EffectResolver>($"Resolving enemy move: {move.MoveName}");
 
-            foreach (CardEffect effect in move.Effects)
+            var effects = move.Effects;
+            for (int i = 0; i < effects.Count; i++)
             {
-                ResolveBattleEffect(effect, isPlayerCard: false);
+                ResolveBattleEffect(effects[i], isPlayerCard: false);
+                // Pause between effects (not after the last one)
+                if (i < effects.Count - 1)
+                    yield return new WaitForSeconds(EffectStepDelay);
             }
         }
 
