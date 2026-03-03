@@ -14,59 +14,59 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Battle.StatusEffectIconMapSO
   _entries:
   - type: 0
-    icon: {fileID: 0}
+    icon: {fileID: 648246831, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
   - type: 1
-    icon: {fileID: 0}
+    icon: {fileID: -928613997, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
   - type: 2
-    icon: {fileID: 0}
+    icon: {fileID: -949628480, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
   - type: 3
-    icon: {fileID: 0}
+    icon: {fileID: -1455384912, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
   - type: 4
-    icon: {fileID: 0}
+    icon: {fileID: -2141919793, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
   - type: 5
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: -529419605, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 6
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: 2099413619, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 7
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: 893964791, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 8
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: 1790912913747163299, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 9
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: -237358296, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 10
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: -638447516, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 11
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: -371255345, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 12
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: 113071119, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 13
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: 610889023, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 14
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: -1700718424, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 15
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: -919203351, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 16
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: -1750313214, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 17
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: 1661807162, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
   - type: 18
-    icon: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    icon: {fileID: -605739430, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}

@@ -17,8 +17,8 @@ MonoBehaviour:
   _nepoBabyCardBack: {fileID: 21300000, guid: 9bb65edd49322274c8bb670f251bf5c4, type: 3}
   _actorCardBack: {fileID: 21300000, guid: 60e08d6205752cd4d80e7ea0d06e7f1f, type: 3}
   _pressureFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
-  _rhetoricFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
-  _policyFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
+  _rhetoricFrame: {fileID: 21300000, guid: dc67360bcc0d7cb408982a16417918a0, type: 3}
+  _policyFrame: {fileID: 21300000, guid: 25322d8af2aefbf47b6829c9b7d7bdf2, type: 3}
   _basicFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
   _enhancedFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
   _rareFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}

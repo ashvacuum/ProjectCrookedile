@@ -41,6 +41,11 @@ namespace Crookedile.UI.Battle
         public void Refresh(StatusEffectManager effects)
         {
             if (effects == null) return;
+            if (_iconMap == null)
+            {
+                Debug.LogWarning($"[StatusEffectPanelUI] _iconMap is not assigned on {gameObject.name} — assign a StatusEffectIconMapSO in the Inspector.", this);
+                return;
+            }
 
             // Track which types are still active so we can remove expired ones afterwards.
             var seen = new HashSet<StatusEffectType>();

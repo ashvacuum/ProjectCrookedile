@@ -256,11 +256,23 @@ namespace Crookedile.Gameplay.Battle
                     break;
 
                 case TargetType.Random:
-                    // Single coin-flip for both stats AND status mgr (fixes original double-roll bug)
-                    if (UnityEngine.Random.value > 0.5f)
-                        pairs.Add((casterStats, casterStatusMgr));
+                    if (isPlayerCard)
+                    {
+                        // Player cards: pick a random living enemy — never the player themselves.
+                        if (_allEnemies != null)
+                        {
+                            var living = new List<(BattleStats, StatusEffectManager)>();
+                            foreach (var e in _allEnemies)
+                                if (!e.IsDefeated) living.Add((e.Stats, e.StatusEffects));
+                            if (living.Count > 0)
+                                pairs.Add(living[UnityEngine.Random.Range(0, living.Count)]);
+                        }
+                    }
                     else
+                    {
+                        // Enemy cards: target the player.
                         pairs.Add((targetStats, targetStatusMgr));
+                    }
                     break;
 
                 case TargetType.All:

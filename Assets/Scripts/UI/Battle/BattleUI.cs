@@ -38,13 +38,6 @@ namespace Crookedile.UI.Battle
         [Tooltip("Victory / defeat result panels.")]
         [SerializeField] private BattleResultPanel resultPanel;
 
-        // ── Player Stats ──────────────────────────────────────────────────────
-        [Header("Player Stats")]
-        [SerializeField] private TMP_Text playerResolveText;
-        [SerializeField] private TMP_Text playerComposureText;
-        [SerializeField] private TMP_Text playerHostilityText;
-        [SerializeField] private TMP_Text playerAPText;
-
         // ── Enemy Slots ───────────────────────────────────────────────────────
         [Header("Enemy Slots")]
         [Tooltip("Parent transform that enemy slot panels are spawned into.")]
@@ -73,6 +66,10 @@ namespace Crookedile.UI.Battle
         [Header("Battle Info")]
         [SerializeField] private TMP_Text turnNumberText;
         [SerializeField] private TMP_Text phaseText;
+        [Tooltip("Seconds the turn/phase label stays fully visible before fading.")]
+        [SerializeField] private float _battleInfoHoldTime = 1.5f;
+        [Tooltip("Seconds the fade-out takes after the hold delay.")]
+        [SerializeField] private float _battleInfoFadeTime = 0.5f;
 
         // ── Controls ──────────────────────────────────────────────────────────
         [Header("Controls")]
@@ -108,6 +105,8 @@ namespace Crookedile.UI.Battle
         private BattleResult                _lastBattleResult;
         private List<EnemySlotUI>           _enemySlots = new List<EnemySlotUI>();
         private CardChoiceRequestedEvent    _pendingCardChoice;
+        private bool                        _handRefreshPending;
+        private Coroutine                   _battleInfoFade;
 
         #region Initialization
 
@@ -142,6 +141,8 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<ComposureChangedEvent>(OnComposureChanged);
             EventBus.Subscribe<DamageDealtEvent>(OnDamageDealt);
             EventBus.Subscribe<EnemyActingEvent>(OnEnemyActing);
+            EventBus.Subscribe<CardDrawnEvent>(OnCardDrawn);
+            EventBus.Subscribe<StatusEffectAppliedEvent>(OnStatusEffectApplied);
         }
 
         private void UnsubscribeFromEvents()
@@ -160,6 +161,8 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<ComposureChangedEvent>(OnComposureChanged);
             EventBus.Unsubscribe<DamageDealtEvent>(OnDamageDealt);
             EventBus.Unsubscribe<EnemyActingEvent>(OnEnemyActing);
+            EventBus.Unsubscribe<CardDrawnEvent>(OnCardDrawn);
+            EventBus.Unsubscribe<StatusEffectAppliedEvent>(OnStatusEffectApplied);
         }
 
         /// <summary>
@@ -228,6 +231,21 @@ namespace Crookedile.UI.Battle
             handPanel?.RefreshNormalHand(battleManager, OnCardButtonClicked);
         }
 
+        private void OnCardDrawn(CardDrawnEvent evt)
+        {
+            if (!evt.IsPlayer) return;          // enemy draws don't affect the player's hand panel
+            if (_handRefreshPending) return;    // already waiting — batch multiple draws into one rebuild
+            _handRefreshPending = true;
+            StartCoroutine(RefreshHandNextFrame());
+        }
+
+        private IEnumerator RefreshHandNextFrame()
+        {
+            yield return null;  // wait one frame so all draw events from one effect batch together
+            _handRefreshPending = false;
+            handPanel?.RefreshNormalHand(battleManager, OnCardButtonClicked);
+        }
+
         private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
         {
             if (evt.Move != null)
@@ -280,8 +298,9 @@ namespace Crookedile.UI.Battle
             _fsm?.ChangeState(BattleUIState.WaitingForCardChoice);
         }
 
-        private void OnResolveChanged(ResolveChangedEvent evt)    => UpdateStatsDisplay();
-        private void OnComposureChanged(ComposureChangedEvent evt) => UpdateStatsDisplay();
+        private void OnResolveChanged(ResolveChangedEvent evt)         => UpdateStatsDisplay();
+        private void OnComposureChanged(ComposureChangedEvent evt)      => UpdateStatsDisplay();
+        private void OnStatusEffectApplied(StatusEffectAppliedEvent evt) => UpdateStatsDisplay();
 
         private void OnDamageDealt(DamageDealtEvent evt)
         {
@@ -303,13 +322,6 @@ namespace Crookedile.UI.Battle
         internal void UpdateStatsDisplay()
         {
             if (battleManager == null) return;
-
-            var playerStats = battleManager.PlayerStats;
-            if (playerStats == null) return;
-
-            if (playerResolveText  != null) playerResolveText.text  = $"Resolve: {playerStats.CurrentResolve}/{playerStats.MaxResolve}";
-            if (playerComposureText != null) playerComposureText.text = $"Composure: {playerStats.CurrentComposure}";
-            if (playerAPText       != null) playerAPText.text       = $"AP: {playerStats.CurrentActionPoints}/{playerStats.MaxActionPoints}";
 
             _playerSlotUI?.Refresh();
 
@@ -335,13 +347,40 @@ namespace Crookedile.UI.Battle
             if (battleManager == null) return;
 
             if (turnNumberText != null)
-                turnNumberText.text = $"Turn: {battleManager.CurrentTurn}";
+            {
+                turnNumberText.text  = $"Turn: {battleManager.CurrentTurn}";
+                turnNumberText.alpha = 1f;
+            }
 
             if (phaseText != null)
             {
                 string turnOwner = battleManager.IsPlayerTurn ? "Player" : "Opponent";
-                phaseText.text = $"{battleManager.CurrentState} ({turnOwner})";
+                phaseText.text  = $"{battleManager.CurrentState} ({turnOwner})";
+                phaseText.alpha = 1f;
             }
+
+            // Restart the fade — cancel any in-progress fade so the text shows fully first.
+            if (_battleInfoFade != null) StopCoroutine(_battleInfoFade);
+            _battleInfoFade = StartCoroutine(FadeBattleInfo());
+        }
+
+        private IEnumerator FadeBattleInfo()
+        {
+            yield return new WaitForSeconds(_battleInfoHoldTime);
+
+            float elapsed = 0f;
+            while (elapsed < _battleInfoFadeTime)
+            {
+                elapsed += Time.deltaTime;
+                float alpha = 1f - Mathf.Clamp01(elapsed / _battleInfoFadeTime);
+                if (turnNumberText != null) turnNumberText.alpha = alpha;
+                if (phaseText      != null) phaseText.alpha      = alpha;
+                yield return null;
+            }
+
+            if (turnNumberText != null) turnNumberText.alpha = 0f;
+            if (phaseText      != null) phaseText.alpha      = 0f;
+            _battleInfoFade = null;
         }
 
         #endregion

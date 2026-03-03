@@ -22,7 +22,7 @@ MonoBehaviour:
   _demographicValues: 2
   _startingEffects:
   - _type: 15
-    _stacks: 3
+    _stacks: 2
     _durationType: 2
   _movePattern: 1
   _moves:
