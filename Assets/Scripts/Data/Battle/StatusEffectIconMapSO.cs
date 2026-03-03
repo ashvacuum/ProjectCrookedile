@@ -22,6 +22,11 @@ namespace Crookedile.Data.Battle
             public Sprite           icon;
             [Tooltip("Tint color applied to the icon image.")]
             public Color            color;
+            [Tooltip("Short display name shown in the tooltip header (e.g. \"Poison\").")]
+            public string           effectName;
+            [TextArea(1, 3)]
+            [Tooltip("One-sentence description of what the effect does.")]
+            public string           description;
         }
 
         [SerializeField] private List<Entry> _entries = new List<Entry>();
@@ -36,24 +41,35 @@ namespace Crookedile.Data.Battle
         }
 
         /// <summary>
-        /// Attempts to retrieve the icon and color for a given status effect type.
-        /// Returns false (with null icon and white color) when no entry is configured.
+        /// Attempts to retrieve the icon, color, name, and description for a given status effect type.
+        /// Returns false (with null icon, white color, and empty strings) when no entry is configured.
         /// </summary>
-        public bool TryGet(StatusEffectType type, out Sprite icon, out Color color)
+        public bool TryGet(StatusEffectType type, out Sprite icon, out Color color,
+                           out string effectName, out string description)
         {
             if (_lookup == null) BuildLookup();
 
             if (_lookup.TryGetValue(type, out Entry entry))
             {
-                icon  = entry.icon;
-                color = entry.color;
+                icon        = entry.icon;
+                color       = entry.color;
+                effectName  = entry.effectName;
+                description = entry.description;
                 return true;
             }
 
-            icon  = null;
-            color = Color.white;
+            icon        = null;
+            color       = Color.white;
+            effectName  = string.Empty;
+            description = string.Empty;
             return false;
         }
+
+        /// <summary>
+        /// Backwards-compatible 2-out-param overload. Existing callers (StatusEffectPanelUI) are unaffected.
+        /// </summary>
+        public bool TryGet(StatusEffectType type, out Sprite icon, out Color color)
+            => TryGet(type, out icon, out color, out _, out _);
 
         private void OnValidate() => _lookup = null;  // invalidate cache when edited in Inspector
     }

@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
@@ -13,6 +15,9 @@ namespace Crookedile.UI.Battle
     /// Embed this as a child of each EnemySlotUI prefab. EnemySlotUI drives it directly
     /// via ShowIntent() — no EventBus subscriptions needed here.
     ///
+    /// Hovering the intent panel opens <see cref="BattleTooltipUI"/> with the move's
+    /// authored <see cref="Crookedile.Data.Enemy.EnemyMoveData.Description"/>.
+    ///
     /// Inspector wiring:
     ///   intentPanel      → the root GameObject of this intent display (show/hide)
     ///   intentIcon       → Image showing a sword / shield / etc. icon (optional)
@@ -20,8 +25,13 @@ namespace Crookedile.UI.Battle
     ///   intentDescText   → TMP_Text showing the description, e.g. "Will deal 8 damage"
     ///   intentTypeBadge  → Image colour-coded by move type (Attack=red, Defend=blue, …)
     ///   intentTheme      → ScriptableObject mapping EnemyMoveType → Sprite + Color
+    ///
+    /// NOTE: The intentPanel's background Image must have Raycast Target = true for
+    /// hover events to fire.
     /// </summary>
-    public class EnemyIntentDisplay : MonoBehaviour
+    public class EnemyIntentDisplay : MonoBehaviour,
+                                      IPointerEnterHandler,
+                                      IPointerExitHandler
     {
         [Header("Intent Panel")]
         [Tooltip("Root panel GameObject. Shown when intent is known; hidden at battle start.")]
@@ -46,14 +56,19 @@ namespace Crookedile.UI.Battle
                  "Create via: Assets → Create → Crookedile → Enemy → Intent Theme")]
         [SerializeField] private EnemyIntentTheme intentTheme;
 
+        private EnemyMoveData _currentMove;
+
         // ─── Unity Lifecycle ──────────────────────────────────────────────────────
 
         private void Awake() => SetPanelVisible(false);
 
         // ─── Display ──────────────────────────────────────────────────────────────
 
-        public void ShowIntent(EnemyMoveData move, StatusEffectManager attackerStatus = null)
+        public void ShowIntent(EnemyMoveData move, StatusEffectManager attackerStatus = null,
+                               StatusEffectManager targetStatus = null)
         {
+            _currentMove = move;
+
             if (move == null)
             {
                 SetPanelVisible(false);
@@ -83,7 +98,7 @@ namespace Crookedile.UI.Battle
                 bool isOffensive = move.MoveType == EnemyMoveType.Attack
                                 || move.MoveType == EnemyMoveType.OffensiveBuff
                                 || move.MoveType == EnemyMoveType.DebuffAttack;
-                intentDescText.text = isOffensive ? BuildDamagePreview(move, attackerStatus) : string.Empty;
+                intentDescText.text = isOffensive ? BuildDamagePreview(move, attackerStatus, targetStatus) : string.Empty;
             }
 
             // Colour badge by move type
@@ -91,20 +106,75 @@ namespace Crookedile.UI.Battle
                 intentTypeBadge.color = color;
         }
 
-        /// <summary>
-        /// Sums all damage effects in the move, applies attacker status modifiers (Weakened, Strength),
-        /// and returns a display string. Fixed damage → total number. Random damage → "min-max".
-        /// DamageEqualToComposure → "?". Returns empty string if no damage effects are present.
-        /// </summary>
-        private static string BuildDamagePreview(EnemyMoveData move, StatusEffectManager attackerStatus)
+        // ─── Pointer Events ───────────────────────────────────────────────────────
+
+        public void OnPointerEnter(PointerEventData _)
         {
+            if (_currentMove == null || BattleTooltipUI.Instance == null) return;
+            if (string.IsNullOrEmpty(_currentMove.Description)) return;
+            BattleTooltipUI.Instance.Show(_currentMove.MoveName, _currentMove.Description);
+        }
+
+        public void OnPointerExit(PointerEventData _)
+        {
+            BattleTooltipUI.Instance?.Hide();
+        }
+
+        // ─── Damage Preview ───────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Builds the intent description string shown beneath the move name.
+        /// Supports multi-hit: equal fixed-damage effects → "N×amount"; equal random → "N×min-max".
+        /// Falls back to summing for single or mixed effects (existing behaviour).
+        /// Returns empty string if no damage effects are present.
+        /// </summary>
+        private static string BuildDamagePreview(EnemyMoveData move,
+                                                   StatusEffectManager attackerStatus,
+                                                   StatusEffectManager targetStatus)
+        {
+            // Collect damage effects
+            var dmgEffects = new List<CardEffect>();
+            foreach (var e in move.Effects)
+                if (e.Category == EffectCategory.Damage) dmgEffects.Add(e);
+
+            if (dmgEffects.Count == 0) return string.Empty;
+
+            // Two-step preview: attacker mods (Strength/Weakened/Exposed) then target mods
+            // (Vulnerable/Plated/Intangible). Neither step has side effects.
+            static int Preview(int raw, StatusEffectManager atk, StatusEffectManager tgt)
+            {
+                int d = atk != null ? atk.PreviewDamageDealt(raw) : raw;
+                    d = tgt != null ? tgt.PreviewDamageTaken(d)   : d;
+                return Mathf.Max(0, d);
+            }
+
+            // Multi-hit: all effects are identical FixedDamage → "N×amount"
+            if (dmgEffects.Count > 1
+                && dmgEffects.TrueForAll(e => e.DamageType == DamageType.FixedDamage)
+                && dmgEffects.TrueForAll(e => e.DamageAmount == dmgEffects[0].DamageAmount))
+            {
+                int adj = Preview(dmgEffects[0].DamageAmount, attackerStatus, targetStatus);
+                return adj > 0 ? $"{dmgEffects.Count}\u00d7{adj}" : string.Empty;
+            }
+
+            // Multi-hit: all effects are identical RandomDamage → "N×min-max"
+            if (dmgEffects.Count > 1
+                && dmgEffects.TrueForAll(e => e.DamageType == DamageType.RandomDamage)
+                && dmgEffects.TrueForAll(e => e.RandomDamageMin == dmgEffects[0].RandomDamageMin
+                                           && e.RandomDamageMax == dmgEffects[0].RandomDamageMax))
+            {
+                int adjMin = Preview(dmgEffects[0].RandomDamageMin, attackerStatus, targetStatus);
+                int adjMax = Preview(dmgEffects[0].RandomDamageMax, attackerStatus, targetStatus);
+                return $"{dmgEffects.Count}\u00d7{adjMin}-{adjMax}";
+            }
+
+            // Single or mixed effects — sum as before
             int fixedTotal = 0;
             int randMin = 0, randMax = 0;
             bool hasFixed = false, hasRandom = false, hasComposure = false;
 
-            foreach (var effect in move.Effects)
+            foreach (var effect in dmgEffects)
             {
-                if (effect.Category != EffectCategory.Damage) continue;
                 switch (effect.DamageType)
                 {
                     case DamageType.FixedDamage:
@@ -125,22 +195,16 @@ namespace Crookedile.UI.Battle
             if (!hasFixed && !hasRandom && !hasComposure) return string.Empty;
             if (hasComposure) return hasFixed ? $"{fixedTotal}+" : "?";
 
-            // Apply attacker status modifiers (Weakened reduces, Strength increases)
+            // Apply full two-step preview pipeline
             if (hasRandom)
             {
-                int adjMin = Mathf.Max(0, attackerStatus != null
-                    ? attackerStatus.ModifyDamageDealt(randMin + fixedTotal)
-                    : randMin + fixedTotal);
-                int adjMax = Mathf.Max(0, attackerStatus != null
-                    ? attackerStatus.ModifyDamageDealt(randMax + fixedTotal)
-                    : randMax + fixedTotal);
+                int adjMin = Preview(randMin + fixedTotal, attackerStatus, targetStatus);
+                int adjMax = Preview(randMax + fixedTotal, attackerStatus, targetStatus);
                 return $"{adjMin}-{adjMax}";
             }
 
-            int adj = Mathf.Max(0, attackerStatus != null
-                ? attackerStatus.ModifyDamageDealt(fixedTotal)
-                : fixedTotal);
-            return adj > 0 ? adj.ToString() : string.Empty;
+            int finalAdj = Preview(fixedTotal, attackerStatus, targetStatus);
+            return finalAdj > 0 ? finalAdj.ToString() : string.Empty;
         }
 
         private void SetPanelVisible(bool visible)

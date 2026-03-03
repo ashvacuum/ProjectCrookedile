@@ -81,6 +81,22 @@ namespace Crookedile.Data.Enemy
         public string            MoveName          => _moveName;
         public EnemyMoveType     MoveType          => _moveType;
         public string            IntentDescription => _intentDescription;
+
+        /// <summary>
+        /// Auto-generated hover tooltip text — one line per effect, built from
+        /// <see cref="CardEffect.GetDescription()"/>. Empty when the move has no effects.
+        /// </summary>
+        public string Description
+        {
+            get
+            {
+                if (_effects == null || _effects.Count == 0) return string.Empty;
+                var lines = new string[_effects.Count];
+                for (int i = 0; i < _effects.Count; i++)
+                    lines[i] = _effects[i].GetDescription();
+                return string.Join("\n", lines);
+            }
+        }
         public IReadOnlyList<CardEffect> Effects   => _effects;
         public VFXEvent          MoveVFX           => _moveVFX;
         public EnemyData         MinionToSummon    => _minionToSummon;

@@ -71,7 +71,7 @@ namespace Crookedile.UI.Battle
                     var ui  = go.GetComponent<StatusEffectIconUI>();
                     if (ui == null) continue;
 
-                    ui.Setup(icon, color, stacks);
+                    ui.Setup(type, icon, color, stacks);
                     _active[type] = ui;
                 }
             }

@@ -1,45 +1,93 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
+using Crookedile.Data.Battle;
+using Crookedile.Gameplay.Battle;
 
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Displays a single active status effect as an icon pill: [icon] [stack count].
+    /// Displays a single active status effect as an icon pill.
     /// Placed on the <c>StatusEffectIconPrefab</c> and managed by <see cref="StatusEffectPanelUI"/>.
     ///
-    /// Setup: Assign <see cref="_icon"/> and <see cref="_stackText"/> in the Inspector.
-    /// The stack count text is hidden when stacks ≤ 1 so permanent and single-stack
-    /// effects display cleanly without a redundant "1" label.
+    /// Hovering the icon opens the shared <see cref="BattleTooltipUI"/> with the effect's
+    /// name, description, and current stack count.
+    ///
+    /// The stack count badge (<see cref="_stackText"/>) is shown whenever stacks &gt; 1;
+    /// hidden for single-stack effects to keep the icon clean.
+    ///
+    /// Setup: Assign <see cref="_icon"/>, <see cref="_stackText"/> (can be null), and
+    /// <see cref="_iconMap"/> in the Inspector (same asset as <see cref="StatusEffectPanelUI"/>).
     /// </summary>
-    public class StatusEffectIconUI : MonoBehaviour
+    public class StatusEffectIconUI : MonoBehaviour,
+                                       IPointerEnterHandler,
+                                       IPointerExitHandler
     {
-        [SerializeField] private Image    _icon;
-        [SerializeField] private TMP_Text _stackText;
+        [SerializeField] private Image                  _icon;
+        [SerializeField] private TMP_Text               _stackText;
+        [Tooltip("Same StatusEffectIconMapSO asset assigned to StatusEffectPanelUI — provides tooltip text.")]
+        [SerializeField] private StatusEffectIconMapSO  _iconMap;
+
+        private StatusEffectType _type;
+        private int              _currentStacks;
+
+        // ─── Initialisation ───────────────────────────────────────────────────────
 
         /// <summary>
         /// Full initialisation — sets the icon sprite, tint color, and initial stack count.
         /// Call once when the icon is first created for an effect.
         /// </summary>
-        public void Setup(Sprite icon, Color color, int stacks)
+        public void Setup(StatusEffectType type, Sprite icon, Color color, int stacks)
         {
+            _type = type;
+
             if (_icon != null)
             {
                 _icon.sprite = icon;
                 _icon.color  = color;
             }
+
             Refresh(stacks);
         }
 
         /// <summary>
-        /// Updates only the stack count display. Call each time the effect stacks change.
+        /// Updates the stored stack count and refreshes the badge text.
+        /// Badge is hidden when stacks == 1 (single-stack effects read cleaner without a number).
         /// </summary>
         public void Refresh(int stacks)
         {
-            if (_stackText == null) return;
-            bool showCount = stacks > 1;
-            _stackText.gameObject.SetActive(showCount);
-            if (showCount) _stackText.text = stacks.ToString();
+            _currentStacks = stacks;
+
+            if (_stackText != null)
+            {
+                _stackText.gameObject.SetActive(stacks > 1);
+                _stackText.text = stacks.ToString();
+            }
+        }
+
+        // ─── Pointer Events ───────────────────────────────────────────────────────
+
+        public void OnPointerEnter(PointerEventData _)
+        {
+            if (_iconMap == null || BattleTooltipUI.Instance == null) return;
+
+            _iconMap.TryGet(_type, out var icon, out var color, out var name, out var desc);
+
+            // Default: fall back to the enum name when effectName is not authored in the SO
+            if (string.IsNullOrEmpty(name)) name = _type.ToString();
+
+            // Template substitution: replace {a} with the current stack count
+            if (!string.IsNullOrEmpty(desc))
+                desc = desc.Replace("{a}", _currentStacks.ToString());
+
+            string extraLine = _currentStacks > 1 ? $"Stacks: {_currentStacks}" : null;
+            BattleTooltipUI.Instance.Show(name, desc, icon, color, extraLine);
+        }
+
+        public void OnPointerExit(PointerEventData _)
+        {
+            BattleTooltipUI.Instance?.Hide();
         }
     }
 }
