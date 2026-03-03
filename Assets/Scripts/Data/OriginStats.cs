@@ -61,6 +61,9 @@ namespace Crookedile.Data
         [Tooltip("Maximum Action Points per turn")]
         public int maxActionPoints = 3;
 
+        [Tooltip("Character portrait shown in the player slot during battle.")]
+        public Sprite portrait;
+
         /// <summary>
         /// Gets a summary description of these stats.
         /// </summary>

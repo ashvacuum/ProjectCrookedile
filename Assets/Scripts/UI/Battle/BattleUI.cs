@@ -54,8 +54,20 @@ namespace Crookedile.UI.Battle
 
         // ── VFX Anchors ───────────────────────────────────────────────────────
         [Header("VFX Anchors")]
-        [Tooltip("RectTransform of the player stats panel — used by BattleFeedbackController as VFX target for player-targeted effects.")]
+        [Tooltip("RectTransform of the player stats panel — fallback VFX target when PlayerSlotUI is not assigned.")]
         [field: SerializeField] public RectTransform PlayerStatsPanel { get; private set; }
+
+        // ── Player Slot ───────────────────────────────────────────────────────
+        [Header("Player Slot")]
+        [Tooltip("PlayerSlotUI instance in the scene. Provides the portrait, health bar, and VFX anchor for player-targeted effects.")]
+        [SerializeField] private PlayerSlotUI _playerSlotUI;
+
+        /// <summary>
+        /// RectTransform anchor at the player slot — preferred target for VFX and floating damage numbers.
+        /// Falls back to <see cref="PlayerStatsPanel"/> when no slot is assigned.
+        /// </summary>
+        public RectTransform PlayerSlotTransform =>
+            _playerSlotUI != null ? _playerSlotUI.SlotRect : PlayerStatsPanel;
 
         // ── Battle Info ───────────────────────────────────────────────────────
         [Header("Battle Info")]
@@ -184,6 +196,7 @@ namespace Crookedile.UI.Battle
         private void OnBattleStarted(BattleStartedEvent evt)
         {
             logPanel?.AddEntry("=== Battle Started ===");
+            _playerSlotUI?.Initialize(battleManager, evt.Setup.GetPlayerStats().portrait);
             BuildEnemySlots();
             UpdateStatsDisplay();
             _fsm?.ChangeState(BattleUIState.Idle);
@@ -297,6 +310,8 @@ namespace Crookedile.UI.Battle
             if (playerResolveText  != null) playerResolveText.text  = $"Resolve: {playerStats.CurrentResolve}/{playerStats.MaxResolve}";
             if (playerComposureText != null) playerComposureText.text = $"Composure: {playerStats.CurrentComposure}";
             if (playerAPText       != null) playerAPText.text       = $"AP: {playerStats.CurrentActionPoints}/{playerStats.MaxActionPoints}";
+
+            _playerSlotUI?.Refresh();
 
             // Enemy slots — refresh + focus highlight
             for (int i = 0; i < _enemySlots.Count; i++)

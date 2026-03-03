@@ -465,10 +465,11 @@ namespace Crookedile.Gameplay.Battle
                 bool isPlayerAttacking = attacker == _playerStats;
                 EventBus.Publish(new DamageDealtEvent
                 {
-                    Amount           = actualDamage,
-                    IsToPlayer       = target == _playerStats,
-                    AttackerName     = isPlayerAttacking ? "Player" : _attackerName,
-                    SourceEnemyIndex = isPlayerAttacking ? -1 : _attackerEnemyIndex,
+                    Amount            = actualDamage,
+                    IsToPlayer        = target == _playerStats,
+                    AttackerName      = isPlayerAttacking ? "Player" : _attackerName,
+                    SourceEnemyIndex  = isPlayerAttacking ? -1 : _attackerEnemyIndex,
+                    TargetEnemyIndex  = isPlayerAttacking ? _attackerEnemyIndex : -1,
                 });
             }
 
@@ -521,10 +522,11 @@ namespace Crookedile.Gameplay.Battle
                 bool isPlayerAttacking = attacker == _playerStats;
                 EventBus.Publish(new DamageDealtEvent
                 {
-                    Amount           = actualDamage,
-                    IsToPlayer       = target == _playerStats,
-                    AttackerName     = isPlayerAttacking ? "Player" : _attackerName,
-                    SourceEnemyIndex = isPlayerAttacking ? -1 : _attackerEnemyIndex,
+                    Amount            = actualDamage,
+                    IsToPlayer        = target == _playerStats,
+                    AttackerName      = isPlayerAttacking ? "Player" : _attackerName,
+                    SourceEnemyIndex  = isPlayerAttacking ? -1 : _attackerEnemyIndex,
+                    TargetEnemyIndex  = isPlayerAttacking ? _attackerEnemyIndex : -1,
                 });
             }
 
@@ -587,10 +589,11 @@ namespace Crookedile.Gameplay.Battle
                 bool isPlayerAttacking = attacker == _playerStats;
                 EventBus.Publish(new DamageDealtEvent
                 {
-                    Amount           = actualDamage,
-                    IsToPlayer       = target == _playerStats,
-                    AttackerName     = isPlayerAttacking ? "Player" : _attackerName,
-                    SourceEnemyIndex = isPlayerAttacking ? -1 : _attackerEnemyIndex,
+                    Amount            = actualDamage,
+                    IsToPlayer        = target == _playerStats,
+                    AttackerName      = isPlayerAttacking ? "Player" : _attackerName,
+                    SourceEnemyIndex  = isPlayerAttacking ? -1 : _attackerEnemyIndex,
+                    TargetEnemyIndex  = isPlayerAttacking ? _attackerEnemyIndex : -1,
                 });
             }
 

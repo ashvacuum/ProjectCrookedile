@@ -3,6 +3,7 @@ using UnityEngine;
 using Crookedile.Core;
 using Crookedile.Gameplay.Battle;
 using Crookedile.Data.Audio;
+using Crookedile.Managers;
 
 namespace Crookedile.UI.Battle
 {
@@ -23,8 +24,14 @@ namespace Crookedile.UI.Battle
         [SerializeField] private BattleSoundMap _soundMap;
 
         [Header("Scene References")]
-        [Tooltip("Needed to resolve VFX target positions (player stats panel, enemy slots).")]
+        [Tooltip("Needed to resolve VFX target positions (player slot, enemy slots).")]
         [SerializeField] private BattleUI       _battleUI;
+
+        [Header("Floating Numbers")]
+        [Tooltip("Color of damage number text spawned by FloatingTextManager.")]
+        [SerializeField] private Color _damageColor = new Color(0.9f, 0.2f, 0.2f);
+        [Tooltip("Color of heal number text spawned by FloatingTextManager.")]
+        [SerializeField] private Color _healColor   = new Color(0.2f, 0.9f, 0.2f);
 
         // ─── Lifecycle ────────────────────────────────────────────────────────
 
@@ -42,6 +49,7 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<HealingAppliedEvent>(OnHealApplied);
             EventBus.Subscribe<StatusEffectAppliedEvent>(OnStatusApplied);
             EventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
+            EventBus.Subscribe<EnemyActingEvent>(OnEnemyActing);
             EventBus.Subscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
             EventBus.Subscribe<ComposureChangedEvent>(OnComposureChanged);
             EventBus.Subscribe<EnemyHostilityChangedEvent>(OnHostilityChanged);
@@ -62,6 +70,7 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<HealingAppliedEvent>(OnHealApplied);
             EventBus.Unsubscribe<StatusEffectAppliedEvent>(OnStatusApplied);
             EventBus.Unsubscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
+            EventBus.Unsubscribe<EnemyActingEvent>(OnEnemyActing);
             EventBus.Unsubscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
             EventBus.Unsubscribe<ComposureChangedEvent>(OnComposureChanged);
             EventBus.Unsubscribe<EnemyHostilityChangedEvent>(OnHostilityChanged);
@@ -103,30 +112,47 @@ namespace Crookedile.UI.Battle
             var trigger = evt.IsToPlayer ? BattleAudioTrigger.DamageDealtToPlayer
                                          : BattleAudioTrigger.DamageDealtToEnemy;
 
-            // Enemy → player: show VFX at the attacking enemy's slot so the player
-            //   sees which enemy hit them.
-            // Player → enemy: show VFX at the player stats panel (source of the attack).
-            var target = evt.IsToPlayer
+            // VFX source: attacker's position.
+            // Enemy → player: VFX at the attacking enemy's slot.
+            // Player → enemy: VFX at the player slot (source of the attack).
+            var vfxSource = evt.IsToPlayer
                 ? _battleUI?.GetEnemySlotTransform(evt.SourceEnemyIndex)
-                : _battleUI?.PlayerStatsPanel;
+                : _battleUI?.PlayerSlotTransform;
+            Play(trigger, vfxSource);
 
-            Play(trigger, target);
+            // Floating damage number: appears at the target that took the hit.
+            // Player took damage: number appears at the player slot.
+            // Enemy took damage: number appears at the targeted enemy slot.
+            var dmgTarget = evt.IsToPlayer
+                ? _battleUI?.PlayerSlotTransform
+                : _battleUI?.GetEnemySlotTransform(evt.TargetEnemyIndex);
+            FloatingTextManager.Instance?.Show(evt.Amount.ToString(), dmgTarget, _damageColor);
         }
 
         private void OnHealApplied(HealingAppliedEvent evt)
         {
-            var target = evt.IsToPlayer ? _battleUI?.PlayerStatsPanel : null;
+            var target = evt.IsToPlayer ? _battleUI?.PlayerSlotTransform : null;
             Play(BattleAudioTrigger.HealApplied, target);
+            if (evt.IsToPlayer)
+                FloatingTextManager.Instance?.Show($"+{evt.Amount}", target, _healColor);
         }
 
         private void OnStatusApplied(StatusEffectAppliedEvent evt)
         {
-            var target = evt.IsToPlayer ? _battleUI?.PlayerStatsPanel : null;
+            var target = evt.IsToPlayer ? _battleUI?.PlayerSlotTransform : null;
             Play(BattleAudioTrigger.StatusEffectApplied, target);
         }
 
         private void OnEnemyDefeated(EnemyDefeatedEvent evt)
             => Play(BattleAudioTrigger.EnemyDefeated, _battleUI?.GetEnemySlotTransform(evt.EnemyIndex));
+
+        private void OnEnemyActing(EnemyActingEvent evt)
+        {
+            // Play the move's VFX on the player slot if one is configured.
+            // Non-blocking: damage resolves simultaneously on the same frame.
+            if (evt.Move?.MoveVFX != null)
+                VFXManager.Instance?.Play(evt.Move.MoveVFX, _battleUI?.PlayerSlotTransform);
+        }
 
         private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
             => Play(BattleAudioTrigger.EnemyIntentDeclared, _battleUI?.GetEnemySlotTransform(evt.EnemyIndex));

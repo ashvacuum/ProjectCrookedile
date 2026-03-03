@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Data.Cards;
+using Crookedile.Data.VFX;
 
 namespace Crookedile.Data.Enemy
 {
@@ -56,6 +57,13 @@ namespace Crookedile.Data.Enemy
                  "Avoid CardManipulation effects — enemies have no deck.")]
         [SerializeField] private List<CardEffect> _effects = new List<CardEffect>();
 
+        // ─── VFX ─────────────────────────────────────────────────────────────────
+
+        [Header("VFX")]
+        [Tooltip("Optional VFX to play on the player slot when this move executes. " +
+                 "Non-blocking — damage resolves alongside the animation.")]
+        [SerializeField] private VFXEvent _moveVFX;
+
         // ─── Summon ───────────────────────────────────────────────────────────────
 
         [Header("Summon")]
@@ -74,6 +82,7 @@ namespace Crookedile.Data.Enemy
         public EnemyMoveType     MoveType          => _moveType;
         public string            IntentDescription => _intentDescription;
         public IReadOnlyList<CardEffect> Effects   => _effects;
+        public VFXEvent          MoveVFX           => _moveVFX;
         public EnemyData         MinionToSummon    => _minionToSummon;
         public int               MinionCount       => _minionCount;
     }

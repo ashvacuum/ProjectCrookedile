@@ -233,6 +233,10 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Zero-based index of the attacking enemy in BattleManager.Enemies.
         /// -1 when the player is the attacker.</summary>
         public int SourceEnemyIndex;
+
+        /// <summary>Zero-based index of the enemy that received the damage.
+        /// -1 when the player is the damage target (use <see cref="IsToPlayer"/> to confirm).</summary>
+        public int TargetEnemyIndex;
     }
 
     /// <summary>
@@ -403,6 +407,10 @@ namespace Crookedile.Gameplay.Battle
     {
         /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that is about to act.</summary>
         public int EnemyIndex;
+
+        /// <summary>The move this enemy is about to execute. Used by <c>BattleFeedbackController</c>
+        /// to play <see cref="EnemyMoveData.MoveVFX"/> on the player slot.</summary>
+        public EnemyMoveData Move;
     }
 
     #endregion
