@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 2025183054822338141}
   - component: {fileID: 1536427791691868524}
   m_Layer: 5
-  m_Name: Hostility (1)
+  m_Name: StatusEffectPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -204,7 +204,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ab2bfac1a548b74f97abbfaf99bdf5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.StatusEffectPanelUI
-  _iconMap: {fileID: 0}
+  _iconMap: {fileID: 11400000, guid: bdd496b695a5d36468f769b25dd3f0f2, type: 2}
   _iconPrefab: {fileID: 8550396782278976253, guid: 0d37b3ae6ab682c41a72d91daa47d3b0, type: 3}
   _container: {fileID: 1624491701605836522}
 --- !u!1 &1110113178335294695
@@ -865,7 +865,7 @@ MonoBehaviour:
   composureObject: {fileID: 4380771465406978076}
   enemySprite: {fileID: 5818194391219280397}
   _intentDisplay: {fileID: 6888796589589481908}
-  _statusEffectPanel: {fileID: 0}
+  _statusEffectPanel: {fileID: 1536427791691868524}
   barLerpSpeed: 8
   selectionHighlight: {fileID: 3678169182946379061}
   dragDropHighlight: {fileID: 3678169182946379061}
