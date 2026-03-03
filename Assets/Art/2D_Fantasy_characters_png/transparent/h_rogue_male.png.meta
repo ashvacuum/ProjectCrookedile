@@ -1,0 +1,1079 @@
+fileFormatVersion: 2
+guid: f453abd53f53b394d8c08f1e0e2ff3c7
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7704362764828804391
+    second: h_rogue_male_0
+  - first:
+      213: 4298030136570915659
+    second: h_rogue_male_1
+  - first:
+      213: -5037292285550293406
+    second: h_rogue_male_2
+  - first:
+      213: 2530542444820599428
+    second: h_rogue_male_3
+  - first:
+      213: -7365301679586932772
+    second: h_rogue_male_4
+  - first:
+      213: 3215273972539151353
+    second: h_rogue_male_5
+  - first:
+      213: 2278956215445894414
+    second: h_rogue_male_6
+  - first:
+      213: -2248896568934068776
+    second: h_rogue_male_7
+  - first:
+      213: -3191063583420616391
+    second: h_rogue_male_8
+  - first:
+      213: -1106093012664911061
+    second: h_rogue_male_9
+  - first:
+      213: -6360157721946331920
+    second: h_rogue_male_10
+  - first:
+      213: 8582795217421351262
+    second: h_rogue_male_11
+  - first:
+      213: -3340137610553668034
+    second: h_rogue_male_12
+  - first:
+      213: 7541515927035281181
+    second: h_rogue_male_13
+  - first:
+      213: -2639591253892790704
+    second: h_rogue_male_14
+  - first:
+      213: 8381467189653539972
+    second: h_rogue_male_15
+  - first:
+      213: 1061902902267120764
+    second: h_rogue_male_16
+  - first:
+      213: -4956421070729615651
+    second: h_rogue_male_17
+  - first:
+      213: -1401789713624223836
+    second: h_rogue_male_18
+  - first:
+      213: -4261438307839051450
+    second: h_rogue_male_19
+  - first:
+      213: -3773607018839148893
+    second: h_rogue_male_20
+  - first:
+      213: 1382735872200103409
+    second: h_rogue_male_21
+  - first:
+      213: -7929844929295134044
+    second: h_rogue_male_22
+  - first:
+      213: -3292718269637781
+    second: h_rogue_male_23
+  - first:
+      213: -2878702782087351003
+    second: h_rogue_male_24
+  - first:
+      213: 3978020955173069102
+    second: h_rogue_male_25
+  - first:
+      213: 1448042525451292146
+    second: h_rogue_male_26
+  - first:
+      213: -8814029479724698066
+    second: h_rogue_male_27
+  - first:
+      213: 794211120011445488
+    second: h_rogue_male_28
+  - first:
+      213: 3111911335172819782
+    second: h_rogue_male_29
+  - first:
+      213: -6790138955891758755
+    second: h_rogue_male_30
+  - first:
+      213: 8871240217634504614
+    second: h_rogue_male_31
+  - first:
+      213: -5139582951426104676
+    second: h_rogue_male_32
+  - first:
+      213: 2455790652505437244
+    second: h_rogue_male_33
+  - first:
+      213: -4949451824926239155
+    second: h_rogue_male_34
+  - first:
+      213: -3085178184053429555
+    second: h_rogue_male_35
+  - first:
+      213: 5068209645392407342
+    second: h_rogue_male_36
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: h_rogue_male_0
+      rect:
+        serializedVersion: 2
+        x: 353
+        y: 544
+        width: 17
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7250e5a7d156bea60800000000000000
+      internalID: 7704362764828804391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_1
+      rect:
+        serializedVersion: 2
+        x: 365
+        y: 90
+        width: 1604
+        height: 2650
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4bab3423aba5ab30800000000000000
+      internalID: 4298030136570915659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_2
+      rect:
+        serializedVersion: 2
+        x: 371
+        y: 548
+        width: 12
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26e85f1ea51f71ab0800000000000000
+      internalID: -5037292285550293406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_3
+      rect:
+        serializedVersion: 2
+        x: 194
+        y: 512
+        width: 48
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 482949832fa4e1320800000000000000
+      internalID: 2530542444820599428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_4
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 530
+        width: 9
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd702ac352139c990800000000000000
+      internalID: -7365301679586932772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_5
+      rect:
+        serializedVersion: 2
+        x: 248
+        y: 508
+        width: 51
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f351cc84a2fe9c20800000000000000
+      internalID: 3215273972539151353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_6
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 526
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0532508a9a70af10800000000000000
+      internalID: 2278956215445894414
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_7
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 534
+        width: 47
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8dd07185c705ac0e0800000000000000
+      internalID: -2248896568934068776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_8
+      rect:
+        serializedVersion: 2
+        x: 380
+        y: 526
+        width: 14
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 931778ee39017b3d0800000000000000
+      internalID: -3191063583420616391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_9
+      rect:
+        serializedVersion: 2
+        x: 253
+        y: 527
+        width: 15
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2bf09be34e56a0f0800000000000000
+      internalID: -1106093012664911061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_10
+      rect:
+        serializedVersion: 2
+        x: 341
+        y: 512
+        width: 43
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f46eebdf3e2cb7a0800000000000000
+      internalID: -6360157721946331920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_11
+      rect:
+        serializedVersion: 2
+        x: 175
+        y: 517
+        width: 20
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e593252d6c63c1770800000000000000
+      internalID: 8582795217421351262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_12
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 507
+        width: 19
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3ec60e3a8275a1d0800000000000000
+      internalID: -3340137610553668034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_13
+      rect:
+        serializedVersion: 2
+        x: 310
+        y: 500
+        width: 41
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1f73ea67c8d8a860800000000000000
+      internalID: 7541515927035281181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_14
+      rect:
+        serializedVersion: 2
+        x: 236
+        y: 510
+        width: 12
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0560e7f5db94e5bd0800000000000000
+      internalID: -2639591253892790704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_15
+      rect:
+        serializedVersion: 2
+        x: 351
+        y: 507
+        width: 19
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48c04e78004f05470800000000000000
+      internalID: 8381467189653539972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_16
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 491
+        width: 12
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7c869b3013acbe00800000000000000
+      internalID: 1061902902267120764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_17
+      rect:
+        serializedVersion: 2
+        x: 308
+        y: 497
+        width: 12
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd666e1eb41473bb0800000000000000
+      internalID: -4956421070729615651
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_18
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 429
+        width: 18
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4afa1a5bea7db8ce0800000000000000
+      internalID: -1401789713624223836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_19
+      rect:
+        serializedVersion: 2
+        x: 306
+        y: 436
+        width: 72
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 649f205ef645cd4c0800000000000000
+      internalID: -4261438307839051450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 394
+        width: 64
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a6fb28e86471abc0800000000000000
+      internalID: -3773607018839148893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_21
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 418
+        width: 243
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f55da023f6703310800000000000000
+      internalID: 1382735872200103409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_22
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 410
+        width: 26
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a25e690d0883f190800000000000000
+      internalID: -7929844929295134044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_23
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 408
+        width: 12
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6b51394a4d44fff0800000000000000
+      internalID: -3292718269637781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_24
+      rect:
+        serializedVersion: 2
+        x: 313
+        y: 394
+        width: 10
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52531cb521bcc08d0800000000000000
+      internalID: -2878702782087351003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_25
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 383
+        width: 44
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e21a6267bf4c43730800000000000000
+      internalID: 3978020955173069102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_26
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 382
+        width: 21
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fd0f2d310b781410800000000000000
+      internalID: 1448042525451292146
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_27
+      rect:
+        serializedVersion: 2
+        x: 306
+        y: 391
+        width: 10
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e26303d03e64ea580800000000000000
+      internalID: -8814029479724698066
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_28
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 375
+        width: 28
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f482f44eca950b00800000000000000
+      internalID: 794211120011445488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_29
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 363
+        width: 51
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64bcc792fdabf2b20800000000000000
+      internalID: 3111911335172819782
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_30
+      rect:
+        serializedVersion: 2
+        x: 101
+        y: 376
+        width: 31
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d59a786689494c1a0800000000000000
+      internalID: -6790138955891758755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_31
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 369
+        width: 39
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6af7341e9f9fc1b70800000000000000
+      internalID: 8871240217634504614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_32
+      rect:
+        serializedVersion: 2
+        x: 315
+        y: 371
+        width: 53
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c92e79e49888ca8b0800000000000000
+      internalID: -5139582951426104676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_33
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 350
+        width: 91
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c34bf4d4698b41220800000000000000
+      internalID: 2455790652505437244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_34
+      rect:
+        serializedVersion: 2
+        x: 169
+        y: 337
+        width: 193
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d46dc5ed9c3005bb0800000000000000
+      internalID: -4949451824926239155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_35
+      rect:
+        serializedVersion: 2
+        x: 353
+        y: 353
+        width: 40
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcae5be99ce3f25d0800000000000000
+      internalID: -3085178184053429555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: h_rogue_male_36
+      rect:
+        serializedVersion: 2
+        x: 381
+        y: 332
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2ba2d8e1d5e55640800000000000000
+      internalID: 5068209645392407342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      h_rogue_male_0: 7704362764828804391
+      h_rogue_male_1: 4298030136570915659
+      h_rogue_male_10: -6360157721946331920
+      h_rogue_male_11: 8582795217421351262
+      h_rogue_male_12: -3340137610553668034
+      h_rogue_male_13: 7541515927035281181
+      h_rogue_male_14: -2639591253892790704
+      h_rogue_male_15: 8381467189653539972
+      h_rogue_male_16: 1061902902267120764
+      h_rogue_male_17: -4956421070729615651
+      h_rogue_male_18: -1401789713624223836
+      h_rogue_male_19: -4261438307839051450
+      h_rogue_male_2: -5037292285550293406
+      h_rogue_male_20: -3773607018839148893
+      h_rogue_male_21: 1382735872200103409
+      h_rogue_male_22: -7929844929295134044
+      h_rogue_male_23: -3292718269637781
+      h_rogue_male_24: -2878702782087351003
+      h_rogue_male_25: 3978020955173069102
+      h_rogue_male_26: 1448042525451292146
+      h_rogue_male_27: -8814029479724698066
+      h_rogue_male_28: 794211120011445488
+      h_rogue_male_29: 3111911335172819782
+      h_rogue_male_3: 2530542444820599428
+      h_rogue_male_30: -6790138955891758755
+      h_rogue_male_31: 8871240217634504614
+      h_rogue_male_32: -5139582951426104676
+      h_rogue_male_33: 2455790652505437244
+      h_rogue_male_34: -4949451824926239155
+      h_rogue_male_35: -3085178184053429555
+      h_rogue_male_36: 5068209645392407342
+      h_rogue_male_4: -7365301679586932772
+      h_rogue_male_5: 3215273972539151353
+      h_rogue_male_6: 2278956215445894414
+      h_rogue_male_7: -2248896568934068776
+      h_rogue_male_8: -3191063583420616391
+      h_rogue_male_9: -1106093012664911061
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
