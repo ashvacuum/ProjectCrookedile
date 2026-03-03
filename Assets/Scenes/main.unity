@@ -1242,7 +1242,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7edd1df01fd0df4cba91b3998fb5b66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.FloatingText
-  _text: {fileID: 0}
+  _text: {fileID: 617319887}
   _duration: 1.2
   _risePixels: 60
   _fadeFraction: 0.4
