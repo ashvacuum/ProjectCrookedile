@@ -103,12 +103,12 @@ TextureImporter:
       name: Skill And Ability Icons_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 3299
-        height: 4880
+        x: 100
+        y: 4524
+        width: 256
+        height: 256
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -121,11 +121,3289 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_1
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 4524
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d57a852324f56104bac7d48c30e91c4f
+      internalID: -1302553849
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_2
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 4524
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6cacf7ea65632b0459e31dfa3da24413
+      internalID: -605739430
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_3
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 4524
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2c49e7b8ec4913346973d0f43c248e58
+      internalID: 1656853673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_4
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 4524
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f2d79549b324814283daacf8220a5de
+      internalID: -949628480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_5
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 4524
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b1a7c77a7596d24a8941de2f56bdc06
+      internalID: 648246831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_6
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 4524
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5f4ed19dadb394247a0b60832504dc4e
+      internalID: 1661807162
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_7
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 4524
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b88edcbc974cd9c4aa5be7a9a15467f9
+      internalID: 515021022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_8
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 4524
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 62dfd4f0fbde0d44180aaa36ffb6c54c
+      internalID: -928613997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_9
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 4524
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7cce97318d5607a41956d8d17db36e34
+      internalID: -825764823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_10
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 4208
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 175aeb61ef2660a4389b5a804e998144
+      internalID: 1205679984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_11
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 4208
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6e792502b484d2b47a2475da6707e1b2
+      internalID: 1168649144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_12
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 4208
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e20f1e4f56a91594285b78c4624838ae
+      internalID: -844991433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_13
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 4208
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 84d9d74da5231f04e90e971c25c3f04d
+      internalID: 2008686998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_14
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 4208
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0869fdfabe33ff94994e76148c5c879a
+      internalID: 517037878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_15
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 4208
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3bc188789aded24bab8000bf9396cb2
+      internalID: -1211958613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_16
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 4208
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ad8cae8a4c010ca44bace5871b2a70c3
+      internalID: 1266941395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_17
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 4208
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 571746dd823cbf24fa911043d68e3078
+      internalID: -2141919793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_18
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 4208
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ed156047e6f436243a4a3775906598f8
+      internalID: -942056666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_19
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 4208
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ac108a61ad412264487e584ea127a0eb
+      internalID: 1879725334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_20
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 3892
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d6b1bf9e2b391bd4f8d5c26ef98e3f3c
+      internalID: -1071641041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_21
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 3892
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 53458e6e7e2567345904575304330d4c
+      internalID: 113071119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_22
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 3892
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d8954dc3d03328429f022f21b290f08
+      internalID: -237358296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_23
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 3892
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b74919f610e640d4a92462db8c658d6a
+      internalID: 1374137284
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_24
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 3892
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 113d0d63b78a34d4794d93d3697539d4
+      internalID: 85466419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_25
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 3892
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f855436ac947f7348aa141dc779441aa
+      internalID: 799732040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_26
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 3892
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ab4d822ba237d814eb1aedc85afa4302
+      internalID: -529419605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_27
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 3892
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8034d80aaf2eff44cb09b21ea5431f8f
+      internalID: -1529832828
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_28
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 3892
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 83ffe9f6a6311c44fa2c59d3bf8b4ea6
+      internalID: 1728326426
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_29
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 3892
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 300fba1975dcf804f8b2ceaceac1b44b
+      internalID: 931606173
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_30
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 3576
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 973ca10d0c96aa34ebfb758178b8ad89
+      internalID: -1514340460
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_31
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 3576
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 397fc61e51a13e044afb5f5d899d4ff8
+      internalID: 681961694
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_32
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 3576
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: defb11834e2acde4a885129b12c8fc0f
+      internalID: -524155898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_33
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 3576
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 684f2a2cf080992409925f7d77fbf620
+      internalID: -1095056690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_34
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 3576
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 796373bad905fc9418b573fe38be89ed
+      internalID: -1455384912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_35
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 3576
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5e92a7f721009184db04171697f07c62
+      internalID: -749924901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_36
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 3576
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1b4dabe9fd6f131449352cb8f3423888
+      internalID: -919203351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_37
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 3576
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a3a01167c26bcdb4c8196e00ae170637
+      internalID: -1700718424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_38
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 3576
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 94dc63bde1ec6c340b075a5ce5807c34
+      internalID: 925066829
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_39
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 3576
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9ae61f94ccdfb3c41acce404297b363e
+      internalID: 801948486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_40
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 3260
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dd4db96e494704d43ae7c4c678aaba8b
+      internalID: -1321455643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_41
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 3260
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5203e08cb5ffa8749a42bb56b8b42834
+      internalID: -1603088492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_42
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 3260
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 08c112b5e05c1f64d8d339178a4426d0
+      internalID: -1464502441
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_43
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 3260
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1bc244aeab8a5714498fb40a0936bee3
+      internalID: -675214637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_44
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 3260
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bd71abfe9b2ff984bb71b3b392905a2c
+      internalID: 244505080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_45
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 3260
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 238661f7608f625438bef70a6f63edad
+      internalID: -1019880091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_46
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 3260
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3b674d800a2f64f4494954d5301b8002
+      internalID: 1556580048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_47
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 3260
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 476b41c7158132841ac12d64fdcb4bf0
+      internalID: 24701199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_48
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 3260
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb5fdf4df8d2d634daa431d994614373
+      internalID: 1135936401
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_49
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 3260
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4611f47bab84d5b418ab48c889231188
+      internalID: -2010213517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_50
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 2944
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 56c4bc01f5e149243b4d0323df362c84
+      internalID: 1618241836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_51
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 2944
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a570753716962434e9fce05597eea1fe
+      internalID: 421837644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_52
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 2944
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2a9eff717f673d040be21aa65828c89d
+      internalID: 456378752
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_53
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 2944
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c598d290ba0df9f4789a1f9ed8be96ab
+      internalID: -945767135
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_54
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 2944
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b4a17986378d98f4ba18263cbcb2741e
+      internalID: 471193392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_55
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 2944
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d4292429e2328b64fbbc27006527f6be
+      internalID: -1750313214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_56
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 2944
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a5017cb28a8f2c4478b987a266b91e57
+      internalID: -240636137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_57
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 2944
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e3e294aea43cb0d4983c3f69bbb2c4da
+      internalID: -2028785334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_58
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 2944
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c2806feda8a6c94d87d2dc32962a2e1
+      internalID: -563604912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_59
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 2944
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9c6498754edbf554588c632954300edb
+      internalID: -648979075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_60
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 2628
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e145871e808e314493c16bba4d4a3ad
+      internalID: -229867196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_61
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 2628
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 887203cd470348c4f991c4788648f48f
+      internalID: 610889023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_62
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 2628
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e52c00b13c75329458ea83c260a4bc1e
+      internalID: -14694286
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_63
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 2628
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 749d77c690ad3824aa4be0e8c88187bc
+      internalID: 1553174476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_64
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 2628
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0be4a6231c5a9e548a653a48b6e1739c
+      internalID: 539355578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_65
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 2628
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 769840ebc0dfd364d972f798a61361fd
+      internalID: -1999486668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_66
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 2628
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e93c5afdf49c170488e32c858a5b5b3a
+      internalID: 1937179825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_67
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 2628
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 079db13ab6cb8a04b89fbab72aa0ba5d
+      internalID: -596064858
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_68
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 2628
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9c899ba45a9f923408d4cb147c12d5a4
+      internalID: 55581399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_69
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 2628
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0cbc105c764917d44bbdb4ce55b5883e
+      internalID: 981860566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_70
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 2312
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52633c0fa8340704a87962c12043df70
+      internalID: -341505501
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_71
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 2312
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: de9e9092bd99b7a4fbf8e98f7c1c9e1c
+      internalID: 65139670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_72
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 2312
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c8d3125bf019e734f8490139e933af5b
+      internalID: 880689926
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_73
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 2312
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 34a833cdc6358da42834fbedc5de206d
+      internalID: -126289035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_74
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 2312
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bc6bcd4352eb75f4f9c7e412bd0d4600
+      internalID: 1420567810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_75
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 2312
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 536b991c1d50323499dca70afd63fde6
+      internalID: 1882069498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_76
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 2312
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d1fb7765db3ee148904bc49d39fcb57
+      internalID: 1095026876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_77
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 2312
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 45bfcbb237a358e4c978754011ebccf6
+      internalID: -987202950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_78
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 2312
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 70339dd15a76fd24391391469a304784
+      internalID: 1497585752
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_79
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 2312
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c53d45d6ad78134bb7a6e31d04c8d5b
+      internalID: 1341858074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_80
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 1996
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 272f98d2e8c7c3341a60e5f450a35fed
+      internalID: 696679764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_81
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 1996
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0922bbc953828d74f890acae1936f96a
+      internalID: -2130348857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_82
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 1996
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9c80c13d4306d734da367a0332926052
+      internalID: -247310077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_83
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 1996
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d1d772f6b5bc2d4d9d5b818a2fa85b3
+      internalID: -1381379971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_84
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 1996
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e11742e8f2eb809488aab819bddc74d4
+      internalID: 341934498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_85
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 1996
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3f32e6f56cd767941b661a02e29597f7
+      internalID: -291729710
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_86
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 1996
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ef5b1adcc486c445a23e2cf223124af
+      internalID: -1331661313
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_87
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 1996
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: db4af2693f453be49b82ca057bc3c7e2
+      internalID: 1739477160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_88
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 1996
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 11fefebe606b8bd469c75755e53e09fd
+      internalID: -894445781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_89
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 1996
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 36a3033510dbf5548b20e04d5892aaf2
+      internalID: 1181175931
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_90
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 1680
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f54e33a39c01c024eb8d6606d5f181fd
+      internalID: -1827501279
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_91
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 1680
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bb1705cbb747bb64c8faa90dbf651f62
+      internalID: -1228507869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_92
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 1680
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6554688c8719f2740b9939da5755d990
+      internalID: -671643469
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_93
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 1680
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 39e655385b72a154f8b90b0a7c1ca6da
+      internalID: 531092630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_94
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 1680
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f4571e0d73432e94b9b1876923dcc3d3
+      internalID: -1999886335
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_95
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 1680
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 18e2e1f2887070c479f69cee926c15d1
+      internalID: 893964791
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_96
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 1680
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 874c4345faccbfd41a8b72a14bd37b67
+      internalID: -610479914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_97
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 1680
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 454e8d6c38af14742a76aab491e84d79
+      internalID: -154153604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_98
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 1680
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f441fc62fd803744adeabaf7a53985c
+      internalID: -388973398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_99
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 1680
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e477b94ba9be0b64b82f86c8d7c3099d
+      internalID: -2059615114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_100
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 1364
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e38ba7ac5f0c9a74ea06efbf3cc62cb3
+      internalID: -1840264058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_101
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 1364
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9f4a193eb6aa2ba4885df3109eca0b0e
+      internalID: -700412785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_102
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 1364
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 08ae773cffe822a42b10ecbc073d4158
+      internalID: 1057368253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_103
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 1364
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f0d8795e0eb36f4bb5450f4304d5ab9
+      internalID: 100157964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_104
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 1364
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0057fef911181f74ca3624591e823f7b
+      internalID: -1075633572
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_105
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 1364
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 58a5bfbf54c9bb140bbabfad7bfbdbc6
+      internalID: 202952195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_106
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 1364
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 43a37a868b4e92042b76054736875bee
+      internalID: 1815168549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_107
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 1364
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b84f783cc271a194594497abba2546a8
+      internalID: 668768641
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_108
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 1364
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 459c7669fca2bdf49a2f5a3bfd87afba
+      internalID: -1400992719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_109
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 1364
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 543107903cf57b4458f7176c96082940
+      internalID: -444791494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_110
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 1048
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 694ed5edb781d3b4a8d6accc599f9b21
+      internalID: -246373702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_111
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 1048
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e68a033d288979438c2ad1bd3ea36bc
+      internalID: -1753390829
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_112
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 1048
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ce3f4c46f456a39438d4a35614e1ab76
+      internalID: 1120631877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_113
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 1048
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f56b2cf5f6fdc1c4f90d8b2f7271ece1
+      internalID: -2104271408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_114
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 1048
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1d03c5eaab0d2264aa4602301031363f
+      internalID: -352758628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_115
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 1048
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a1e25fb7467a25c409b29919fbc6cd94
+      internalID: -1191939351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_116
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 1048
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7774277b235839d4d8a3f0a2c33cb413
+      internalID: 1838476404
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_117
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 1048
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 12ba6251be3702f4a9592a8ba2050c23
+      internalID: -1591937362
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_118
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 1048
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 31e8fa5c1176c2a4db3d52bbf6590622
+      internalID: 1762284952
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_119
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 1048
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a7a98bf070cf3cf4293e1c7ac22936eb
+      internalID: 151858411
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_120
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 732
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cd19f46493fc2ac43841c5a2a91c562e
+      internalID: 1559881072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_121
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 732
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dddac58b4aaf1424594dd051792166df
+      internalID: 518684395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_122
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 732
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2bbf571f21e7a214c9c3f20e7131c38d
+      internalID: -1654670525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_123
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 732
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 158801c358803a541a7cfad7ec55eb25
+      internalID: -788129909
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_124
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 732
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2df0a14154c32d343b97caf44bbac65d
+      internalID: -638447516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_125
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 732
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 20618d5da710fa6418089c519c8bcfe0
+      internalID: 2009399972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_126
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 732
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c919630112fcc6c4b8903a63cadaaa60
+      internalID: 986338134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_127
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 732
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ef274c598f94f143b75b461d8e127a8
+      internalID: -643226645
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_128
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 732
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c0b4a5d9ec54c14ca0d8940db9fd26e
+      internalID: -1012881770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_129
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 732
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: efadff5e088a59d4685f1408b51b2cb4
+      internalID: -1866598957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_130
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 416
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 705cd02fdac6fd246a5cb2d16170d2e0
+      internalID: 608185198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_131
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 416
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1eadd983657979349b5f9f091441ae23
+      internalID: -371255345
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_132
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 416
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dd4d217c93af8ca41b00482f92d85e21
+      internalID: -1206733612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_133
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 416
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 439100089109fa84b9e2857db924ae76
+      internalID: -923192575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_134
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 416
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e7f0ed7652533ec4b9f63e63ed968023
+      internalID: -6130542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_135
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 416
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 53b44852e6d8e534fa9d76bd822ec01f
+      internalID: -376944924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_136
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 416
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d7e2b68fd99696a4b8251ce004f68e33
+      internalID: -1149932749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_137
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 416
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0bbe234e42e92df479a98f68fe7c58f6
+      internalID: 1605313624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_138
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 416
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2d0d74991d43d3d40b4f99c3a9fe0d68
+      internalID: 1874626009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_139
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 416
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a922ff0af6f953d40b6f2c6aaa1c2d06
+      internalID: -1893001793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_140
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 100
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 88b43f0bddf1a2a4d9eaf4598699bf09
+      internalID: 1281520084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_141
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 100
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e9454ddc95e8f634ea33dc11aaeb1a17
+      internalID: 56504307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_142
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 100
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd3b150d4f7aca746b962b9bf2e5c8d5
+      internalID: 923692486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_143
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 100
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 943435b1f1dd79d4db956afd0e7160c7
+      internalID: 2099413619
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_144
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 100
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 248640a212afeb342acb0ecb930969b0
+      internalID: 1929790144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_145
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 100
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 582c7bff6ac2ef04f8d218768b0bfcf8
+      internalID: -637480292
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_146
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 100
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b91f00738e0e2b74cbc9d21dd2f15a6d
+      internalID: -1403523162
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_147
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 100
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d0498a5f6be53347ac45d3dadcd0ee9
+      internalID: -2058429175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_148
+      rect:
+        serializedVersion: 2
+        x: 2628
+        y: 100
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6bdd9a29435dd294c976fd1be2bbd569
+      internalID: 554867624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Skill And Ability Icons_149
+      rect:
+        serializedVersion: 2
+        x: 2944
+        y: 100
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0173bd8542833e94ba65a63d442dc38e
+      internalID: 1657116231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 0d394740c44119d45ab97f91a20f4095
     internalID: 0
     vertices: []
     indices: 
@@ -133,9 +3411,160 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":256.0,"y":256.0},"gridSpriteOffset":{"x":100.0,"y":100.0},"gridSpritePadding":{"x":60.0,"y":60.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       Skill And Ability Icons_0: 1790912913747163299
+      Skill And Ability Icons_1: -1302553849
+      Skill And Ability Icons_10: 1205679984
+      Skill And Ability Icons_100: -1840264058
+      Skill And Ability Icons_101: -700412785
+      Skill And Ability Icons_102: 1057368253
+      Skill And Ability Icons_103: 100157964
+      Skill And Ability Icons_104: -1075633572
+      Skill And Ability Icons_105: 202952195
+      Skill And Ability Icons_106: 1815168549
+      Skill And Ability Icons_107: 668768641
+      Skill And Ability Icons_108: -1400992719
+      Skill And Ability Icons_109: -444791494
+      Skill And Ability Icons_11: 1168649144
+      Skill And Ability Icons_110: -246373702
+      Skill And Ability Icons_111: -1753390829
+      Skill And Ability Icons_112: 1120631877
+      Skill And Ability Icons_113: -2104271408
+      Skill And Ability Icons_114: -352758628
+      Skill And Ability Icons_115: -1191939351
+      Skill And Ability Icons_116: 1838476404
+      Skill And Ability Icons_117: -1591937362
+      Skill And Ability Icons_118: 1762284952
+      Skill And Ability Icons_119: 151858411
+      Skill And Ability Icons_12: -844991433
+      Skill And Ability Icons_120: 1559881072
+      Skill And Ability Icons_121: 518684395
+      Skill And Ability Icons_122: -1654670525
+      Skill And Ability Icons_123: -788129909
+      Skill And Ability Icons_124: -638447516
+      Skill And Ability Icons_125: 2009399972
+      Skill And Ability Icons_126: 986338134
+      Skill And Ability Icons_127: -643226645
+      Skill And Ability Icons_128: -1012881770
+      Skill And Ability Icons_129: -1866598957
+      Skill And Ability Icons_13: 2008686998
+      Skill And Ability Icons_130: 608185198
+      Skill And Ability Icons_131: -371255345
+      Skill And Ability Icons_132: -1206733612
+      Skill And Ability Icons_133: -923192575
+      Skill And Ability Icons_134: -6130542
+      Skill And Ability Icons_135: -376944924
+      Skill And Ability Icons_136: -1149932749
+      Skill And Ability Icons_137: 1605313624
+      Skill And Ability Icons_138: 1874626009
+      Skill And Ability Icons_139: -1893001793
+      Skill And Ability Icons_14: 517037878
+      Skill And Ability Icons_140: 1281520084
+      Skill And Ability Icons_141: 56504307
+      Skill And Ability Icons_142: 923692486
+      Skill And Ability Icons_143: 2099413619
+      Skill And Ability Icons_144: 1929790144
+      Skill And Ability Icons_145: -637480292
+      Skill And Ability Icons_146: -1403523162
+      Skill And Ability Icons_147: -2058429175
+      Skill And Ability Icons_148: 554867624
+      Skill And Ability Icons_149: 1657116231
+      Skill And Ability Icons_15: -1211958613
+      Skill And Ability Icons_16: 1266941395
+      Skill And Ability Icons_17: -2141919793
+      Skill And Ability Icons_18: -942056666
+      Skill And Ability Icons_19: 1879725334
+      Skill And Ability Icons_2: -605739430
+      Skill And Ability Icons_20: -1071641041
+      Skill And Ability Icons_21: 113071119
+      Skill And Ability Icons_22: -237358296
+      Skill And Ability Icons_23: 1374137284
+      Skill And Ability Icons_24: 85466419
+      Skill And Ability Icons_25: 799732040
+      Skill And Ability Icons_26: -529419605
+      Skill And Ability Icons_27: -1529832828
+      Skill And Ability Icons_28: 1728326426
+      Skill And Ability Icons_29: 931606173
+      Skill And Ability Icons_3: 1656853673
+      Skill And Ability Icons_30: -1514340460
+      Skill And Ability Icons_31: 681961694
+      Skill And Ability Icons_32: -524155898
+      Skill And Ability Icons_33: -1095056690
+      Skill And Ability Icons_34: -1455384912
+      Skill And Ability Icons_35: -749924901
+      Skill And Ability Icons_36: -919203351
+      Skill And Ability Icons_37: -1700718424
+      Skill And Ability Icons_38: 925066829
+      Skill And Ability Icons_39: 801948486
+      Skill And Ability Icons_4: -949628480
+      Skill And Ability Icons_40: -1321455643
+      Skill And Ability Icons_41: -1603088492
+      Skill And Ability Icons_42: -1464502441
+      Skill And Ability Icons_43: -675214637
+      Skill And Ability Icons_44: 244505080
+      Skill And Ability Icons_45: -1019880091
+      Skill And Ability Icons_46: 1556580048
+      Skill And Ability Icons_47: 24701199
+      Skill And Ability Icons_48: 1135936401
+      Skill And Ability Icons_49: -2010213517
+      Skill And Ability Icons_5: 648246831
+      Skill And Ability Icons_50: 1618241836
+      Skill And Ability Icons_51: 421837644
+      Skill And Ability Icons_52: 456378752
+      Skill And Ability Icons_53: -945767135
+      Skill And Ability Icons_54: 471193392
+      Skill And Ability Icons_55: -1750313214
+      Skill And Ability Icons_56: -240636137
+      Skill And Ability Icons_57: -2028785334
+      Skill And Ability Icons_58: -563604912
+      Skill And Ability Icons_59: -648979075
+      Skill And Ability Icons_6: 1661807162
+      Skill And Ability Icons_60: -229867196
+      Skill And Ability Icons_61: 610889023
+      Skill And Ability Icons_62: -14694286
+      Skill And Ability Icons_63: 1553174476
+      Skill And Ability Icons_64: 539355578
+      Skill And Ability Icons_65: -1999486668
+      Skill And Ability Icons_66: 1937179825
+      Skill And Ability Icons_67: -596064858
+      Skill And Ability Icons_68: 55581399
+      Skill And Ability Icons_69: 981860566
+      Skill And Ability Icons_7: 515021022
+      Skill And Ability Icons_70: -341505501
+      Skill And Ability Icons_71: 65139670
+      Skill And Ability Icons_72: 880689926
+      Skill And Ability Icons_73: -126289035
+      Skill And Ability Icons_74: 1420567810
+      Skill And Ability Icons_75: 1882069498
+      Skill And Ability Icons_76: 1095026876
+      Skill And Ability Icons_77: -987202950
+      Skill And Ability Icons_78: 1497585752
+      Skill And Ability Icons_79: 1341858074
+      Skill And Ability Icons_8: -928613997
+      Skill And Ability Icons_80: 696679764
+      Skill And Ability Icons_81: -2130348857
+      Skill And Ability Icons_82: -247310077
+      Skill And Ability Icons_83: -1381379971
+      Skill And Ability Icons_84: 341934498
+      Skill And Ability Icons_85: -291729710
+      Skill And Ability Icons_86: -1331661313
+      Skill And Ability Icons_87: 1739477160
+      Skill And Ability Icons_88: -894445781
+      Skill And Ability Icons_89: 1181175931
+      Skill And Ability Icons_9: -825764823
+      Skill And Ability Icons_90: -1827501279
+      Skill And Ability Icons_91: -1228507869
+      Skill And Ability Icons_92: -671643469
+      Skill And Ability Icons_93: 531092630
+      Skill And Ability Icons_94: -1999886335
+      Skill And Ability Icons_95: 893964791
+      Skill And Ability Icons_96: -610479914
+      Skill And Ability Icons_97: -154153604
+      Skill And Ability Icons_98: -388973398
+      Skill And Ability Icons_99: -2059615114
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
