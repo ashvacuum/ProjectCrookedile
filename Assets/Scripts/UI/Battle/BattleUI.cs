@@ -106,6 +106,7 @@ namespace Crookedile.UI.Battle
         private List<EnemySlotUI>           _enemySlots = new List<EnemySlotUI>();
         private CardChoiceRequestedEvent    _pendingCardChoice;
         private bool                        _handRefreshPending;
+        private HashSet<CardData>           _pendingDrawnCards = new HashSet<CardData>();
         private Coroutine                   _battleInfoFade;
 
         #region Initialization
@@ -222,19 +223,31 @@ namespace Crookedile.UI.Battle
 
         private void OnCardPlayed(CardPlayedEvent evt)
         {
-            string player = evt.IsPlayer ? "Player" : "Opponent";
-            logPanel?.AddEntry($"{player} played: {evt.Card.CardName}");
+            logPanel?.AddEntry($"{(evt.IsPlayer ? "Player" : "Opponent")} played: {evt.Card.CardName}");
             UpdateStatsDisplay();
-            // PlayCardAtIndex runs before CardPlayedEvent is published, so the card is already
-            // out of Hand when we arrive here. Rebuild the hand to remove its button and
-            // re-evaluate affordability for remaining cards in one pass.
-            handPanel?.RefreshNormalHand(battleManager, OnCardButtonClicked);
+
+            if (evt.IsPlayer)
+            {
+                // Pull the button out and fly it to the discard pile concurrently.
+                var discardBtn = handPanel?.ExtractCard(evt.Card);
+                if (discardBtn != null)
+                    CardFlyAnimator.Instance?.AnimateDiscardOut(discardBtn,
+                        () => BattlePoolManager.Instance?.ReturnCard(discardBtn));
+            }
+
+            // Defer one frame — any draw events from this card's effect batch in via OnCardDrawn.
+            if (!_handRefreshPending)
+            {
+                _handRefreshPending = true;
+                StartCoroutine(RefreshHandNextFrame());
+            }
         }
 
         private void OnCardDrawn(CardDrawnEvent evt)
         {
-            if (!evt.IsPlayer) return;          // enemy draws don't affect the player's hand panel
-            if (_handRefreshPending) return;    // already waiting — batch multiple draws into one rebuild
+            if (!evt.IsPlayer) return;              // enemy draws don't affect the player's hand panel
+            _pendingDrawnCards.Add(evt.Card);       // track which cards are new this batch
+            if (_handRefreshPending) return;        // coroutine already running — just add to batch
             _handRefreshPending = true;
             StartCoroutine(RefreshHandNextFrame());
         }
@@ -243,7 +256,16 @@ namespace Crookedile.UI.Battle
         {
             yield return null;  // wait one frame so all draw events from one effect batch together
             _handRefreshPending = false;
-            handPanel?.RefreshNormalHand(battleManager, OnCardButtonClicked);
+            var drawn = _pendingDrawnCards.Count > 0
+                ? new HashSet<CardData>(_pendingDrawnCards) : null;
+            _pendingDrawnCards.Clear();
+
+            // If cards were drawn, merge them in and animate only the new ones;
+            // otherwise just reposition and re-init the existing buttons.
+            if (drawn != null)
+                handPanel?.AddDrawnCards(drawn, battleManager, OnCardButtonClicked);
+            else
+                handPanel?.RearrangeCurrentHand(battleManager, OnCardButtonClicked);
         }
 
         private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)

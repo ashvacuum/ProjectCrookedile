@@ -149,6 +149,10 @@ namespace Crookedile.Managers
         /// <summary>
         /// Spawns an animated UI image instance on the VFX canvas, positioned at the target's canvas location,
         /// and plays the specified Animator state. Returns the spawned <see cref="VFXAnimatedImage"/>, or null.
+        ///
+        /// Positioning uses a lightweight pivot <see cref="RectTransform"/> placed at the target position.
+        /// The VFX instance is parented to that pivot at (0,0), so Animator position curves baked into the
+        /// clip animate relative to the spawn point rather than overwriting the canvas-space placement we compute.
         /// </summary>
         private VFXAnimatedImage SpawnAnimatedImageAt(string stateName, RectTransform uiTarget, Vector2 pixelOffset)
         {
@@ -160,50 +164,16 @@ namespace Crookedile.Managers
 
             GameObject instance = GetFromPool();
             if (instance == null) return null;
-
-            instance.transform.SetParent(_vfxCanvas.transform, worldPositionStays: false);
-
-            RectTransform rt = instance.GetComponent<RectTransform>();
-            if (rt != null)
-            {
-                Vector2 canvasLocalPos = Vector2.zero;
-
-                if (uiTarget != null)
-                {
-                    // Use the SOURCE element's root canvas camera for WorldToScreenPoint.
-                    // The game canvas and VFX canvas can have different render modes/cameras
-                    // (e.g. game canvas = Screen Space – Camera, VFX canvas = Screen Space – Overlay),
-                    // so using the VFX canvas camera here would give wrong screen coordinates.
-                    Canvas sourceCanvas = uiTarget.GetComponentInParent<Canvas>();
-                    if (sourceCanvas != null) sourceCanvas = sourceCanvas.rootCanvas;
-                    Camera sourceCam = (sourceCanvas != null
-                                       && sourceCanvas.renderMode == RenderMode.ScreenSpaceCamera)
-                        ? sourceCanvas.worldCamera
-                        : null;
-
-                    // VFX canvas camera is only needed for ScreenPointToLocalPointInRectangle.
-                    Camera vfxCam = _vfxCanvas.renderMode == RenderMode.ScreenSpaceOverlay
-                        ? null
-                        : _vfxCanvas.worldCamera;
-
-                    Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(sourceCam, uiTarget.position);
-                    RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                        (RectTransform)_vfxCanvas.transform, screenPos, vfxCam, out canvasLocalPos);
-                }
-
-                // Use localPosition rather than anchoredPosition — anchoredPosition depends on
-                // the prefab's anchor setup and will be offset when the anchor is not (0.5, 0.5).
-                // localPosition is always relative to the parent's pivot, matching the output of
-                // ScreenPointToLocalPointInRectangle which returns a point in parent local space.
-                rt.localPosition = new Vector3(canvasLocalPos.x + pixelOffset.x,
-                                               canvasLocalPos.y + pixelOffset.y, 0f);
-            }
-
+            
+            instance.transform.SetParent(uiTarget.transform, worldPositionStays: false);
+            instance.transform.SetAsLastSibling();
+            
             return ActivateInstance(instance, stateName);
         }
 
         /// <summary>
         /// Spawns an animated image at a world-space position, converting it to canvas space first.
+        /// Uses the same pivot-wrapper pattern as <see cref="SpawnAnimatedImageAt"/>.
         /// </summary>
         private VFXAnimatedImage SpawnAnimatedImageAtWorld(string stateName, Vector3 worldPos, Vector2 pixelOffset)
         {
@@ -213,38 +183,54 @@ namespace Crookedile.Managers
                 return null;
             }
 
-            Camera cam = _vfxCanvas.renderMode == RenderMode.ScreenSpaceOverlay
-                ? null
-                : _vfxCanvas.worldCamera;
-
-            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(cam, worldPos);
-
             GameObject instance = GetFromPool();
             if (instance == null) return null;
 
-            instance.transform.SetParent(_vfxCanvas.transform, worldPositionStays: false);
+            Camera cam = _vfxCanvas.renderMode == RenderMode.ScreenSpaceOverlay
+                ? null : _vfxCanvas.worldCamera;
 
+            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(cam, worldPos);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                (RectTransform)_vfxCanvas.transform, screenPos, cam, out Vector2 localPos);
+
+            GameObject pivot   = new GameObject("VFXPivot");
+            var        pivotRT = pivot.AddComponent<RectTransform>();
+            pivotRT.SetParent(_vfxCanvas.transform, worldPositionStays: false);
+            pivotRT.anchorMin = pivotRT.anchorMax = new Vector2(0.5f, 0.5f);
+            pivotRT.pivot     = new Vector2(0.5f, 0.5f);
+            pivotRT.sizeDelta = Vector2.zero;
+            pivotRT.anchoredPosition = localPos + pixelOffset;
+
+            instance.transform.SetParent(pivot.transform, worldPositionStays: false);
             RectTransform rt = instance.GetComponent<RectTransform>();
             if (rt != null)
             {
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    (RectTransform)_vfxCanvas.transform, screenPos, cam, out Vector2 localPos);
-                rt.anchoredPosition = localPos + pixelOffset;
+                rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+                rt.pivot     = new Vector2(0.5f, 0.5f);
+                rt.anchoredPosition = Vector2.zero;
             }
 
-            return ActivateInstance(instance, stateName);
+            return ActivateInstance(instance, stateName, pivot);
         }
 
         /// <summary>
         /// Activates a pooled instance, wires the pool-return callback, and plays the named animation state.
         /// Falls back to a timed coroutine if the instance has no <see cref="VFXAnimatedImage"/> component.
+        /// <paramref name="pivot"/> is the lightweight wrapper created by the spawn methods; it is
+        /// destroyed and the instance re-parented to null when the animation completes.
         /// </summary>
-        private VFXAnimatedImage ActivateInstance(GameObject instance, string stateName)
+        private VFXAnimatedImage ActivateInstance(GameObject instance, string stateName, GameObject pivot = null)
         {
             var controller = instance.GetComponent<VFXAnimatedImage>();
             if (controller != null)
             {
-                controller.OnComplete = () => ReturnToPool(instance);
+                controller.OnComplete = () =>
+                {
+                    // Detach from pivot before pooling so the instance can be re-parented next spawn.
+                    instance.transform.SetParent(null);
+                    if (pivot != null) Destroy(pivot);
+                    ReturnToPool(instance);
+                };
             }
 
             instance.SetActive(true);
@@ -256,7 +242,7 @@ namespace Crookedile.Managers
             if (controller == null)
             {
                 float duration = GetStateDuration(instance.GetComponent<Animator>(), stateName);
-                StartCoroutine(ReturnAfterDelay(instance, duration));
+                StartCoroutine(ReturnAfterDelay(instance, duration, pivot));
             }
 
             return controller;
@@ -280,12 +266,15 @@ namespace Crookedile.Managers
         {
             if (instance == null) return;
             instance.SetActive(false);
+            instance.transform.SetParent(_vfxCanvas.transform);
             _pool.Enqueue(instance);
         }
 
-        private IEnumerator ReturnAfterDelay(GameObject instance, float delay)
+        private IEnumerator ReturnAfterDelay(GameObject instance, float delay, GameObject pivot = null)
         {
             if (delay > 0f) yield return new WaitForSeconds(delay);
+            instance.transform.SetParent(null);
+            if (pivot != null) Destroy(pivot);
             ReturnToPool(instance);
         }
 

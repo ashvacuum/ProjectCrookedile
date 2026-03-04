@@ -23,66 +23,73 @@ namespace Crookedile.UI.Battle
     {
         // ─── UI Structure References ──────────────────────────────────────────────
 
-        [Header("Card Art")]
-        [Tooltip("Shows the card's artwork sprite from CardData")]
-        [SerializeField] private Image artworkImage;
+        [Header("Card Art")] [Tooltip("Shows the card's artwork sprite from CardData")] [SerializeField]
+        private Image artworkImage;
 
-        [Tooltip("Border frame image — set by card type (Diplomacy/Hostility/Manipulate)")]
-        [SerializeField] private Image typeFrameImage;
+        [Tooltip("Border frame image — set by card type (Diplomacy/Hostility/Manipulate)")] [SerializeField]
+        private Image typeFrameImage;
 
-        [Tooltip("Rarity overlay image — set by card rarity (Basic/Enhanced/Rare)")]
-        [SerializeField] private Image rarityOverlayImage;
+        [Tooltip("Rarity overlay image — set by card rarity (Basic/Enhanced/Rare)")] [SerializeField]
+        private Image rarityOverlayImage;
 
-        [Header("Card Text")]
-        [SerializeField] private TMP_Text cardNameText;
+        [Header("Card Text")] [SerializeField] private TMP_Text cardNameText;
         [SerializeField] private TMP_Text cardCostText;
         [SerializeField] private TMP_Text cardDescriptionText;
         [SerializeField] private TMP_Text flavorText;
 
         [Header("Card Type Color Strip")]
         [Tooltip("Optional colored strip at top/bottom indicating card type")]
-        [SerializeField] private Image cardTypeStrip;
+        [SerializeField]
+        private Image cardTypeStrip;
 
         // ─── Visual Settings ──────────────────────────────────────────────────────
 
         [Header("Visual Settings")]
         [Tooltip("Optional: reference to CardVisualSettings for frame/rarity sprites")]
-        [SerializeField] private CardVisualSettings visualSettings;
+        [SerializeField]
+        private CardVisualSettings visualSettings;
 
-        [Header("Card Type Colors")]
-        [SerializeField] private Color pressureColor = new Color(0.2f, 0.8f, 0.2f);   // Green
-        [SerializeField] private Color rhetoricColor = new Color(0.8f, 0.2f, 0.2f);   // Red
-        [SerializeField] private Color policyColor   = new Color(0.2f, 0.5f, 0.9f);   // Blue
+        [Header("Card Type Colors")] [SerializeField]
+        private Color pressureColor = new Color(0.2f, 0.8f, 0.2f); // Green
+
+        [SerializeField] private Color rhetoricColor = new Color(0.8f, 0.2f, 0.2f); // Red
+        [SerializeField] private Color policyColor = new Color(0.2f, 0.5f, 0.9f); // Blue
         [SerializeField] private Color unaffordableColor = new Color(0.4f, 0.4f, 0.4f, 0.6f);
 
         // ─── Hover / Scale ────────────────────────────────────────────────────────
 
-        [Header("Hover Behaviour")]
-        [Tooltip("How much to scale up on hover (1.1 = 10% bigger)")]
-        [SerializeField] private float hoverScale = 1.12f;
-        [Tooltip("How fast the scale animates")]
-        [SerializeField] private float hoverLerpSpeed = 12f;
+        [Header("Hover Behaviour")] [Tooltip("How much to scale up on hover (1.1 = 10% bigger)")] [SerializeField]
+        private float hoverScale = 1.12f;
+
+        [Tooltip("How fast the scale animates")] [SerializeField]
+        private float hoverLerpSpeed = 12f;
+
         [Tooltip("Gap in pixels between the card's bottom edge and the screen bottom when hovered. " +
                  "All cards share this height regardless of their arc position.")]
-        [SerializeField] private float hoverEdgePadding = 6f;
+        [SerializeField]
+        private float hoverEdgePadding = 6f;
 
         // ─── Drag to Play ─────────────────────────────────────────────────────────
 
         [Header("Drag to Play")]
         [Tooltip("How many pixels upward the card must travel to trigger a play when not dropped on an enemy.")]
-        [SerializeField] private float dragUpThreshold = 100f;
+        [SerializeField]
+        private float dragUpThreshold = 100f;
 
         // ─── MMFeedbacks ──────────────────────────────────────────────────────────
 
-        [Header("Feedbacks")]
-        [Tooltip("Plays when this card is drawn into hand")]
+        [Header("Feedbacks")] [Tooltip("Plays when this card is drawn into hand")]
         public MMFeedbacks drawFeedback;
+
         [Tooltip("Plays when mouse enters the card")]
         public MMFeedbacks hoverEnterFeedback;
+
         [Tooltip("Plays when mouse leaves the card")]
         public MMFeedbacks hoverExitFeedback;
+
         [Tooltip("Plays when the card is selected / clicked")]
         public MMFeedbacks selectFeedback;
+
         [Tooltip("Plays when the card is discarded from hand")]
         public MMFeedbacks discardFeedback;
 
@@ -90,22 +97,33 @@ namespace Crookedile.UI.Battle
 
         [Header("Policy-Only Elements")]
         [Tooltip("Icon shown when this Policy card leans Left. Leave null on Pressure/Rhetoric prefabs.")]
-        [SerializeField] private Image _policyLeanLeftIcon;
+        [SerializeField]
+        private Image _policyLeanLeftIcon;
+
         [Tooltip("Icon shown when this Policy card leans Center. Leave null on Pressure/Rhetoric prefabs.")]
-        [SerializeField] private Image _policyLeanCenterIcon;
+        [SerializeField]
+        private Image _policyLeanCenterIcon;
+
         [Tooltip("Icon shown when this Policy card leans Right. Leave null on Pressure/Rhetoric prefabs.")]
-        [SerializeField] private Image _policyLeanRightIcon;
+        [SerializeField]
+        private Image _policyLeanRightIcon;
 
         // ─── Selection (CardSelectionPanel) ───────────────────────────────────────
 
         [Header("Selection")]
-        [Tooltip("Overlay Image shown when this card is selected in a CardSelectionPanel. Assign a colored border child.")]
-        [SerializeField] private Image _selectionOutline;
+        [Tooltip(
+            "Overlay Image shown when this card is selected in a CardSelectionPanel. Assign a colored border child.")]
+        [SerializeField]
+        private Image _selectionOutline;
 
         // ─── Runtime State ────────────────────────────────────────────────────────
 
         private CardData cardData;
         private int handIndex;
+
+        /// <summary>Read-only access to the card data — used by HandPanel.ExtractCard to match buttons.</summary>
+        public CardData CardData => cardData;
+
         private Action onClickCallback;
 
         private bool isHovered;
@@ -113,23 +131,25 @@ namespace Crookedile.UI.Battle
 
         // Cached cost values from Initialize so CanAfford and RefreshVisuals use the same numbers
         // as the AP-spend validation in BattleManager (status effect modifiers applied).
-        private int  _effectiveCost;
-        private bool _forceUnplayable;  // true when Silenced blocks a Rhetoric card, etc.
+        private int _effectiveCost;
+        private bool _forceUnplayable; // true when Silenced blocks a Rhetoric card, etc.
 
-        private Vector3    baseScale;
-        private Vector3    basePosition;
-        private Vector3    targetScale;
-        private Vector3    targetPosition;
+        private Vector3 baseScale;
+        private Vector3 basePosition;
+        private Vector3 targetScale;
+        private Vector3 targetPosition;
         private Quaternion baseRotation;
         private Quaternion targetRotation;
-        private int        baseSiblingIndex;
+
+        private int baseSiblingIndex;
+
         // True once SetBasePosition() has been called explicitly. Prevents Update() from
         // lerping cards toward (0,0) before a layout group has had a chance to position them.
-        private bool       _basePositionSet;
+        private bool _basePositionSet;
 
         // Drag / targeting state
-        private bool    _isDragging;
-        private bool    _isTargeting;
+        private bool _isDragging;
+        private bool _isTargeting;
         private Vector2 _dragStartScreenPos;
 
         /// <summary>The card currently being dragged, or null.</summary>
@@ -159,11 +179,11 @@ namespace Crookedile.UI.Battle
 
         private void Awake()
         {
-            baseScale      = transform.localScale;
-            basePosition   = transform.localPosition;
-            targetScale    = baseScale;
+            baseScale = transform.localScale;
+            basePosition = transform.localPosition;
+            targetScale = baseScale;
             targetPosition = basePosition;
-            baseRotation   = transform.localRotation;
+            baseRotation = transform.localRotation;
             targetRotation = baseRotation;
         }
 
@@ -176,8 +196,10 @@ namespace Crookedile.UI.Battle
             transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * hoverLerpSpeed);
             if (_basePositionSet)
             {
-                transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, Time.deltaTime * hoverLerpSpeed);
-                transform.localRotation = Quaternion.Lerp(transform.localRotation, targetRotation, Time.deltaTime * hoverLerpSpeed);
+                transform.localPosition =
+                    Vector3.Lerp(transform.localPosition, targetPosition, Time.deltaTime * hoverLerpSpeed);
+                transform.localRotation = Quaternion.Lerp(transform.localRotation, targetRotation,
+                    Time.deltaTime * hoverLerpSpeed);
             }
         }
 
@@ -188,23 +210,23 @@ namespace Crookedile.UI.Battle
         /// force-unplayable flag (e.g. Silenced blocking Rhetoric), and a click callback.
         /// </summary>
         public void Initialize(CardData card, int index, int currentActionPoints,
-                               int effectiveCost, bool forceUnplayable = false, Action onClick = null)
+            int effectiveCost, bool forceUnplayable = false, Action onClick = null)
         {
-            PooledCardType   = card.CardType;
-            cardData         = card;
-            handIndex        = index;
-            onClickCallback  = onClick;
-            _effectiveCost   = effectiveCost;
+            PooledCardType = card.CardType;
+            cardData = card;
+            handIndex = index;
+            onClickCallback = onClick;
+            _effectiveCost = effectiveCost;
             _forceUnplayable = forceUnplayable;
-            isPlayable       = !forceUnplayable && CanAfford(currentActionPoints);
+            isPlayable = !forceUnplayable && CanAfford(currentActionPoints);
 
-            baseScale        = transform.localScale;
-            basePosition     = transform.localPosition;
-            targetScale      = baseScale;
-            targetPosition   = basePosition;
-            baseRotation     = transform.localRotation;
-            targetRotation   = baseRotation;
-            _basePositionSet = false;   // cleared until SetBasePosition() is called by the layout
+            baseScale = transform.localScale;
+            basePosition = transform.localPosition;
+            targetScale = baseScale;
+            targetPosition = basePosition;
+            baseRotation = transform.localRotation;
+            targetRotation = baseRotation;
+            _basePositionSet = false; // cleared until SetBasePosition() is called by the layout
 
             UpdateDisplay();
         }
@@ -238,7 +260,7 @@ namespace Crookedile.UI.Battle
         public void SetBasePosition(Vector3 position)
         {
             _basePositionSet = true;
-            basePosition     = position;
+            basePosition = position;
 
             // Capture the arc-tilt rotation that CardHandLayout wrote to localRotation
             // immediately before calling this method. This is the card's canonical resting angle.
@@ -285,9 +307,9 @@ namespace Crookedile.UI.Battle
             if (isHovered || _isDragging) return;
             isHovered = true;
 
-            targetScale    = baseScale * hoverScale;
+            targetScale = baseScale * hoverScale;
             targetPosition = new Vector3(basePosition.x, ComputeHoverY(), basePosition.z);
-            targetRotation = Quaternion.identity;   // straighten the arc tilt on hover
+            targetRotation = Quaternion.identity; // straighten the arc tilt on hover
 
             // Bring this card in front of all its neighbours while hovered.
             // CardHandLayout.SetSiblingOrder() restores natural z-order on the next hand rebuild.
@@ -301,9 +323,9 @@ namespace Crookedile.UI.Battle
             if (!isHovered) return;
             isHovered = false;
 
-            targetScale    = baseScale;
+            targetScale = baseScale;
             targetPosition = basePosition;
-            targetRotation = baseRotation;          // return to arc tilt
+            targetRotation = baseRotation; // return to arc tilt
             transform.SetSiblingIndex(baseSiblingIndex);
 
             hoverExitFeedback?.PlayFeedbacks();
@@ -321,7 +343,7 @@ namespace Crookedile.UI.Battle
             if (canvas == null) return basePosition.y;
 
             var canvasRect = canvas.GetComponent<RectTransform>();
-            var myRect     = GetComponent<RectTransform>();
+            var myRect = GetComponent<RectTransform>();
 
             // Bottom edge of the canvas converted to this card's parent local space
             Vector3 bottomWorld = canvas.transform.TransformPoint(
@@ -340,14 +362,14 @@ namespace Crookedile.UI.Battle
         {
             if (!isPlayable) return;
 
-            _isDragging         = true;
-            _isTargeting        = false;
+            _isDragging = true;
+            _isTargeting = false;
             _dragStartScreenPos = eventData.position;
-            DraggedCard         = this;
+            DraggedCard = this;
 
             // Clear hover state; card stays at its arc position (no re-parenting or cursor-follow).
-            isHovered      = false;
-            targetScale    = baseScale;
+            isHovered = false;
+            targetScale = baseScale;
             targetRotation = Quaternion.identity;
 
             // Disable raycasts so enemy slots above the hand can receive pointer events.
@@ -383,7 +405,8 @@ namespace Crookedile.UI.Battle
             EnemySlotUI targetedSlot = EnemySlotUI.TargetedSlot;
             bool wasTargeting = _isTargeting;
 
-            Debug.Log($"[CardButton] OnEndDrag: wasTargeting={wasTargeting}  targetedSlot={targetedSlot?.name ?? "none"}  requiresTarget={RequiresSpecificTarget()}  callback={(onClickCallback != null ? "set" : "null")}");
+            Debug.Log(
+                $"[CardButton] OnEndDrag: wasTargeting={wasTargeting}  targetedSlot={targetedSlot?.name ?? "none"}  requiresTarget={RequiresSpecificTarget()}  callback={(onClickCallback != null ? "set" : "null")}");
 
             if (_isTargeting)
                 ExitTargetingMode();
@@ -411,7 +434,7 @@ namespace Crookedile.UI.Battle
                 {
                     Debug.Log("[CardButton] Single-target released in empty space — cancel");
                     targetPosition = basePosition;
-                    targetScale    = baseScale;
+                    targetScale = baseScale;
                     targetRotation = baseRotation;
                 }
             }
@@ -419,7 +442,7 @@ namespace Crookedile.UI.Battle
             {
                 Debug.Log("[CardButton] Drag ended without targeting mode — cancel");
                 targetPosition = basePosition;
-                targetScale    = baseScale;
+                targetScale = baseScale;
                 targetRotation = baseRotation;
             }
         }
@@ -439,9 +462,9 @@ namespace Crookedile.UI.Battle
         private void EnterTargetingMode(PointerEventData eventData)
         {
             _isTargeting = true;
-            IsTargeting  = true;
+            IsTargeting = true;
 
-            targetScale    = baseScale * hoverScale;
+            targetScale = baseScale * hoverScale;
             targetRotation = Quaternion.identity;
 
             var rt = GetComponent<RectTransform>();
@@ -452,7 +475,7 @@ namespace Crookedile.UI.Battle
         private void ExitTargetingMode()
         {
             _isTargeting = false;
-            IsTargeting  = false;
+            IsTargeting = false;
 
             targetScale = baseScale;
 
@@ -503,7 +526,7 @@ namespace Crookedile.UI.Battle
             if (artworkImage == null) return;
 
             Sprite artwork = cardData.GetArtwork();
-            artworkImage.sprite  = artwork;
+            artworkImage.sprite = artwork;
             artworkImage.enabled = artwork != null;
         }
 
@@ -515,7 +538,7 @@ namespace Crookedile.UI.Battle
             if (typeFrameImage != null)
             {
                 Sprite frame = visualSettings.GetFrameForType(cardData.CardType);
-                typeFrameImage.sprite  = frame;
+                typeFrameImage.sprite = frame;
                 typeFrameImage.enabled = frame != null;
             }
 
@@ -523,7 +546,7 @@ namespace Crookedile.UI.Battle
             if (rarityOverlayImage != null)
             {
                 Sprite rarity = visualSettings.GetFrameForRarity(cardData.Rarity);
-                rarityOverlayImage.sprite  = rarity;
+                rarityOverlayImage.sprite = rarity;
                 rarityOverlayImage.enabled = rarity != null;
             }
         }
@@ -567,7 +590,7 @@ namespace Crookedile.UI.Battle
             var cost = cardData.Costs[0];
 
             if (cost.CostType == CostType.None) return "Free";
-            if (cost.IsXCost)                   return "X";
+            if (cost.IsXCost) return "X";
 
             // Use the effective cost (post status-effect modifiers) so Focus/Energized/Entangled
             // are reflected in the cost display on the card.
@@ -583,9 +606,12 @@ namespace Crookedile.UI.Battle
         {
             bool isPolicy = cardData?.CardType == CardType.Policy;
 
-            if (_policyLeanLeftIcon   != null) _policyLeanLeftIcon.enabled   = isPolicy && cardData.PolicyLean == PolicyLean.Left;
-            if (_policyLeanCenterIcon != null) _policyLeanCenterIcon.enabled = isPolicy && cardData.PolicyLean == PolicyLean.Center;
-            if (_policyLeanRightIcon  != null) _policyLeanRightIcon.enabled  = isPolicy && cardData.PolicyLean == PolicyLean.Right;
+            if (_policyLeanLeftIcon != null)
+                _policyLeanLeftIcon.enabled = isPolicy && cardData.PolicyLean == PolicyLean.Left;
+            if (_policyLeanCenterIcon != null)
+                _policyLeanCenterIcon.enabled = isPolicy && cardData.PolicyLean == PolicyLean.Center;
+            if (_policyLeanRightIcon != null)
+                _policyLeanRightIcon.enabled = isPolicy && cardData.PolicyLean == PolicyLean.Right;
         }
 
         private bool CanAfford(int currentAP)
@@ -604,8 +630,8 @@ namespace Crookedile.UI.Battle
             {
                 CardType.Pressure => pressureColor,
                 CardType.Rhetoric => rhetoricColor,
-                CardType.Policy   => policyColor,
-                _                 => Color.white
+                CardType.Policy => policyColor,
+                _ => Color.white
             };
         }
 
@@ -614,7 +640,12 @@ namespace Crookedile.UI.Battle
         private void OnDestroy()
         {
             if (DraggedCard == this) DraggedCard = null;
-            if (_isTargeting) { IsTargeting = false; CardTargetingArrow.Instance?.Hide(); }
+            if (_isTargeting)
+            {
+                IsTargeting = false;
+                CardTargetingArrow.Instance?.Hide();
+            }
+
             onClickCallback = null;
         }
     }
