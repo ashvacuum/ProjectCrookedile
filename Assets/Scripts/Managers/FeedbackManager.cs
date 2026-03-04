@@ -48,6 +48,10 @@ namespace Crookedile.Managers
                  "player's MMF_Position feedbacks at a specific object before playing.")]
         [SerializeField] private FeedbackEntry[] _entries;
 
+        [SerializeField] private Transform _cardHandParent;
+
+        public Transform CardHandParent => _cardHandParent;
+
         // ─── Runtime State ────────────────────────────────────────────────────────
 
         private Dictionary<string, MMF_Player> _map;
