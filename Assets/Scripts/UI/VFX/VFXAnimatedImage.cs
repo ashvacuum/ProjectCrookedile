@@ -102,13 +102,18 @@ namespace Crookedile.UI
             anim?.Play(stateName, 0, 0f);
 
             float clipLength = anim != null ? GetClipLength(anim, stateName) : -1f;
-            GameLogger.LogError("VFX", $"Playing '{stateName}' on '{gameObject.name}' (clipLength={clipLength:F2}s)  parent='{transform.parent?.name ?? "none"}'", this);
+            if (clipLength < 0f)
+                GameLogger.LogWarning("VFX", $"Clip '{stateName}' not found on '{gameObject.name}' — using 3s fallback timeout.", this);
+            else
+                GameLogger.LogInfo("VFX", $"Playing '{stateName}' on '{gameObject.name}' (clipLength={clipLength:F2}s)  parent='{transform.parent?.name ?? "none"}'", this);
 
-            // Start / restart timeout so a missing Animation Event can never permanently block play.
+            // Always start a completion timer — code drives VFX lifecycle, not Animation Events.
+            // Animation Events (OnAnimationComplete, ApplyEffects) are optional enhancements that
+            // can fire early, but the coroutine is the guaranteed fallback so _vfxInFlight can
+            // never be permanently stuck by a missing or misconfigured clip/event.
             if (_completionTimeout != null) StopCoroutine(_completionTimeout);
-            _completionTimeout = clipLength > 0f
-                ? StartCoroutine(CompletionTimeout(clipLength + TimeoutBuffer))
-                : null;
+            float safeDuration = clipLength > 0f ? clipLength + TimeoutBuffer : 3f;
+            _completionTimeout = StartCoroutine(CompletionTimeout(safeDuration));
         }
 
         private IEnumerator CompletionTimeout(float delay)

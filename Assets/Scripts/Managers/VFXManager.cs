@@ -159,14 +159,13 @@ namespace Crookedile.Managers
         // ─── Internal — Animated Image Spawn ─────────────────────────────────
 
         /// <summary>
-        /// Spawns an animated UI image instance on the VFX canvas, positioned at the target's canvas location,
-        /// and plays the specified Animator state. Returns the spawned <see cref="VFXAnimatedImage"/>, or null.
-        ///
-        /// Positioning uses a lightweight pivot <see cref="RectTransform"/> placed at the target position.
-        /// The VFX instance is parented to that pivot at (0,0), so Animator position curves baked into the
-        /// clip animate relative to the spawn point rather than overwriting the canvas-space placement we compute.
+        /// Spawns an animated UI image instance parented to <paramref name="uiTarget"/> (or the VFX
+        /// canvas root if no target is given), zeroes its local position, and plays the named state.
+        /// The optional <paramref name="context"/> is forwarded to <see cref="VFXAnimatedImage.SetBattleContext"/>
+        /// so animation-event-driven or coroutine-driven completion can fire battle callbacks in sync.
         /// </summary>
-        private VFXAnimatedImage SpawnAnimatedImageAt(string stateName, RectTransform uiTarget, Vector2 pixelOffset)
+        private VFXAnimatedImage SpawnAnimatedImageAt(string stateName, RectTransform uiTarget,
+                                                      Vector2 pixelOffset, BattleVFXContext context = null)
         {
             if (_vfxCanvas == null)
             {
@@ -176,26 +175,9 @@ namespace Crookedile.Managers
 
             GameObject instance = GetFromPool();
             if (instance == null) return null;
-            
-            instance.transform.SetParent(uiTarget.transform, worldPositionStays: false);
-            instance.transform.SetAsLastSibling();
-            instance.transform.localPosition = Vector3.zero;
-            
-            return ActivateInstance(instance, stateName);
-        }
-        
-        private VFXAnimatedImage SpawnAnimatedImageAt(string stateName, RectTransform uiTarget, Vector2 pixelOffset, BattleVFXContext context)
-        {
-            if (_vfxCanvas == null)
-            {
-                GameLogger.LogWarning("VFX", "VFXManager: _vfxCanvas is not assigned — cannot spawn animated image.");
-                return null;
-            }
 
-            GameObject instance = GetFromPool();
-            if (instance == null) return null;
-            
-            instance.transform.SetParent(uiTarget.transform, worldPositionStays: false);
+            Transform parent = uiTarget != null ? uiTarget.transform : _vfxCanvas.transform;
+            instance.transform.SetParent(parent, worldPositionStays: false);
             instance.transform.SetAsLastSibling();
             instance.transform.localPosition = Vector3.zero;
 
@@ -257,21 +239,31 @@ namespace Crookedile.Managers
             {
                 controller.OnComplete = () =>
                 {
-                    // Destroy the pivot wrapper (world-spawn path only) before pooling.
                     if (pivot != null) Destroy(pivot);
                     ReturnToPool(instance);
                 };
+
+                // SetBattleContext must be called AFTER OnComplete is wired (it chains on top of it)
+                // and must be INSIDE the null guard — calling it on a null controller would crash
+                // and leave _vfxInFlight permanently true.
+                if (ctx != null)
+                    controller.SetBattleContext(ctx);
             }
-            
-            if(ctx != null)
-                controller.SetBattleContext(ctx);
+            else if (ctx != null)
+            {
+                // No VFXAnimatedImage component — resolve battle context immediately so
+                // _vfxInFlight is never left stuck by a missing component on the prefab.
+                GameLogger.LogWarning("VFX", $"VFX instance '{instance.name}' has no VFXAnimatedImage component — resolving battle context immediately.");
+                ctx.OnApplyEffects?.Invoke();
+                ctx.OnComplete?.Invoke();
+            }
 
             instance.SetActive(true);
 
             // Play the specific animation state from time 0 (after SetActive so the Animator is awake).
             controller?.PlayAnimation(stateName);
 
-            // Fallback: if no VFXAnimatedImage, estimate duration from the Animator and use a coroutine.
+            // Fallback pool-return: if no VFXAnimatedImage, use a timed coroutine to return the instance.
             if (controller == null)
             {
                 float duration = GetStateDuration(instance.GetComponent<Animator>(), stateName);
