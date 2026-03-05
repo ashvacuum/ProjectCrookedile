@@ -24,9 +24,12 @@ MonoBehaviour:
     - Example_DebugUsage
   - categoryName: Card
     enabled: 1
-    logLevel: 4
+    logLevel: 3
     scripts:
     - Example_CardDebug
+    - CardButton
+    - CardFlyAnimator
+    - EnemySlotUI
   - categoryName: Console
     enabled: 0
     logLevel: 3
@@ -68,7 +71,8 @@ MonoBehaviour:
     scripts:
     - FloatingTextManager
   - categoryName: VFX
-    enabled: 0
+    enabled: 1
     logLevel: 2
     scripts:
+    - VFXAnimatedImage
     - VFXManager

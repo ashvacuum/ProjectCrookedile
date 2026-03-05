@@ -67,7 +67,10 @@ namespace Crookedile.Managers
             if (_vfxPrefab == null) return;
             for (int i = 0; i < _initialPoolSize; i++)
             {
-                var instance = Instantiate(_vfxPrefab);
+                // Parent to the VFX canvas immediately so instances are always canvas children at rest.
+                var instance = _vfxCanvas != null
+                    ? Instantiate(_vfxPrefab, _vfxCanvas.transform)
+                    : Instantiate(_vfxPrefab);
                 instance.SetActive(false);
                 _pool.Enqueue(instance);
             }
@@ -194,7 +197,8 @@ namespace Crookedile.Managers
             
             instance.transform.SetParent(uiTarget.transform, worldPositionStays: false);
             instance.transform.SetAsLastSibling();
-            
+            instance.transform.localPosition = Vector3.zero;
+
             return ActivateInstance(instance, stateName, ctx: context);
         }
 
@@ -253,8 +257,7 @@ namespace Crookedile.Managers
             {
                 controller.OnComplete = () =>
                 {
-                    // Detach from pivot before pooling so the instance can be re-parented next spawn.
-                    instance.transform.SetParent(null);
+                    // Destroy the pivot wrapper (world-spawn path only) before pooling.
                     if (pivot != null) Destroy(pivot);
                     ReturnToPool(instance);
                 };
@@ -312,15 +315,17 @@ namespace Crookedile.Managers
         private void ReturnToPool(GameObject instance)
         {
             if (instance == null) return;
+            // Parent back to the VFX canvas BEFORE deactivating so the instance is always
+            // a canvas child while at rest in the pool (never parented to a gameplay object).
+            if (_vfxCanvas != null)
+                instance.transform.SetParent(_vfxCanvas.transform);
             instance.SetActive(false);
-            instance.transform.SetParent(_vfxCanvas.transform);
             _pool.Enqueue(instance);
         }
 
         private IEnumerator ReturnAfterDelay(GameObject instance, float delay, GameObject pivot = null)
         {
             if (delay > 0f) yield return new WaitForSeconds(delay);
-            instance.transform.SetParent(null);
             if (pivot != null) Destroy(pivot);
             ReturnToPool(instance);
         }
