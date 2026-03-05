@@ -68,15 +68,20 @@ namespace Crookedile.UI
         {
             _context            = context;
             _effectsApplied     = false;
-            _poolReturnCallback = OnComplete; // save bare pool-return before chaining
+
+            // Capture the current pool-return callback as a LOCAL variable for the lambda closure.
+            // If we captured _poolReturnCallback (a field) instead, OnAnimationComplete would null
+            // that field before invoking the chain, making the lambda see null and skip pool-return.
+            var poolReturn      = OnComplete;
+            _poolReturnCallback = OnComplete; // also stored in field so OnDisable can detect + defer it
 
             GameLogger.LogInfo("VFX", $"SetBattleContext on '{gameObject.name}' — parent='{transform.parent?.name ?? "none"}'", this);
 
-            // Chain: pool-return (already wired by VFXManager) fires first, then the battle callback.
+            // Chain: pool-return fires first (local capture, immune to field clearing), then battle callback.
             OnComplete = () =>
             {
                 GameLogger.LogInfo("VFX", $"OnComplete chain firing on '{gameObject.name}'", this);
-                _poolReturnCallback?.Invoke();
+                poolReturn?.Invoke();           // local capture — always has the value
                 context.OnComplete?.Invoke();
             };
         }
@@ -97,7 +102,7 @@ namespace Crookedile.UI
             anim?.Play(stateName, 0, 0f);
 
             float clipLength = anim != null ? GetClipLength(anim, stateName) : -1f;
-            GameLogger.LogInfo("VFX", $"Playing '{stateName}' on '{gameObject.name}' (clipLength={clipLength:F2}s)  parent='{transform.parent?.name ?? "none"}'", this);
+            GameLogger.LogError("VFX", $"Playing '{stateName}' on '{gameObject.name}' (clipLength={clipLength:F2}s)  parent='{transform.parent?.name ?? "none"}'", this);
 
             // Start / restart timeout so a missing Animation Event can never permanently block play.
             if (_completionTimeout != null) StopCoroutine(_completionTimeout);
