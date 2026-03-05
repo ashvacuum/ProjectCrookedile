@@ -62,7 +62,7 @@ namespace Crookedile.UI.Battle
                 _activeButtons.Add(btn);
             }
 
-            ArrangeCards();
+            PlayCardDrawAnimation(_activeButtons);
         }
 
         /// <summary>
@@ -166,7 +166,6 @@ namespace Crookedile.UI.Battle
                 else Destroy(orphan.gameObject);
             }
 
-            ArrangeCards();
             PlayCardDrawAnimation(toAnimate);
         }
 

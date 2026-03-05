@@ -6,6 +6,7 @@ using System;
 using MoreMountains.Feedbacks;
 using Crookedile.Data.Cards;
 using Crookedile.Data;
+using Crookedile.Utilities;
 
 namespace Crookedile.UI.Battle
 {
@@ -14,6 +15,7 @@ namespace Crookedile.UI.Battle
     /// Handles artwork, frames, cost display, hover state, and click-to-play.
     /// Replaces the old Card3DView + CardButton split. This is now the single card view component.
     /// </summary>
+    [Debuggable("Card", LogLevel.Info)]
     public class CardButton : MonoBehaviour,
         IPointerEnterHandler,
         IPointerExitHandler,
@@ -179,9 +181,9 @@ namespace Crookedile.UI.Battle
 
         private void Awake()
         {
-            baseScale = transform.localScale;
+            baseScale = Vector3.one;
             basePosition = transform.localPosition;
-            targetScale = baseScale;
+            targetScale = Vector3.one;
             targetPosition = basePosition;
             baseRotation = transform.localRotation;
             targetRotation = baseRotation;
@@ -220,7 +222,7 @@ namespace Crookedile.UI.Battle
             _forceUnplayable = forceUnplayable;
             isPlayable = !forceUnplayable && CanAfford(currentActionPoints);
 
-            baseScale = transform.localScale;
+            baseScale = Vector3.one;
             basePosition = transform.localPosition;
             targetScale = baseScale;
             targetPosition = basePosition;
@@ -366,6 +368,7 @@ namespace Crookedile.UI.Battle
             _isTargeting = false;
             _dragStartScreenPos = eventData.position;
             DraggedCard = this;
+            GameLogger.LogInfo("Card", $"Drag started: {cardData?.CardName}", this);
 
             // Clear hover state; card stays at its arc position (no re-parenting or cursor-follow).
             isHovered = false;
@@ -385,7 +388,7 @@ namespace Crookedile.UI.Battle
 
             if (yDelta >= dragUpThreshold && !_isTargeting)
             {
-                Debug.Log($"[CardButton] Entering targeting mode (yDelta={yDelta:F0}, threshold={dragUpThreshold})");
+                GameLogger.LogInfo("Card", $"Targeting mode entered (yDelta={yDelta:F0}, threshold={dragUpThreshold})", this);
                 EnterTargetingMode(eventData);
             }
             else if (yDelta < dragUpThreshold && _isTargeting)
@@ -405,8 +408,8 @@ namespace Crookedile.UI.Battle
             EnemySlotUI targetedSlot = EnemySlotUI.TargetedSlot;
             bool wasTargeting = _isTargeting;
 
-            Debug.Log(
-                $"[CardButton] OnEndDrag: wasTargeting={wasTargeting}  targetedSlot={targetedSlot?.name ?? "none"}  requiresTarget={RequiresSpecificTarget()}  callback={(onClickCallback != null ? "set" : "null")}");
+            GameLogger.LogInfo("Card",
+                $"OnEndDrag: card={cardData?.CardName}  wasTargeting={wasTargeting}  targetedSlot={targetedSlot?.name ?? "none"}  requiresTarget={RequiresSpecificTarget()}  callback={(onClickCallback != null ? "set" : "null")}", this);
 
             if (_isTargeting)
                 ExitTargetingMode();
@@ -420,19 +423,19 @@ namespace Crookedile.UI.Battle
             {
                 if (targetedSlot != null)
                 {
-                    Debug.Log($"[CardButton] Playing on enemy slot: {targetedSlot.name}");
+                    GameLogger.LogInfo("Card", $"Playing '{cardData?.CardName}' on enemy slot: {targetedSlot.name}", this);
                     targetedSlot.PlayCardOnEnemy(this);
                 }
                 else if (!RequiresSpecificTarget())
                 {
-                    Debug.Log("[CardButton] AOE/self card — playing on current focus");
+                    GameLogger.LogInfo("Card", $"AOE/self card '{cardData?.CardName}' — playing on current focus", this);
                     LastPlayedRect = GetComponent<RectTransform>();
                     selectFeedback?.PlayFeedbacks();
                     onClickCallback?.Invoke();
                 }
                 else
                 {
-                    Debug.Log("[CardButton] Single-target released in empty space — cancel");
+                    GameLogger.LogWarning("Card", $"Single-target '{cardData?.CardName}' released in empty space — cancelled", this);
                     targetPosition = basePosition;
                     targetScale = baseScale;
                     targetRotation = baseRotation;
@@ -440,7 +443,7 @@ namespace Crookedile.UI.Battle
             }
             else
             {
-                Debug.Log("[CardButton] Drag ended without targeting mode — cancel");
+                GameLogger.LogVerbose("Card", $"Drag ended below threshold for '{cardData?.CardName}' — cancelled", this);
                 targetPosition = basePosition;
                 targetScale = baseScale;
                 targetRotation = baseRotation;
@@ -453,6 +456,7 @@ namespace Crookedile.UI.Battle
         public void PlayFromDrop()
         {
             LastPlayedRect = GetComponent<RectTransform>();
+            GameLogger.LogInfo("Card", $"PlayFromDrop: '{cardData?.CardName}' (callback={(onClickCallback != null ? "set" : "null")})", this);
             selectFeedback?.PlayFeedbacks();
             onClickCallback?.Invoke();
         }

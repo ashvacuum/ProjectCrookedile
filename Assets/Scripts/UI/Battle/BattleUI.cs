@@ -106,6 +106,8 @@ namespace Crookedile.UI.Battle
         private List<EnemySlotUI>           _enemySlots = new List<EnemySlotUI>();
         private CardChoiceRequestedEvent    _pendingCardChoice;
         private bool                        _handRefreshPending;
+        /// <summary>Card button extracted from hand on CardPlayedEvent, waiting for VFX to finish before animating to discard.</summary>
+        private CardButton                  _pendingDiscardButton;
         private HashSet<CardData>           _pendingDrawnCards = new HashSet<CardData>();
         private Coroutine                   _battleInfoFade;
 
@@ -144,6 +146,7 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<EnemyActingEvent>(OnEnemyActing);
             EventBus.Subscribe<CardDrawnEvent>(OnCardDrawn);
             EventBus.Subscribe<StatusEffectAppliedEvent>(OnStatusEffectApplied);
+            EventBus.Subscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
         }
 
         private void UnsubscribeFromEvents()
@@ -164,6 +167,7 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<EnemyActingEvent>(OnEnemyActing);
             EventBus.Unsubscribe<CardDrawnEvent>(OnCardDrawn);
             EventBus.Unsubscribe<StatusEffectAppliedEvent>(OnStatusEffectApplied);
+            EventBus.Unsubscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
         }
 
         /// <summary>
@@ -228,18 +232,59 @@ namespace Crookedile.UI.Battle
 
             if (evt.IsPlayer)
             {
-                // Pull the button out and fly it to the discard pile concurrently.
-                var discardBtn = handPanel?.ExtractCard(evt.Card);
-                if (discardBtn != null)
-                    CardFlyAnimator.Instance?.AnimateDiscardOut(discardBtn,
-                        () => BattlePoolManager.Instance?.ReturnCard(discardBtn));
+                // Extract the card from hand immediately so the layout closes the gap,
+                // but hold it — the discard animation fires in OnCardVFXComplete so the
+                // sequence is: VFX resolves → card flies to discard → new draws appear.
+                GameLogger.LogInfo("Card", $"Extracted '{evt.Card.CardName}' from hand — awaiting VFX complete before discard");
+                _pendingDiscardButton = handPanel?.ExtractCard(evt.Card);
             }
-
-            // Defer one frame — any draw events from this card's effect batch in via OnCardDrawn.
-            if (!_handRefreshPending)
+            else
             {
-                _handRefreshPending = true;
-                StartCoroutine(RefreshHandNextFrame());
+                // Enemy card — no VFX sequencing needed; refresh hand immediately.
+                if (!_handRefreshPending)
+                {
+                    _handRefreshPending = true;
+                    StartCoroutine(RefreshHandNextFrame());
+                }
+            }
+        }
+
+        /// <summary>
+        /// Fires after a played card's VFX animation fully completes (or immediately if no VFX).
+        /// Begins the discard animation; once the card lands in the discard pile the hand
+        /// refreshes — so newly drawn cards appear AFTER the discard, not during VFX.
+        /// </summary>
+        private void OnCardVFXComplete(CardVFXCompleteEvent evt)
+        {
+            GameLogger.LogInfo("Card", $"CardVFXComplete for '{evt.Card?.CardName}' — starting discard animation");
+
+            if (_pendingDiscardButton != null)
+            {
+                var btn = _pendingDiscardButton;
+                _pendingDiscardButton = null;
+
+                CardFlyAnimator.Instance?.AnimateDiscardOut(btn, () =>
+                {
+                    GameLogger.LogInfo("Card", $"Discard animation done for '{btn.CardData?.CardName}' — returning to pool and refreshing hand");
+                    BattlePoolManager.Instance?.ReturnCard(btn);
+
+                    // Refresh hand AFTER discard so any drawn cards appear once the discard lands.
+                    if (!_handRefreshPending)
+                    {
+                        _handRefreshPending = true;
+                        StartCoroutine(RefreshHandNextFrame());
+                    }
+                });
+            }
+            else
+            {
+                // No card to discard (no-VFX card that was already handled, or edge case).
+                GameLogger.LogWarning("Card", $"CardVFXComplete for '{evt.Card?.CardName}' but no pending discard button found");
+                if (!_handRefreshPending)
+                {
+                    _handRefreshPending = true;
+                    StartCoroutine(RefreshHandNextFrame());
+                }
             }
         }
 
@@ -485,9 +530,15 @@ namespace Crookedile.UI.Battle
 
         private void OnCardButtonClicked(CardData card, int handIndex)
         {
+            GameLogger.LogInfo("Card", $"OnCardButtonClicked: '{card?.CardName}' [handIndex={handIndex}]  battleManager={(battleManager != null ? "set" : "null")}  IsPlayerTurn={battleManager?.IsPlayerTurn}");
             if (battleManager != null && battleManager.IsPlayerTurn)
             {
+                GameLogger.LogInfo("Card", $"Publishing PlayCardRequestedEvent for '{card?.CardName}'");
                 EventBus.Publish(new PlayCardRequestedEvent { Card = card, HandIndex = handIndex });
+            }
+            else
+            {
+                GameLogger.LogWarning("Card", $"Card play blocked in BattleUI — battleManager={(battleManager != null ? "set" : "null")}  IsPlayerTurn={battleManager?.IsPlayerTurn}");
             }
         }
 

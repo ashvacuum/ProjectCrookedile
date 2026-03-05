@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Crookedile.Core;
 using Crookedile.Managers;
+using Crookedile.Utilities;
 
 namespace Crookedile.UI.Battle
 {
@@ -28,6 +29,7 @@ namespace Crookedile.UI.Battle
     ///   4. Assign <see cref="_rootCanvas"/> to the root battle Canvas.
     ///   5. Tune the draw/discard parameters in the Inspector.
     /// </summary>
+    [Debuggable("Card", LogLevel.Info)]
     public class CardFlyAnimator : Singleton<CardFlyAnimator>
     {
         // ─── Inspector ────────────────────────────────────────────────────────────
@@ -96,11 +98,12 @@ namespace Crookedile.UI.Battle
                 
                 if (_rootCanvas != null)
                     btn.transform.SetParent(FeedbackManager.Instance.CardHandParent, false);
-                
+
                 FeedbackManager.Instance.Play("DrawHand");
-                Debug.Log("Hand Drawn Feedback Played");
+                GameLogger.LogVerbose("Card", $"Draw feedback played for '{btn.CardData?.CardName}'", this);
                 btn.gameObject.SetActive(true);
                 yield return new WaitForSeconds(_drawStaggerDelay);
+                btn.transform.localScale = Vector3.one;
                 btn.transform.SetParent(container, false);
             }
             
@@ -114,6 +117,8 @@ namespace Crookedile.UI.Battle
             // Disable CardButton so its Update() lerp doesn't fight our position coroutine.
             btn.enabled = false;
 
+            GameLogger.LogInfo("Card", $"Discard animation started for '{btn.CardData?.CardName}'", this);
+
             // Re-parent to root canvas PRESERVING world position so the card stays visually
             // in place. worldPositionStays: true avoids anchor / coordinate-space mismatch
             // and means we can lerp transform.position directly without any conversion.
@@ -122,10 +127,11 @@ namespace Crookedile.UI.Battle
             // Prevent hover / drag interactions while flying.
             if (btn.TryGetComponent<CanvasGroup>(out var cg))
                 cg.blocksRaycasts = false;
-            
+
             FeedbackManager.Instance.Play("DiscardHand");
 
-            yield return new WaitForSeconds(_discardDuration); 
+            yield return new WaitForSeconds(_discardDuration);
+            GameLogger.LogVerbose("Card", $"Discard animation complete for '{btn.CardData?.CardName}'", this);
             btn.enabled = true;
             onComplete?.Invoke();
         }

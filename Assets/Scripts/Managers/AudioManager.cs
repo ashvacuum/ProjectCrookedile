@@ -50,6 +50,7 @@ namespace Crookedile.Managers
             for (int i = 0; i < _sfxPoolSize; i++)
             {
                 AudioSource source = gameObject.AddComponent<AudioSource>();
+                source.outputAudioMixerGroup = _sfxSource.outputAudioMixerGroup;
                 source.playOnAwake = false;
                 _sfxPool.Enqueue(source);
             }
