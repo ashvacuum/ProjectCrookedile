@@ -173,6 +173,18 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
+    /// Published by <c>BattleManager</c> once a played card's VFX animation fully completes,
+    /// or immediately after effects resolve when the card has no VFX.
+    /// <c>BattleUI</c> subscribes to this to begin the card discard animation, ensuring the
+    /// sequence is always: VFX resolves → card flies to discard → new draws appear.
+    /// </summary>
+    public struct CardVFXCompleteEvent : IGameEvent
+    {
+        /// <summary>The card whose VFX (or immediate resolution) just finished.</summary>
+        public CardData Card;
+    }
+
+    /// <summary>
     /// Published by <c>DeckManager.DiscardCard()</c> when a card moves from hand to the discard pile.
     /// </summary>
     public struct CardDiscardedEvent : IGameEvent

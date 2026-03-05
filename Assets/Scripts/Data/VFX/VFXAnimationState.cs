@@ -59,6 +59,7 @@ namespace Crookedile.Data.VFX
         public static readonly Dictionary<string, Vector2> NativeSizes =
             new Dictionary<string, Vector2>
         {
+            { "fanfx_yellow_lightning", new Vector2(64f, 128f) },
             { "fanfx2_absorb_large_red", new Vector2(66.06451f, 66f) },
             { "fanfx2_claw_large_black", new Vector2(128f, 128f) },
             { "fanfx2_earth_spikes_large_brown", new Vector2(64f, 51f) },

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -132,6 +133,14 @@ namespace Crookedile.Managers
             return SpawnAnimatedImageAt(evt.AnimationStateName, target, evt.Offset);
         }
 
+        public VFXAnimatedImage PlayAndSetInstance(VFXEvent evt, RectTransform target, BattleVFXContext context)
+        {
+            if (evt == null) return null;
+            PlayFeel(evt, target);
+            if (string.IsNullOrEmpty(evt.AnimationStateName)) return null;
+            return SpawnAnimatedImageAt(evt.AnimationStateName, target, evt.Offset, context);
+        }
+
         // ─── Internal — Feel ──────────────────────────────────────────────────
 
         private void PlayFeel(VFXEvent evt, Transform target)
@@ -167,8 +176,26 @@ namespace Crookedile.Managers
             
             instance.transform.SetParent(uiTarget.transform, worldPositionStays: false);
             instance.transform.SetAsLastSibling();
+            instance.transform.localPosition = Vector3.zero;
             
             return ActivateInstance(instance, stateName);
+        }
+        
+        private VFXAnimatedImage SpawnAnimatedImageAt(string stateName, RectTransform uiTarget, Vector2 pixelOffset, BattleVFXContext context)
+        {
+            if (_vfxCanvas == null)
+            {
+                GameLogger.LogWarning("VFX", "VFXManager: _vfxCanvas is not assigned — cannot spawn animated image.");
+                return null;
+            }
+
+            GameObject instance = GetFromPool();
+            if (instance == null) return null;
+            
+            instance.transform.SetParent(uiTarget.transform, worldPositionStays: false);
+            instance.transform.SetAsLastSibling();
+            
+            return ActivateInstance(instance, stateName, ctx: context);
         }
 
         /// <summary>
@@ -219,7 +246,7 @@ namespace Crookedile.Managers
         /// <paramref name="pivot"/> is the lightweight wrapper created by the spawn methods; it is
         /// destroyed and the instance re-parented to null when the animation completes.
         /// </summary>
-        private VFXAnimatedImage ActivateInstance(GameObject instance, string stateName, GameObject pivot = null)
+        private VFXAnimatedImage ActivateInstance(GameObject instance, string stateName, GameObject pivot = null, BattleVFXContext ctx = null)
         {
             var controller = instance.GetComponent<VFXAnimatedImage>();
             if (controller != null)
@@ -232,6 +259,9 @@ namespace Crookedile.Managers
                     ReturnToPool(instance);
                 };
             }
+            
+            if(ctx != null)
+                controller.SetBattleContext(ctx);
 
             instance.SetActive(true);
 
@@ -260,6 +290,23 @@ namespace Crookedile.Managers
             foreach (var clip in anim.runtimeAnimatorController.animationClips)
                 if (clip.name == stateName) return clip.length;
             return 1f;
+        }
+
+        /// <summary>
+        /// Runs <paramref name="callback"/> on the next frame.
+        /// Used by <see cref="VFXAnimatedImage"/> to defer pool-return <c>SetParent</c> calls
+        /// that would throw if invoked while a parent GameObject is mid-activation/deactivation.
+        /// </summary>
+        internal void DeferredCallback(System.Action callback)
+        {
+            if (callback == null) return;
+            StartCoroutine(DeferOneFrame(callback));
+        }
+
+        private IEnumerator DeferOneFrame(System.Action callback)
+        {
+            yield return null;
+            callback?.Invoke();
         }
 
         private void ReturnToPool(GameObject instance)

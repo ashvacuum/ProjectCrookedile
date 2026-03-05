@@ -138,7 +138,7 @@ namespace Crookedile.Utilities
                     Debug.Log($"<color=cyan>{formattedMessage}</color>", context);
                     break;
                 case LogLevel.Verbose:
-                    Debug.Log($"<color=gray>{formattedMessage}</color>", context);
+                    Debug.Log($"<color=grey>{formattedMessage}</color>", context);
                     break;
             }
         }

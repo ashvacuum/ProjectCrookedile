@@ -83,7 +83,6 @@ namespace Crookedile.Managers
                         (RectTransform)_vfxCanvas.transform, screenPos, cam, out canvasLocalPos);
                 }
                 rt.anchoredPosition = canvasLocalPos;
-                Debug.Log($"[Text]Setting pooled {rt.rect.position} from target {target.rect.position}");
             }
 
             instance.SetActive(true);

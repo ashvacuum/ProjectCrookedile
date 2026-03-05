@@ -18,7 +18,7 @@ MonoBehaviour:
   showStackTrace: 0
   categories:
   - categoryName: Gameplay
-    enabled: 1
+    enabled: 0
     logLevel: 3
     scripts:
     - Example_DebugUsage
@@ -28,27 +28,27 @@ MonoBehaviour:
     scripts:
     - Example_CardDebug
   - categoryName: Console
-    enabled: 1
+    enabled: 0
     logLevel: 3
     scripts:
     - DeveloperConsole
   - categoryName: Audio
-    enabled: 1
+    enabled: 0
     logLevel: 2
     scripts:
     - AudioManager
   - categoryName: Cheats
-    enabled: 1
+    enabled: 0
     logLevel: 3
     scripts:
     - CheatsManager
   - categoryName: Localization
-    enabled: 1
+    enabled: 0
     logLevel: 3
     scripts:
     - LocalizationManager
   - categoryName: SaveManager
-    enabled: 1
+    enabled: 0
     logLevel: 3
     scripts:
     - SaveManager
@@ -62,3 +62,13 @@ MonoBehaviour:
     logLevel: 3
     scripts:
     - EffectResolver
+  - categoryName: FloatingText
+    enabled: 0
+    logLevel: 2
+    scripts:
+    - FloatingTextManager
+  - categoryName: VFX
+    enabled: 0
+    logLevel: 2
+    scripts:
+    - VFXManager

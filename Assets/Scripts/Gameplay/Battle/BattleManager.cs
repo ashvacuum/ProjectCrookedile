@@ -196,6 +196,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void SetFocusedEnemy(int index)
         {
+            GameLogger.LogInfo<BattleManager>($"Focused enemy: [{index}] Count {_enemies.Count} is Defeated? {_enemies[index].IsDefeated}");
             if (index < 0 || index >= _enemies.Count || _enemies[index].IsDefeated) return;
             _focusedEnemyIndex = index;
             _effectResolver.SetFocusedOpponent(
@@ -262,10 +263,15 @@ namespace Crookedile.Gameplay.Battle
 
         private void OnPlayCardRequested(PlayCardRequestedEvent evt)
         {
-            if (_vfxInFlight) return;
+            GameLogger.LogInfo<BattleManager>($"PlayCardRequested received: '{evt.Card?.CardName}'  _vfxInFlight={_vfxInFlight}  IsPlayerTurn={_isPlayerTurn}  State={CurrentState}");
+            if (_vfxInFlight)
+            {
+                GameLogger.LogWarning<BattleManager>($"Card play blocked: VFX animation still in flight");
+                return;
+            }
             if (!_isPlayerTurn || CurrentState != BattleState.PlayerTurn)
             {
-                GameLogger.LogWarning<BattleManager>("Cannot play card — not player's turn!");
+                GameLogger.LogWarning<BattleManager>($"Card play blocked: IsPlayerTurn={_isPlayerTurn}  State={CurrentState}");
                 return;
             }
             PlayCard(evt.Card, evt.HandIndex, CardButton.LastPlayedRect);
@@ -304,33 +310,46 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
             // PassiveResolver listens to CardPlayedEvent via EventBus — no direct call needed
 
+            // Target VFX at the enemy slot rather than the card — the card will be discarded
+            // shortly after play, and parenting VFX to it would kill the animation early.
+            var vfxTarget = EnemySlotUI.LastTargetedRect ?? sourceRect;
+            GameLogger.LogInfo<BattleManager>($"Player played: {card.CardName}  vfxTarget={(vfxTarget != null ? vfxTarget.name : "none")}");
+
             if (card.CardVFX != null)
             {
                 // VFX path: spawn the animation and defer effect resolution to the hit-frame event.
                 _vfxInFlight = true;
-                VFXAnimatedImage vfx = VFXManager.Instance?.PlayAndGetInstance(card.CardVFX, sourceRect);
-                if (vfx != null)
-                {
-                    vfx.SetBattleContext(new BattleVFXContext
+                var vfx = VFXManager.Instance?.PlayAndSetInstance(card.CardVFX,
+                    vfxTarget,
+                    new BattleVFXContext
                     {
-                        OnApplyEffects = () => ApplyCardEffects(card, amountOverrides),
-                        OnComplete     = () => _vfxInFlight = false
+                        OnApplyEffects = () =>
+                        {
+                            GameLogger.LogInfo<BattleManager>($"VFX ApplyEffects fired for '{card.CardName}'");
+                            ApplyCardEffects(card, amountOverrides);
+                        },
+                        OnComplete = () =>
+                        {
+                            GameLogger.LogInfo<BattleManager>($"VFX complete for '{card.CardName}' — unblocking input, signalling discard");
+                            _vfxInFlight = false;
+                            EventBus.Publish(new CardVFXCompleteEvent { Card = card });
+                        }
                     });
-                }
-                else
+
+                if (vfx == null)
                 {
-                    // VFX spawn failed — resolve immediately so the card isn't lost.
+                    GameLogger.LogWarning<BattleManager>($"VFX failed to spawn for '{card.CardName}' — resolving immediately");
                     _vfxInFlight = false;
                     ApplyCardEffects(card, amountOverrides);
+                    EventBus.Publish(new CardVFXCompleteEvent { Card = card });
                 }
             }
             else
             {
-                // No VFX — resolve effects immediately (backwards-compatible behaviour).
+                // No VFX — resolve effects immediately then signal discard is ready.
                 ApplyCardEffects(card, amountOverrides);
+                EventBus.Publish(new CardVFXCompleteEvent { Card = card });
             }
-
-            GameLogger.LogInfo<BattleManager>($"Player played: {card.CardName}");
         }
 
         /// <summary>

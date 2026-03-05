@@ -6,6 +6,7 @@ using TMPro;
 using Crookedile.Data;
 using Crookedile.Data.Enemy;
 using Crookedile.Gameplay.Battle;
+using Crookedile.Utilities;
 
 namespace Crookedile.UI.Battle
 {
@@ -17,6 +18,7 @@ namespace Crookedile.UI.Battle
     /// Spawned at runtime by BattleUI.BuildEnemySlots() for each enemy in the battle.
     /// Designed to be used as a prefab: assign text/button/image references in the Inspector.
     /// </summary>
+    [Debuggable("Card", LogLevel.Info)]
     public class EnemySlotUI : MonoBehaviour,
         IPointerEnterHandler,
         IPointerExitHandler
@@ -47,6 +49,13 @@ namespace Crookedile.UI.Battle
 
         /// <summary>The enemy slot currently targeted by the card targeting arrow, or null.</summary>
         public static EnemySlotUI TargetedSlot { get; private set; }
+
+        /// <summary>
+        /// The RectTransform of the most recently targeted or hovered enemy slot.
+        /// Set on pointer-enter during targeting and on PlayCardOnEnemy.
+        /// Read by BattleManager to position VFX on the enemy rather than the card.
+        /// </summary>
+        public static RectTransform LastTargetedRect { get; private set; }
 
         /// <summary>
         /// Clears the targeted slot and removes its drag-drop highlight.
@@ -221,6 +230,8 @@ namespace Crookedile.UI.Battle
             if (_enemyIndex < _battleManager.Enemies.Count &&
                 _battleManager.Enemies[_enemyIndex].IsDefeated) return;
 
+            LastTargetedRect = GetComponent<RectTransform>();
+            GameLogger.LogInfo("Card", $"'{card.CardData?.CardName}' targeted at enemy slot [{_enemyIndex}]  LastTargetedRect set", this);
             _battleManager.SetFocusedEnemy(_enemyIndex);
             card.PlayFromDrop();
         }
@@ -231,13 +242,19 @@ namespace Crookedile.UI.Battle
             if (!CardButton.IsTargeting) return;
             if (dragDropHighlight != null) dragDropHighlight.enabled = true;
             TargetedSlot = this;
+            LastTargetedRect = GetComponent<RectTransform>();
+            GameLogger.LogVerbose("Card", $"Arrow hovering enemy slot [{_enemyIndex}]", this);
         }
 
         /// <summary>Hides the targeting highlight and clears this slot as the target when the cursor leaves.</summary>
         public void OnPointerExit(PointerEventData eventData)
         {
             if (dragDropHighlight != null) dragDropHighlight.enabled = false;
-            if (TargetedSlot == this) TargetedSlot = null;
+            if (TargetedSlot == this)
+            {
+                GameLogger.LogVerbose("Card", $"Arrow left enemy slot [{_enemyIndex}]", this);
+                TargetedSlot = null;
+            }
         } 
 
         // ─── Private ──────────────────────────────────────────────────────────────
