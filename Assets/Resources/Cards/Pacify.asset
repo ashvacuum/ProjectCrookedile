@@ -26,6 +26,8 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
+  _newEffects:
+  - rid: 4738608336531357812
   _effects:
   - _name: 
     _category: 3
@@ -38,7 +40,12 @@ MonoBehaviour:
     _cardManipulationType: 0
     _cardAmount: 2
     _cardToAdd: {fileID: 0}
+    _cardSelectionMode: 0
+    _filterCardType: 0
+    _discardDrawAmount: 0
     _costReduction: 1
+    _chancePercent: 50
+    _chanceEffects: []
     _statusEffectType: 0
     _statusStacks: 3
     _statusDuration: 0
@@ -49,6 +56,19 @@ MonoBehaviour:
   - faithleader
   _isStarterCard: 0
   _isUnlockable: 0
+  _isUnplayable: 0
   _policyLean: 3
+  _passives: []
   _triggeredEffects: []
   _cardVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 4738608336531357812
+      type: {class: ApplyStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _target: 1
+        _statusType: 0
+        _stacks: 3
+        _duration: 0

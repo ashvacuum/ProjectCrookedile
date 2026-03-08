@@ -98,8 +98,8 @@ namespace Crookedile.Gameplay.Battle
         /// New coordinator — resolves a card's <see cref="BattleEffect"/> list using the
         /// polymorphic self-executing hierarchy. Falls back to the legacy path when
         /// <see cref="CardData.NewEffects"/> is empty (migration window).
-        ///
-        /// Triggered effects still use <see cref="CardEffect"/> (Phase 2 migration).
+        /// Triggered effects are resolved using <see cref="ResolveTriggeredEffects"/> against
+        /// the same <see cref="EffectExecutionContext"/>, with no legacy bridge required.
         /// </summary>
         public EffectExecutionContext ResolveCardEffectsNew(
             CardData card, bool isPlayerCard, int[] amountOverrides = null)
@@ -118,25 +118,9 @@ namespace Crookedile.Gameplay.Battle
                 effects[j].Execute(execCtx, overrideAmount);
             }
 
-            // Triggered effects still use the legacy EffectContext path during the migration window.
-            // Build a compatible EffectContext from the accumulated execution results.
+            // Fire triggered effects directly against the execution context (no bridge needed)
             if (card.TriggeredEffects != null && card.TriggeredEffects.Count > 0)
-            {
-                var legacyCtx = new EffectContext
-                {
-                    Caster              = execCtx.Caster,
-                    Target              = execCtx.Target,
-                    LastDamageDealt     = execCtx.LastDamageDealt,
-                    LastHealAmount      = execCtx.LastHealAmount,
-                    LastComposureGained = execCtx.LastComposureGained,
-                    LastTargetDied      = execCtx.LastTargetDied,
-                    ShouldExhaust       = execCtx.ShouldExhaust,
-                };
-                ResolveTriggeredEffects(card.TriggeredEffects, legacyCtx, isPlayerCard);
-
-                // Sync back any changes triggered effects made
-                execCtx.ShouldExhaust = legacyCtx.ShouldExhaust;
-            }
+                ResolveTriggeredEffects(card.TriggeredEffects, execCtx);
 
             return execCtx;
         }
@@ -202,45 +186,44 @@ namespace Crookedile.Gameplay.Battle
                 ResolveBattleEffect(card.Effects[j], isPlayerCard, ctx, overrideAmount);
             }
 
-            // Fire any triggered effects that reacted to what happened above
+            // TriggeredEffects require the new execution path — warn if a legacy card has them
             if (card.TriggeredEffects != null && card.TriggeredEffects.Count > 0)
-                ResolveTriggeredEffects(card.TriggeredEffects, ctx, isPlayerCard);
+                GameLogger.LogWarning<EffectResolver>(
+                    $"[{card.CardName}] has TriggeredEffects but is using the legacy resolution path. " +
+                    "Populate NewEffects to use TriggeredEffects.");
 
             return ctx;
         }
 
         /// <summary>
-        /// Evaluates each TriggeredEffect in the list against the accumulated EffectContext,
-        /// and resolves those whose trigger occurred and whose condition is satisfied.
-        /// Called automatically at the end of <see cref="ResolveCardEffects"/> when the card
-        /// has triggered effects defined.
+        /// Evaluates each TriggeredEffect in the list against the accumulated
+        /// <see cref="EffectExecutionContext"/>, and executes those whose trigger occurred
+        /// and whose condition is satisfied. Called at the end of
+        /// <see cref="ResolveCardEffectsNew"/> when the card has triggered effects defined.
         /// </summary>
         private void ResolveTriggeredEffects(
-            IReadOnlyList<TriggeredEffect> triggered, EffectContext ctx, bool isPlayerCard)
+            IReadOnlyList<TriggeredEffect> triggered, EffectExecutionContext execCtx)
         {
-            StatusEffectManager targetStatusMgr =
-                isPlayerCard ? _opponentStatusEffects : _playerStatusEffects;
-
             foreach (var te in triggered)
             {
-                if (!TriggerOccurred(te.Trigger, ctx))            continue;
-                if (!EvaluateCondition(te.Condition, te.ConditionThreshold, ctx, targetStatusMgr)) continue;
+                if (!TriggerOccurred(te.Trigger, execCtx))                         continue;
+                if (!EvaluateCondition(te.Condition, te.ConditionThreshold, execCtx)) continue;
 
                 GameLogger.LogInfo<EffectResolver>($"Triggered effect fired: '{te.Name}'");
-                // Share the same ctx so the response can also read context values
-                ResolveBattleEffect(te.ResponseEffect, isPlayerCard, ctx);
+                foreach (var effect in te.Effects)
+                    effect?.Execute(execCtx);
             }
         }
 
         /// <summary>Returns true if the given trigger event occurred during the card's resolution.</summary>
-        private static bool TriggerOccurred(EffectTrigger trigger, EffectContext ctx)
+        private static bool TriggerOccurred(EffectTrigger trigger, EffectExecutionContext execCtx)
         {
             switch (trigger)
             {
-                case EffectTrigger.OnDamageDealt:     return ctx.LastDamageDealt > 0;
-                case EffectTrigger.OnKill:            return ctx.LastTargetDied;
-                case EffectTrigger.OnComposureGained: return ctx.LastComposureGained > 0;
-                case EffectTrigger.OnHeal:            return ctx.LastHealAmount > 0;
+                case EffectTrigger.OnDamageDealt:     return execCtx.LastDamageDealt > 0;
+                case EffectTrigger.OnKill:            return execCtx.LastTargetDied;
+                case EffectTrigger.OnComposureGained: return execCtx.LastComposureGained > 0;
+                case EffectTrigger.OnHeal:            return execCtx.LastHealAmount > 0;
                 case EffectTrigger.OnStatusApplied:   return true; // conservative: trust the card authored this correctly
                 case EffectTrigger.OnDamageTaken:
                     // OnDamageTaken cannot fire during card resolution — the player never takes
@@ -258,16 +241,15 @@ namespace Crookedile.Gameplay.Battle
         /// Returns true if the extra condition on the triggered effect is satisfied.
         /// </summary>
         private static bool EvaluateCondition(
-            EffectCondition condition, int threshold, EffectContext ctx,
-            StatusEffectManager targetStatusMgr) => condition switch
+            EffectCondition condition, int threshold, EffectExecutionContext execCtx) => condition switch
         {
             EffectCondition.Always                 => true,
-            EffectCondition.IfDamageDealt          => ctx.LastDamageDealt > 0,
-            EffectCondition.IfTargetDied           => ctx.LastTargetDied,
-            EffectCondition.IfTargetHasBuff        => targetStatusMgr?.HasAnyBuff()   ?? false,
-            EffectCondition.IfTargetHasDebuff      => targetStatusMgr?.HasAnyDebuff() ?? false,
+            EffectCondition.IfDamageDealt          => execCtx.LastDamageDealt > 0,
+            EffectCondition.IfTargetDied           => execCtx.LastTargetDied,
+            EffectCondition.IfTargetHasBuff        => execCtx.TargetStatusEffects?.HasAnyBuff()   ?? false,
+            EffectCondition.IfTargetHasDebuff      => execCtx.TargetStatusEffects?.HasAnyDebuff() ?? false,
             EffectCondition.IfAmountAboveThreshold =>
-                ctx.LastDamageDealt > threshold || ctx.LastHealAmount > threshold || ctx.LastComposureGained > threshold,
+                execCtx.LastDamageDealt > threshold || execCtx.LastHealAmount > threshold || execCtx.LastComposureGained > threshold,
             _                                      => true
         };
 

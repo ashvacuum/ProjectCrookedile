@@ -26,6 +26,9 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
+  _newEffects:
+  - rid: 4738608336531357818
+  - rid: 4738608336531357819
   _effects:
   - _name: 
     _category: 1
@@ -38,7 +41,12 @@ MonoBehaviour:
     _cardManipulationType: 0
     _cardAmount: 2
     _cardToAdd: {fileID: 0}
+    _cardSelectionMode: 0
+    _filterCardType: 0
+    _discardDrawAmount: 0
     _costReduction: 1
+    _chancePercent: 50
+    _chanceEffects: []
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
@@ -54,7 +62,12 @@ MonoBehaviour:
     _cardManipulationType: 0
     _cardAmount: 2
     _cardToAdd: {fileID: 0}
+    _cardSelectionMode: 0
+    _filterCardType: 0
+    _discardDrawAmount: 0
     _costReduction: 1
+    _chancePercent: 50
+    _chanceEffects: []
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
@@ -65,6 +78,22 @@ MonoBehaviour:
   - nepobaby
   _isStarterCard: 1
   _isUnlockable: 0
+  _isUnplayable: 0
   _policyLean: 1
+  _passives: []
   _triggeredEffects: []
   _cardVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 4738608336531357818
+      type: {class: GainComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _amount: 2
+        _amountSource: 0
+    - rid: 4738608336531357819
+      type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _amount: 1
