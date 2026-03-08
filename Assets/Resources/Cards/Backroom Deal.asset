@@ -26,6 +26,9 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
+  _newEffects:
+  - rid: 4738608336531357789
+  - rid: 4738608336531357790
   _effects:
   - _name: 
     _category: 2
@@ -38,6 +41,9 @@ MonoBehaviour:
     _cardManipulationType: 0
     _cardAmount: 2
     _cardToAdd: {fileID: 0}
+    _cardSelectionMode: 0
+    _filterCardType: 0
+    _discardDrawAmount: 0
     _costReduction: 1
     _chancePercent: 50
     _chanceEffects: []
@@ -56,6 +62,9 @@ MonoBehaviour:
     _cardManipulationType: 0
     _cardAmount: 2
     _cardToAdd: {fileID: 0}
+    _cardSelectionMode: 0
+    _filterCardType: 0
+    _discardDrawAmount: 0
     _costReduction: 1
     _chancePercent: 50
     _chanceEffects: []
@@ -71,5 +80,19 @@ MonoBehaviour:
   _isUnlockable: 0
   _isUnplayable: 0
   _policyLean: 3
+  _passives: []
   _triggeredEffects: []
   _cardVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 4738608336531357789
+      type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _amount: 2
+    - rid: 4738608336531357790
+      type: {class: GainActionPointsNextTurnEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _amount: 1

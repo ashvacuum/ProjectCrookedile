@@ -13,8 +13,9 @@ namespace Crookedile.Gameplay.Battle
     /// Supports two parallel passive systems:
     ///
     ///   1. LEGACY — single-passive per OriginPassive ScriptableObject (switch-statement dispatch).
-    ///      Kept for backward compatibility — notably required by the Actor's Improvise mechanic,
-    ///      which is interactive and doesn't fit the fire-and-forget BattlePassive model.
+    ///      Kept for backward compatibility. <see cref="PassiveEffectType.Improvise"/> is intentionally
+    ///      legacy-only: it requires interactive player input (choosing cards to discard), which doesn't
+    ///      fit the fire-and-forget <see cref="BattlePassive"/> model of the new system.
     ///
     ///   2. NEW (SOLID) — any number of <see cref="BattlePassive"/> entries registered from:
     ///      • OriginPassive._passives (when non-empty, preferred over legacy for that origin)
@@ -36,7 +37,7 @@ namespace Crookedile.Gameplay.Battle
 
         private int  _playerTurnNumber  = 0;
         private int  _triggerEventCount = 0;   // for NthEvent condition (legacy)
-        private bool _fired             = false; // one-shot guard (legacy)
+        private bool _oneShotFired      = false; // one-shot guard: true once the passive has fired once (legacy)
 
         // ── Improvise state (Actor passive — legacy path only) ────────────────
 
@@ -447,12 +448,12 @@ namespace Crookedile.Gameplay.Battle
         private void LegacyTryFire()
         {
             if (_passive == null) return;
-            if (_passive.OneShot && _fired) return;
+            if (_passive.OneShot && _oneShotFired) return;
 
             _triggerEventCount++;
             if (!LegacyEvaluateCondition()) return;
 
-            _fired = true;
+            _oneShotFired = true;
             LegacyResolveEffect();
         }
 
@@ -494,11 +495,17 @@ namespace Crookedile.Gameplay.Battle
                     break;
 
                 case PassiveEffectType.ReduceHostility:
-                    GameLogger.LogWarning<PassiveResolver>(
-                        $"[{_passive.PassiveName}] ReduceHostility is not supported in the legacy passive path.");
+                    foreach (var enemy in _enemies)
+                    {
+                        if (!enemy.IsDefeated)
+                            enemy.Stats.ReduceHostility(_passive.EffectAmount);
+                    }
                     break;
 
                 case PassiveEffectType.Improvise:
+                    // Interactive mechanic: stays legacy-only by design.
+                    // The new BattlePassive system is fire-and-forget and cannot
+                    // pause to wait for player card selection. See class summary.
                     _improviseAvailable = true;
                     OnImproviseAvailable?.Invoke();
                     break;

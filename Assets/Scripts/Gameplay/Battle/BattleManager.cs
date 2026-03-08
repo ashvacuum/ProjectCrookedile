@@ -358,7 +358,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         private void ApplyCardEffects(CardData card, int[] amountOverrides)
         {
-            var ctx = _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides: amountOverrides);
+            var ctx = ResolveCardEffectsDispatch(card, amountOverrides);
 
             // If any effect flagged exhaust, move the card from discard → exhaust pile now
             // (PlayCardAtIndex already moved it hand → discard before effects resolved).
@@ -379,10 +379,34 @@ namespace Crookedile.Gameplay.Battle
             {
                 _effectResolver.PlayerStatusEffects.RemoveStacks(StatusEffectType.Echo, 1);
                 GameLogger.LogInfo<BattleManager>($"Echo triggered — replaying {card.CardName}");
-                _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides: null);
+                ResolveCardEffectsDispatch(card, null);
                 CheckAndAdvanceFocusAfterCardPlay();
                 CheckAndEndBattleIfOver();
             }
+        }
+
+        /// <summary>
+        /// Routes card effect resolution to the new polymorphic path when the card has
+        /// <see cref="CardData.NewEffects"/>, otherwise falls back to the legacy path.
+        /// Returns a unified <see cref="EffectContext"/> so callers stay path-agnostic.
+        /// </summary>
+        private EffectContext ResolveCardEffectsDispatch(CardData card, int[] amountOverrides)
+        {
+            if (card.NewEffects != null && card.NewEffects.Count > 0)
+            {
+                var execCtx = _effectResolver.ResolveCardEffectsNew(card, isPlayerCard: true, amountOverrides);
+                return new EffectContext
+                {
+                    Caster              = execCtx.Caster,
+                    Target              = execCtx.Target,
+                    LastDamageDealt     = execCtx.LastDamageDealt,
+                    LastHealAmount      = execCtx.LastHealAmount,
+                    LastComposureGained = execCtx.LastComposureGained,
+                    LastTargetDied      = execCtx.LastTargetDied,
+                    ShouldExhaust       = execCtx.ShouldExhaust,
+                };
+            }
+            return _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides: amountOverrides);
         }
 
         private bool CanPlayCard(CardData card, BattleStats stats)
@@ -817,8 +841,11 @@ namespace Crookedile.Gameplay.Battle
                     // Temporarily point EffectResolver at this enemy as the caster
                     _manager._effectResolver.SetFocusedOpponent(
                         enemy.Stats, enemy.StatusEffects, i, enemy.EnemyData.EnemyName);
+                    var move = enemy.CurrentIntent;
                     yield return _manager.StartCoroutine(
-                        _manager._effectResolver.ResolveEnemyMoveEffects(enemy.CurrentIntent));
+                        (move?.NewEffects != null && move.NewEffects.Count > 0)
+                            ? _manager._effectResolver.ResolveEnemyMoveEffectsNew(move)
+                            : _manager._effectResolver.ResolveEnemyMoveEffects(move));
 
                     // If the player was killed by this move, end the battle immediately
                     // so remaining enemies don't continue acting.
