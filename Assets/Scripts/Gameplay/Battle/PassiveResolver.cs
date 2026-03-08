@@ -305,7 +305,7 @@ namespace Crookedile.Gameplay.Battle
             // Card passives — all cards in the full deck (draw + hand + discard)
             if (deck != null)
             {
-                foreach (var card in deck.AllCards)
+                foreach (var card in deck.Hand)
                 {
                     if (card?.Passives == null) continue;
                     foreach (var bp in card.Passives)

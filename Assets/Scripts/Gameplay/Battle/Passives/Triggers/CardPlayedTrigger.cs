@@ -1,4 +1,5 @@
 using System;
+using Crookedile.Data;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Data.Cards;

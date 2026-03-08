@@ -233,16 +233,26 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>Returns true if the given trigger event occurred during the card's resolution.</summary>
-        private static bool TriggerOccurred(EffectTrigger trigger, EffectContext ctx) => trigger switch
+        private static bool TriggerOccurred(EffectTrigger trigger, EffectContext ctx)
         {
-            EffectTrigger.OnDamageDealt     => ctx.LastDamageDealt > 0,
-            EffectTrigger.OnKill            => ctx.LastTargetDied,
-            EffectTrigger.OnComposureGained => ctx.LastComposureGained > 0,
-            EffectTrigger.OnHeal            => ctx.LastHealAmount > 0,
-            EffectTrigger.OnStatusApplied   => true,   // conservative: trust the card authored this correctly
-            EffectTrigger.OnDamageTaken     => false,  // reserved — not fired from player cards yet
-            _                               => false
-        };
+            switch (trigger)
+            {
+                case EffectTrigger.OnDamageDealt:     return ctx.LastDamageDealt > 0;
+                case EffectTrigger.OnKill:            return ctx.LastTargetDied;
+                case EffectTrigger.OnComposureGained: return ctx.LastComposureGained > 0;
+                case EffectTrigger.OnHeal:            return ctx.LastHealAmount > 0;
+                case EffectTrigger.OnStatusApplied:   return true; // conservative: trust the card authored this correctly
+                case EffectTrigger.OnDamageTaken:
+                    // OnDamageTaken cannot fire during card resolution — the player never takes
+                    // damage while playing their own cards. Use PassiveTrigger.OnDamageTaken in
+                    // an OriginPassive (EventBus-based) for reactive damage responses instead.
+                    GameLogger.LogWarning<EffectResolver>(
+                        "EffectTrigger.OnDamageTaken is reserved and will never fire during card " +
+                        "resolution. Use PassiveTrigger.OnDamageTaken in an OriginPassive instead.");
+                    return false;
+                default: return false;
+            }
+        }
 
         /// <summary>
         /// Returns true if the extra condition on the triggered effect is satisfied.
@@ -316,10 +326,12 @@ namespace Crookedile.Gameplay.Battle
             StatusEffectManager casterStatusEffects = isPlayerCard ? _playerStatusEffects   : _opponentStatusEffects;
             StatusEffectManager targetStatusEffects = isPlayerCard ? _opponentStatusEffects : _playerStatusEffects;
 
-            // Resource and CardManipulation are always caster-scoped — apply once and return
+            // Resource and CardManipulation are always caster-scoped — apply once and return.
+            // targetStats is forwarded so that opponent-scoped resource effects (ReduceHostility,
+            // RaiseTargetHostility) hit the right BattleStats rather than hardcoding _opponentStats.
             if (effect.Category == EffectCategory.Resource)
             {
-                ResolveResourceEffect(effect, casterStats, ctx, amountOverride);
+                ResolveResourceEffect(effect, casterStats, targetStats, ctx, amountOverride);
                 EventBus.Publish(new EffectAppliedEvent { Effect = effect, IsPlayer = isPlayerCard });
                 return;
             }
@@ -469,7 +481,8 @@ namespace Crookedile.Gameplay.Battle
             }
         }
 
-        private void ResolveResourceEffect(CardEffect effect, BattleStats caster, EffectContext ctx = null, int? amountOverride = null)
+        private void ResolveResourceEffect(CardEffect effect, BattleStats caster, BattleStats target,
+                                            EffectContext ctx = null, int? amountOverride = null)
         {
             // Local helper: returns the override amount when Confused is active, otherwise the normal effect amount
             int GetAmount() => amountOverride ?? effect.GetEffectiveAmount(ctx);
@@ -492,12 +505,15 @@ namespace Crookedile.Gameplay.Battle
                     ApplyComposureEqualToHostility(caster, ctx);
                     break;
 
+                // Opponent-scoped: reduce/raise the *target's* hostility, not the caster's.
+                // Uses the resolved target (focused enemy for player cards, player for enemy cards)
+                // rather than _opponentStats so multi-enemy and enemy-card scenarios are correct.
                 case ResourceEffectType.ReduceHostility:
-                    ApplyReduceHostility(_opponentStats, GetAmount());
+                    ApplyReduceHostility(target, GetAmount());
                     break;
 
                 case ResourceEffectType.RaiseTargetHostility:
-                    ApplyRaiseTargetHostility(_opponentStats, GetAmount());
+                    ApplyRaiseTargetHostility(target, GetAmount());
                     break;
 
                 case ResourceEffectType.GainActionPoints:
@@ -607,14 +623,19 @@ namespace Crookedile.Gameplay.Battle
 
         #region Core Damage & Healing
 
-        private void ApplyResolveDamage(BattleStats target, BattleStats attacker, int baseDamage, EffectContext ctx = null)
+        /// <summary>
+        /// Shared damage pipeline: applies attacker/target status modifiers and the hostility
+        /// multiplier, calls DamageResolve, publishes DamageDealtEvent, and writes to ctx.
+        /// All three damage-type methods (fixed, random, composure-equal) funnel through here
+        /// so that modifier logic lives in exactly one place.
+        /// </summary>
+        private void ApplyDamagePipeline(BattleStats target, BattleStats attacker, int rawDamage, EffectContext ctx)
         {
-            // Get attacker and target status effect managers
             StatusEffectManager attackerStatusMgr = GetStatusEffectManager(attacker);
             StatusEffectManager targetStatusMgr   = GetStatusEffectManager(target);
 
             // Apply attacker's damage modifiers (Strength, Weakened, Exposed)
-            int modifiedDamage = attackerStatusMgr.ModifyDamageDealt(baseDamage);
+            int modifiedDamage = attackerStatusMgr.ModifyDamageDealt(rawDamage);
 
             // Apply target's damage taken modifiers (Vulnerable, Plated, Intangible, Thorns)
             modifiedDamage = targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker);
@@ -623,23 +644,25 @@ namespace Crookedile.Gameplay.Battle
             if (attacker != _playerStats && attacker.CurrentHostility > 0)
             {
                 float hostilityMult = Mathf.Max(0.1f, attacker.HostilityDamageMultiplier);
-                modifiedDamage = Mathf.RoundToInt(modifiedDamage * hostilityMult);
+                modifiedDamage      = Mathf.RoundToInt(modifiedDamage * hostilityMult);
             }
 
             // Apply damage — target's Composure shield absorbs first, then Resolve takes the rest
             int actualDamage = target.DamageResolve(modifiedDamage);
-            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} damage (base: {baseDamage}, modified: {modifiedDamage}, HostilityMult: {(attacker != _playerStats && attacker.CurrentHostility > 0 ? attacker.HostilityDamageMultiplier.ToString("F2") : "1.00")})");
+            GameLogger.LogInfo<EffectResolver>(
+                $"Dealt {actualDamage} damage (raw: {rawDamage}, modified: {modifiedDamage}, " +
+                $"HostilityMult: {(attacker != _playerStats && attacker.CurrentHostility > 0 ? attacker.HostilityDamageMultiplier.ToString("F2") : "1.00")})");
 
             if (actualDamage > 0)
             {
                 bool isPlayerAttacking = attacker == _playerStats;
                 EventBus.Publish(new DamageDealtEvent
                 {
-                    Amount            = actualDamage,
-                    IsToPlayer        = target == _playerStats,
-                    AttackerName      = isPlayerAttacking ? "Player" : _attackerName,
-                    SourceEnemyIndex  = isPlayerAttacking ? -1 : _attackerEnemyIndex,
-                    TargetEnemyIndex  = isPlayerAttacking ? _attackerEnemyIndex : -1,
+                    Amount           = actualDamage,
+                    IsToPlayer       = target == _playerStats,
+                    AttackerName     = isPlayerAttacking ? "Player" : _attackerName,
+                    SourceEnemyIndex = isPlayerAttacking ? -1 : _attackerEnemyIndex,
+                    TargetEnemyIndex = isPlayerAttacking ? _attackerEnemyIndex : -1,
                 });
             }
 
@@ -649,6 +672,11 @@ namespace Crookedile.Gameplay.Battle
                 ctx.LastDamageDealt += actualDamage;
                 if (target.CurrentResolve <= 0) ctx.LastTargetDied = true;
             }
+        }
+
+        private void ApplyResolveDamage(BattleStats target, BattleStats attacker, int baseDamage, EffectContext ctx = null)
+        {
+            ApplyDamagePipeline(target, attacker, baseDamage, ctx);
         }
 
         private void ApplyResolveHeal(BattleStats target, int amount, EffectContext ctx = null)
@@ -665,46 +693,8 @@ namespace Crookedile.Gameplay.Battle
         private void ApplyRandomDamage(BattleStats target, BattleStats attacker, int minDamage, int maxDamage, EffectContext ctx = null)
         {
             int randomDamage = RandomHelper.Range(minDamage, maxDamage + 1);
-
-            // Get attacker and target status effect managers
-            StatusEffectManager attackerStatusMgr = GetStatusEffectManager(attacker);
-            StatusEffectManager targetStatusMgr = GetStatusEffectManager(target);
-
-            // Apply attacker's damage modifiers (Strength, Weakened, Exposed)
-            int modifiedDamage = attackerStatusMgr.ModifyDamageDealt(randomDamage);
-
-            // Apply target's damage taken modifiers (Vulnerable, Plated, Intangible, Thorns)
-            modifiedDamage = targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker);
-
-            // Hostile enemies (positive hostility) deal amplified damage; neutral and receptive don't
-            if (attacker != _playerStats && attacker.CurrentHostility > 0)
-            {
-                float hostilityMult = Mathf.Max(0.1f, attacker.HostilityDamageMultiplier);
-                modifiedDamage = Mathf.RoundToInt(modifiedDamage * hostilityMult);
-            }
-
-            // Apply damage — target's Composure shield absorbs first, then Resolve takes the rest
-            int actualDamage = target.DamageResolve(modifiedDamage);
-            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} random damage (rolled {randomDamage} from {minDamage}-{maxDamage}, modified: {modifiedDamage})");
-
-            if (actualDamage > 0)
-            {
-                bool isPlayerAttacking = attacker == _playerStats;
-                EventBus.Publish(new DamageDealtEvent
-                {
-                    Amount            = actualDamage,
-                    IsToPlayer        = target == _playerStats,
-                    AttackerName      = isPlayerAttacking ? "Player" : _attackerName,
-                    SourceEnemyIndex  = isPlayerAttacking ? -1 : _attackerEnemyIndex,
-                    TargetEnemyIndex  = isPlayerAttacking ? _attackerEnemyIndex : -1,
-                });
-            }
-
-            if (ctx != null)
-            {
-                ctx.LastDamageDealt += actualDamage;
-                if (target.CurrentResolve <= 0) ctx.LastTargetDied = true;
-            }
+            GameLogger.LogInfo<EffectResolver>($"Random damage roll: {randomDamage} (range {minDamage}–{maxDamage})");
+            ApplyDamagePipeline(target, attacker, randomDamage, ctx);
         }
 
         #endregion
@@ -732,46 +722,8 @@ namespace Crookedile.Gameplay.Battle
         private void ApplyResolveDamageEqualToComposure(BattleStats target, BattleStats attacker, EffectContext ctx = null)
         {
             int composure = attacker.CurrentComposure;
-
-            // Get attacker and target status effect managers
-            StatusEffectManager attackerStatusMgr = GetStatusEffectManager(attacker);
-            StatusEffectManager targetStatusMgr = GetStatusEffectManager(target);
-
-            // Apply attacker's damage modifiers (Strength, Weakened, Exposed)
-            int modifiedDamage = attackerStatusMgr.ModifyDamageDealt(composure);
-
-            // Apply target's damage taken modifiers (Vulnerable, Plated, Intangible, Thorns)
-            modifiedDamage = targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker);
-
-            // Hostile enemies (positive hostility) deal amplified damage; neutral and receptive don't
-            if (attacker != _playerStats && attacker.CurrentHostility > 0)
-            {
-                float hostilityMult = Mathf.Max(0.1f, attacker.HostilityDamageMultiplier);
-                modifiedDamage = Mathf.RoundToInt(modifiedDamage * hostilityMult);
-            }
-
-            // Apply damage (damage value equals caster's Composure; target's Composure shield still absorbs first)
-            int actualDamage = target.DamageResolve(modifiedDamage);
-            GameLogger.LogInfo<EffectResolver>($"Dealt {actualDamage} damage equal to Composure ({composure}, modified: {modifiedDamage})");
-
-            if (actualDamage > 0)
-            {
-                bool isPlayerAttacking = attacker == _playerStats;
-                EventBus.Publish(new DamageDealtEvent
-                {
-                    Amount            = actualDamage,
-                    IsToPlayer        = target == _playerStats,
-                    AttackerName      = isPlayerAttacking ? "Player" : _attackerName,
-                    SourceEnemyIndex  = isPlayerAttacking ? -1 : _attackerEnemyIndex,
-                    TargetEnemyIndex  = isPlayerAttacking ? _attackerEnemyIndex : -1,
-                });
-            }
-
-            if (ctx != null)
-            {
-                ctx.LastDamageDealt += actualDamage;
-                if (target.CurrentResolve <= 0) ctx.LastTargetDied = true;
-            }
+            GameLogger.LogInfo<EffectResolver>($"Damage-equal-to-Composure: raw value = {composure}");
+            ApplyDamagePipeline(target, attacker, composure, ctx);
         }
 
         private void ApplyConsumeAllComposure(BattleStats caster)
@@ -1096,15 +1048,6 @@ namespace Crookedile.Gameplay.Battle
         #endregion
 
         #region Utility
-
-        /// <summary>
-        /// Checks if an effect can be applied (e.g., enough resources, valid target).
-        /// </summary>
-        public bool CanApplyEffect(CardEffect effect, bool isPlayerCard)
-        {
-            // Basic validation - all effects are now battle effects
-            return true;
-        }
 
         /// <summary>
         /// Gets the StatusEffectManager for the given BattleStats.

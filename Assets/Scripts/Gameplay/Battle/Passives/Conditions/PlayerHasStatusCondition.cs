@@ -12,7 +12,7 @@ namespace Crookedile.Gameplay.Battle
     public class PlayerHasStatusCondition : PassiveConditionBase
     {
         [Tooltip("The status type to check for on the player.")]
-        [SerializeField] private StatusEffectType _statusType = StatusEffectType.Empowered;
+        [SerializeField] private StatusEffectType _statusType = StatusEffectType.Confused;
 
         [Tooltip("Minimum stack count required.")]
         [MinValue(1)]

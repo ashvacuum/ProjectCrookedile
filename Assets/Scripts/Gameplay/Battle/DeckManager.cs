@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Crookedile.Core;
 using Crookedile.Data;
 using UnityEngine;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
+using EventBus = Crookedile.Core.EventBus;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -86,6 +86,13 @@ namespace Crookedile.Gameplay.Battle
         /// Cards currently in the draw pile (read-only). Order reflects the live shuffle.
         /// </summary>
         public IReadOnlyList<CardData> DrawPile => _deck.AsReadOnly();
+
+        /// <summary>
+        /// All cards across every zone — draw pile, hand, discard, and exhaust (read-only snapshot).
+        /// Order: draw → hand → discard → exhaust.
+        /// </summary>
+        public IReadOnlyList<CardData> AllCards =>
+            _deck.Concat(_hand).Concat(_discard).Concat(_exhaust).ToList().AsReadOnly();
 
         #endregion
 
