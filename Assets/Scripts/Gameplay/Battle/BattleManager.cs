@@ -358,10 +358,19 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         private void ApplyCardEffects(CardData card, int[] amountOverrides)
         {
-            _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides: amountOverrides);
+            var ctx = _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides: amountOverrides);
+
+            // If any effect flagged exhaust, move the card from discard → exhaust pile now
+            // (PlayCardAtIndex already moved it hand → discard before effects resolved).
+            if (ctx.ShouldExhaust)
+                _playerDeck.ExhaustFromDiscard(card);
+
             ApplyPolicyHostilityShifts(card);
             CheckAndAdvanceFocusAfterCardPlay();
             TriggerMomentum();
+
+            // Immediately end the battle if all enemies are dead (or player died e.g. from Thorns).
+            if (CheckAndEndBattleIfOver()) return;
 
             // Echo — replay the card a second time; consume the stack BEFORE the replay to
             // prevent a second Echo stack (if any) from triggering an infinite chain.
@@ -372,11 +381,15 @@ namespace Crookedile.Gameplay.Battle
                 GameLogger.LogInfo<BattleManager>($"Echo triggered — replaying {card.CardName}");
                 _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides: null);
                 CheckAndAdvanceFocusAfterCardPlay();
+                CheckAndEndBattleIfOver();
             }
         }
 
         private bool CanPlayCard(CardData card, BattleStats stats)
         {
+            // Curses and flagged Status cards are never playable
+            if (card.IsUnplayable) return false;
+
             foreach (var cost in card.Costs)
             {
                 if (cost.CostType == CostType.ActionPoints)
@@ -477,7 +490,7 @@ namespace Crookedile.Gameplay.Battle
                     return;
                 }
             }
-            // All defeated — TurnEnd victory check will catch it
+            // All defeated — CheckAndEndBattleIfOver will catch it after ApplyCardEffects returns
         }
 
         /// <summary>
@@ -586,6 +599,18 @@ namespace Crookedile.Gameplay.Battle
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Convenience wrapper: checks victory conditions and, if the battle is over,
+        /// immediately transitions to BattleEnd — bypassing TurnEnd cleanup.
+        /// Returns true if the battle ended so callers can exit early.
+        /// </summary>
+        private bool CheckAndEndBattleIfOver()
+        {
+            if (!CheckVictoryConditions()) return false;
+            TransitionToState(BattleState.BattleEnd);
+            return true;
         }
 
         /// <summary>Returns the cached battle result.</summary>
@@ -794,6 +819,10 @@ namespace Crookedile.Gameplay.Battle
                         enemy.Stats, enemy.StatusEffects, i, enemy.EnemyData.EnemyName);
                     yield return _manager.StartCoroutine(
                         _manager._effectResolver.ResolveEnemyMoveEffects(enemy.CurrentIntent));
+
+                    // If the player was killed by this move, end the battle immediately
+                    // so remaining enemies don't continue acting.
+                    if (_manager.CheckAndEndBattleIfOver()) yield break;
 
                     // Handle SummonMinion moves after normal effects resolve
                     if (enemy.CurrentIntent.MoveType == EnemyMoveType.SummonMinion &&

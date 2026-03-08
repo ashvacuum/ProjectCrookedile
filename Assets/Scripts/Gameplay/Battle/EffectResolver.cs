@@ -62,6 +62,115 @@ namespace Crookedile.Gameplay.Battle
             _attackerName          = enemyName;
         }
 
+        #region New BattleEffect Coordinator (Phase 2 — parallel with legacy)
+
+        /// <summary>
+        /// Creates an <see cref="EffectExecutionContext"/> from the resolver's current state.
+        /// Used by the new <see cref="BattleEffect"/>-based resolution path.
+        /// </summary>
+        /// <param name="isPlayerCard">
+        /// True for player cards (caster = player, target = focused enemy).
+        /// False for enemy moves (caster = focused enemy, target = player, deck = null).
+        /// </param>
+        public EffectExecutionContext CreateContext(bool isPlayerCard)
+        {
+            BattleStats         caster         = isPlayerCard ? _playerStats          : _opponentStats;
+            BattleStats         target         = isPlayerCard ? _opponentStats         : _playerStats;
+            DeckManager         deck           = isPlayerCard ? _playerDeck            : null;
+            StatusEffectManager casterStatus   = isPlayerCard ? _playerStatusEffects   : _opponentStatusEffects;
+            StatusEffectManager targetStatus   = isPlayerCard ? _opponentStatusEffects : _playerStatusEffects;
+
+            return new EffectExecutionContext(
+                caster:               caster,
+                target:               target,
+                playerStats:          _playerStats,
+                isPlayerCard:         isPlayerCard,
+                deck:                 deck,
+                allEnemies:           _allEnemies,
+                casterStatusEffects:  casterStatus,
+                targetStatusEffects:  targetStatus,
+                playerStatusEffects:  _playerStatusEffects,
+                attackerName:         isPlayerCard ? "Player" : _attackerName,
+                attackerEnemyIndex:   isPlayerCard ? -1 : _attackerEnemyIndex);
+        }
+
+        /// <summary>
+        /// New coordinator — resolves a card's <see cref="BattleEffect"/> list using the
+        /// polymorphic self-executing hierarchy. Falls back to the legacy path when
+        /// <see cref="CardData.NewEffects"/> is empty (migration window).
+        ///
+        /// Triggered effects still use <see cref="CardEffect"/> (Phase 2 migration).
+        /// </summary>
+        public EffectExecutionContext ResolveCardEffectsNew(
+            CardData card, bool isPlayerCard, int[] amountOverrides = null)
+        {
+            GameLogger.LogInfo<EffectResolver>(
+                $"[New] Resolving effects for: {card.CardName} (Player: {isPlayerCard})");
+
+            var execCtx = CreateContext(isPlayerCard);
+
+            var effects = card.NewEffects;
+            for (int j = 0; j < effects.Count; j++)
+            {
+                if (effects[j] == null) continue;
+                int? overrideAmount = (amountOverrides != null && j < amountOverrides.Length)
+                    ? (int?)amountOverrides[j] : null;
+                effects[j].Execute(execCtx, overrideAmount);
+            }
+
+            // Triggered effects still use the legacy EffectContext path during the migration window.
+            // Build a compatible EffectContext from the accumulated execution results.
+            if (card.TriggeredEffects != null && card.TriggeredEffects.Count > 0)
+            {
+                var legacyCtx = new EffectContext
+                {
+                    Caster              = execCtx.Caster,
+                    Target              = execCtx.Target,
+                    LastDamageDealt     = execCtx.LastDamageDealt,
+                    LastHealAmount      = execCtx.LastHealAmount,
+                    LastComposureGained = execCtx.LastComposureGained,
+                    LastTargetDied      = execCtx.LastTargetDied,
+                    ShouldExhaust       = execCtx.ShouldExhaust,
+                };
+                ResolveTriggeredEffects(card.TriggeredEffects, legacyCtx, isPlayerCard);
+
+                // Sync back any changes triggered effects made
+                execCtx.ShouldExhaust = legacyCtx.ShouldExhaust;
+            }
+
+            return execCtx;
+        }
+
+        /// <summary>
+        /// New coordinator — resolves an enemy move's <see cref="BattleEffect"/> list with a
+        /// delay between effects, identical to <see cref="ResolveEnemyMoveEffects"/> but using
+        /// self-executing effects. Falls back to the legacy path when <c>NewEffects</c> is empty.
+        /// </summary>
+        public IEnumerator ResolveEnemyMoveEffectsNew(EnemyMoveData move)
+        {
+            if (move == null) yield break;
+
+            // Fall back to legacy path if the move hasn't been migrated yet
+            if (move.NewEffects == null || move.NewEffects.Count == 0)
+            {
+                yield return ResolveEnemyMoveEffects(move);
+                yield break;
+            }
+
+            GameLogger.LogInfo<EffectResolver>($"[New] Resolving enemy move: {move.MoveName}");
+
+            var execCtx = CreateContext(isPlayerCard: false);
+            var effects  = move.NewEffects;
+            for (int i = 0; i < effects.Count; i++)
+            {
+                effects[i]?.Execute(execCtx);
+                if (i < effects.Count - 1)
+                    yield return new WaitForSeconds(EffectStepDelay);
+            }
+        }
+
+        #endregion
+
         #region Effect Resolution
 
         /// <summary>
@@ -75,7 +184,7 @@ namespace Crookedile.Gameplay.Battle
         /// Used by the Confused status effect to randomise card values 0–3 this turn.
         /// Pass null (default) for normal resolution.
         /// </param>
-        public void ResolveCardEffects(CardData card, bool isPlayerCard, int[] amountOverrides = null)
+        public EffectContext ResolveCardEffects(CardData card, bool isPlayerCard, int[] amountOverrides = null)
         {
             GameLogger.LogInfo<EffectResolver>($"Resolving effects for: {card.CardName} (Player: {isPlayerCard})");
 
@@ -96,6 +205,8 @@ namespace Crookedile.Gameplay.Battle
             // Fire any triggered effects that reacted to what happened above
             if (card.TriggeredEffects != null && card.TriggeredEffects.Count > 0)
                 ResolveTriggeredEffects(card.TriggeredEffects, ctx, isPlayerCard);
+
+            return ctx;
         }
 
         /// <summary>
@@ -216,7 +327,7 @@ namespace Crookedile.Gameplay.Battle
             {
                 // Enemies have no deck (casterDeck == null) — skip silently.
                 if (casterDeck != null)
-                    ResolveCardManipulationEffect(effect, casterDeck);
+                    ResolveCardManipulationEffect(effect, casterDeck, isPlayerCard, ctx);
                 EventBus.Publish(new EffectAppliedEvent { Effect = effect, IsPlayer = isPlayerCard });
                 return;
             }
@@ -385,6 +496,10 @@ namespace Crookedile.Gameplay.Battle
                     ApplyReduceHostility(_opponentStats, GetAmount());
                     break;
 
+                case ResourceEffectType.RaiseTargetHostility:
+                    ApplyRaiseTargetHostility(_opponentStats, GetAmount());
+                    break;
+
                 case ResourceEffectType.GainActionPoints:
                     ApplyGainActionPoints(caster, GetAmount());
                     break;
@@ -399,7 +514,8 @@ namespace Crookedile.Gameplay.Battle
             }
         }
 
-        private void ResolveCardManipulationEffect(CardEffect effect, DeckManager deck)
+        private void ResolveCardManipulationEffect(CardEffect effect, DeckManager deck,
+                                                    bool isPlayerCard = false, EffectContext ctx = null)
         {
             switch (effect.CardManipulationType)
             {
@@ -420,11 +536,15 @@ namespace Crookedile.Gameplay.Battle
                     break;
 
                 case CardManipulationType.DiscardHand:
-                    ApplyDiscardHand(deck);
+                    ApplyDiscardHand(deck, effect);
                     break;
 
                 case CardManipulationType.ExhaustThisCard:
-                    ApplyExhaustCard(deck);
+                    ApplyExhaustCard(ctx);
+                    break;
+
+                case CardManipulationType.ChooseToDiscard:
+                    ApplyChooseToDiscard(deck, effect.CardAmount, effect);
                     break;
 
                 case CardManipulationType.AddCardToDeck:
@@ -436,7 +556,7 @@ namespace Crookedile.Gameplay.Battle
                     break;
 
                 case CardManipulationType.UpgradeCardThisBattle:
-                    ApplyUpgradeCardThisBattle(deck);
+                    ApplyUpgradeCardThisBattle(deck, effect);
                     break;
 
                 case CardManipulationType.UpgradeAllCardsInHand:
@@ -444,7 +564,7 @@ namespace Crookedile.Gameplay.Battle
                     break;
 
                 case CardManipulationType.MakeCardRetain:
-                    ApplyMakeCardRetain(deck);
+                    ApplyMakeCardRetain(deck, effect);
                     break;
 
                 case CardManipulationType.MakeAllCardsRetain:
@@ -452,12 +572,34 @@ namespace Crookedile.Gameplay.Battle
                     break;
 
                 case CardManipulationType.ReduceCardCost:
-                    ApplyReduceCardCost(deck, effect.CostReduction);
+                    ApplyReduceCardCost(deck, effect.CostReduction, effect);
                     break;
 
                 case CardManipulationType.MakeCardFree:
-                    ApplyMakeCardFree(deck);
+                    ApplyMakeCardFree(deck, effect);
                     break;
+
+                case CardManipulationType.ChanceRoll:
+                    ApplyChanceRoll(effect, isPlayerCard, ctx);
+                    break;
+            }
+        }
+
+        private void ApplyChanceRoll(CardEffect effect, bool isPlayerCard, EffectContext ctx)
+        {
+            if (!RandomHelper.Chance(effect.ChancePercent / 100f))
+            {
+                GameLogger.LogInfo<EffectResolver>($"Chance roll failed ({effect.ChancePercent}%)");
+                return;
+            }
+
+            GameLogger.LogInfo<EffectResolver>(
+                $"Chance roll succeeded ({effect.ChancePercent}%) — resolving {effect.ChanceEffects.Count} effect(s)");
+
+            foreach (var childEffect in effect.ChanceEffects)
+            {
+                if (childEffect != null)
+                    ResolveBattleEffect(childEffect, isPlayerCard, ctx);
             }
         }
 
@@ -642,10 +784,16 @@ namespace Crookedile.Gameplay.Battle
 
         #region Hostility
 
-        private void ApplyReduceHostility(BattleStats caster, int amount)
+        private void ApplyReduceHostility(BattleStats target, int amount)
         {
-            int actualReduction = caster.ReduceHostility(amount);
+            int actualReduction = target.ReduceHostility(amount);
             GameLogger.LogInfo<EffectResolver>($"Reduced {actualReduction} Hostility");
+        }
+
+        private void ApplyRaiseTargetHostility(BattleStats target, int amount)
+        {
+            target.GainHostility(amount);
+            GameLogger.LogInfo<EffectResolver>($"Raised target Hostility by {amount} (now {target.CurrentHostility})");
         }
 
         private void ApplyComposureEqualToHostility(BattleStats caster, EffectContext ctx = null)
@@ -697,16 +845,109 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<EffectResolver>($"Discarded {cardsDiscarded} cards");
         }
 
-        private void ApplyExhaustCard(DeckManager deck)
+        private void ApplyExhaustCard(EffectContext ctx)
         {
-            // Exhaust the card that was just played (handled by DeckManager)
-            GameLogger.LogInfo<EffectResolver>("Card will be exhausted after play");
+            // Signal BattleManager to move the played card from discard → exhaust
+            // after all effects on this card have resolved.
+            if (ctx != null) ctx.ShouldExhaust = true;
+            GameLogger.LogInfo<EffectResolver>("Card flagged for exhaust after play");
         }
 
-        private void ApplyDiscardHand(DeckManager deck)
+        private void ApplyDiscardHand(DeckManager deck, CardEffect effect)
         {
-            int cardsDiscarded = deck.DiscardHand();
-            GameLogger.LogInfo<EffectResolver>($"Discarded entire hand ({cardsDiscarded} cards)");
+            List<CardData> discarded = deck.DiscardHand();
+            GameLogger.LogInfo<EffectResolver>($"Discarded entire hand ({discarded.Count} cards)");
+
+            int drawAmount = effect.DiscardDrawAmount;
+            if (drawAmount <= 0 || discarded.Count == 0) return;
+
+            int count = Mathf.Min(drawAmount, discarded.Count);
+            string title = count == 1 ? "Reclaim 1 card" : $"Reclaim {count} cards";
+            EventBus.Publish(new CardChoiceRequestedEvent
+            {
+                Title         = title,
+                Choices       = discarded,
+                RequiredCount = count,
+                OnConfirmed   = chosen =>
+                {
+                    foreach (var card in chosen)
+                        deck.MoveFromDiscardToHand(card);
+                }
+            });
+        }
+
+        private void ApplyChooseToDiscard(DeckManager deck, int amount, CardEffect effect)
+        {
+            if (deck.HandCount == 0)
+            {
+                GameLogger.LogInfo<EffectResolver>("ChooseToDiscard: hand is empty — no-op");
+                return;
+            }
+            int count = Mathf.Min(amount, deck.HandCount);
+            string title = count == 1 ? "Choose a card to Discard" : $"Choose {count} cards to Discard";
+            ResolveCardSelection(deck.Hand, effect.SelectionMode, effect.FilterCardType,
+                title, count,
+                chosen => { foreach (var card in chosen) deck.DiscardCard(card); });
+        }
+
+        /// <summary>
+        /// Central card-selection resolver for single-pool choice-based effects.
+        /// Supports three modes:
+        /// <list type="bullet">
+        ///   <item><see cref="CardSelectionMode.PlayerChoice"/> — opens <see cref="CardChoicePanel"/> via EventBus</item>
+        ///   <item><see cref="CardSelectionMode.RandomAny"/> — picks randomly from the full pool</item>
+        ///   <item><see cref="CardSelectionMode.RandomByType"/> — filters by <paramref name="filterType"/> then picks randomly</item>
+        /// </list>
+        /// </summary>
+        private void ResolveCardSelection(
+            IReadOnlyList<CardData> pool,
+            CardSelectionMode       mode,
+            CardType                filterType,
+            string                  choiceTitle,
+            int                     count,
+            Action<List<CardData>>  onResolved)
+        {
+            // Build the candidate list — apply type filter for RandomByType
+            var candidates = new List<CardData>();
+            foreach (var c in pool)
+            {
+                if (c == null) continue;
+                if (mode == CardSelectionMode.RandomByType && c.CardType != filterType) continue;
+                candidates.Add(c);
+            }
+
+            if (candidates.Count == 0)
+            {
+                GameLogger.LogInfo<EffectResolver>("ResolveCardSelection: no candidates — no-op");
+                onResolved?.Invoke(new List<CardData>());
+                return;
+            }
+
+            if (mode == CardSelectionMode.PlayerChoice)
+            {
+                EventBus.Publish(new CardChoiceRequestedEvent
+                {
+                    Title         = choiceTitle,
+                    Choices       = candidates,
+                    RequiredCount = Mathf.Min(count, candidates.Count),
+                    OnConfirmed   = onResolved
+                });
+            }
+            else
+            {
+                // Random without replacement
+                int pickCount = Mathf.Min(count, candidates.Count);
+                var chosen    = new List<CardData>();
+                var remaining = new List<CardData>(candidates);
+                for (int i = 0; i < pickCount; i++)
+                {
+                    int idx = RandomHelper.Range(0, remaining.Count);
+                    chosen.Add(remaining[idx]);
+                    remaining.RemoveAt(idx);
+                }
+                GameLogger.LogInfo<EffectResolver>($"ResolveCardSelection: randomly picked {chosen.Count} card(s)");
+                onResolved?.Invoke(chosen);
+            }
         }
 
         private void ApplyChooseFromDiscardToHand(DeckManager deck, int amount)
@@ -769,7 +1010,7 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<EffectResolver>($"Added {cardsAdded}/{amount}x {card.CardName} to hand");
         }
 
-        private void ApplyUpgradeCardThisBattle(DeckManager deck)
+        private void ApplyUpgradeCardThisBattle(DeckManager deck, CardEffect effect)
         {
             var upgradeable = new List<CardData>();
             foreach (var c in deck.Hand)
@@ -780,19 +1021,14 @@ namespace Crookedile.Gameplay.Battle
                 GameLogger.LogInfo<EffectResolver>("UpgradeCardThisBattle: no upgradeable cards in hand — no-op");
                 return;
             }
-            EventBus.Publish(new CardChoiceRequestedEvent
-            {
-                Title         = "Choose a card to Upgrade",
-                Choices       = upgradeable,
-                RequiredCount = 1,
-                OnConfirmed   = chosen =>
+            ResolveCardSelection(upgradeable, effect.SelectionMode, effect.FilterCardType,
+                "Choose a card to Upgrade", 1,
+                chosen =>
                 {
                     if (chosen.Count == 0) return;
-                    CardData old      = chosen[0];
-                    CardData upgraded = old.GetCurrentVersion();
-                    deck.SwapCardInHand(old, upgraded);
-                }
-            });
+                    CardData upgraded = chosen[0].GetCurrentVersion();
+                    deck.SwapCardInHand(chosen[0], upgraded);
+                });
         }
 
         private void ApplyUpgradeAllCardsInHand(DeckManager deck)
@@ -809,20 +1045,16 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<EffectResolver>($"Upgraded {pairs.Count} cards in hand");
         }
 
-        private void ApplyMakeCardRetain(DeckManager deck)
+        private void ApplyMakeCardRetain(DeckManager deck, CardEffect effect)
         {
             if (deck.HandCount == 0)
             {
                 GameLogger.LogInfo<EffectResolver>("MakeCardRetain: hand is empty — no-op");
                 return;
             }
-            EventBus.Publish(new CardChoiceRequestedEvent
-            {
-                Title         = "Choose a card to Retain",
-                Choices       = deck.Hand,
-                RequiredCount = 1,
-                OnConfirmed   = chosen => { if (chosen.Count > 0) deck.RetainCard(chosen[0]); }
-            });
+            ResolveCardSelection(deck.Hand, effect.SelectionMode, effect.FilterCardType,
+                "Choose a card to Retain", 1,
+                chosen => { if (chosen.Count > 0) deck.RetainCard(chosen[0]); });
         }
 
         private void ApplyMakeAllCardsRetain(DeckManager deck)
@@ -837,36 +1069,28 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<EffectResolver>($"Retained all {count} cards in hand");
         }
 
-        private void ApplyReduceCardCost(DeckManager deck, int reduction)
+        private void ApplyReduceCardCost(DeckManager deck, int reduction, CardEffect effect)
         {
             if (deck.HandCount == 0)
             {
                 GameLogger.LogInfo<EffectResolver>("ReduceCardCost: hand is empty — no-op");
                 return;
             }
-            EventBus.Publish(new CardChoiceRequestedEvent
-            {
-                Title         = $"Choose a card — Reduce cost by {reduction}",
-                Choices       = deck.Hand,
-                RequiredCount = 1,
-                OnConfirmed   = chosen => { if (chosen.Count > 0) deck.ApplyCostReduction(chosen[0], reduction); }
-            });
+            ResolveCardSelection(deck.Hand, effect.SelectionMode, effect.FilterCardType,
+                $"Choose a card — Reduce cost by {reduction}", 1,
+                chosen => { if (chosen.Count > 0) deck.ApplyCostReduction(chosen[0], reduction); });
         }
 
-        private void ApplyMakeCardFree(DeckManager deck)
+        private void ApplyMakeCardFree(DeckManager deck, CardEffect effect)
         {
             if (deck.HandCount == 0)
             {
                 GameLogger.LogInfo<EffectResolver>("MakeCardFree: hand is empty — no-op");
                 return;
             }
-            EventBus.Publish(new CardChoiceRequestedEvent
-            {
-                Title         = "Choose a card — Make it Free",
-                Choices       = deck.Hand,
-                RequiredCount = 1,
-                OnConfirmed   = chosen => { if (chosen.Count > 0) deck.MakeCardFreeThisBattle(chosen[0]); }
-            });
+            ResolveCardSelection(deck.Hand, effect.SelectionMode, effect.FilterCardType,
+                "Choose a card — Make it Free", 1,
+                chosen => { if (chosen.Count > 0) deck.MakeCardFreeThisBattle(chosen[0]); });
         }
 
         #endregion

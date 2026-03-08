@@ -55,9 +55,9 @@ namespace Crookedile.UI.Battle
 
                 int  idx          = i;
                 int  effectiveCost = bm.GetEffectiveCardCost(captured);
-                // Silenced prevents Rhetoric cards from being played
-                bool silencedBlock = isSilenced && captured.CardType == CardType.Rhetoric;
-                btn.Initialize(captured, idx, currentAP, effectiveCost, silencedBlock, () => onCardClicked(captured, idx));
+                bool forceUnplayable = captured.IsUnplayable
+                                    || (isSilenced && captured.CardType == CardType.Rhetoric);
+                btn.Initialize(captured, idx, currentAP, effectiveCost, forceUnplayable, () => onCardClicked(captured, idx));
                 btn.PlayDrawAnimation();
                 _activeButtons.Add(btn);
             }
@@ -84,12 +84,13 @@ namespace Crookedile.UI.Battle
                 var  captured      = btn.CardData;
                 int  capturedIdx   = i;
                 int  effectiveCost = bm.GetEffectiveCardCost(captured);
-                bool silencedBlock = isSilenced && captured.CardType == CardType.Rhetoric;
-                btn.Initialize(captured, i, currentAP, effectiveCost, silencedBlock,
+                bool forceUnplayable = captured.IsUnplayable
+                                    || (isSilenced && captured.CardType == CardType.Rhetoric);
+                btn.Initialize(captured, i, currentAP, effectiveCost, forceUnplayable,
                     () => onCardClicked(captured, capturedIdx));
             }
 
-            ArrangeCards();
+            ArrangeCards(animated: true);
         }
 
         /// <summary>
@@ -130,7 +131,8 @@ namespace Crookedile.UI.Battle
             {
                 CardData card          = hand[i];
                 int      effectiveCost = bm.GetEffectiveCardCost(card);
-                bool     silencedBlock = isSilenced && card.CardType == CardType.Rhetoric;
+                bool     forceUnplayable = card.IsUnplayable
+                                        || (isSilenced && card.CardType == CardType.Rhetoric);
                 int      capturedIdx   = i;
                 var      captured      = card;
 
@@ -141,7 +143,7 @@ namespace Crookedile.UI.Battle
                     btn = available[existingIdx];
                     available.RemoveAt(existingIdx);
                     // Existing button — refresh index, cost, callback; no animation.
-                    btn.Initialize(card, i, currentAP, effectiveCost, silencedBlock,
+                    btn.Initialize(card, i, currentAP, effectiveCost, forceUnplayable,
                         () => onCardClicked(captured, capturedIdx));
                 }
                 else
@@ -149,7 +151,7 @@ namespace Crookedile.UI.Battle
                     // Newly drawn — create a button and queue it for the fly-in.
                     btn = GetOrCreate(card.CardType);
                     if (btn == null) continue;
-                    btn.Initialize(card, i, currentAP, effectiveCost, silencedBlock,
+                    btn.Initialize(card, i, currentAP, effectiveCost, forceUnplayable,
                         () => onCardClicked(captured, capturedIdx));
                     btn.gameObject.SetActive(true); // always activate; StaggeredDraw hides+reveals on top
                     btn.PlayDrawAnimation();
@@ -196,8 +198,9 @@ namespace Crookedile.UI.Battle
 
                 CardData captured     = card;
                 int      effectiveCost = bm.GetEffectiveCardCost(captured);
-                bool     silencedBlock = isSilenced && captured.CardType == CardType.Rhetoric;
-                btn.Initialize(card, i, currentAP, effectiveCost, silencedBlock,
+                bool     forceUnplayable = captured.IsUnplayable
+                                        || (isSilenced && captured.CardType == CardType.Rhetoric);
+                btn.Initialize(card, i, currentAP, effectiveCost, forceUnplayable,
                     () => { panel.AddToDiscard(captured); RefreshImproviseHand(bm, panel); });
                 _activeButtons.Add(btn);
             }
@@ -256,9 +259,9 @@ namespace Crookedile.UI.Battle
             return Instantiate(prefab, cardButtonContainer);
         }
 
-        private void ArrangeCards()
+        private void ArrangeCards(bool animated = false)
         {
-            cardButtonContainer.GetComponent<CardHandLayout>()?.ArrangeCards(_activeButtons);
+            cardButtonContainer.GetComponent<CardHandLayout>()?.ArrangeCards(_activeButtons, animated);
         }
 
         private void PlayCardDrawAnimation(List<CardButton> buttons)

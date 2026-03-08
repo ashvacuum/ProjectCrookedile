@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Gameplay.Battle;
@@ -64,10 +65,32 @@ namespace Crookedile.Data.Cards
         [LabelText("Card to Add")]
         [SerializeField] private CardData _cardToAdd;
 
+        [ShowIf("ShowCardSelectionMode")]
+        [LabelText("Card Selection")]
+        [SerializeField] private CardSelectionMode _cardSelectionMode = CardSelectionMode.PlayerChoice;
+
+        [ShowIf("ShowFilterCardType")]
+        [LabelText("Filter Type")]
+        [SerializeField] private CardType _filterCardType = CardType.Pressure;
+
+        [ShowIf("ShowDiscardHandDraw")]
+        [LabelText("Reclaim After Discard")]
+        [MinValue(0)]
+        [SerializeField] private int _discardDrawAmount = 0;
+
         [ShowIf("ShowCostReduction")]
         [LabelText("Cost Reduction")]
         [MinValue(1)]
         [SerializeField] private int _costReduction = 1;
+
+        [ShowIf("ShowChanceRoll")]
+        [LabelText("Chance (out of 100)")]
+        [Range(1, 100)]
+        [SerializeField] private int _chancePercent = 50;
+
+        [ShowIf("ShowChanceRoll")]
+        [LabelText("Effects on Success")]
+        [SerializeReference] private List<CardEffect> _chanceEffects = new List<CardEffect>();
 
         [Title("Status Effect")]
         [ShowIf("_category", EffectCategory.StatusEffect)]
@@ -110,7 +133,8 @@ namespace Crookedile.Data.Cards
                 { "Composure/Lose Composure", ResourceEffectType.LoseComposure },
                 { "Composure/Consume All Composure", ResourceEffectType.ConsumeAllComposure },
                 { "Composure/Composure = Hostility (Actor)", ResourceEffectType.ComposureEqualToHostility },
-                { "Hostility/Reduce Hostility", ResourceEffectType.ReduceHostility },
+                { "Hostility/Reduce Hostility",       ResourceEffectType.ReduceHostility },
+                { "Hostility/Raise Target Hostility", ResourceEffectType.RaiseTargetHostility },
                 { "Action Points/Gain AP (This Turn)", ResourceEffectType.GainActionPoints },
                 { "Action Points/Gain AP (Next Turn)", ResourceEffectType.GainActionPointsNextTurn },
                 { "Resolve/Heal Resolve", ResourceEffectType.HealResolve },
@@ -125,9 +149,10 @@ namespace Crookedile.Data.Cards
                 { "Draw/Choose from Discard to Hand", CardManipulationType.ChooseFromDiscardToHand },
                 { "Draw/Choose from Discard to Deck", CardManipulationType.ChooseFromDiscardToDeck },
 
-                { "Discard/Discard Cards", CardManipulationType.DiscardCards },
-                { "Discard/Discard Hand", CardManipulationType.DiscardHand },
-                { "Discard/Exhaust This Card", CardManipulationType.ExhaustThisCard },
+                { "Discard/Discard Cards",             CardManipulationType.DiscardCards },
+                { "Discard/Choose Cards to Discard",  CardManipulationType.ChooseToDiscard },
+                { "Discard/Discard Hand",              CardManipulationType.DiscardHand },
+                { "Discard/Exhaust This Card",         CardManipulationType.ExhaustThisCard },
 
                 { "Create/Add Card to Deck", CardManipulationType.AddCardToDeck },
                 { "Create/Add Card to Hand", CardManipulationType.AddCardToHand },
@@ -139,7 +164,9 @@ namespace Crookedile.Data.Cards
                 { "Retain/Make All Cards Retain", CardManipulationType.MakeAllCardsRetain },
 
                 { "Cost/Reduce Card Cost This Battle", CardManipulationType.ReduceCardCost },
-                { "Cost/Make Card Cost 0 This Turn", CardManipulationType.MakeCardFree },
+                { "Cost/Make Card Cost 0 This Battle", CardManipulationType.MakeCardFree },
+
+                { "Chance/Roll Chance", CardManipulationType.ChanceRoll },
             };
         }
 
@@ -194,10 +221,11 @@ namespace Crookedile.Data.Cards
         private bool ShowResourceAmount()
         {
             return _category == EffectCategory.Resource &&
-                   (_resourceType == ResourceEffectType.GainComposure ||
-                    _resourceType == ResourceEffectType.LoseComposure ||
-                    _resourceType == ResourceEffectType.ReduceHostility ||
-                    _resourceType == ResourceEffectType.GainActionPoints ||
+                   (_resourceType == ResourceEffectType.GainComposure          ||
+                    _resourceType == ResourceEffectType.LoseComposure          ||
+                    _resourceType == ResourceEffectType.ReduceHostility        ||
+                    _resourceType == ResourceEffectType.RaiseTargetHostility   ||
+                    _resourceType == ResourceEffectType.GainActionPoints       ||
                     _resourceType == ResourceEffectType.GainActionPointsNextTurn ||
                     _resourceType == ResourceEffectType.HealResolve) &&
                    _amountSource == EffectContextValue.FixedAmount;
@@ -214,10 +242,11 @@ namespace Crookedile.Data.Cards
                 return _damageType == DamageType.FixedDamage;
             if (_category == EffectCategory.Resource)
             {
-                return _resourceType == ResourceEffectType.GainComposure   ||
-                       _resourceType == ResourceEffectType.LoseComposure   ||
-                       _resourceType == ResourceEffectType.ReduceHostility ||
-                       _resourceType == ResourceEffectType.GainActionPoints ||
+                return _resourceType == ResourceEffectType.GainComposure          ||
+                       _resourceType == ResourceEffectType.LoseComposure          ||
+                       _resourceType == ResourceEffectType.ReduceHostility        ||
+                       _resourceType == ResourceEffectType.RaiseTargetHostility   ||
+                       _resourceType == ResourceEffectType.GainActionPoints       ||
                        _resourceType == ResourceEffectType.GainActionPointsNextTurn ||
                        _resourceType == ResourceEffectType.HealResolve;
             }
@@ -227,13 +256,29 @@ namespace Crookedile.Data.Cards
         private bool ShowCardAmount()
         {
             return _category == EffectCategory.CardManipulation &&
-                   (_cardManipulationType == CardManipulationType.DrawCards ||
-                    _cardManipulationType == CardManipulationType.DiscardCards ||
+                   (_cardManipulationType == CardManipulationType.DrawCards           ||
+                    _cardManipulationType == CardManipulationType.DiscardCards        ||
+                    _cardManipulationType == CardManipulationType.ChooseToDiscard     ||
                     _cardManipulationType == CardManipulationType.ChooseFromDiscardToHand ||
                     _cardManipulationType == CardManipulationType.ChooseFromDiscardToDeck ||
-                    _cardManipulationType == CardManipulationType.AddCardToDeck ||
+                    _cardManipulationType == CardManipulationType.AddCardToDeck       ||
                     _cardManipulationType == CardManipulationType.AddCardToHand);
         }
+
+        private bool ShowDiscardHandDraw() =>
+            _category == EffectCategory.CardManipulation &&
+            _cardManipulationType == CardManipulationType.DiscardHand;
+
+        private bool ShowCardSelectionMode() =>
+            _category == EffectCategory.CardManipulation &&
+            (_cardManipulationType == CardManipulationType.MakeCardFree          ||
+             _cardManipulationType == CardManipulationType.ReduceCardCost        ||
+             _cardManipulationType == CardManipulationType.MakeCardRetain        ||
+             _cardManipulationType == CardManipulationType.UpgradeCardThisBattle ||
+             _cardManipulationType == CardManipulationType.ChooseToDiscard);
+
+        private bool ShowFilterCardType() =>
+            ShowCardSelectionMode() && _cardSelectionMode == CardSelectionMode.RandomByType;
 
         private bool ShowCardToAdd()
         {
@@ -246,6 +291,12 @@ namespace Crookedile.Data.Cards
         {
             return _category == EffectCategory.CardManipulation &&
                    _cardManipulationType == CardManipulationType.ReduceCardCost;
+        }
+
+        private bool ShowChanceRoll()
+        {
+            return _category == EffectCategory.CardManipulation &&
+                   _cardManipulationType == CardManipulationType.ChanceRoll;
         }
 
         #endregion
@@ -264,7 +315,12 @@ namespace Crookedile.Data.Cards
         public CardManipulationType CardManipulationType => _cardManipulationType;
         public int CardAmount => _cardAmount;
         public CardData CardToAdd => _cardToAdd;
+        public int DiscardDrawAmount => _discardDrawAmount;
+        public CardSelectionMode SelectionMode  => _cardSelectionMode;
+        public CardType          FilterCardType => _filterCardType;
         public int CostReduction => _costReduction;
+        public int ChancePercent => _chancePercent;
+        public IReadOnlyList<CardEffect> ChanceEffects => _chanceEffects;
         public StatusEffectType   StatusEffectType => _statusEffectType;
         public int                StatusStacks     => _statusStacks;
         public StatusDurationType StatusDuration   => _statusDuration;
@@ -360,7 +416,8 @@ namespace Crookedile.Data.Cards
                 ResourceEffectType.LoseComposure => $"Lose {_resourceAmount} Composure",
                 ResourceEffectType.ConsumeAllComposure => "Consume all Composure",
                 ResourceEffectType.ComposureEqualToHostility => "Gain Composure = Hostility",
-                ResourceEffectType.ReduceHostility => $"Reduce {_resourceAmount} Hostility",
+                ResourceEffectType.ReduceHostility      => $"Reduce {_resourceAmount} Hostility",
+                ResourceEffectType.RaiseTargetHostility => $"Raise target Hostility by {_resourceAmount}",
                 ResourceEffectType.GainActionPoints => $"Gain {_resourceAmount} AP",
                 ResourceEffectType.GainActionPointsNextTurn => $"Gain {_resourceAmount} AP next turn",
                 ResourceEffectType.HealResolve => $"Heal {_resourceAmount} Resolve",
@@ -378,24 +435,57 @@ namespace Crookedile.Data.Cards
                 CardManipulationType.ChooseFromDiscardToHand => $"Choose {_cardAmount} card(s) from discard pile to hand",
                 CardManipulationType.ChooseFromDiscardToDeck => $"Choose {_cardAmount} card(s) from discard pile to deck",
 
-                CardManipulationType.DiscardCards => $"Discard {_cardAmount} card(s)",
-                CardManipulationType.DiscardHand => "Discard your entire hand",
+                CardManipulationType.DiscardCards    => $"Discard {_cardAmount} card(s)",
+                CardManipulationType.ChooseToDiscard =>
+                    _cardSelectionMode == CardSelectionMode.PlayerChoice
+                        ? $"Choose {_cardAmount} card(s) to discard"
+                        : $"Discard {GetSelectionSuffix()}",
+                CardManipulationType.DiscardHand     =>
+                    _discardDrawAmount > 0
+                        ? $"Discard your hand, reclaim {_discardDrawAmount}"
+                        : "Discard your entire hand",
                 CardManipulationType.ExhaustThisCard => "Exhaust this card",
 
                 CardManipulationType.AddCardToDeck => $"Add {_cardAmount} {cardName} to deck",
                 CardManipulationType.AddCardToHand => $"Add {_cardAmount} {cardName} to hand",
 
-                CardManipulationType.UpgradeCardThisBattle => "Upgrade a card this battle",
+                CardManipulationType.UpgradeCardThisBattle => $"Upgrade {GetSelectionSuffix()} this battle",
                 CardManipulationType.UpgradeAllCardsInHand => "Upgrade all cards in hand",
 
-                CardManipulationType.MakeCardRetain => "Make a card retain (permanent)",
+                CardManipulationType.MakeCardRetain => $"Retain {GetSelectionSuffix()} (permanent until battle ends)",
                 CardManipulationType.MakeAllCardsRetain => "Make all cards retain",
 
-                CardManipulationType.ReduceCardCost => $"Reduce a card's cost by {_costReduction} this battle",
-                CardManipulationType.MakeCardFree => "Make a card cost 0 this turn",
+                CardManipulationType.ReduceCardCost => $"Reduce {GetSelectionSuffix()}'s cost by {_costReduction} this battle",
+                CardManipulationType.MakeCardFree   => $"Make {GetSelectionSuffix()} cost 0 this battle",
+
+                CardManipulationType.ChanceRoll => GetChanceRollDescription(),
 
                 _ => "Unknown card manipulation"
             };
+        }
+
+        private string GetSelectionSuffix()
+        {
+            return _cardSelectionMode switch
+            {
+                CardSelectionMode.RandomAny    => "a random card",
+                CardSelectionMode.RandomByType => $"a random {_filterCardType} card",
+                _                              => "a card",  // PlayerChoice
+            };
+        }
+
+        private string GetChanceRollDescription()
+        {
+            if (_chanceEffects == null || _chanceEffects.Count == 0)
+                return $"{_chancePercent}% chance: [no effects]";
+
+            var parts = new System.Text.StringBuilder();
+            for (int i = 0; i < _chanceEffects.Count; i++)
+            {
+                if (i > 0) parts.Append(", ");
+                parts.Append(_chanceEffects[i]?.GetDescription() ?? "null");
+            }
+            return $"{_chancePercent}% chance: {parts}";
         }
 
         private string GetStatusEffectDescription()
@@ -445,6 +535,7 @@ namespace Crookedile.Data.Cards
         GainActionPoints          = 6,
         GainActionPointsNextTurn  = 7,
         HealResolve               = 8,
+        RaiseTargetHostility      = 9,  // Raise target's Hostility (enemy hits harder)
     }
 
     public enum CardManipulationType
@@ -456,6 +547,7 @@ namespace Crookedile.Data.Cards
 
         // Discard effects
         DiscardCards,
+        ChooseToDiscard,   // Player picks N cards from hand to discard
         DiscardHand,
         ExhaustThisCard,
 
@@ -473,7 +565,17 @@ namespace Crookedile.Data.Cards
 
         // Cost modification effects
         ReduceCardCost,
-        MakeCardFree
+        MakeCardFree,
+
+        // Chance effects
+        ChanceRoll
+    }
+
+    public enum CardSelectionMode
+    {
+        PlayerChoice,   // Opens CardChoicePanel — player picks (default)
+        RandomAny,      // Auto-picks a random card from the eligible pool
+        RandomByType,   // Auto-picks a random card of a specific CardType
     }
 
     #endregion

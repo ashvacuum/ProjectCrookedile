@@ -1,0 +1,25 @@
+using System;
+using UnityEngine;
+using Sirenix.OdinInspector;
+using Crookedile.Core;
+using Crookedile.Utilities;
+
+namespace Crookedile.Gameplay.Battle
+{
+    /// <summary>Grants Action Points to the caster at the start of their next turn.</summary>
+    [Serializable]
+    public class GainActionPointsNextTurnEffect : BattleEffect
+    {
+        [MinValue(1)]
+        [SerializeField] private int _amount = 1;
+
+        public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
+        {
+            int amount = amountOverride ?? _amount;
+            ctx.Caster.GainActionPointsNextTurn(amount);
+            GameLogger.LogInfo<GainActionPointsNextTurnEffect>($"Will gain {amount} AP next turn");
+        }
+
+        public override string GetDescription() => $"Gain {_amount} Action Point(s) next turn";
+    }
+}

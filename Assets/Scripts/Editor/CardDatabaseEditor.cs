@@ -19,8 +19,10 @@ namespace Crookedile.Editor
         private SortMode currentSortMode = SortMode.Name;
         private bool sortDescending = false;
         private string searchFilter = "";
-        private CardType? filterByType = null;
+        private CardType?   filterByType = null;
         private CardRarity? filterByRarity = null;
+        private OriginType? filterByOrigin = null;
+        private bool        filterStarterOnly = false;
 
         // View mode
         private ViewMode viewMode = ViewMode.Statistics;
@@ -308,9 +310,11 @@ namespace Crookedile.Editor
 
             if (GUILayout.Button("Clear", GUILayout.Width(50)))
             {
-                searchFilter = "";
-                filterByType = null;
-                filterByRarity = null;
+                searchFilter     = "";
+                filterByType     = null;
+                filterByRarity   = null;
+                filterByOrigin   = null;
+                filterStarterOnly = false;
                 RefreshFilteredCards();
                 GUI.FocusControl(null);
             }
@@ -365,6 +369,43 @@ namespace Crookedile.Editor
                         RefreshFilteredCards();
                     }
                 }
+            }
+            GUILayout.EndHorizontal();
+
+            // Class (OriginType) filter
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Class:", GUILayout.Width(60));
+
+            if (GUILayout.Toggle(filterByOrigin == null, "All", SirenixGUIStyles.MiniButton))
+            {
+                if (filterByOrigin != null)
+                {
+                    filterByOrigin = null;
+                    RefreshFilteredCards();
+                }
+            }
+
+            foreach (OriginType origin in System.Enum.GetValues(typeof(OriginType)))
+            {
+                if (GUILayout.Toggle(filterByOrigin == origin, origin.ToString(), SirenixGUIStyles.MiniButton))
+                {
+                    if (filterByOrigin != origin)
+                    {
+                        filterByOrigin = origin;
+                        RefreshFilteredCards();
+                    }
+                }
+            }
+            GUILayout.EndHorizontal();
+
+            // Starter card filter
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Starter:", GUILayout.Width(60));
+            bool newStarterOnly = GUILayout.Toggle(filterStarterOnly, "Starter Only", SirenixGUIStyles.MiniButton, GUILayout.Width(90));
+            if (newStarterOnly != filterStarterOnly)
+            {
+                filterStarterOnly = newStarterOnly;
+                RefreshFilteredCards();
             }
             GUILayout.EndHorizontal();
 
@@ -530,6 +571,19 @@ namespace Crookedile.Editor
                 filteredCards = filteredCards.Where(c => c.Rarity == filterByRarity.Value).ToList();
             }
 
+            if (filterByOrigin.HasValue)
+            {
+                string originTag = filterByOrigin.Value.ToString().ToLower();
+                filteredCards = filteredCards
+                    .Where(c => c.HasTag(originTag) || c.HasTag("universal"))
+                    .ToList();
+            }
+
+            if (filterStarterOnly)
+            {
+                filteredCards = filteredCards.Where(c => c.IsStarterCard).ToList();
+            }
+
             // Apply sorting
             filteredCards = SortCards(filteredCards);
         }
@@ -619,7 +673,9 @@ namespace Crookedile.Editor
                 CardType.Pressure => new Color(0.3f, 0.8f, 0.3f),
                 CardType.Rhetoric => new Color(0.9f, 0.3f, 0.3f),
                 CardType.Policy   => new Color(0.3f, 0.5f, 0.9f),
-                _ => Color.grey
+                CardType.Status   => new Color(0.6f, 0.3f, 0.85f),
+                CardType.Curse    => new Color(0.4f, 0.1f, 0.1f),
+                _                 => Color.grey
             };
         }
 

@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
+using Crookedile.Gameplay.Battle;
 
 namespace Crookedile.Data
 {
@@ -41,12 +43,20 @@ namespace Crookedile.Data
         [Tooltip("If true, the passive fires exactly once per battle then goes silent.")]
         [SerializeField] private bool _oneShot;
 
-        [Header("Effect")]
-        [Tooltip("What happens when the passive fires?")]
+        [Header("Effect (Legacy — single effect, enum-based)")]
+        [Tooltip("Legacy: What happens when the passive fires? Use 'Passives (New System)' below for new content.")]
         [SerializeField] private PassiveEffectType _effectType;
 
-        [Tooltip("Magnitude of the effect (e.g. how many AP, how many cards to draw)")]
+        [Tooltip("Legacy: Magnitude of the effect (e.g. how many AP, how many cards to draw)")]
         [SerializeField] private int _effectAmount;
+
+        [Title("Passives (New System)")]
+        [Tooltip("Polymorphic passives using the BattlePassive + BattleEffect hierarchy.\n" +
+                 "Add entries here for all new content. The legacy fields above are kept for\n" +
+                 "backward compatibility (Improvise etc.) and will be migrated later.\n\n" +
+                 "When this list is non-empty, PassiveResolver uses it instead of the legacy path.")]
+        [SerializeReference]
+        [SerializeField] private List<BattlePassive> _passives = new List<BattlePassive>();
 
         #region Properties
 
@@ -59,6 +69,12 @@ namespace Crookedile.Data
         public bool              OneShot       => _oneShot;
         public PassiveEffectType EffectType    => _effectType;
         public int               EffectAmount  => _effectAmount;
+
+        /// <summary>
+        /// New-system polymorphic passives. When non-empty, PassiveResolver uses these
+        /// instead of the legacy Trigger/Condition/EffectType fields.
+        /// </summary>
+        public IReadOnlyList<BattlePassive> Passives => _passives;
 
         #endregion
 

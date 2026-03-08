@@ -3,6 +3,7 @@ using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Data.Cards;
 using Crookedile.Data.VFX;
+using Crookedile.Gameplay.Battle;
 
 namespace Crookedile.Data.Enemy
 {
@@ -52,9 +53,14 @@ namespace Crookedile.Data.Enemy
         // ─── Effects ──────────────────────────────────────────────────────────────
 
         [Header("Effects")]
-        [Tooltip("The effects that execute when this move is played. " +
-                 "Uses the same CardEffect system as player cards. " +
-                 "Avoid CardManipulation effects — enemies have no deck.")]
+        [Tooltip("New polymorphic effect list — use this for all newly authored enemy moves. " +
+                 "Avoid CardManipulation effects — enemies have no deck (ctx.Deck will be null).")]
+        [SerializeReference]
+        [SerializeField] private List<BattleEffect> _newEffects = new List<BattleEffect>();
+
+        [Tooltip("Legacy effect list — kept for backwards compatibility during migration. " +
+                 "Run Crookedile / Tools / Migrate Effects to convert. Do not author new effects here.")]
+        [FoldoutGroup("Legacy Effects (Migration)")]
         [SerializeField] private List<CardEffect> _effects = new List<CardEffect>();
 
         // ─── VFX ─────────────────────────────────────────────────────────────────
@@ -83,21 +89,36 @@ namespace Crookedile.Data.Enemy
         public string            IntentDescription => _intentDescription;
 
         /// <summary>
-        /// Auto-generated hover tooltip text — one line per effect, built from
-        /// <see cref="CardEffect.GetDescription()"/>. Empty when the move has no effects.
+        /// Polymorphic effect list for this enemy move.
+        /// Returns <c>_newEffects</c> when populated; falls back to an empty list during migration.
+        /// </summary>
+        public List<BattleEffect> NewEffects => _newEffects;
+
+        /// <summary>Legacy effect list — read by the migration tool and old resolver path.</summary>
+        public IReadOnlyList<CardEffect> Effects => _effects;
+
+        /// <summary>
+        /// Auto-generated hover tooltip text — one line per effect.
+        /// Uses the new effect list when populated, otherwise the legacy list.
         /// </summary>
         public string Description
         {
             get
             {
+                if (_newEffects != null && _newEffects.Count > 0)
+                {
+                    var lines = new string[_newEffects.Count];
+                    for (int i = 0; i < _newEffects.Count; i++)
+                        lines[i] = _newEffects[i]?.GetDescription() ?? string.Empty;
+                    return string.Join("\n", lines);
+                }
                 if (_effects == null || _effects.Count == 0) return string.Empty;
-                var lines = new string[_effects.Count];
+                var legacyLines = new string[_effects.Count];
                 for (int i = 0; i < _effects.Count; i++)
-                    lines[i] = _effects[i].GetDescription();
-                return string.Join("\n", lines);
+                    legacyLines[i] = _effects[i].GetDescription();
+                return string.Join("\n", legacyLines);
             }
         }
-        public IReadOnlyList<CardEffect> Effects   => _effects;
         public VFXEvent          MoveVFX           => _moveVFX;
         public EnemyData         MinionToSummon    => _minionToSummon;
         public int               MinionCount       => _minionCount;

@@ -492,5 +492,33 @@ namespace Crookedile.Gameplay.Battle
         public CardData NewCard;
     }
 
+    // ── Card Retention / Recovery ─────────────────────────────────────────────
+
+    /// <summary>
+    /// Published by <c>DeckManager.RetainCard()</c> when a card in hand is marked to be
+    /// retained at end of turn instead of being discarded.
+    /// </summary>
+    public struct CardRetainedEvent : IGameEvent
+    {
+        /// <summary>The card that was marked as retained.</summary>
+        public CardData Card;
+
+        /// <summary>True if the player's card was retained (always true in current usage).</summary>
+        public bool IsPlayer;
+    }
+
+    /// <summary>
+    /// Published by <c>DeckManager.MoveFromDiscardToHand()</c> when a card is successfully
+    /// moved from the discard pile back into the player's hand.
+    /// </summary>
+    public struct CardRecoveredEvent : IGameEvent
+    {
+        /// <summary>The card that was moved from discard to hand.</summary>
+        public CardData Card;
+
+        /// <summary>True if the player's card was recovered (always true in current usage).</summary>
+        public bool IsPlayer;
+    }
+
     #endregion
 }

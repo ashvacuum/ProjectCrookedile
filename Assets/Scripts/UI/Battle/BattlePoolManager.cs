@@ -10,8 +10,8 @@ namespace Crookedile.UI.Battle
     /// <summary>
     /// Scene-level singleton pool manager for the battle UI.
     ///
-    /// Owns one <see cref="ObjectPool{T}"/> per <see cref="CardType"/> (Pressure, Rhetoric, Policy)
-    /// so each card type can use a wholly different prefab layout.
+    /// Owns one <see cref="ObjectPool{T}"/> per <see cref="CardType"/> (Pressure, Rhetoric, Policy,
+    /// Status, Curse) so each card type can use a wholly different prefab layout.
     /// Also owns a pool for <see cref="EnemySlotUI"/>.
     ///
     /// Accessible globally via <c>BattlePoolManager.Instance</c> — no injection required.
@@ -32,6 +32,10 @@ namespace Crookedile.UI.Battle
         [SerializeField] private CardButton _rhetoricCardPrefab;
         [Tooltip("CardButton prefab used for Policy cards.")]
         [SerializeField] private CardButton _policyCardPrefab;
+        [Tooltip("CardButton prefab used for Status cards.")]
+        [SerializeField] private CardButton _statusCardPrefab;
+        [Tooltip("CardButton prefab used for Curse cards.")]
+        [SerializeField] private CardButton _curseCardPrefab;
 
         [Tooltip("EnemySlotUI component on the root of the enemy slot prefab.")]
         [SerializeField] private EnemySlotUI _enemySlotPrefab;
@@ -43,12 +47,18 @@ namespace Crookedile.UI.Battle
         [SerializeField] private int _rhetoricPoolSize  = 15;
         [Tooltip("Pre-warmed Policy card button count (default 10).")]
         [SerializeField] private int _policyPoolSize    = 10;
+        [Tooltip("Pre-warmed Status card button count (default 8).")]
+        [SerializeField] private int _statusPoolSize    =  8;
+        [Tooltip("Pre-warmed Curse card button count (default 8).")]
+        [SerializeField] private int _cursePoolSize     =  8;
         [Tooltip("Pre-warmed enemy slot count. Should equal max enemies per battle (default 5).")]
         [SerializeField] private int _enemySlotPoolSize =  5;
 
         private ObjectPool<CardButton>  _pressurePool;
         private ObjectPool<CardButton>  _rhetoricPool;
         private ObjectPool<CardButton>  _policyPool;
+        private ObjectPool<CardButton>  _statusPool;
+        private ObjectPool<CardButton>  _cursePool;
         private ObjectPool<EnemySlotUI> _slotPool;
 
         protected override void OnAwake()
@@ -67,6 +77,16 @@ namespace Crookedile.UI.Battle
                 _policyPool = new ObjectPool<CardButton>(_policyCardPrefab, _policyPoolSize, transform);
             else
                 Debug.LogWarning("[BattlePoolManager] Policy card prefab is not assigned — Policy pool not created.");
+
+            if (_statusCardPrefab != null)
+                _statusPool = new ObjectPool<CardButton>(_statusCardPrefab, _statusPoolSize, transform);
+            else
+                Debug.LogWarning("[BattlePoolManager] Status card prefab is not assigned — Status pool not created.");
+
+            if (_curseCardPrefab != null)
+                _cursePool = new ObjectPool<CardButton>(_curseCardPrefab, _cursePoolSize, transform);
+            else
+                Debug.LogWarning("[BattlePoolManager] Curse card prefab is not assigned — Curse pool not created.");
 
             if (_enemySlotPrefab != null)
                 _slotPool = new ObjectPool<EnemySlotUI>(_enemySlotPrefab, _enemySlotPoolSize, transform);
@@ -156,7 +176,9 @@ namespace Crookedile.UI.Battle
             {
                 CardType.Rhetoric => _rhetoricPool,
                 CardType.Policy   => _policyPool,
-                _                 => _pressurePool,   // Pressure and any future types
+                CardType.Status   => _statusPool,
+                CardType.Curse    => _cursePool,
+                _                 => _pressurePool,   // Pressure fallback
             };
         }
     }

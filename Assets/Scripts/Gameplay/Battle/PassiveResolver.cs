@@ -8,266 +8,455 @@ using Crookedile.Utilities;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Evaluates and fires origin passive abilities at the correct battle moments.
+    /// Evaluates and fires passive abilities at the correct battle moments.
     ///
-    /// All trigger/condition/effect configuration lives in <see cref="OriginPassive"/> ScriptableObject
-    /// assets — no code changes are needed when adding new passives.
+    /// Supports two parallel passive systems:
     ///
-    /// Most triggers are wired via EventBus subscriptions, keeping BattleManager
-    /// nearly passive-agnostic. The two exceptions (BattleStart, TurnStart) are
-    /// still direct-called because they carry data (deck reference, turn number)
-    /// that isn't in the published events.
+    ///   1. LEGACY — single-passive per OriginPassive ScriptableObject (switch-statement dispatch).
+    ///      Kept for backward compatibility — notably required by the Actor's Improvise mechanic,
+    ///      which is interactive and doesn't fit the fire-and-forget BattlePassive model.
     ///
-    /// Call <see cref="Dispose"/> when the battle ends to unsubscribe all events.
+    ///   2. NEW (SOLID) — any number of <see cref="BattlePassive"/> entries registered from:
+    ///      • OriginPassive._passives (when non-empty, preferred over legacy for that origin)
+    ///      • CardData._passives (every card in the player's starting deck contributes its passives)
+    ///
+    ///      New-system passives use fully polymorphic triggers (<see cref="PassiveTriggerBase"/>),
+    ///      conditions (<see cref="PassiveConditionBase"/>), and effects (<see cref="BattleEffect"/>).
+    ///      No switch statement — adding new triggers / conditions / effects = adding new files only.
+    ///
+    /// Call <see cref="Dispose"/> when the battle ends to unsubscribe legacy EventBus listeners.
     /// </summary>
     public class PassiveResolver : IDisposable
     {
-        private readonly OriginPassive _passive;
+        // ── Legacy single-passive path ────────────────────────────────────────
+
+        private readonly OriginPassive _passive;          // null if origin has no legacy passive
         private readonly BattleStats   _playerStats;
         private DeckManager            _deck;
 
-        // ── Condition tracking ────────────────────────────────────────────────
         private int  _playerTurnNumber  = 0;
-        private int  _triggerEventCount = 0;   // total trigger fires (used by NthEvent)
-        private bool _fired             = false; // one-shot guard
+        private int  _triggerEventCount = 0;   // for NthEvent condition (legacy)
+        private bool _fired             = false; // one-shot guard (legacy)
 
-        // ── Improvise state (Actor passive) ───────────────────────────────────
+        // ── Improvise state (Actor passive — legacy path only) ────────────────
+
         private bool _improviseAvailable = false;
         private bool _improviseUsed      = false;
 
-        /// <summary>
-        /// Fired when the Actor's Improvise window opens.
-        /// BattleUI subscribes to show/hide the Improvise button.
-        /// </summary>
+        /// <summary>Fired when the Actor's Improvise window opens. BattleUI subscribes.</summary>
         public event Action OnImproviseAvailable;
 
         /// <summary>True when Improvise is available this turn and hasn't been used yet.</summary>
         public bool ImproviseAvailable => _improviseAvailable && !_improviseUsed;
 
+        // ── New-system BattlePassive collection ───────────────────────────────
+
+        private readonly List<BattlePassive>           _allPassives;
+        private readonly EffectResolver                _effectResolver;
+        private          IReadOnlyList<EnemyController> _enemies;
+        private          StatusEffectManager            _playerStatusEffects;
+
+        // ── Lambda references for unconditional new-system subscriptions ──────
+        // Stored as fields so that Dispose() can unsubscribe them correctly.
+
+        private readonly Action<TurnStartedEvent>          _onTurnStarted;
+        private readonly Action<TurnEndedEvent>            _onTurnEnded;
+        private readonly Action<BattleEndedEvent>          _onBattleEnded;
+        private readonly Action<CardPlayedEvent>           _onCardPlayed;
+        private readonly Action<CardDrawnEvent>            _onCardDrawn;
+        private readonly Action<CardDiscardedEvent>        _onCardDiscarded;
+        private readonly Action<CardExhaustedEvent>        _onCardExhausted;
+        private readonly Action<CardRetainedEvent>         _onCardRetained;
+        private readonly Action<CardRecoveredEvent>        _onCardRecovered;
+        private readonly Action<CardUpgradedEvent>         _onCardUpgraded;
+        private readonly Action<DamageDealtEvent>          _onDamageDealt;
+        private readonly Action<HealingAppliedEvent>       _onHealingApplied;
+        private readonly Action<StatusEffectAppliedEvent>  _onStatusEffectApplied;
+        private readonly Action<ComposureChangedEvent>     _onComposureChanged;
+        private readonly Action<EnemyDefeatedEvent>        _onEnemyDefeated;
+        private readonly Action<EnemySummonedEvent>        _onEnemySummoned;
+        private readonly Action<EnemyActingEvent>          _onEnemyActing;
+
         // ─── Constructor ──────────────────────────────────────────────────────
 
-        public PassiveResolver(OriginPassive passive, BattleStats playerStats)
+        /// <summary>
+        /// Creates a PassiveResolver for the given origin passive and player state.
+        /// </summary>
+        /// <param name="passive">The origin's passive ScriptableObject (may be null).</param>
+        /// <param name="playerStats">Player's battle statistics.</param>
+        /// <param name="effectResolver">Creates <see cref="EffectExecutionContext"/> for BattleEffect execution.</param>
+        /// <param name="enemies">All active enemies (for condition evaluation).</param>
+        /// <param name="playerStatusEffects">Player's status manager (for condition evaluation).</param>
+        public PassiveResolver(
+            OriginPassive                  passive,
+            BattleStats                    playerStats,
+            EffectResolver                 effectResolver,
+            IReadOnlyList<EnemyController> enemies            = null,
+            StatusEffectManager            playerStatusEffects = null)
         {
-            _passive     = passive;
-            _playerStats = playerStats;
-            SubscribeToEvents();
+            _passive             = passive;
+            _playerStats         = playerStats;
+            _effectResolver      = effectResolver;
+            _enemies             = enemies     ?? Array.Empty<EnemyController>();
+            _playerStatusEffects = playerStatusEffects;
+            _allPassives         = new List<BattlePassive>();
+
+            // Initialise stored lambdas (required so Dispose can unsubscribe exact same delegate)
+            _onTurnStarted         = e => DispatchEvent(e);
+            _onTurnEnded           = e => DispatchEvent(e);
+            _onBattleEnded         = e => DispatchEvent(e);
+            _onCardPlayed          = e => DispatchEvent(e);
+            _onCardDrawn           = e => DispatchEvent(e);
+            _onCardDiscarded       = e => DispatchEvent(e);
+            _onCardExhausted       = e => DispatchEvent(e);
+            _onCardRetained        = e => DispatchEvent(e);
+            _onCardRecovered       = e => DispatchEvent(e);
+            _onCardUpgraded        = e => DispatchEvent(e);
+            _onDamageDealt         = e => DispatchEvent(e);
+            _onHealingApplied      = e => DispatchEvent(e);
+            _onStatusEffectApplied = e => DispatchEvent(e);
+            _onComposureChanged    = e => DispatchEvent(e);
+            _onEnemyDefeated       = e => DispatchEvent(e);
+            _onEnemySummoned       = e => DispatchEvent(e);
+            _onEnemyActing         = e => DispatchEvent(e);
+
+            SubscribeToLegacyEvents();
+            SubscribeToAllEventsForNewSystem();
         }
 
-        // ─── EventBus wiring ──────────────────────────────────────────────────
+        // ─── EventBus wiring — LEGACY ─────────────────────────────────────────
 
-        private void SubscribeToEvents()
-        {
-            if (_passive == null) return;
-
-            switch (_passive.Trigger)
-            {
-                case PassiveTrigger.TurnEnd:
-                    EventBus.Subscribe<TurnEndedEvent>(OnTurnEnded);
-                    break;
-
-                case PassiveTrigger.OnCardPlayed:
-                case PassiveTrigger.OnPressureCardPlayed:
-                case PassiveTrigger.OnRhetoricCardPlayed:
-                case PassiveTrigger.OnPolicyCardPlayed:
-                    EventBus.Subscribe<CardPlayedEvent>(OnCardPlayed);
-                    break;
-
-                case PassiveTrigger.OnDamageTaken:
-                case PassiveTrigger.OnDamageDealt:
-                    EventBus.Subscribe<DamageDealtEvent>(OnDamageDealt);
-                    break;
-
-                case PassiveTrigger.OnStatusApplied:
-                    EventBus.Subscribe<StatusEffectAppliedEvent>(OnStatusApplied);
-                    break;
-
-                case PassiveTrigger.OnCardDrawn:
-                    EventBus.Subscribe<CardDrawnEvent>(OnCardDrawn);
-                    break;
-
-                case PassiveTrigger.OnCardDiscarded:
-                    EventBus.Subscribe<CardDiscardedEvent>(OnCardDiscarded);
-                    break;
-
-                case PassiveTrigger.OnComposureLost:
-                    EventBus.Subscribe<ComposureChangedEvent>(OnComposureChanged);
-                    break;
-
-                case PassiveTrigger.OnEnemyDefeated:
-                    EventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
-                    break;
-
-                case PassiveTrigger.BattleEnd:
-                    EventBus.Subscribe<BattleEndedEvent>(OnBattleEnded);
-                    break;
-
-                // BattleStart, TurnStart, Always — handled via direct Fire* calls
-            }
-        }
-
-        private void UnsubscribeFromEvents()
+        private void SubscribeToLegacyEvents()
         {
             if (_passive == null) return;
 
             switch (_passive.Trigger)
             {
                 case PassiveTrigger.TurnEnd:
-                    EventBus.Unsubscribe<TurnEndedEvent>(OnTurnEnded);
+                    EventBus.Subscribe<TurnEndedEvent>(OnLegacyTurnEnded);
                     break;
 
                 case PassiveTrigger.OnCardPlayed:
                 case PassiveTrigger.OnPressureCardPlayed:
                 case PassiveTrigger.OnRhetoricCardPlayed:
                 case PassiveTrigger.OnPolicyCardPlayed:
-                    EventBus.Unsubscribe<CardPlayedEvent>(OnCardPlayed);
+                    EventBus.Subscribe<CardPlayedEvent>(OnLegacyCardPlayed);
                     break;
 
                 case PassiveTrigger.OnDamageTaken:
                 case PassiveTrigger.OnDamageDealt:
-                    EventBus.Unsubscribe<DamageDealtEvent>(OnDamageDealt);
+                    EventBus.Subscribe<DamageDealtEvent>(OnLegacyDamageDealt);
                     break;
 
                 case PassiveTrigger.OnStatusApplied:
-                    EventBus.Unsubscribe<StatusEffectAppliedEvent>(OnStatusApplied);
+                    EventBus.Subscribe<StatusEffectAppliedEvent>(OnLegacyStatusApplied);
                     break;
 
                 case PassiveTrigger.OnCardDrawn:
-                    EventBus.Unsubscribe<CardDrawnEvent>(OnCardDrawn);
+                    EventBus.Subscribe<CardDrawnEvent>(OnLegacyCardDrawn);
                     break;
 
                 case PassiveTrigger.OnCardDiscarded:
-                    EventBus.Unsubscribe<CardDiscardedEvent>(OnCardDiscarded);
+                    EventBus.Subscribe<CardDiscardedEvent>(OnLegacyCardDiscarded);
                     break;
 
                 case PassiveTrigger.OnComposureLost:
-                    EventBus.Unsubscribe<ComposureChangedEvent>(OnComposureChanged);
+                    EventBus.Subscribe<ComposureChangedEvent>(OnLegacyComposureChanged);
                     break;
 
                 case PassiveTrigger.OnEnemyDefeated:
-                    EventBus.Unsubscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
+                    EventBus.Subscribe<EnemyDefeatedEvent>(OnLegacyEnemyDefeated);
                     break;
 
                 case PassiveTrigger.BattleEnd:
-                    EventBus.Unsubscribe<BattleEndedEvent>(OnBattleEnded);
+                    EventBus.Subscribe<BattleEndedEvent>(OnLegacyBattleEnded);
                     break;
             }
         }
 
-        /// <summary>Call when the battle ends to release all EventBus subscriptions.</summary>
-        public void Dispose() => UnsubscribeFromEvents();
+        private void UnsubscribeFromLegacyEvents()
+        {
+            if (_passive == null) return;
 
-        // ─── Direct-call hooks (still invoked by BattleManager) ───────────────
+            switch (_passive.Trigger)
+            {
+                case PassiveTrigger.TurnEnd:
+                    EventBus.Unsubscribe<TurnEndedEvent>(OnLegacyTurnEnded);
+                    break;
+
+                case PassiveTrigger.OnCardPlayed:
+                case PassiveTrigger.OnPressureCardPlayed:
+                case PassiveTrigger.OnRhetoricCardPlayed:
+                case PassiveTrigger.OnPolicyCardPlayed:
+                    EventBus.Unsubscribe<CardPlayedEvent>(OnLegacyCardPlayed);
+                    break;
+
+                case PassiveTrigger.OnDamageTaken:
+                case PassiveTrigger.OnDamageDealt:
+                    EventBus.Unsubscribe<DamageDealtEvent>(OnLegacyDamageDealt);
+                    break;
+
+                case PassiveTrigger.OnStatusApplied:
+                    EventBus.Unsubscribe<StatusEffectAppliedEvent>(OnLegacyStatusApplied);
+                    break;
+
+                case PassiveTrigger.OnCardDrawn:
+                    EventBus.Unsubscribe<CardDrawnEvent>(OnLegacyCardDrawn);
+                    break;
+
+                case PassiveTrigger.OnCardDiscarded:
+                    EventBus.Unsubscribe<CardDiscardedEvent>(OnLegacyCardDiscarded);
+                    break;
+
+                case PassiveTrigger.OnComposureLost:
+                    EventBus.Unsubscribe<ComposureChangedEvent>(OnLegacyComposureChanged);
+                    break;
+
+                case PassiveTrigger.OnEnemyDefeated:
+                    EventBus.Unsubscribe<EnemyDefeatedEvent>(OnLegacyEnemyDefeated);
+                    break;
+
+                case PassiveTrigger.BattleEnd:
+                    EventBus.Unsubscribe<BattleEndedEvent>(OnLegacyBattleEnded);
+                    break;
+            }
+        }
+
+        // ─── EventBus wiring — NEW SYSTEM (unconditional, all events) ─────────
+
+        private void SubscribeToAllEventsForNewSystem()
+        {
+            // Subscribe unconditionally to every known event type.
+            // Each BattlePassive's PassiveTriggerBase.Matches() handles filtering.
+            // BattleStartedEvent is omitted — timing handled via FireBattleStart() instead.
+
+            EventBus.Subscribe(_onTurnStarted);
+            EventBus.Subscribe(_onTurnEnded);
+            EventBus.Subscribe(_onBattleEnded);
+
+            EventBus.Subscribe(_onCardPlayed);
+            EventBus.Subscribe(_onCardDrawn);
+            EventBus.Subscribe(_onCardDiscarded);
+            EventBus.Subscribe(_onCardExhausted);
+            EventBus.Subscribe(_onCardRetained);
+            EventBus.Subscribe(_onCardRecovered);
+            EventBus.Subscribe(_onCardUpgraded);
+
+            EventBus.Subscribe(_onDamageDealt);
+            EventBus.Subscribe(_onHealingApplied);
+            EventBus.Subscribe(_onStatusEffectApplied);
+            EventBus.Subscribe(_onComposureChanged);
+
+            EventBus.Subscribe(_onEnemyDefeated);
+            EventBus.Subscribe(_onEnemySummoned);
+            EventBus.Subscribe(_onEnemyActing);
+        }
+
+        private void UnsubscribeFromAllEventsForNewSystem()
+        {
+            EventBus.Unsubscribe(_onTurnStarted);
+            EventBus.Unsubscribe(_onTurnEnded);
+            EventBus.Unsubscribe(_onBattleEnded);
+
+            EventBus.Unsubscribe(_onCardPlayed);
+            EventBus.Unsubscribe(_onCardDrawn);
+            EventBus.Unsubscribe(_onCardDiscarded);
+            EventBus.Unsubscribe(_onCardExhausted);
+            EventBus.Unsubscribe(_onCardRetained);
+            EventBus.Unsubscribe(_onCardRecovered);
+            EventBus.Unsubscribe(_onCardUpgraded);
+
+            EventBus.Unsubscribe(_onDamageDealt);
+            EventBus.Unsubscribe(_onHealingApplied);
+            EventBus.Unsubscribe(_onStatusEffectApplied);
+            EventBus.Unsubscribe(_onComposureChanged);
+
+            EventBus.Unsubscribe(_onEnemyDefeated);
+            EventBus.Unsubscribe(_onEnemySummoned);
+            EventBus.Unsubscribe(_onEnemyActing);
+        }
+
+        /// <summary>Unsubscribes all EventBus listeners. Call when the battle ends.</summary>
+        public void Dispose()
+        {
+            UnsubscribeFromLegacyEvents();
+            UnsubscribeFromAllEventsForNewSystem();
+        }
+
+        // ─── New-system: registration ─────────────────────────────────────────
+
+        /// <summary>
+        /// Collects all <see cref="BattlePassive"/> entries from the origin passive and
+        /// every card in the player's deck, resets their runtime state, and fires BattleStart
+        /// triggers on the new system.
+        /// </summary>
+        /// <remarks>Must be called after the opening hand is dealt.</remarks>
+        private void RegisterCardPassives(DeckManager deck)
+        {
+            _allPassives.Clear();
+
+            // Origin passive — new-system entries (when present)
+            if (_passive?.Passives != null)
+            {
+                foreach (var bp in _passive.Passives)
+                    if (bp != null) _allPassives.Add(bp);
+            }
+
+            // Card passives — all cards in the full deck (draw + hand + discard)
+            if (deck != null)
+            {
+                foreach (var card in deck.AllCards)
+                {
+                    if (card?.Passives == null) continue;
+                    foreach (var bp in card.Passives)
+                        if (bp != null) _allPassives.Add(bp);
+                }
+            }
+
+            // Reset all passives so they're fresh for this battle
+            foreach (var bp in _allPassives)
+                bp.ResetForBattle();
+
+            GameLogger.LogInfo<PassiveResolver>(
+                $"Registered {_allPassives.Count} BattlePassive(s) for this battle.");
+        }
+
+        // ─── New-system: dispatch ─────────────────────────────────────────────
+
+        /// <summary>
+        /// Boxes <paramref name="evt"/> and dispatches to all registered BattlePassives.
+        /// Each passive handles its own trigger matching, condition evaluation, and effect execution.
+        /// </summary>
+        private void DispatchEvent<T>(T evt) where T : struct, IGameEvent
+        {
+            if (_allPassives.Count == 0 || _effectResolver == null) return;
+
+            var evtCtx  = new PassiveEventContext(evt);
+            var evalCtx = new PassiveEvaluationContext(
+                _playerStats,
+                _deck,
+                _enemies,
+                _playerStatusEffects,
+                _playerTurnNumber,
+                evtCtx);
+
+            foreach (var passive in _allPassives)
+            {
+                // Fresh execution context per passive prevents state bleed between passives
+                var execCtx = _effectResolver.CreateContext(isPlayerCard: true);
+                passive.TryFire(evtCtx, evalCtx, execCtx);
+            }
+        }
+
+        // ─── Direct-call hooks (invoked by BattleManager) ─────────────────────
 
         /// <summary>
         /// Called once after the opening hand is dealt.
-        /// Also stores the deck reference needed by DrawCards effect type.
+        /// Registers card passives, fires BattleStart legacy passive, then dispatches
+        /// a synthetic BattleStartedEvent so new-system passives with BattleStartTrigger fire.
         /// </summary>
         public void FireBattleStart(DeckManager deck)
         {
             _deck = deck;
+            RegisterCardPassives(deck);
+
+            // Legacy path
             if (_passive?.Trigger == PassiveTrigger.BattleStart)
-                TryFire();
+                LegacyTryFire();
+
+            // New system: synthetic event (after opening hand, not at BattleStartedEvent time)
+            DispatchEvent(default(BattleStartedEvent));
         }
 
         /// <summary>
-        /// Called at the start of each player turn (not enemy turns).
-        /// Tracks the cumulative player turn number for condition evaluation
-        /// and resets the Improvise window each turn.
+        /// Called at the start of each player turn by BattleManager.
+        /// Updates the turn counter (needed by TurnNumber conditions), resets Improvise,
+        /// and fires the legacy TurnStart passive if applicable.
+        /// New-system TurnStart passives fire via the TurnStartedEvent subscription.
         /// </summary>
         public void FireTurnStart(int playerTurnNumber)
         {
             _playerTurnNumber = playerTurnNumber;
             _improviseUsed    = false;
 
+            // Legacy path only
             if (_passive?.Trigger == PassiveTrigger.TurnStart)
-                TryFire();
+                LegacyTryFire();
+
+            // New system fires via EventBus.Subscribe<TurnStartedEvent> (published after this call)
         }
 
-        // ─── EventBus handlers ────────────────────────────────────────────────
+        // ─── Legacy EventBus handlers ──────────────────────────────────────────
 
-        private void OnTurnEnded(TurnEndedEvent evt)
+        private void OnLegacyTurnEnded(TurnEndedEvent evt)
         {
             if (!evt.WasPlayerTurn) return;
-            TryFire();
+            LegacyTryFire();
         }
 
-        private void OnCardPlayed(CardPlayedEvent evt)
+        private void OnLegacyCardPlayed(CardPlayedEvent evt)
         {
             if (!evt.IsPlayer) return;
-
-            // For typed triggers, check the card's CardType
             bool typeMatch = _passive.Trigger switch
             {
                 PassiveTrigger.OnPressureCardPlayed => evt.Card.CardType == CardType.Pressure,
                 PassiveTrigger.OnRhetoricCardPlayed => evt.Card.CardType == CardType.Rhetoric,
                 PassiveTrigger.OnPolicyCardPlayed   => evt.Card.CardType == CardType.Policy,
-                _                                   => true,  // OnCardPlayed — any type
+                _                                   => true,
             };
-
-            if (typeMatch) TryFire();
+            if (typeMatch) LegacyTryFire();
         }
 
-        private void OnDamageDealt(DamageDealtEvent evt)
+        private void OnLegacyDamageDealt(DamageDealtEvent evt)
         {
             if (evt.Amount <= 0) return;
-
             bool match = _passive.Trigger == PassiveTrigger.OnDamageTaken ?  evt.IsToPlayer
                        : _passive.Trigger == PassiveTrigger.OnDamageDealt ? !evt.IsToPlayer
                        : false;
-
-            if (match) TryFire();
+            if (match) LegacyTryFire();
         }
 
-        private void OnStatusApplied(StatusEffectAppliedEvent evt)
+        private void OnLegacyStatusApplied(StatusEffectAppliedEvent evt)
         {
-            // "OnStatusApplied" means the player applied a status to an enemy
-            if (!evt.IsToPlayer) TryFire();
+            if (!evt.IsToPlayer) LegacyTryFire();
         }
 
-        private void OnCardDrawn(CardDrawnEvent evt)
+        private void OnLegacyCardDrawn(CardDrawnEvent evt)
         {
             if (!evt.IsPlayer) return;
-            TryFire();
+            LegacyTryFire();
         }
 
-        private void OnCardDiscarded(CardDiscardedEvent evt)
+        private void OnLegacyCardDiscarded(CardDiscardedEvent evt)
         {
             if (!evt.IsPlayer) return;
-            TryFire();
+            LegacyTryFire();
         }
 
-        private void OnComposureChanged(ComposureChangedEvent evt)
+        private void OnLegacyComposureChanged(ComposureChangedEvent evt)
         {
-            // Only fire when the player actually lost composure (not gained)
             if (!evt.IsPlayer || evt.NewValue >= evt.OldValue) return;
-            TryFire();
+            LegacyTryFire();
         }
 
-        private void OnEnemyDefeated(EnemyDefeatedEvent evt) => TryFire();
-        private void OnBattleEnded(BattleEndedEvent evt)     => TryFire();
+        private void OnLegacyEnemyDefeated(EnemyDefeatedEvent evt) => LegacyTryFire();
+        private void OnLegacyBattleEnded(BattleEndedEvent evt)     => LegacyTryFire();
 
-        // ─── Core dispatch ────────────────────────────────────────────────────
+        // ─── Legacy core ───────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Increments the event counter, checks the one-shot guard and condition,
-        /// then calls <see cref="ResolveEffect"/> if everything passes.
-        /// </summary>
-        private void TryFire()
+        private void LegacyTryFire()
         {
             if (_passive == null) return;
-
-            // One-shot: stop after the first successful fire
             if (_passive.OneShot && _fired) return;
 
             _triggerEventCount++;
-
-            if (!EvaluateCondition()) return;
+            if (!LegacyEvaluateCondition()) return;
 
             _fired = true;
-            ResolveEffect();
+            LegacyResolveEffect();
         }
 
-        private bool EvaluateCondition()
+        private bool LegacyEvaluateCondition()
         {
             var c = _passive.Condition;
             return c.Type switch
@@ -282,7 +471,7 @@ namespace Crookedile.Gameplay.Battle
             };
         }
 
-        private void ResolveEffect()
+        private void LegacyResolveEffect()
         {
             if (_passive == null) return;
 
@@ -305,9 +494,8 @@ namespace Crookedile.Gameplay.Battle
                     break;
 
                 case PassiveEffectType.ReduceHostility:
-                    // Requires an enemy reference not available here; log and skip.
                     GameLogger.LogWarning<PassiveResolver>(
-                        $"[{_passive.PassiveName}] ReduceHostility requires an enemy reference — not supported as a passive effect.");
+                        $"[{_passive.PassiveName}] ReduceHostility is not supported in the legacy passive path.");
                     break;
 
                 case PassiveEffectType.Improvise:
@@ -315,27 +503,21 @@ namespace Crookedile.Gameplay.Battle
                     OnImproviseAvailable?.Invoke();
                     break;
 
-                // Campaign effects (GainInfluence, GainFunds, ReduceHeat) and
-                // modifier effects (ReduceCardCost, IncreaseCardEffect, etc.)
-                // are no-op inside a battle — handled by the campaign layer.
                 default:
                     break;
             }
 
             GameLogger.LogInfo<PassiveResolver>(
-                $"[{_passive.PassiveName}] fired — {_passive.EffectType} ×{_passive.EffectAmount}" +
+                $"[Legacy: {_passive.PassiveName}] fired — {_passive.EffectType} ×{_passive.EffectAmount}" +
                 (_passive.OneShot ? " (one-shot)" : ""));
         }
 
-        // ─── Improvise API (Actor passive) ────────────────────────────────────
+        // ─── Improvise API (Actor passive — legacy path) ───────────────────────
 
         /// <summary>
         /// Called by the UI when the player confirms an Improvise selection.
         /// Discards the chosen cards and draws the same number back.
         /// </summary>
-        /// <param name="deck">Player's deck manager.</param>
-        /// <param name="cardsToDiscard">Cards to discard. Empty/null = skip.</param>
-        /// <returns>True if Improvise executed; false if unavailable or skipped.</returns>
         public bool TryImprovise(DeckManager deck, List<CardData> cardsToDiscard)
         {
             if (!ImproviseAvailable)

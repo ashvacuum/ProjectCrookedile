@@ -255,21 +255,21 @@ namespace Crookedile.Gameplay.Battle
         /// Retained cards stay in hand for the next turn; their retain flag is cleared so they
         /// discard normally next end-of-turn unless retained again.
         /// </summary>
-        public int DiscardHand()
+        public List<CardData> DiscardHand()
         {
-            int discarded = 0;
+            var discarded = new List<CardData>();
             for (int i = _hand.Count - 1; i >= 0; i--)
             {
                 CardData card = _hand[i];
                 if (_retainedCards.Contains(card)) continue;   // skip — stays in hand
                 _hand.RemoveAt(i);
                 _discard.Add(card);
+                discarded.Add(card);
                 EventBus.Publish(new CardDiscardedEvent { Card = card, IsPlayer = _isPlayer });
-                discarded++;
             }
             _retainedCards.Clear();   // retain only lasts one turn
 
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} discarded {discarded} card(s). " +
+            GameLogger.LogInfo<DeckManager>($"{_ownerName} discarded {discarded.Count} card(s). " +
                                              $"Hand retained: {_hand.Count}");
             return discarded;
         }
@@ -335,6 +335,7 @@ namespace Crookedile.Gameplay.Battle
             _discard.Remove(card);
             _hand.Add(card);
             GameLogger.LogInfo<DeckManager>($"{_ownerName}: Moved {card.CardName} from discard to hand");
+            EventBus.Publish(new CardRecoveredEvent { Card = card, IsPlayer = _isPlayer });
             return true;
         }
 
@@ -388,6 +389,7 @@ namespace Crookedile.Gameplay.Battle
             }
             _retainedCards.Add(card);
             GameLogger.LogInfo<DeckManager>($"{_ownerName}: {card.CardName} marked as retained");
+            EventBus.Publish(new CardRetainedEvent { Card = card, IsPlayer = _isPlayer });
             return true;
         }
 
