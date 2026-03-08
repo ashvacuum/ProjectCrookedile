@@ -174,7 +174,7 @@ namespace Crookedile.Gameplay.Battle
             var passive = _originPassives != null
                 ? System.Array.Find(_originPassives, p => p != null && p.Origin == _playerOrigin)
                 : null;
-            _passiveResolver = new PassiveResolver(passive, _playerStats);
+            _passiveResolver = new PassiveResolver(passive, _playerStats, _effectResolver, _enemies, _effectResolver.PlayerStatusEffects);
             // Event subscriptions are managed internally by PassiveResolver via EventBus
 
             // Reset counters

@@ -18,7 +18,7 @@ namespace Crookedile.Gameplay.Battle
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
             if (ctx.PlayerStats == null) return false;
-            int composure = ctx.PlayerStats.Composure;
+            int composure = ctx.PlayerStats.CurrentComposure;
             return _comparison switch
             {
                 ComparisonType.AtLeast => composure >= _value,
