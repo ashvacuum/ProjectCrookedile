@@ -17,7 +17,7 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: d37888b5dc7798c469d7f9c2789f24e7, type: 3}
-  _description: Discard 1 card. Draw 2 cards.
+  _description: 'Draw 2 cards. Discard 1 card. '
   _flavorText: One call, a hundred doors.
   _costs:
   - _costType: 1
@@ -35,10 +35,12 @@ MonoBehaviour:
     _randomDamageRange: {x: 3, y: 9}
     _resourceType: 0
     _resourceAmount: 3
-    _cardManipulationType: 3
-    _cardAmount: 1
+    _cardManipulationType: 0
+    _cardAmount: 2
     _cardToAdd: {fileID: 0}
     _costReduction: 1
+    _chancePercent: 50
+    _chanceEffects: []
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
@@ -51,10 +53,12 @@ MonoBehaviour:
     _randomDamageRange: {x: 3, y: 9}
     _resourceType: 0
     _resourceAmount: 3
-    _cardManipulationType: 0
-    _cardAmount: 2
+    _cardManipulationType: 3
+    _cardAmount: 1
     _cardToAdd: {fileID: 0}
     _costReduction: 1
+    _chancePercent: 50
+    _chanceEffects: []
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
@@ -65,6 +69,7 @@ MonoBehaviour:
   - nepobaby
   _isStarterCard: 1
   _isUnlockable: 0
+  _isUnplayable: 0
   _policyLean: 3
   _triggeredEffects: []
   _cardVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}

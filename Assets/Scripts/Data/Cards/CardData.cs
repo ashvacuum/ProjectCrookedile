@@ -3,6 +3,7 @@ using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Data;
 using Crookedile.Data.VFX;
+using Crookedile.Gameplay.Battle;
 
 namespace Crookedile.Data.Cards
 {
@@ -47,7 +48,14 @@ namespace Crookedile.Data.Cards
         [SerializeField] private List<CardCost> _costs = new List<CardCost>();
 
         [Header("Effects")]
-        [Tooltip("List of effects that trigger when this card is played")]
+        [Tooltip("New polymorphic effect list — use this for all newly authored cards. " +
+                 "Add effects via the + button; each subclass shows only its own fields.")]
+        [SerializeReference]
+        [SerializeField] private List<BattleEffect> _newEffects = new List<BattleEffect>();
+
+        [Tooltip("Legacy effect list — kept for backwards compatibility during migration. " +
+                 "Run Crookedile / Tools / Migrate Effects to convert. Do not author new effects here.")]
+        [FoldoutGroup("Legacy Effects (Migration)")]
         [SerializeField] private List<CardEffect> _effects = new List<CardEffect>();
 
         [Header("Upgrade")]
@@ -67,6 +75,11 @@ namespace Crookedile.Data.Cards
         [Tooltip("Must this card be unlocked through progression?")]
         [SerializeField] private bool _isUnlockable = false;
 
+        [ShowIf("_cardType", CardType.Status)]
+        [Tooltip("If true, this Status card is shown in the hand but cannot be played. " +
+                 "All Curses are always unplayable regardless of this flag.")]
+        [SerializeField] private bool _isUnplayable = false;
+
         [Header("Policy")]
         [ShowIf("_cardType", CardType.Policy)]
         [Tooltip("The political lean of this Policy card.\n" +
@@ -75,6 +88,15 @@ namespace Crookedile.Data.Cards
                  "Right: Traditionals −1 hostility, Progressives +1 hostility\n" +
                  "None: No demographic hostility shift when played")]
         [SerializeField] private PolicyLean _policyLean = PolicyLean.None;
+
+        [Header("Card Passives")]
+        [Tooltip("Battle-scoped passives that fire on broad battle events (turn start, damage dealt, etc.) " +
+                 "for the entire battle regardless of card location in the deck.\n\n" +
+                 "Each entry has its own polymorphic trigger, optional conditions, and a list of " +
+                 "BattleEffects to execute. Add entries via the + button and use the type picker " +
+                 "to choose trigger and condition classes.")]
+        [SerializeReference]
+        [SerializeField] private List<BattlePassive> _passives = new List<BattlePassive>();
 
         [Header("Triggered Effects")]
         [Tooltip("Named effects that fire automatically after this card's base effects resolve, " +
@@ -131,8 +153,14 @@ namespace Crookedile.Data.Cards
         public List<CardCost> Costs => _costs;
 
         /// <summary>
-        /// List of effects that trigger when played.
+        /// Polymorphic effect list for this card.
+        /// Returns <c>_newEffects</c> when populated (new system); falls back to the legacy
+        /// <c>_effects</c> list during the migration window. After migration is complete and
+        /// <c>_effects</c> is cleared, this will always return <c>_newEffects</c>.
         /// </summary>
+        public List<BattleEffect> NewEffects => _newEffects;
+
+        /// <summary>Legacy effect list — read by the migration tool and the old EffectResolver path.</summary>
         public List<CardEffect> Effects => _effects;
 
         /// <summary>
@@ -167,10 +195,23 @@ namespace Crookedile.Data.Cards
         public bool IsUnlockable => _isUnlockable;
 
         /// <summary>
+        /// True if this card can never be played: all Curses, and Status cards flagged as unplayable.
+        /// The hand displays these cards at half alpha; dragging is blocked.
+        /// </summary>
+        public bool IsUnplayable => _cardType == CardType.Curse ||
+                                    (_cardType == CardType.Status && _isUnplayable);
+
+        /// <summary>
         /// Political lean of this card. Only relevant for CardType.Policy.
         /// Determines which demographics become more or less hostile when played.
         /// </summary>
         public PolicyLean PolicyLean => _policyLean;
+
+        /// <summary>
+        /// Battle-scoped passives that fire on broad battle events for the entire battle.
+        /// Registered by PassiveResolver at the start of each battle.
+        /// </summary>
+        public IReadOnlyList<BattlePassive> Passives => _passives;
 
         /// <summary>
         /// Named reactive effects that fire after this card's base effects resolve,
@@ -281,7 +322,15 @@ namespace Crookedile.Data.Cards
         }
 
         /// <summary>
-        /// Gets the effects for the current version (base or upgraded).
+        /// Gets the new polymorphic effects for the current version (base or upgraded).
+        /// </summary>
+        public List<BattleEffect> GetNewEffects(bool useUpgraded = true)
+        {
+            return useUpgraded ? GetCurrentVersion().NewEffects : _newEffects;
+        }
+
+        /// <summary>
+        /// Gets the legacy effects for the current version (base or upgraded).
         /// </summary>
         public List<CardEffect> GetEffects(bool useUpgraded = true)
         {

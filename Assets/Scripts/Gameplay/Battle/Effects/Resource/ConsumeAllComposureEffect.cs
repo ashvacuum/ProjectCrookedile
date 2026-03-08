@@ -1,0 +1,19 @@
+using System;
+using Crookedile.Core;
+using Crookedile.Utilities;
+
+namespace Crookedile.Gameplay.Battle
+{
+    /// <summary>Consumes all of the caster's Composure, reducing it to zero.</summary>
+    [Serializable]
+    public class ConsumeAllComposureEffect : BattleEffect
+    {
+        public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
+        {
+            int consumed = ctx.Caster.ConsumeAllComposure();
+            GameLogger.LogInfo<ConsumeAllComposureEffect>($"Consumed {consumed} Composure");
+        }
+
+        public override string GetDescription() => "Consume all Composure";
+    }
+}

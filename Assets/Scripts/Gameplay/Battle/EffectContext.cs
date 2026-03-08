@@ -31,6 +31,12 @@ namespace Crookedile.Gameplay.Battle
         public BattleStats Target { get; set; }
 
         /// <summary>
+        /// Set by <see cref="CardManipulationType.ExhaustThisCard"/> so <c>BattleManager</c>
+        /// can move the card from the discard pile to the exhaust pile after all effects resolve.
+        /// </summary>
+        public bool ShouldExhaust { get; set; }
+
+        /// <summary>
         /// Retrieves the integer value indicated by <paramref name="source"/>.
         /// Returns 0 for <see cref="EffectContextValue.FixedAmount"/> — the caller
         /// should use the authored amount on the <c>CardEffect</c> in that case.

@@ -21,7 +21,7 @@ MonoBehaviour:
   _flavorText: The account was always in the black.
   _costs:
   - _costType: 1
-    _baseAmount: 1
+    _baseAmount: 0
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
@@ -39,6 +39,8 @@ MonoBehaviour:
     _cardAmount: 2
     _cardToAdd: {fileID: 0}
     _costReduction: 1
+    _chancePercent: 50
+    _chanceEffects: []
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
@@ -49,6 +51,7 @@ MonoBehaviour:
   - nepobaby
   _isStarterCard: 1
   _isUnlockable: 0
+  _isUnplayable: 0
   _policyLean: 3
   _triggeredEffects: []
   _cardVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}

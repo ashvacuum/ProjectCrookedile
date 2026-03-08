@@ -17,7 +17,7 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: 22e65533b737ce849adc0b903a353c96, type: 3}
-  _description: Gain Composure equal to your Hostility. (Hostility is not reduced.)
+  _description: Raise Hostility by 3. Deal 8 Damage
   _flavorText: Turn the wounds into weapons.
   _costs:
   - _costType: 1
@@ -29,26 +29,47 @@ MonoBehaviour:
   _effects:
   - _name: 
     _category: 1
-    _target: 1
+    _target: 0
     _damageType: 2
     _damageAmount: 3
     _randomDamageRange: {x: 3, y: 9}
-    _resourceType: 4
+    _resourceType: 5
     _resourceAmount: 3
     _cardManipulationType: 0
     _cardAmount: 2
     _cardToAdd: {fileID: 0}
     _costReduction: 1
+    _chancePercent: 50
+    _chanceEffects: []
     _statusEffectType: 0
     _statusStacks: 2
     _statusDuration: 0
-    _amountSource: 5
+    _amountSource: 0
+  - _name: 
+    _category: 0
+    _target: 1
+    _damageType: 0
+    _damageAmount: 8
+    _randomDamageRange: {x: 3, y: 9}
+    _resourceType: 0
+    _resourceAmount: 3
+    _cardManipulationType: 0
+    _cardAmount: 2
+    _cardToAdd: {fileID: 0}
+    _costReduction: 1
+    _chancePercent: 50
+    _chanceEffects: []
+    _statusEffectType: 0
+    _statusStacks: 2
+    _statusDuration: 0
+    _amountSource: 0
   _isUpgraded: 0
   _upgradedVersion: {fileID: 0}
   _tags:
   - actor
   _isStarterCard: 1
   _isUnlockable: 0
+  _isUnplayable: 0
   _policyLean: 3
   _triggeredEffects: []
   _cardVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}

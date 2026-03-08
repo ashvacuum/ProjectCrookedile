@@ -55,7 +55,9 @@ namespace Crookedile.UI.Battle
         private Color pressureColor = new Color(0.2f, 0.8f, 0.2f); // Green
 
         [SerializeField] private Color rhetoricColor = new Color(0.8f, 0.2f, 0.2f); // Red
-        [SerializeField] private Color policyColor = new Color(0.2f, 0.5f, 0.9f); // Blue
+        [SerializeField] private Color policyColor   = new Color(0.2f,  0.5f,  0.9f);  // Blue
+        [SerializeField] private Color statusColor   = new Color(0.6f,  0.3f,  0.85f); // Purple
+        [SerializeField] private Color curseColor    = new Color(0.25f, 0.05f, 0.05f); // Dark crimson
         [SerializeField] private Color unaffordableColor = new Color(0.4f, 0.4f, 0.4f, 0.6f);
 
         // ─── Hover / Scale ────────────────────────────────────────────────────────
@@ -634,8 +636,10 @@ namespace Crookedile.UI.Battle
             {
                 CardType.Pressure => pressureColor,
                 CardType.Rhetoric => rhetoricColor,
-                CardType.Policy => policyColor,
-                _ => Color.white
+                CardType.Policy   => policyColor,
+                CardType.Status   => statusColor,
+                CardType.Curse    => curseColor,
+                _                 => Color.white
             };
         }
 

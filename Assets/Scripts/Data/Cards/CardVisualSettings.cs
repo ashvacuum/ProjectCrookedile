@@ -32,6 +32,12 @@ namespace Crookedile.Data.Cards
         [Tooltip("Frame for Policy cards (Blue - policy positions with lean)")]
         [SerializeField] private Sprite _policyFrame;
 
+        [Tooltip("Frame for Status cards (Purple - temporary effect cards)")]
+        [SerializeField] private Sprite _statusFrame;
+
+        [Tooltip("Frame for Curse cards (Dark crimson - always unplayable negative cards)")]
+        [SerializeField] private Sprite _curseFrame;
+
         [Header("Card Frames by Rarity")]
         [Tooltip("Frame overlay for Basic rarity cards")]
         [SerializeField] private Sprite _basicFrame;
@@ -99,6 +105,8 @@ namespace Crookedile.Data.Cards
                 CardType.Pressure => _pressureFrame,
                 CardType.Rhetoric => _rhetoricFrame,
                 CardType.Policy   => _policyFrame,
+                CardType.Status   => _statusFrame,
+                CardType.Curse    => _curseFrame,
                 _                 => null
             };
         }

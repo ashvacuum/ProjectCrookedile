@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Crookedile.UI.Battle
@@ -40,6 +41,10 @@ namespace Crookedile.UI.Battle
         [Tooltip("Width of a single card in canvas pixels. Used to compute visible area per card when the hand is crowded.")]
         [SerializeField] private float cardWidth = 120f;
 
+        [Header("Lerp Animation")]
+        [Tooltip("Duration in seconds for the animated card arrangement lerp.")]
+        [SerializeField] private float lerpDuration = 0.2f;
+
         [Header("Debug Preview")]
         [Tooltip("Draw ghost card outlines in the Scene view to preview arc layout without needing real cards in the hand.")]
         [SerializeField] private bool showDebugLayout = false;
@@ -62,36 +67,90 @@ namespace Crookedile.UI.Battle
         [Tooltip("Colour of the arc curve.")]
         [SerializeField] private Color debugArcColor = new Color(1f, 1f, 1f, 0.2f);
 
+        // ─── Runtime ──────────────────────────────────────────────────────────────
+
+        private Coroutine _lerpCoroutine;
+
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
         /// Position, rotate, and z-sort all cards into a fan.
-        /// Called by BattleUI after the hand is instantiated.
+        /// Pass <paramref name="animated"/> = <c>true</c> to lerp cards smoothly into position
+        /// instead of snapping instantly.
         /// </summary>
-        public void ArrangeCards(List<CardButton> cards)
+        public void ArrangeCards(List<CardButton> cards, bool animated = false)
         {
             int count = cards.Count;
             if (count == 0) return;
 
+            // Cancel any in-progress lerp before starting a new arrangement.
+            if (_lerpCoroutine != null)
+            {
+                StopCoroutine(_lerpCoroutine);
+                _lerpCoroutine = null;
+            }
+
+            // Compute target transforms for every card.
+            var targets = new List<(CardButton btn, Vector3 pos, float angle)>(count);
             if (count == 1)
             {
-                ApplyToCard(cards[0], Vector3.zero, 0f);
-                return;
+                targets.Add((cards[0], Vector3.zero, 0f));
             }
-
-            float effectiveStep = ComputeEffectiveStep(count);
-            float startAngle    = -(count - 1) * effectiveStep * 0.5f;
-
-            for (int i = 0; i < count; i++)
+            else
             {
-                float angleDeg = startAngle + effectiveStep * i;
-                ApplyToCard(cards[i], ComputeLocalPosition(angleDeg), angleDeg);
+                float effectiveStep = ComputeEffectiveStep(count);
+                float startAngle    = -(count - 1) * effectiveStep * 0.5f;
+                for (int i = 0; i < count; i++)
+                {
+                    float angleDeg = startAngle + effectiveStep * i;
+                    targets.Add((cards[i], ComputeLocalPosition(angleDeg), angleDeg));
+                }
             }
 
+            // Sibling order is always applied immediately — it's render-only, not positional.
             SetSiblingOrder(cards);
+
+            if (animated && lerpDuration > 0f)
+                _lerpCoroutine = StartCoroutine(LerpCardsCoroutine(targets));
+            else
+                foreach (var (btn, pos, angle) in targets)
+                    ApplyToCard(btn, pos, angle);
         }
 
         // ─── Helpers ──────────────────────────────────────────────────────────────
+
+        private IEnumerator LerpCardsCoroutine(List<(CardButton btn, Vector3 targetPos, float targetAngle)> targets)
+        {
+            // Snapshot starting transforms.
+            var startPos = new Vector3[targets.Count];
+            var startRot = new Quaternion[targets.Count];
+            for (int i = 0; i < targets.Count; i++)
+            {
+                RectTransform rt = targets[i].btn.GetComponent<RectTransform>();
+                startPos[i] = rt.localPosition;
+                startRot[i] = rt.localRotation;
+            }
+
+            float elapsed = 0f;
+            while (elapsed < lerpDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / lerpDuration));
+                for (int i = 0; i < targets.Count; i++)
+                {
+                    RectTransform rt = targets[i].btn.GetComponent<RectTransform>();
+                    rt.localPosition = Vector3.Lerp(startPos[i], targets[i].targetPos, t);
+                    rt.localRotation = Quaternion.Lerp(startRot[i], Quaternion.Euler(0f, 0f, -targets[i].targetAngle), t);
+                }
+                yield return null;
+            }
+
+            // Snap to exact final values and register base positions for hover.
+            foreach (var (btn, pos, angle) in targets)
+                ApplyToCard(btn, pos, angle);
+
+            _lerpCoroutine = null;
+        }
 
         /// <summary>Apply position + rotation to one card and update its hover base.</summary>
         private static void ApplyToCard(CardButton card, Vector3 localPos, float angleDeg)
