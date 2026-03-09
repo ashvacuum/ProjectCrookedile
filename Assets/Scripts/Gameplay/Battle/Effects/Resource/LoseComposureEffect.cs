@@ -16,7 +16,7 @@ namespace Crookedile.Gameplay.Battle
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             int amount = amountOverride ?? _amount;
-            int actual = ctx.Caster.LoseComposure(amount);
+            int actual = ApplyLoseComposure(ctx.Caster, amount, ctx);
             GameLogger.LogInfo<LoseComposureEffect>($"Lost {actual} Composure");
         }
 

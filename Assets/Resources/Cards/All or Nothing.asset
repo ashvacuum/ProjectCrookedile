@@ -51,7 +51,15 @@ MonoBehaviour:
     _statusDuration: 0
     _amountSource: 0
   _isUpgraded: 0
-  _upgradedVersion: {fileID: 0}
+  _upgradedCosts:
+  - _costType: 1
+    _baseAmount: 2
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _upgradedEffects:
+  - rid: 4738608357276909568
   _tags:
   - actor
   _isStarterCard: 1
@@ -75,4 +83,11 @@ MonoBehaviour:
         _name: 
         _target: 1
         _minDamage: 1
+        _maxDamage: 9
+    - rid: 4738608357276909568
+      type: {class: DealRandomDamageEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _target: 1
+        _minDamage: 5
         _maxDamage: 9

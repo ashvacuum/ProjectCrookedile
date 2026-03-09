@@ -53,11 +53,13 @@ namespace Crookedile.UI.Battle
                 CardButton btn = GetOrCreate(captured.CardType);
                 if (btn == null) continue;
 
-                int  idx          = i;
-                int  effectiveCost = bm.GetEffectiveCardCost(captured);
-                bool forceUnplayable = captured.IsUnplayable
-                                    || (isSilenced && captured.CardType == CardType.Rhetoric);
-                btn.Initialize(captured, idx, currentAP, effectiveCost, forceUnplayable, () => onCardClicked(captured, idx));
+                int  idx              = i;
+                int  effectiveCost    = bm.GetEffectiveCardCost(captured);
+                bool forceUnplayable  = captured.IsUnplayable
+                                     || (isSilenced && captured.CardType == CardType.Rhetoric);
+                bool isCostDiscounted = bm.PlayerDeck.GetCardCostReduction(captured) != 0;
+                btn.Initialize(captured, idx, currentAP, effectiveCost, forceUnplayable, isCostDiscounted,
+                    () => onCardClicked(captured, idx));
                 btn.PlayDrawAnimation();
                 _activeButtons.Add(btn);
             }
@@ -81,12 +83,13 @@ namespace Crookedile.UI.Battle
             {
                 var btn = _activeButtons[i];
                 if (btn == null) continue;
-                var  captured      = btn.CardData;
-                int  capturedIdx   = i;
-                int  effectiveCost = bm.GetEffectiveCardCost(captured);
-                bool forceUnplayable = captured.IsUnplayable
-                                    || (isSilenced && captured.CardType == CardType.Rhetoric);
-                btn.Initialize(captured, i, currentAP, effectiveCost, forceUnplayable,
+                var  captured         = btn.CardData;
+                int  capturedIdx      = i;
+                int  effectiveCost    = bm.GetEffectiveCardCost(captured);
+                bool forceUnplayable  = captured.IsUnplayable
+                                     || (isSilenced && captured.CardType == CardType.Rhetoric);
+                bool isCostDiscounted = bm.PlayerDeck.GetCardCostReduction(captured) != 0;
+                btn.Initialize(captured, i, currentAP, effectiveCost, forceUnplayable, isCostDiscounted,
                     () => onCardClicked(captured, capturedIdx));
             }
 
@@ -136,6 +139,7 @@ namespace Crookedile.UI.Battle
                 int      capturedIdx   = i;
                 var      captured      = card;
 
+                bool isCostDiscounted = bm.PlayerDeck.GetCardCostReduction(card) != 0;
                 int existingIdx = available.FindIndex(b => b?.CardData == card);
                 CardButton btn;
                 if (existingIdx >= 0)
@@ -143,7 +147,7 @@ namespace Crookedile.UI.Battle
                     btn = available[existingIdx];
                     available.RemoveAt(existingIdx);
                     // Existing button — refresh index, cost, callback; no animation.
-                    btn.Initialize(card, i, currentAP, effectiveCost, forceUnplayable,
+                    btn.Initialize(card, i, currentAP, effectiveCost, forceUnplayable, isCostDiscounted,
                         () => onCardClicked(captured, capturedIdx));
                 }
                 else
@@ -151,7 +155,7 @@ namespace Crookedile.UI.Battle
                     // Newly drawn — create a button and queue it for the fly-in.
                     btn = GetOrCreate(card.CardType);
                     if (btn == null) continue;
-                    btn.Initialize(card, i, currentAP, effectiveCost, forceUnplayable,
+                    btn.Initialize(card, i, currentAP, effectiveCost, forceUnplayable, isCostDiscounted,
                         () => onCardClicked(captured, capturedIdx));
                     btn.gameObject.SetActive(true); // always activate; StaggeredDraw hides+reveals on top
                     btn.PlayDrawAnimation();

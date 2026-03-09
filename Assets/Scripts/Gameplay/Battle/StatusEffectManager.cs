@@ -134,7 +134,7 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>
         /// Returns true if the combatant has at least one active debuff.
-        /// Used by TriggeredEffect condition checks (IfTargetHasDebuff).
+        /// Used by <see cref="EnemyHasAnyDebuffCondition"/> and similar passive condition checks.
         /// </summary>
         public bool HasAnyDebuff()
         {
@@ -143,7 +143,7 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>
         /// Returns true if the combatant has at least one active buff.
-        /// Used by TriggeredEffect condition checks (IfTargetHasBuff).
+        /// Used by <see cref="EnemyHasAnyBuffCondition"/> and similar passive condition checks.
         /// </summary>
         public bool HasAnyBuff()
         {

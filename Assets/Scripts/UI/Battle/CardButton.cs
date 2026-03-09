@@ -60,6 +60,10 @@ namespace Crookedile.UI.Battle
         [SerializeField] private Color curseColor    = new Color(0.25f, 0.05f, 0.05f); // Dark crimson
         [SerializeField] private Color unaffordableColor = new Color(0.4f, 0.4f, 0.4f, 0.6f);
 
+        [Tooltip("Default color for the cost text when no discount is active. " +
+                 "Should match the prefab's TMP default color.")]
+        [SerializeField] private Color _defaultCostColor = Color.white;
+
         // ─── Hover / Scale ────────────────────────────────────────────────────────
 
         [Header("Hover Behaviour")] [Tooltip("How much to scale up on hover (1.1 = 10% bigger)")] [SerializeField]
@@ -135,8 +139,9 @@ namespace Crookedile.UI.Battle
 
         // Cached cost values from Initialize so CanAfford and RefreshVisuals use the same numbers
         // as the AP-spend validation in BattleManager (status effect modifiers applied).
-        private int _effectiveCost;
-        private bool _forceUnplayable; // true when Silenced blocks a Rhetoric card, etc.
+        private int  _effectiveCost;
+        private bool _forceUnplayable;   // true when Silenced blocks a Rhetoric card, etc.
+        private bool _isCostDiscounted;  // true when a battle effect has reduced/zeroed the cost
 
         private Vector3 baseScale;
         private Vector3 basePosition;
@@ -210,18 +215,20 @@ namespace Crookedile.UI.Battle
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Initialize the card with data, current AP, pre-computed effective cost, an optional
-        /// force-unplayable flag (e.g. Silenced blocking Rhetoric), and a click callback.
+        /// Initialize the card with data, current AP, pre-computed effective cost, optional flags
+        /// (force-unplayable e.g. Silenced; cost-discounted e.g. MakeCardFree), and a click callback.
         /// </summary>
         public void Initialize(CardData card, int index, int currentActionPoints,
-            int effectiveCost, bool forceUnplayable = false, Action onClick = null)
+            int effectiveCost, bool forceUnplayable = false, bool isCostDiscounted = false,
+            Action onClick = null)
         {
-            PooledCardType = card.CardType;
-            cardData = card;
-            handIndex = index;
-            onClickCallback = onClick;
-            _effectiveCost = effectiveCost;
+            PooledCardType   = card.CardType;
+            cardData         = card;
+            handIndex        = index;
+            onClickCallback  = onClick;
+            _effectiveCost   = effectiveCost;
             _forceUnplayable = forceUnplayable;
+            _isCostDiscounted = isCostDiscounted;
             isPlayable = !forceUnplayable && CanAfford(currentActionPoints);
 
             baseScale = Vector3.one;
@@ -598,7 +605,14 @@ namespace Crookedile.UI.Battle
             }
 
             if (cardCostText != null)
+            {
                 cardCostText.text = GetCostString();
+
+                if (_isCostDiscounted && visualSettings != null && visualSettings.DiscountedCostColor.a > 0f)
+                    cardCostText.color = visualSettings.DiscountedCostColor;
+                else
+                    cardCostText.color = _defaultCostColor;
+            }
 
             if (cardDescriptionText != null)
                 cardDescriptionText.text = cardData.Description;

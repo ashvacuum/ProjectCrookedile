@@ -98,8 +98,6 @@ namespace Crookedile.Gameplay.Battle
         /// New coordinator — resolves a card's <see cref="BattleEffect"/> list using the
         /// polymorphic self-executing hierarchy. Falls back to the legacy path when
         /// <see cref="CardData.NewEffects"/> is empty (migration window).
-        /// Triggered effects are resolved using <see cref="ResolveTriggeredEffects"/> against
-        /// the same <see cref="EffectExecutionContext"/>, with no legacy bridge required.
         /// </summary>
         public EffectExecutionContext ResolveCardEffectsNew(
             CardData card, bool isPlayerCard, int[] amountOverrides = null)
@@ -117,10 +115,6 @@ namespace Crookedile.Gameplay.Battle
                     ? (int?)amountOverrides[j] : null;
                 effects[j].Execute(execCtx, overrideAmount);
             }
-
-            // Fire triggered effects directly against the execution context (no bridge needed)
-            if (card.TriggeredEffects != null && card.TriggeredEffects.Count > 0)
-                ResolveTriggeredEffects(card.TriggeredEffects, execCtx);
 
             return execCtx;
         }
@@ -158,8 +152,8 @@ namespace Crookedile.Gameplay.Battle
         #region Effect Resolution
 
         /// <summary>
-        /// Resolves all effects from a played card, then fires any triggered effects
-        /// whose trigger/condition match what happened during base-effect resolution.
+        /// Resolves all effects from a played card (legacy path — use
+        /// <see cref="ResolveCardEffectsNew"/> for cards with <see cref="CardData.NewEffects"/>).
         /// </summary>
         /// <param name="card">The card being played</param>
         /// <param name="isPlayerCard">Is this card played by the player?</param>
@@ -186,72 +180,8 @@ namespace Crookedile.Gameplay.Battle
                 ResolveBattleEffect(card.Effects[j], isPlayerCard, ctx, overrideAmount);
             }
 
-            // TriggeredEffects require the new execution path — warn if a legacy card has them
-            if (card.TriggeredEffects != null && card.TriggeredEffects.Count > 0)
-                GameLogger.LogWarning<EffectResolver>(
-                    $"[{card.CardName}] has TriggeredEffects but is using the legacy resolution path. " +
-                    "Populate NewEffects to use TriggeredEffects.");
-
             return ctx;
         }
-
-        /// <summary>
-        /// Evaluates each TriggeredEffect in the list against the accumulated
-        /// <see cref="EffectExecutionContext"/>, and executes those whose trigger occurred
-        /// and whose condition is satisfied. Called at the end of
-        /// <see cref="ResolveCardEffectsNew"/> when the card has triggered effects defined.
-        /// </summary>
-        private void ResolveTriggeredEffects(
-            IReadOnlyList<TriggeredEffect> triggered, EffectExecutionContext execCtx)
-        {
-            foreach (var te in triggered)
-            {
-                if (!TriggerOccurred(te.Trigger, execCtx))                         continue;
-                if (!EvaluateCondition(te.Condition, te.ConditionThreshold, execCtx)) continue;
-
-                GameLogger.LogInfo<EffectResolver>($"Triggered effect fired: '{te.Name}'");
-                foreach (var effect in te.Effects)
-                    effect?.Execute(execCtx);
-            }
-        }
-
-        /// <summary>Returns true if the given trigger event occurred during the card's resolution.</summary>
-        private static bool TriggerOccurred(EffectTrigger trigger, EffectExecutionContext execCtx)
-        {
-            switch (trigger)
-            {
-                case EffectTrigger.OnDamageDealt:     return execCtx.LastDamageDealt > 0;
-                case EffectTrigger.OnKill:            return execCtx.LastTargetDied;
-                case EffectTrigger.OnComposureGained: return execCtx.LastComposureGained > 0;
-                case EffectTrigger.OnHeal:            return execCtx.LastHealAmount > 0;
-                case EffectTrigger.OnStatusApplied:   return true; // conservative: trust the card authored this correctly
-                case EffectTrigger.OnDamageTaken:
-                    // OnDamageTaken cannot fire during card resolution — the player never takes
-                    // damage while playing their own cards. Use a DamageTakenTrigger on an
-                    // OriginPassive BattlePassive (EventBus-based) for reactive damage responses.
-                    GameLogger.LogWarning<EffectResolver>(
-                        "EffectTrigger.OnDamageTaken is reserved and will never fire during card resolution. " +
-                        "Use DamageTakenTrigger on an OriginPassive BattlePassive instead.");
-                    return false;
-                default: return false;
-            }
-        }
-
-        /// <summary>
-        /// Returns true if the extra condition on the triggered effect is satisfied.
-        /// </summary>
-        private static bool EvaluateCondition(
-            EffectCondition condition, int threshold, EffectExecutionContext execCtx) => condition switch
-        {
-            EffectCondition.Always                 => true,
-            EffectCondition.IfDamageDealt          => execCtx.LastDamageDealt > 0,
-            EffectCondition.IfTargetDied           => execCtx.LastTargetDied,
-            EffectCondition.IfTargetHasBuff        => execCtx.TargetStatusEffects?.HasAnyBuff()   ?? false,
-            EffectCondition.IfTargetHasDebuff      => execCtx.TargetStatusEffects?.HasAnyDebuff() ?? false,
-            EffectCondition.IfAmountAboveThreshold =>
-                execCtx.LastDamageDealt > threshold || execCtx.LastHealAmount > threshold || execCtx.LastComposureGained > threshold,
-            _                                      => true
-        };
 
         /// <summary>
         /// Delay (in seconds) yielded between each effect in a multi-effect enemy move,
