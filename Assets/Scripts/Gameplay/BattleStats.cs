@@ -80,16 +80,11 @@ namespace Crookedile.Gameplay
 
         /// <summary>
         /// Hostility damage multiplier for incoming damage.
-        /// Formula: 1.0 + (Hostility × 0.5)
-        /// Example: 3 Hostility = 1 + (3 × 0.5) = 2.5× damage multiplier
+        /// Formula: max(0.1, 1.0 + Hostility × 0.5)
+        /// Example: 3 Hostility = 1 + (3 × 0.5) = 2.5× damage | −4 Hostility = max(0.1, −1.0) = 0.1×
+        /// Floored at 0.1 so even maximally receptive enemies still deal some damage.
         /// </summary>
-        public float HostilityDamageMultiplier
-        {
-            get
-            {
-                return 1.0f + (_currentHostility * 0.5f);
-            }
-        }
+        public float HostilityDamageMultiplier => Mathf.Max(0.1f, 1.0f + _currentHostility * 0.5f);
 
         #endregion
 
@@ -264,15 +259,16 @@ namespace Crookedile.Gameplay
         /// <summary>
         /// Shifts hostility down (makes enemy more receptive). Clamped at per-enemy min.
         /// </summary>
-        /// <returns>The amount passed in (hostility may have been clamped internally).</returns>
+        /// <returns>The actual hostility reduction applied (may be less than <paramref name="amount"/> due to clamping).</returns>
         public int ReduceHostility(int amount)
         {
             int old = _currentHostility;
             _currentHostility -= amount;
             _currentHostility = Mathf.Max(_minHostility, _currentHostility);
-            Debug.Log($"Reduced {amount} Hostility. Current: {_currentHostility}");
+            int actual = old - _currentHostility;
+            Debug.Log($"Reduced {actual} Hostility (requested {amount}). Current: {_currentHostility}");
             EventBus.Publish(new HostilityChangedEvent { OldValue = old, NewValue = _currentHostility, IsPlayer = _isPlayer });
-            return amount;
+            return actual;
         }
 
         /// <summary>

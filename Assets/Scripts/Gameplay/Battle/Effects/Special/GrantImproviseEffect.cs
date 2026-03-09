@@ -1,28 +1,42 @@
 using System;
-using Crookedile.Core;
+using System.Collections.Generic;
+using Crookedile.Data.Cards;
 using Crookedile.Utilities;
 
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Publishes <see cref="ImproviseGrantedEvent"/> so that <c>BattleManager</c> can activate
-    /// the Actor's Improvise window for the current battle.
+    /// Discards the player's entire hand and draws the same number of cards back.
     ///
-    /// Designed for use in the Actor's <c>OriginPassive._passives</c> list with a
-    /// <c>BattleStartTrigger</c> and <c>OneShot = true</c>.
-    ///
-    /// The actual discard-and-redraw mechanic is handled by
-    /// <c>BattleManager.TryPlayerImprovise()</c>, which the UI calls after card selection.
+    /// Designed for use in the Actor's <c>OriginPassive._passives</c> list.
+    /// The trigger and OneShot settings on the BattlePassive entry control
+    /// when and how often this fires (e.g. TurnStartTrigger each turn).
     /// </summary>
     [Serializable]
-    public class GrantImproviseEffect : BattleEffect
+    public class DiscardHandAndRedrawEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            EventBus.Publish(new ImproviseGrantedEvent());
-            GameLogger.LogInfo<GrantImproviseEffect>("Improvise granted — Actor can swap cards once per turn.");
+            if (ctx.Deck == null) return; // guard: enemies have no deck
+
+            var hand = new List<CardData>(ctx.Deck.Hand);
+            int count = hand.Count;
+
+            if (count == 0)
+            {
+                GameLogger.LogInfo<DiscardHandAndRedrawEffect>("Improvise: no cards in hand.");
+                return;
+            }
+
+            foreach (var card in hand)
+                ctx.Deck.DiscardCard(card);
+
+            int drawn = ctx.Deck.DrawCards(count);
+            GameLogger.LogInfo<DiscardHandAndRedrawEffect>(
+                $"Improvise: discarded {count} card(s), drew {drawn} back.");
         }
 
-        public override string GetDescription() => "Grant Improvise: once per turn, discard any cards and draw the same number back.";
+        public override string GetDescription() =>
+            "Discard your hand and draw the same number of cards.";
     }
 }

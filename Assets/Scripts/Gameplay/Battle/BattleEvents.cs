@@ -76,10 +76,6 @@ using Crookedile.Data.Enemy;
 //   EnemySummonedEvent         Publisher: BattleManager.SummonMinions
 //                              Subscribers: BattleUI (spawns new enemy slot)
 //
-// ── Actor Mechanic ────────────────────────────────────────────────────────────
-//   ImproviseGrantedEvent    Publisher: GrantImproviseEffect (via ActorPassive BattlePassive)
-//                            Subscribers: BattleManager (sets _improviseAvailable)
-//
 // ── Player Input ─────────────────────────────────────────────────────────────
 //   EndTurnRequestedEvent    Publisher: BattleUI end-turn button
 //                            Subscribers: BattleManager
@@ -494,6 +490,9 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>The upgraded card that replaced it in hand.</summary>
         public CardData NewCard;
+
+        /// <summary>True if the player's card was upgraded (false for an enemy upgrade).</summary>
+        public bool IsPlayer;
     }
 
     // ── Card Retention / Recovery ─────────────────────────────────────────────
@@ -526,15 +525,4 @@ namespace Crookedile.Gameplay.Battle
 
     #endregion
 
-    #region Actor Mechanic Events
-
-    /// <summary>
-    /// Published by <see cref="Effects.Special.GrantImproviseEffect"/> when the Actor's Improvise
-    /// ability is activated (typically at BattleStart via the ActorPassive BattlePassive entry).
-    /// <c>BattleManager</c> subscribes to set its <c>_improviseAvailable</c> flag, which the UI
-    /// reads via <c>BattleManager.IsImproviseAvailable</c>.
-    /// </summary>
-    public struct ImproviseGrantedEvent : IGameEvent { }
-
-    #endregion
 }

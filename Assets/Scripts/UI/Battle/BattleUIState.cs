@@ -15,16 +15,9 @@ namespace Crookedile.UI.Battle
 
         /// <summary>
         /// Player's normal turn.
-        /// Hand is shown with play-card callbacks; EndTurn enabled; Improvise button
-        /// visible if <c>BattleManager.IsImproviseAvailable</c>.
+        /// Hand is shown with play-card callbacks; EndTurn button is enabled.
         /// </summary>
         PlayerTurn,
-
-        /// <summary>
-        /// Improvise passive modal is open.
-        /// Hand cards use AddToDiscard callbacks; <c>CardSelectionPanel</c> floats above the hand.
-        /// </summary>
-        Improvise,
 
         /// <summary>
         /// A card effect is requesting interactive player input (e.g. choose a card from discard,

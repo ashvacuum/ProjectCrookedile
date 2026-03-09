@@ -227,11 +227,11 @@ namespace Crookedile.Gameplay.Battle
                 case EffectTrigger.OnStatusApplied:   return true; // conservative: trust the card authored this correctly
                 case EffectTrigger.OnDamageTaken:
                     // OnDamageTaken cannot fire during card resolution — the player never takes
-                    // damage while playing their own cards. Use PassiveTrigger.OnDamageTaken in
-                    // an OriginPassive (EventBus-based) for reactive damage responses instead.
+                    // damage while playing their own cards. Use a DamageTakenTrigger on an
+                    // OriginPassive BattlePassive (EventBus-based) for reactive damage responses.
                     GameLogger.LogWarning<EffectResolver>(
-                        "EffectTrigger.OnDamageTaken is reserved and will never fire during card " +
-                        "resolution. Use PassiveTrigger.OnDamageTaken in an OriginPassive instead.");
+                        "EffectTrigger.OnDamageTaken is reserved and will never fire during card resolution. " +
+                        "Use DamageTakenTrigger on an OriginPassive BattlePassive instead.");
                     return false;
                 default: return false;
             }
@@ -617,10 +617,14 @@ namespace Crookedile.Gameplay.Battle
             StatusEffectManager targetStatusMgr   = GetStatusEffectManager(target);
 
             // Apply attacker's damage modifiers (Strength, Weakened, Exposed)
-            int modifiedDamage = attackerStatusMgr.ModifyDamageDealt(rawDamage);
+            int modifiedDamage = attackerStatusMgr != null
+                ? attackerStatusMgr.ModifyDamageDealt(rawDamage)
+                : rawDamage;
 
             // Apply target's damage taken modifiers (Vulnerable, Plated, Intangible, Thorns)
-            modifiedDamage = targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker);
+            modifiedDamage = targetStatusMgr != null
+                ? targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker)
+                : modifiedDamage;
 
             // Hostile enemies (positive hostility) deal amplified damage; neutral and receptive don't
             if (attacker != _playerStats && attacker.CurrentHostility > 0)
@@ -687,7 +691,9 @@ namespace Crookedile.Gameplay.Battle
         {
             // Apply Composure gain modifiers (Dexterity, Frail)
             StatusEffectManager targetStatusMgr = GetStatusEffectManager(target);
-            int modifiedAmount = targetStatusMgr.ModifyComposureGained(amount);
+            int modifiedAmount = targetStatusMgr != null
+                ? targetStatusMgr.ModifyComposureGained(amount)
+                : amount;
 
             target.GainComposure(modifiedAmount);
             GameLogger.LogInfo<EffectResolver>($"Gained {modifiedAmount} Composure (base: {amount})");

@@ -59,7 +59,12 @@ MonoBehaviour:
   _isUnplayable: 0
   _policyLean: 3
   _passives: []
-  _triggeredEffects: []
+  _triggeredEffects:
+  - _name: Triggered Effect
+    _trigger: 0
+    _condition: 0
+    _conditionThreshold: 0
+    _effects: []
   _cardVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}
   references:
     version: 2
