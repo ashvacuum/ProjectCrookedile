@@ -10,11 +10,11 @@ namespace Crookedile.UI.Battle
 {
     /// <summary>
     /// Owns all card-hand display logic: card button pooling, normal play callbacks,
-    /// improvise-mode discard callbacks, affordability dimming, and arc-fan layout.
+    /// affordability dimming, and arc-fan layout.
     ///
     /// Extracted from <c>BattleUI</c> so the FSM state classes can call focused, single-
-    /// responsibility methods (<c>RefreshNormalHand</c>, <c>RefreshImproviseHand</c>,
-    /// <c>ClearHand</c>) without BattleUI managing hand state internally.
+    /// responsibility methods (<c>RefreshNormalHand</c>, <c>ClearHand</c>) without BattleUI
+    /// managing hand state internally.
     /// </summary>
     public class HandPanel : MonoBehaviour
     {
@@ -169,43 +169,6 @@ namespace Crookedile.UI.Battle
             }
 
             PlayCardDrawAnimation(toAnimate);
-        }
-
-        /// <summary>
-        /// Rebuilds the hand using AddToDiscard callbacks (improvise mode).
-        /// Cards already present in <paramref name="panel"/>'s discard zone are hidden.
-        /// Called by <c>ImproviseBattleUIState</c> whenever the discard zone changes.
-        /// </summary>
-        public void RefreshImproviseHand(BattleManager bm, CardSelectionPanel panel)
-        {
-            if (cardButtonContainer == null || bm?.PlayerStats == null) return;
-            if (!HasPrefabSource()) return;
-
-            ClearHand();
-
-            var  excluded   = panel.SelectedForDiscard;
-            int  currentAP  = bm.PlayerStats.CurrentActionPoints;
-            bool isSilenced = bm.PlayerStatusEffects?.HasEffect(StatusEffectType.Silenced) ?? false;
-            var  hand       = bm.PlayerDeck.Hand;
-
-            for (int i = 0; i < hand.Count; i++)
-            {
-                CardData card = hand[i];
-                if (excluded.Contains(card)) continue;   // already queued — skip
-
-                CardButton btn = GetOrCreate(card.CardType);
-                if (btn == null) continue;
-
-                CardData captured     = card;
-                int      effectiveCost = bm.GetEffectiveCardCost(captured);
-                bool     forceUnplayable = captured.IsUnplayable
-                                        || (isSilenced && captured.CardType == CardType.Rhetoric);
-                btn.Initialize(card, i, currentAP, effectiveCost, forceUnplayable,
-                    () => { panel.AddToDiscard(captured); RefreshImproviseHand(bm, panel); });
-                _activeButtons.Add(btn);
-            }
-
-            ArrangeCards();
         }
 
         /// <summary>

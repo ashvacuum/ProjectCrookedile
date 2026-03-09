@@ -25,7 +25,7 @@ namespace Crookedile.Gameplay.Battle
             if (!ctx.Is<CardPlayedEvent>()) return false;
             var e = ctx.As<CardPlayedEvent>();
             if (!e.IsPlayer) return false;
-            if (_filterByType && e.Card != null && e.Card.CardType != _filterType) return false;
+            if (_filterByType && (e.Card == null || e.Card.CardType != _filterType)) return false;
             return true;
         }
 

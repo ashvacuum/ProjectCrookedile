@@ -16,10 +16,30 @@ MonoBehaviour:
   _origin: 0
   _description: Gain 1 extra AP on your first turn.
   _icon: {fileID: 0}
-  _trigger: 1
-  _condition:
-    Type: 0
-    Value: 1
-  _oneShot: 1
-  _effectType: 2
-  _effectAmount: 1
+  _passives:
+  - rid: 4738608336531357826
+  references:
+    version: 2
+    RefIds:
+    - rid: 4738608336531357826
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: New Passive
+        _trigger:
+          rid: 4738608336531357827
+        _conditions:
+        - rid: 4738608336531357829
+        _oneShot: 1
+        _effects:
+        - rid: 4738608336531357828
+    - rid: 4738608336531357827
+      type: {class: BattleStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data: 
+    - rid: 4738608336531357828
+      type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _amount: 1
+    - rid: 4738608336531357829
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data: 

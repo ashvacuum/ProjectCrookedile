@@ -39,7 +39,7 @@ namespace Crookedile.Gameplay.Battle
                 $"Chance roll succeeded ({_chancePercent}%) — resolving {_effects.Count} effect(s)");
 
             foreach (var child in _effects)
-                child?.Execute(ctx);
+                child?.Execute(ctx, amountOverride);
         }
 
         public override string GetDescription()

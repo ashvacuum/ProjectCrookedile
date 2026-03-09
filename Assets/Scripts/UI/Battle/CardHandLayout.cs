@@ -45,6 +45,11 @@ namespace Crookedile.UI.Battle
         [Tooltip("Duration in seconds for the animated card arrangement lerp.")]
         [SerializeField] private float lerpDuration = 0.2f;
 
+        [Header("Hover Spread")]
+        [Tooltip("Extra degrees added to the angle step when any card is hovered, " +
+                 "making the hand fan out slightly. 1–3° feels natural.")]
+        [SerializeField] private float hoverSpreadAngleBonus = 2f;
+
         [Header("Debug Preview")]
         [Tooltip("Draw ghost card outlines in the Scene view to preview arc layout without needing real cards in the hand.")]
         [SerializeField] private bool showDebugLayout = false;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Crookedile.Data;
 using UnityEngine;
@@ -17,8 +18,8 @@ namespace Crookedile.Gameplay.Battle
     public class DeckManager
     {
         [Header("Card Zones")]
-        [SerializeField] private List<CardData> _deck = new List<CardData>();
-        [SerializeField] private List<CardData> _hand = new List<CardData>();
+        [SerializeField] private List<CardData> _deck    = new List<CardData>();
+        [SerializeField] private List<CardData> _hand    = new List<CardData>();
         [SerializeField] private List<CardData> _discard = new List<CardData>();
         [SerializeField] private List<CardData> _exhaust = new List<CardData>();
 
@@ -34,6 +35,14 @@ namespace Crookedile.Gameplay.Battle
         // Per-card AP cost reductions applied this battle (individual card effects).
         // int.MaxValue signals "free" (0 AP regardless of base cost).
         private readonly Dictionary<CardData, int> _cardCostReductions = new Dictionary<CardData, int>();
+
+        // Cached ReadOnlyCollection wrappers — live views of the underlying lists.
+        // AsReadOnly() returns a wrapper that reflects the list directly, so we only
+        // need to create it once and reuse the same instance on every property access.
+        private ReadOnlyCollection<CardData> _handReadOnly;
+        private ReadOnlyCollection<CardData> _discardReadOnly;
+        private ReadOnlyCollection<CardData> _exhaustReadOnly;
+        private ReadOnlyCollection<CardData> _deckReadOnly;
 
         #region Properties
 
@@ -58,9 +67,9 @@ namespace Crookedile.Gameplay.Battle
         public int ExhaustCount => _exhaust.Count;
 
         /// <summary>
-        /// Cards currently in hand (read-only).
+        /// Cards currently in hand (read-only live view).
         /// </summary>
-        public IReadOnlyList<CardData> Hand => _hand.AsReadOnly();
+        public IReadOnlyList<CardData> Hand => _handReadOnly;
 
         /// <summary>
         /// Is the hand full?
@@ -73,23 +82,24 @@ namespace Crookedile.Gameplay.Battle
         public bool IsDeckEmpty => _deck.Count == 0;
 
         /// <summary>
-        /// Cards currently in the discard pile (read-only). Ordered oldest-to-newest.
+        /// Cards currently in the discard pile (read-only live view). Ordered oldest-to-newest.
         /// </summary>
-        public IReadOnlyList<CardData> DiscardPile => _discard.AsReadOnly();
+        public IReadOnlyList<CardData> DiscardPile => _discardReadOnly;
 
         /// <summary>
-        /// Cards currently in the exhaust pile (read-only). Ordered oldest-to-newest.
+        /// Cards currently in the exhaust pile (read-only live view). Ordered oldest-to-newest.
         /// </summary>
-        public IReadOnlyList<CardData> ExhaustPile => _exhaust.AsReadOnly();
+        public IReadOnlyList<CardData> ExhaustPile => _exhaustReadOnly;
 
         /// <summary>
-        /// Cards currently in the draw pile (read-only). Order reflects the live shuffle.
+        /// Cards currently in the draw pile (read-only live view). Order reflects the live shuffle.
         /// </summary>
-        public IReadOnlyList<CardData> DrawPile => _deck.AsReadOnly();
+        public IReadOnlyList<CardData> DrawPile => _deckReadOnly;
 
         /// <summary>
-        /// All cards across every zone — draw pile, hand, discard, and exhaust (read-only snapshot).
+        /// All cards across every zone — draw pile, hand, discard, and exhaust (snapshot).
         /// Order: draw → hand → discard → exhaust.
+        /// Note: allocates a new list; use the individual zone properties for repeated access.
         /// </summary>
         public IReadOnlyList<CardData> AllCards =>
             _deck.Concat(_hand).Concat(_discard).Concat(_exhaust).ToList().AsReadOnly();
@@ -106,6 +116,13 @@ namespace Crookedile.Gameplay.Battle
             _ownerName   = ownerName;
             _maxHandSize = maxHandSize;
             _isPlayer    = isPlayer;
+
+            // Create cached wrappers once — they track the underlying list by reference.
+            _handReadOnly    = _hand.AsReadOnly();
+            _discardReadOnly = _discard.AsReadOnly();
+            _exhaustReadOnly = _exhaust.AsReadOnly();
+            _deckReadOnly    = _deck.AsReadOnly();
+
             InitializeDeck(initialDeck);
         }
 
@@ -142,19 +159,13 @@ namespace Crookedile.Gameplay.Battle
             for (int i = 0; i < count; i++)
             {
                 if (DrawCard())
-                {
                     cardsDrawn++;
-                }
                 else
-                {
                     break; // Can't draw more cards
-                }
             }
 
             if (cardsDrawn > 0)
-            {
                 GameLogger.LogInfo<DeckManager>($"{_ownerName} drew {cardsDrawn} card(s). Hand: {HandCount}/{_maxHandSize}");
-            }
 
             return cardsDrawn;
         }
@@ -165,20 +176,16 @@ namespace Crookedile.Gameplay.Battle
         /// <returns>True if a card was drawn, false if hand is full or no cards available</returns>
         public bool DrawCard()
         {
-            // Check if hand is full
             if (IsHandFull)
             {
                 GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot draw - hand is full ({_maxHandSize})");
                 return false;
             }
 
-            // If deck is empty, try to shuffle discard pile
             if (IsDeckEmpty)
             {
                 if (_discard.Count > 0)
-                {
                     ShuffleDiscardIntoDeck();
-                }
                 else
                 {
                     GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot draw - deck and discard are empty");
@@ -206,13 +213,14 @@ namespace Crookedile.Gameplay.Battle
         /// <returns>True if card was successfully played</returns>
         public bool PlayCard(CardData card)
         {
-            if (!_hand.Contains(card))
+            int idx = _hand.IndexOf(card);
+            if (idx < 0)
             {
                 GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot play card - not in hand");
                 return false;
             }
 
-            _hand.Remove(card);
+            _hand.RemoveAt(idx);
             _discard.Add(card);
 
             GameLogger.LogInfo<DeckManager>($"{_ownerName} played card: {card.CardName}");
@@ -231,7 +239,11 @@ namespace Crookedile.Gameplay.Battle
             }
 
             CardData card = _hand[index];
-            return PlayCard(card);
+            _hand.RemoveAt(index);
+            _discard.Add(card);
+
+            GameLogger.LogInfo<DeckManager>($"{_ownerName} played card: {card.CardName}");
+            return true;
         }
 
         #endregion
@@ -243,13 +255,14 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public bool DiscardCard(CardData card)
         {
-            if (!_hand.Contains(card))
+            int idx = _hand.IndexOf(card);
+            if (idx < 0)
             {
                 GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot discard card - not in hand");
                 return false;
             }
 
-            _hand.Remove(card);
+            _hand.RemoveAt(idx);
             _discard.Add(card);
 
             EventBus.Publish(new CardDiscardedEvent { Card = card, IsPlayer = _isPlayer });
@@ -290,13 +303,14 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public bool ExhaustCard(CardData card)
         {
-            if (!_hand.Contains(card))
+            int idx = _hand.IndexOf(card);
+            if (idx < 0)
             {
                 GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot exhaust card - not in hand");
                 return false;
             }
 
-            _hand.Remove(card);
+            _hand.RemoveAt(idx);
             _exhaust.Add(card);
 
             EventBus.Publish(new CardExhaustedEvent { Card = card, IsPlayer = _isPlayer });
@@ -309,13 +323,14 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public bool ExhaustFromDiscard(CardData card)
         {
-            if (!_discard.Contains(card))
+            int idx = _discard.IndexOf(card);
+            if (idx < 0)
             {
                 GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot exhaust card - not in discard");
                 return false;
             }
 
-            _discard.Remove(card);
+            _discard.RemoveAt(idx);
             _exhaust.Add(card);
 
             GameLogger.LogInfo<DeckManager>($"{_ownerName} exhausted card from discard: {card.CardName}");
@@ -329,7 +344,13 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public bool MoveFromDiscardToHand(CardData card)
         {
-            if (card == null || !_discard.Contains(card))
+            if (card == null)
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToHand — card is null");
+                return false;
+            }
+            int idx = _discard.IndexOf(card);
+            if (idx < 0)
             {
                 GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToHand — card not in discard");
                 return false;
@@ -339,7 +360,7 @@ namespace Crookedile.Gameplay.Battle
                 GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToHand — hand is full");
                 return false;
             }
-            _discard.Remove(card);
+            _discard.RemoveAt(idx);
             _hand.Add(card);
             GameLogger.LogInfo<DeckManager>($"{_ownerName}: Moved {card.CardName} from discard to hand");
             EventBus.Publish(new CardRecoveredEvent { Card = card, IsPlayer = _isPlayer });
@@ -353,12 +374,18 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public bool MoveFromDiscardToDeck(CardData card)
         {
-            if (card == null || !_discard.Contains(card))
+            if (card == null)
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToDeck — card is null");
+                return false;
+            }
+            int idx = _discard.IndexOf(card);
+            if (idx < 0)
             {
                 GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToDeck — card not in discard");
                 return false;
             }
-            _discard.Remove(card);
+            _discard.RemoveAt(idx);
             _deck.Insert(0, card);   // index 0 = top (DrawCard reads _deck[0])
             GameLogger.LogInfo<DeckManager>($"{_ownerName}: Moved {card.CardName} from discard to top of draw pile");
             return true;
@@ -379,7 +406,7 @@ namespace Crookedile.Gameplay.Battle
             }
             _hand[idx] = newCard;
             GameLogger.LogInfo<DeckManager>($"{_ownerName}: Upgraded {oldCard.CardName} → {newCard.CardName} in hand");
-            EventBus.Publish(new CardUpgradedEvent { OldCard = oldCard, NewCard = newCard });
+            EventBus.Publish(new CardUpgradedEvent { OldCard = oldCard, NewCard = newCard, IsPlayer = _isPlayer });
             return true;
         }
 
@@ -495,26 +522,19 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Checks if a specific card is in hand.
         /// </summary>
-        public bool IsCardInHand(CardData card)
-        {
-            return _hand.Contains(card);
-        }
+        public bool IsCardInHand(CardData card) => _hand.Contains(card);
 
         /// <summary>
         /// Gets all cards in hand of a specific type.
         /// </summary>
-        public List<CardData> GetCardsOfType(CardType cardType)
-        {
-            return _hand.Where(c => c.CardType == cardType).ToList();
-        }
+        public List<CardData> GetCardsOfType(CardType cardType) =>
+            _hand.Where(c => c.CardType == cardType).ToList();
 
         /// <summary>
         /// Gets all cards in hand with a specific tag.
         /// </summary>
-        public List<CardData> GetCardsWithTag(string tag)
-        {
-            return _hand.Where(c => c.HasTag(tag)).ToList();
-        }
+        public List<CardData> GetCardsWithTag(string tag) =>
+            _hand.Where(c => c.HasTag(tag)).ToList();
 
         #endregion
 
@@ -532,18 +552,12 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Called at the start of each turn.
         /// </summary>
-        public void StartTurn(int cardsToDraw)
-        {
-            DrawCards(cardsToDraw);
-        }
+        public void StartTurn(int cardsToDraw) => DrawCards(cardsToDraw);
 
         /// <summary>
         /// Called at the end of each turn - discards hand.
         /// </summary>
-        public void EndTurn()
-        {
-            DiscardHand();
-        }
+        public void EndTurn() => DiscardHand();
 
         /// <summary>
         /// Called at the end of battle - cleanup.
@@ -585,9 +599,8 @@ namespace Crookedile.Gameplay.Battle
             }
 
             for (int i = 0; i < count; i++)
-            {
                 _deck.Add(card);
-            }
+
             Shuffle();
             GameLogger.LogInfo<DeckManager>($"{_ownerName} added {count}x {card.CardName} to deck");
         }
@@ -643,10 +656,8 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Gets a summary of all card zones.
         /// </summary>
-        public string GetStatusString()
-        {
-            return $"Deck: {DeckCount} | Hand: {HandCount}/{_maxHandSize} | Discard: {DiscardCount} | Exhaust: {ExhaustCount}";
-        }
+        public string GetStatusString() =>
+            $"Deck: {DeckCount} | Hand: {HandCount}/{_maxHandSize} | Discard: {DiscardCount} | Exhaust: {ExhaustCount}";
 
         #endregion
     }

@@ -19,7 +19,9 @@
       "Bash(Remove-Item \"C:\\\\Users\\\\v-2jo\\\\UE\\\\ProjectCrookedile\\\\Assets\\\\Scripts\\\\UI\\\\Battle\\\\CardZoneRowUI.cs.meta\" -Force -ErrorAction SilentlyContinue)",
       "Bash(ls:*)",
       "Bash(grep:*)",
-      "Bash(xargs wc -l)"
+      "Bash(xargs wc -l)",
+      "Bash(Special)",
+      "Bash(Passives \")"
     ],
     "deny": [],
     "ask": []

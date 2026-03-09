@@ -78,14 +78,6 @@ namespace Crookedile.Gameplay.Battle
         public int         CurrentTurn   => _currentTurn;
         public bool        IsPlayerTurn  => _isPlayerTurn;
 
-        // Phase B — Improvise (Actor passive)
-        /// <summary>True when the Actor's Improvise window is open this turn.</summary>
-        public bool IsImproviseAvailable => _passiveResolver?.ImproviseAvailable ?? false;
-
-        /// <summary>Phase B: UI calls this after the player selects cards to discard.</summary>
-        public bool TryPlayerImprovise(List<CardData> cardsToDiscard)
-            => _passiveResolver?.TryImprovise(_playerDeck, cardsToDiscard) ?? false;
-
         // Multi-enemy
         public IReadOnlyList<EnemyController> Enemies    => _enemies;
         public EnemyController FocusedEnemy              => _enemies.Count > 0 ? _enemies[_focusedEnemyIndex] : null;
@@ -164,6 +156,12 @@ namespace Crookedile.Gameplay.Battle
             }
             _focusedEnemyIndex = 0;
 
+            if (_enemies.Count == 0)
+            {
+                GameLogger.LogError<BattleManager>("StartBattle: setup contains no valid enemies — battle cannot proceed.");
+                return;
+            }
+
             // Player deck
             _playerDeck = new DeckManager(setup.playerDeck, "Player", 10);
 
@@ -196,8 +194,13 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void SetFocusedEnemy(int index)
         {
-            GameLogger.LogInfo<BattleManager>($"Focused enemy: [{index}] Count {_enemies.Count} is Defeated? {_enemies[index].IsDefeated}");
-            if (index < 0 || index >= _enemies.Count || _enemies[index].IsDefeated) return;
+            if (index < 0 || index >= _enemies.Count)
+            {
+                GameLogger.LogWarning<BattleManager>($"SetFocusedEnemy: index {index} out of range (count: {_enemies.Count})");
+                return;
+            }
+            GameLogger.LogInfo<BattleManager>($"SetFocusedEnemy: [{index}] of {_enemies.Count}, defeated={_enemies[index].IsDefeated}");
+            if (_enemies[index].IsDefeated) return;
             _focusedEnemyIndex = index;
             _effectResolver.SetFocusedOpponent(
                 FocusedEnemy.Stats, FocusedEnemy.StatusEffects,

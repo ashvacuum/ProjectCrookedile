@@ -118,11 +118,6 @@ namespace Crookedile.UI.Battle
             if (endTurnButton != null)
                 endTurnButton.onClick.AddListener(OnEndTurnClicked);
 
-            if (improviseButton != null)
-            {
-                improviseButton.onClick.AddListener(OnImproviseClicked);
-                improviseButton.gameObject.SetActive(false);
-            }
         }
 
         private void OnEnable()  => SubscribeToEvents();
@@ -189,8 +184,7 @@ namespace Crookedile.UI.Battle
             _fsm = new StateMachine<BattleUIState>();
             _fsm.RegisterState(BattleUIState.Idle,                new IdleBattleUIState(this));
             _fsm.RegisterState(BattleUIState.PlayerTurn,          new PlayerTurnBattleUIState(this));
-            _fsm.RegisterState(BattleUIState.Improvise,           new ImproviseBattleUIState(this));
-            _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceBattleUIState(this));
+_fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceBattleUIState(this));
             _fsm.RegisterState(BattleUIState.BattleEnd,           new BattleEndBattleUIState(this));
             _fsm.ChangeState(BattleUIState.Idle);
 
@@ -542,20 +536,6 @@ namespace Crookedile.UI.Battle
             }
         }
 
-        private void OnImproviseClicked()
-        {
-            _fsm?.ChangeState(BattleUIState.Improvise);
-        }
-
-        /// <summary>
-        /// Called by <c>ImproviseBattleUIState</c> via <c>CardSelectionPanel.Open</c> callback
-        /// when the player presses Discard.
-        /// </summary>
-        internal void OnImproviseConfirmed(List<CardData> selectedCards)
-        {
-            battleManager.TryPlayerImprovise(selectedCards);
-            _fsm?.ChangeState(BattleUIState.PlayerTurn);
-        }
 
         /// <summary>
         /// Fired by <see cref="BattleResultPanel.OnContinueClicked"/> after a victory.
@@ -657,48 +637,8 @@ namespace Crookedile.UI.Battle
                 _ui.handPanel?.RefreshNormalHand(_ui.battleManager, _ui.OnCardButtonClicked);
                 if (_ui.endTurnButton != null) _ui.endTurnButton.interactable = true;
 
-                bool showImprovise = _ui.battleManager?.IsImproviseAvailable ?? false;
-                if (_ui.improviseButton != null)
-                    _ui.improviseButton.gameObject.SetActive(showImprovise);
-
                 _ui.UpdateStatsDisplay();
                 _ui.UpdateBattleInfo();
-            }
-        }
-
-        #endregion
-
-        #region State: Improvise
-
-        private sealed class ImproviseBattleUIState : State
-        {
-            private readonly BattleUI _ui;
-            public ImproviseBattleUIState(BattleUI ui) => _ui = ui;
-
-            public override void OnEnter()
-            {
-                if (_ui.cardSelectionPanel == null) return;
-
-                _ui.cardSelectionPanel.OnCardReturnedToHand += OnCardReturned;
-                _ui.cardSelectionPanel.Open("Improvise", _ui.OnImproviseConfirmed);
-                _ui.handPanel?.RefreshImproviseHand(_ui.battleManager, _ui.cardSelectionPanel);
-
-                // Hide the Improvise button while the modal is open
-                if (_ui.improviseButton != null)
-                    _ui.improviseButton.gameObject.SetActive(false);
-            }
-
-            public override void OnExit()
-            {
-                if (_ui.cardSelectionPanel != null)
-                    _ui.cardSelectionPanel.OnCardReturnedToHand -= OnCardReturned;
-                // Panel closes itself via OnDiscardClicked → OnImproviseConfirmed
-            }
-
-            private void OnCardReturned(CardData card)
-            {
-                // A card was sent back from the discard zone — rebuild the hand to show it again.
-                _ui.handPanel?.RefreshImproviseHand(_ui.battleManager, _ui.cardSelectionPanel);
             }
         }
 

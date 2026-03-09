@@ -9,16 +9,12 @@ using Crookedile.Data.Cards;
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Panel that floats above the existing hand and shows cards queued for discard.
+    /// Panel that floats above the existing hand and shows cards queued for a card-choice effect.
     ///
     /// The actual hand (CardHandLayout) remains visible below and is the source.
-    /// BattleUI calls <see cref="AddToDiscard"/> when a hand card is clicked in improvise mode.
-    /// Clicking a card in the discard zone fires <see cref="OnCardReturnedToHand"/> so
+    /// BattleUI calls <see cref="AddToDiscard"/> when a hand card is clicked during selection.
+    /// Clicking a card in the selection zone fires <see cref="OnCardReturnedToHand"/> so
     /// BattleUI can rebuild the hand to show the card again.
-    ///
-    /// Usage:
-    ///   panel.Open("Improvise", OnImproviseConfirmed);
-    ///   // Then wire hand card callbacks to: panel.AddToDiscard(card)
     ///
     /// Attach to a Panel anchored above the hand area. Starts inactive (hidden).
     /// discardContainer should use HorizontalLayoutGroup.
@@ -38,8 +34,7 @@ namespace Crookedile.UI.Battle
         // ─── Events ───────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Fired when the player clicks a card in the discard zone to return it to hand.
-        /// BattleUI should respond by calling RefreshImproviseHand() to show the card again.
+        /// Fired when the player clicks a card in the selection zone to return it to hand.
         /// </summary>
         public event Action<CardData> OnCardReturnedToHand;
 
