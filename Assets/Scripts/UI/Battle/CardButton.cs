@@ -589,7 +589,13 @@ namespace Crookedile.UI.Battle
         private void UpdateText()
         {
             if (cardNameText != null)
-                cardNameText.text = cardData.GetDisplayName();
+            {
+                string suffix = visualSettings != null ? visualSettings.UpgradedNameSuffix : "+";
+                cardNameText.text = cardData.GetDisplayName(suffix);
+
+                if (visualSettings != null && cardData.IsUpgraded && visualSettings.UpgradedNameColor.a > 0f)
+                    cardNameText.color = visualSettings.UpgradedNameColor;
+            }
 
             if (cardCostText != null)
                 cardCostText.text = GetCostString();

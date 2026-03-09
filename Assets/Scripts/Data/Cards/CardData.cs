@@ -59,11 +59,15 @@ namespace Crookedile.Data.Cards
         [SerializeField] private List<CardEffect> _effects = new List<CardEffect>();
 
         [Header("Upgrade")]
-        [Tooltip("Is this the upgraded (+) version?")]
+        [Tooltip("Is this card currently in its upgraded state?")]
         [SerializeField] private bool _isUpgraded = false;
 
-        [Tooltip("Reference to the upgraded (+) version of this card (if it exists)")]
-        [SerializeField] private CardData _upgradedVersion;
+        [Tooltip("Overridden costs when this card is upgraded. If empty, base costs are used.")]
+        [SerializeField] private List<CardCost> _upgradedCosts = new List<CardCost>();
+
+        [Tooltip("Overridden effects when this card is upgraded. If empty, base effects are used.")]
+        [SerializeReference]
+        [SerializeField] private List<BattleEffect> _upgradedEffects = new List<BattleEffect>();
 
         [Header("Metadata")]
         [Tooltip("Tags for searching/filtering (e.g., 'violence', 'corruption', 'persuasion')")]
@@ -164,20 +168,25 @@ namespace Crookedile.Data.Cards
         public List<CardEffect> Effects => _effects;
 
         /// <summary>
-        /// Is this the upgraded (+) version?
+        /// Is this card currently in its upgraded state?
         /// </summary>
         public bool IsUpgraded => _isUpgraded;
 
         /// <summary>
-        /// Reference to the upgraded (+) version of this card.
-        /// Null if no upgraded version exists.
+        /// Overridden costs used when this card is upgraded. Empty means base costs apply.
         /// </summary>
-        public CardData UpgradedVersion => _upgradedVersion;
+        public List<CardCost> UpgradedCosts => _upgradedCosts;
 
         /// <summary>
-        /// Can this card be upgraded? (Has an upgraded version and is not already upgraded)
+        /// Overridden effects used when this card is upgraded. Empty means base effects apply.
         /// </summary>
-        public bool CanUpgrade => !_isUpgraded && _upgradedVersion != null;
+        public List<BattleEffect> UpgradedEffects => _upgradedEffects;
+
+        /// <summary>
+        /// Can this card be upgraded? True if it is not already upgraded and has at least one
+        /// upgraded cost or upgraded effect defined.
+        /// </summary>
+        public bool CanUpgrade => !_isUpgraded && (_upgradedCosts.Count > 0 || _upgradedEffects.Count > 0);
 
         /// <summary>
         /// Tags for searching and filtering.
@@ -261,9 +270,10 @@ namespace Crookedile.Data.Cards
             // Create a copy
             CardData duplicate = Instantiate(this);
             duplicate._id = System.Guid.NewGuid().ToString();
-            duplicate._upgradedVersion = null; // New card doesn't reference upgrades
             duplicate._cardName = $"{_cardName} Copy";
             duplicate._isUpgraded = false;
+            duplicate._upgradedCosts = new List<CardCost>();
+            duplicate._upgradedEffects = new List<BattleEffect>();
 
             // Create the asset
             UnityEditor.AssetDatabase.CreateAsset(duplicate, newPath);
@@ -287,70 +297,79 @@ namespace Crookedile.Data.Cards
         /// <summary>
         /// Gets the display name with upgrade indicator.
         /// </summary>
-        /// <returns>Card name with + suffix if upgraded</returns>
-        public string GetDisplayName()
+        /// <param name="upgradedSuffix">Suffix appended when the card is upgraded (default "+").</param>
+        /// <returns>Card name with suffix if upgraded</returns>
+        public string GetDisplayName(string upgradedSuffix = "+")
         {
-            return _isUpgraded ? $"{_cardName}+" : _cardName;
+            return _isUpgraded ? $"{_cardName}{upgradedSuffix}" : _cardName;
         }
 
-
         /// <summary>
-        /// Gets the current card to use (returns upgraded version if this is base and has upgrade).
-        /// Use this for runtime card operations to automatically use upgraded stats.
+        /// Creates a runtime instance of this card in its upgraded state.
+        /// The returned object is a new <see cref="ScriptableObject"/> instance; caller is
+        /// responsible for managing its lifetime (e.g. destroying it when the battle ends).
         /// </summary>
-        /// <returns>Upgraded version if available and not already upgraded, otherwise this card</returns>
-        public CardData GetCurrentVersion()
+        public CardData CreateUpgradedInstance()
         {
-            // If we have an upgraded version referenced and we're not already upgraded, use the upgrade
-            return (!_isUpgraded && _upgradedVersion != null) ? _upgradedVersion : this;
+            var copy = Instantiate(this);
+            copy._isUpgraded = true;
+            return copy;
         }
 
         /// <summary>
-        /// Gets the card name for the current version (base or upgraded).
-        /// </summary>
-        public string GetCardName(bool useUpgraded = true)
-        {
-            return useUpgraded ? GetCurrentVersion().CardName : _cardName;
-        }
-
-        /// <summary>
-        /// Gets the costs for the current version (base or upgraded).
+        /// Gets the costs to use, respecting upgrade state.
+        /// Returns <see cref="_upgradedCosts"/> when upgraded and the list is non-empty;
+        /// falls back to base <see cref="_costs"/> otherwise.
         /// </summary>
         public List<CardCost> GetCosts(bool useUpgraded = true)
         {
-            return useUpgraded ? GetCurrentVersion().Costs : _costs;
+            if (useUpgraded && _isUpgraded && _upgradedCosts.Count > 0)
+                return _upgradedCosts;
+            return _costs;
         }
 
         /// <summary>
-        /// Gets the new polymorphic effects for the current version (base or upgraded).
+        /// Gets the new polymorphic effects to use, respecting upgrade state.
+        /// Returns <see cref="_upgradedEffects"/> when upgraded and the list is non-empty;
+        /// falls back to base <see cref="_newEffects"/> otherwise.
         /// </summary>
         public List<BattleEffect> GetNewEffects(bool useUpgraded = true)
         {
-            return useUpgraded ? GetCurrentVersion().NewEffects : _newEffects;
+            if (useUpgraded && _isUpgraded && _upgradedEffects.Count > 0)
+                return _upgradedEffects;
+            return _newEffects;
         }
 
         /// <summary>
-        /// Gets the legacy effects for the current version (base or upgraded).
+        /// Gets the legacy effects for this card.
         /// </summary>
         public List<CardEffect> GetEffects(bool useUpgraded = true)
         {
-            return useUpgraded ? GetCurrentVersion().Effects : _effects;
+            return _effects;
         }
 
         /// <summary>
-        /// Gets the description for the current version (base or upgraded).
+        /// Gets the description for this card.
         /// </summary>
         public string GetDescription(bool useUpgraded = true)
         {
-            return useUpgraded ? GetCurrentVersion().Description : _description;
+            return _description;
         }
 
         /// <summary>
-        /// Gets the artwork for the current version (base or upgraded).
+        /// Gets the artwork for this card.
         /// </summary>
         public Sprite GetArtwork(bool useUpgraded = true)
         {
-            return useUpgraded ? GetCurrentVersion().Artwork : _artwork;
+            return _artwork;
+        }
+
+        /// <summary>
+        /// Gets the card name (without any upgrade suffix).
+        /// </summary>
+        public string GetCardName(bool useUpgraded = true)
+        {
+            return _cardName;
         }
 
         #endregion
