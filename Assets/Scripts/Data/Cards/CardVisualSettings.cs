@@ -48,6 +48,14 @@ namespace Crookedile.Data.Cards
         [Tooltip("Frame overlay for Rare rarity cards")]
         [SerializeField] private Sprite _rareFrame;
 
+        [Header("Upgrade Visuals")]
+        [Tooltip("Suffix appended to a card's name when it is in its upgraded state (e.g. \"+\")")]
+        [SerializeField] private string _upgradedNameSuffix = "+";
+
+        [Tooltip("Optional tint color applied to the card name text when the card is upgraded. " +
+                 "Set alpha to 0 to leave the name color unchanged.")]
+        [SerializeField] private Color _upgradedNameColor = Color.white;
+
         #region Properties
 
         /// <summary>
@@ -69,6 +77,16 @@ namespace Crookedile.Data.Cards
         /// Card back for Actor origin cards.
         /// </summary>
         public Sprite ActorCardBack => _actorCardBack;
+
+        /// <summary>
+        /// Suffix appended to a card's display name when it is in its upgraded state.
+        /// </summary>
+        public string UpgradedNameSuffix => _upgradedNameSuffix;
+
+        /// <summary>
+        /// Tint color applied to the card name text when the card is upgraded.
+        /// </summary>
+        public Color UpgradedNameColor => _upgradedNameColor;
 
         #endregion
 

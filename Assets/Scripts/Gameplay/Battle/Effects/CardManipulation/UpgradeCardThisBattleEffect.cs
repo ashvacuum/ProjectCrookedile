@@ -42,7 +42,7 @@ namespace Crookedile.Gameplay.Battle
                 chosen =>
                 {
                     if (chosen.Count == 0) return;
-                    var upgraded = chosen[0].GetCurrentVersion();
+                    var upgraded = chosen[0].CreateUpgradedInstance();
                     ctx.Deck.SwapCardInHand(chosen[0], upgraded);
                 });
         }

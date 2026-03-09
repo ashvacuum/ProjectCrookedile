@@ -18,7 +18,7 @@ namespace Crookedile.Gameplay.Battle
             var pairs = new List<(CardData old, CardData upgraded)>();
             foreach (var card in ctx.Deck.Hand)
                 if (card != null && card.CanUpgrade)
-                    pairs.Add((card, card.GetCurrentVersion()));
+                    pairs.Add((card, card.CreateUpgradedInstance()));
 
             foreach (var (old, upgraded) in pairs)
                 ctx.Deck.SwapCardInHand(old, upgraded);

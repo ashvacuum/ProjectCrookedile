@@ -966,7 +966,7 @@ namespace Crookedile.Gameplay.Battle
                 chosen =>
                 {
                     if (chosen.Count == 0) return;
-                    CardData upgraded = chosen[0].GetCurrentVersion();
+                    CardData upgraded = chosen[0].CreateUpgradedInstance();
                     deck.SwapCardInHand(chosen[0], upgraded);
                 });
         }
@@ -977,7 +977,7 @@ namespace Crookedile.Gameplay.Battle
             var pairs = new List<(CardData old, CardData upgraded)>();
             foreach (var card in deck.Hand)
                 if (card != null && card.CanUpgrade)
-                    pairs.Add((card, card.GetCurrentVersion()));
+                    pairs.Add((card, card.CreateUpgradedInstance()));
 
             foreach (var (old, upgraded) in pairs)
                 deck.SwapCardInHand(old, upgraded);
