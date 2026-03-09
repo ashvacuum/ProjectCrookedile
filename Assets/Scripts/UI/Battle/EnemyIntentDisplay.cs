@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -44,8 +45,18 @@ namespace Crookedile.UI.Battle
         [Tooltip("Move name text, e.g. 'Aggressive Debate'")]
         [SerializeField] private TMP_Text intentNameText;
 
+        [Tooltip("When false the move-name label is hidden (still data-set so the tooltip works). " +
+                 "Enable in the Inspector if you want the text visible on screen.")]
+        [SerializeField] private bool _showMoveName = false;
+
         [Tooltip("Intent description text, e.g. 'Will deal 8 damage'")]
         [SerializeField] private TMP_Text intentDescText;
+
+        [Tooltip("Size of the per-hit damage value in multi-hit previews, as a percentage of " +
+                 "the base text size. E.g. 70 renders '4\u00d72' as '4\u00d7<size=70%>2</size>'. " +
+                 "Set to 100 to disable sub-sizing.")]
+        [Range(40, 100)]
+        [SerializeField] private int _multiHitSubTextSize = 70;
 
         [Header("Move Type Badge")]
         [Tooltip("Background image whose colour changes to reflect the move type")]
@@ -56,11 +67,61 @@ namespace Crookedile.UI.Battle
                  "Create via: Assets → Create → Crookedile → Enemy → Intent Theme")]
         [SerializeField] private EnemyIntentTheme intentTheme;
 
+        [Header("Bob Animation")]
+        [Tooltip("Pixels the intent panel travels up and down per sine cycle.")]
+        [SerializeField] private float _bobAmplitude = 4f;
+
+        [Tooltip("Bob cycles per second.")]
+        [SerializeField] private float _bobSpeed = 0.9f;
+
+        [Header("Damage Text Punch")]
+        [Tooltip("Pixels the damage-number text snaps upward the instant intent is revealed.")]
+        [SerializeField] private float _punchRise = 10f;
+
+        [Tooltip("Seconds to reach the peak of the punch.")]
+        [SerializeField] private float _punchRiseDuration = 0.06f;
+
+        [Tooltip("Seconds to ease back to the resting position after the peak.")]
+        [SerializeField] private float _punchFallDuration = 0.35f;
+
         private EnemyMoveData _currentMove;
+
+        // Bob state
+        private float         _bobPhase;        // random per-instance offset so enemies don't sync
+        private bool          _isBobbing;
+        private RectTransform _intentPanelRect;
+        private Vector2       _bobAnchor;       // panel's designed anchoredPosition (captured in Awake)
+
+        // Punch animation state
+        private Coroutine     _punchCoroutine;
+        private RectTransform _descTextRect;
+        private Vector2       _descTextAnchor;  // desc text's authored anchoredPosition (captured in Awake)
 
         // ─── Unity Lifecycle ──────────────────────────────────────────────────────
 
-        private void Awake() => SetPanelVisible(false);
+        private void Awake()
+        {
+            // Cache the RectTransform and remember the panel's authored resting position
+            // before SetPanelVisible hides it — so the bob has a stable origin.
+            _intentPanelRect = intentPanel != null ? intentPanel.GetComponent<RectTransform>() : null;
+            if (_intentPanelRect != null) _bobAnchor = _intentPanelRect.anchoredPosition;
+
+            // Cache the desc text rect so the punch coroutine has a stable resting origin.
+            _descTextRect = intentDescText != null ? intentDescText.GetComponent<RectTransform>() : null;
+            if (_descTextRect != null) _descTextAnchor = _descTextRect.anchoredPosition;
+
+            // Random phase offset keeps multiple enemies from bobbing in unison
+            _bobPhase = Random.Range(0f, Mathf.PI * 2f);
+
+            SetPanelVisible(false);
+        }
+
+        private void Update()
+        {
+            if (!_isBobbing || _intentPanelRect == null) return;
+            float yOffset = Mathf.Sin(Time.time * _bobSpeed * Mathf.PI * 2f + _bobPhase) * _bobAmplitude;
+            _intentPanelRect.anchoredPosition = _bobAnchor + new Vector2(0f, yOffset);
+        }
 
         // ─── Display ──────────────────────────────────────────────────────────────
 
@@ -89,16 +150,23 @@ namespace Crookedile.UI.Battle
                 intentIcon.enabled = icon != null;
             }
 
-            // Text
+            // Text — always store the name so the tooltip can read it; visibility is optional
             if (intentNameText != null)
-                intentNameText.text = move.MoveName;
+            {
+                intentNameText.text    = move.MoveName;
+                intentNameText.enabled = _showMoveName;
+            }
 
             if (intentDescText != null)
             {
                 bool isOffensive = move.MoveType == EnemyMoveType.Attack
                                 || move.MoveType == EnemyMoveType.OffensiveBuff
                                 || move.MoveType == EnemyMoveType.DebuffAttack;
-                intentDescText.text = isOffensive ? BuildDamagePreview(move, attackerStatus, targetStatus) : string.Empty;
+                string preview = isOffensive
+                    ? BuildDamagePreview(move, attackerStatus, targetStatus, _multiHitSubTextSize)
+                    : string.Empty;
+                intentDescText.text = preview;
+                if (!string.IsNullOrEmpty(preview)) TriggerDescPunch();
             }
 
             // Colour badge by move type
@@ -124,13 +192,15 @@ namespace Crookedile.UI.Battle
 
         /// <summary>
         /// Builds the intent description string shown beneath the move name.
-        /// Supports multi-hit: equal fixed-damage effects → "N×amount"; equal random → "N×min-max".
+        /// Supports multi-hit: equal fixed-damage effects → "N×&lt;size=X%&gt;amount&lt;/size&gt;";
+        /// equal random → "N×&lt;size=X%&gt;min-max&lt;/size&gt;".
         /// Falls back to summing for single or mixed effects (existing behaviour).
         /// Returns empty string if no damage effects are present.
         /// </summary>
         private static string BuildDamagePreview(EnemyMoveData move,
                                                    StatusEffectManager attackerStatus,
-                                                   StatusEffectManager targetStatus)
+                                                   StatusEffectManager targetStatus,
+                                                   int multiHitSubTextSize = 70)
         {
             // Collect damage effects
             var dmgEffects = new List<CardEffect>();
@@ -154,7 +224,9 @@ namespace Crookedile.UI.Battle
                 && dmgEffects.TrueForAll(e => e.DamageAmount == dmgEffects[0].DamageAmount))
             {
                 int adj = Preview(dmgEffects[0].DamageAmount, attackerStatus, targetStatus);
-                return adj > 0 ? $"{dmgEffects.Count}\u00d7{adj}" : string.Empty;
+                return adj > 0
+                    ? $"{dmgEffects.Count}\u00d7<size={multiHitSubTextSize}%>{adj}</size>"
+                    : string.Empty;
             }
 
             // Multi-hit: all effects are identical RandomDamage → "N×min-max"
@@ -165,7 +237,7 @@ namespace Crookedile.UI.Battle
             {
                 int adjMin = Preview(dmgEffects[0].RandomDamageMin, attackerStatus, targetStatus);
                 int adjMax = Preview(dmgEffects[0].RandomDamageMax, attackerStatus, targetStatus);
-                return $"{dmgEffects.Count}\u00d7{adjMin}-{adjMax}";
+                return $"{dmgEffects.Count}\u00d7<size={multiHitSubTextSize}%>{adjMin}-{adjMax}</size>";
             }
 
             // Single or mixed effects — sum as before
@@ -211,6 +283,59 @@ namespace Crookedile.UI.Battle
         {
             if (intentPanel != null)
                 intentPanel.SetActive(visible);
+
+            _isBobbing = visible;
+
+            if (!visible)
+            {
+                // Snap both the panel and the desc text back to their resting positions
+                if (_intentPanelRect != null) _intentPanelRect.anchoredPosition = _bobAnchor;
+                if (_descTextRect    != null) _descTextRect.anchoredPosition    = _descTextAnchor;
+
+                // Stop any in-progress punch so re-show starts from a clean state
+                if (_punchCoroutine != null) { StopCoroutine(_punchCoroutine); _punchCoroutine = null; }
+            }
+        }
+
+        // ─── Punch Animation ──────────────────────────────────────────────────────
+
+        private void TriggerDescPunch()
+        {
+            if (_descTextRect == null) return;
+            if (_punchCoroutine != null) StopCoroutine(_punchCoroutine);
+            _punchCoroutine = StartCoroutine(PunchDescCoroutine());
+        }
+
+        /// <summary>
+        /// Phase 1 — sudden rise: linearly reaches the peak in <see cref="_punchRiseDuration"/> seconds.
+        /// Phase 2 — gradual fall: quadratic ease-out (fast start, slow finish) back to the resting position.
+        /// </summary>
+        private IEnumerator PunchDescCoroutine()
+        {
+            // Phase 1: fast rise to peak
+            float t = 0f;
+            while (t < _punchRiseDuration)
+            {
+                t += Time.deltaTime;
+                float frac = Mathf.Clamp01(t / _punchRiseDuration);
+                _descTextRect.anchoredPosition = _descTextAnchor + new Vector2(0f, frac * _punchRise);
+                yield return null;
+            }
+            _descTextRect.anchoredPosition = _descTextAnchor + new Vector2(0f, _punchRise);
+
+            // Phase 2: gradual ease-out fall — (1-t)² decelerates from fast to still
+            t = 0f;
+            while (t < _punchFallDuration)
+            {
+                t += Time.deltaTime;
+                float frac      = Mathf.Clamp01(t / _punchFallDuration);
+                float remaining = (1f - frac) * (1f - frac);   // 1 → 0 with deceleration
+                _descTextRect.anchoredPosition = _descTextAnchor + new Vector2(0f, _punchRise * remaining);
+                yield return null;
+            }
+
+            _descTextRect.anchoredPosition = _descTextAnchor;
+            _punchCoroutine = null;
         }
     }
 }

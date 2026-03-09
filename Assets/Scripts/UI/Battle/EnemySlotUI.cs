@@ -38,6 +38,10 @@ namespace Crookedile.UI.Battle
         [Tooltip("How fast the HP bar lerps toward the target fill. Higher = snappier.")]
         [SerializeField] private float barLerpSpeed = 8f;
 
+        [Header("Name Hover")]
+        [Tooltip("Duration in seconds for the enemy name to fade in or out when the HP bar is hovered.")]
+        [SerializeField] private float _nameFadeDuration = 0.2f;
+
         [SerializeField] private Image selectionHighlight;
         [SerializeField] private Image dragDropHighlight;
         [SerializeField] private GameObject defeatedOverlay;
@@ -46,6 +50,7 @@ namespace Crookedile.UI.Battle
         private BattleManager _battleManager;
         private OriginType _playerOrigin;
         private float _targetFill = 1f;
+        private Coroutine _nameFadeCoroutine;
 
         /// <summary>The enemy slot currently targeted by the card targeting arrow, or null.</summary>
         public static EnemySlotUI TargetedSlot { get; private set; }
@@ -82,6 +87,9 @@ namespace Crookedile.UI.Battle
             if (defeatedOverlay != null) defeatedOverlay.SetActive(false);
             if (selectionHighlight != null) selectionHighlight.enabled = false;
             if (dragDropHighlight != null) dragDropHighlight.enabled = false;
+
+            // Start with name invisible — revealed on HP bar hover
+            if (nameText != null) nameText.alpha = 0f;
 
             _intentDisplay?.ShowIntent(null); // hidden until intent is declared
 
@@ -207,6 +215,42 @@ namespace Crookedile.UI.Battle
         /// The panel will reappear when the next EnemyIntentDeclaredEvent fires.
         /// </summary>
         public void ClearIntent() => _intentDisplay?.ShowIntent(null);
+
+        // ─── Name Hover Fade ──────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Fades the enemy name label in. Called by <see cref="HPBarHoverTrigger"/> on pointer-enter.
+        /// </summary>
+        public void ShowNameLabel()
+        {
+            if (nameText == null || !nameText.gameObject.activeInHierarchy) return;
+            if (_nameFadeCoroutine != null) StopCoroutine(_nameFadeCoroutine);
+            _nameFadeCoroutine = StartCoroutine(FadeNameAlpha(nameText.alpha, 1f));
+        }
+
+        /// <summary>
+        /// Fades the enemy name label out. Called by <see cref="HPBarHoverTrigger"/> on pointer-exit.
+        /// </summary>
+        public void HideNameLabel()
+        {
+            if (nameText == null) return;
+            if (_nameFadeCoroutine != null) StopCoroutine(_nameFadeCoroutine);
+            _nameFadeCoroutine = StartCoroutine(FadeNameAlpha(nameText.alpha, 0f));
+        }
+
+        private IEnumerator FadeNameAlpha(float from, float to)
+        {
+            if (nameText == null) yield break;
+            float elapsed = 0f;
+            while (elapsed < _nameFadeDuration)
+            {
+                elapsed     += Time.deltaTime;
+                nameText.alpha = Mathf.Lerp(from, to, elapsed / _nameFadeDuration);
+                yield return null;
+            }
+            nameText.alpha    = to;
+            _nameFadeCoroutine = null;
+        }
 
         // ─── HP Bar ───────────────────────────────────────────────────────────────
 
