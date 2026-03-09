@@ -73,16 +73,20 @@ MonoBehaviour:
     _statusStacks: 2
     _statusDuration: 0
     _amountSource: 0
+  _passives: []
   _isUpgraded: 0
-  _upgradedVersion: {fileID: 0}
+  _upgradedCosts: []
+  _upgradedEffects:
+  - rid: 4738608357276909674
+  - rid: 4738608357276909675
+  _upgradedPassives:
+  - rid: 4738608357276909677
   _tags:
   - actor
   _isStarterCard: 1
   _isUnlockable: 0
   _isUnplayable: 0
   _policyLean: 3
-  _passives: []
-  _triggeredEffects: []
   _cardVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}
   references:
     version: 2
@@ -102,3 +106,33 @@ MonoBehaviour:
         _name: 
         _selectionMode: 0
         _filterType: 0
+    - rid: 4738608357276909674
+      type: {class: DealDamageEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _target: 1
+        _amount: 3
+        _amountSource: 0
+    - rid: 4738608357276909675
+      type: {class: MakeCardFreeEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _selectionMode: 0
+        _filterType: 0
+    - rid: 4738608357276909677
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: New Passive
+        _trigger:
+          rid: 4738608357276909681
+        _conditions:
+        - rid: 4738608357276909679
+        _oneShot: 0
+        _effects: []
+    - rid: 4738608357276909679
+      type: {class: NthEventCondition, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _n: 5
+    - rid: 4738608357276909681
+      type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data: 
