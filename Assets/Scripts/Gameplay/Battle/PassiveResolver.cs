@@ -181,14 +181,19 @@ namespace Crookedile.Gameplay.Battle
                     if (bp != null) _allPassives.Add(bp);
             }
 
-            // Card passives — all cards in the full deck (draw + hand + discard)
+            // Card passives — all cards in the full deck (draw pile + hand + discard).
+            // Exhaust pile is excluded: exhausted cards leave active play for the battle duration.
             if (deck != null)
             {
-                foreach (var card in deck.Hand)
+                var zones = new IReadOnlyList<CardData>[] { deck.DrawPile, deck.Hand, deck.DiscardPile };
+                foreach (var zone in zones)
                 {
-                    if (card?.Passives == null) continue;
-                    foreach (var bp in card.Passives)
-                        if (bp != null) _allPassives.Add(bp);
+                    foreach (var card in zone)
+                    {
+                        if (card?.Passives == null) continue;
+                        foreach (var bp in card.Passives)
+                            if (bp != null) _allPassives.Add(bp);
+                    }
                 }
             }
 
