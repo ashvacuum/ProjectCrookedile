@@ -73,7 +73,14 @@ MonoBehaviour:
     _statusDuration: 0
     _amountSource: 0
   _isUpgraded: 0
-  _upgradedVersion: {fileID: 0}
+  _upgradedCosts:
+  - _costType: 1
+    _baseAmount: 1
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _upgradedEffects: []
   _tags:
   - faithleader
   _isStarterCard: 1

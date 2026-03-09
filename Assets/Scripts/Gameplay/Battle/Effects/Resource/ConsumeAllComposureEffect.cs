@@ -11,6 +11,7 @@ namespace Crookedile.Gameplay.Battle
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             int consumed = ctx.Caster.ConsumeAllComposure();
+            ctx.LastComposureLost += consumed;
             GameLogger.LogInfo<ConsumeAllComposureEffect>($"Consumed {consumed} Composure");
         }
 

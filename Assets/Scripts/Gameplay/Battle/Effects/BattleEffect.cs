@@ -109,6 +109,18 @@ namespace Crookedile.Gameplay.Battle
             ctx.LastComposureGained += modified;
         }
 
+        /// <summary>
+        /// Removes Composure from <paramref name="target"/> and accumulates
+        /// <see cref="EffectExecutionContext.LastComposureLost"/>.
+        /// </summary>
+        /// <returns>Actual Composure removed after clamping.</returns>
+        protected static int ApplyLoseComposure(BattleStats target, int amount, EffectExecutionContext ctx)
+        {
+            int actual = target.LoseComposure(amount);
+            ctx.LastComposureLost += actual;
+            return actual;
+        }
+
         // ─── Shared card-selection helper ────────────────────────────────────────
 
         /// <summary>

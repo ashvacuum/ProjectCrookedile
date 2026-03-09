@@ -21,7 +21,8 @@
       "Bash(grep:*)",
       "Bash(xargs wc -l)",
       "Bash(Special)",
-      "Bash(Passives \")"
+      "Bash(Passives \")",
+      "Bash(del \"C:\\\\Users\\\\v-2jo\\\\UE\\\\ProjectCrookedile\\\\Assets\\\\Scripts\\\\Data\\\\Cards\\\\TriggeredEffect.cs\")"
     ],
     "deny": [],
     "ask": []

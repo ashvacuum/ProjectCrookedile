@@ -21,6 +21,9 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Total Composure gained by this card's base effects.</summary>
         public int  LastComposureGained { get; set; }
 
+        /// <summary>Total Composure lost by this card's base effects.</summary>
+        public int  LastComposureLost   { get; set; }
+
         /// <summary>True if any target's Resolve reached 0 during this card's resolution.</summary>
         public bool LastTargetDied      { get; set; }
 
@@ -48,6 +51,7 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.LastDamageDealt     => LastDamageDealt,
                 EffectContextValue.LastHealAmount       => LastHealAmount,
                 EffectContextValue.LastComposureGained  => LastComposureGained,
+                EffectContextValue.LastComposureLost    => LastComposureLost,
                 EffectContextValue.CurrentComposure     => Caster?.CurrentComposure ?? 0,
                 EffectContextValue.CurrentHostility     => Target?.CurrentHostility ?? 0,
                 _                                       => 0   // FixedAmount — use authored value

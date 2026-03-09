@@ -56,6 +56,12 @@ namespace Crookedile.Data.Cards
                  "Set alpha to 0 to leave the name color unchanged.")]
         [SerializeField] private Color _upgradedNameColor = Color.white;
 
+        [Header("Cost Display")]
+        [Tooltip("Color applied to the cost text when the card's AP cost has been temporarily " +
+                 "reduced or made free by a battle effect (e.g. MakeCardFree, MakeAllCardsFreeNextPlay). " +
+                 "Set alpha to 0 to disable the tint.")]
+        [SerializeField] private Color _discountedCostColor = new Color(0.3f, 1f, 0.3f, 1f);
+
         #region Properties
 
         /// <summary>
@@ -87,6 +93,12 @@ namespace Crookedile.Data.Cards
         /// Tint color applied to the card name text when the card is upgraded.
         /// </summary>
         public Color UpgradedNameColor => _upgradedNameColor;
+
+        /// <summary>
+        /// Color applied to the cost text when the card's cost has been temporarily reduced
+        /// or made free by a battle effect. Alpha 0 disables the tint.
+        /// </summary>
+        public Color DiscountedCostColor => _discountedCostColor;
 
         #endregion
 

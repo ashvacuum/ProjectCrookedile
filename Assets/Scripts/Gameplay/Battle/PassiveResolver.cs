@@ -190,8 +190,9 @@ namespace Crookedile.Gameplay.Battle
                 {
                     foreach (var card in zone)
                     {
-                        if (card?.Passives == null) continue;
-                        foreach (var bp in card.Passives)
+                        var cardPassives = card?.GetPassives();
+                        if (cardPassives == null) continue;
+                        foreach (var bp in cardPassives)
                             if (bp != null) _allPassives.Add(bp);
                     }
                 }
@@ -226,9 +227,47 @@ namespace Crookedile.Gameplay.Battle
 
             foreach (var passive in _allPassives)
             {
-                // Fresh execution context per passive prevents state bleed between passives
+                // Fresh execution context per passive prevents state bleed between passives.
+                // Enrich it with values from the triggering event so passive effects can use
+                // AmountSource (e.g. LastDamageDealt for lifesteal-style passives).
                 var execCtx = _effectResolver.CreateContext(isPlayerCard: true);
+                EnrichContextFromEvent(evtCtx, execCtx);
                 passive.TryFire(evtCtx, evalCtx, execCtx);
+            }
+        }
+
+        /// <summary>
+        /// Populates the accumulated result fields on <paramref name="execCtx"/> from the
+        /// data carried by the triggering event. This allows passive <see cref="BattleEffect"/>
+        /// entries to use <see cref="EffectContextValue"/> sources such as
+        /// <c>LastDamageDealt</c>, <c>LastHealAmount</c>, <c>LastComposureGained</c>, and
+        /// <c>LastComposureLost</c> — mirroring the values card effects accumulate during
+        /// in-resolution execution.
+        /// </summary>
+        private static void EnrichContextFromEvent(PassiveEventContext evtCtx, EffectExecutionContext execCtx)
+        {
+            if (evtCtx.Is<DamageDealtEvent>())
+            {
+                var e = evtCtx.As<DamageDealtEvent>();
+                if (!e.IsToPlayer)
+                    execCtx.LastDamageDealt = e.Amount;
+            }
+            else if (evtCtx.Is<HealingAppliedEvent>())
+            {
+                var e = evtCtx.As<HealingAppliedEvent>();
+                if (e.IsToPlayer)
+                    execCtx.LastHealAmount = e.Amount;
+            }
+            else if (evtCtx.Is<ComposureChangedEvent>())
+            {
+                var e     = evtCtx.As<ComposureChangedEvent>();
+                int delta = e.NewValue - e.OldValue;
+                if (delta > 0) execCtx.LastComposureGained =  delta;
+                else if (delta < 0) execCtx.LastComposureLost = -delta;
+            }
+            else if (evtCtx.Is<EnemyDefeatedEvent>())
+            {
+                execCtx.LastTargetDied = true;
             }
         }
 

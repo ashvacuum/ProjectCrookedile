@@ -28,6 +28,7 @@ MonoBehaviour:
     _maximumCost: 99
   _newEffects:
   - rid: 4738608336531357791
+  - rid: 4738608357276909574
   _effects:
   - _name: 
     _category: 0
@@ -51,7 +52,11 @@ MonoBehaviour:
     _statusDuration: 0
     _amountSource: 0
   _isUpgraded: 0
-  _upgradedVersion: {fileID: 0}
+  _upgradedCosts: []
+  _upgradedEffects:
+  - rid: 4738608357276909571
+  - rid: 4738608357276909575
+  - rid: 4738608357276909576
   _tags:
   - faithleader
   _isStarterCard: 1
@@ -69,3 +74,22 @@ MonoBehaviour:
       data:
         _name: 
         _target: 1
+    - rid: 4738608357276909571
+      type: {class: DealDamageEqualToComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _target: 1
+    - rid: 4738608357276909574
+      type: {class: ConsumeAllComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+    - rid: 4738608357276909575
+      type: {class: ConsumeAllComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+    - rid: 4738608357276909576
+      type: {class: GainComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _amount: 3
+        _amountSource: 1

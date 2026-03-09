@@ -58,16 +58,36 @@ namespace Crookedile.Data.Cards
         [FoldoutGroup("Legacy Effects (Migration)")]
         [SerializeField] private List<CardEffect> _effects = new List<CardEffect>();
 
-        [Header("Upgrade")]
+        [Header("Card Passives")]
+        [Tooltip("Battle-scoped passives that fire on broad battle events (turn start, damage dealt, etc.) " +
+                 "for the entire battle regardless of card location in the deck.\n\n" +
+                 "Each entry has its own polymorphic trigger, optional conditions, and a list of " +
+                 "BattleEffects to execute. Add entries via the + button and use the type picker " +
+                 "to choose trigger and condition classes.")]
+        [SerializeReference]
+        [SerializeField] private List<BattlePassive> _passives = new List<BattlePassive>();
+
+        // ─── Upgrade ──────────────────────────────────────────────────────────────
+
+        [FoldoutGroup("Upgrade")]
         [Tooltip("Is this card currently in its upgraded state?")]
         [SerializeField] private bool _isUpgraded = false;
 
+        [FoldoutGroup("Upgrade")]
         [Tooltip("Overridden costs when this card is upgraded. If empty, base costs are used.")]
         [SerializeField] private List<CardCost> _upgradedCosts = new List<CardCost>();
 
+        [FoldoutGroup("Upgrade")]
         [Tooltip("Overridden effects when this card is upgraded. If empty, base effects are used.")]
         [SerializeReference]
         [SerializeField] private List<BattleEffect> _upgradedEffects = new List<BattleEffect>();
+
+        [FoldoutGroup("Upgrade")]
+        [Tooltip("Overridden battle-scoped passives when this card is upgraded. If empty, base passives are used.")]
+        [SerializeReference]
+        [SerializeField] private List<BattlePassive> _upgradedPassives = new List<BattlePassive>();
+
+        // ─── Metadata ─────────────────────────────────────────────────────────────
 
         [Header("Metadata")]
         [Tooltip("Tags for searching/filtering (e.g., 'violence', 'corruption', 'persuasion')")]
@@ -93,22 +113,6 @@ namespace Crookedile.Data.Cards
                  "None: No demographic hostility shift when played")]
         [SerializeField] private PolicyLean _policyLean = PolicyLean.None;
 
-        [Header("Card Passives")]
-        [Tooltip("Battle-scoped passives that fire on broad battle events (turn start, damage dealt, etc.) " +
-                 "for the entire battle regardless of card location in the deck.\n\n" +
-                 "Each entry has its own polymorphic trigger, optional conditions, and a list of " +
-                 "BattleEffects to execute. Add entries via the + button and use the type picker " +
-                 "to choose trigger and condition classes.")]
-        [SerializeReference]
-        [SerializeField] private List<BattlePassive> _passives = new List<BattlePassive>();
-
-        [Header("Triggered Effects")]
-        [Tooltip("Named effects that fire automatically after this card's base effects resolve, " +
-                 "conditioned on runtime events (damage dealt, kills, status applied, etc.).\n\n" +
-                 "Example — Lifesteal: Trigger=OnDamageDealt, Condition=Always, " +
-                 "Response=HealResolve with AmountSource=LastDamageDealt.")]
-        [SerializeField] private List<TriggeredEffect> _triggeredEffects = new List<TriggeredEffect>();
-
         [Header("VFX")]
         [Tooltip("VFX played when this card is used. Leave null for no card VFX.\n" +
                  "Add an 'ApplyEffects' AnimationEvent at the hit frame to resolve damage in sync with the animation.")]
@@ -116,91 +120,68 @@ namespace Crookedile.Data.Cards
 
         #region Properties
 
-        /// <summary>
-        /// Unique identifier for this card. Auto-generated GUID.
-        /// </summary>
+        /// <summary>Unique identifier for this card. Auto-generated GUID.</summary>
         public string ID => _id;
 
-        /// <summary>
-        /// Display name of the card shown to players.
-        /// </summary>
+        /// <summary>Display name of the card shown to players.</summary>
         public string CardName => _cardName;
 
-        /// <summary>
-        /// Type of card (Pressure, Rhetoric, Policy).
-        /// </summary>
+        /// <summary>Type of card (Pressure, Rhetoric, Policy).</summary>
         public CardType CardType => _cardType;
 
-        /// <summary>
-        /// Rarity level (Common, Uncommon, Rare, Legendary).
-        /// </summary>
+        /// <summary>Rarity level (Common, Uncommon, Rare, Legendary).</summary>
         public CardRarity Rarity => _rarity;
 
-        /// <summary>
-        /// Main artwork displayed on the front of the card.
-        /// </summary>
+        /// <summary>Main artwork displayed on the front of the card.</summary>
         public Sprite Artwork => _artwork;
 
-        /// <summary>
-        /// Mechanical description of card effects.
-        /// </summary>
+        /// <summary>Mechanical description of card effects.</summary>
         public string Description => _description;
 
-        /// <summary>
-        /// Flavor text for storytelling and theme.
-        /// </summary>
+        /// <summary>Flavor text for storytelling and theme.</summary>
         public string FlavorText => _flavorText;
 
-        /// <summary>
-        /// List of costs required to play this card.
-        /// </summary>
+        /// <summary>List of costs required to play this card.</summary>
         public List<CardCost> Costs => _costs;
 
         /// <summary>
         /// Polymorphic effect list for this card.
         /// Returns <c>_newEffects</c> when populated (new system); falls back to the legacy
-        /// <c>_effects</c> list during the migration window. After migration is complete and
-        /// <c>_effects</c> is cleared, this will always return <c>_newEffects</c>.
+        /// <c>_effects</c> list during the migration window.
         /// </summary>
         public List<BattleEffect> NewEffects => _newEffects;
 
         /// <summary>Legacy effect list — read by the migration tool and the old EffectResolver path.</summary>
         public List<CardEffect> Effects => _effects;
 
-        /// <summary>
-        /// Is this card currently in its upgraded state?
-        /// </summary>
+        /// <summary>Is this card currently in its upgraded state?</summary>
         public bool IsUpgraded => _isUpgraded;
 
-        /// <summary>
-        /// Overridden costs used when this card is upgraded. Empty means base costs apply.
-        /// </summary>
+        /// <summary>Overridden costs used when this card is upgraded. Empty means base costs apply.</summary>
         public List<CardCost> UpgradedCosts => _upgradedCosts;
 
-        /// <summary>
-        /// Overridden effects used when this card is upgraded. Empty means base effects apply.
-        /// </summary>
+        /// <summary>Overridden effects used when this card is upgraded. Empty means base effects apply.</summary>
         public List<BattleEffect> UpgradedEffects => _upgradedEffects;
+
+        /// <summary>Overridden passives used when this card is upgraded. Empty means base passives apply.</summary>
+        public IReadOnlyList<BattlePassive> UpgradedPassives => _upgradedPassives;
 
         /// <summary>
         /// Can this card be upgraded? True if it is not already upgraded and has at least one
-        /// upgraded cost or upgraded effect defined.
+        /// upgraded field defined (costs, effects, or passives).
         /// </summary>
-        public bool CanUpgrade => !_isUpgraded && (_upgradedCosts.Count > 0 || _upgradedEffects.Count > 0);
+        public bool CanUpgrade => !_isUpgraded && (
+            _upgradedCosts.Count > 0 ||
+            _upgradedEffects.Count > 0 ||
+            _upgradedPassives.Count > 0);
 
-        /// <summary>
-        /// Tags for searching and filtering.
-        /// </summary>
+        /// <summary>Tags for searching and filtering.</summary>
         public List<string> Tags => _tags;
 
-        /// <summary>
-        /// Whether this card appears in starter decks.
-        /// </summary>
+        /// <summary>Whether this card appears in starter decks.</summary>
         public bool IsStarterCard => _isStarterCard;
 
-        /// <summary>
-        /// Whether this card must be unlocked.
-        /// </summary>
+        /// <summary>Whether this card must be unlocked.</summary>
         public bool IsUnlockable => _isUnlockable;
 
         /// <summary>
@@ -221,12 +202,6 @@ namespace Crookedile.Data.Cards
         /// Registered by PassiveResolver at the start of each battle.
         /// </summary>
         public IReadOnlyList<BattlePassive> Passives => _passives;
-
-        /// <summary>
-        /// Named reactive effects that fire after this card's base effects resolve,
-        /// conditioned on runtime events such as damage dealt, kills, or status applied.
-        /// </summary>
-        public IReadOnlyList<TriggeredEffect> TriggeredEffects => _triggeredEffects;
 
         /// <summary>
         /// VFX played when this card is used. Null means effects resolve immediately (no regression).
@@ -258,24 +233,20 @@ namespace Crookedile.Data.Cards
         [PropertySpace(SpaceBefore = 10)]
         private void DuplicateCard()
         {
-            // Get the path of the current asset
             string currentPath = UnityEditor.AssetDatabase.GetAssetPath(this);
-            string directory = System.IO.Path.GetDirectoryName(currentPath);
-            string fileName = System.IO.Path.GetFileNameWithoutExtension(currentPath);
-            string newPath = $"{directory}/{fileName} Copy.asset";
+            string directory   = System.IO.Path.GetDirectoryName(currentPath);
+            string fileName    = System.IO.Path.GetFileNameWithoutExtension(currentPath);
+            string newPath     = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(
+                $"{directory}/{fileName} Copy.asset");
 
-            // Make sure the path is unique
-            newPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(newPath);
+            CardData duplicate                    = Instantiate(this);
+            duplicate._id                         = System.Guid.NewGuid().ToString();
+            duplicate._cardName                   = $"{_cardName} Copy";
+            duplicate._isUpgraded       = false;
+            duplicate._upgradedCosts    = new List<CardCost>();
+            duplicate._upgradedEffects  = new List<BattleEffect>();
+            duplicate._upgradedPassives = new List<BattlePassive>();
 
-            // Create a copy
-            CardData duplicate = Instantiate(this);
-            duplicate._id = System.Guid.NewGuid().ToString();
-            duplicate._cardName = $"{_cardName} Copy";
-            duplicate._isUpgraded = false;
-            duplicate._upgradedCosts = new List<CardCost>();
-            duplicate._upgradedEffects = new List<BattleEffect>();
-
-            // Create the asset
             UnityEditor.AssetDatabase.CreateAsset(duplicate, newPath);
             UnityEditor.AssetDatabase.SaveAssets();
 
@@ -287,18 +258,12 @@ namespace Crookedile.Data.Cards
         /// <summary>
         /// Checks if this card has a specific tag.
         /// </summary>
-        /// <param name="tag">Tag to search for</param>
-        /// <returns>True if the card has this tag</returns>
-        public bool HasTag(string tag)
-        {
-            return _tags.Contains(tag);
-        }
+        public bool HasTag(string tag) => _tags.Contains(tag);
 
         /// <summary>
         /// Gets the display name with upgrade indicator.
         /// </summary>
         /// <param name="upgradedSuffix">Suffix appended when the card is upgraded (default "+").</param>
-        /// <returns>Card name with suffix if upgraded</returns>
         public string GetDisplayName(string upgradedSuffix = "+")
         {
             return _isUpgraded ? $"{_cardName}{upgradedSuffix}" : _cardName;
@@ -341,43 +306,34 @@ namespace Crookedile.Data.Cards
         }
 
         /// <summary>
-        /// Gets the legacy effects for this card.
+        /// Gets the battle-scoped passives to use, respecting upgrade state.
+        /// Returns <see cref="_upgradedPassives"/> when upgraded and the list is non-empty;
+        /// falls back to base <see cref="_passives"/> otherwise.
         /// </summary>
-        public List<CardEffect> GetEffects(bool useUpgraded = true)
+        public IReadOnlyList<BattlePassive> GetPassives(bool useUpgraded = true)
         {
-            return _effects;
+            if (useUpgraded && _isUpgraded && _upgradedPassives.Count > 0)
+                return _upgradedPassives;
+            return _passives;
         }
 
-        /// <summary>
-        /// Gets the description for this card.
-        /// </summary>
-        public string GetDescription(bool useUpgraded = true)
-        {
-            return _description;
-        }
+        /// <summary>Gets the legacy effects for this card.</summary>
+        public List<CardEffect> GetEffects(bool useUpgraded = true) => _effects;
 
-        /// <summary>
-        /// Gets the artwork for this card.
-        /// </summary>
-        public Sprite GetArtwork(bool useUpgraded = true)
-        {
-            return _artwork;
-        }
+        /// <summary>Gets the description for this card.</summary>
+        public string GetDescription(bool useUpgraded = true) => _description;
 
-        /// <summary>
-        /// Gets the card name (without any upgrade suffix).
-        /// </summary>
-        public string GetCardName(bool useUpgraded = true)
-        {
-            return _cardName;
-        }
+        /// <summary>Gets the artwork for this card.</summary>
+        public Sprite GetArtwork(bool useUpgraded = true) => _artwork;
+
+        /// <summary>Gets the card name (without any upgrade suffix).</summary>
+        public string GetCardName(bool useUpgraded = true) => _cardName;
 
         #endregion
 
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            // Auto-generate unique ID if empty
             if (string.IsNullOrEmpty(_id))
             {
                 _id = System.Guid.NewGuid().ToString();
@@ -387,7 +343,6 @@ namespace Crookedile.Data.Cards
 
         private void Reset()
         {
-            // Generate new ID when asset is created
             _id = System.Guid.NewGuid().ToString();
         }
 #endif

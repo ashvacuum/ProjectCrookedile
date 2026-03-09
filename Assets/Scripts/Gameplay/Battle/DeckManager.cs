@@ -36,6 +36,10 @@ namespace Crookedile.Gameplay.Battle
         // int.MaxValue signals "free" (0 AP regardless of base cost).
         private readonly Dictionary<CardData, int> _cardCostReductions = new Dictionary<CardData, int>();
 
+        // Snapshot of _cardCostReductions taken before a "next-play-only" free-all pass.
+        // Non-null only while a MakeAllCardsFreeNextPlay is active; restored after the next card play.
+        private Dictionary<CardData, int> _costReductionSnapshot;
+
         // Cached ReadOnlyCollection wrappers — live views of the underlying lists.
         // AsReadOnly() returns a wrapper that reflects the list directly, so we only
         // need to create it once and reuse the same instance on every property access.
@@ -462,6 +466,34 @@ namespace Crookedile.Gameplay.Battle
         {
             if (card == null) return 0;
             return _cardCostReductions.TryGetValue(card, out int r) ? r : 0;
+        }
+
+        /// <summary>
+        /// Captures a snapshot of all current cost reductions so they can be restored later.
+        /// Called by <see cref="MakeAllCardsFreeNextPlayEffect"/> before applying its transient
+        /// free-all pass, so any pre-existing permanent reductions survive the revert.
+        /// Safe to call even if a snapshot is already active (overwrites the old one).
+        /// </summary>
+        public void SnapshotCostReductions()
+        {
+            _costReductionSnapshot = new Dictionary<CardData, int>(_cardCostReductions);
+            GameLogger.LogInfo<DeckManager>($"{_ownerName}: Cost-reduction snapshot captured ({_costReductionSnapshot.Count} entries)");
+        }
+
+        /// <summary>
+        /// Restores cost reductions to the previously captured snapshot, discarding any transient
+        /// changes made after the snapshot was taken.
+        /// Called by <see cref="MakeAllCardsFreeNextPlayEffect"/>'s one-shot revert handler
+        /// after the next card is played. No-op if no snapshot exists.
+        /// </summary>
+        public void RestoreCostReductionSnapshot()
+        {
+            if (_costReductionSnapshot == null) return;
+            _cardCostReductions.Clear();
+            foreach (var kvp in _costReductionSnapshot)
+                _cardCostReductions[kvp.Key] = kvp.Value;
+            _costReductionSnapshot = null;
+            GameLogger.LogInfo<DeckManager>($"{_ownerName}: Cost reductions restored from snapshot");
         }
 
         #endregion

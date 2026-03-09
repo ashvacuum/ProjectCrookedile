@@ -221,35 +221,8 @@ namespace Crookedile.Data
     }
 
     /// <summary>
-    /// The event during card resolution that can fire a TriggeredEffect.
-    /// </summary>
-    public enum EffectTrigger
-    {
-        OnDamageDealt,      // Any Resolve damage was dealt by this card's base effects
-        OnDamageTaken,      // Reserved for enemy reactions (not used for player cards yet)
-        OnKill,             // An enemy's Resolve hit 0 during this card's resolution
-        OnStatusApplied,    // A status effect was applied by this card
-        OnComposureGained,  // Composure was gained by this card
-        OnHeal              // Resolve healing was applied by this card
-    }
-
-    /// <summary>
-    /// Extra condition that must be satisfied before a TriggeredEffect fires.
-    /// AND-ed with the trigger — both must be true for the response to execute.
-    /// </summary>
-    public enum EffectCondition
-    {
-        Always,                  // No restriction — always fires when trigger occurs
-        IfDamageDealt,           // ctx.LastDamageDealt > 0
-        IfTargetDied,            // ctx.LastTargetDied == true
-        IfTargetHasBuff,         // focused target has at least one buff status effect
-        IfTargetHasDebuff,       // focused target has at least one debuff status effect
-        IfAmountAboveThreshold   // the relevant ctx amount > conditionThreshold
-    }
-
-    /// <summary>
-    /// Determines where a CardEffect reads its numeric amount at runtime.
-    /// Used on TriggeredEffect response effects to mirror values from EffectContext
+    /// Determines where a BattleEffect reads its numeric amount at runtime.
+    /// Used by passive and card effects to mirror values accumulated during resolution
     /// (e.g. heal for the damage you just dealt = LastDamageDealt).
     /// </summary>
     public enum EffectContextValue
@@ -258,8 +231,9 @@ namespace Crookedile.Data
         LastDamageDealt,        // 1 — ctx.LastDamageDealt  — e.g. lifesteal
         LastHealAmount,         // 2 — ctx.LastHealAmount
         LastComposureGained,    // 3 — ctx.LastComposureGained
-        CurrentComposure,       // 4 — caster.CurrentComposure at time of trigger
-        CurrentHostility,       // 5 — focused target.CurrentHostility at time of trigger
-        None                    // 6 — return 0; hides fixed amount fields (use when amount is irrelevant)
+        LastComposureLost,      // 4 — ctx.LastComposureLost — e.g. bonus damage equal to composure spent
+        CurrentComposure,       // 5 — caster.CurrentComposure at time of trigger
+        CurrentHostility,       // 6 — focused target.CurrentHostility at time of trigger
+        None                    // 7 — return 0; hides fixed amount fields (use when amount is irrelevant)
     }
 }
