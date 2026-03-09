@@ -67,7 +67,7 @@ namespace Crookedile.Gameplay.Battle
             StatusEffectManager targetMgr   = ctx.GetStatusEffectManager(target);
 
             int mod = attackerMgr?.ModifyDamageDealt(baseDamage) ?? baseDamage;
-            mod     = targetMgr?.ModifyDamageTaken(mod, attacker) ?? mod;
+            mod     = targetMgr?.ModifyDamageTaken(mod, attacker, isAttackerPlayer: ctx.IsPlayerCard) ?? mod;
 
             // Hostile enemies deal amplified damage; neutral and receptive don't.
             if (!ctx.IsPlayerCard && attacker.CurrentHostility > 0)

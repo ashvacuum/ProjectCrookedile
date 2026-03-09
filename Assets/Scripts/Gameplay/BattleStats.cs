@@ -156,6 +156,30 @@ namespace Crookedile.Gameplay
         }
 
         /// <summary>
+        /// Damages Resolve directly, bypassing the Composure shield entirely.
+        /// Use for reflected damage (Thorns) where the attacker's mental defences
+        /// should not cushion the retaliation.
+        /// Publishes <see cref="ResolveChangedEvent"/> so the UI damage number still appears.
+        /// </summary>
+        /// <param name="damage">Incoming damage (not reduced by Composure)</param>
+        /// <returns>Actual Resolve lost (capped at current Resolve)</returns>
+        public int DamageResolveBypass(int damage)
+        {
+            if (damage <= 0) return 0;
+
+            int actual = Mathf.Min(damage, _currentResolve);
+            if (actual > 0)
+            {
+                int oldResolve  = _currentResolve;
+                _currentResolve -= actual;
+                Debug.Log($"Bypass damage (ignores Composure): {actual}. Resolve: {_currentResolve}/{_maxResolve}");
+                EventBus.Publish(new ResolveChangedEvent { OldValue = oldResolve, NewValue = _currentResolve, IsPlayer = _isPlayer });
+            }
+
+            return actual;
+        }
+
+        /// <summary>
         /// Damages Resolve with Hostility multiplier applied (for opponent attacking player).
         /// Delegates to <see cref="DamageResolve"/> after applying the multiplier.
         /// </summary>

@@ -17,7 +17,7 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField] private int _n = 3;
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
-            => _n > 0 && ctx.TriggerFireCount % _n == 0;
+            => _n >= 2 && ctx.TriggerFireCount % _n == 0;
 
         public override string ConditionLabel => $"every {_n}th time";
     }

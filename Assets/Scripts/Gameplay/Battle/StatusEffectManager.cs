@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Crookedile.Core;
 using Crookedile.Utilities;
 
 namespace Crookedile.Gameplay.Battle
@@ -158,13 +159,8 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void OnTurnStart(BattleStats ownerStats)
         {
-            List<StatusEffect> toRemove = new List<StatusEffect>();
-
             foreach (StatusEffect effect in _activeEffects)
-            {
-                // Trigger turn-start effects
                 TriggerEffectWithStats(effect, StatusTriggerTiming.OnTurnStart, ownerStats);
-            }
 
             GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Turn start status effects triggered");
         }
@@ -235,8 +231,10 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>
         /// Modifies damage taken based on active effects.
+        /// <paramref name="isAttackerPlayer"/> is forwarded to the <see cref="DamageDealtEvent"/>
+        /// published when Thorns reflects damage back to the attacker.
         /// </summary>
-        public int ModifyDamageTaken(int baseDamage, BattleStats attackerStats)
+        public int ModifyDamageTaken(int baseDamage, BattleStats attackerStats, bool isAttackerPlayer = false)
         {
             float finalDamage = baseDamage;
 
@@ -256,12 +254,23 @@ namespace Crookedile.Gameplay.Battle
                 RemoveStacks(StatusEffectType.Intangible, 1);
             }
 
-            // Apply Thorns (deal damage back to attacker; bypasses attacker's Composure shield since it is reflected)
+            // Apply Thorns (deal damage back to attacker; bypasses Composure since it is reflected)
             int thornsStacks = GetStacks(StatusEffectType.Thorns);
             if (thornsStacks > 0 && attackerStats != null)
             {
-                attackerStats.DamageResolve(thornsStacks);
-                GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Thorns dealt {thornsStacks} damage back!");
+                int thornsActual = attackerStats.DamageResolve(thornsStacks);
+                GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Thorns dealt {thornsActual} damage back!");
+                if (thornsActual > 0)
+                {
+                    EventBus.Publish(new DamageDealtEvent
+                    {
+                        Amount           = thornsActual,
+                        IsToPlayer       = isAttackerPlayer,  // attacker is now the damage target
+                        AttackerName     = _ownerName,        // entity with Thorns is the "attacker"
+                        SourceEnemyIndex = -1,
+                        TargetEnemyIndex = -1,
+                    });
+                }
             }
 
             return Mathf.Max(0, Mathf.RoundToInt(finalDamage));

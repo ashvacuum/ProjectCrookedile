@@ -623,7 +623,7 @@ namespace Crookedile.Gameplay.Battle
 
             // Apply target's damage taken modifiers (Vulnerable, Plated, Intangible, Thorns)
             modifiedDamage = targetStatusMgr != null
-                ? targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker)
+                ? targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker, isAttackerPlayer: attacker == _playerStats)
                 : modifiedDamage;
 
             // Hostile enemies (positive hostility) deal amplified damage; neutral and receptive don't

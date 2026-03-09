@@ -381,6 +381,14 @@ namespace Crookedile.Gameplay.Battle
             if (echoStacks > 0)
             {
                 _effectResolver.PlayerStatusEffects.RemoveStacks(StatusEffectType.Echo, 1);
+                // Notify the UI and any passive listening for status changes that
+                // one Echo stack was consumed (negative Stacks = removed).
+                EventBus.Publish(new StatusEffectAppliedEvent
+                {
+                    StatusType = StatusEffectType.Echo,
+                    Stacks     = -1,
+                    IsToPlayer = true,
+                });
                 GameLogger.LogInfo<BattleManager>($"Echo triggered — replaying {card.CardName}");
                 ResolveCardEffectsDispatch(card, null);
                 CheckAndAdvanceFocusAfterCardPlay();
@@ -501,13 +509,22 @@ namespace Crookedile.Gameplay.Battle
         {
             if (FocusedEnemy == null || !FocusedEnemy.IsDefeated) return;
 
+            // Snapshot before publishing — a passive triggered by the defeat event
+            // could change _focusedEnemyIndex, so we capture the reference first.
+            var defeatedEnemy = FocusedEnemy;
+
             EventBus.Publish(new EnemyDefeatedEvent
             {
                 EnemyIndex = _focusedEnemyIndex,
-                EnemyName  = FocusedEnemy.EnemyData.EnemyName
+                EnemyName  = defeatedEnemy.EnemyData.EnemyName
             });
 
-            GameLogger.LogInfo<BattleManager>($"Enemy [{_focusedEnemyIndex}] {FocusedEnemy.EnemyData.EnemyName} defeated — seeking next target");
+            // Purge status effects now that all defeat-event passives have had a
+            // chance to read them. Prevents stale buffs/debuffs living in memory
+            // on a dead enemy and affecting any future queries.
+            defeatedEnemy.StatusEffects.ClearAll();
+
+            GameLogger.LogInfo<BattleManager>($"Enemy [{_focusedEnemyIndex}] {defeatedEnemy.EnemyData.EnemyName} defeated — seeking next target");
 
             for (int i = 0; i < _enemies.Count; i++)
             {
@@ -577,9 +594,20 @@ namespace Crookedile.Gameplay.Battle
                 if (!e.IsDefeated) living.Add(e);
             if (living.Count == 0) return;
 
-            var target = living[UnityEngine.Random.Range(0, living.Count)];
-            target.Stats.DamageResolve(stacks);
-            GameLogger.LogInfo<BattleManager>($"Momentum dealt {stacks} damage to {target.EnemyData.EnemyName}");
+            var target         = living[UnityEngine.Random.Range(0, living.Count)];
+            int momentumActual = target.Stats.DamageResolve(stacks);
+            GameLogger.LogInfo<BattleManager>($"Momentum dealt {momentumActual} damage to {target.EnemyData.EnemyName}");
+            if (momentumActual > 0)
+            {
+                EventBus.Publish(new DamageDealtEvent
+                {
+                    Amount           = momentumActual,
+                    IsToPlayer       = false,
+                    AttackerName     = "Player",
+                    SourceEnemyIndex = -1,
+                    TargetEnemyIndex = _enemies.IndexOf(target),
+                });
+            }
         }
 
         /// <summary>
