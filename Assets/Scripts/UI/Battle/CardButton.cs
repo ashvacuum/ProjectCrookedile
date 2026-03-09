@@ -257,6 +257,24 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
+        /// Updates this card's target layout position during hover-spread, without a full
+        /// rearrange. Non-hovered cards animate smoothly to the new position via
+        /// <c>Update()</c>'s lerp. Hovered cards only update their base so the hover-lift
+        /// position is preserved; they'll animate to the spread base when hover ends.
+        /// Called by <see cref="CardHandLayout.SetHoverSpread"/>.
+        /// </summary>
+        public void SetLayoutTarget(Vector3 localPos, float angleDeg)
+        {
+            basePosition = localPos;
+            baseRotation = Quaternion.Euler(0f, 0f, -angleDeg);
+            if (!isHovered)
+            {
+                targetPosition = localPos;
+                targetRotation = baseRotation;
+            }
+        }
+
+        /// <summary>
         /// Updates the card's resting position after arc layout is applied.
         /// Called by CardHandLayout after it positions each card so hover-lift
         /// knows where to return the card when the mouse leaves.
@@ -311,7 +329,7 @@ namespace Crookedile.UI.Battle
             if (isHovered || _isDragging) return;
             isHovered = true;
 
-            targetScale = baseScale * hoverScale;
+            targetScale    = baseScale * hoverScale;
             targetPosition = new Vector3(basePosition.x, ComputeHoverY(), basePosition.z);
             targetRotation = Quaternion.identity; // straighten the arc tilt on hover
 
@@ -320,6 +338,9 @@ namespace Crookedile.UI.Battle
             transform.SetAsLastSibling();
 
             hoverEnterFeedback?.PlayFeedbacks();
+
+            // Fan the hand apart from this card — left neighbours shift left, right shift right.
+            GetComponentInParent<CardHandLayout>()?.SetHoverSpread(true, this);
         }
 
         public void OnPointerExit(PointerEventData eventData)
@@ -327,12 +348,17 @@ namespace Crookedile.UI.Battle
             if (!isHovered) return;
             isHovered = false;
 
-            targetScale = baseScale;
+            targetScale    = baseScale;
             targetPosition = basePosition;
             targetRotation = baseRotation; // return to arc tilt
             transform.SetSiblingIndex(baseSiblingIndex);
 
             hoverExitFeedback?.PlayFeedbacks();
+
+            // Restore the hand to its original width.
+            // SetHoverSpread(false) calls SetLayoutTarget on all cards, which (since !isHovered
+            // is now true for this card too) also corrects targetPosition to the un-spread base.
+            GetComponentInParent<CardHandLayout>()?.SetHoverSpread(false);
         }
 
         /// <summary>
@@ -373,9 +399,12 @@ namespace Crookedile.UI.Battle
             GameLogger.LogInfo("Card", $"Drag started: {cardData?.CardName}", this);
 
             // Clear hover state; card stays at its arc position (no re-parenting or cursor-follow).
-            isHovered = false;
-            targetScale = baseScale;
+            isHovered      = false;
+            targetScale    = baseScale;
             targetRotation = Quaternion.identity;
+
+            // Drag bypasses OnPointerExit so we must collapse the spread manually here.
+            GetComponentInParent<CardHandLayout>()?.SetHoverSpread(false);
 
             // Disable raycasts so enemy slots above the hand can receive pointer events.
             CanvasGroup cg = GetComponent<CanvasGroup>();

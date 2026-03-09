@@ -26,15 +26,12 @@ MonoBehaviour:
       data:
         _name: New Passive
         _trigger:
-          rid: 4738608336531357827
+          rid: 4738608336531357843
         _conditions:
         - rid: 4738608336531357829
         _oneShot: 1
         _effects:
         - rid: 4738608336531357828
-    - rid: 4738608336531357827
-      type: {class: BattleStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
-      data: 
     - rid: 4738608336531357828
       type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
@@ -42,4 +39,7 @@ MonoBehaviour:
         _amount: 1
     - rid: 4738608336531357829
       type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data: 
+    - rid: 4738608336531357843
+      type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data: 

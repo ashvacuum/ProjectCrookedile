@@ -76,6 +76,11 @@ namespace Crookedile.UI.Battle
 
         private Coroutine _lerpCoroutine;
 
+        // Hover spread — cached card list so SetHoverSpread() can recompute without parameters
+        private List<CardButton> _cachedCards    = new List<CardButton>();
+        private bool             _hoverSpreadActive;
+        private CardButton       _hoverSpreadCard;   // pivot card; cards to its left shift left, right shift right
+
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
@@ -85,6 +90,13 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void ArrangeCards(List<CardButton> cards, bool animated = false)
         {
+            // Reset spread state and cache the new card list.
+            // Any active hover-spread is cleared because a full rearrange implies
+            // the hand has changed (card played, turn started, etc.).
+            _hoverSpreadActive = false;
+            _hoverSpreadCard   = null;
+            _cachedCards = new List<CardButton>(cards);
+
             int count = cards.Count;
             if (count == 0) return;
 
@@ -120,6 +132,62 @@ namespace Crookedile.UI.Battle
             else
                 foreach (var (btn, pos, angle) in targets)
                     ApplyToCard(btn, pos, angle);
+        }
+
+        // ─── Hover Spread API ─────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Fans the hand apart from the hovered card when <paramref name="active"/> is true:
+        /// cards to its left shift left, cards to its right shift right, creating a gap around it.
+        /// When <paramref name="active"/> is false all cards return to their base arc positions.
+        /// Pass <paramref name="hoveredCard"/> when activating so the layout knows the pivot.
+        /// Uses <see cref="CardButton.SetLayoutTarget"/> so the existing per-card
+        /// <c>Update()</c> lerp handles smooth animation — no coroutine conflict.
+        /// </summary>
+        public void SetHoverSpread(bool active, CardButton hoveredCard = null)
+        {
+            if (_hoverSpreadActive == active && _hoverSpreadCard == hoveredCard) return;
+            _hoverSpreadActive = active;
+            _hoverSpreadCard   = active ? hoveredCard : null;
+            ApplyHoverSpread();
+        }
+
+        private void ApplyHoverSpread()
+        {
+            int count = _cachedCards == null ? 0 : _cachedCards.Count;
+            if (count == 0) return;
+
+            if (count == 1)
+            {
+                // Single card — no neighbours to spread; still update base so it stays consistent.
+                _cachedCards[0].SetLayoutTarget(Vector3.zero, 0f);
+                return;
+            }
+
+            float step       = ComputeEffectiveStep(count);
+            float startAngle = -(count - 1) * step * 0.5f;
+
+            // Locate the pivot — the card the player is hovering.
+            // −1 means no pivot (spread inactive or card not in cached list).
+            int pivotIdx = _hoverSpreadActive && _hoverSpreadCard != null
+                ? _cachedCards.IndexOf(_hoverSpreadCard)
+                : -1;
+
+            for (int i = 0; i < count; i++)
+            {
+                if (_cachedCards[i] == null) continue;
+
+                float angleDeg = startAngle + step * i;
+
+                if (pivotIdx >= 0 && i != pivotIdx)
+                {
+                    // Cards to the pivot's left  (i < pivotIdx) shift further left  (−bonus).
+                    // Cards to the pivot's right (i > pivotIdx) shift further right (+bonus).
+                    angleDeg += i < pivotIdx ? -hoverSpreadAngleBonus : hoverSpreadAngleBonus;
+                }
+
+                _cachedCards[i].SetLayoutTarget(ComputeLocalPosition(angleDeg), angleDeg);
+            }
         }
 
         // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -169,35 +237,24 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
-        /// Reorders children so the centre card renders on top of its neighbours.
-        /// Cards farthest from centre get the lowest sibling index (rendered behind).
+        /// Reorders children left-to-right: the leftmost card gets sibling index 0
+        /// (rendered behind all others) and the rightmost card gets the highest sibling
+        /// index (rendered in front), creating a natural hand-held fan overlap.
         /// CardButton.OnPointerEnter() calls SetAsLastSibling() to pop a hovered card
         /// to the very front regardless of this order.
         /// </summary>
         private static void SetSiblingOrder(List<CardButton> cards)
         {
             int count = cards.Count;
-            float centre = (count - 1) * 0.5f;
 
-            // Sort card indices by distance from centre — descending.
-            // Farthest from centre = lowest sibling index = renders behind.
-            int[] sortedIndices = new int[count];
-            for (int i = 0; i < count; i++) sortedIndices[i] = i;
-
-            System.Array.Sort(sortedIndices, (a, b) =>
+            // Left → right: cards[0] (leftmost) = sibling 0 (behind),
+            //               cards[count-1] (rightmost) = last sibling (in front).
+            // Unity renumbers siblings on each SetSiblingIndex call; iterating
+            // left-to-right keeps the final positions consistent.
+            for (int i = 0; i < count; i++)
             {
-                float distA = Mathf.Abs(a - centre);
-                float distB = Mathf.Abs(b - centre);
-                return distB.CompareTo(distA); // descending: farthest first
-            });
-
-            // Assign sibling indices in sorted order.
-            // Unity renumbers siblings on each SetSiblingIndex call,
-            // so we process from slot 0 upward.
-            for (int slot = 0; slot < count; slot++)
-            {
-                cards[sortedIndices[slot]].transform.SetSiblingIndex(slot);
-                cards[sortedIndices[slot]].SetBaseSiblingIndex(slot);
+                cards[i].transform.SetSiblingIndex(i);
+                cards[i].SetBaseSiblingIndex(i);
             }
         }
 

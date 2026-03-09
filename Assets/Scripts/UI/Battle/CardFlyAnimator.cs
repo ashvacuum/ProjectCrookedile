@@ -105,8 +105,10 @@ namespace Crookedile.UI.Battle
                 yield return new WaitForSeconds(_drawStaggerDelay);
                 btn.transform.localScale = Vector3.one;
                 btn.transform.SetParent(container, false);
+                btn.transform.SetSiblingIndex(0);   // enter behind all existing cards; ArrangeCards restores proper z-order
+                container.GetComponent<CardHandLayout>()?.ArrangeCards(buttons);
             }
-            
+
             container.GetComponent<CardHandLayout>()?.ArrangeCards(buttons);
         }
 
