@@ -16,10 +16,35 @@ MonoBehaviour:
   _origin: 1
   _description: Every 5th card you play costs 1 AP less.
   _icon: {fileID: 0}
-  _trigger: 1
-  _condition:
-    Type: 0
-    Value: 0
-  _oneShot: 1
-  _effectType: 9
-  _effectAmount: 1
+  _passives:
+  - rid: 4738608336531357833
+  references:
+    version: 2
+    RefIds:
+    - rid: 4738608336531357833
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: New Passive
+        _trigger:
+          rid: 4738608336531357834
+        _conditions:
+        - rid: 4738608336531357836
+        _oneShot: 0
+        _effects:
+        - rid: 4738608336531357837
+    - rid: 4738608336531357834
+      type: {class: CardPlayedTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _filterByType: 0
+        _filterType: 0
+    - rid: 4738608336531357836
+      type: {class: NthEventCondition, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _n: 5
+    - rid: 4738608336531357837
+      type: {class: ReduceCardCostEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _costReduction: 1
+        _selectionMode: 1
+        _filterType: 0

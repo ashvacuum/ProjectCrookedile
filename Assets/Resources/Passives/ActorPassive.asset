@@ -14,13 +14,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _passiveName: Improvise
   _origin: 2
-  _description: On every even player turn, you may discard any number of cards and
-    draw the same number back.
+  _description: Once every battle, at the start of your turn you can discard any
+    number of cards and draw the same number back.
   _icon: {fileID: 0}
-  _trigger: 0
-  _condition:
-    Type: 0
-    Value: 0
-  _oneShot: 1
-  _effectType: 13
-  _effectAmount: 0
+  _passives:
+  - rid: 4738608336531357838
+  references:
+    version: 2
+    RefIds:
+    - rid: 4738608336531357838
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: New Passive
+        _trigger:
+          rid: 4738608336531357845
+        _conditions:
+        - rid: 4738608336531357840
+        _oneShot: 1
+        _effects:
+        - rid: 4738608336531357841
+    - rid: 4738608336531357840
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data: 
+    - rid: 4738608336531357841
+      type: {class: DiscardHandAndRedrawEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+    - rid: 4738608336531357845
+      type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data: 
