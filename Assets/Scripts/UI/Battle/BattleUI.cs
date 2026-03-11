@@ -461,7 +461,23 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
 
         private void OnResolveChanged(ResolveChangedEvent evt)         => UpdateStatsDisplay();
         private void OnComposureChanged(ComposureChangedEvent evt)      => UpdateStatsDisplay();
-        private void OnStatusEffectApplied(StatusEffectAppliedEvent evt) => UpdateStatsDisplay();
+        private void OnStatusEffectApplied(StatusEffectAppliedEvent evt)
+        {
+            UpdateStatsDisplay();
+
+            // When Stunned is applied to an enemy, immediately hide their intent display.
+            // The enemy can't act this turn, so showing a planned move would be misleading.
+            if (evt.StatusType == StatusEffectType.Stunned && !evt.IsToPlayer && evt.Stacks > 0)
+            {
+                for (int i = 0; i < _enemySlots.Count; i++)
+                {
+                    if (battleManager != null &&
+                        i < battleManager.Enemies.Count &&
+                        battleManager.Enemies[i].StatusEffects.HasEffect(StatusEffectType.Stunned))
+                        _enemySlots[i]?.ClearIntent();
+                }
+            }
+        }
 
         private void OnDamageDealt(DamageDealtEvent evt)
         {
