@@ -96,12 +96,33 @@ namespace Crookedile.Gameplay
         public BattleStats() { }
 
         /// <summary>
-        /// Creates battle stats with specified values.
+        /// Creates battle stats with specified values. Current Resolve is set to <paramref name="maxResolve"/>.
         /// </summary>
         public BattleStats(int maxResolve, int maxActionPoints = 3, bool isPlayer = true)
         {
             _maxResolve          = maxResolve;
             _currentResolve      = maxResolve;
+            _maxActionPoints     = maxActionPoints;
+            _currentActionPoints = maxActionPoints;
+            _currentComposure    = 0;
+            _currentHostility    = 0;
+            _actionPointsNextTurn = 0;
+            _isPlayer            = isPlayer;
+        }
+
+        /// <summary>
+        /// Creates battle stats where current Resolve differs from the maximum.
+        /// Used when HP carries over from a previous battle in the same run.
+        /// </summary>
+        /// <param name="maxResolve">The combatant's maximum HP cap.</param>
+        /// <param name="currentResolve">Starting HP for this battle (clamped to [0, maxResolve]).</param>
+        /// <param name="maxActionPoints">Action Points available each turn.</param>
+        /// <param name="isPlayer">Whether these stats belong to the player (affects event publishing).</param>
+        public BattleStats(int maxResolve, int currentResolve, int maxActionPoints,
+                           bool isPlayer = true)
+        {
+            _maxResolve          = maxResolve;
+            _currentResolve      = Mathf.Clamp(currentResolve, 0, maxResolve);
             _maxActionPoints     = maxActionPoints;
             _currentActionPoints = maxActionPoints;
             _currentComposure    = 0;

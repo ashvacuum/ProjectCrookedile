@@ -142,9 +142,13 @@ namespace Crookedile.Gameplay.Battle
         {
             GameLogger.LogInfo<BattleManager>($"Starting battle: {setup.playerOrigin} vs {setup.enemies.Count} enemies");
 
-            // Player stats from origin
+            // Player stats from origin — use carried HP if provided, otherwise start at full
             OriginBattleStats playerOriginStats = setup.GetPlayerStats();
-            _playerStats  = new BattleStats(playerOriginStats.maxResolve, playerOriginStats.maxActionPoints);
+            int startingResolve = setup.initialPlayerResolve ?? playerOriginStats.maxResolve;
+            _playerStats = startingResolve == playerOriginStats.maxResolve
+                ? new BattleStats(playerOriginStats.maxResolve, playerOriginStats.maxActionPoints)
+                : new BattleStats(playerOriginStats.maxResolve, startingResolve,
+                                  playerOriginStats.maxActionPoints);
             _playerOrigin = setup.playerOrigin;
 
             // Build enemy controllers — each owns its own BattleStats + StatusEffectManager
@@ -695,6 +699,15 @@ namespace Crookedile.Gameplay.Battle
                 _playerStats.StartTurn();
                 _effectResolver.PlayerStatusEffects.OnTurnStart(_playerStats);
 
+                // Remove player-turn-start duration effects from all living enemies (e.g. Stunned).
+                // This must run after enemy actions have resolved, ensuring a stunned enemy
+                // skips its turn and is only un-stunned once the player regains control.
+                foreach (var enemy in _enemies)
+                {
+                    if (!enemy.IsDefeated)
+                        enemy.StatusEffects.OnPlayerTurnStart();
+                }
+
                 // Confused: randomize card effect amounts for this turn
                 if (_effectResolver.PlayerStatusEffects.HasEffect(StatusEffectType.Confused))
                     ApplyConfusedOverrides();
@@ -860,6 +873,14 @@ namespace Crookedile.Gameplay.Battle
                     var enemy = _manager._enemies[i];
                     if (enemy.IsDefeated || enemy.CurrentIntent == null) continue;
 
+                    // Stunned enemies skip their entire action for this turn.
+                    if (enemy.StatusEffects.HasEffect(StatusEffectType.Stunned))
+                    {
+                        GameLogger.LogInfo<BattleManager>(
+                            $"Enemy [{i}] {enemy.EnemyData.EnemyName} is Stunned — skipping action");
+                        continue;
+                    }
+
                     // Signal the UI: this enemy is about to act (shake + highlight intent panel)
                     EventBus.Publish(new EnemyActingEvent { EnemyIndex = i, Move = enemy.CurrentIntent });
 
@@ -955,6 +976,13 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>All enemies present in this room (1–5). Order = display order.</summary>
         public List<EnemyData> enemies = new List<EnemyData>();
+
+        /// <summary>
+        /// Optional starting Resolve (HP) for the player this battle.
+        /// When <c>null</c> the player starts at full HP from <see cref="GetPlayerStats"/>.
+        /// Set this to carry HP damage over from a previous battle in the same run.
+        /// </summary>
+        public int? initialPlayerResolve;
 
         /// <summary>Gets the player's battle stats based on their origin.</summary>
         public OriginBattleStats GetPlayerStats()

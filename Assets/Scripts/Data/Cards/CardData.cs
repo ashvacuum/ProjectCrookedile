@@ -118,6 +118,16 @@ namespace Crookedile.Data.Cards
                  "Add an 'ApplyEffects' AnimationEvent at the hit frame to resolve damage in sync with the animation.")]
         [SerializeField] private VFXEvent _cardVFX;
 
+        // ─── Configuration Tracking ───────────────────────────────────────────────
+
+        [FoldoutGroup("Configuration")]
+        [InfoBox("Outstanding setup steps — see notes below. Clear this field when done.",
+            InfoMessageType.Warning, "NeedsConfiguration")]
+        [Tooltip("Designer notes for effects/passives still needing manual Inspector setup. " +
+                 "Populated by the card generator. Clear this field when all steps are complete.")]
+        [TextArea(2, 6)]
+        [SerializeField] private string _configurationNotes;
+
         #region Properties
 
         /// <summary>Unique identifier for this card. Auto-generated GUID.</summary>
@@ -209,6 +219,17 @@ namespace Crookedile.Data.Cards
         /// or to <see cref="Crookedile.UI.VFXAnimatedImage.OnAnimationComplete"/> as a safety net.
         /// </summary>
         public VFXEvent CardVFX => _cardVFX;
+
+        /// <summary>
+        /// True when this card asset still has manual Inspector setup steps outstanding.
+        /// Populated by the card generator; designer clears the notes when complete.
+        /// </summary>
+        public bool NeedsConfiguration => !string.IsNullOrEmpty(_configurationNotes);
+
+        /// <summary>
+        /// Human-readable description of what still needs to be configured in the Unity Inspector.
+        /// </summary>
+        public string ConfigurationNotes => _configurationNotes;
 
         #endregion
 

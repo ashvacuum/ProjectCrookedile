@@ -37,6 +37,11 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField] private BattleManager battleManager;
         [SerializeField] private BattleUI battleUI;
 
+        [Header("Session")]
+        [Tooltip("Optional multi-round session asset. If assigned, enemies for each battle are " +
+                 "taken from here instead of the Enemies list. Leave null for single-round testing.")]
+        [SerializeField] private BattleSession battleSession;
+
         [Header("Settings")]
         [Tooltip("Automatically start the battle when the scene loads")]
         [SerializeField] private bool startOnAwake = true;
@@ -91,47 +96,116 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void StartTestBattle()
         {
-            if (enemies == null || enemies.Count == 0 || enemies.All(e => e == null))
+            // Require at least one enemy source: a session asset OR the fallback enemies list.
+            bool hasSession  = battleSession != null && battleSession.RoundCount > 0;
+            bool hasEnemies  = enemies != null && enemies.Count > 0 && enemies.Any(e => e != null);
+            if (!hasSession && !hasEnemies)
             {
                 Debug.LogError("[BattleTestStarter] No enemies assigned. " +
-                               "Create one via Right-click → Crookedile / Enemy / Enemy Data " +
-                               "and assign it to the enemies list.");
+                               "Either assign a BattleSession asset or assign enemies to the Enemies list. " +
+                               "Create enemies via Right-click → Crookedile / Enemy / Enemy Data.");
                 return;
             }
 
-            // Load every CardData asset from Resources/Cards/
-            CardData[] allCards = Resources.LoadAll<CardData>("Cards");
+            List<CardData>  playerDeck;
+            List<EnemyData> battleEnemies;
 
-            if (allCards == null || allCards.Length == 0)
+            if (RunState.Current == null)
             {
-                Debug.LogError("[BattleTestStarter] No CardData assets found in Resources/Cards/. " +
-                               "Make sure all card .asset files are in Assets/Resources/Cards/.");
-                return;
+                // ── First battle of the run ──────────────────────────────────────────────
+                // Build the starter deck from the hardcoded template and initialise RunState.
+
+                CardData[] allCards = Resources.LoadAll<CardData>("Cards");
+
+                if (allCards == null || allCards.Length == 0)
+                {
+                    Debug.LogError("[BattleTestStarter] No CardData assets found in Resources/Cards/. " +
+                                   "Make sure all card .asset files are in Assets/Resources/Cards/.");
+                    return;
+                }
+
+                Debug.Log($"[BattleTestStarter] Loaded {allCards.Length} card assets.");
+
+                playerDeck = BuildDeck(playerOrigin, allCards);
+
+                if (playerDeck.Count == 0)
+                {
+                    Debug.LogError("[BattleTestStarter] Player deck could not be built. " +
+                                   "Check the warnings above for missing card names.");
+                    return;
+                }
+
+                // Build the battle queue from the session asset (if assigned) or wrap the
+                // single enemies list as a one-round queue.
+                List<List<EnemyData>> battleQueue;
+                if (battleSession != null && battleSession.RoundCount > 0)
+                {
+                    battleQueue = battleSession.BuildBattleQueue();
+                    Debug.Log($"[BattleTestStarter] Session '{battleSession.name}' — " +
+                              $"{battleQueue.Count} rounds.");
+                }
+                else
+                {
+                    battleQueue = new List<List<EnemyData>>
+                        { enemies.Where(e => e != null).ToList() };
+                    Debug.Log("[BattleTestStarter] No session assigned — single-round fallback.");
+                }
+
+                // Starting HP: first battle always starts at the class's max HP.
+                int initialResolve = originStats != null
+                    ? originStats.GetStatsForOrigin(playerOrigin).maxResolve
+                    : 20;
+
+                RunState.Create(playerOrigin, playerDeck, initialResolve, battleQueue);
+                Debug.Log($"[BattleTestStarter] RunState created for origin: {playerOrigin} " +
+                          $"({initialResolve} Resolve)");
             }
-
-            Debug.Log($"[BattleTestStarter] Loaded {allCards.Length} card assets.");
-
-            // Build the player deck
-            List<CardData> playerDeck = BuildDeck(playerOrigin, allCards);
-
-            if (playerDeck.Count == 0)
+            else
             {
-                Debug.LogError("[BattleTestStarter] Player deck could not be built. " +
-                               "Check the warnings above for missing card names.");
+                // ── Returning from a reward screen ───────────────────────────────────────
+                // RunState already holds the updated deck, HP, and battle index.
+                playerOrigin = RunState.Current.Origin;
+                playerDeck   = RunState.Current.Deck;
+                Debug.Log($"[BattleTestStarter] Continuing run — deck has {playerDeck.Count} cards, " +
+                          $"battle index {RunState.Current.CurrentBattleIndex}, " +
+                          $"Resolve {RunState.Current.CurrentResolve}.");
+            }
+
+            // Resolve this battle's enemy list from RunState's queue.
+            var queueEnemies = RunState.Current?.CurrentBattleEnemies;
+            if (queueEnemies != null && queueEnemies.Count > 0)
+            {
+                battleEnemies = queueEnemies.Where(e => e != null).ToList();
+            }
+            else
+            {
+                // Fallback: use the Inspector enemies list directly (no session assigned).
+                battleEnemies = enemies.Where(e => e != null).ToList();
+            }
+
+            if (battleEnemies.Count == 0)
+            {
+                Debug.LogError("[BattleTestStarter] No valid enemies for this battle. " +
+                               "Check the session asset or the Enemies list.");
                 return;
             }
 
-            var validEnemies = enemies.Where(e => e != null).ToList();
             Debug.Log($"[BattleTestStarter] Player ({playerOrigin}): {playerDeck.Count} cards | " +
-                      $"Enemies: {string.Join(", ", validEnemies.Select(e => e.EnemyName))}");
+                      $"Enemies: {string.Join(", ", battleEnemies.Select(e => e.EnemyName))}");
+
+            // Carry HP from RunState (null if first battle — StartBattle then uses maxResolve).
+            int? carriedResolve = RunState.Current?.CurrentResolve > 0
+                ? (int?)RunState.Current.CurrentResolve
+                : null;
 
             // Assemble BattleSetup
             var setup = new BattleSetup
             {
-                playerOrigin = playerOrigin,
-                originStats  = originStats,   // null → BattleManager defaults to 20 Resolve / 3 AP
-                playerDeck   = playerDeck,
-                enemies      = enemies.Where(e => e != null).ToList(),
+                playerOrigin        = playerOrigin,
+                originStats         = originStats,   // null → BattleManager defaults to 20 Resolve / 3 AP
+                playerDeck          = playerDeck,
+                enemies             = battleEnemies,
+                initialPlayerResolve = carriedResolve,
             };
 
             // Wire BattleUI before starting (BattleUI needs BattleManager reference)

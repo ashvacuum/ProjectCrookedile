@@ -35,6 +35,42 @@ namespace Crookedile.Editor
             Debug.Log("✅ Generated all 30 starter cards!");
         }
 
+        [MenuItem("Assets/Crookedile/Generate Faith Leader Reward Cards", false, 2)]
+        public static void GenerateFaithLeaderRewardCards()
+        {
+            string rewardPath  = "Assets/Data/Cards/Rewards";
+            string flPath      = $"{rewardPath}/FaithLeader";
+            string tokenPath   = $"{rewardPath}/Tokens";     // player-generated Pressure cards
+            string statusPath  = $"{rewardPath}/Status";     // enemy-generated, playable at a cost
+            string cursePath   = $"{rewardPath}/Curses";     // enemy-generated, always unplayable
+
+            // Ensure folders exist
+            foreach (var (parent, child, folder) in new[]
+            {
+                ("Assets",                    "Data",       "Assets/Data"),
+                ("Assets/Data",               "Cards",      "Assets/Data/Cards"),
+                ("Assets/Data/Cards",         "Rewards",    rewardPath),
+                (rewardPath,                  "FaithLeader", flPath),
+                (rewardPath,                  "Tokens",     tokenPath),
+                (rewardPath,                  "Status",     statusPath),
+                (rewardPath,                  "Curses",     cursePath),
+            })
+            {
+                if (!AssetDatabase.IsValidFolder(folder))
+                    AssetDatabase.CreateFolder(parent, child);
+            }
+
+            GenerateFaithLeaderRewardPool(flPath);
+            GenerateFaithLeaderTokenCards(tokenPath);
+            GenerateFaithLeaderStatusCards(statusPath);
+            GenerateFaithLeaderCurseCards(cursePath);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            Debug.Log("✅ Generated Faith Leader reward, token, status, and curse cards!");
+        }
+
         #region Faith Leader Cards
 
         private static void GenerateFaithLeaderCards(string basePath)
@@ -375,34 +411,414 @@ namespace Crookedile.Editor
 
         #endregion
 
+        #region Faith Leader Reward Pool
+
+        private static void GenerateFaithLeaderRewardPool(string path)
+        {
+            // ── BASIC ────────────────────────────────────────────────────────────────
+
+            // Sermon — Gain 3 Composure, Draw 1
+            CreateCard(path: $"{path}/Sermon.asset",
+                name: "Sermon",                     type: CardType.Pressure,
+                rarity: CardRarity.Basic,           cost: 1,
+                description: "Share your conviction. Build inner strength and keep the ideas flowing.",
+                tags: new[] { "faithleader" },
+                effects: new CardEffect[]
+                {
+                    CreateGainComposureEffect(3),
+                    CreateDrawCardsEffect(1),
+                });
+
+            // Preach — Deal 4 damage, Gain 3 Composure
+            CreateCard(path: $"{path}/Preach.asset",
+                name: "Preach",                     type: CardType.Pressure,
+                rarity: CardRarity.Basic,           cost: 1,
+                description: "Press your moral argument. Your conviction grows as you speak.",
+                tags: new[] { "faithleader" },
+                effects: new CardEffect[]
+                {
+                    CreateDamageEffect(4),
+                    CreateGainComposureEffect(3),
+                });
+
+            // Righteous Fury — Deal 4 damage, Lose 3 Composure
+            CreateCard(path: $"{path}/RighteousFury.asset",
+                name: "Righteous Fury",             type: CardType.Rhetoric,
+                rarity: CardRarity.Basic,           cost: 1,
+                description: "Channel your outrage into an attack. Composure gives way to righteous anger.",
+                tags: new[] { "faithleader" },
+                effects: new CardEffect[]
+                {
+                    CreateDamageEffect(4),
+                    CreateLoseComposureEffect(3),
+                });
+
+            // Moral High Ground — Gain 3 Composure, Reduce Hostility 1
+            // NOTE: 'Retain' mechanic requires the new BattleEffect system — configure in Unity Editor.
+            CreateCard(path: $"{path}/MoralHighGround.asset",
+                name: "Moral High Ground",          type: CardType.Policy,
+                rarity: CardRarity.Basic,           cost: 1,
+                description: "Stand firm and de-escalate. Retain.",
+                tags: new[] { "faithleader" },
+                configNotes: "Add RetainThisCard effect + configure Retain behaviour via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateGainComposureEffect(3),
+                    CreateReduceHostilityEffect(1),
+                });
+
+            // False Prophet — Deal 4 damage
+            // NOTE: "Enemy gains 2 Hostility" requires RaiseTargetHostilityEffect (new system).
+            CreateCard(path: $"{path}/FalseProphet.asset",
+                name: "False Prophet",              type: CardType.Rhetoric,
+                rarity: CardRarity.Basic,           cost: 1,
+                description: "Expose their hypocrisy. They become more agitated.",
+                tags: new[] { "faithleader" },
+                configNotes: "Add RaiseTargetHostilityEffect (amount 2) via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateDamageEffect(4),
+                });
+
+            // ── ENHANCED ─────────────────────────────────────────────────────────────
+
+            // Prayer — Gain 5 Composure (+ Add Blessed to hand via Inspector)
+            CreateCard(path: $"{path}/Prayer.asset",
+                name: "Prayer",                     type: CardType.Pressure,
+                rarity: CardRarity.Enhanced,        cost: 1,
+                description: "A moment of reflection. Gain strength and receive a divine token.",
+                tags: new[] { "faithleader" },
+                configNotes: "Add AddCardToHand 'Blessed' effect via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateGainComposureEffect(5),
+                });
+
+            // Congregation — Draw 3, Gain 9 Composure (approximated as 3 per card drawn)
+            CreateCard(path: $"{path}/Congregation.asset",
+                name: "Congregation",               type: CardType.Policy,
+                rarity: CardRarity.Enhanced,        cost: 2,
+                description: "Rally your followers. Draw strength from the crowd.",
+                tags: new[] { "faithleader" },
+                effects: new CardEffect[]
+                {
+                    CreateDrawCardsEffect(3),
+                    CreateGainComposureEffect(9),
+                });
+
+            // Holy Patience — Gain 6 Composure (Retain + conditional gain via Inspector)
+            CreateCard(path: $"{path}/HolyPatience.asset",
+                name: "Holy Patience",              type: CardType.Pressure,
+                rarity: CardRarity.Enhanced,        cost: 1,
+                description: "Wait for the right moment. Retain. At end of turn, if still in hand: gain 6 Composure.",
+                tags: new[] { "faithleader" },
+                configNotes: "Add RetainThisCard effect + TurnEndTrigger passive: GainComposure 6 via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateGainComposureEffect(6),
+                });
+
+            // Excommunicate — Deal 5 damage (+ Apply Weakened 2 + Vulnerable 1 via Inspector)
+            CreateCard(path: $"{path}/Excommunicate.asset",
+                name: "Excommunicate",              type: CardType.Rhetoric,
+                rarity: CardRarity.Enhanced,        cost: 2,
+                description: "Cast them out. Apply Weakened 2. Apply Vulnerable 1. Deal 5 damage.",
+                tags: new[] { "faithleader" },
+                configNotes: "Add ApplyStatusEffect Weakened 2 + Vulnerable 1 via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateDamageEffect(5),
+                });
+
+            // Pastoral Care — Gain 4 Composure (+ Heal 10 Resolve via Inspector)
+            CreateCard(path: $"{path}/PastoralCare.asset",
+                name: "Pastoral Care",              type: CardType.Policy,
+                rarity: CardRarity.Enhanced,        cost: 2,
+                description: "Tend to your own wounds and steady your resolve. Heal 10 Resolve. Gain 4 Composure.",
+                tags: new[] { "faithleader" },
+                configNotes: "Add HealResolveEffect (amount 10) via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateGainComposureEffect(4),
+                });
+
+            // ── RARE ─────────────────────────────────────────────────────────────────
+
+            // Holy Alliance — Gain 6 Composure + Reduce Hostility 3
+            // NOTE: "Double current Composure" requires new BattleEffect — configure in Inspector.
+            CreateCard(path: $"{path}/HolyAlliance.asset",
+                name: "Holy Alliance",              type: CardType.Policy,
+                rarity: CardRarity.Rare,            cost: 2,
+                description: "Rally powerful allies. Double your current Composure. Reduce Hostility 3.",
+                tags: new[] { "faithleader" },
+                configNotes: "Replace GainComposure effect with DoubleCurrentComposureEffect via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateGainComposureEffect(6),
+                    CreateReduceHostilityEffect(3),
+                });
+
+            // Condemnation — Deal damage = enemy Hostility × 4
+            // NOTE: "Scale with Hostility" requires DealDamageEqualToHostility (new system).
+            CreateCard(path: $"{path}/Condemnation.asset",
+                name: "Condemnation",               type: CardType.Rhetoric,
+                rarity: CardRarity.Rare,            cost: 2,
+                description: "Divine judgment. Deal damage equal to enemy Hostility × 4.",
+                tags: new[] { "faithleader" },
+                configNotes: "Replace DealDamage effect with DealDamageEqualToHostilityEffect (multiplier 4) via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateDamageEffect(8),
+                });
+
+            // Revelation — Look at top 3 cards, play one free
+            // NOTE: Full effect is "look at top 3, play one free" — configure Scry via Inspector.
+            CreateCard(path: $"{path}/Revelation.asset",
+                name: "Revelation",                 type: CardType.Pressure,
+                rarity: CardRarity.Rare,            cost: 1,
+                description: "The path forward becomes clear. Look at the top 3 cards. Play one for free.",
+                tags: new[] { "faithleader" },
+                configNotes: "Configure ScryEffect (count 3) + play-one-free logic via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateDrawCardsEffect(3),
+                });
+
+            // Absolution — Exhaust hand, Gain 6 Composure per card exhausted, Draw 3
+            // NOTE: Full version uses ExhaustHand + scale per card. Simplified for now.
+            CreateCard(path: $"{path}/Absolution.asset",
+                name: "Absolution",                 type: CardType.Policy,
+                rarity: CardRarity.Rare,            cost: 2,
+                description: "Sacrifice everything. Exhaust your hand. Gain 6 Composure per card exhausted. Draw 3.",
+                tags: new[] { "faithleader" },
+                configNotes: "Change DiscardCards to ExhaustHandEffect; replace flat GainComposure with GainComposurePerExhaustedCard (6 per card) via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateDiscardCardsEffect(99),
+                    CreateGainComposureEffect(6),
+                    CreateDrawCardsEffect(3),
+                });
+
+            // Martyrdom — Lose all Resolve except 1, Gain Composure = Resolve lost
+            // NOTE: Full effect is very complex — configure via Inspector.
+            CreateCard(path: $"{path}/Martyrdom.asset",
+                name: "Martyrdom",                  type: CardType.Policy,
+                rarity: CardRarity.Rare,            cost: 0,
+                description: "Give everything. Lose all Resolve except 1. Gain Composure equal to Resolve lost.",
+                tags: new[] { "faithleader" },
+                configNotes: "Replace DealDamage with LoseAllResolveExceptOneEffect + GainComposureEqualToResolveLostEffect via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateDamageEffect(8),
+                });
+        }
+
+        #endregion
+
+        #region Faith Leader Player Token Cards (CardType.Pressure — generated by card effects)
+
+        // Token cards are ordinary Pressure cards generated by other cards (Prayer, Congregation, etc.)
+        // and added directly to the player's hand or deck during a run.
+        // They cost 0 AP and Exhaust on play. Configure ExhaustThisCard effect in the Inspector.
+
+        private static void GenerateFaithLeaderTokenCards(string path)
+        {
+            // Blessed — Pressure, 0 AP: Gain 3 Composure, Exhaust
+            // Generated by: Prayer
+            CreateCard(path: $"{path}/Blessed.asset",
+                name: "Blessed",                    type: CardType.Pressure,
+                rarity: CardRarity.Basic,           cost: 0,
+                description: "A divine gift. Gain 3 Composure. Exhaust.",
+                tags: new[] { "faithleader" },
+                isUnplayable: false,
+                configNotes: "Add ExhaustThisCard effect via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateGainComposureEffect(3),
+                });
+
+            // Fervor — Pressure, 0 AP: Next Blessing deals double damage, Exhaust
+            // Generated by: future cards
+            // NOTE: "Next Blessing deals double" is a passive trigger — configure via Inspector.
+            CreateCard(path: $"{path}/Fervor.asset",
+                name: "Fervor",                     type: CardType.Pressure,
+                rarity: CardRarity.Basic,           cost: 0,
+                description: "Divine fervour builds. Your next Blessing deals double damage. Exhaust.",
+                tags: new[] { "faithleader" },
+                isUnplayable: false,
+                configNotes: "Add ExhaustThisCard + TurnEnd/CardPlayed passive: NextBlessingDealsDouble via Inspector.",
+                effects: new CardEffect[] { });
+
+            // Sermon Notes — Pressure, 0 AP: Draw 1, Exhaust
+            // Generated by: Congregation
+            CreateCard(path: $"{path}/SermonNotes.asset",
+                name: "Sermon Notes",               type: CardType.Pressure,
+                rarity: CardRarity.Basic,           cost: 0,
+                description: "A scribbled reminder. Draw 1. Exhaust.",
+                tags: new[] { "faithleader" },
+                isUnplayable: false,
+                configNotes: "Add ExhaustThisCard effect via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateDrawCardsEffect(1),
+                });
+        }
+
+        #endregion
+
+        #region Enemy Status Cards (CardType.Status — enemy-generated, playable at a cost)
+
+        // Status cards are put into the player's deck by enemies.
+        // Unlike Curses they CAN be played to remove them, but playing them always costs something.
+        // These are GENERAL — no origin tags — any enemy can inflict them on any class.
+        // Configure ExhaustThisCard in the Inspector for each.
+        //
+        // Hounded additionally requires a TurnEndTrigger BattlePassive (Inspector):
+        //   Trigger: TurnEndTrigger
+        //   Effect:  RaiseAllOpponentsHostilityEffect (amount = 3)
+        //   OneShot: false
+
+        private static void GenerateFaithLeaderStatusCards(string path)
+        {
+            // Unnerved — Status, 0 AP: Lose 5 Composure, Exhaust
+            // General: no origin tag. Brutally punishes Composure builds.
+            CreateCard(path: $"{path}/Unnerved.asset",
+                name: "Unnerved",                   type: CardType.Status,
+                rarity: CardRarity.Basic,           cost: 0,
+                description: "Your confidence cracks. Lose 5 Composure. Exhaust.",
+                tags: null,
+                isUnplayable: false,
+                configNotes: "Add ExhaustThisCard effect via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateLoseComposureEffect(5),
+                });
+
+            // Hounded — Status, 0 AP: Lose 4 Resolve, Exhaust
+            // General: no origin tag. On play costs HP; at end of turn ALL enemies gain 3 Hostility.
+            // Wire TurnEndTrigger → RaiseAllOpponentsHostilityEffect(3) in Inspector.
+            CreateCard(path: $"{path}/Hounded.asset",
+                name: "Hounded",                    type: CardType.Status,
+                rarity: CardRarity.Basic,           cost: 0,
+                description: "They close in from every side. Lose 4 Resolve. Exhaust.\nEnd of turn while held: all enemies gain 3 Hostility.",
+                tags: null,
+                isUnplayable: false,
+                configNotes: "Add ExhaustThisCard effect + TurnEndTrigger passive: RaiseAllOpponentsHostilityEffect (amount 3) via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateDamageEffect(4),
+                });
+
+            // Stifled — Status, 2 AP: Draw 1, Exhaust
+            // General: no origin tag. Pure tempo drain — 2 AP for 1 card is a losing exchange.
+            CreateCard(path: $"{path}/Stifled.asset",
+                name: "Stifled",                    type: CardType.Status,
+                rarity: CardRarity.Basic,           cost: 2,
+                description: "Every idea meets resistance. Spend 2 AP to shake it off. Draw 1. Exhaust.",
+                tags: null,
+                isUnplayable: false,
+                configNotes: "Add ExhaustThisCard effect via Inspector.",
+                effects: new CardEffect[]
+                {
+                    CreateDrawCardsEffect(1),
+                });
+        }
+
+        #endregion
+
+        #region Faith Leader Curse Cards
+
+        private static void GenerateFaithLeaderCurseCards(string path)
+        {
+            // All curses are unplayable. Their trigger effects (on draw, turn start/end)
+            // require BattlePassive configuration in the Inspector — the generator creates
+            // the card shells with descriptions only.
+
+            // Crisis of Faith — lose 4 Composure at end of turn if in hand
+            CreateCard(path: $"{path}/CrisisOfFaith.asset",
+                name: "Crisis of Faith",            type: CardType.Curse,
+                rarity: CardRarity.Basic,           cost: 0,
+                description: "Doubt creeps in. Lose 4 Composure at end of turn while held.",
+                tags: new[] { "faithleader" },
+                isUnplayable: true,
+                configNotes: "Add TurnEndTrigger passive: LoseComposureEffect (amount 4) via Inspector.",
+                effects: new CardEffect[] { });
+
+            // Scandal — lose 3 Resolve at start of turn if in hand
+            CreateCard(path: $"{path}/Scandal.asset",
+                name: "Scandal",                    type: CardType.Curse,
+                rarity: CardRarity.Basic,           cost: 0,
+                description: "The headlines hurt. Lose 3 Resolve at start of turn while held.",
+                tags: new[] { "faithleader" },
+                isUnplayable: true,
+                configNotes: "Add TurnStartTrigger passive: DamageResolveEffect (amount 3) via Inspector.",
+                effects: new CardEffect[] { });
+
+            // False Accusations — discard a random card when drawn
+            CreateCard(path: $"{path}/FalseAccusations.asset",
+                name: "False Accusations",          type: CardType.Curse,
+                rarity: CardRarity.Basic,           cost: 0,
+                description: "Chaos enters your hand when this does. On draw: discard a random card.",
+                tags: new[] { "faithleader" },
+                isUnplayable: true,
+                configNotes: "Add CardDrawnTrigger passive: DiscardRandomCardEffect (amount 1, exclude Curses) via Inspector.",
+                effects: new CardEffect[] { });
+
+            // Doubt — lose 4 Composure on draw
+            CreateCard(path: $"{path}/Doubt.asset",
+                name: "Doubt",                      type: CardType.Curse,
+                rarity: CardRarity.Basic,           cost: 0,
+                description: "Uncertainty strikes the moment this enters your hand. On draw: lose 4 Composure.",
+                tags: new[] { "faithleader" },
+                isUnplayable: true,
+                configNotes: "Add CardDrawnTrigger passive: LoseComposureEffect (amount 4) via Inspector.",
+                effects: new CardEffect[] { });
+        }
+
+        #endregion
+
         #region Card Creation Helpers
 
-        private static void CreateCard(string path, string name, CardType type, CardRarity rarity, string description, int cost, CardEffect[] effects)
+        /// <summary>
+        /// Creates a CardData ScriptableObject at <paramref name="path"/> with legacy CardEffect data.
+        /// Use <paramref name="tags"/> to make reward cards discoverable by origin (e.g. "faithleader").
+        /// Set <paramref name="isUnplayable"/> to true for Status and Curse cards that cannot be played.
+        /// </summary>
+        private static void CreateCard(string path, string name, CardType type, CardRarity rarity,
+                                       string description, int cost, CardEffect[] effects,
+                                       string[] tags = null, bool isUnplayable = false,
+                                       string configNotes = null)
         {
             CardData card = ScriptableObject.CreateInstance<CardData>();
 
             // Use reflection to set private serialized fields
-            var nameField = typeof(CardData).GetField("_cardName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var typeField = typeof(CardData).GetField("_cardType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var rarityField = typeof(CardData).GetField("_rarity", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var nameField        = typeof(CardData).GetField("_cardName",    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var typeField        = typeof(CardData).GetField("_cardType",    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var rarityField      = typeof(CardData).GetField("_rarity",      System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var descriptionField = typeof(CardData).GetField("_description", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var costsField = typeof(CardData).GetField("_costs", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var effectsField = typeof(CardData).GetField("_effects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var costsField       = typeof(CardData).GetField("_costs",       System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var effectsField     = typeof(CardData).GetField("_effects",     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var tagsField        = typeof(CardData).GetField("_tags",        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var unplayableField  = typeof(CardData).GetField("_isUnplayable",System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             nameField?.SetValue(card, name);
             typeField?.SetValue(card, type);
             rarityField?.SetValue(card, rarity);
             descriptionField?.SetValue(card, description);
+            unplayableField?.SetValue(card, isUnplayable);
+
+            if (tags != null && tags.Length > 0)
+                tagsField?.SetValue(card, new List<string>(tags));
+
+            var notesField = typeof(CardData).GetField("_configurationNotes",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (!string.IsNullOrEmpty(configNotes))
+                notesField?.SetValue(card, configNotes);
 
             List<CardCost> costs = new List<CardCost>();
-            if (cost > 0)
-            {
-                costs.Add(new CardCost(CostType.ActionPoints, cost));
-            }
-            else
-            {
-                costs.Add(new CardCost(CostType.None, 0));
-            }
+            costs.Add(cost > 0
+                ? new CardCost(CostType.ActionPoints, cost)
+                : new CardCost(CostType.None, 0));
             costsField?.SetValue(card, costs);
 
             effectsField?.SetValue(card, new List<CardEffect>(effects));

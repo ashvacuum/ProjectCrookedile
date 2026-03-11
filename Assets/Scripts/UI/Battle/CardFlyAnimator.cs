@@ -47,6 +47,16 @@ namespace Crookedile.UI.Battle
         [Tooltip("Total duration (seconds) of the fly-to-discard animation.")]
         [SerializeField] private float _discardDuration = 0.28f;
 
+        [Header("Card Grant Settings")]
+        [Tooltip("Seconds to scale the card in from zero at the start of the grant animation.")]
+        [SerializeField] private float _grantScaleInDuration = 0.15f;
+
+        [Tooltip("Seconds the granted card is held at full size before flying to the zone.")]
+        [SerializeField] private float _grantHoldDuration = 0.7f;
+
+        [Tooltip("Seconds for the card to fly from screen center to the target zone.")]
+        [SerializeField] private float _grantFlyDuration = 0.35f;
+
         // ─── Draw API ─────────────────────────────────────────────────────────────
 
         /// <summary>
@@ -72,6 +82,20 @@ namespace Crookedile.UI.Battle
         public void AnimateDiscardOut(CardButton btn, Action onComplete)
         {
             StartCoroutine(DiscardFlyRoutine(btn, onComplete));
+        }
+
+        // ─── Card Grant API ───────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Shows <paramref name="btn"/> at the center of the battle canvas with a pop scale-in,
+        /// holds it so the player can read it, plays "GrantCard" feedback, then flies it to
+        /// <paramref name="targetZone"/> while shrinking to zero.
+        /// <paramref name="onArrival"/> is invoked once the card reaches the zone
+        /// (use it to bump the count text and return the button to the pool).
+        /// </summary>
+        public void AnimateCardGranted(CardButton btn, Transform targetZone, Action onArrival)
+        {
+            StartCoroutine(CardGrantedRoutine(btn, targetZone, onArrival));
         }
 
         // ─── Internal — Draw ──────────────────────────────────────────────────────
@@ -136,6 +160,65 @@ namespace Crookedile.UI.Battle
             GameLogger.LogVerbose("Card", $"Discard animation complete for '{btn.CardData?.CardName}'", this);
             btn.enabled = true;
             onComplete?.Invoke();
+        }
+
+        // ─── Internal — Card Grant ────────────────────────────────────────────────
+
+        private IEnumerator CardGrantedRoutine(CardButton btn, Transform targetZone, Action onArrival)
+        {
+            btn.enabled = false;
+            if (btn.TryGetComponent<CanvasGroup>(out var cg))
+                cg.blocksRaycasts = false;
+
+            // Place at screen center, invisible, parented to the root canvas overlay.
+            var rt = btn.GetComponent<RectTransform>();
+            if (_rootCanvas != null)
+                btn.transform.SetParent(_rootCanvas.transform, false);
+            rt.anchoredPosition = Vector2.zero;
+            btn.transform.localScale = Vector3.zero;
+            btn.gameObject.SetActive(true);
+
+            // Phase 1 — pop scale-in with a slight overshoot (0 → 1.1 → 1.0).
+            float t = 0f;
+            while (t < _grantScaleInDuration)
+            {
+                t += Time.deltaTime;
+                float frac  = Mathf.Clamp01(t / _grantScaleInDuration);
+                // Overshoot peaks at 80% of the phase, then settles to 1.
+                float scale = frac < 0.8f
+                    ? Mathf.Lerp(0f, 1.1f, frac / 0.8f)
+                    : Mathf.Lerp(1.1f, 1f, (frac - 0.8f) / 0.2f);
+                btn.transform.localScale = Vector3.one * scale;
+                yield return null;
+            }
+            btn.transform.localScale = Vector3.one;
+
+            // Phase 2 — hold: play feedback then wait so the player can read the card.
+            FeedbackManager.Instance?.Play("GrantCard");
+            GameLogger.LogInfo("Card", $"Grant animation holding for '{btn.CardData?.CardName}'", this);
+            yield return new WaitForSeconds(_grantHoldDuration);
+
+            // Phase 3 — fly to target zone while shrinking (ease-in² → accelerates toward zone).
+            Vector3 startPos = btn.transform.position;
+            Vector3 endPos   = targetZone != null ? targetZone.position : startPos;
+            t = 0f;
+            while (t < _grantFlyDuration)
+            {
+                t += Time.deltaTime;
+                float frac  = Mathf.Clamp01(t / _grantFlyDuration);
+                float eased = frac * frac;   // ease-in: card accelerates toward zone
+                btn.transform.position   = Vector3.Lerp(startPos, endPos, eased);
+                btn.transform.localScale = Vector3.one * (1f - frac);
+                yield return null;
+            }
+
+            btn.gameObject.SetActive(false);
+            btn.transform.localScale = Vector3.one;   // reset for pool reuse
+            btn.enabled = true;
+            if (cg != null) cg.blocksRaycasts = true;
+
+            GameLogger.LogInfo("Card", $"Grant animation complete for '{btn.CardData?.CardName}'", this);
+            onArrival?.Invoke();
         }
     }
 }
