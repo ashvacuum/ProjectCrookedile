@@ -359,7 +359,7 @@ namespace Crookedile.Gameplay
         public void GainActionPoints(int amount)
         {
             int old = _currentActionPoints;
-            _currentActionPoints += amount;
+            _currentActionPoints = Mathf.Max(0, _currentActionPoints + amount);
             Debug.Log($"Gained {amount} Action Points. Current: {_currentActionPoints}");
             EventBus.Publish(new ActionPointsChangedEvent { OldValue = old, NewValue = _currentActionPoints, IsPlayer = _isPlayer });
         }
@@ -381,7 +381,7 @@ namespace Crookedile.Gameplay
         public void RefreshActionPoints()
         {
             int old = _currentActionPoints;
-            _currentActionPoints = _maxActionPoints + _actionPointsNextTurn;
+            _currentActionPoints = Mathf.Max(0, _maxActionPoints + _actionPointsNextTurn);
             Debug.Log($"Action Points refreshed: {_maxActionPoints} + {_actionPointsNextTurn} banked = {_currentActionPoints}");
             _actionPointsNextTurn = 0; // Reset banked AP
             EventBus.Publish(new ActionPointsChangedEvent { OldValue = old, NewValue = _currentActionPoints, IsPlayer = _isPlayer });

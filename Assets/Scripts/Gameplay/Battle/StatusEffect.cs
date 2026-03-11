@@ -42,14 +42,21 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>
         /// Reduce stacks by 1 (called each turn). Returns true if depleted.
+        /// Moves toward 0 in both directions so negative stacks (e.g. -3 Strength)
+        /// fade correctly: -3 → -2 → -1 → 0 (removed).
         /// </summary>
         public bool DecrementStack()
         {
             if (_durationType == StatusDurationType.Permanent) return false;
             if (_durationType == StatusDurationType.RemoveAtPlayerTurnStart) return false;
 
-            _stacks--;
-            return _stacks <= 0;
+            // Always step toward 0 so both positive and negative stacks expire correctly.
+            if (_stacks > 0)
+                _stacks--;
+            else
+                _stacks++;
+
+            return _stacks == 0;
         }
 
         /// <summary>

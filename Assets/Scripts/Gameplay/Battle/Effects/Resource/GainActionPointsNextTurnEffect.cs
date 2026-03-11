@@ -10,7 +10,6 @@ namespace Crookedile.Gameplay.Battle
     [Serializable]
     public class GainActionPointsNextTurnEffect : BattleEffect
     {
-        [MinValue(1)]
         [SerializeField] private int _amount = 1;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)

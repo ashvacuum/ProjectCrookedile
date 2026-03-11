@@ -10,60 +10,53 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Self Doubt
+  m_Name: Emptiness
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: 3abec8ff-b814-4dbd-b72b-84599119c174
-  _cardName: Self Doubt
+  _id: 272060e5-38a8-4f31-8347-d2e89bba9fa9
+  _cardName: Emptiness
   _cardType: 3
-  _rarity: 0
-  _artwork: {fileID: 21300000, guid: eb0b08d5c38cc4842a043b1280a3019c, type: 3}
-  _description: The headlines hurt. Lose 1 Strength at turn end when left in hand. 
-    Exhaust.
+  _rarity: 1
+  _artwork: {fileID: 21300000, guid: 20d242356a775c34aa129e3fb70fd626, type: 3}
+  _description: When drawn removes 1 action point.
   _flavorText: 
-  _costs:
-  - _costType: 1
-    _baseAmount: 1
-    _isXCost: 0
-    _costChangePerTurn: 0
-    _minimumCost: 0
-    _maximumCost: 99
+  _costs: []
   _newEffects: []
   _effects: []
   _passives:
-  - rid: 4738608375284105304
+  - rid: 4738608375284105321
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
   _upgradedPassives: []
-  _tags:
-  - faithleader
+  _tags: []
   _isStarterCard: 0
   _isUnlockable: 0
-  _isUnplayable: 1
+  _isUnplayable: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
   references:
     version: 2
     RefIds:
-    - rid: 4738608375284105304
+    - rid: 4738608375284105321
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: New Passive
         _trigger:
-          rid: 4738608375284105307
-        _conditions: []
+          rid: 4738608375284105322
+        _conditions:
+        - rid: 4738608375284105323
         _oneShot: 0
         _effects:
-        - rid: 4738608375284105315
-    - rid: 4738608375284105307
-      type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+        - rid: 4738608375284105324
+    - rid: 4738608375284105322
+      type: {class: CardDrawnTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data: 
-    - rid: 4738608375284105315
-      type: {class: ApplyStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+    - rid: 4738608375284105323
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data: 
+    - rid: 4738608375284105324
+      type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: 
-        _target: 1
-        _statusType: 9
-        _stacks: -1
-        _duration: 0
+        _amount: -1

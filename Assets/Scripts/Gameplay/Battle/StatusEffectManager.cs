@@ -40,9 +40,19 @@ namespace Crookedile.Gameplay.Battle
                     return;
                 }
 
-                // Stack exists - add more stacks
+                // Stack exists — add (or subtract) stacks.
                 existing.AddStacks(stacks);
-                GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {type} stacked +{stacks} (now {existing.Stacks} stacks)");
+
+                // If the effect has been neutralised (e.g. +3 Strength cancelled by -3), remove it
+                // immediately so the UI doesn't show a lingering 0-stack badge.
+                if (existing.Stacks == 0)
+                {
+                    _activeEffects.Remove(existing);
+                    GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {type} neutralised — removed");
+                    return;
+                }
+
+                GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {type} stacked {stacks:+0;-0} (now {existing.Stacks} stacks)");
             }
             else
             {

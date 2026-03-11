@@ -20,8 +20,7 @@ namespace Crookedile.Gameplay.Battle
         [Tooltip("Which status effect to apply.")]
         [SerializeField] private StatusEffectType _statusType = StatusEffectType.Weakened;
 
-        [MinValue(1)]
-        [Tooltip("Number of stacks to apply.")]
+        [Tooltip("Number of stacks to apply. Negative values reduce the stat (supported for Strength and Dexterity).")]
         [SerializeField] private int _stacks = 1;
 
         [Tooltip("How the status duration is tracked.")]
