@@ -17,7 +17,7 @@ MonoBehaviour:
   _cardType: 4
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: 'The headlines hurt. Lose 3 Resolve at turn start while held. (Configure
+  _description: 'The headlines hurt. Lose 3 Resolve at turn end while held. (Configure
     TurnStart passive: LoseResolve 3 via Inspector.)'
   _flavorText: 
   _costs:
@@ -29,7 +29,8 @@ MonoBehaviour:
     _maximumCost: 99
   _newEffects: []
   _effects: []
-  _passives: []
+  _passives:
+  - rid: 4738608375284105304
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
@@ -41,6 +42,19 @@ MonoBehaviour:
   _isUnplayable: 1
   _policyLean: 3
   _cardVFX: {fileID: 0}
+  _configurationNotes: 
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 4738608375284105304
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: New Passive
+        _trigger:
+          rid: 4738608375284105307
+        _conditions: []
+        _oneShot: 0
+        _effects: []
+    - rid: 4738608375284105307
+      type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data: 

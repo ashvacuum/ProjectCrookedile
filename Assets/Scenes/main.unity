@@ -1705,6 +1705,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2789037277794d042a5ec22391908f4c, type: 2}
   battleManager: {fileID: 507472318}
   battleUI: {fileID: 507472321}
+  battleSession: {fileID: 0}
   startOnAwake: 1
 --- !u!1 &526455970
 GameObject:

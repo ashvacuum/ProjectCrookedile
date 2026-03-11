@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
+  m_Name: Introduce Doubt
+  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Enemy.EnemyMoveData
+  _moveName: Introduce Doubt
+  _moveType: 3
+  _intentDescription: 
+  _newEffects:
+  - rid: 4738608375284105306
+  _effects:
+  - _name: 
+    _category: 0
+    _target: 4
+    _damageType: 0
+    _damageAmount: 3
+    _randomDamageRange: {x: 3, y: 9}
+    _resourceType: 0
+    _resourceAmount: 3
+    _cardManipulationType: 0
+    _cardAmount: 2
+    _cardToAdd: {fileID: 0}
+    _cardSelectionMode: 0
+    _filterCardType: 0
+    _discardDrawAmount: 0
+    _costReduction: 1
+    _chancePercent: 50
+    _chanceEffects: []
+    _statusEffectType: 0
+    _statusStacks: 2
+    _statusDuration: 0
+    _amountSource: 0
+  _moveVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}
+  _minionToSummon: {fileID: 0}
+  _minionCount: 1
+  _condition: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 4738608375284105306
+      type: {class: AddCardToDiscardEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: Scandal
+        _card: {fileID: 11400000, guid: 7a198186b7b4ae549aa0d48002f25ad1, type: 2}
+        _amount: 1

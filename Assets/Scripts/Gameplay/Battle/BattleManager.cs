@@ -245,7 +245,7 @@ namespace Crookedile.Gameplay.Battle
                 EventBus.Publish(new EnemySummonedEvent { EnemyData = data, EnemyIndex = newIndex });
 
                 // Pre-declare intent so the player sees the threat on the next player turn
-                var intent = controller.SelectNextMove();
+                var intent = controller.SelectNextMove(_enemies);
                 if (intent != null)
                     EventBus.Publish(new EnemyIntentDeclaredEvent { Move = intent, EnemyIndex = newIndex });
 
@@ -807,7 +807,7 @@ namespace Crookedile.Gameplay.Battle
                     {
                         var enemy = _manager._enemies[i];
                         if (enemy.IsDefeated) continue;
-                        EnemyMoveData intent = enemy.SelectNextMove();
+                        EnemyMoveData intent = enemy.SelectNextMove(_manager._enemies);
                         if (intent != null)
                         {
                             EventBus.Publish(new EnemyIntentDeclaredEvent { Move = intent, EnemyIndex = i });
