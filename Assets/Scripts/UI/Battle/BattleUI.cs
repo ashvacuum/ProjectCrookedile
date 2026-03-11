@@ -99,6 +99,12 @@ namespace Crookedile.UI.Battle
         [Tooltip("Reward screen overlay panel (starts inactive). Shown after a victory Continue click.")]
         [SerializeField] private RewardScreen  _rewardScreen;
 
+        [Header("Card Grant Animation")]
+        [Tooltip("Seconds for the zone count text to scale up on card grant arrival.")]
+        [SerializeField] private float _countPunchDuration = 0.25f;
+        [Tooltip("Scale multiplier applied to the count text at the peak of the punch.")]
+        [SerializeField] private float _countPunchScale = 1.4f;
+
         // ── Runtime ───────────────────────────────────────────────────────────
         private BattleManager               battleManager;
         private StateMachine<BattleUIState> _fsm;
@@ -110,6 +116,7 @@ namespace Crookedile.UI.Battle
         private CardButton                  _pendingDiscardButton;
         private HashSet<CardData>           _pendingDrawnCards = new HashSet<CardData>();
         private Coroutine                   _battleInfoFade;
+        private Coroutine                   _countPunchCoroutine;
 
         #region Initialization
 
@@ -142,6 +149,8 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<CardDrawnEvent>(OnCardDrawn);
             EventBus.Subscribe<StatusEffectAppliedEvent>(OnStatusEffectApplied);
             EventBus.Subscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
+            EventBus.Subscribe<CardGrantedEvent>(OnCardGranted);
+            EventBus.Subscribe<CardExhaustedEvent>(OnCardExhausted);
         }
 
         private void UnsubscribeFromEvents()
@@ -163,6 +172,8 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<CardDrawnEvent>(OnCardDrawn);
             EventBus.Unsubscribe<StatusEffectAppliedEvent>(OnStatusEffectApplied);
             EventBus.Unsubscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
+            EventBus.Unsubscribe<CardGrantedEvent>(OnCardGranted);
+            EventBus.Unsubscribe<CardExhaustedEvent>(OnCardExhausted);
         }
 
         /// <summary>
@@ -291,6 +302,22 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
             StartCoroutine(RefreshHandNextFrame());
         }
 
+        private void OnCardGranted(CardGrantedEvent evt)
+        {
+            if (!evt.IsPlayer) return;
+            Transform target  = evt.ToDiscard ? discardZoneButton.transform : deckZoneButton.transform;
+            TMP_Text  counter = evt.ToDiscard ? discardCountText            : deckCountText;
+            StartCoroutine(CardGrantedAnimationSequence(evt.Card, target, counter));
+        }
+
+        private void OnCardExhausted(CardExhaustedEvent evt)
+        {
+            // Ensure exhaust count is always up-to-date regardless of trigger source
+            // (ExhaustFromDiscard does not go through CardPlayedEvent → UpdateStatsDisplay).
+            if (!evt.IsPlayer) return;
+            UpdateStatsDisplay();
+        }
+
         private IEnumerator RefreshHandNextFrame()
         {
             yield return null;  // wait one frame so all draw events from one effect batch together
@@ -305,6 +332,74 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
                 handPanel?.AddDrawnCards(drawn, battleManager, OnCardButtonClicked);
             else
                 handPanel?.RearrangeCurrentHand(battleManager, OnCardButtonClicked);
+        }
+
+        /// <summary>
+        /// Rents a card button, initialises it display-only, then asks CardFlyAnimator to
+        /// show it at screen centre and fly it to the target zone.  On arrival the count
+        /// text receives a scale-punch and the button is returned to the pool.
+        /// </summary>
+        private IEnumerator CardGrantedAnimationSequence(CardData card, Transform targetZone, TMP_Text countText)
+        {
+            var btn = BattlePoolManager.Instance?.RentCard(card.CardType, transform);
+            if (btn == null)
+            {
+                UpdateStatsDisplay();
+                yield break;
+            }
+
+            int ap   = battleManager?.PlayerStats.CurrentActionPoints ?? 0;
+            int cost = battleManager?.GetEffectiveCardCost(card) ?? 1;
+            btn.Initialize(card, 0, ap, cost, forceUnplayable: true);
+
+            bool arrived = false;
+            CardFlyAnimator.Instance?.AnimateCardGranted(btn, targetZone, () =>
+            {
+                UpdateStatsDisplay();
+                PunchCountText(countText);
+                BattlePoolManager.Instance?.ReturnCard(btn);
+                arrived = true;
+            });
+
+            yield return new WaitUntil(() => arrived);
+        }
+
+        private void PunchCountText(TMP_Text text)
+        {
+            if (text == null) return;
+            if (_countPunchCoroutine != null) StopCoroutine(_countPunchCoroutine);
+            _countPunchCoroutine = StartCoroutine(CountTextPunchRoutine(text));
+        }
+
+        private IEnumerator CountTextPunchRoutine(TMP_Text text)
+        {
+            if (text == null) yield break;
+
+            float halfDuration = _countPunchDuration * 0.5f;
+
+            // Scale up
+            float t = 0f;
+            while (t < halfDuration)
+            {
+                t += Time.deltaTime;
+                float frac = Mathf.Clamp01(t / halfDuration);
+                text.transform.localScale = Vector3.one * Mathf.Lerp(1f, _countPunchScale, frac);
+                yield return null;
+            }
+
+            // Ease-out back to 1 — (1-t)² decelerates to a smooth stop
+            t = 0f;
+            while (t < halfDuration)
+            {
+                t += Time.deltaTime;
+                float frac      = Mathf.Clamp01(t / halfDuration);
+                float remaining = (1f - frac) * (1f - frac);
+                text.transform.localScale = Vector3.one * Mathf.Lerp(1f, _countPunchScale, remaining);
+                yield return null;
+            }
+
+            text.transform.localScale = Vector3.one;
+            _countPunchCoroutine = null;
         }
 
         private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
@@ -350,6 +445,11 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
             string outcome = evt.Result.isVictory ? "=== VICTORY ===" : "=== DEFEAT ===";
             logPanel?.AddEntry(outcome);
             _lastBattleResult = evt.Result;
+
+            // Persist the player's remaining HP so it carries into the next battle.
+            if (evt.Result.isVictory)
+                RunState.Current?.UpdateResolve(evt.Result.finalPlayerResolve);
+
             _fsm?.ChangeState(BattleUIState.BattleEnd);
         }
 
@@ -540,12 +640,14 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
         /// <summary>
         /// Fired by <see cref="BattleResultPanel.OnContinueClicked"/> after a victory.
         /// Generates a reward offer and opens the reward screen.
-        /// On defeat (or if reward infrastructure isn't set up yet) simply reloads the scene.
+        /// On defeat (or if reward infrastructure isn't set up yet) clears the run and reloads.
         /// </summary>
         private void OnResultContinueClicked()
         {
             if (!_lastBattleResult.isVictory || _cardDatabase == null || _rewardScreen == null)
             {
+                // Defeat — wipe RunState so the next scene load starts a fresh run.
+                RunState.Clear();
                 SceneLoader.Instance?.ReloadCurrentScene();
                 return;
             }
@@ -556,16 +658,27 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
 
         /// <summary>
         /// Callback from <see cref="RewardScreen"/> once the player picks a card (or skips).
-        /// Adds the card to <see cref="RunState.Current"/> and reloads the scene
-        /// (placeholder until the map / location system exists).
+        /// Adds the card to <see cref="RunState.Current"/>, advances the session battle index,
+        /// and reloads the scene. Clears RunState when the session is fully complete.
         /// </summary>
         private void OnRewardChosen(CardData picked)
         {
             if (picked != null)
                 RunState.Current?.AddCardToDeck(picked);
 
-            // Placeholder transition: reload the current scene until map navigation exists.
-            SceneLoader.Instance?.ReloadCurrentScene();
+            if (RunState.Current?.HasNextBattle == true)
+            {
+                // More battles remain — advance the index and reload into the next fight.
+                RunState.Current.AdvanceToNextBattle();
+                SceneLoader.Instance?.ReloadCurrentScene();
+            }
+            else
+            {
+                // Session complete (or no session). Clear RunState and restart for playtesting.
+                Debug.Log("[BattleUI] Run complete! Clearing RunState — next scene load starts fresh.");
+                RunState.Clear();
+                SceneLoader.Instance?.ReloadCurrentScene();
+            }
         }
 
         #endregion

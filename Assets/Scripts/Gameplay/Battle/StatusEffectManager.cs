@@ -33,6 +33,13 @@ namespace Crookedile.Gameplay.Battle
 
             if (existing != null)
             {
+                // Stunned is non-stackable: a second application is ignored entirely.
+                if (type == StatusEffectType.Stunned)
+                {
+                    GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {type} already active — re-application ignored");
+                    return;
+                }
+
                 // Stack exists - add more stacks
                 existing.AddStacks(stacks);
                 GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {type} stacked +{stacks} (now {existing.Stacks} stacks)");
@@ -205,6 +212,23 @@ namespace Crookedile.Gameplay.Battle
             }
         }
 
+
+        /// <summary>
+        /// Called when the player's turn begins. Removes all effects with
+        /// <see cref="StatusDurationType.RemoveAtPlayerTurnStart"/> duration (e.g. Stunned).
+        /// </summary>
+        public void OnPlayerTurnStart()
+        {
+            var toRemove = _activeEffects
+                .Where(e => e.DurationType == StatusDurationType.RemoveAtPlayerTurnStart)
+                .ToList();
+
+            foreach (var e in toRemove)
+            {
+                _activeEffects.Remove(e);
+                GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {e.Type} removed (player turn start)");
+            }
+        }
 
         /// <summary>
         /// Modifies damage dealt based on active effects.
@@ -413,6 +437,7 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Scandal => true,
                 StatusEffectType.Confused => true,
                 StatusEffectType.Silenced => true,
+                StatusEffectType.Stunned  => true,
                 _ => false
             };
         }

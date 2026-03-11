@@ -41,7 +41,8 @@ namespace Crookedile.Editor
         private enum ViewMode
         {
             Statistics,
-            CardBrowser
+            CardBrowser,
+            NeedsSetup
         }
 
         protected override void OnEnable()
@@ -67,6 +68,9 @@ namespace Crookedile.Editor
                     break;
                 case ViewMode.CardBrowser:
                     DrawCardBrowserView();
+                    break;
+                case ViewMode.NeedsSetup:
+                    DrawNeedsSetupView();
                     break;
             }
 
@@ -124,6 +128,16 @@ namespace Crookedile.Editor
             {
                 viewMode = ViewMode.CardBrowser;
                 RefreshFilteredCards();
+            }
+
+            int needsSetupCount = database.GetAll().Count(c => c.NeedsConfiguration);
+            string needsSetupLabel = needsSetupCount > 0
+                ? $"Needs Setup ({needsSetupCount})"
+                : "Needs Setup";
+            if (GUILayout.Toggle(viewMode == ViewMode.NeedsSetup, needsSetupLabel,
+                SirenixGUIStyles.Button, GUILayout.Width(160), GUILayout.Height(25)))
+            {
+                viewMode = ViewMode.NeedsSetup;
             }
 
             GUILayout.FlexibleSpace();
@@ -688,6 +702,90 @@ namespace Crookedile.Editor
                 CardRarity.Rare => new Color(0.9f, 0.7f, 0.2f),
                 _ => Color.grey
             };
+        }
+
+        #endregion
+
+        #region Needs Setup View
+
+        private void DrawNeedsSetupView()
+        {
+            var incompleteCards = database.GetAll()
+                .Where(c => c.NeedsConfiguration)
+                .OrderBy(c => c.CardName)
+                .ToList();
+
+            SirenixEditorGUI.BeginBox();
+
+            // ── Header ──────────────────────────────────────────────────────
+            SirenixEditorGUI.BeginBoxHeader();
+            GUILayout.BeginHorizontal();
+
+            if (incompleteCards.Count > 0)
+            {
+                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
+                labelStyle.normal.textColor = new Color(1f, 0.65f, 0f); // orange
+                GUILayout.Label($"⚠  {incompleteCards.Count} card(s) need Inspector setup", labelStyle);
+            }
+            else
+            {
+                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
+                labelStyle.normal.textColor = new Color(0.4f, 0.85f, 0.4f); // green
+                GUILayout.Label("✓  All cards are fully configured", labelStyle);
+            }
+
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();          // close header horizontal
+            SirenixEditorGUI.EndBoxHeader();
+
+            EditorGUILayout.Space(5);
+
+            // ── Card List ────────────────────────────────────────────────────
+            if (incompleteCards.Count == 0)
+            {
+                EditorGUILayout.Space(10);
+                GUILayout.Label("Nothing left to configure. Nice work!", SirenixGUIStyles.CenteredGreyMiniLabel);
+                EditorGUILayout.Space(10);
+                SirenixEditorGUI.EndBox();
+                return;
+            }
+
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition,
+                GUILayout.MaxHeight(500));
+
+            foreach (var card in incompleteCards)
+            {
+                SirenixEditorGUI.BeginVerticalList();
+                GUILayout.BeginHorizontal();
+
+                // Card name + type pill
+                GUILayout.BeginVertical();
+                GUILayout.Label(card.CardName, EditorStyles.boldLabel);
+                GUILayout.Label($"{card.CardType}  ·  {card.Rarity}", SirenixGUIStyles.LeftAlignedGreyLabel);
+                GUILayout.EndVertical();
+
+                GUILayout.FlexibleSpace();
+
+                // Select button
+                if (GUILayout.Button("Select", GUILayout.Width(60), GUILayout.Height(30)))
+                {
+                    Selection.activeObject = card;
+                    EditorGUIUtility.PingObject(card);
+                }
+
+                GUILayout.EndHorizontal();
+
+                // Configuration notes
+                var notesStyle = new GUIStyle(EditorStyles.helpBox) { wordWrap = true };
+                GUILayout.Label(card.ConfigurationNotes, notesStyle);
+
+                SirenixEditorGUI.EndVerticalList();
+                EditorGUILayout.Space(4);
+            }
+
+            EditorGUILayout.EndScrollView();
+
+            SirenixEditorGUI.EndBox();
         }
 
         #endregion

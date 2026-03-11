@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
+  m_Name: FalseProphet
+  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
+  _id: e462e9fd-9ae8-4d93-8449-7174b5bbbcb1
+  _cardName: False Prophet
+  _cardType: 1
+  _rarity: 0
+  _artwork: {fileID: 0}
+  _description: Expose their hypocrisy. They become more agitated. (Add RaiseTargetHostility
+    2 via Inspector.)
+  _flavorText: 
+  _costs:
+  - _costType: 1
+    _baseAmount: 1
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _newEffects: []
+  _effects:
+  - _name: 
+    _category: 0
+    _target: 1
+    _damageType: 0
+    _damageAmount: 4
+    _randomDamageRange: {x: 3, y: 9}
+    _resourceType: 0
+    _resourceAmount: 3
+    _cardManipulationType: 0
+    _cardAmount: 2
+    _cardToAdd: {fileID: 0}
+    _cardSelectionMode: 0
+    _filterCardType: 0
+    _discardDrawAmount: 0
+    _costReduction: 1
+    _chancePercent: 50
+    _chanceEffects: []
+    _statusEffectType: 0
+    _statusStacks: 2
+    _statusDuration: 0
+    _amountSource: 0
+  _passives: []
+  _isUpgraded: 0
+  _upgradedCosts: []
+  _upgradedEffects: []
+  _upgradedPassives: []
+  _tags:
+  - faithleader
+  _isStarterCard: 0
+  _isUnlockable: 0
+  _isUnplayable: 0
+  _policyLean: 3
+  _cardVFX: {fileID: 0}
+  references:
+    version: 2
+    RefIds: []

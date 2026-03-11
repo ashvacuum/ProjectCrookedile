@@ -617,6 +617,7 @@ namespace Crookedile.Gameplay.Battle
             _deck.Add(card);
             Shuffle();
             GameLogger.LogInfo<DeckManager>($"{_ownerName} added {card.CardName} to deck");
+            EventBus.Publish(new CardGrantedEvent { Card = card, IsPlayer = _isPlayer, Count = 1, ToDiscard = false });
         }
 
         /// <summary>
@@ -635,6 +636,7 @@ namespace Crookedile.Gameplay.Battle
 
             Shuffle();
             GameLogger.LogInfo<DeckManager>($"{_ownerName} added {count}x {card.CardName} to deck");
+            EventBus.Publish(new CardGrantedEvent { Card = card, IsPlayer = _isPlayer, Count = count, ToDiscard = false });
         }
 
         /// <summary>
@@ -679,6 +681,40 @@ namespace Crookedile.Gameplay.Battle
 
             GameLogger.LogInfo<DeckManager>($"{_ownerName} added {cardsAdded}x {card.CardName} to hand");
             return cardsAdded;
+        }
+
+        /// <summary>
+        /// Adds a card directly to the discard pile (e.g. a status or curse card granted by an enemy effect).
+        /// </summary>
+        public void AddCardToDiscard(CardData card)
+        {
+            if (card == null)
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to discard");
+                return;
+            }
+
+            _discard.Add(card);
+            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {card.CardName} to discard");
+            EventBus.Publish(new CardGrantedEvent { Card = card, IsPlayer = _isPlayer, Count = 1, ToDiscard = true });
+        }
+
+        /// <summary>
+        /// Adds multiple copies of a card directly to the discard pile.
+        /// </summary>
+        public void AddCardsToDiscard(CardData card, int count)
+        {
+            if (card == null)
+            {
+                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to discard");
+                return;
+            }
+
+            for (int i = 0; i < count; i++)
+                _discard.Add(card);
+
+            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {count}x {card.CardName} to discard");
+            EventBus.Publish(new CardGrantedEvent { Card = card, IsPlayer = _isPlayer, Count = count, ToDiscard = true });
         }
 
         #endregion

@@ -18,7 +18,7 @@ namespace Crookedile.Gameplay.Battle
         [Tooltip("Number of stacks. Most effects scale linearly with stacks.")]
         [SerializeField] private int _stacks;
 
-        [Tooltip("DecreasePerTurn: loses 1 stack each turn.\nRemoveEndOfTurn: gone entirely at end of turn.\nPermanent: never expires.")]
+        [Tooltip("DecreasePerTurn: loses 1 stack each turn.\nRemoveEndOfTurn: gone entirely at end of turn.\nPermanent: never expires.\nRemoveAtPlayerTurnStart: removed when the player's next turn begins (e.g. Stunned).")]
         [SerializeField] private StatusDurationType _durationType;
 
         public StatusEffectType Type => _type;
@@ -46,6 +46,7 @@ namespace Crookedile.Gameplay.Battle
         public bool DecrementStack()
         {
             if (_durationType == StatusDurationType.Permanent) return false;
+            if (_durationType == StatusDurationType.RemoveAtPlayerTurnStart) return false;
 
             _stacks--;
             return _stacks <= 0;
@@ -73,6 +74,7 @@ namespace Crookedile.Gameplay.Battle
             StatusEffectType.Scandal        => "Take X damage at end of turn (like Poison).",
             StatusEffectType.Confused       => "Effect values are randomised each turn.",
             StatusEffectType.Silenced       => "Cannot play Rhetoric cards.",
+            StatusEffectType.Stunned        => "Skips its next action. Removed at start of player turn.",
             // Buffs
             StatusEffectType.Strength       => "Deal X more damage.",
             StatusEffectType.Dexterity      => "Gain X more Composure per card played.",
@@ -95,9 +97,10 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public enum StatusDurationType
     {
-        DecreasePerTurn,    // Default: Stacks reduce by 1 each turn (Slay the Spire)
-        RemoveEndOfTurn,    // Removed entirely at end of turn (like Focus, Intangible)
-        Permanent           // Stacks never decrease (until manually removed)
+        DecreasePerTurn,            // Default: Stacks reduce by 1 each turn (Slay the Spire)
+        RemoveEndOfTurn,            // Removed entirely at end of turn (like Focus, Intangible)
+        Permanent,                  // Stacks never decrease (until manually removed)
+        RemoveAtPlayerTurnStart     // Removed when the player's turn begins (e.g. Stunned)
     }
 
     /// <summary>
@@ -115,6 +118,7 @@ namespace Crookedile.Gameplay.Battle
         Scandal,        // Take X damage at end of turn (like Poison)
         Confused,       // Effect values are randomised each turn
         Silenced,       // Cannot play Rhetoric cards
+        Stunned,        // Skips its next action; removed at start of player turn (non-stackable)
 
         // BUFFS (Positive)
         Strength,       // Deal X more damage

@@ -209,6 +209,27 @@ namespace Crookedile.Gameplay.Battle
         public bool IsPlayer;
     }
 
+    /// <summary>
+    /// Published by <c>DeckManager.AddCardToDeck()</c>, <c>AddCardsToDeck()</c>,
+    /// <c>AddCardToDiscard()</c>, and <c>AddCardsToDiscard()</c> when a card is granted
+    /// directly into the draw pile or discard pile during battle.
+    /// Not fired for normal draws, hand additions, or discards from hand.
+    /// </summary>
+    public struct CardGrantedEvent : IGameEvent
+    {
+        /// <summary>The card data that was granted.</summary>
+        public CardData Card;
+
+        /// <summary>True = granted to the player; false = to an enemy.</summary>
+        public bool IsPlayer;
+
+        /// <summary>Number of copies that were added.</summary>
+        public int Count;
+
+        /// <summary>True = card landed in the discard pile; false = draw pile.</summary>
+        public bool ToDiscard;
+    }
+
     #endregion
 
     #region Effect Events

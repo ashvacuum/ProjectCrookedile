@@ -25,7 +25,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1218339870940539292}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.14108, y: 0.27884, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -47,8 +47,12 @@ MonoBehaviour:
   _pressureCardPrefab: {fileID: 4407586219784281703, guid: d21cd7a1c65a6be428dc22f98b8bbb7e, type: 3}
   _rhetoricCardPrefab: {fileID: 6132933749022953883, guid: 4954616b2d132384898dddd7bfd65471, type: 3}
   _policyCardPrefab: {fileID: 3755019219694851433, guid: 624ef68a59f25474eb76622fc186aaf2, type: 3}
+  _statusCardPrefab: {fileID: 2015001486025000026, guid: 312f529e285c35640b0982d7a6072da5, type: 3}
+  _curseCardPrefab: {fileID: 8836768624359982599, guid: 0ec20cce992e73e4691ec8a0d6450e1f, type: 3}
   _enemySlotPrefab: {fileID: 2845183935342811957, guid: 27b4f0d6ccdeff948896ca6804495b83, type: 3}
   _pressurePoolSize: 15
   _rhetoricPoolSize: 15
   _policyPoolSize: 10
+  _statusPoolSize: 8
+  _cursePoolSize: 8
   _enemySlotPoolSize: 5
