@@ -233,6 +233,14 @@ namespace Crookedile.Data.Cards
         /// </summary>
         public string ConfigurationNotes => _configurationNotes;
 
+        /// <summary>
+        /// True if this card still has legacy <see cref="CardEffect"/> entries and no new
+        /// <see cref="BattleEffect"/> entries. Used by the editor to surface un-migrated cards.
+        /// </summary>
+        public bool UsesLegacyEffects =>
+            _effects != null && _effects.Count > 0 &&
+            (_newEffects == null || _newEffects.Count == 0);
+
         #endregion
 
         #region Public Methods

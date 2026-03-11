@@ -64,6 +64,6 @@ MonoBehaviour:
       data:
         _name: 
         _target: 1
-        _statusType: 0
-        _stacks: 1
+        _statusType: 9
+        _stacks: -1
         _duration: 0

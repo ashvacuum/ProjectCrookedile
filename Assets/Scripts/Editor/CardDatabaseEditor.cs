@@ -42,7 +42,8 @@ namespace Crookedile.Editor
         {
             Statistics,
             CardBrowser,
-            NeedsSetup
+            NeedsSetup,
+            LegacyEffects
         }
 
         protected override void OnEnable()
@@ -71,6 +72,9 @@ namespace Crookedile.Editor
                     break;
                 case ViewMode.NeedsSetup:
                     DrawNeedsSetupView();
+                    break;
+                case ViewMode.LegacyEffects:
+                    DrawLegacyEffectsView();
                     break;
             }
 
@@ -138,6 +142,16 @@ namespace Crookedile.Editor
                 SirenixGUIStyles.Button, GUILayout.Width(160), GUILayout.Height(25)))
             {
                 viewMode = ViewMode.NeedsSetup;
+            }
+
+            int legacyCount = database.GetAll().Count(c => c.UsesLegacyEffects);
+            string legacyLabel = legacyCount > 0
+                ? $"Legacy Effects ({legacyCount})"
+                : "Legacy Effects";
+            if (GUILayout.Toggle(viewMode == ViewMode.LegacyEffects, legacyLabel,
+                SirenixGUIStyles.Button, GUILayout.Width(160), GUILayout.Height(25)))
+            {
+                viewMode = ViewMode.LegacyEffects;
             }
 
             GUILayout.FlexibleSpace();
@@ -779,6 +793,90 @@ namespace Crookedile.Editor
                 var notesStyle = new GUIStyle(EditorStyles.helpBox) { wordWrap = true };
                 GUILayout.Label(card.ConfigurationNotes, notesStyle);
 
+                SirenixEditorGUI.EndVerticalList();
+                EditorGUILayout.Space(4);
+            }
+
+            EditorGUILayout.EndScrollView();
+
+            SirenixEditorGUI.EndBox();
+        }
+
+        private void DrawLegacyEffectsView()
+        {
+            var legacyCards = database.GetAll()
+                .Where(c => c.UsesLegacyEffects)
+                .OrderBy(c => c.CardName)
+                .ToList();
+
+            SirenixEditorGUI.BeginBox();
+
+            // ── Header ──────────────────────────────────────────────────────
+            SirenixEditorGUI.BeginBoxHeader();
+            GUILayout.BeginHorizontal();
+
+            if (legacyCards.Count > 0)
+            {
+                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
+                labelStyle.normal.textColor = new Color(1f, 0.65f, 0f); // orange
+                GUILayout.Label($"⚠  {legacyCards.Count} card(s) still using legacy CardEffect system", labelStyle);
+            }
+            else
+            {
+                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
+                labelStyle.normal.textColor = new Color(0.4f, 0.85f, 0.4f); // green
+                GUILayout.Label("✓  All cards use the new BattleEffect system", labelStyle);
+            }
+
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+            SirenixEditorGUI.EndBoxHeader();
+
+            EditorGUILayout.Space(5);
+
+            // ── Empty state ──────────────────────────────────────────────────
+            if (legacyCards.Count == 0)
+            {
+                EditorGUILayout.Space(10);
+                GUILayout.Label("Migration complete. Nothing left to convert!", SirenixGUIStyles.CenteredGreyMiniLabel);
+                EditorGUILayout.Space(10);
+                SirenixEditorGUI.EndBox();
+                return;
+            }
+
+            // ── Migration hint ───────────────────────────────────────────────
+            EditorGUILayout.HelpBox(
+                "Run  Crookedile → Tools → Migrate Effects to New System  to auto-convert these cards.",
+                MessageType.Info);
+            EditorGUILayout.Space(4);
+
+            // ── Card List ────────────────────────────────────────────────────
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition,
+                GUILayout.MaxHeight(500));
+
+            foreach (var card in legacyCards)
+            {
+                SirenixEditorGUI.BeginVerticalList();
+                GUILayout.BeginHorizontal();
+
+                // Card name + type + effect count
+                GUILayout.BeginVertical();
+                GUILayout.Label(card.CardName, EditorStyles.boldLabel);
+                GUILayout.Label(
+                    $"{card.CardType}  ·  {card.Rarity}  ·  {card.Effects.Count} legacy effect(s)",
+                    SirenixGUIStyles.LeftAlignedGreyLabel);
+                GUILayout.EndVertical();
+
+                GUILayout.FlexibleSpace();
+
+                // Select button
+                if (GUILayout.Button("Select", GUILayout.Width(60), GUILayout.Height(30)))
+                {
+                    Selection.activeObject = card;
+                    EditorGUIUtility.PingObject(card);
+                }
+
+                GUILayout.EndHorizontal();
                 SirenixEditorGUI.EndVerticalList();
                 EditorGUILayout.Space(4);
             }
