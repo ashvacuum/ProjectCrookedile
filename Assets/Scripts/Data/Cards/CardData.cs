@@ -35,8 +35,12 @@ namespace Crookedile.Data.Cards
         [Tooltip("Main artwork displayed on the front of the card")]
         [SerializeField] private Sprite _artwork;
 
-        [Tooltip("Mechanical description of what the card does (e.g., 'Deal 10 damage. +1 Heat')")]
-        [TextArea(3, 5)]
+        [FoldoutGroup("Description Override")]
+        [InfoBox("Leave blank — description is auto-generated from card effects at runtime. " +
+                 "Only fill this when the auto-generated text is insufficient.",
+                 InfoMessageType.Info)]
+        [Tooltip("Optional explicit override. Leave blank to auto-generate from card effects.")]
+        [TextArea(2, 5)]
         [SerializeField] private string _description;
 
         [Tooltip("Optional flavor text for storytelling and theme (e.g., 'A direct threat.')")]
@@ -145,8 +149,12 @@ namespace Crookedile.Data.Cards
         /// <summary>Main artwork displayed on the front of the card.</summary>
         public Sprite Artwork => _artwork;
 
-        /// <summary>Mechanical description of card effects.</summary>
-        public string Description => _description;
+        /// <summary>
+        /// Mechanical description of card effects.
+        /// Returns the manual override if set, otherwise auto-generates from the card's effects.
+        /// </summary>
+        public string Description =>
+            !string.IsNullOrEmpty(_description) ? _description : BuildAutoDescription();
 
         /// <summary>Flavor text for storytelling and theme.</summary>
         public string FlavorText => _flavorText;
@@ -240,6 +248,12 @@ namespace Crookedile.Data.Cards
         public bool UsesLegacyEffects =>
             _effects != null && _effects.Count > 0 &&
             (_newEffects == null || _newEffects.Count == 0);
+
+        /// <summary>
+        /// True if this card has no artwork assigned and is therefore not yet ready for gameplay.
+        /// Cards in development are excluded from reward pools and card-choice panels.
+        /// </summary>
+        public bool IsInDevelopment => _artwork == null;
 
         #endregion
 
@@ -351,8 +365,44 @@ namespace Crookedile.Data.Cards
         /// <summary>Gets the legacy effects for this card.</summary>
         public List<CardEffect> GetEffects(bool useUpgraded = true) => _effects;
 
-        /// <summary>Gets the description for this card.</summary>
-        public string GetDescription(bool useUpgraded = true) => _description;
+        /// <summary>
+        /// Gets the description for this card.
+        /// Returns the manual override if set, otherwise auto-generates from the card's effects.
+        /// </summary>
+        public string GetDescription(bool useUpgraded = true) =>
+            !string.IsNullOrEmpty(_description) ? _description : BuildAutoDescription();
+
+        /// <summary>
+        /// Builds a description string by concatenating <see cref="BattleEffect.GetDescription"/>
+        /// from all effects. Uses the new BattleEffect system first, falls back to legacy
+        /// CardEffect descriptions. Returns an empty string if no effects are present.
+        /// </summary>
+        private string BuildAutoDescription()
+        {
+            // New BattleEffect system takes priority
+            if (_newEffects != null && _newEffects.Count > 0)
+            {
+                var parts = new System.Collections.Generic.List<string>(_newEffects.Count);
+                foreach (var e in _newEffects)
+                {
+                    if (e == null) continue;
+                    string d = e.GetDescription();
+                    if (!string.IsNullOrEmpty(d)) parts.Add(d);
+                }
+                if (parts.Count > 0) return string.Join(". ", parts);
+            }
+
+            // Legacy CardEffect fallback
+            if (_effects != null && _effects.Count > 0)
+            {
+                var parts = new System.Collections.Generic.List<string>(_effects.Count);
+                foreach (var e in _effects)
+                    parts.Add(e.GetDescription());
+                return string.Join(". ", parts);
+            }
+
+            return string.Empty;
+        }
 
         /// <summary>Gets the artwork for this card.</summary>
         public Sprite GetArtwork(bool useUpgraded = true) => _artwork;

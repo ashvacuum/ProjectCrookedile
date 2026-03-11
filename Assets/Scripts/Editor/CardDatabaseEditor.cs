@@ -43,7 +43,8 @@ namespace Crookedile.Editor
             Statistics,
             CardBrowser,
             NeedsSetup,
-            LegacyEffects
+            LegacyEffects,
+            InDevelopment
         }
 
         protected override void OnEnable()
@@ -75,6 +76,9 @@ namespace Crookedile.Editor
                     break;
                 case ViewMode.LegacyEffects:
                     DrawLegacyEffectsView();
+                    break;
+                case ViewMode.InDevelopment:
+                    DrawInDevelopmentView();
                     break;
             }
 
@@ -152,6 +156,16 @@ namespace Crookedile.Editor
                 SirenixGUIStyles.Button, GUILayout.Width(160), GUILayout.Height(25)))
             {
                 viewMode = ViewMode.LegacyEffects;
+            }
+
+            int devCount = database.GetAll().Count(c => c.IsInDevelopment);
+            string devLabel = devCount > 0
+                ? $"In Development ({devCount})"
+                : "In Development";
+            if (GUILayout.Toggle(viewMode == ViewMode.InDevelopment, devLabel,
+                SirenixGUIStyles.Button, GUILayout.Width(160), GUILayout.Height(25)))
+            {
+                viewMode = ViewMode.InDevelopment;
             }
 
             GUILayout.FlexibleSpace();
@@ -865,6 +879,88 @@ namespace Crookedile.Editor
                 GUILayout.Label(
                     $"{card.CardType}  ·  {card.Rarity}  ·  {card.Effects.Count} legacy effect(s)",
                     SirenixGUIStyles.LeftAlignedGreyLabel);
+                GUILayout.EndVertical();
+
+                GUILayout.FlexibleSpace();
+
+                // Select button
+                if (GUILayout.Button("Select", GUILayout.Width(60), GUILayout.Height(30)))
+                {
+                    Selection.activeObject = card;
+                    EditorGUIUtility.PingObject(card);
+                }
+
+                GUILayout.EndHorizontal();
+                SirenixEditorGUI.EndVerticalList();
+                EditorGUILayout.Space(4);
+            }
+
+            EditorGUILayout.EndScrollView();
+
+            SirenixEditorGUI.EndBox();
+        }
+
+        private void DrawInDevelopmentView()
+        {
+            var devCards = database.GetAll()
+                .Where(c => c.IsInDevelopment)
+                .OrderBy(c => c.CardName)
+                .ToList();
+
+            SirenixEditorGUI.BeginBox();
+
+            // ── Header ──────────────────────────────────────────────────────
+            SirenixEditorGUI.BeginBoxHeader();
+            GUILayout.BeginHorizontal();
+
+            if (devCards.Count > 0)
+            {
+                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
+                labelStyle.normal.textColor = new Color(1f, 0.65f, 0f); // orange
+                GUILayout.Label($"⚠  {devCards.Count} card(s) have no artwork assigned", labelStyle);
+            }
+            else
+            {
+                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
+                labelStyle.normal.textColor = new Color(0.4f, 0.85f, 0.4f); // green
+                GUILayout.Label("✓  All cards have artwork assigned", labelStyle);
+            }
+
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+            SirenixEditorGUI.EndBoxHeader();
+
+            EditorGUILayout.Space(5);
+
+            // ── Empty state ──────────────────────────────────────────────────
+            if (devCards.Count == 0)
+            {
+                EditorGUILayout.Space(10);
+                GUILayout.Label("All cards have artwork and are ready for gameplay.", SirenixGUIStyles.CenteredGreyMiniLabel);
+                EditorGUILayout.Space(10);
+                SirenixEditorGUI.EndBox();
+                return;
+            }
+
+            // ── Info note ────────────────────────────────────────────────────
+            EditorGUILayout.HelpBox(
+                "These cards are excluded from reward pools and card-choice panels until artwork is assigned.",
+                MessageType.Info);
+            EditorGUILayout.Space(4);
+
+            // ── Card List ────────────────────────────────────────────────────
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition,
+                GUILayout.MaxHeight(500));
+
+            foreach (var card in devCards)
+            {
+                SirenixEditorGUI.BeginVerticalList();
+                GUILayout.BeginHorizontal();
+
+                // Card name + type + rarity
+                GUILayout.BeginVertical();
+                GUILayout.Label(card.CardName, EditorStyles.boldLabel);
+                GUILayout.Label($"{card.CardType}  ·  {card.Rarity}", SirenixGUIStyles.LeftAlignedGreyLabel);
                 GUILayout.EndVertical();
 
                 GUILayout.FlexibleSpace();

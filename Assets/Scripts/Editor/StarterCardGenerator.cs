@@ -795,7 +795,6 @@ namespace Crookedile.Editor
             var nameField        = typeof(CardData).GetField("_cardName",    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var typeField        = typeof(CardData).GetField("_cardType",    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var rarityField      = typeof(CardData).GetField("_rarity",      System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var descriptionField = typeof(CardData).GetField("_description", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var costsField       = typeof(CardData).GetField("_costs",       System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var effectsField     = typeof(CardData).GetField("_effects",     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var tagsField        = typeof(CardData).GetField("_tags",        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -804,7 +803,7 @@ namespace Crookedile.Editor
             nameField?.SetValue(card, name);
             typeField?.SetValue(card, type);
             rarityField?.SetValue(card, rarity);
-            descriptionField?.SetValue(card, description);
+            // _description is intentionally NOT set — description is auto-generated from effects at runtime.
             unplayableField?.SetValue(card, isUnplayable);
 
             if (tags != null && tags.Length > 0)

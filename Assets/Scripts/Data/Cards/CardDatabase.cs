@@ -280,6 +280,7 @@ namespace Crookedile.Data.Cards
                 if (card == null)          continue;
                 if (card.IsStarterCard)    continue;
                 if (card.IsUpgraded)       continue;   // offer base version only
+                if (card.IsInDevelopment)  continue;   // no artwork — not ready for play
 
                 switch (card.CardType)
                 {
