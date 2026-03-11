@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Fervor
   _cardType: 3
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 7e284d257664b0b4db17d0d913a398e2, type: 3}
   _description: Divine fervour builds. Your next Blessing is supercharged. (Configure
     NextCardDoubles passive trigger via Inspector.)
   _flavorText: 
@@ -41,6 +41,7 @@ MonoBehaviour:
   _isUnplayable: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
+  _configurationNotes: 
   references:
     version: 2
     RefIds: []

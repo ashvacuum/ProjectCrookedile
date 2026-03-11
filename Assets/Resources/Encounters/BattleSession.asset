@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 753352c9291356a40b81076a162b5ad7, type: 3}
+  m_Name: BattleSession
+  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.BattleSession
+  rounds:
+  - label: Round 1
+    enemies: []
+  - label: Round 2
+    enemies: []
+  - label: Round 3
+    enemies: []
+  - label: Round 4
+    enemies: []

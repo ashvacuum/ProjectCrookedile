@@ -13,16 +13,15 @@ MonoBehaviour:
   m_Name: SermonNotes
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
   _id: 71a4aaa3-d020-4f11-a020-007dab775bfe
-  _cardName: Sermon Notes
+  _cardName: Heckler
   _cardType: 3
   _rarity: 0
-  _artwork: {fileID: 0}
-  _description: A scribbled reminder. Draw the next thought. (Add ExhaustThisCard
-    via Inspector.)
+  _artwork: {fileID: 21300000, guid: 3ac49e2395a7c7747a818de796518b78, type: 3}
+  _description: Draw 1 Card. Exhaust.
   _flavorText: 
   _costs:
-  - _costType: 0
-    _baseAmount: 0
+  - _costType: 1
+    _baseAmount: 1
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
@@ -50,7 +49,8 @@ MonoBehaviour:
     _statusStacks: 2
     _statusDuration: 0
     _amountSource: 0
-  _passives: []
+  _passives:
+  - rid: 4738608375284105309
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
@@ -62,6 +62,24 @@ MonoBehaviour:
   _isUnplayable: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
+  _configurationNotes: 
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 4738608375284105309
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: New Passive
+        _trigger:
+          rid: 4738608375284105310
+        _conditions: []
+        _oneShot: 0
+        _effects:
+        - rid: 4738608375284105311
+    - rid: 4738608375284105310
+      type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data: 
+    - rid: 4738608375284105311
+      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: Exhaust

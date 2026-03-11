@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
-  m_Name: Attack
+  m_Name: StrengthenArgument
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Normal Attack
-  _moveType: 0
+  _moveName: Strengthen Argument
+  _moveType: 2
   _intentDescription: 
   _newEffects:
-  - rid: 4738608336531357822
+  - rid: 4738608375284105305
   _effects:
   - _name: 
     _category: 0
@@ -46,10 +46,11 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4738608336531357822
-      type: {class: DealDamageEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+    - rid: 4738608375284105305
+      type: {class: ApplyStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: 
-        _target: 4
-        _amount: 4
-        _amountSource: 0
+        _target: 0
+        _statusType: 9
+        _stacks: 1
+        _duration: 2

@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Inspired
   _cardType: 3
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 4b5d931a2d2419649a005db7bf4d8a28, type: 3}
   _description: A lingering sense of purpose. Gain 1 Composure at turn start while
     held. (Configure TurnStart passive trigger via Inspector.)
   _flavorText: 
@@ -41,6 +41,7 @@ MonoBehaviour:
   _isUnplayable: 1
   _policyLean: 3
   _cardVFX: {fileID: 0}
+  _configurationNotes: 
   references:
     version: 2
     RefIds: []

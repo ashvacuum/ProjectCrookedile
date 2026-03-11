@@ -180,7 +180,9 @@ namespace Crookedile.Data.Cards
         /// Can this card be upgraded? True if it is not already upgraded and has at least one
         /// upgraded field defined (costs, effects, or passives).
         /// </summary>
-        public bool CanUpgrade => !_isUpgraded && (
+        public bool CanUpgrade => _cardType != CardType.Curse &&
+                               _cardType != CardType.Status &&
+                               !_isUpgraded && (
             _upgradedCosts.Count > 0 ||
             _upgradedEffects.Count > 0 ||
             _upgradedPassives.Count > 0);

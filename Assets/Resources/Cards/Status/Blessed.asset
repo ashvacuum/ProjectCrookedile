@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Blessed
   _cardType: 3
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 9d0cb3c9aea568642b8febed29b8787a, type: 3}
   _description: A divine gift. Gain composure and it's gone. (Add ExhaustThisCard
     effect via Inspector.)
   _flavorText: 
@@ -62,6 +62,7 @@ MonoBehaviour:
   _isUnplayable: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
+  _configurationNotes: 
   references:
     version: 2
     RefIds: []

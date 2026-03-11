@@ -20,11 +20,8 @@ MonoBehaviour:
   _minHostility: -3
   _demographicClass: 1
   _demographicValues: 2
-  _startingEffects:
-  - _type: 15
-    _stacks: 2
-    _durationType: 2
-  _movePattern: 1
+  _startingEffects: []
+  _movePattern: 0
   _moves:
   - {fileID: 11400000, guid: 840cb7f1c3234024d8c13dcb7b49b315, type: 2}
   - {fileID: 11400000, guid: e4b31db34c15a8f429acb82038362824, type: 2}

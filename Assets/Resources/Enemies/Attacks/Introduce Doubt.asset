@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
-  m_Name: Attack
+  m_Name: Introduce Doubt
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Normal Attack
-  _moveType: 0
+  _moveName: Introduce Doubt
+  _moveType: 3
   _intentDescription: 
   _newEffects:
-  - rid: 4738608336531357822
+  - rid: 4738608375284105306
   _effects:
   - _name: 
     _category: 0
@@ -46,10 +46,9 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4738608336531357822
-      type: {class: DealDamageEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+    - rid: 4738608375284105306
+      type: {class: AddCardToDiscardEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
-        _name: 
-        _target: 4
-        _amount: 4
-        _amountSource: 0
+        _name: Scandal
+        _card: {fileID: 11400000, guid: 7a198186b7b4ae549aa0d48002f25ad1, type: 2}
+        _amount: 1

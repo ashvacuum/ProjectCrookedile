@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Crookedile.Data.Enemy;
@@ -19,8 +20,11 @@ namespace Crookedile.Gameplay.Battle
 
         private readonly EnemyData _enemyData;
 
-        /// <summary>Index into the move list for Sequential pattern.</summary>
-        private int _moveIndex;
+        /// <summary>Index into the move list for Sequential / RandomSequential pattern.</summary>
+        private int  _moveIndex;
+
+        /// <summary>True once the random starting offset has been seeded (RandomSequential only).</summary>
+        private bool _moveIndexInitialized;
 
         /// <summary>
         /// The move the enemy intends to execute this turn.
@@ -63,11 +67,29 @@ namespace Crookedile.Gameplay.Battle
         /// Call this at the START of the player's turn (Slay the Spire timing) so the
         /// player can see the threat before deciding which cards to play.
         /// </summary>
-        /// <returns>The selected move, or null if no moves are defined.</returns>
-        public EnemyMoveData SelectNextMove()
+        /// <param name="allEnemies">
+        /// All living and dead enemies in the current battle. Used to evaluate per-move
+        /// conditions (e.g. <see cref="EnemyMoveCondition.OnlyIfNoMinionsAlive"/>).
+        /// Pass <c>null</c> to skip condition filtering (all moves treated as eligible).
+        /// </param>
+        /// <returns>The selected move, or null if no moves are defined or all are blocked.</returns>
+        public EnemyMoveData SelectNextMove(IReadOnlyList<EnemyController> allEnemies = null)
         {
             var moves = _enemyData?.Moves;
             if (moves == null || moves.Count == 0)
+            {
+                CurrentIntent = null;
+                return null;
+            }
+
+            // Filter out moves whose conditions aren't met right now.
+            // This is re-evaluated every turn so dynamic conditions (e.g. "are minions alive?")
+            // always reflect the current battle state.
+            var eligible = moves
+                .Where(m => IsMoveEligible(m, allEnemies))
+                .ToList();
+
+            if (eligible.Count == 0)
             {
                 CurrentIntent = null;
                 return null;
@@ -78,7 +100,7 @@ namespace Crookedile.Gameplay.Battle
             // SummonMinion is neutral and stays in the eligible pool.
             if (Stats.IsReceptive)
             {
-                var nonOffensiveMoves = moves
+                var nonOffensiveMoves = eligible
                     .Where(m => m.MoveType != EnemyMoveType.Attack
                              && m.MoveType != EnemyMoveType.OffensiveBuff
                              && m.MoveType != EnemyMoveType.DebuffAttack)
@@ -95,21 +117,55 @@ namespace Crookedile.Gameplay.Battle
             switch (_enemyData.MovePattern)
             {
                 case EnemyMovePattern.Sequential:
-                    CurrentIntent = moves[_moveIndex % moves.Count];
+                    CurrentIntent = eligible[_moveIndex % eligible.Count];
                     _moveIndex++;
                     break;
 
                 case EnemyMovePattern.Random:
-                    int randomIndex = Random.Range(0, moves.Count);
-                    CurrentIntent = moves[randomIndex];
+                    int randomIndex = Random.Range(0, eligible.Count);
+                    CurrentIntent = eligible[randomIndex];
+                    break;
+
+                case EnemyMovePattern.RandomSequential:
+                    if (!_moveIndexInitialized)
+                    {
+                        _moveIndex = Random.Range(0, eligible.Count);
+                        _moveIndexInitialized = true;
+                    }
+                    CurrentIntent = eligible[_moveIndex % eligible.Count];
+                    _moveIndex++;
                     break;
 
                 default:
-                    CurrentIntent = moves[0];
+                    CurrentIntent = eligible[0];
                     break;
             }
 
             return CurrentIntent;
+        }
+
+        // ─── Private Helpers ──────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Returns true if <paramref name="move"/> should be included in the selection pool
+        /// this turn based on its <see cref="EnemyMoveCondition"/>.
+        /// </summary>
+        private bool IsMoveEligible(EnemyMoveData move, IReadOnlyList<EnemyController> allEnemies)
+        {
+            switch (move.Condition)
+            {
+                case EnemyMoveCondition.OnlyIfNoMinionsAlive:
+                    // Move is eligible only when no living enemy matches the minion template.
+                    // Requires both a valid enemy list and a MinionToSummon reference;
+                    // if either is missing, default to eligible so the move isn't silently lost.
+                    if (allEnemies == null || move.MinionToSummon == null) return true;
+                    return !allEnemies.Any(e => e != this
+                                             && !e.IsDefeated
+                                             && e.EnemyData == move.MinionToSummon);
+
+                default: // EnemyMoveCondition.None
+                    return true;
+            }
         }
     }
 }

@@ -24,6 +24,17 @@ namespace Crookedile.Data.Enemy
     }
 
     /// <summary>
+    /// Determines when a move is included in the selection pool.
+    /// Checked each time SelectNextMove() is called, so conditions that change mid-battle
+    /// (e.g. living minion count) are always evaluated on the latest state.
+    /// </summary>
+    public enum EnemyMoveCondition
+    {
+        None,                   // Default — move is always eligible
+        OnlyIfNoMinionsAlive,   // Skip if any living enemy already matches MinionToSummon
+    }
+
+    /// <summary>
     /// One scripted move an enemy can perform on their turn.
     /// Effects reuse the existing CardEffect system — EffectResolver handles them
     /// with isPlayerCard=false (enemy is caster, player is target).
@@ -82,6 +93,15 @@ namespace Crookedile.Data.Enemy
         [Tooltip("How many copies of the minion to summon (capped to keep total enemies ≤ 5).")]
         [SerializeField] private int _minionCount = 1;
 
+        // ─── Selection Condition ──────────────────────────────────────────────────
+
+        [Header("Condition")]
+        [Tooltip("When this move is included in the selection pool.\n\n" +
+                 "None: always eligible.\n" +
+                 "OnlyIfNoMinionsAlive: only selected when no living enemy matches MinionToSummon " +
+                 "(boss re-summons minions only after they have all been killed).")]
+        [SerializeField] private EnemyMoveCondition _condition = EnemyMoveCondition.None;
+
         // ─── Properties ───────────────────────────────────────────────────────────
 
         public string            MoveName          => _moveName;
@@ -122,5 +142,6 @@ namespace Crookedile.Data.Enemy
         public VFXEvent          MoveVFX           => _moveVFX;
         public EnemyData         MinionToSummon    => _minionToSummon;
         public int               MinionCount       => _minionCount;
+        public EnemyMoveCondition Condition        => _condition;
     }
 }

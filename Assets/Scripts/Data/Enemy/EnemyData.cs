@@ -14,7 +14,10 @@ namespace Crookedile.Data.Enemy
         Sequential,
 
         /// <summary>Picks any move at random each turn.</summary>
-        Random
+        Random,
+
+        /// <summary>Like Sequential but picks a random starting offset — then cycles in order from there.</summary>
+        RandomSequential
     }
 
     /// <summary>
