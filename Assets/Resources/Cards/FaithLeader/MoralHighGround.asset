@@ -26,7 +26,9 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
-  _newEffects: []
+  _newEffects:
+  - rid: 4738608375284105335
+  - rid: 4738608375284105336
   _effects:
   - _name: 
     _category: 1
@@ -82,6 +84,18 @@ MonoBehaviour:
   _isUnplayable: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
+  _configurationNotes: 
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 4738608375284105335
+      type: {class: GainComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _amount: 3
+        _amountSource: 0
+    - rid: 4738608375284105336
+      type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _amount: 1

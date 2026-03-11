@@ -122,8 +122,8 @@ namespace Crookedile.Editor
                 "This tool stamps all 19 starter card assets with:\n" +
                 "  • IsStarterCard = true\n" +
                 "  • Origin tag (faithleader / nepobaby / actor)\n" +
-                "  • Mechanical description\n" +
                 "  • Flavor text\n\n" +
+                "Note: Mechanical descriptions are now auto-generated from card effects at runtime.\n\n" +
                 "Cards are loaded from Assets/Resources/Cards/.\n" +
                 "Safe to run multiple times — idempotent.",
                 MessageType.Info);
@@ -170,12 +170,7 @@ namespace Crookedile.Editor
                     changed = true;
                 }
 
-                // Description
-                if (card.Description != meta.description)
-                {
-                    SetField(card, "_description", meta.description);
-                    changed = true;
-                }
+                // Description is now auto-generated from card effects — no longer stamped here.
 
                 // FlavorText
                 if (card.FlavorText != meta.flavorText)
@@ -239,7 +234,7 @@ namespace Crookedile.Editor
                 string status = $"  {kvp.Key}: " +
                                 $"IsStarter={card.IsStarterCard}, " +
                                 $"Tags=[{string.Join(",", card.Tags)}], " +
-                                $"Desc={(string.IsNullOrEmpty(card.Description) ? "EMPTY" : "OK")}";
+                                $"Artwork={(card.Artwork == null ? "MISSING" : "OK")}";
                 Debug.Log(status);
             }
         }

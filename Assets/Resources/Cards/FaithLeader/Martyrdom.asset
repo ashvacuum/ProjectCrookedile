@@ -27,7 +27,8 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
-  _newEffects: []
+  _newEffects:
+  - rid: 4738608375284105334
   _effects:
   - _name: 
     _category: 0
@@ -62,6 +63,14 @@ MonoBehaviour:
   _isUnplayable: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
+  _configurationNotes: 
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 4738608375284105334
+      type: {class: DealDamageEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _target: 1
+        _amount: 8
+        _amountSource: 0
