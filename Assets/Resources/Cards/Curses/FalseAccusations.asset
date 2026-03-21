@@ -29,18 +29,38 @@ MonoBehaviour:
     _maximumCost: 99
   _newEffects: []
   _effects: []
-  _passives: []
+  _passives:
+  - rid: 4738608601116966912
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
   _upgradedPassives: []
   _tags:
-  - faithleader
+  - universal
   _isStarterCard: 0
   _isUnlockable: 0
   _isUnplayable: 1
   _policyLean: 3
   _cardVFX: {fileID: 0}
+  _configurationNotes: 
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 4738608601116966912
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: New Passive
+        _trigger:
+          rid: 4738608601116966913
+        _conditions: []
+        _oneShot: 0
+        _effects:
+        - rid: 4738608601116966914
+    - rid: 4738608601116966913
+      type: {class: CardDrawnTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data: 
+    - rid: 4738608601116966914
+      type: {class: DiscardCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name: 
+        _amount: 1

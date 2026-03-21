@@ -25,6 +25,25 @@ namespace Crookedile.Data.Cards
     [CreateAssetMenu(fileName = "CardDatabase", menuName = "Crookedile/Database/Card Database")]
     public class CardDatabase : GameDatabase<CardData>
     {
+        // ─── Constants ────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Tag applied to cards that are eligible for any origin's reward pool.
+        /// Use this constant wherever tag comparisons are needed to avoid magic strings.
+        /// </summary>
+        public const string UniversalTag = "universal";
+
+        /// <summary>
+        /// Rarity weights used for reward card selection.
+        /// Adjust values here to tune drop rates; add a new entry when adding a new CardRarity.
+        /// </summary>
+        private static readonly Dictionary<CardRarity, float> RewardWeights = new Dictionary<CardRarity, float>
+        {
+            [CardRarity.Basic]    = 70f,
+            [CardRarity.Enhanced] = 25f,
+            [CardRarity.Rare]     =  5f,
+        };
+
         /// <summary>
         /// Gets the unique ID from a CardData item.
         /// Used internally by the database system.
@@ -208,13 +227,7 @@ namespace Crookedile.Data.Cards
 
             foreach (var card in allCards)
             {
-                float weight = card.Rarity switch
-                {
-                    CardRarity.Basic => 70f,
-                    CardRarity.Enhanced => 25f,
-                    CardRarity.Rare => 5f,
-                    _ => 1f
-                };
+                float weight = RewardWeights.TryGetValue(card.Rarity, out float w) ? w : 1f;
                 weights.Add(weight);
             }
 
@@ -236,7 +249,7 @@ namespace Crookedile.Data.Cards
             // Get all starter cards tagged with the origin name
             string originTag = origin.ToString().ToLower();
             return FindAll(card => card.IsStarterCard &&
-                                 (card.Tags.Count == 0 || card.HasTag(originTag) || card.HasTag("universal")));
+                                 (card.Tags.Count == 0 || card.HasTag(originTag) || card.HasTag(UniversalTag)));
         }
 
         #endregion
@@ -290,12 +303,12 @@ namespace Crookedile.Data.Cards
                         break;
 
                     case CardType.Pressure:
-                        if (includePressure && (card.HasTag(originTag) || card.HasTag("universal")))
+                        if (includePressure && (card.HasTag(originTag) || card.HasTag(UniversalTag)))
                             candidates.Add(card);
                         break;
 
                     case CardType.Rhetoric:
-                        if (includeRhetoric && (card.HasTag(originTag) || card.HasTag("universal")))
+                        if (includeRhetoric && (card.HasTag(originTag) || card.HasTag(UniversalTag)))
                             candidates.Add(card);
                         break;
                 }
@@ -308,11 +321,6 @@ namespace Crookedile.Data.Cards
             var enhancedBucket = candidates.Where(c => c.Rarity == CardRarity.Enhanced).ToList();
             var rareBucket     = candidates.Where(c => c.Rarity == CardRarity.Rare).ToList();
 
-            // Rarity weights: Basic 70 / Enhanced 25 / Rare 5
-            const float weightBasic    = 70f;
-            const float weightEnhanced = 25f;
-            const float weightRare     =  5f;
-
             var result = new List<CardData>(count);
 
             for (int i = 0; i < count; i++)
@@ -322,9 +330,9 @@ namespace Crookedile.Data.Cards
 
                 // Weighted pick among non-empty buckets
                 List<CardData> bucket = PickWeightedBucket(
-                    basicBucket,    weightBasic,
-                    enhancedBucket, weightEnhanced,
-                    rareBucket,     weightRare);
+                    basicBucket,    RewardWeights[CardRarity.Basic],
+                    enhancedBucket, RewardWeights[CardRarity.Enhanced],
+                    rareBucket,     RewardWeights[CardRarity.Rare]);
 
                 if (bucket == null || bucket.Count == 0) break;
 

@@ -1,4 +1,5 @@
 using Crookedile.Data;
+using Crookedile.Data.Enemy;
 using UnityEditor;
 using UnityEngine;
 using Crookedile.Data.Cards;
@@ -44,7 +45,9 @@ namespace Crookedile.Editor
             CardBrowser,
             NeedsSetup,
             LegacyEffects,
-            InDevelopment
+            InDevelopment,
+            PassiveIssues,
+            EnemyAudit
         }
 
         protected override void OnEnable()
@@ -79,6 +82,12 @@ namespace Crookedile.Editor
                     break;
                 case ViewMode.InDevelopment:
                     DrawInDevelopmentView();
+                    break;
+                case ViewMode.PassiveIssues:
+                    DrawPassiveIssuesView();
+                    break;
+                case ViewMode.EnemyAudit:
+                    DrawEnemyAuditView();
                     break;
             }
 
@@ -124,49 +133,57 @@ namespace Crookedile.Editor
 
         private void DrawViewModeSelector()
         {
+            // ── Row 1: Browse ──────────────────────────────────────────────────
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Toggle(viewMode == ViewMode.Statistics, "Statistics", SirenixGUIStyles.Button, GUILayout.Width(120), GUILayout.Height(25)))
-            {
+            if (GUILayout.Toggle(viewMode == ViewMode.Statistics, "Statistics",
+                    SirenixGUIStyles.Button, GUILayout.Width(120), GUILayout.Height(25)))
                 viewMode = ViewMode.Statistics;
-            }
 
-            if (GUILayout.Toggle(viewMode == ViewMode.CardBrowser, "Card Browser", SirenixGUIStyles.Button, GUILayout.Width(120), GUILayout.Height(25)))
+            if (GUILayout.Toggle(viewMode == ViewMode.CardBrowser, "Card Browser",
+                    SirenixGUIStyles.Button, GUILayout.Width(120), GUILayout.Height(25)))
             {
                 viewMode = ViewMode.CardBrowser;
                 RefreshFilteredCards();
             }
 
             int needsSetupCount = database.GetAll().Count(c => c.NeedsConfiguration);
-            string needsSetupLabel = needsSetupCount > 0
-                ? $"Needs Setup ({needsSetupCount})"
-                : "Needs Setup";
+            string needsSetupLabel = needsSetupCount > 0 ? $"Needs Setup ({needsSetupCount})" : "Needs Setup";
             if (GUILayout.Toggle(viewMode == ViewMode.NeedsSetup, needsSetupLabel,
-                SirenixGUIStyles.Button, GUILayout.Width(160), GUILayout.Height(25)))
-            {
+                    SirenixGUIStyles.Button, GUILayout.Width(150), GUILayout.Height(25)))
                 viewMode = ViewMode.NeedsSetup;
-            }
 
             int legacyCount = database.GetAll().Count(c => c.UsesLegacyEffects);
-            string legacyLabel = legacyCount > 0
-                ? $"Legacy Effects ({legacyCount})"
-                : "Legacy Effects";
+            string legacyLabel = legacyCount > 0 ? $"Legacy Effects ({legacyCount})" : "Legacy Effects";
             if (GUILayout.Toggle(viewMode == ViewMode.LegacyEffects, legacyLabel,
-                SirenixGUIStyles.Button, GUILayout.Width(160), GUILayout.Height(25)))
-            {
+                    SirenixGUIStyles.Button, GUILayout.Width(150), GUILayout.Height(25)))
                 viewMode = ViewMode.LegacyEffects;
-            }
+
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.Space(2);
+
+            // ── Row 2: Quality / Audit ─────────────────────────────────────────
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
 
             int devCount = database.GetAll().Count(c => c.IsInDevelopment);
-            string devLabel = devCount > 0
-                ? $"In Development ({devCount})"
-                : "In Development";
+            string devLabel = devCount > 0 ? $"In Development ({devCount})" : "In Development";
             if (GUILayout.Toggle(viewMode == ViewMode.InDevelopment, devLabel,
-                SirenixGUIStyles.Button, GUILayout.Width(160), GUILayout.Height(25)))
-            {
+                    SirenixGUIStyles.Button, GUILayout.Width(150), GUILayout.Height(25)))
                 viewMode = ViewMode.InDevelopment;
-            }
+
+            int passiveIssueCount = database.GetAll().Count(c => GetCardPassiveIssues(c).Count > 0);
+            string passiveLabel = passiveIssueCount > 0 ? $"Passive Issues ({passiveIssueCount})" : "Passive Issues";
+            if (GUILayout.Toggle(viewMode == ViewMode.PassiveIssues, passiveLabel,
+                    SirenixGUIStyles.Button, GUILayout.Width(150), GUILayout.Height(25)))
+                viewMode = ViewMode.PassiveIssues;
+
+            if (GUILayout.Toggle(viewMode == ViewMode.EnemyAudit, "Enemy Audit",
+                    SirenixGUIStyles.Button, GUILayout.Width(120), GUILayout.Height(25)))
+                viewMode = ViewMode.EnemyAudit;
 
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
@@ -980,6 +997,328 @@ namespace Crookedile.Editor
             EditorGUILayout.EndScrollView();
 
             SirenixEditorGUI.EndBox();
+        }
+
+        #endregion
+
+        #region Passive Issues View
+
+        private void DrawPassiveIssuesView()
+        {
+            var cardsWithIssues = database.GetAll()
+                .Select(c => (card: c, issues: GetCardPassiveIssues(c)))
+                .Where(x => x.issues.Count > 0)
+                .OrderBy(x => x.card.CardName)
+                .ToList();
+
+            SirenixEditorGUI.BeginBox();
+
+            // ── Header ──────────────────────────────────────────────────────
+            SirenixEditorGUI.BeginBoxHeader();
+            GUILayout.BeginHorizontal();
+
+            if (cardsWithIssues.Count > 0)
+            {
+                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
+                labelStyle.normal.textColor = new Color(1f, 0.65f, 0f);
+                GUILayout.Label($"⚠  {cardsWithIssues.Count} card(s) have passive or behavior issues", labelStyle);
+            }
+            else
+            {
+                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
+                labelStyle.normal.textColor = new Color(0.4f, 0.85f, 0.4f);
+                GUILayout.Label("✓  All card passives and effects are configured", labelStyle);
+            }
+
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+            SirenixEditorGUI.EndBoxHeader();
+
+            EditorGUILayout.Space(5);
+
+            if (cardsWithIssues.Count == 0)
+            {
+                EditorGUILayout.Space(10);
+                GUILayout.Label("No passive or behavior issues found.", SirenixGUIStyles.CenteredGreyMiniLabel);
+                EditorGUILayout.Space(10);
+                SirenixEditorGUI.EndBox();
+                return;
+            }
+
+            EditorGUILayout.HelpBox(
+                "Cards listed here either have no behavior at all, or have passives that are misconfigured " +
+                "(missing trigger, no effects). Unplayable cards (Curse / Status) with empty effects are expected.",
+                MessageType.Info);
+            EditorGUILayout.Space(4);
+
+            // ── Card list ────────────────────────────────────────────────────
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.MaxHeight(500));
+
+            foreach (var (card, issues) in cardsWithIssues)
+            {
+                SirenixEditorGUI.BeginVerticalList();
+                GUILayout.BeginHorizontal();
+
+                GUILayout.BeginVertical();
+                GUILayout.Label(card.CardName, EditorStyles.boldLabel);
+                GUILayout.Label($"{card.CardType}  ·  {card.Rarity}", SirenixGUIStyles.LeftAlignedGreyLabel);
+                GUILayout.EndVertical();
+
+                GUILayout.FlexibleSpace();
+
+                if (GUILayout.Button("Select", GUILayout.Width(60), GUILayout.Height(30)))
+                {
+                    Selection.activeObject = card;
+                    EditorGUIUtility.PingObject(card);
+                }
+
+                GUILayout.EndHorizontal();
+
+                foreach (var issue in issues)
+                    GUILayout.Label($"• {issue}", EditorStyles.helpBox);
+
+                SirenixEditorGUI.EndVerticalList();
+                EditorGUILayout.Space(4);
+            }
+
+            EditorGUILayout.EndScrollView();
+            SirenixEditorGUI.EndBox();
+        }
+
+        /// <summary>
+        /// Returns a list of human-readable issues for a card's passive and effect configuration.
+        /// An empty list means the card is clean.
+        /// </summary>
+        private static List<string> GetCardPassiveIssues(CardData card)
+        {
+            var issues = new List<string>();
+
+            bool hasNewEffects    = card.NewEffects != null && card.NewEffects.Count > 0;
+            bool hasLegacyEffects = card.Effects    != null && card.Effects.Count    > 0;
+            bool hasPassives      = card.Passives   != null && card.Passives.Count   > 0;
+
+            // Card with no behavior at all (and can theoretically be played)
+            if (!hasNewEffects && !hasLegacyEffects && !hasPassives && !card.IsUnplayable)
+                issues.Add("No effects or passives — card has no behavior when played");
+
+            // Per-passive checks
+            if (card.Passives == null) return issues;
+
+            for (int i = 0; i < card.Passives.Count; i++)
+            {
+                var passive = card.Passives[i];
+                if (passive == null)
+                {
+                    issues.Add($"Passive [{i}]: null entry in list");
+                    continue;
+                }
+
+                if (passive.Trigger == null)
+                    issues.Add($"Passive '{passive.Name}': no trigger set — will never fire");
+
+                if (passive.Effects == null || passive.Effects.Count == 0)
+                    issues.Add($"Passive '{passive.Name}': has trigger but no effects — fires silently");
+            }
+
+            return issues;
+        }
+
+        #endregion
+
+        #region Enemy Audit View
+
+        private void DrawEnemyAuditView()
+        {
+            // Load all enemy and move assets from the project
+            var enemies = AssetDatabase.FindAssets("t:EnemyData")
+                .Select(g => AssetDatabase.LoadAssetAtPath<EnemyData>(AssetDatabase.GUIDToAssetPath(g)))
+                .Where(e => e != null)
+                .OrderBy(e => e.EnemyName)
+                .ToList();
+
+            var moves = AssetDatabase.FindAssets("t:EnemyMoveData")
+                .Select(g => AssetDatabase.LoadAssetAtPath<EnemyMoveData>(AssetDatabase.GUIDToAssetPath(g)))
+                .Where(m => m != null)
+                .OrderBy(m => m.MoveName)
+                .ToList();
+
+            var enemiesWithIssues = enemies
+                .Select(e => (enemy: e, issues: GetEnemyIssues(e)))
+                .Where(x => x.issues.Count > 0)
+                .ToList();
+
+            var movesWithIssues = moves
+                .Select(m => (move: m, issues: GetMoveIssues(m)))
+                .Where(x => x.issues.Count > 0)
+                .ToList();
+
+            int totalIssues = enemiesWithIssues.Count + movesWithIssues.Count;
+
+            SirenixEditorGUI.BeginBox();
+
+            // ── Header ──────────────────────────────────────────────────────
+            SirenixEditorGUI.BeginBoxHeader();
+            GUILayout.BeginHorizontal();
+
+            if (totalIssues > 0)
+            {
+                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
+                labelStyle.normal.textColor = new Color(1f, 0.65f, 0f);
+                GUILayout.Label(
+                    $"⚠  {enemiesWithIssues.Count} enemy issue(s)  ·  {movesWithIssues.Count} move issue(s)",
+                    labelStyle);
+            }
+            else
+            {
+                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
+                labelStyle.normal.textColor = new Color(0.4f, 0.85f, 0.4f);
+                GUILayout.Label($"✓  All {enemies.Count} enemies and {moves.Count} moves are ready", labelStyle);
+            }
+
+            GUILayout.FlexibleSpace();
+            GUILayout.Label($"{enemies.Count} enemies  ·  {moves.Count} moves",
+                SirenixGUIStyles.RightAlignedGreyMiniLabel);
+            GUILayout.EndHorizontal();
+            SirenixEditorGUI.EndBoxHeader();
+
+            EditorGUILayout.Space(5);
+
+            if (totalIssues == 0)
+            {
+                EditorGUILayout.Space(10);
+                GUILayout.Label("All enemies and moves are ready for gameplay.",
+                    SirenixGUIStyles.CenteredGreyMiniLabel);
+                EditorGUILayout.Space(10);
+                SirenixEditorGUI.EndBox();
+                return;
+            }
+
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.MaxHeight(500));
+
+            // ── Enemy issues ─────────────────────────────────────────────────
+            if (enemiesWithIssues.Count > 0)
+            {
+                GUILayout.Label("Enemies", EditorStyles.boldLabel);
+                EditorGUILayout.Space(4);
+
+                foreach (var (enemy, issues) in enemiesWithIssues)
+                {
+                    SirenixEditorGUI.BeginVerticalList();
+                    GUILayout.BeginHorizontal();
+
+                    GUILayout.BeginVertical();
+                    GUILayout.Label(enemy.EnemyName, EditorStyles.boldLabel);
+                    GUILayout.Label(
+                        $"Resolve: {enemy.MaxResolve}  ·  Moves: {enemy.Moves?.Count ?? 0}",
+                        SirenixGUIStyles.LeftAlignedGreyLabel);
+                    GUILayout.EndVertical();
+
+                    GUILayout.FlexibleSpace();
+
+                    if (GUILayout.Button("Select", GUILayout.Width(60), GUILayout.Height(30)))
+                    {
+                        Selection.activeObject = enemy;
+                        EditorGUIUtility.PingObject(enemy);
+                    }
+
+                    GUILayout.EndHorizontal();
+
+                    foreach (var issue in issues)
+                        GUILayout.Label($"• {issue}", EditorStyles.helpBox);
+
+                    SirenixEditorGUI.EndVerticalList();
+                    EditorGUILayout.Space(4);
+                }
+
+                EditorGUILayout.Space(8);
+            }
+
+            // ── Move issues ──────────────────────────────────────────────────
+            if (movesWithIssues.Count > 0)
+            {
+                GUILayout.Label("Enemy Moves", EditorStyles.boldLabel);
+                EditorGUILayout.Space(4);
+
+                foreach (var (move, issues) in movesWithIssues)
+                {
+                    SirenixEditorGUI.BeginVerticalList();
+                    GUILayout.BeginHorizontal();
+
+                    string displayName = string.IsNullOrWhiteSpace(move.MoveName)
+                        ? "[Unnamed Move]"
+                        : move.MoveName;
+
+                    GUILayout.BeginVertical();
+                    GUILayout.Label(displayName, EditorStyles.boldLabel);
+                    GUILayout.Label($"{move.MoveType}", SirenixGUIStyles.LeftAlignedGreyLabel);
+                    GUILayout.EndVertical();
+
+                    GUILayout.FlexibleSpace();
+
+                    if (GUILayout.Button("Select", GUILayout.Width(60), GUILayout.Height(30)))
+                    {
+                        Selection.activeObject = move;
+                        EditorGUIUtility.PingObject(move);
+                    }
+
+                    GUILayout.EndHorizontal();
+
+                    foreach (var issue in issues)
+                        GUILayout.Label($"• {issue}", EditorStyles.helpBox);
+
+                    SirenixEditorGUI.EndVerticalList();
+                    EditorGUILayout.Space(4);
+                }
+            }
+
+            EditorGUILayout.EndScrollView();
+            SirenixEditorGUI.EndBox();
+        }
+
+        /// <summary>Returns validation issues for an enemy asset.</summary>
+        private static List<string> GetEnemyIssues(EnemyData enemy)
+        {
+            var issues = new List<string>();
+
+            if (enemy.Portrait == null)
+                issues.Add("Missing portrait — battle UI will show a broken image slot");
+
+            if (enemy.Moves == null || enemy.Moves.Count == 0)
+                issues.Add("No moves defined — enemy cannot act on their turn");
+            else
+            {
+                for (int i = 0; i < enemy.Moves.Count; i++)
+                    if (enemy.Moves[i] == null)
+                        issues.Add($"Move slot [{i}] is null — will cause a NullReferenceException at runtime");
+            }
+
+            if (enemy.MaxResolve <= 0)
+                issues.Add($"MaxResolve is {enemy.MaxResolve} — enemy will be instantly defeated");
+
+            return issues;
+        }
+
+        /// <summary>Returns validation issues for an enemy move asset.</summary>
+        private static List<string> GetMoveIssues(EnemyMoveData move)
+        {
+            var issues = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(move.MoveName))
+                issues.Add("No move name — intent display will be blank in logs and debug UI");
+
+            if (string.IsNullOrWhiteSpace(move.IntentDescription))
+                issues.Add("No intent description — player cannot see what this move will do");
+
+            bool hasNewEffects    = move.NewEffects != null && move.NewEffects.Count > 0;
+            bool hasLegacyEffects = move.Effects    != null && move.Effects.Count    > 0;
+
+            if (!hasNewEffects && !hasLegacyEffects && move.MoveType != EnemyMoveType.SummonMinion)
+                issues.Add("No effects defined — move resolves but does nothing");
+
+            if (move.MoveType == EnemyMoveType.SummonMinion && move.MinionToSummon == null)
+                issues.Add("SummonMinion move has no MinionToSummon set — summon will silently fail");
+
+            return issues;
         }
 
         #endregion
