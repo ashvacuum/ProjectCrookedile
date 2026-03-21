@@ -16,15 +16,21 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public class EnemyController
     {
+        // ─── Condition evaluators registry ───────────────────────────────────────
+        // Add an entry here when introducing a new EnemyMoveCondition value —
+        // no changes to IsMoveEligible() or any other method are needed.
+
+        private static readonly Dictionary<EnemyMoveCondition, IMoveConditionEvaluator> ConditionEvaluators
+            = new Dictionary<EnemyMoveCondition, IMoveConditionEvaluator>
+        {
+            [EnemyMoveCondition.None]                 = new NoConditionEvaluator(),
+            [EnemyMoveCondition.OnlyIfNoMinionsAlive] = new NoMinionsAliveEvaluator(),
+        };
+
         // ─── State ────────────────────────────────────────────────────────────────
 
-        private readonly EnemyData _enemyData;
-
-        /// <summary>Index into the move list for Sequential / RandomSequential pattern.</summary>
-        private int  _moveIndex;
-
-        /// <summary>True once the random starting offset has been seeded (RandomSequential only).</summary>
-        private bool _moveIndexInitialized;
+        private readonly EnemyData            _enemyData;
+        private readonly IMovePatternSelector _moveSelector;
 
         /// <summary>
         /// The move the enemy intends to execute this turn.
@@ -49,9 +55,19 @@ namespace Crookedile.Gameplay.Battle
 
         public EnemyController(EnemyData enemyData)
         {
-            _enemyData   = enemyData;
-            _moveIndex   = 0;
-            Stats        = new BattleStats(enemyData.MaxResolve, maxActionPoints: 0, isPlayer: false);
+            _enemyData = enemyData;
+
+            // Factory switch — acceptable here: construction happens once per enemy instance.
+            // To add a new pattern, add an enum value + a new IMovePatternSelector class.
+            _moveSelector = enemyData.MovePattern switch
+            {
+                EnemyMovePattern.Sequential       => new SequentialMoveSelector(),
+                EnemyMovePattern.Random           => new RandomMoveSelector(),
+                EnemyMovePattern.RandomSequential => new RandomSequentialMoveSelector(),
+                _                                 => new SequentialMoveSelector(),
+            };
+
+            Stats = new BattleStats(enemyData.MaxResolve, maxActionPoints: 0, isPlayer: false);
             Stats.SetHostilityLimits(enemyData.MinHostility, enemyData.MaxHostility);
             Stats.SetHostility(enemyData.StartingHostility);
             StatusEffects = new StatusEffectManager(enemyData.EnemyName);
@@ -83,8 +99,7 @@ namespace Crookedile.Gameplay.Battle
             }
 
             // Filter out moves whose conditions aren't met right now.
-            // This is re-evaluated every turn so dynamic conditions (e.g. "are minions alive?")
-            // always reflect the current battle state.
+            // Condition evaluation is fully encapsulated in the ConditionEvaluators registry.
             var eligible = moves
                 .Where(m => IsMoveEligible(m, allEnemies))
                 .ToList();
@@ -96,8 +111,6 @@ namespace Crookedile.Gameplay.Battle
             }
 
             // When receptive (negative hostility), prefer non-offensive moves.
-            // Attack, OffensiveBuff and DebuffAttack are all considered offensive;
-            // SummonMinion is neutral and stays in the eligible pool.
             if (Stats.IsReceptive)
             {
                 var nonOffensiveMoves = eligible
@@ -111,36 +124,10 @@ namespace Crookedile.Gameplay.Battle
                     CurrentIntent = nonOffensiveMoves[Random.Range(0, nonOffensiveMoves.Count)];
                     return CurrentIntent;
                 }
-                // No non-offensive moves available — fall through to normal selection
+                // No non-offensive moves available — fall through to normal selection.
             }
 
-            switch (_enemyData.MovePattern)
-            {
-                case EnemyMovePattern.Sequential:
-                    CurrentIntent = eligible[_moveIndex % eligible.Count];
-                    _moveIndex++;
-                    break;
-
-                case EnemyMovePattern.Random:
-                    int randomIndex = Random.Range(0, eligible.Count);
-                    CurrentIntent = eligible[randomIndex];
-                    break;
-
-                case EnemyMovePattern.RandomSequential:
-                    if (!_moveIndexInitialized)
-                    {
-                        _moveIndex = Random.Range(0, eligible.Count);
-                        _moveIndexInitialized = true;
-                    }
-                    CurrentIntent = eligible[_moveIndex % eligible.Count];
-                    _moveIndex++;
-                    break;
-
-                default:
-                    CurrentIntent = eligible[0];
-                    break;
-            }
-
+            CurrentIntent = _moveSelector.SelectMove(eligible);
             return CurrentIntent;
         }
 
@@ -148,24 +135,15 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>
         /// Returns true if <paramref name="move"/> should be included in the selection pool
-        /// this turn based on its <see cref="EnemyMoveCondition"/>.
+        /// this turn. Delegates to the <see cref="ConditionEvaluators"/> registry —
+        /// add new conditions there, not here.
         /// </summary>
         private bool IsMoveEligible(EnemyMoveData move, IReadOnlyList<EnemyController> allEnemies)
         {
-            switch (move.Condition)
-            {
-                case EnemyMoveCondition.OnlyIfNoMinionsAlive:
-                    // Move is eligible only when no living enemy matches the minion template.
-                    // Requires both a valid enemy list and a MinionToSummon reference;
-                    // if either is missing, default to eligible so the move isn't silently lost.
-                    if (allEnemies == null || move.MinionToSummon == null) return true;
-                    return !allEnemies.Any(e => e != this
-                                             && !e.IsDefeated
-                                             && e.EnemyData == move.MinionToSummon);
+            if (!ConditionEvaluators.TryGetValue(move.Condition, out var evaluator))
+                return true; // Unknown condition — default to eligible.
 
-                default: // EnemyMoveCondition.None
-                    return true;
-            }
+            return evaluator.IsMet(move, allEnemies, this);
         }
     }
 }

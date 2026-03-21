@@ -22,7 +22,12 @@
       "Bash(xargs wc -l)",
       "Bash(Special)",
       "Bash(Passives \")",
-      "Bash(del \"C:\\\\Users\\\\v-2jo\\\\UE\\\\ProjectCrookedile\\\\Assets\\\\Scripts\\\\Data\\\\Cards\\\\TriggeredEffect.cs\")"
+      "Bash(del \"C:\\\\Users\\\\v-2jo\\\\UE\\\\ProjectCrookedile\\\\Assets\\\\Scripts\\\\Data\\\\Cards\\\\TriggeredEffect.cs\")",
+      "Bash(for file:*)",
+      "Bash(do if:*)",
+      "Bash(! grep:*)",
+      "Bash(then basename:*)",
+      "Bash(grep -E \"\\\\.\\(cs\\)$\")"
     ],
     "deny": [],
     "ask": []
