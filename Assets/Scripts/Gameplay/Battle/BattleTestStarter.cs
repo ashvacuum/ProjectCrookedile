@@ -46,6 +46,15 @@ namespace Crookedile.Gameplay.Battle
         [Tooltip("Automatically start the battle when the scene loads")]
         [SerializeField] private bool startOnAwake = true;
 
+        [Tooltip("Maximum player turns before Judgment. Used when no BattleSession is assigned. " +
+                 "0 = no turn limit. (Sessions define this per-round.)")]
+        [SerializeField] private int fallbackMaxTurns = 10;
+
+        [Tooltip("Starting Opinion Meter value (0–100). Used when no BattleSession is assigned. " +
+                 "(Sessions define this per-round.)")]
+        [Range(0, 100)]
+        [SerializeField] private int fallbackStartingOpinion = 50;
+
         // ─── Deck Definitions ─────────────────────────────────────────────────────
         // Each entry is (assetName, count). Name must match the .asset filename in Resources/Cards/.
 
@@ -198,15 +207,28 @@ namespace Crookedile.Gameplay.Battle
                 ? (int?)RunState.Current.CurrentResolve
                 : null;
 
+            // Resolve per-round Opinion Meter settings from the session, or fall back to inspector values.
+            int battleIndex = RunState.Current?.CurrentBattleIndex ?? 0;
+            BattleSession.BattleRound currentRound = battleSession?.GetRound(battleIndex);
+
+            int  roundMaxTurns       = currentRound != null ? currentRound.maxTurns       : fallbackMaxTurns;
+            int  roundStartOpinion   = currentRound != null ? currentRound.startingOpinion : fallbackStartingOpinion;
+
             // Assemble BattleSetup
             var setup = new BattleSetup
             {
-                playerOrigin        = playerOrigin,
-                originStats         = originStats,   // null → BattleManager defaults to 20 Resolve / 3 AP
-                playerDeck          = playerDeck,
-                enemies             = battleEnemies,
+                playerOrigin         = playerOrigin,
+                originStats          = originStats,   // null → BattleManager defaults to 20 Resolve / 3 AP
+                playerDeck           = playerDeck,
+                enemies              = battleEnemies,
                 initialPlayerResolve = carriedResolve,
+                maxTurns             = roundMaxTurns > 0 ? roundMaxTurns : (int?)null,
+                startingOpinion      = roundStartOpinion,
             };
+
+            Debug.Log($"[BattleTestStarter] Opinion Meter: start={roundStartOpinion}, " +
+                      $"maxTurns={(roundMaxTurns > 0 ? roundMaxTurns.ToString() : "none")} " +
+                      $"(source: {(currentRound != null ? $"session round '{currentRound.label}'" : "fallback inspector values")})");
 
             // Wire BattleUI before starting (BattleUI needs BattleManager reference)
             if (battleUI != null)
