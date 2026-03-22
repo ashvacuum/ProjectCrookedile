@@ -63,6 +63,12 @@ namespace Crookedile.Gameplay.Battle
         private int _playerTurnNumber = 0;   // counts only the player's turns (for Actor Improvise)
         private bool _isPlayerTurn = true;
 
+        // Opinion Meter — shared battle resource driven by damage events
+        private int _currentOpinion;
+        private int _maxOpinion = 100;
+        private int _maxTurns;               // 0 = no limit
+        private int _playerTurnsElapsed;
+
         // Battle result
         private BattleResult _battleResult;
 
@@ -91,6 +97,13 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Maps hand index to randomized effect amounts while the player has Confused. Empty when not confused.</summary>
         public IReadOnlyDictionary<int, int[]> ConfusedOverrides => _confusedOverrides;
 
+        // Opinion Meter
+        public int   CurrentOpinion   => _currentOpinion;
+        public int   MaxOpinion       => _maxOpinion;
+        public int   MaxTurns         => _maxTurns;
+        public int   PlayerTurnsElapsed => _playerTurnsElapsed;
+        public float OpinionPercentage  => _maxOpinion > 0 ? (float)_currentOpinion / _maxOpinion : 0f;
+
         #endregion
 
         #region Initialization
@@ -111,12 +124,16 @@ namespace Crookedile.Gameplay.Battle
         {
             EventBus.Subscribe<EndTurnRequestedEvent>(OnEndTurnRequested);
             EventBus.Subscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
+            EventBus.Subscribe<DamageDealtEvent>(OnDamageDealtForOpinion);
+            EventBus.Subscribe<OpinionRaisedDirectlyEvent>(OnOpinionRaisedDirectly);
         }
 
         private void UnsubscribeFromEvents()
         {
             EventBus.Unsubscribe<EndTurnRequestedEvent>(OnEndTurnRequested);
             EventBus.Unsubscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
+            EventBus.Unsubscribe<DamageDealtEvent>(OnDamageDealtForOpinion);
+            EventBus.Unsubscribe<OpinionRaisedDirectlyEvent>(OnOpinionRaisedDirectly);
         }
 
         private void InitializeStateMachine()
@@ -182,10 +199,16 @@ namespace Crookedile.Gameplay.Battle
             // Reset counters
             _currentTurn = 0;
             _playerTurnNumber = 0;
+            _playerTurnsElapsed = 0;
             // Start as false so the first NextTurn() call (in TurnStartState) flips it to
             // true, making turn 1 the player's turn. Starting as true would give the opponent
             // the first move.
             _isPlayerTurn = false;
+
+            // Opinion Meter
+            _maxOpinion = setup.maxOpinion ?? 100;
+            _maxTurns   = setup.maxTurns   ?? 0;
+            _currentOpinion = setup.startingOpinion ?? _maxOpinion / 2;
 
             EventBus.Publish(new BattleStartedEvent { Setup = setup });
             _stateMachine.ChangeState(BattleState.Initialize);
@@ -284,6 +307,68 @@ namespace Crookedile.Gameplay.Battle
             PlayCard(evt.Card, evt.HandIndex, CardButton.LastPlayedRect);
         }
 
+        /// <summary>
+        /// Drives the Opinion Meter from the existing damage pipeline.
+        /// Enemy damage lowers opinion; player damage to enemies raises it.
+        /// Composure naturally shields opinion because DamageDealtEvent reports post-Composure amounts.
+        /// </summary>
+        private void OnDamageDealtForOpinion(DamageDealtEvent evt)
+        {
+            if (evt.IsToPlayer) LowerOpinion(evt.Amount);
+            else                RaiseOpinion(evt.Amount);
+        }
+
+        /// <summary>
+        /// Raises the Opinion Meter directly from effects that do not deal Resolve damage
+        /// (e.g. <c>HealResolveEffect</c> reworked as a crowd-appeal effect).
+        /// </summary>
+        private void OnOpinionRaisedDirectly(OpinionRaisedDirectlyEvent evt)
+        {
+            RaiseOpinion(evt.Amount);
+        }
+
+        #endregion
+
+        #region Opinion Meter
+
+        /// <summary>
+        /// Raises the Opinion Meter by <paramref name="amount"/>, clamped to MaxOpinion.
+        /// Published by player damage to enemies.
+        /// </summary>
+        public void RaiseOpinion(int amount)
+        {
+            if (amount <= 0) return;
+            int old = _currentOpinion;
+            _currentOpinion = Mathf.Min(_currentOpinion + amount, _maxOpinion);
+            if (_currentOpinion == old) return;
+            EventBus.Publish(new OpinionChangedEvent
+            {
+                OldValue         = old,
+                NewValue         = _currentOpinion,
+                MaxValue         = _maxOpinion,
+                WasRaisedByPlayer = true
+            });
+        }
+
+        /// <summary>
+        /// Lowers the Opinion Meter by <paramref name="amount"/>, clamped to 0.
+        /// Published by enemy damage to player.
+        /// </summary>
+        public void LowerOpinion(int amount)
+        {
+            if (amount <= 0) return;
+            int old = _currentOpinion;
+            _currentOpinion = Mathf.Max(_currentOpinion - amount, 0);
+            if (_currentOpinion == old) return;
+            EventBus.Publish(new OpinionChangedEvent
+            {
+                OldValue          = old,
+                NewValue          = _currentOpinion,
+                MaxValue          = _maxOpinion,
+                WasRaisedByPlayer = false
+            });
+        }
+
         #endregion
 
         #region Card Playing
@@ -373,6 +458,7 @@ namespace Crookedile.Gameplay.Battle
                 _playerDeck.ExhaustFromDiscard(card);
 
             ApplyPolicyHostilityShifts(card);
+            ApplySingleTargetHostilityRaise(card);
             CheckAndAdvanceFocusAfterCardPlay();
             TriggerMomentum();
 
@@ -489,6 +575,63 @@ namespace Crookedile.Gameplay.Battle
                         NewValue   = enemy.Stats.CurrentHostility,
                         EnemyIndex = i
                     });
+            }
+        }
+
+        /// <summary>
+        /// If the played card has any effect targeting a single enemy (<see cref="TargetType.Opponent"/>),
+        /// raises the focused enemy's Hostility by 1. This reflects the personal escalation of
+        /// singling someone out in a public debate.
+        /// Does not apply to AoE or self-targeting cards.
+        /// </summary>
+        private void ApplySingleTargetHostilityRaise(CardData card)
+        {
+            bool isSingleTarget = false;
+
+            // Check new polymorphic effects
+            if (card.NewEffects != null)
+            {
+                foreach (var effect in card.NewEffects)
+                {
+                    if (effect.Target == TargetType.Opponent)
+                    {
+                        isSingleTarget = true;
+                        break;
+                    }
+                }
+            }
+
+            // Fall back to legacy effects if new effects didn't match
+            if (!isSingleTarget && card.Effects != null)
+            {
+                foreach (var effect in card.Effects)
+                {
+                    if (effect.Target == TargetType.Opponent)
+                    {
+                        isSingleTarget = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!isSingleTarget) return;
+            if (FocusedEnemy == null || FocusedEnemy.IsDefeated) return;
+
+            int old = FocusedEnemy.Stats.CurrentHostility;
+            FocusedEnemy.Stats.GainHostility(1);
+            FocusedEnemy.CheckBecameHostile();
+
+            if (FocusedEnemy.Stats.CurrentHostility != old)
+            {
+                EventBus.Publish(new EnemyHostilityChangedEvent
+                {
+                    OldValue   = old,
+                    NewValue   = FocusedEnemy.Stats.CurrentHostility,
+                    EnemyIndex = _focusedEnemyIndex
+                });
+                GameLogger.LogInfo<BattleManager>(
+                    $"Single-target card '{card.CardName}' raised hostility on [{_focusedEnemyIndex}] " +
+                    $"{FocusedEnemy.EnemyData.EnemyName}: {old} → {FocusedEnemy.Stats.CurrentHostility}");
             }
         }
 
@@ -640,10 +783,11 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Checks if the battle has ended and caches the result.</summary>
         public bool CheckVictoryConditions()
         {
-            bool playerDefeated    = _playerStats.IsDefeated;
+            bool playerDefeated     = _playerStats.IsDefeated;
+            bool opinionCollapsed   = _currentOpinion <= 0;
             bool allEnemiesDefeated = _enemies.Count > 0 && _enemies.TrueForAll(e => e.IsDefeated);
 
-            if (playerDefeated || allEnemiesDefeated)
+            if (playerDefeated || opinionCollapsed || allEnemiesDefeated)
             {
                 _battleResult = new BattleResult
                 {
@@ -651,7 +795,9 @@ namespace Crookedile.Gameplay.Battle
                     turnsToWin            = _currentTurn,
                     finalPlayerResolve    = _playerStats.CurrentResolve,
                     finalPlayerComposure  = _playerStats.CurrentComposure,
-                    finalPlayerHostility  = _playerStats.CurrentHostility
+                    finalPlayerHostility  = _playerStats.CurrentHostility,
+                    finalOpinion          = _currentOpinion,
+                    wasJudgmentVictory    = false
                 };
 
                 GameLogger.LogInfo("BattleManager", $"Battle ended: {(_battleResult.isVictory ? "Victory" : "Defeat")} in {_currentTurn} turns");
@@ -799,8 +945,25 @@ namespace Crookedile.Gameplay.Battle
                     _manager._playerTurnNumber++;
                     _manager._passiveResolver?.FireTurnStart(_manager._playerTurnNumber);
 
-                    // Draw cards for the player
-                    _manager._playerDeck.StartTurn(_manager._cardsPerTurn);
+                    // Count bonus draws BEFORE snapshotting (BecameHostileThisTurn reflects last turn's escalations)
+                    int bonusDraws = 0;
+                    foreach (var enemy in _manager._enemies)
+                    {
+                        if (!enemy.IsDefeated && (enemy.Stats.IsHostile || enemy.BecameHostileThisTurn))
+                            bonusDraws++;
+                    }
+
+                    // Snapshot hostility for the new turn (resets BecameHostileThisTurn on all enemies)
+                    foreach (var enemy in _manager._enemies)
+                        enemy.SnapshotHostilityForTurn();
+
+                    // Draw cards — base draw plus one per hostile/newly-hostile enemy
+                    int totalDraw = _manager._cardsPerTurn + bonusDraws;
+                    _manager._playerDeck.StartTurn(totalDraw);
+
+                    if (bonusDraws > 0)
+                        GameLogger.LogInfo<BattleManager>(
+                            $"Hostile crowd: drawing +{bonusDraws} extra card(s) ({totalDraw} total)");
 
                     // Every living enemy declares their intent (Slay the Spire timing)
                     for (int i = 0; i < _manager._enemies.Count; i++)
@@ -881,6 +1044,24 @@ namespace Crookedile.Gameplay.Battle
                         continue;
                     }
 
+                    // Receptive enemies have a chance to hold back (20% per negative hostility stack).
+                    if (enemy.Stats.IsReceptive)
+                    {
+                        float skipChance = Mathf.Clamp01(Mathf.Abs(enemy.Stats.CurrentHostility) * 0.20f);
+                        if (UnityEngine.Random.value < skipChance)
+                        {
+                            GameLogger.LogInfo<BattleManager>(
+                                $"Enemy [{i}] {enemy.EnemyData.EnemyName} is Receptive — held back " +
+                                $"(skip chance {skipChance:P0})");
+                            EventBus.Publish(new EnemySkippedTurnEvent
+                            {
+                                EnemyIndex = i,
+                                EnemyName  = enemy.EnemyData.EnemyName
+                            });
+                            continue;
+                        }
+                    }
+
                     // Signal the UI: this enemy is about to act (shake + highlight intent panel)
                     EventBus.Publish(new EnemyActingEvent { EnemyIndex = i, Move = enemy.CurrentIntent });
 
@@ -939,6 +1120,54 @@ namespace Crookedile.Gameplay.Battle
                     WasPlayerTurn  = _manager.IsPlayerTurn
                 });
 
+                // Track player turns and check the Judgment turn limit.
+                if (_manager.IsPlayerTurn)
+                {
+                    _manager._playerTurnsElapsed++;
+
+                    int remaining = _manager._maxTurns > 0
+                        ? Mathf.Max(0, _manager._maxTurns - _manager._playerTurnsElapsed)
+                        : 0;
+
+                    EventBus.Publish(new TurnLimitUpdatedEvent
+                    {
+                        PlayerTurnsElapsed = _manager._playerTurnsElapsed,
+                        MaxTurns           = _manager._maxTurns,
+                        TurnsRemaining     = remaining
+                    });
+
+                    if (_manager._maxTurns > 0 && _manager._playerTurnsElapsed >= _manager._maxTurns)
+                    {
+                        // Judgment — outcome decided by majority opinion
+                        bool isVictory = _manager._currentOpinion > _manager._maxOpinion / 2;
+                        int threshold  = _manager._maxOpinion / 2;
+
+                        _manager._battleResult = new BattleResult
+                        {
+                            isVictory            = isVictory,
+                            turnsToWin           = _manager._currentTurn,
+                            finalPlayerResolve   = _manager._playerStats.CurrentResolve,
+                            finalPlayerComposure = _manager._playerStats.CurrentComposure,
+                            finalPlayerHostility = _manager._playerStats.CurrentHostility,
+                            finalOpinion         = _manager._currentOpinion,
+                            wasJudgmentVictory   = isVictory
+                        };
+
+                        EventBus.Publish(new JudgmentEvent
+                        {
+                            FinalOpinion = _manager._currentOpinion,
+                            Threshold    = threshold,
+                            IsVictory    = isVictory
+                        });
+
+                        GameLogger.LogInfo<BattleManager>(
+                            $"Judgment! Opinion {_manager._currentOpinion}/{_manager._maxOpinion} — {(isVictory ? "VICTORY" : "DEFEAT")}");
+
+                        _manager.TransitionToState(BattleState.BattleEnd);
+                        return;
+                    }
+                }
+
                 if (_manager.CheckVictoryConditions())
                     _manager.TransitionToState(BattleState.BattleEnd);
                 else
@@ -984,6 +1213,15 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public int? initialPlayerResolve;
 
+        /// <summary>Maximum number of player turns before Judgment is called. 0 = no limit.</summary>
+        public int? maxTurns;
+
+        /// <summary>Starting Opinion Meter value. When null, defaults to half of maxOpinion.</summary>
+        public int? startingOpinion;
+
+        /// <summary>Maximum Opinion Meter value. Defaults to 100.</summary>
+        public int? maxOpinion;
+
         /// <summary>Gets the player's battle stats based on their origin.</summary>
         public OriginBattleStats GetPlayerStats()
         {
@@ -1002,6 +1240,8 @@ namespace Crookedile.Gameplay.Battle
         public int  finalPlayerResolve;
         public int  finalPlayerComposure;
         public int  finalPlayerHostility;
+        public int  finalOpinion;
+        public bool wasJudgmentVictory;
 
         // TODO: Add rewards when reward system exists
     }

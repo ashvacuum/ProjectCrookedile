@@ -32,6 +32,9 @@ namespace Crookedile.Gameplay.Battle
         private readonly EnemyData            _enemyData;
         private readonly IMovePatternSelector _moveSelector;
 
+        // Hostile-this-turn tracking — used by BattleManager to award bonus card draws
+        private int _hostilityAtTurnStart;
+
         /// <summary>
         /// The move the enemy intends to execute this turn.
         /// Set by SelectNextMove() at the start of the player's turn
@@ -50,6 +53,13 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>True when this enemy's Resolve has reached zero.</summary>
         public bool IsDefeated => Stats.IsDefeated;
+
+        /// <summary>
+        /// True if this enemy crossed from non-hostile (≤ 0) to hostile (&gt; 0) during the
+        /// current player turn. Reset each turn by <see cref="SnapshotHostilityForTurn"/>.
+        /// Read by BattleManager at the start of the next turn to award bonus card draws.
+        /// </summary>
+        public bool BecameHostileThisTurn { get; private set; }
 
         // ─── Constructor ──────────────────────────────────────────────────────────
 
@@ -129,6 +139,31 @@ namespace Crookedile.Gameplay.Battle
 
             CurrentIntent = _moveSelector.SelectMove(eligible);
             return CurrentIntent;
+        }
+
+        // ─── Hostility Snapshot ───────────────────────────────────────────────────
+
+        /// <summary>
+        /// Captures the enemy's current hostility as the baseline for this turn and resets
+        /// <see cref="BecameHostileThisTurn"/>. Call at the START of each player turn,
+        /// before any cards are played, so the bonus draw calculation is correct.
+        /// </summary>
+        public void SnapshotHostilityForTurn()
+        {
+            _hostilityAtTurnStart  = Stats.CurrentHostility;
+            BecameHostileThisTurn  = false;
+        }
+
+        /// <summary>
+        /// Checks whether the enemy has just crossed from non-hostile to hostile since
+        /// <see cref="SnapshotHostilityForTurn"/> was last called, and sets
+        /// <see cref="BecameHostileThisTurn"/> accordingly.
+        /// Call after any operation that raises this enemy's Hostility.
+        /// </summary>
+        public void CheckBecameHostile()
+        {
+            if (!BecameHostileThisTurn && _hostilityAtTurnStart <= 0 && Stats.CurrentHostility > 0)
+                BecameHostileThisTurn = true;
         }
 
         // ─── Private Helpers ──────────────────────────────────────────────────────

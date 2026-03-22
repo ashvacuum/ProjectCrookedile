@@ -234,13 +234,29 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public int GetValue(EffectContextValue source) => source switch
         {
-            EffectContextValue.LastDamageDealt    => LastDamageDealt,
-            EffectContextValue.LastHealAmount      => LastHealAmount,
-            EffectContextValue.LastComposureGained => LastComposureGained,
-            EffectContextValue.LastComposureLost   => LastComposureLost,
-            EffectContextValue.CurrentComposure    => Caster?.CurrentComposure ?? 0,
-            EffectContextValue.CurrentHostility    => Target?.CurrentHostility ?? 0,
-            _                                      => 0   // FixedAmount — use authored value
+            EffectContextValue.LastDamageDealt     => LastDamageDealt,
+            EffectContextValue.LastHealAmount       => LastHealAmount,
+            EffectContextValue.LastComposureGained  => LastComposureGained,
+            EffectContextValue.LastComposureLost    => LastComposureLost,
+            EffectContextValue.CurrentComposure     => Caster?.CurrentComposure ?? 0,
+            EffectContextValue.CurrentHostility     => Target?.CurrentHostility ?? 0,
+            EffectContextValue.HostileEnemyCount    => CountLivingEnemies(e => e.Stats.IsHostile),
+            EffectContextValue.ReceptiveEnemyCount  => CountLivingEnemies(e => e.Stats.IsReceptive),
+            _                                       => 0   // FixedAmount / None — use authored value
         };
+
+        /// <summary>
+        /// Counts living enemies matching <paramref name="predicate"/>.
+        /// Returns 0 if <see cref="AllEnemies"/> is null (e.g. enemy move context).
+        /// </summary>
+        private int CountLivingEnemies(System.Func<EnemyController, bool> predicate)
+        {
+            if (AllEnemies == null) return 0;
+            int count = 0;
+            foreach (var enemy in AllEnemies)
+                if (!enemy.IsDefeated && predicate(enemy))
+                    count++;
+            return count;
+        }
     }
 }

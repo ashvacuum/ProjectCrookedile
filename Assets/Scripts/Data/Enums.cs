@@ -234,6 +234,8 @@ namespace Crookedile.Data
         LastComposureLost,      // 4 — ctx.LastComposureLost — e.g. bonus damage equal to composure spent
         CurrentComposure,       // 5 — caster.CurrentComposure at time of trigger
         CurrentHostility,       // 6 — focused target.CurrentHostility at time of trigger
-        None                    // 7 — return 0; hides fixed amount fields (use when amount is irrelevant)
+        None,                   // 7 — return 0; hides fixed amount fields (use when amount is irrelevant)
+        HostileEnemyCount,      // 8 — number of living enemies with Hostility > 0
+        ReceptiveEnemyCount,    // 9 — number of living enemies with Hostility < 0
     }
 }

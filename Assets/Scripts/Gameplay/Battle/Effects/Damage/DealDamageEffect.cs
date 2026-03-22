@@ -18,6 +18,8 @@ namespace Crookedile.Gameplay.Battle
         [Tooltip("Who receives the damage.")]
         [SerializeField] private TargetType _target = TargetType.Opponent;
 
+        public override TargetType Target => _target;
+
         [Tooltip("Base damage amount. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]
         [MinValue(1)]

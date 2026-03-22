@@ -17,6 +17,8 @@ namespace Crookedile.Gameplay.Battle
         [Tooltip("Who receives the status effect.")]
         [SerializeField] private TargetType _target = TargetType.Opponent;
 
+        public override TargetType Target => _target;
+
         [Tooltip("Which status effect to apply.")]
         [SerializeField] private StatusEffectType _statusType = StatusEffectType.Weakened;
 

@@ -31,6 +31,14 @@ namespace Crookedile.Gameplay.Battle
         public string Name => _name;
 
         /// <summary>
+        /// The target type of this effect. Defaults to <see cref="TargetType.Self"/> for effects
+        /// that have no explicit target (buffs, deck manipulation, etc.).
+        /// Override in subclasses that expose a <c>_target</c> field.
+        /// Used by <c>BattleManager</c> to determine whether a card raises hostility on a single enemy.
+        /// </summary>
+        public virtual TargetType Target => TargetType.Self;
+
+        /// <summary>
         /// Executes this effect using the provided execution context.
         /// The context carries all dependencies (caster, target, deck, status managers)
         /// and accumulates results (damage dealt, healing applied, composure gained) for

@@ -597,13 +597,9 @@ namespace Crookedile.Gameplay.Battle
 
         private void ApplyResolveHeal(BattleStats target, int amount, EffectContext ctx = null)
         {
-            int actualHealing = target.RestoreResolve(amount);
-            GameLogger.LogInfo<EffectResolver>($"Restored {actualHealing} Resolve");
-
-            if (actualHealing > 0)
-                EventBus.Publish(new HealingAppliedEvent { Amount = actualHealing, IsToPlayer = target == _playerStats });
-
-            if (ctx != null) ctx.LastHealAmount += actualHealing;
+            if (amount <= 0) return;
+            EventBus.Publish(new OpinionRaisedDirectlyEvent { Amount = amount });
+            GameLogger.LogInfo<EffectResolver>($"Raised Opinion by {amount} (legacy HealResolve path)");
         }
 
         private void ApplyRandomDamage(BattleStats target, BattleStats attacker, int minDamage, int maxDamage, EffectContext ctx = null)
@@ -668,10 +664,15 @@ namespace Crookedile.Gameplay.Battle
 
         private void ApplyComposureEqualToHostility(BattleStats caster, EffectContext ctx = null)
         {
-            int hostility = caster.CurrentHostility;
+            int hostileCount = 0;
+            if (_allEnemies != null)
+                foreach (var enemy in _allEnemies)
+                    if (!enemy.IsDefeated && enemy.Stats.IsHostile)
+                        hostileCount++;
+
             // Route through ApplyGainComposure so Dexterity/Frail modifiers are respected
-            ApplyGainComposure(caster, hostility, ctx);
-            GameLogger.LogInfo<EffectResolver>($"Gained Composure equal to Hostility ({hostility})");
+            ApplyGainComposure(caster, hostileCount, ctx);
+            GameLogger.LogInfo<EffectResolver>($"Gained Composure equal to hostile enemy count ({hostileCount})");
         }
 
         #endregion

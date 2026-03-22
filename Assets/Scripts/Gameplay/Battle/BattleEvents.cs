@@ -63,6 +63,19 @@ using Crookedile.Data.Enemy;
 //   HostilityChangedEvent    Publisher: BattleStats (GainHostility / ReduceHostility)
 //                            Subscribers: BattleUI hostility bar, EnemySlotUI
 //
+// ── Opinion Meter ─────────────────────────────────────────────────────────────
+//   OpinionChangedEvent        Publisher: BattleManager (RaiseOpinion / LowerOpinion)
+//                              Subscribers: BattleUI (OpinionMeterUI)
+//
+//   JudgmentEvent              Publisher: BattleManager (TurnEndState — turn limit reached)
+//                              Subscribers: BattleUI (result log)
+//
+//   TurnLimitUpdatedEvent      Publisher: BattleManager (TurnEndState — each player turn)
+//                              Subscribers: BattleUI (OpinionMeterUI countdown)
+//
+//   EnemySkippedTurnEvent      Publisher: BattleManager (OpponentTurnState — receptive skip)
+//                              Subscribers: BattleUI (battle log)
+//
 // ── Enemy ────────────────────────────────────────────────────────────────────
 //   EnemyIntentDeclaredEvent   Publisher: EnemyController (at start of player turn)
 //                              Subscribers: BattleUI (EnemySlotUI)
@@ -368,6 +381,85 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>True = the player's hostility changed; false = an enemy's hostility changed.
         /// Note: in current design the player's hostility stays 0 — this flag is reserved for symmetry.</summary>
         public bool IsPlayer;
+    }
+
+    #endregion
+
+    #region Opinion Meter Events
+
+    /// <summary>
+    /// Published by <c>BattleManager</c> whenever the shared Opinion Meter changes.
+    /// Fired by both <c>RaiseOpinion</c> (player deals damage) and <c>LowerOpinion</c> (enemy deals damage).
+    /// </summary>
+    public struct OpinionChangedEvent : IGameEvent
+    {
+        /// <summary>Opinion value before the change.</summary>
+        public int OldValue;
+
+        /// <summary>Opinion value after the change (clamped to [0, MaxValue]).</summary>
+        public int NewValue;
+
+        /// <summary>Maximum possible opinion value for this battle.</summary>
+        public int MaxValue;
+
+        /// <summary>True = player's action raised opinion; false = enemy attack lowered it.</summary>
+        public bool WasRaisedByPlayer;
+    }
+
+    /// <summary>
+    /// Published by <c>BattleManager.TurnEndState</c> when the turn limit expires.
+    /// The battle transitions to BattleEnd immediately after this fires.
+    /// </summary>
+    public struct JudgmentEvent : IGameEvent
+    {
+        /// <summary>Opinion value at the moment judgment was called.</summary>
+        public int FinalOpinion;
+
+        /// <summary>The threshold opinion must exceed for a victory (MaxOpinion / 2).</summary>
+        public int Threshold;
+
+        /// <summary>True = opinion exceeded the threshold (player wins); false = player loses.</summary>
+        public bool IsVictory;
+    }
+
+    /// <summary>
+    /// Published by <c>BattleManager.TurnEndState</c> each time a player turn ends,
+    /// so the UI countdown always reflects the latest turn count.
+    /// </summary>
+    public struct TurnLimitUpdatedEvent : IGameEvent
+    {
+        /// <summary>Number of player turns that have fully completed.</summary>
+        public int PlayerTurnsElapsed;
+
+        /// <summary>Total player turns allowed this battle (0 = no limit).</summary>
+        public int MaxTurns;
+
+        /// <summary>How many player turns remain before Judgment (0 when limit is reached).</summary>
+        public int TurnsRemaining;
+    }
+
+    /// <summary>
+    /// Published by effects that directly raise the Opinion Meter without dealing Resolve damage
+    /// (e.g. rallying speeches, crowd appeals). <c>BattleManager</c> subscribes and calls
+    /// <c>RaiseOpinion</c> on receipt.
+    /// </summary>
+    public struct OpinionRaisedDirectlyEvent : IGameEvent
+    {
+        /// <summary>Amount to raise the Opinion Meter by.</summary>
+        public int Amount;
+    }
+
+    /// <summary>
+    /// Published by <c>BattleManager.OpponentTurnState</c> when a receptive enemy
+    /// rolls to skip their action this turn.
+    /// </summary>
+    public struct EnemySkippedTurnEvent : IGameEvent
+    {
+        /// <summary>Zero-based index of the skipping enemy in <c>BattleManager.Enemies</c>.</summary>
+        public int EnemyIndex;
+
+        /// <summary>Display name of the skipping enemy (for battle log).</summary>
+        public string EnemyName;
     }
 
     #endregion
