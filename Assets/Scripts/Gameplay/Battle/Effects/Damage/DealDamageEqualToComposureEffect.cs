@@ -14,6 +14,8 @@ namespace Crookedile.Gameplay.Battle
         [Tooltip("Who receives the damage.")]
         [SerializeField] private TargetType _target = TargetType.Opponent;
 
+        public override TargetType Target => _target;
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             int composure = ctx.Caster.CurrentComposure;

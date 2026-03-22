@@ -5,22 +5,29 @@ using Crookedile.Utilities;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Grants Composure equal to the caster's current Hostility.
+    /// Grants Composure equal to the number of currently Hostile enemies (Hostility > 0).
     /// Dexterity/Frail modifiers still apply to the gained amount.
-    /// Useful for enemies or cards that convert aggression into defence.
+    /// Rewards the player for maintaining a hostile crowd — each aggressor converts to defence.
     /// </summary>
     [Serializable]
     public class ComposureEqualToHostilityEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            int hostility = ctx.Caster.CurrentHostility;
-            ApplyGainComposure(ctx.Caster, hostility, ctx);
+            int hostileCount = 0;
+            if (ctx.AllEnemies != null)
+            {
+                foreach (var enemy in ctx.AllEnemies)
+                    if (!enemy.IsDefeated && enemy.Stats.IsHostile)
+                        hostileCount++;
+            }
+
+            ApplyGainComposure(ctx.Caster, hostileCount, ctx);
             GameLogger.LogInfo<ComposureEqualToHostilityEffect>(
-                $"Gained Composure equal to Hostility ({hostility})");
+                $"Gained Composure equal to hostile enemy count ({hostileCount})");
         }
 
         public override string GetDescription() =>
-            "Gain Composure equal to your Hostility";
+            "Gain Composure equal to the number of Hostile enemies";
     }
 }

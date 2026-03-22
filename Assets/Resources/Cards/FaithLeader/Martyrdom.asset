@@ -17,9 +17,8 @@ MonoBehaviour:
   _cardType: 2
   _rarity: 2
   _artwork: {fileID: 0}
-  _description: Give everything. Sacrifice your resolve to fuel one decisive blow.
-    (Configure LoseResolve + GainComposure + Bless trigger via Inspector.)
-  _flavorText: 
+  _description: Deal 8 damage. Raise all enemies' Hostility by 2.
+  _flavorText:
   _costs:
   - _costType: 0
     _baseAmount: 0
@@ -29,6 +28,7 @@ MonoBehaviour:
     _maximumCost: 99
   _newEffects:
   - rid: 4738608375284105334
+  - rid: 4738608375284105335
   _effects:
   - _name: 
     _category: 0
@@ -70,7 +70,12 @@ MonoBehaviour:
     - rid: 4738608375284105334
       type: {class: DealDamageEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
-        _name: 
+        _name:
         _target: 1
         _amount: 8
         _amountSource: 0
+    - rid: 4738608375284105335
+      type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      data:
+        _name:
+        _amount: 2

@@ -88,16 +88,13 @@ namespace Crookedile.UI.Battle
             if (selectionHighlight != null) selectionHighlight.enabled = false;
             if (dragDropHighlight != null) dragDropHighlight.enabled = false;
 
-            // Start with name invisible — revealed on HP bar hover
-            if (nameText != null) nameText.alpha = 0f;
+            // Name is always visible — no HP bar to hover over
+            if (nameText != null) nameText.alpha = 1f;
 
             _intentDisplay?.ShowIntent(null); // hidden until intent is declared
 
             _statusEffectPanel?.Clear(); // reset any icons left over from a previously pooled slot
             Refresh();
-
-            // Snap bar to full on spawn — no lerp animation on first appearance
-            if (resolveBarFill != null) resolveBarFill.fillAmount = _targetFill;
 
             if (enemySprite != null) enemySprite.sprite = enemyData.Portrait;
         }
@@ -115,14 +112,6 @@ namespace Crookedile.UI.Battle
 
             if (nameText != null) nameText.SetText(enemy.EnemyData.EnemyName);
 
-            // HP bar — set target fill; Update() lerps toward it
-            _targetFill = enemy.Stats.MaxResolve > 0
-                ? (float)enemy.Stats.CurrentResolve / enemy.Stats.MaxResolve
-                : 0f;
-
-            if (resolveText != null)
-                resolveText.SetText($"{enemy.Stats.CurrentResolve}/{enemy.Stats.MaxResolve}");
-            
             if(composureText != null)
                 composureText.SetText(enemy.Stats.CurrentComposure > 0 ? $"{enemy.Stats.CurrentComposure}" : string.Empty);
             
@@ -252,14 +241,13 @@ namespace Crookedile.UI.Battle
             _nameFadeCoroutine = null;
         }
 
-        // ─── HP Bar ───────────────────────────────────────────────────────────────
+        // ─── HP Bar (resolve bar removed from prefab; Update kept null-safe) ──────
 
         private void Update()
         {
-            if (resolveBarFill == null) return;
-            if (Mathf.Approximately(resolveBarFill.fillAmount, _targetFill)) return;
-            resolveBarFill.fillAmount = Mathf.Lerp(resolveBarFill.fillAmount, _targetFill,
-                Time.deltaTime * barLerpSpeed);
+            // resolveBarFill has been removed from the enemy slot prefab.
+            // This method is kept as a no-op so any remaining [SerializeField] reference
+            // on older prefabs doesn't cause errors.
         }
 
         // ─── Targeting Handlers ───────────────────────────────────────────────────

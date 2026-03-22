@@ -62,6 +62,11 @@ namespace Crookedile.UI.Battle
         public RectTransform PlayerSlotTransform =>
             _playerSlotUI != null ? _playerSlotUI.SlotRect : PlayerStatsPanel;
 
+        // ── Opinion Meter ─────────────────────────────────────────────────────
+        [Header("Opinion Meter")]
+        [Tooltip("OpinionMeterUI instance in the scene — shows the shared opinion bar and turn countdown.")]
+        [SerializeField] private OpinionMeterUI _opinionMeterUI;
+
         // ── Battle Info ───────────────────────────────────────────────────────
         [Header("Battle Info")]
         [SerializeField] private TMP_Text turnNumberText;
@@ -151,6 +156,10 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
             EventBus.Subscribe<CardGrantedEvent>(OnCardGranted);
             EventBus.Subscribe<CardExhaustedEvent>(OnCardExhausted);
+            EventBus.Subscribe<OpinionChangedEvent>(OnOpinionChanged);
+            EventBus.Subscribe<TurnLimitUpdatedEvent>(OnTurnLimitUpdated);
+            EventBus.Subscribe<JudgmentEvent>(OnJudgment);
+            EventBus.Subscribe<EnemySkippedTurnEvent>(OnEnemySkippedTurn);
         }
 
         private void UnsubscribeFromEvents()
@@ -174,6 +183,10 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
             EventBus.Unsubscribe<CardGrantedEvent>(OnCardGranted);
             EventBus.Unsubscribe<CardExhaustedEvent>(OnCardExhausted);
+            EventBus.Unsubscribe<OpinionChangedEvent>(OnOpinionChanged);
+            EventBus.Unsubscribe<TurnLimitUpdatedEvent>(OnTurnLimitUpdated);
+            EventBus.Unsubscribe<JudgmentEvent>(OnJudgment);
+            EventBus.Unsubscribe<EnemySkippedTurnEvent>(OnEnemySkippedTurn);
         }
 
         /// <summary>
@@ -212,6 +225,7 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
             _playerSlotUI?.Initialize(battleManager, evt.Setup.GetPlayerStats().portrait);
             BuildEnemySlots();
             UpdateStatsDisplay();
+            RefreshOpinionMeter();
             _fsm?.ChangeState(BattleUIState.Idle);
         }
 
@@ -483,6 +497,38 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
         {
             if (!evt.IsToPlayer) return;
             logPanel?.AddEntry($"{evt.AttackerName} dealt {evt.Amount} damage");
+        }
+
+        private void OnOpinionChanged(OpinionChangedEvent evt)
+        {
+            RefreshOpinionMeter();
+        }
+
+        private void OnTurnLimitUpdated(TurnLimitUpdatedEvent evt)
+        {
+            RefreshOpinionMeter();
+        }
+
+        private void OnJudgment(JudgmentEvent evt)
+        {
+            string outcome = evt.IsVictory ? "VICTORY" : "DEFEAT";
+            logPanel?.AddEntry(
+                $"=== JUDGMENT: Opinion {evt.FinalOpinion} / {evt.Threshold * 2} — {outcome} ===");
+        }
+
+        private void OnEnemySkippedTurn(EnemySkippedTurnEvent evt)
+        {
+            logPanel?.AddEntry($"{evt.EnemyName} held back this turn.");
+        }
+
+        private void RefreshOpinionMeter()
+        {
+            if (_opinionMeterUI == null || battleManager == null) return;
+            _opinionMeterUI.Refresh(
+                battleManager.CurrentOpinion,
+                battleManager.MaxOpinion,
+                battleManager.PlayerTurnsElapsed,
+                battleManager.MaxTurns);
         }
 
         private void OnEnemyActing(EnemyActingEvent evt)

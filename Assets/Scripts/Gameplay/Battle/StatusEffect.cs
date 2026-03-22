@@ -82,6 +82,7 @@ namespace Crookedile.Gameplay.Battle
             StatusEffectType.Confused       => "Effect values are randomised each turn.",
             StatusEffectType.Silenced       => "Cannot play Rhetoric cards.",
             StatusEffectType.Stunned        => "Skips its next action. Removed at start of player turn.",
+            StatusEffectType.Rattled        => "Take bonus damage equal to attacker Hostility per stack (reduced if attacker is Receptive).",
             // Buffs
             StatusEffectType.Strength       => "Deal X more damage.",
             StatusEffectType.Dexterity      => "Gain X more Composure per card played.",
@@ -90,7 +91,7 @@ namespace Crookedile.Gameplay.Battle
             StatusEffectType.Plated         => "Reduce incoming damage by X.",
             StatusEffectType.Regeneration   => "Heal X Resolve at end of turn.",
             StatusEffectType.Intangible     => "Take only 1 damage from all attacks.",
-            StatusEffectType.Thorns         => "Deal X damage back to attackers.",
+            StatusEffectType.Thorns         => "Reflect X to the Opinion Meter when hit.",
             // Special
             StatusEffectType.Ritual         => "Gain X Composure at the start of each turn.",
             StatusEffectType.Momentum       => "Deal X damage to a random enemy per card played this turn.",
@@ -118,7 +119,7 @@ namespace Crookedile.Gameplay.Battle
     {
         // DEBUFFS (Negative)
         Weakened,       // Deal X less damage
-        Vulnerable,     // Take X% more damage (usually 50%)
+        Vulnerable,     // Take 50% more damage (opinion meter)
         Frail,          // Gain X% less Composure (usually 25%)
         Entangled,      // Cards cost +1 AP
         Exposed,        // Next attack deals double damage
@@ -126,6 +127,7 @@ namespace Crookedile.Gameplay.Battle
         Confused,       // Effect values are randomised each turn
         Silenced,       // Cannot play Rhetoric cards
         Stunned,        // Skips its next action; removed at start of player turn (non-stackable)
+        Rattled,        // Take bonus/reduced damage equal to attacker's Hostility per stack
 
         // BUFFS (Positive)
         Strength,       // Deal X more damage
@@ -135,7 +137,7 @@ namespace Crookedile.Gameplay.Battle
         Plated,         // Reduce incoming damage by X
         Regeneration,   // Heal X Resolve at end of turn
         Intangible,     // Take only 1 damage from attacks (duration-based)
-        Thorns,         // Deal X damage back when attacked
+        Thorns,         // Reflect X to Opinion Meter when hit (no Resolve damage)
 
         // SPECIAL
         Ritual,         // Gain X Composure at start of turn

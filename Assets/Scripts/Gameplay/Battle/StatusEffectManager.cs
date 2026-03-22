@@ -266,16 +266,25 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Modifies damage taken based on active effects.
         /// <paramref name="isAttackerPlayer"/> is forwarded to the <see cref="DamageDealtEvent"/>
-        /// published when Thorns reflects damage back to the attacker.
+        /// published when Thorns reflects the hit to the Opinion Meter.
         /// </summary>
         public int ModifyDamageTaken(int baseDamage, BattleStats attackerStats, bool isAttackerPlayer = false)
         {
             float finalDamage = baseDamage;
 
-            // Apply Vulnerable (+50% damage)
+            // Apply Vulnerable (+50% damage to opinion meter impact)
             if (HasEffect(StatusEffectType.Vulnerable))
             {
                 finalDamage *= 1.5f;
+            }
+
+            // Apply Rattled — damage shifted by attacker's Hostility per stack.
+            // Hostile attacker = hits land harder; receptive attacker = hits land softer.
+            // Naturally caps at 0 via the Mathf.Max at the end.
+            int rattledStacks = GetStacks(StatusEffectType.Rattled);
+            if (rattledStacks != 0 && attackerStats != null)
+            {
+                finalDamage += attackerStats.CurrentHostility * rattledStacks;
             }
 
             // Apply Plated (reduce damage)
@@ -288,23 +297,22 @@ namespace Crookedile.Gameplay.Battle
                 RemoveStacks(StatusEffectType.Intangible, 1);
             }
 
-            // Apply Thorns (deal damage back to attacker; bypasses Composure since it is reflected)
+            // Apply Thorns — reflects the hit as Opinion gain instead of Resolve damage.
+            // isAttackerPlayer = false when an enemy attacked the player, so IsToPlayer = false
+            // routes to RaiseOpinion in BattleManager (the defender looks good hitting back).
             int thornsStacks = GetStacks(StatusEffectType.Thorns);
-            if (thornsStacks > 0 && attackerStats != null)
+            if (thornsStacks > 0)
             {
-                int thornsActual = attackerStats.DamageResolve(thornsStacks);
-                GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Thorns dealt {thornsActual} damage back!");
-                if (thornsActual > 0)
+                GameLogger.LogInfo<StatusEffectManager>(
+                    $"{_ownerName}: Thorns reflected {thornsStacks} to Opinion Meter");
+                EventBus.Publish(new DamageDealtEvent
                 {
-                    EventBus.Publish(new DamageDealtEvent
-                    {
-                        Amount           = thornsActual,
-                        IsToPlayer       = isAttackerPlayer,  // attacker is now the damage target
-                        AttackerName     = _ownerName,        // entity with Thorns is the "attacker"
-                        SourceEnemyIndex = -1,
-                        TargetEnemyIndex = -1,
-                    });
-                }
+                    Amount           = thornsStacks,
+                    IsToPlayer       = isAttackerPlayer,
+                    AttackerName     = _ownerName,
+                    SourceEnemyIndex = -1,
+                    TargetEnemyIndex = -1,
+                });
             }
 
             return Mathf.Max(0, Mathf.RoundToInt(finalDamage));
@@ -328,11 +336,18 @@ namespace Crookedile.Gameplay.Battle
         /// Preview version of ModifyDamageTaken — applies Vulnerable/Plated/Intangible math
         /// WITHOUT consuming Intangible stacks or triggering Thorns. Safe to call for UI display.
         /// </summary>
-        public int PreviewDamageTaken(int incomingDamage)
+        /// <param name="attackerHostility">
+        /// Pass the attacker's current Hostility when known (e.g. from intent preview) so
+        /// <see cref="StatusEffectType.Rattled"/> can be factored in. Defaults to 0 (no adjustment).
+        /// </param>
+        public int PreviewDamageTaken(int incomingDamage, int attackerHostility = 0)
         {
             float final = incomingDamage;
             if (HasEffect(StatusEffectType.Vulnerable))
                 final *= 1.5f;
+            int rattled = GetStacks(StatusEffectType.Rattled);
+            if (rattled != 0)
+                final += attackerHostility * rattled;
             final -= GetStacks(StatusEffectType.Plated);
             if (HasEffect(StatusEffectType.Intangible))
                 final = 1;                      // show 1 — Intangible stack consumed on actual hit
@@ -448,6 +463,7 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Confused => true,
                 StatusEffectType.Silenced => true,
                 StatusEffectType.Stunned  => true,
+                StatusEffectType.Rattled  => true,
                 _ => false
             };
         }
