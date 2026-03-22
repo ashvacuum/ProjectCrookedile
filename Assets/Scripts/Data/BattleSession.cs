@@ -26,6 +26,14 @@ namespace Crookedile.Data
 
             [Tooltip("Enemies present in this fight (1–5). Order = display order.")]
             public List<EnemyData> enemies = new List<EnemyData>();
+
+            [Space]
+            [Tooltip("Maximum player turns before Judgment is called. 0 = no turn limit.")]
+            public int maxTurns = 10;
+
+            [Tooltip("Starting Opinion Meter value (0–100). 50 = neutral start.")]
+            [Range(0, 100)]
+            public int startingOpinion = 50;
         }
 
         [Tooltip("Ordered list of encounters. Player fights them in sequence, collecting rewards between each.")]
@@ -35,12 +43,20 @@ namespace Crookedile.Data
         public int RoundCount => rounds?.Count ?? 0;
 
         /// <summary>
+        /// Returns the round at <paramref name="index"/>, or <c>null</c> if out of range.
+        /// </summary>
+        public BattleRound GetRound(int index)
+        {
+            if (rounds == null || index < 0 || index >= rounds.Count) return null;
+            return rounds[index];
+        }
+
+        /// <summary>
         /// Returns the enemy list for the round at <paramref name="index"/>, or <c>null</c> if out of range.
         /// </summary>
         public List<EnemyData> GetRoundEnemies(int index)
         {
-            if (rounds == null || index < 0 || index >= rounds.Count) return null;
-            return rounds[index]?.enemies;
+            return GetRound(index)?.enemies;
         }
 
         /// <summary>
