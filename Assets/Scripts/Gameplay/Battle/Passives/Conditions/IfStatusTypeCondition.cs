@@ -17,11 +17,13 @@ namespace Crookedile.Gameplay.Battle
     public class IfStatusTypeCondition : PassiveConditionBase
     {
         [Tooltip("The passive fires only if the triggering event applied this status type.")]
-        [SerializeField] private StatusEffectType _requiredStatus = StatusEffectType.Weakened;
+        [SerializeField]
+        private StatusEffectType _requiredStatus = StatusEffectType.Weakened;
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
-            if (!ctx.EventCtx.Is<StatusEffectAppliedEvent>()) return true; // not a status event — don't block
+            if (!ctx.EventCtx.Is<StatusEffectAppliedEvent>())
+                return true; // not a status event — don't block
             return ctx.EventCtx.As<StatusEffectAppliedEvent>().StatusType == _requiredStatus;
         }
 

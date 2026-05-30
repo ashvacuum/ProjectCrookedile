@@ -15,19 +15,23 @@ namespace Crookedile.Gameplay.Battle
     public class EnemyHasStatusCondition : PassiveConditionBase
     {
         [Tooltip("The status type to check for on any enemy.")]
-        [SerializeField] private StatusEffectType _statusType = StatusEffectType.Weakened;
+        [SerializeField]
+        private StatusEffectType _statusType = StatusEffectType.Weakened;
 
         [Tooltip("Minimum stack count required.")]
         [MinValue(1)]
-        [SerializeField] private int _minStacks = 1;
+        [SerializeField]
+        private int _minStacks = 1;
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
-            if (ctx.Enemies == null) return false;
+            if (ctx.Enemies == null)
+                return false;
             return ctx.Enemies.Any(e =>
-                e != null &&
-                e.StatusEffects != null &&
-                e.StatusEffects.GetStacks(_statusType) >= _minStacks);
+                e != null
+                && e.StatusEffects != null
+                && e.StatusEffects.GetStacks(_statusType) >= _minStacks
+            );
         }
 
         public override string ConditionLabel =>

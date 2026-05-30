@@ -8,6 +8,7 @@ namespace Crookedile.Gameplay.Battle
     public class EnemyDefeatedTrigger : PassiveTriggerBase
     {
         public override bool Matches(PassiveEventContext ctx) => ctx.Is<EnemyDefeatedEvent>();
+
         public override string TriggerLabel => "When an enemy is defeated";
     }
 }

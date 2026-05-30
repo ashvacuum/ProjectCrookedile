@@ -1,15 +1,13 @@
-
-
-namespace Crookedile.Gameplay.Battle
+﻿namespace Crookedile.Gameplay.Battle
 {
-    
     using System;
     using System.Collections.Generic;
-    using UnityEngine;
     using Crookedile.Core;
     using Crookedile.Data;
     using Crookedile.Data.Cards;
     using Crookedile.Utilities;
+    using UnityEngine;
+
     /// <summary>
     /// Abstract base class for all battle effects in the Crookedile effect system.
     ///
@@ -25,7 +23,8 @@ namespace Crookedile.Gameplay.Battle
     [Serializable]
     public abstract class BattleEffect
     {
-        [SerializeField] private string _name;
+        [SerializeField]
+        private string _name;
 
         /// <summary>Optional designer label — shown in the inspector list for readability.</summary>
         public string Name => _name;
@@ -58,38 +57,39 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public abstract string GetDescription();
 
-        // ─── Shared damage helpers ───────────────────────────────────────────────
-
+        #region Shared pressure helpers
         /// <summary>
-        /// Applies Resolve damage from <paramref name="attacker"/> to <paramref name="target"/>,
-        /// respecting status-effect modifiers (Strength, Weakened, Vulnerable, Plated,
-        /// Intangible, Thorns) and the attacker's Hostility damage multiplier.
-        /// Publishes <see cref="DamageDealtEvent"/>, accumulates <see cref="EffectExecutionContext.LastDamageDealt"/>,
-        /// and sets <see cref="EffectExecutionContext.LastTargetDied"/> if the target is defeated.
+        /// Applies opinion-meter pressure from <paramref name="attacker"/> to <paramref name="target"/>.
+        /// The target's composure absorbs first; the remainder is published as
+        /// <see cref="DamageDealtEvent"/> which BattleManager routes to the opinion meter.
+        /// Hostile-enemy multiplier still applies when enemies attack.
         /// </summary>
-        /// <returns>Actual damage applied after all modifiers.</returns>
-        protected static int ApplyResolveDamage(
-            BattleStats target, BattleStats attacker, int baseDamage, EffectExecutionContext ctx)
+        /// <returns>Post-composure pressure that reached the opinion meter.</returns>
+        protected static int ApplyPressure(
+            BattleStats target,
+            BattleStats attacker,
+            int basePressure,
+            EffectExecutionContext ctx
+        )
         {
             StatusEffectManager attackerMgr = ctx.GetStatusEffectManager(attacker);
             StatusEffectManager targetMgr   = ctx.GetStatusEffectManager(target);
 
-            int mod = attackerMgr?.ModifyDamageDealt(baseDamage) ?? baseDamage;
-            mod     = targetMgr?.ModifyDamageTaken(mod, attacker, isAttackerPlayer: ctx.IsPlayerCard) ?? mod;
+            int mod = attackerMgr?.ModifyDamageDealt(basePressure) ?? basePressure;
+            mod = targetMgr?.ModifyDamageTaken(mod, attacker, isAttackerPlayer: ctx.IsPlayerCard)
+                  ?? mod;
 
-            // Hostile enemies deal amplified damage; neutral and receptive don't.
+            // Hostile enemies amplify their opinion-meter pressure.
             if (!ctx.IsPlayerCard && attacker.CurrentHostility > 0)
-            {
-                float mult = Mathf.Max(0.1f, attacker.HostilityDamageMultiplier);
-                mod = Mathf.RoundToInt(mod * mult);
-            }
+                mod = Mathf.RoundToInt(mod * Mathf.Max(0.1f, attacker.HostilityDamageMultiplier));
 
-            int actual = target.DamageResolve(mod);
-            if (actual > 0)
+            // Composure absorbs first — the remainder is what actually hits the opinion meter.
+            int remainder = target.AbsorbThroughComposure(mod);
+            if (remainder > 0)
             {
                 EventBus.Publish(new DamageDealtEvent
                 {
-                    Amount           = actual,
+                    Amount           = remainder,
                     IsToPlayer       = target == ctx.PlayerStats,
                     AttackerName     = ctx.AttackerName,
                     SourceEnemyIndex = ctx.IsPlayerCard ? -1 : ctx.AttackerEnemyIndex,
@@ -97,22 +97,30 @@ namespace Crookedile.Gameplay.Battle
                 });
             }
 
-            ctx.LastDamageDealt += actual;
-            if (target.CurrentResolve <= 0) ctx.LastTargetDied = true;
-
-            return actual;
+            ctx.LastDamageDealt += remainder;
+            return remainder;
         }
 
-        // ─── Shared composure helpers ────────────────────────────────────────────
+        // Keep the old name as a redirect so any call sites not yet updated still compile.
+        protected static int ApplyResolveDamage(
+            BattleStats target, BattleStats attacker, int baseDamage, EffectExecutionContext ctx)
+            => ApplyPressure(target, attacker, baseDamage, ctx);
 
+        #endregion
+
+        #region Shared composure helpers
         /// <summary>
         /// Applies Composure gain to <paramref name="target"/>, respecting Dexterity/Frail
         /// status modifiers. Accumulates <see cref="EffectExecutionContext.LastComposureGained"/>.
         /// </summary>
-        protected static void ApplyGainComposure(BattleStats target, int amount, EffectExecutionContext ctx)
+        protected static void ApplyGainComposure(
+            BattleStats target,
+            int amount,
+            EffectExecutionContext ctx
+        )
         {
-            StatusEffectManager mgr      = ctx.GetStatusEffectManager(target);
-            int                 modified = mgr?.ModifyComposureGained(amount) ?? amount;
+            StatusEffectManager mgr = ctx.GetStatusEffectManager(target);
+            int modified = mgr?.ModifyComposureGained(amount) ?? amount;
             target.GainComposure(modified);
             ctx.LastComposureGained += modified;
         }
@@ -122,15 +130,20 @@ namespace Crookedile.Gameplay.Battle
         /// <see cref="EffectExecutionContext.LastComposureLost"/>.
         /// </summary>
         /// <returns>Actual Composure removed after clamping.</returns>
-        protected static int ApplyLoseComposure(BattleStats target, int amount, EffectExecutionContext ctx)
+        protected static int ApplyLoseComposure(
+            BattleStats target,
+            int amount,
+            EffectExecutionContext ctx
+        )
         {
             int actual = target.LoseComposure(amount);
             ctx.LastComposureLost += actual;
             return actual;
         }
 
-        // ─── Shared card-selection helper ────────────────────────────────────────
+        #endregion
 
+        #region Shared card-selection helper
         /// <summary>
         /// Central card-selection resolver — routes to player-choice UI or random auto-pick.
         /// <list type="bullet">
@@ -141,17 +154,20 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         protected static void ResolveCardSelection(
             IReadOnlyList<CardData> pool,
-            CardSelectionMode       mode,
-            CardType                filterType,
-            string                  choiceTitle,
-            int                     count,
-            Action<List<CardData>>  onResolved)
+            CardSelectionMode mode,
+            CardType filterType,
+            string choiceTitle,
+            int count,
+            Action<List<CardData>> onResolved
+        )
         {
             var candidates = new List<CardData>();
             foreach (var c in pool)
             {
-                if (c == null) continue;
-                if (mode == CardSelectionMode.RandomByType && c.CardType != filterType) continue;
+                if (c == null)
+                    continue;
+                if (mode == CardSelectionMode.RandomByType && c.CardType != filterType)
+                    continue;
                 candidates.Add(c);
             }
 
@@ -163,18 +179,20 @@ namespace Crookedile.Gameplay.Battle
 
             if (mode == CardSelectionMode.PlayerChoice)
             {
-                EventBus.Publish(new CardChoiceRequestedEvent
-                {
-                    Title         = choiceTitle,
-                    Choices       = candidates,
-                    RequiredCount = Mathf.Min(count, candidates.Count),
-                    OnConfirmed   = onResolved,
-                });
+                EventBus.Publish(
+                    new CardChoiceRequestedEvent
+                    {
+                        Title = choiceTitle,
+                        Choices = candidates,
+                        RequiredCount = Mathf.Min(count, candidates.Count),
+                        OnConfirmed = onResolved,
+                    }
+                );
             }
             else
             {
                 int pickCount = Mathf.Min(count, candidates.Count);
-                var chosen    = new List<CardData>();
+                var chosen = new List<CardData>();
                 var remaining = new List<CardData>(candidates);
                 for (int i = 0; i < pickCount; i++)
                 {
@@ -187,3 +205,4 @@ namespace Crookedile.Gameplay.Battle
         }
     }
 }
+        #endregion

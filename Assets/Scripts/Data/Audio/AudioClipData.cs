@@ -16,7 +16,8 @@ namespace Crookedile.Data.Audio
         [HorizontalGroup("ID")]
         [ReadOnly]
         [HideLabel]
-        [SerializeField] private string _id;
+        [SerializeField]
+        private string _id;
 
         /// <summary>Copies the clip ID to the clipboard for pasting into AnimationEvent string fields.</summary>
         [Button("Copy ID", ButtonSizes.Small)]
@@ -45,8 +46,11 @@ namespace Crookedile.Data.Audio
 
         [HorizontalGroup("Name")]
         [HideLabel]
-        [Tooltip("Human-readable name for code/editor lookups (e.g. \"crack_hit\"). Use AudioManager.PlaySoundByName().")]
-        [SerializeField] private string _clipName;
+        [Tooltip(
+            "Human-readable name for code/editor lookups (e.g. \"crack_hit\"). Use AudioManager.PlaySoundByName()."
+        )]
+        [SerializeField]
+        private string _clipName;
 
         /// <summary>Copies the clip name to the clipboard.</summary>
         [Button("Copy Name", ButtonSizes.Small)]
@@ -57,21 +61,27 @@ namespace Crookedile.Data.Audio
             Debug.Log($"Copied clip name to clipboard: {_clipName}");
         }
 
-        [SerializeField] private AudioClip _clip;
+        [SerializeField]
+        private AudioClip _clip;
 
-        [SerializeField, Range(0f, 1f)] private float _volume = 1f;
+        [SerializeField, Range(0f, 1f)]
+        private float _volume = 1f;
 
         [Tooltip("Pitch multiplier (1 = normal speed).")]
-        [SerializeField] private float _pitch = 1f;
+        [SerializeField]
+        private float _pitch = 1f;
 
-        [Tooltip("Category tag for filtering in the Sound Library (e.g. \"combat\", \"ui\", \"vfx\", \"music\").")]
-        [SerializeField] private string _category = "";
+        [Tooltip(
+            "Category tag for filtering in the Sound Library (e.g. \"combat\", \"ui\", \"vfx\", \"music\")."
+        )]
+        [SerializeField]
+        private string _category = "";
 
-        public string     ID        => _id;
-        public string     ClipName  => _clipName;
-        public AudioClip  Clip      => _clip;
-        public float      Volume    => _volume;
-        public float      Pitch     => _pitch;
-        public string     Category  => _category;
+        public string ID => _id;
+        public string ClipName => _clipName;
+        public AudioClip Clip => _clip;
+        public float Volume => _volume;
+        public float Pitch => _pitch;
+        public string Category => _category;
     }
 }

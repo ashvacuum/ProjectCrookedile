@@ -1,6 +1,6 @@
+using Crookedile.Managers;
 using UnityEditor;
 using UnityEngine;
-using Crookedile.Managers;
 
 namespace Crookedile.Editor
 {
@@ -53,7 +53,10 @@ namespace Crookedile.Editor
 #if CHEATS_ENABLED
             EditorGUILayout.LabelField("CHEATS_ENABLED: True", EditorStyles.boldLabel);
 #else
-            EditorGUILayout.HelpBox("CHEATS_ENABLED flag is not set. Use menu: Crookedile > Toggle Cheats Build", MessageType.Warning);
+            EditorGUILayout.HelpBox(
+                "CHEATS_ENABLED flag is not set. Use menu: Crookedile > Toggle Cheats Build",
+                MessageType.Warning
+            );
 #endif
             EditorGUILayout.Space(10);
         }
@@ -168,13 +171,13 @@ namespace Crookedile.Editor
         {
             EditorGUILayout.LabelField("Hotkeys", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox(
-                "F1 - Toggle Cheat Panel\n" +
-                "F2 - Toggle God Mode\n" +
-                "F3 - Toggle Unlimited Resources\n" +
-                "F4 - Give Resources\n" +
-                "+ - Speed Up Time\n" +
-                "- - Slow Down Time\n" +
-                "0 - Reset Time",
+                "F1 - Toggle Cheat Panel\n"
+                    + "F2 - Toggle God Mode\n"
+                    + "F3 - Toggle Unlimited Resources\n"
+                    + "F4 - Give Resources\n"
+                    + "+ - Speed Up Time\n"
+                    + "- - Slow Down Time\n"
+                    + "0 - Reset Time",
                 MessageType.Info
             );
         }

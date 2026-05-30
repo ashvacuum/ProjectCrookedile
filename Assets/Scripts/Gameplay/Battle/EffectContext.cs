@@ -13,19 +13,19 @@ namespace Crookedile.Gameplay.Battle
     public class EffectContext
     {
         /// <summary>Total Resolve damage dealt to any target(s) by this card's base effects.</summary>
-        public int  LastDamageDealt     { get; set; }
+        public int LastDamageDealt { get; set; }
 
         /// <summary>Total Resolve healing applied by this card's base effects.</summary>
-        public int  LastHealAmount      { get; set; }
+        public int LastHealAmount { get; set; }
 
         /// <summary>Total Composure gained by this card's base effects.</summary>
-        public int  LastComposureGained { get; set; }
+        public int LastComposureGained { get; set; }
 
         /// <summary>Total Composure lost by this card's base effects.</summary>
-        public int  LastComposureLost   { get; set; }
+        public int LastComposureLost { get; set; }
 
         /// <summary>True if any target's Resolve reached 0 during this card's resolution.</summary>
-        public bool LastTargetDied      { get; set; }
+        public bool LastTargetDied { get; set; }
 
         /// <summary>The BattleStats of the card's caster (set at card-play time).</summary>
         public BattleStats Caster { get; set; }
@@ -48,13 +48,13 @@ namespace Crookedile.Gameplay.Battle
         {
             return source switch
             {
-                EffectContextValue.LastDamageDealt     => LastDamageDealt,
-                EffectContextValue.LastHealAmount       => LastHealAmount,
-                EffectContextValue.LastComposureGained  => LastComposureGained,
-                EffectContextValue.LastComposureLost    => LastComposureLost,
-                EffectContextValue.CurrentComposure     => Caster?.CurrentComposure ?? 0,
-                EffectContextValue.CurrentHostility     => Target?.CurrentHostility ?? 0,
-                _                                       => 0   // FixedAmount — use authored value
+                EffectContextValue.LastDamageDealt => LastDamageDealt,
+                EffectContextValue.LastHealAmount => LastHealAmount,
+                EffectContextValue.LastComposureGained => LastComposureGained,
+                EffectContextValue.LastComposureLost => LastComposureLost,
+                EffectContextValue.CurrentComposure => Caster?.CurrentComposure ?? 0,
+                EffectContextValue.CurrentHostility => Target?.CurrentHostility ?? 0,
+                _ => 0, // FixedAmount — use authored value
             };
         }
     }

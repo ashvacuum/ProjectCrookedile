@@ -1,4 +1,4 @@
-using Crookedile.Core;
+﻿using Crookedile.Core;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 
@@ -10,21 +10,25 @@ using Crookedile.Data.Enemy;
 //   Unsubscribe: EventBus.Unsubscribe<FooEvent>(OnFoo);     // call in OnDisable
 //   Publish:     EventBus.Publish(new FooEvent { ... });
 //
-// ── Lifecycle ────────────────────────────────────────────────────────────────
+#region Lifecycle
 //   BattleStartedEvent       Publisher: BattleManager.StartBattle
 //                            Subscribers: BattleUI, EnemyController
 //
 //   BattleEndedEvent         Publisher: BattleManager (BattleEndState)
 //                            Subscribers: BattleUI, CampaignManager
 //
-// ── Turns ────────────────────────────────────────────────────────────────────
+#endregion
+
+#region Turns
 //   TurnStartedEvent         Publisher: BattleManager (TurnStartState)
 //                            Subscribers: BattleUI, EnemyController
 //
 //   TurnEndedEvent           Publisher: BattleManager (TurnEndState)
 //                            Subscribers: BattleUI
 //
-// ── Cards ────────────────────────────────────────────────────────────────────
+#endregion
+
+#region Cards
 //   CardDrawnEvent           Publisher: DeckManager.DrawCards
 //                            Subscribers: BattleUI, PassiveResolver (future)
 //
@@ -37,7 +41,9 @@ using Crookedile.Data.Enemy;
 //   CardExhaustedEvent       Publisher: DeckManager.ExhaustCard
 //                            Subscribers: BattleUI
 //
-// ── Effects ──────────────────────────────────────────────────────────────────
+#endregion
+
+#region Effects
 //   EffectAppliedEvent       Publisher: EffectResolver (per card effect)
 //                            Subscribers: BattleUI (future), analytics
 //
@@ -50,7 +56,9 @@ using Crookedile.Data.Enemy;
 //   StatusEffectAppliedEvent Publisher: EffectResolver
 //                            Subscribers: BattleUI status icons
 //
-// ── Resources ────────────────────────────────────────────────────────────────
+#endregion
+
+#region Resources
 //   ActionPointsChangedEvent Publisher: BattleStats (GainActionPoints / PayCost)
 //                            Subscribers: BattleUI AP display
 //
@@ -63,7 +71,9 @@ using Crookedile.Data.Enemy;
 //   HostilityChangedEvent    Publisher: BattleStats (GainHostility / ReduceHostility)
 //                            Subscribers: BattleUI hostility bar, EnemySlotUI
 //
-// ── Opinion Meter ─────────────────────────────────────────────────────────────
+#endregion
+
+#region Opinion Meter
 //   OpinionChangedEvent        Publisher: BattleManager (RaiseOpinion / LowerOpinion)
 //                              Subscribers: BattleUI (OpinionMeterUI)
 //
@@ -76,7 +86,9 @@ using Crookedile.Data.Enemy;
 //   EnemySkippedTurnEvent      Publisher: BattleManager (OpponentTurnState — receptive skip)
 //                              Subscribers: BattleUI (battle log)
 //
-// ── Enemy ────────────────────────────────────────────────────────────────────
+#endregion
+
+#region Enemy
 //   EnemyIntentDeclaredEvent   Publisher: EnemyController (at start of player turn)
 //                              Subscribers: BattleUI (EnemySlotUI)
 //
@@ -89,7 +101,9 @@ using Crookedile.Data.Enemy;
 //   EnemySummonedEvent         Publisher: BattleManager.SummonMinions
 //                              Subscribers: BattleUI (spawns new enemy slot)
 //
-// ── Player Input ─────────────────────────────────────────────────────────────
+#endregion
+
+#region Player Input
 //   EndTurnRequestedEvent    Publisher: BattleUI end-turn button
 //                            Subscribers: BattleManager
 //
@@ -103,6 +117,17 @@ namespace Crookedile.Gameplay.Battle
     #region Battle Lifecycle Events
 
     /// <summary>
+    /// Published by <c>BattleManager</c> whenever it transitions between states.
+    /// This is the single authoritative event for driving structural UI changes — panels,
+    /// buttons, and hand visibility should all be gated on this rather than on individual
+    /// turn/battle events.
+    /// </summary>
+    public struct BattleStateChangedEvent : IGameEvent
+    {
+        public BattleState Previous;
+        public BattleState Current;
+    }
+
     /// Published by <c>BattleManager.StartBattle()</c> once the battle is fully initialized.
     /// Subscribers should use this to do any first-frame setup that requires a live BattleManager.
     /// </summary>
@@ -206,7 +231,7 @@ namespace Crookedile.Gameplay.Battle
     public struct CardPlayVFXRequestedEvent : IGameEvent
     {
         public CardData Card;
-        public int[]    AmountOverrides;
+        public int[] AmountOverrides;
     }
 
     /// <summary>
@@ -216,7 +241,7 @@ namespace Crookedile.Gameplay.Battle
     public struct CardVFXApplyEffectsEvent : IGameEvent
     {
         public CardData Card;
-        public int[]    AmountOverrides;
+        public int[] AmountOverrides;
     }
 
     /// <summary>
@@ -525,7 +550,7 @@ namespace Crookedile.Gameplay.Battle
     public struct EnemyDefeatedEvent : IGameEvent
     {
         /// <summary>Zero-based index of the defeated enemy in <c>BattleManager.Enemies</c>.</summary>
-        public int    EnemyIndex;
+        public int EnemyIndex;
 
         /// <summary>Display name of the defeated enemy (for battle log and UI feedback).</summary>
         public string EnemyName;
@@ -630,8 +655,9 @@ namespace Crookedile.Gameplay.Battle
         public bool IsPlayer;
     }
 
-    // ── Card Retention / Recovery ─────────────────────────────────────────────
+    #endregion
 
+    #region Card Retention / Recovery
     /// <summary>
     /// Published by <c>DeckManager.RetainCard()</c> when a card in hand is marked to be
     /// retained at end of turn instead of being discarded.
@@ -659,5 +685,5 @@ namespace Crookedile.Gameplay.Battle
     }
 
     #endregion
-
 }
+#endregion

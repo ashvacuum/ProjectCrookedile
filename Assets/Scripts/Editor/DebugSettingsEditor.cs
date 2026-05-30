@@ -1,6 +1,6 @@
+using Crookedile.Utilities;
 using UnityEditor;
 using UnityEngine;
-using Crookedile.Utilities;
 
 namespace Crookedile.Editor
 {
@@ -78,7 +78,10 @@ namespace Crookedile.Editor
         {
             if (_settings == null)
             {
-                EditorGUILayout.HelpBox("No DebugSettings found. Creating new one...", MessageType.Info);
+                EditorGUILayout.HelpBox(
+                    "No DebugSettings found. Creating new one...",
+                    MessageType.Info
+                );
                 if (GUILayout.Button("Create Debug Settings"))
                 {
                     LoadOrCreateSettings();
@@ -113,14 +116,23 @@ namespace Crookedile.Editor
             EditorGUILayout.Space(10);
 
             // Global Settings
-            _showGlobalSettings = EditorGUILayout.BeginFoldoutHeaderGroup(_showGlobalSettings, "Global Settings");
+            _showGlobalSettings = EditorGUILayout.BeginFoldoutHeaderGroup(
+                _showGlobalSettings,
+                "Global Settings"
+            );
             if (_showGlobalSettings)
             {
                 EditorGUI.indentLevel++;
-                _settings.globalLoggingEnabled = EditorGUILayout.Toggle("Global Logging Enabled", _settings.globalLoggingEnabled);
-                _settings.globalLogLevel = (LogLevel)EditorGUILayout.EnumPopup("Global Log Level", _settings.globalLogLevel);
-                _settings.showTimestamp = EditorGUILayout.Toggle("Show Timestamp", _settings.showTimestamp);
-                _settings.showStackTrace = EditorGUILayout.Toggle("Show Stack Trace", _settings.showStackTrace);
+                _settings.globalLoggingEnabled = EditorGUILayout.Toggle(
+                    "Global Logging Enabled",
+                    _settings.globalLoggingEnabled
+                );
+                _settings.globalLogLevel = (LogLevel)
+                    EditorGUILayout.EnumPopup("Global Log Level", _settings.globalLogLevel);
+                _settings.showTimestamp = EditorGUILayout.Toggle(
+                    "Show Timestamp",
+                    _settings.showTimestamp
+                );
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
@@ -143,11 +155,15 @@ namespace Crookedile.Editor
                 EditorGUILayout.EndHorizontal();
 
                 EditorGUI.indentLevel++;
-                category.logLevel = (LogLevel)EditorGUILayout.EnumPopup("Log Level", category.logLevel);
+                category.logLevel = (LogLevel)
+                    EditorGUILayout.EnumPopup("Log Level", category.logLevel);
 
                 if (category.scripts.Count > 0)
                 {
-                    EditorGUILayout.LabelField($"Scripts ({category.scripts.Count}):", EditorStyles.miniLabel);
+                    EditorGUILayout.LabelField(
+                        $"Scripts ({category.scripts.Count}):",
+                        EditorStyles.miniLabel
+                    );
                     EditorGUI.indentLevel++;
                     foreach (string script in category.scripts)
                     {

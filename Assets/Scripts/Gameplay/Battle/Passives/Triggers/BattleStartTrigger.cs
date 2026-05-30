@@ -8,6 +8,7 @@ namespace Crookedile.Gameplay.Battle
     public class BattleStartTrigger : PassiveTriggerBase
     {
         public override bool Matches(PassiveEventContext ctx) => ctx.Is<BattleStartedEvent>();
+
         public override string TriggerLabel => "At battle start";
     }
 }

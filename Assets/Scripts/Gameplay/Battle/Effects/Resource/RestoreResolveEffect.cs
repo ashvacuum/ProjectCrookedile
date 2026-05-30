@@ -1,9 +1,9 @@
 ﻿using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -20,35 +20,39 @@ namespace Crookedile.Gameplay.Battle
         [Tooltip("Base Resolve to restore. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]
         [MinValue(1)]
-        [SerializeField] private int _amount = 5;
+        [SerializeField]
+        private int _amount = 5;
 
-        [Tooltip("Where to read the heal amount from at runtime. FixedAmount uses the authored Amount field.")]
-        [SerializeField] private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
+        [Tooltip(
+            "Where to read the heal amount from at runtime. FixedAmount uses the authored Amount field."
+        )]
+        [SerializeField]
+        private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            int amount = amountOverride
-                ?? (_amountSource == EffectContextValue.FixedAmount ? _amount : ctx.GetValue(_amountSource));
+            int amount =
+                amountOverride
+                ?? (
+                    _amountSource == EffectContextValue.FixedAmount
+                        ? _amount
+                        : ctx.GetValue(_amountSource)
+                );
 
-            int actual = ctx.Caster.RestoreResolve(amount);
-            GameLogger.LogInfo<RestoreResolveEffect>($"Restored {actual} Resolve");
+            if (amount <= 0) return;
 
-            if (actual > 0)
-                EventBus.Publish(new HealingAppliedEvent
-                {
-                    Amount     = actual,
-                    IsToPlayer = ctx.Caster == ctx.PlayerStats,
-                });
-
-            ctx.LastHealAmount += actual;
+            EventBus.Publish(new OpinionRaisedDirectlyEvent { Amount = amount });
+            GameLogger.LogInfo<RestoreResolveEffect>($"Raised Opinion by {amount}");
+            ctx.LastHealAmount += amount;
         }
 
         public override string GetDescription()
         {
-            string amountStr = _amountSource == EffectContextValue.FixedAmount
-                ? _amount.ToString()
-                : _amountSource.ToString();
-            return $"Restore {amountStr} Resolve";
+            string amountStr =
+                _amountSource == EffectContextValue.FixedAmount
+                    ? _amount.ToString()
+                    : _amountSource.ToString();
+            return $"Raise Opinion by {amountStr}";
         }
     }
 }

@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Crookedile.Data;
+using Crookedile.Data.Cards;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Crookedile.Data.Cards;
 
 namespace Crookedile.UI.Battle
 {
@@ -15,23 +15,37 @@ namespace Crookedile.UI.Battle
     /// </summary>
     public class CardZonePanel : MonoBehaviour
     {
-        [SerializeField] private TMP_Text   titleText;
-        [SerializeField] private TMP_Text   countText;
-        [SerializeField] private TMP_Text   emptyLabel;
-        [SerializeField] private Transform  cardContainer;  // Child Content with GridLayoutGroup
-        [SerializeField] private Button     closeButton;
+        [SerializeField]
+        private TMP_Text titleText;
+
+        [SerializeField]
+        private TMP_Text countText;
+
+        [SerializeField]
+        private TMP_Text emptyLabel;
+
+        [SerializeField]
+        private Transform cardContainer; // Child Content with GridLayoutGroup
+
+        [SerializeField]
+        private Button closeButton;
 
         [Header("Fallback Prefabs (used only when BattlePoolManager singleton is absent)")]
-        [SerializeField] private CardButton _pressurePrefab;
-        [SerializeField] private CardButton _rhetoricPrefab;
-        [SerializeField] private CardButton _policyPrefab;
+        [SerializeField]
+        private CardButton _pressurePrefab;
 
-        // ─── Runtime ─────────────────────────────────────────────────────────────
+        [SerializeField]
+        private CardButton _rhetoricPrefab;
 
+        [SerializeField]
+        private CardButton _policyPrefab;
+
+        #region Runtime
         private readonly List<CardButton> _spawnedButtons = new List<CardButton>();
 
-        // ─── Lifecycle ────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Lifecycle
         private void Awake()
         {
             closeButton?.onClick.AddListener(Close);
@@ -45,36 +59,43 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void Open(string title, IReadOnlyList<CardData> cards)
         {
-            if (titleText != null) titleText.text = title;
-            if (countText != null) countText.text = $"({cards.Count})";
+            if (titleText != null)
+                titleText.text = title;
+            if (countText != null)
+                countText.text = $"({cards.Count})";
 
             // Return any previously displayed cards before spawning new ones
             ClearCards();
 
             bool isEmpty = cards.Count == 0;
-            if (emptyLabel != null) emptyLabel.gameObject.SetActive(isEmpty);
+            if (emptyLabel != null)
+                emptyLabel.gameObject.SetActive(isEmpty);
 
             // Newest-first: iterate backwards
             for (int i = cards.Count - 1; i >= 0; i--)
             {
                 CardData cardData = cards[i];
-                CardButton card = BattlePoolManager.Instance != null
-                    ? BattlePoolManager.Instance.RentCard(cardData.CardType, cardContainer)
-                    : InstantiateFallback(cardData.CardType);
+                CardButton card =
+                    BattlePoolManager.Instance != null
+                        ? BattlePoolManager.Instance.RentCard(cardData.CardType, cardContainer)
+                        : InstantiateFallback(cardData.CardType);
 
-                if (card == null) continue;
+                if (card == null)
+                    continue;
 
                 // int.MaxValue AP → all cards show as "affordable" (no grey tint)
                 // null callback  → nothing fires if interaction somehow reaches the card
-                int baseCost = cardData.Costs != null && cardData.Costs.Count > 0
-                    ? cardData.Costs[0].BaseAmount : 0;
+                int baseCost =
+                    cardData.Costs != null && cardData.Costs.Count > 0
+                        ? cardData.Costs[0].BaseAmount
+                        : 0;
                 card.Initialize(cardData, i, int.MaxValue, baseCost);
 
                 // Kill all interaction — hover scale, drag, click
                 CanvasGroup cg = card.GetComponent<CanvasGroup>();
                 if (cg != null)
                 {
-                    cg.interactable   = false;
+                    cg.interactable = false;
                     cg.blocksRaycasts = false;
                 }
 
@@ -90,15 +111,19 @@ namespace Crookedile.UI.Battle
             gameObject.SetActive(false);
         }
 
-        // ─── Internal ─────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Internal
         private void ClearCards()
         {
             foreach (var btn in _spawnedButtons)
             {
-                if (btn == null) continue;
-                if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnCard(btn);
-                else Destroy(btn.gameObject);
+                if (btn == null)
+                    continue;
+                if (BattlePoolManager.Instance != null)
+                    BattlePoolManager.Instance.ReturnCard(btn);
+                else
+                    Destroy(btn.gameObject);
             }
             _spawnedButtons.Clear();
         }
@@ -108,11 +133,13 @@ namespace Crookedile.UI.Battle
             CardButton prefab = cardType switch
             {
                 CardType.Rhetoric => _rhetoricPrefab,
-                CardType.Policy   => _policyPrefab,
-                _                 => _pressurePrefab,
+                CardType.Policy => _policyPrefab,
+                _ => _pressurePrefab,
             };
-            if (prefab == null) return null;
+            if (prefab == null)
+                return null;
             return Instantiate(prefab, cardContainer);
         }
     }
 }
+        #endregion

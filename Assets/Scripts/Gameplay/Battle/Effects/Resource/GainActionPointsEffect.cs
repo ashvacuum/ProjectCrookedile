@@ -1,8 +1,8 @@
 ﻿using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Core;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -11,7 +11,8 @@ namespace Crookedile.Gameplay.Battle
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class GainActionPointsEffect : BattleEffect
     {
-        [SerializeField] private int _amount = 1;
+        [SerializeField]
+        private int _amount = 1;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {

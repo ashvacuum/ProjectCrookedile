@@ -1,8 +1,8 @@
 ﻿using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Core;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -12,7 +12,8 @@ namespace Crookedile.Gameplay.Battle
     public class ChooseFromDiscardToDeckEffect : BattleEffect
     {
         [MinValue(1)]
-        [SerializeField] private int _amount = 1;
+        [SerializeField]
+        private int _amount = 1;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
@@ -22,20 +23,29 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
 
-            int    count = Mathf.Min(_amount, ctx.Deck.DiscardCount);
-            string title = count == 1 ? "Choose a card — return to Deck"
-                                      : $"Choose {count} cards — return to Deck";
-            EventBus.Publish(new CardChoiceRequestedEvent
-            {
-                Title         = title,
-                Choices       = ctx.Deck.DiscardPile,
-                RequiredCount = count,
-                OnConfirmed   = chosen => { foreach (var c in chosen) ctx.Deck.MoveFromDiscardToDeck(c); },
-            });
+            int count = Mathf.Min(_amount, ctx.Deck.DiscardCount);
+            string title =
+                count == 1
+                    ? "Choose a card — return to Deck"
+                    : $"Choose {count} cards — return to Deck";
+            EventBus.Publish(
+                new CardChoiceRequestedEvent
+                {
+                    Title = title,
+                    Choices = ctx.Deck.DiscardPile,
+                    RequiredCount = count,
+                    OnConfirmed = chosen =>
+                    {
+                        foreach (var c in chosen)
+                            ctx.Deck.MoveFromDiscardToDeck(c);
+                    },
+                }
+            );
         }
 
         public override string GetDescription() =>
-            _amount == 1 ? "Choose 1 card from your discard pile and shuffle it into your deck"
-                         : $"Choose {_amount} cards from your discard pile and shuffle them into your deck";
+            _amount == 1
+                ? "Choose 1 card from your discard pile and shuffle it into your deck"
+                : $"Choose {_amount} cards from your discard pile and shuffle them into your deck";
     }
 }

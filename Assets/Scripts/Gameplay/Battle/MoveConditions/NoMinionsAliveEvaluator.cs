@@ -10,14 +10,19 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public class NoMinionsAliveEvaluator : IMoveConditionEvaluator
     {
-        public bool IsMet(EnemyMoveData move, IReadOnlyList<EnemyController> allEnemies, EnemyController self)
+        public bool IsMet(
+            EnemyMoveData move,
+            IReadOnlyList<EnemyController> allEnemies,
+            EnemyController self
+        )
         {
             // If we can't evaluate, default to eligible so the move isn't silently lost.
-            if (allEnemies == null || move.MinionToSummon == null) return true;
+            if (allEnemies == null || move.MinionToSummon == null)
+                return true;
 
-            return !allEnemies.Any(e => e != self
-                                     && !e.IsDefeated
-                                     && e.EnemyData == move.MinionToSummon);
+            return !allEnemies.Any(e =>
+                e != self && !e.IsDefeated && e.EnemyData == move.MinionToSummon
+            );
         }
     }
 }

@@ -9,7 +9,8 @@ namespace Crookedile.Gameplay.Battle
     {
         public override bool Matches(PassiveEventContext ctx)
         {
-            if (!ctx.Is<CardDiscardedEvent>()) return false;
+            if (!ctx.Is<CardDiscardedEvent>())
+                return false;
             return ctx.As<CardDiscardedEvent>().IsPlayer;
         }
 

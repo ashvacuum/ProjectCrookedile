@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using UnityEngine;
-using Crookedile.Data;
 using Crookedile.Core;
+using Crookedile.Data;
 using Crookedile.Utilities;
+using UnityEngine;
 
 namespace Crookedile.Managers
 {
@@ -18,8 +18,11 @@ namespace Crookedile.Managers
     public class SaveManager : Singleton<SaveManager>
     {
         [Header("Save Settings")]
-        [SerializeField] private bool _useEncryption = true;
-        [SerializeField] private bool _usePrettyPrint = false;
+        [SerializeField]
+        private bool _useEncryption = true;
+
+        [SerializeField]
+        private bool _usePrettyPrint = false;
 
         private const int MAX_SAVE_SLOTS = 3;
         private const string SAVE_FILE_PREFIX = "save_slot_";
@@ -36,11 +39,17 @@ namespace Crookedile.Managers
         {
             if (slot < 0 || slot >= MAX_SAVE_SLOTS)
             {
-                GameLogger.LogError("SaveManager", $"Invalid save slot: {slot}. Must be 0-{MAX_SAVE_SLOTS - 1}");
+                GameLogger.LogError(
+                    "SaveManager",
+                    $"Invalid save slot: {slot}. Must be 0-{MAX_SAVE_SLOTS - 1}"
+                );
                 slot = 0;
             }
             string prefix = isAutoSave ? AUTOSAVE_FILE_PREFIX : SAVE_FILE_PREFIX;
-            return Path.Combine(Application.persistentDataPath, $"{prefix}{slot}{SAVE_FILE_EXTENSION}");
+            return Path.Combine(
+                Application.persistentDataPath,
+                $"{prefix}{slot}{SAVE_FILE_EXTENSION}"
+            );
         }
 
         private string SaveFilePath => GetSaveFilePath(_currentSlot);
@@ -55,7 +64,10 @@ namespace Crookedile.Managers
         {
             if (slot < 0 || slot >= MAX_SAVE_SLOTS)
             {
-                GameLogger.LogError("SaveManager", $"Invalid slot: {slot}. Must be 0-{MAX_SAVE_SLOTS - 1}");
+                GameLogger.LogError(
+                    "SaveManager",
+                    $"Invalid slot: {slot}. Must be 0-{MAX_SAVE_SLOTS - 1}"
+                );
                 return false;
             }
 
@@ -103,11 +115,7 @@ namespace Crookedile.Managers
         /// </summary>
         public SaveSlotInfo GetSlotInfo(int slot)
         {
-            SaveSlotInfo info = new SaveSlotInfo
-            {
-                slotIndex = slot,
-                isEmpty = !SlotHasSave(slot)
-            };
+            SaveSlotInfo info = new SaveSlotInfo { slotIndex = slot, isEmpty = !SlotHasSave(slot) };
 
             if (!info.isEmpty)
             {
@@ -129,7 +137,10 @@ namespace Crookedile.Managers
                 }
                 catch (Exception e)
                 {
-                    GameLogger.LogError("SaveManager", $"Failed to read slot {slot} info: {e.Message}");
+                    GameLogger.LogError(
+                        "SaveManager",
+                        $"Failed to read slot {slot} info: {e.Message}"
+                    );
                     info.isCorrupted = true;
                 }
             }
@@ -179,7 +190,10 @@ namespace Crookedile.Managers
 
                 // Convert to JSON
                 string json = JsonUtility.ToJson(saveData, _usePrettyPrint);
-                GameLogger.LogInfo("SaveManager", $"Serialized save data: {json.Length} characters");
+                GameLogger.LogInfo(
+                    "SaveManager",
+                    $"Serialized save data: {json.Length} characters"
+                );
 
                 // Encrypt if enabled
                 string dataToWrite = _useEncryption ? Encrypt(json) : json;
@@ -194,7 +208,10 @@ namespace Crookedile.Managers
             }
             catch (Exception e)
             {
-                GameLogger.LogError("SaveManager", $"Failed to save game: {e.Message}\n{e.StackTrace}");
+                GameLogger.LogError(
+                    "SaveManager",
+                    $"Failed to save game: {e.Message}\n{e.StackTrace}"
+                );
                 return false;
             }
         }
@@ -286,7 +303,10 @@ namespace Crookedile.Managers
             }
             catch (Exception e)
             {
-                GameLogger.LogError("SaveManager", $"Failed to load game: {e.Message}\n{e.StackTrace}");
+                GameLogger.LogError(
+                    "SaveManager",
+                    $"Failed to load game: {e.Message}\n{e.StackTrace}"
+                );
 
                 // Try autosave as fallback
                 if (tryAutoSave)
@@ -428,7 +448,13 @@ namespace Crookedile.Managers
 
                     using (MemoryStream msEncrypt = new MemoryStream())
                     {
-                        using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                        using (
+                            CryptoStream csEncrypt = new CryptoStream(
+                                msEncrypt,
+                                encryptor,
+                                CryptoStreamMode.Write
+                            )
+                        )
                         {
                             using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
                             {
@@ -460,9 +486,19 @@ namespace Crookedile.Managers
 
                     ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
-                    using (MemoryStream msDecrypt = new MemoryStream(Convert.FromBase64String(cipherText)))
+                    using (
+                        MemoryStream msDecrypt = new MemoryStream(
+                            Convert.FromBase64String(cipherText)
+                        )
+                    )
                     {
-                        using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                        using (
+                            CryptoStream csDecrypt = new CryptoStream(
+                                msDecrypt,
+                                decryptor,
+                                CryptoStreamMode.Read
+                            )
+                        )
                         {
                             using (StreamReader srDecrypt = new StreamReader(csDecrypt))
                             {
@@ -486,10 +522,17 @@ namespace Crookedile.Managers
         private float _autoSaveTimer = 0f;
 
         [Header("Auto Save")]
-        [SerializeField] private bool _enableAutoSave = true;
-        [SerializeField] private float _autoSaveIntervalSeconds = 300f;
-        [SerializeField] private int _maxSaveRetries = 3;
-        [SerializeField] private float _retryDelaySeconds = 1f;
+        [SerializeField]
+        private bool _enableAutoSave = true;
+
+        [SerializeField]
+        private float _autoSaveIntervalSeconds = 300f;
+
+        [SerializeField]
+        private int _maxSaveRetries = 3;
+
+        [SerializeField]
+        private float _retryDelaySeconds = 1f;
 
         private SaveData _currentSaveData;
         private bool _isSaving = false;
@@ -585,7 +628,10 @@ namespace Crookedile.Managers
                 // Save successful - clear dirty flag and remove from queue
                 request.data.ClearDirty();
                 _saveQueue.Dequeue();
-                GameLogger.LogInfo("SaveManager", $"Save completed ({_saveQueue.Count} remaining in queue)");
+                GameLogger.LogInfo(
+                    "SaveManager",
+                    $"Save completed ({_saveQueue.Count} remaining in queue)"
+                );
             }
             else
             {
@@ -593,12 +639,18 @@ namespace Crookedile.Managers
                 request.retryCount++;
                 if (request.retryCount >= _maxSaveRetries)
                 {
-                    GameLogger.LogError("SaveManager", $"Save failed after {_maxSaveRetries} retries - discarding");
+                    GameLogger.LogError(
+                        "SaveManager",
+                        $"Save failed after {_maxSaveRetries} retries - discarding"
+                    );
                     _saveQueue.Dequeue();
                 }
                 else
                 {
-                    GameLogger.LogWarning("SaveManager", $"Save failed - retry {request.retryCount}/{_maxSaveRetries} in {_retryDelaySeconds}s");
+                    GameLogger.LogWarning(
+                        "SaveManager",
+                        $"Save failed - retry {request.retryCount}/{_maxSaveRetries} in {_retryDelaySeconds}s"
+                    );
                 }
             }
 
@@ -702,7 +754,9 @@ namespace Crookedile.Managers
                 }
                 else
                 {
-                    Debug.Log($"Slot {i}: {slot.origin} - Day {slot.currentDay} - {slot.lastSaveTime}");
+                    Debug.Log(
+                        $"Slot {i}: {slot.origin} - Day {slot.currentDay} - {slot.lastSaveTime}"
+                    );
                 }
             }
         }
@@ -711,7 +765,8 @@ namespace Crookedile.Managers
 
 #if UNITY_EDITOR
         [Header("Debug")]
-        [SerializeField] private bool _showDebugInfo = false;
+        [SerializeField]
+        private bool _showDebugInfo = false;
 
         private void OnGUI()
         {

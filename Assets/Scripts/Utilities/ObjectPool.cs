@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace Crookedile.Utilities
 {
-    public class ObjectPool<T> where T : Component
+    public class ObjectPool<T>
+        where T : Component
     {
         private readonly T _prefab;
         private readonly Queue<T> _pool = new Queue<T>();
@@ -47,7 +48,8 @@ namespace Crookedile.Utilities
 
         public void Return(T obj)
         {
-            if (obj == null) return;
+            if (obj == null)
+                return;
             obj.gameObject.SetActive(false);
             _pool.Enqueue(obj);
         }

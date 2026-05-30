@@ -11,21 +11,24 @@ namespace Crookedile.Gameplay.Battle
     public class ComposureCondition : PassiveConditionBase
     {
         [Tooltip("How to compare the player's composure against the threshold.")]
-        [SerializeField] private ComparisonType _comparison = ComparisonType.AtLeast;
+        [SerializeField]
+        private ComparisonType _comparison = ComparisonType.AtLeast;
 
         [Tooltip("The composure stack threshold.")]
-        [SerializeField] private int _value = 1;
+        [SerializeField]
+        private int _value = 1;
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
-            if (ctx.PlayerStats == null) return false;
+            if (ctx.PlayerStats == null)
+                return false;
             int composure = ctx.PlayerStats.CurrentComposure;
             return _comparison switch
             {
                 ComparisonType.AtLeast => composure >= _value,
-                ComparisonType.AtMost  => composure <= _value,
-                ComparisonType.Equals  => composure == _value,
-                _                     => true,
+                ComparisonType.AtMost => composure <= _value,
+                ComparisonType.Equals => composure == _value,
+                _ => true,
             };
         }
 
@@ -33,9 +36,9 @@ namespace Crookedile.Gameplay.Battle
             _comparison switch
             {
                 ComparisonType.AtLeast => $"you have {_value}+ composure",
-                ComparisonType.AtMost  => $"you have {_value} or less composure",
-                ComparisonType.Equals  => $"you have exactly {_value} composure",
-                _                     => $"composure {_value}",
+                ComparisonType.AtMost => $"you have {_value} or less composure",
+                ComparisonType.Equals => $"you have exactly {_value} composure",
+                _ => $"composure {_value}",
             };
     }
 }

@@ -9,7 +9,8 @@ namespace Crookedile.Gameplay.Battle
     {
         public override bool Matches(PassiveEventContext ctx)
         {
-            if (!ctx.Is<ComposureChangedEvent>()) return false;
+            if (!ctx.Is<ComposureChangedEvent>())
+                return false;
             var e = ctx.As<ComposureChangedEvent>();
             return e.IsPlayer && e.NewValue > e.OldValue;
         }

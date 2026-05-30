@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Gameplay.Battle;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Data
 {
@@ -17,31 +17,38 @@ namespace Crookedile.Data
     {
         [Header("Identity")]
         [Tooltip("Name of the passive ability, e.g. 'Discipline'")]
-        [SerializeField] private string _passiveName;
+        [SerializeField]
+        private string _passiveName;
 
         [Tooltip("Which origin has this passive")]
-        [SerializeField] private OriginType _origin;
+        [SerializeField]
+        private OriginType _origin;
 
         [Header("Description")]
         [TextArea(2, 4)]
         [Tooltip("Description shown to the player in the UI")]
-        [SerializeField] private string _description;
+        [SerializeField]
+        private string _description;
 
         [Tooltip("Icon representing this passive")]
-        [SerializeField] private Sprite _icon;
+        [SerializeField]
+        private Sprite _icon;
 
         [Title("Passives")]
-        [Tooltip("Polymorphic passives using the BattlePassive + BattleEffect hierarchy.\n" +
-                 "Add entries here with a trigger, optional conditions, and one or more effects.")]
+        [Tooltip(
+            "Polymorphic passives using the BattlePassive + BattleEffect hierarchy.\n"
+                + "Add entries here with a trigger, optional conditions, and one or more effects."
+        )]
         [SerializeReference]
-        [SerializeField] private List<BattlePassive> _passives = new List<BattlePassive>();
+        [SerializeField]
+        private List<BattlePassive> _passives = new List<BattlePassive>();
 
         #region Properties
 
-        public string            PassiveName   => _passiveName;
-        public OriginType        Origin        => _origin;
-        public string            Description   => _description;
-        public Sprite            Icon          => _icon;
+        public string PassiveName => _passiveName;
+        public OriginType Origin => _origin;
+        public string Description => _description;
+        public Sprite Icon => _icon;
 
         /// <summary>Polymorphic passives using the BattlePassive + BattleEffect hierarchy.</summary>
         public IReadOnlyList<BattlePassive> Passives => _passives;

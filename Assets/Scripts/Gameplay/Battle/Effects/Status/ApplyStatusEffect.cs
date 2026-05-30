@@ -1,9 +1,9 @@
 ﻿using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -16,18 +16,24 @@ namespace Crookedile.Gameplay.Battle
     public class ApplyStatusEffect : BattleEffect
     {
         [Tooltip("Who receives the status effect.")]
-        [SerializeField] private TargetType _target = TargetType.Opponent;
+        [SerializeField]
+        private TargetType _target = TargetType.Opponent;
 
         public override TargetType Target => _target;
 
         [Tooltip("Which status effect to apply.")]
-        [SerializeField] private StatusEffectType _statusType = StatusEffectType.Weakened;
+        [SerializeField]
+        private StatusEffectType _statusType = StatusEffectType.Weakened;
 
-        [Tooltip("Number of stacks to apply. Negative values reduce the stat (supported for Strength and Dexterity).")]
-        [SerializeField] private int _stacks = 1;
+        [Tooltip(
+            "Number of stacks to apply. Negative values reduce the stat (supported for Strength and Dexterity)."
+        )]
+        [SerializeField]
+        private int _stacks = 1;
 
         [Tooltip("How the status duration is tracked.")]
-        [SerializeField] private StatusDurationType _duration = StatusDurationType.DecreasePerTurn;
+        [SerializeField]
+        private StatusDurationType _duration = StatusDurationType.DecreasePerTurn;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
@@ -37,14 +43,17 @@ namespace Crookedile.Gameplay.Battle
             {
                 statusMgr?.ApplyStatusEffect(_statusType, stacks, _duration);
                 GameLogger.LogInfo<ApplyStatusEffect>(
-                    $"Applied {stacks} {_statusType} ({_duration}) to {(targetStats == ctx.PlayerStats ? "Player" : "Enemy")}");
+                    $"Applied {stacks} {_statusType} ({_duration}) to {(targetStats == ctx.PlayerStats ? "Player" : "Enemy")}"
+                );
 
-                EventBus.Publish(new StatusEffectAppliedEvent
-                {
-                    StatusType = _statusType,
-                    Stacks     = stacks,
-                    IsToPlayer = targetStats == ctx.PlayerStats,
-                });
+                EventBus.Publish(
+                    new StatusEffectAppliedEvent
+                    {
+                        StatusType = _statusType,
+                        Stacks = stacks,
+                        IsToPlayer = targetStats == ctx.PlayerStats,
+                    }
+                );
             }
         }
 

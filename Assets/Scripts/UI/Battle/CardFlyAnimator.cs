@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using DG.Tweening;
 using Crookedile.Core;
 using Crookedile.Utilities;
+using DG.Tweening;
+using UnityEngine;
 
 namespace Crookedile.UI.Battle
 {
@@ -32,37 +32,50 @@ namespace Crookedile.UI.Battle
     [Debuggable("Card", LogLevel.Info)]
     public class CardFlyAnimator : Singleton<CardFlyAnimator>
     {
-        // ─── Inspector ────────────────────────────────────────────────────────────
-
+        #region Inspector
         [Header("Transforms")]
-        [Tooltip("Root battle canvas. The discarding card is re-parented here so it can\n" +
-                 "fly past the hand-container clip boundary without being cropped.")]
-        [SerializeField] private Canvas _rootCanvas;
+        [Tooltip(
+            "Root battle canvas. The discarding card is re-parented here so it can\n"
+                + "fly past the hand-container clip boundary without being cropped."
+        )]
+        [SerializeField]
+        private Canvas _rootCanvas;
 
-        [Tooltip("Intermediate parent for cards during draw/discard animations — sits outside " +
-                 "the hand container so cards aren't clipped.")]
-        [SerializeField] private Transform _cardHandParent;
+        [Tooltip(
+            "Intermediate parent for cards during draw/discard animations — sits outside "
+                + "the hand container so cards aren't clipped."
+        )]
+        [SerializeField]
+        private Transform _cardHandParent;
 
-        [Tooltip("Seconds between successive card launches in a draw batch.\n" +
-                 "Set to 0 to launch all cards simultaneously.")]
-        [SerializeField] private float _drawStaggerDelay = 0.4f;
+        [Tooltip(
+            "Seconds between successive card launches in a draw batch.\n"
+                + "Set to 0 to launch all cards simultaneously."
+        )]
+        [SerializeField]
+        private float _drawStaggerDelay = 0.4f;
 
         [Header("Discard Settings")]
         [Tooltip("Total duration (seconds) of the fly-to-discard animation.")]
-        [SerializeField] private float _discardDuration = 0.28f;
+        [SerializeField]
+        private float _discardDuration = 0.28f;
 
         [Header("Card Grant Settings")]
         [Tooltip("Seconds to scale the card in from zero at the start of the grant animation.")]
-        [SerializeField] private float _grantScaleInDuration = 0.15f;
+        [SerializeField]
+        private float _grantScaleInDuration = 0.15f;
 
         [Tooltip("Seconds the granted card is held at full size before flying to the zone.")]
-        [SerializeField] private float _grantHoldDuration = 0.7f;
+        [SerializeField]
+        private float _grantHoldDuration = 0.7f;
 
         [Tooltip("Seconds for the card to fly from screen center to the target zone.")]
-        [SerializeField] private float _grantFlyDuration = 0.35f;
+        [SerializeField]
+        private float _grantFlyDuration = 0.35f;
 
-        // ─── Draw API ─────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Draw API
         /// <summary>
         /// Snaps every button in <paramref name="buttons"/> to the deck position at small scale,
         /// then lets <c>CardButton.Update()</c>'s lerp carry each one to its pre-set arc target.
@@ -71,12 +84,14 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void AnimateDrawIn(List<CardButton> buttons, Transform handContainer)
         {
-            if (handContainer == null) return;
+            if (handContainer == null)
+                return;
             StartCoroutine(StaggeredDraw(buttons, handContainer));
         }
 
-        // ─── Discard API ──────────────────────────────────────────────────────────
+        #endregion
 
+        #region Discard API
         /// <summary>
         /// Flies <paramref name="btn"/> from its current position to the discard pile,
         /// shrinking it to zero.  <paramref name="onComplete"/> is invoked when finished
@@ -92,16 +107,26 @@ namespace Crookedile.UI.Battle
             if (_cardHandParent != null)
                 btn.transform.SetParent(_cardHandParent, false);
 
-            DOVirtual.DelayedCall(_discardDuration, () =>
-            {
-                GameLogger.LogVerbose("Card", $"Discard animation complete for '{btn.CardData?.CardName}'", this);
-                btn.enabled = true;
-                onComplete?.Invoke();
-            }).SetLink(gameObject);
+            DOVirtual
+                .DelayedCall(
+                    _discardDuration,
+                    () =>
+                    {
+                        GameLogger.LogVerbose(
+                            "Card",
+                            $"Discard animation complete for '{btn.CardData?.CardName}'",
+                            this
+                        );
+                        btn.enabled = true;
+                        onComplete?.Invoke();
+                    }
+                )
+                .SetLink(gameObject);
         }
 
-        // ─── Card Grant API ───────────────────────────────────────────────────────
+        #endregion
 
+        #region Card Grant API
         /// <summary>
         /// Shows <paramref name="btn"/> at the center of the battle canvas with a pop scale-in,
         /// holds it so the player can read it, plays "GrantCard" feedback, then flies it to
@@ -124,14 +149,24 @@ namespace Crookedile.UI.Battle
 
             Vector3 endPos = targetZone != null ? targetZone.position : btn.transform.position;
 
-            DOTween.Sequence().SetLink(gameObject)
+            DOTween
+                .Sequence()
+                .SetLink(gameObject)
                 // Phase 1: pop scale-in with overshoot (0 → 1.1 → 1.0)
-                .Append(btn.transform.DOScale(1.1f, _grantScaleInDuration * 0.8f).SetEase(Ease.Linear))
-                .Append(btn.transform.DOScale(1f,   _grantScaleInDuration * 0.2f).SetEase(Ease.Linear))
+                .Append(
+                    btn.transform.DOScale(1.1f, _grantScaleInDuration * 0.8f).SetEase(Ease.Linear)
+                )
+                .Append(
+                    btn.transform.DOScale(1f, _grantScaleInDuration * 0.2f).SetEase(Ease.Linear)
+                )
                 // Phase 2: hold; play feedback at the start
                 .AppendCallback(() =>
                 {
-                    GameLogger.LogInfo("Card", $"Grant animation holding for '{btn.CardData?.CardName}'", this);
+                    GameLogger.LogInfo(
+                        "Card",
+                        $"Grant animation holding for '{btn.CardData?.CardName}'",
+                        this
+                    );
                 })
                 .AppendInterval(_grantHoldDuration)
                 // Phase 3: fly to zone while shrinking (ease-in² = accelerates toward zone)
@@ -142,16 +177,18 @@ namespace Crookedile.UI.Battle
                     btn.gameObject.SetActive(false);
                     btn.transform.localScale = Vector3.one;
                     btn.enabled = true;
-                    if (cg != null) cg.blocksRaycasts = true;
-                    GameLogger.LogInfo("Card", $"Grant animation complete for '{btn.CardData?.CardName}'", this);
+                    if (cg != null)
+                        cg.blocksRaycasts = true;
+                    GameLogger.LogInfo(
+                        "Card",
+                        $"Grant animation complete for '{btn.CardData?.CardName}'",
+                        this
+                    );
                     onArrival?.Invoke();
                 });
         }
 
-        // ─── Internal — Draw ──────────────────────────────────────────────────────
-
-        
-
+        #region Internal — Draw
         private IEnumerator StaggeredDraw(List<CardButton> buttons, Transform container)
         {
             // Snapshot the list immediately — the live _activeButtons list may be mutated
@@ -163,28 +200,35 @@ namespace Crookedile.UI.Battle
             // cards are visible at their final arc positions before the stagger launches them.
             foreach (var btn in snapshot)
             {
-                if (btn != null) btn.transform.localScale = Vector3.zero;
+                if (btn != null)
+                    btn.transform.localScale = Vector3.zero;
             }
 
             foreach (var btn in snapshot)
             {
-                if (btn == null) continue;
-                
+                if (btn == null)
+                    continue;
+
                 if (_cardHandParent != null)
                     btn.transform.SetParent(_cardHandParent, false);
 
-                GameLogger.LogVerbose("Card", $"Draw animation started for '{btn.CardData?.CardName}'", this);
+                GameLogger.LogVerbose(
+                    "Card",
+                    $"Draw animation started for '{btn.CardData?.CardName}'",
+                    this
+                );
                 btn.gameObject.SetActive(true);
                 yield return new WaitForSeconds(_drawStaggerDelay);
                 btn.transform.localScale = Vector3.zero;
                 btn.transform.SetParent(container, false);
                 btn.transform.DOScale(Vector3.one, 0.18f).SetEase(Ease.OutBack);
-                btn.transform.SetSiblingIndex(0);   // enter behind all existing cards; ArrangeCards restores proper z-order
+                btn.transform.SetSiblingIndex(0); // enter behind all existing cards; ArrangeCards restores proper z-order
                 container.GetComponent<CardHandLayout>()?.ArrangeCards(buttons);
             }
 
             container.GetComponent<CardHandLayout>()?.ArrangeCards(buttons);
         }
-
     }
 }
+        #endregion
+        #endregion

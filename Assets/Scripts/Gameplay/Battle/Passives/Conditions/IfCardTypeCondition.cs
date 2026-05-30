@@ -17,7 +17,8 @@ namespace Crookedile.Gameplay.Battle
     public class IfCardTypeCondition : PassiveConditionBase
     {
         [Tooltip("The passive fires only if the triggering card is of this type.")]
-        [SerializeField] private CardType _requiredType = CardType.Pressure;
+        [SerializeField]
+        private CardType _requiredType = CardType.Pressure;
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {

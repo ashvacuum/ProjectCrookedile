@@ -1,10 +1,10 @@
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using Crookedile.Core;
-using Crookedile.Gameplay.Battle;
 using Crookedile.Data.Audio;
 using Crookedile.Data.VFX;
+using Crookedile.Gameplay.Battle;
 using Crookedile.Managers;
+using UnityEngine;
 
 namespace Crookedile.UI.Battle
 {
@@ -21,21 +21,27 @@ namespace Crookedile.UI.Battle
     public class BattleFeedbackController : MonoBehaviour
     {
         [Header("Data")]
-        [Tooltip("ScriptableObject that maps each BattleAudioTrigger to an AudioEvent + VFXEvent pair.")]
-        [SerializeField] private BattleSoundMap _soundMap;
+        [Tooltip(
+            "ScriptableObject that maps each BattleAudioTrigger to an AudioEvent + VFXEvent pair."
+        )]
+        [SerializeField]
+        private BattleSoundMap _soundMap;
 
         [Header("Scene References")]
         [Tooltip("Needed to resolve VFX target positions (player slot, enemy slots).")]
-        [SerializeField] private BattleUI       _battleUI;
+        [SerializeField]
+        private BattleUI _battleUI;
 
         [Header("Floating Numbers")]
         [Tooltip("Color of damage number text spawned by FloatingTextManager.")]
-        [SerializeField] private Color _damageColor = new Color(0.9f, 0.2f, 0.2f);
+        [SerializeField]
+        private Color _damageColor = new Color(0.9f, 0.2f, 0.2f);
+
         [Tooltip("Color of heal number text spawned by FloatingTextManager.")]
-        [SerializeField] private Color _healColor   = new Color(0.2f, 0.9f, 0.2f);
+        [SerializeField]
+        private Color _healColor = new Color(0.2f, 0.9f, 0.2f);
 
-        // ─── Lifecycle ────────────────────────────────────────────────────────
-
+        #region Lifecycle
         private void OnEnable()
         {
             EventBus.Subscribe<BattleStartedEvent>(OnBattleStarted);
@@ -80,40 +86,45 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<CardPlayVFXRequestedEvent>(OnCardPlayVFXRequested);
         }
 
-        // ─── Event Handlers ───────────────────────────────────────────────────
+        #endregion
 
-        private void OnBattleStarted(BattleStartedEvent _)
-            => Play(BattleAudioTrigger.BattleStart);
+        #region Event Handlers
+        private void OnBattleStarted(BattleStartedEvent _) => Play(BattleAudioTrigger.BattleStart);
 
-        private void OnBattleEnded(BattleEndedEvent evt)
-            => Play(evt.Result.isVictory ? BattleAudioTrigger.BattleVictory
-                                         : BattleAudioTrigger.BattleDefeat);
+        private void OnBattleEnded(BattleEndedEvent evt) =>
+            Play(
+                evt.Result.isVictory
+                    ? BattleAudioTrigger.BattleVictory
+                    : BattleAudioTrigger.BattleDefeat
+            );
 
-        private void OnTurnStarted(TurnStartedEvent evt)
-            => Play(evt.IsPlayerTurn ? BattleAudioTrigger.PlayerTurnStart
-                                     : BattleAudioTrigger.OpponentTurnStart);
+        private void OnTurnStarted(TurnStartedEvent evt) =>
+            Play(
+                evt.IsPlayerTurn
+                    ? BattleAudioTrigger.PlayerTurnStart
+                    : BattleAudioTrigger.OpponentTurnStart
+            );
 
         private void OnTurnEnded(TurnEndedEvent _)
         {
             // No dedicated trigger for turn-end yet — add an entry to BattleAudioTrigger if needed.
         }
 
-        private void OnCardPlayed(CardPlayedEvent _)
-            => Play(BattleAudioTrigger.CardPlayed);
+        private void OnCardPlayed(CardPlayedEvent _) => Play(BattleAudioTrigger.CardPlayed);
 
-        private void OnCardDrawn(CardDrawnEvent _)
-            => Play(BattleAudioTrigger.CardDrawn);
+        private void OnCardDrawn(CardDrawnEvent _) => Play(BattleAudioTrigger.CardDrawn);
 
-        private void OnCardDiscarded(CardDiscardedEvent _)
-            => Play(BattleAudioTrigger.CardDiscarded);
+        private void OnCardDiscarded(CardDiscardedEvent _) =>
+            Play(BattleAudioTrigger.CardDiscarded);
 
-        private void OnCardExhausted(CardExhaustedEvent _)
-            => Play(BattleAudioTrigger.CardExhausted);
+        private void OnCardExhausted(CardExhaustedEvent _) =>
+            Play(BattleAudioTrigger.CardExhausted);
 
         private void OnDamageDealt(DamageDealtEvent evt)
         {
-            var trigger = evt.IsToPlayer ? BattleAudioTrigger.DamageDealtToPlayer
-                                         : BattleAudioTrigger.DamageDealtToEnemy;
+            var trigger = evt.IsToPlayer
+                ? BattleAudioTrigger.DamageDealtToPlayer
+                : BattleAudioTrigger.DamageDealtToEnemy;
 
             // VFX source: attacker's position.
             // Enemy → player: VFX at the attacking enemy's slot.
@@ -146,8 +157,11 @@ namespace Crookedile.UI.Battle
             Play(BattleAudioTrigger.StatusEffectApplied, target);
         }
 
-        private void OnEnemyDefeated(EnemyDefeatedEvent evt)
-            => Play(BattleAudioTrigger.EnemyDefeated, _battleUI?.GetEnemySlotTransform(evt.EnemyIndex));
+        private void OnEnemyDefeated(EnemyDefeatedEvent evt) =>
+            Play(
+                BattleAudioTrigger.EnemyDefeated,
+                _battleUI?.GetEnemySlotTransform(evt.EnemyIndex)
+            );
 
         private void OnEnemyActing(EnemyActingEvent evt)
         {
@@ -162,63 +176,93 @@ namespace Crookedile.UI.Battle
             // Resolve VFX spawn target: prefer the last-targeted enemy slot, fall back to the card's origin rect.
             var vfxTarget = EnemySlotUI.LastTargetedRect ?? CardButton.LastPlayedRect;
 
-            var vfx = VFXManager.Instance?.PlayAndSetInstance(evt.Card.CardVFX,
+            var vfx = VFXManager.Instance?.PlayAndSetInstance(
+                evt.Card.CardVFX,
                 vfxTarget,
                 new BattleVFXContext
                 {
-                    OnApplyEffects = () => EventBus.Publish(new CardVFXApplyEffectsEvent
-                    {
-                        Card            = evt.Card,
-                        AmountOverrides = evt.AmountOverrides
-                    }),
-                    OnComplete = () => EventBus.Publish(new CardVFXCompleteEvent { Card = evt.Card })
-                });
+                    OnApplyEffects = () =>
+                        EventBus.Publish(
+                            new CardVFXApplyEffectsEvent
+                            {
+                                Card = evt.Card,
+                                AmountOverrides = evt.AmountOverrides,
+                            }
+                        ),
+                    OnComplete = () =>
+                        EventBus.Publish(new CardVFXCompleteEvent { Card = evt.Card }),
+                }
+            );
 
             if (vfx == null)
             {
                 // VFX failed to spawn — fire both events immediately so BattleManager isn't left blocked.
-                EventBus.Publish(new CardVFXApplyEffectsEvent { Card = evt.Card, AmountOverrides = evt.AmountOverrides });
+                EventBus.Publish(
+                    new CardVFXApplyEffectsEvent
+                    {
+                        Card = evt.Card,
+                        AmountOverrides = evt.AmountOverrides,
+                    }
+                );
                 EventBus.Publish(new CardVFXCompleteEvent { Card = evt.Card });
             }
         }
 
-        private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
-            => Play(BattleAudioTrigger.EnemyIntentDeclared, _battleUI?.GetEnemySlotTransform(evt.EnemyIndex));
+        private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt) =>
+            Play(
+                BattleAudioTrigger.EnemyIntentDeclared,
+                _battleUI?.GetEnemySlotTransform(evt.EnemyIndex)
+            );
 
-        private void OnComposureChanged(ComposureChangedEvent evt)
-            => Play(evt.NewValue > evt.OldValue ? BattleAudioTrigger.ComposureGained
-                                                : BattleAudioTrigger.ComposureLost);
+        private void OnComposureChanged(ComposureChangedEvent evt) =>
+            Play(
+                evt.NewValue > evt.OldValue
+                    ? BattleAudioTrigger.ComposureGained
+                    : BattleAudioTrigger.ComposureLost
+            );
 
-        private void OnHostilityChanged(EnemyHostilityChangedEvent evt)
-            => Play(BattleAudioTrigger.EnemyHostilityChanged,
-                    _battleUI?.GetEnemySlotTransform(evt.EnemyIndex));
+        private void OnHostilityChanged(EnemyHostilityChangedEvent evt) =>
+            Play(
+                BattleAudioTrigger.EnemyHostilityChanged,
+                _battleUI?.GetEnemySlotTransform(evt.EnemyIndex)
+            );
 
         private void OnAPChanged(ActionPointsChangedEvent evt)
         {
             // Only fire for player AP changes (enemies have 0 AP; filter noise).
-            if (!evt.IsPlayer) return;
-            Play(evt.NewValue > evt.OldValue ? BattleAudioTrigger.APGained
-                                             : BattleAudioTrigger.APSpent);
+            if (!evt.IsPlayer)
+                return;
+            Play(
+                evt.NewValue > evt.OldValue
+                    ? BattleAudioTrigger.APGained
+                    : BattleAudioTrigger.APSpent
+            );
         }
 
-        // ─── Core Play Helper ─────────────────────────────────────────────────
+        #endregion
 
+        #region Core Play Helper
         /// <summary>
         /// Looks up the trigger in the sound map and fires audio + VFX.
         /// All null checks are internal — safe to call when map or entries are unassigned.
         /// </summary>
         private void Play(BattleAudioTrigger trigger, RectTransform target = null)
         {
-            if (_soundMap == null) return;
-            if (!_soundMap.TryGet(trigger, out var entry)) return;
+            if (_soundMap == null)
+                return;
+            if (!_soundMap.TryGet(trigger, out var entry))
+                return;
 
             entry.Sound?.Play();
 
             if (entry.Visual != null)
             {
-                if (target != null) VFXManager.Instance?.Play(entry.Visual, target);
-                else                VFXManager.Instance?.Play(entry.Visual, (RectTransform)null);
+                if (target != null)
+                    VFXManager.Instance?.Play(entry.Visual, target);
+                else
+                    VFXManager.Instance?.Play(entry.Visual, (RectTransform)null);
             }
         }
     }
 }
+        #endregion

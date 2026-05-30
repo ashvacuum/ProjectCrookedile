@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Crookedile.Data.VFX
 {
@@ -15,16 +15,19 @@ namespace Crookedile.Data.VFX
     [CreateAssetMenu(menuName = "Crookedile/VFX/VFX Event", fileName = "NewVFXEvent")]
     public class VFXEvent : ScriptableObject
     {
-        [Tooltip("Animation state to play on the shared VFX prefab.\n" +
-                 "States are auto-populated from BaseAnimationVFX.controller.\n" +
-                 "Select None to skip the spawned animation effect.")]
-        [SerializeField] private VFXAnimationState _animationState;
+        [Tooltip(
+            "Animation state to play on the shared VFX prefab.\n"
+                + "States are auto-populated from BaseAnimationVFX.controller.\n"
+                + "Select None to skip the spawned animation effect."
+        )]
+        [SerializeField]
+        private VFXAnimationState _animationState;
 
         [Tooltip("Canvas-space offset (in pixels) added to the target position after placement.")]
-        [SerializeField] private Vector2 _offset = Vector2.zero;
+        [SerializeField]
+        private Vector2 _offset = Vector2.zero;
 
-        // ─── Properties ───────────────────────────────────────────────────────
-
+        #region Properties
         /// <summary>
         /// The exact Animator state name string derived from <see cref="_animationState"/>.
         /// Returns <see cref="string.Empty"/> when <see cref="VFXAnimationState.None"/> is selected.
@@ -33,5 +36,7 @@ namespace Crookedile.Data.VFX
 
         /// <summary>Canvas-space pixel offset applied when positioning the animated image at the target.</summary>
         public Vector2 Offset => _offset;
+
+        #endregion
     }
 }

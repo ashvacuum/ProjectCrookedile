@@ -1,9 +1,9 @@
 ﻿using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -17,24 +17,34 @@ namespace Crookedile.Gameplay.Battle
     public class DealDamageEffect : BattleEffect
     {
         [Tooltip("Who receives the damage.")]
-        [SerializeField] private TargetType _target = TargetType.Opponent;
+        [SerializeField]
+        private TargetType _target = TargetType.Opponent;
 
         public override TargetType Target => _target;
 
         [Tooltip("Base damage amount. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]
         [MinValue(1)]
-        [SerializeField] private int _amount = 5;
+        [SerializeField]
+        private int _amount = 5;
 
-        [Tooltip("Where to read the damage amount from at runtime.\n" +
-                 "FixedAmount = use the authored Amount field.\n" +
-                 "Other options read accumulated values from the effect context (e.g. LastDamageDealt for lifesteal).")]
-        [SerializeField] private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
+        [Tooltip(
+            "Where to read the damage amount from at runtime.\n"
+                + "FixedAmount = use the authored Amount field.\n"
+                + "Other options read accumulated values from the effect context (e.g. LastDamageDealt for lifesteal)."
+        )]
+        [SerializeField]
+        private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            int baseDamage = amountOverride
-                ?? (_amountSource == EffectContextValue.FixedAmount ? _amount : ctx.GetValue(_amountSource));
+            int baseDamage =
+                amountOverride
+                ?? (
+                    _amountSource == EffectContextValue.FixedAmount
+                        ? _amount
+                        : ctx.GetValue(_amountSource)
+                );
 
             foreach (var (target, _) in ctx.GetTargets(_target))
                 ApplyResolveDamage(target, ctx.Caster, baseDamage, ctx);
@@ -42,10 +52,11 @@ namespace Crookedile.Gameplay.Battle
 
         public override string GetDescription()
         {
-            string amountStr = _amountSource == EffectContextValue.FixedAmount
-                ? _amount.ToString()
-                : _amountSource.ToString();
-            return $"Deal {amountStr} damage to {_target}";
+            string amountStr =
+                _amountSource == EffectContextValue.FixedAmount
+                    ? _amount.ToString()
+                    : _amountSource.ToString();
+            return $"Raise Opinion by {amountStr} (through {_target}'s composure)";
         }
     }
 }

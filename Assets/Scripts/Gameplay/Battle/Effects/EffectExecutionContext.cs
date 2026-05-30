@@ -1,8 +1,8 @@
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Utilities;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -16,8 +16,7 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public class EffectExecutionContext
     {
-        // ─── Identities ──────────────────────────────────────────────────────────
-
+        #region Identities
         /// <summary>
         /// The effect caster — player's BattleStats for player cards;
         /// focused enemy's BattleStats for enemy moves.
@@ -38,8 +37,9 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>True for player cards; false for enemy moves.</summary>
         public bool IsPlayerCard { get; }
 
-        // ─── Services / dependencies ─────────────────────────────────────────────
+        #endregion
 
+        #region Services / dependencies
         /// <summary>
         /// The player's deck. <b>Null for enemy moves</b> — card manipulation effects
         /// must guard against null and return early.
@@ -58,8 +58,9 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Always the player's StatusEffectManager (direction-independent).</summary>
         public StatusEffectManager PlayerStatusEffects { get; }
 
-        // ─── Attacker metadata ───────────────────────────────────────────────────
+        #endregion
 
+        #region Attacker metadata
         /// <summary>Display name of the attacker — "Player" or an enemy name.</summary>
         internal string AttackerName { get; }
 
@@ -69,8 +70,9 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         internal int AttackerEnemyIndex { get; }
 
-        // ─── Accumulated results (mutable during resolution) ─────────────────────
+        #endregion
 
+        #region Accumulated results (mutable during resolution)
         /// <summary>Total Resolve damage dealt to any target(s) by this card's effects.</summary>
         public int LastDamageDealt { get; set; }
 
@@ -92,42 +94,47 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public bool ShouldExhaust { get; set; }
 
-        // ─── Constructor ─────────────────────────────────────────────────────────
+        #endregion
 
+        #region Constructor
         public EffectExecutionContext(
-            BattleStats                    caster,
-            BattleStats                    target,
-            BattleStats                    playerStats,
-            bool                           isPlayerCard,
-            DeckManager                    deck,
+            BattleStats caster,
+            BattleStats target,
+            BattleStats playerStats,
+            bool isPlayerCard,
+            DeckManager deck,
             IReadOnlyList<EnemyController> allEnemies,
-            StatusEffectManager            casterStatusEffects,
-            StatusEffectManager            targetStatusEffects,
-            StatusEffectManager            playerStatusEffects,
-            string                         attackerName       = "Player",
-            int                            attackerEnemyIndex = -1)
+            StatusEffectManager casterStatusEffects,
+            StatusEffectManager targetStatusEffects,
+            StatusEffectManager playerStatusEffects,
+            string attackerName = "Player",
+            int attackerEnemyIndex = -1
+        )
         {
-            Caster               = caster;
-            Target               = target;
-            PlayerStats          = playerStats;
-            IsPlayerCard         = isPlayerCard;
-            Deck                 = deck;
-            AllEnemies           = allEnemies;
-            CasterStatusEffects  = casterStatusEffects;
-            TargetStatusEffects  = targetStatusEffects;
-            PlayerStatusEffects  = playerStatusEffects;
-            AttackerName         = attackerName;
-            AttackerEnemyIndex   = attackerEnemyIndex;
+            Caster = caster;
+            Target = target;
+            PlayerStats = playerStats;
+            IsPlayerCard = isPlayerCard;
+            Deck = deck;
+            AllEnemies = allEnemies;
+            CasterStatusEffects = casterStatusEffects;
+            TargetStatusEffects = targetStatusEffects;
+            PlayerStatusEffects = playerStatusEffects;
+            AttackerName = attackerName;
+            AttackerEnemyIndex = attackerEnemyIndex;
         }
 
-        // ─── Target resolution ───────────────────────────────────────────────────
+        #endregion
 
+        #region Target resolution
         /// <summary>
         /// Resolves a <see cref="TargetType"/> into a list of (BattleStats, StatusEffectManager) pairs.
         /// Single-target types return 1 element; multi-target types return N (one per living combatant).
         /// Absorbs the logic previously in <c>EffectResolver.ResolveTargetPairs</c>.
         /// </summary>
-        public List<(BattleStats stats, StatusEffectManager statusMgr)> GetTargets(TargetType targetType)
+        public List<(BattleStats stats, StatusEffectManager statusMgr)> GetTargets(
+            TargetType targetType
+        )
         {
             var pairs = new List<(BattleStats, StatusEffectManager)>();
 
@@ -149,7 +156,8 @@ namespace Crookedile.Gameplay.Battle
                         {
                             var living = new List<(BattleStats, StatusEffectManager)>();
                             foreach (var e in AllEnemies)
-                                if (!e.IsDefeated) living.Add((e.Stats, e.StatusEffects));
+                                if (!e.IsDefeated)
+                                    living.Add((e.Stats, e.StatusEffects));
                             if (living.Count > 0)
                                 pairs.Add(living[Random.Range(0, living.Count)]);
                         }
@@ -166,7 +174,8 @@ namespace Crookedile.Gameplay.Battle
                     pairs.Add((PlayerStats, PlayerStatusEffects));
                     if (AllEnemies != null)
                         foreach (var e in AllEnemies)
-                            if (!e.IsDefeated) pairs.Add((e.Stats, e.StatusEffects));
+                            if (!e.IsDefeated)
+                                pairs.Add((e.Stats, e.StatusEffects));
                     break;
 
                 case TargetType.AllOpponents:
@@ -175,7 +184,8 @@ namespace Crookedile.Gameplay.Battle
                         // Hit all living enemies
                         if (AllEnemies != null)
                             foreach (var e in AllEnemies)
-                                if (!e.IsDefeated) pairs.Add((e.Stats, e.StatusEffects));
+                                if (!e.IsDefeated)
+                                    pairs.Add((e.Stats, e.StatusEffects));
                     }
                     else
                     {
@@ -190,7 +200,8 @@ namespace Crookedile.Gameplay.Battle
                         // Buff all living enemies
                         if (AllEnemies != null)
                             foreach (var e in AllEnemies)
-                                if (!e.IsDefeated) pairs.Add((e.Stats, e.StatusEffects));
+                                if (!e.IsDefeated)
+                                    pairs.Add((e.Stats, e.StatusEffects));
                     }
                     else
                     {
@@ -201,7 +212,8 @@ namespace Crookedile.Gameplay.Battle
 
                 default:
                     GameLogger.LogWarning<EffectExecutionContext>(
-                        $"Unhandled TargetType {targetType} — falling back to Opponent");
+                        $"Unhandled TargetType {targetType} — falling back to Opponent"
+                    );
                     pairs.Add((Target, TargetStatusEffects));
                     break;
             }
@@ -216,14 +228,17 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public StatusEffectManager GetStatusEffectManager(BattleStats stats)
         {
-            if (stats == PlayerStats) return PlayerStatusEffects;
+            if (stats == PlayerStats)
+                return PlayerStatusEffects;
 
             if (AllEnemies != null)
                 foreach (var enemy in AllEnemies)
-                    if (enemy.Stats == stats) return enemy.StatusEffects;
+                    if (enemy.Stats == stats)
+                        return enemy.StatusEffects;
 
             GameLogger.LogWarning<EffectExecutionContext>(
-                "GetStatusEffectManager: unknown BattleStats — returning null");
+                "GetStatusEffectManager: unknown BattleStats — returning null"
+            );
             return null;
         }
 
@@ -232,18 +247,21 @@ namespace Crookedile.Gameplay.Battle
         /// Returns 0 for <see cref="EffectContextValue.FixedAmount"/> — the caller
         /// should use the authored amount on the effect in that case.
         /// </summary>
-        public int GetValue(EffectContextValue source) => source switch
-        {
-            EffectContextValue.LastDamageDealt     => LastDamageDealt,
-            EffectContextValue.LastHealAmount       => LastHealAmount,
-            EffectContextValue.LastComposureGained  => LastComposureGained,
-            EffectContextValue.LastComposureLost    => LastComposureLost,
-            EffectContextValue.CurrentComposure     => Caster?.CurrentComposure ?? 0,
-            EffectContextValue.CurrentHostility     => Target?.CurrentHostility ?? 0,
-            EffectContextValue.HostileEnemyCount    => CountLivingEnemies(e => e.Stats.IsHostile),
-            EffectContextValue.ReceptiveEnemyCount  => CountLivingEnemies(e => e.Stats.IsReceptive),
-            _                                       => 0   // FixedAmount / None — use authored value
-        };
+        public int GetValue(EffectContextValue source) =>
+            source switch
+            {
+                EffectContextValue.LastDamageDealt => LastDamageDealt,
+                EffectContextValue.LastHealAmount => LastHealAmount,
+                EffectContextValue.LastComposureGained => LastComposureGained,
+                EffectContextValue.LastComposureLost => LastComposureLost,
+                EffectContextValue.CurrentComposure => Caster?.CurrentComposure ?? 0,
+                EffectContextValue.CurrentHostility => Target?.CurrentHostility ?? 0,
+                EffectContextValue.HostileEnemyCount => CountLivingEnemies(e => e.Stats.IsHostile),
+                EffectContextValue.ReceptiveEnemyCount => CountLivingEnemies(e =>
+                    e.Stats.IsReceptive
+                ),
+                _ => 0, // FixedAmount / None — use authored value
+            };
 
         /// <summary>
         /// Counts living enemies matching <paramref name="predicate"/>.
@@ -251,7 +269,8 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         private int CountLivingEnemies(System.Func<EnemyController, bool> predicate)
         {
-            if (AllEnemies == null) return 0;
+            if (AllEnemies == null)
+                return 0;
             int count = 0;
             foreach (var enemy in AllEnemies)
                 if (!enemy.IsDefeated && predicate(enemy))
@@ -260,3 +279,4 @@ namespace Crookedile.Gameplay.Battle
         }
     }
 }
+        #endregion

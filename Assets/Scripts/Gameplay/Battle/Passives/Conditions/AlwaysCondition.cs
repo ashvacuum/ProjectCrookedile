@@ -8,6 +8,7 @@ namespace Crookedile.Gameplay.Battle
     public class AlwaysCondition : PassiveConditionBase
     {
         public override bool Evaluate(PassiveEvaluationContext ctx) => true;
+
         public override string ConditionLabel => "always";
     }
 }

@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -17,94 +17,139 @@ namespace Crookedile.Editor
     /// </summary>
     public class CardDataFixer : EditorWindow
     {
-        // ─── Card Metadata ────────────────────────────────────────────────────────
+        #region Card Metadata
         // Keyed by asset name (matches filename in Resources/Cards/).
         // originTag must match OriginType.ToString().ToLower() used in CardDatabase.GetStarterDeck().
 
         private static readonly Dictionary<string, CardMeta> CardMetadata = new()
         {
-            // ── Faith Leader ─────────────────────────────────────────────────────
-            ["Find Common Ground"] = new("faithleader",
-                "Deal 3 Resolve damage.",
-                "Sometimes all it takes is a smile."),
+        #endregion
 
-            ["Blessing"] = new("faithleader",
+            #region Faith Leader
+            ["Find Common Ground"] = new(
+                "faithleader",
+                "Deal 3 Resolve damage.",
+                "Sometimes all it takes is a smile."
+            ),
+
+            ["Blessing"] = new(
+                "faithleader",
                 "Deal damage equal to your Composure. Consume all Composure.",
-                "The congregation holds its breath."),
+                "The congregation holds its breath."
+            ),
 
-            ["Accusation"] = new("faithleader",
+            ["Accusation"] = new(
+                "faithleader",
                 "Deal 4 Resolve damage. Gain 1 Hostility.",
-                "Righteous anger, barely contained."),
+                "Righteous anger, barely contained."
+            ),
 
-            ["Deflect"] = new("faithleader",
+            ["Deflect"] = new(
+                "faithleader",
                 "Gain 3 Composure. Reduce Hostility by 1.",
-                "Grace under fire."),
+                "Grace under fire."
+            ),
 
-            ["Gather Thoughts"] = new("faithleader",
+            ["Gather Thoughts"] = new(
+                "faithleader",
                 "Gain 4 Composure.",
-                "A moment of quiet before the storm."),
+                "A moment of quiet before the storm."
+            ),
 
-            // ── Nepo Baby ─────────────────────────────────────────────────────────
-            ["Family Name"] = new("nepobaby",
+            #endregion
+
+            #region Nepo Baby
+            ["Family Name"] = new(
+                "nepobaby",
                 "Deal 3 Resolve damage.",
-                "Do you know who my father is?"),
+                "Do you know who my father is?"
+            ),
 
-            ["Inherited Privelege"] = new("nepobaby",   // asset typo — keep as-is
+            ["Inherited Privelege"] = new(
+                "nepobaby", // asset typo — keep as-is
                 "Deal 5 Resolve damage. Draw 1 card.",
-                "Some doors open themselves."),
+                "Some doors open themselves."
+            ),
 
-            ["Pull Strings"] = new("nepobaby",
+            ["Pull Strings"] = new(
+                "nepobaby",
                 "Deal 4 Resolve damage. Gain 1 Hostility.",
-                "Everyone has a price. Yours is just lower."),
+                "Everyone has a price. Yours is just lower."
+            ),
 
-            ["Call In Favor"] = new("nepobaby",
+            ["Call In Favor"] = new(
+                "nepobaby",
                 "Draw 2 cards.",
-                "The account was always in the black."),
+                "The account was always in the black."
+            ),
 
-            ["Backroom Deal"] = new("nepobaby",
+            ["Backroom Deal"] = new(
+                "nepobaby",
                 "Draw 2 cards. Gain 1 Action Point next turn.",
-                "Nothing illegal about a private meeting."),
+                "Nothing illegal about a private meeting."
+            ),
 
-            ["Dynasty Network"] = new("nepobaby",
+            ["Dynasty Network"] = new(
+                "nepobaby",
                 "Discard 1 card. Draw 2 cards.",
-                "One call, a hundred doors."),
+                "One call, a hundred doors."
+            ),
 
-            ["Trust Fund"] = new("nepobaby",
+            ["Trust Fund"] = new(
+                "nepobaby",
                 "Gain 2 Composure. Gain 1 Action Point this turn.",
-                "Family always provides."),
+                "Family always provides."
+            ),
 
-            // ── Actor ─────────────────────────────────────────────────────────────
-            ["Charming Gambit"] = new("actor",
+            #endregion
+
+            #region Actor
+            ["Charming Gambit"] = new(
+                "actor",
                 "Deal 3 Resolve damage. 50% chance: Draw 1 card.",
-                "High risk, higher cheekbones."),
+                "High risk, higher cheekbones."
+            ),
 
-            ["All or Nothing"] = new("actor",
+            ["All or Nothing"] = new(
+                "actor",
                 "Deal 3–9 Resolve damage (random).",
-                "Every performance is a gamble."),
+                "Every performance is a gamble."
+            ),
 
-            ["Bold Accusation"] = new("actor",
+            ["Bold Accusation"] = new(
+                "actor",
                 "Deal 5 Resolve damage. Gain 2 Hostility.",
-                "Critics said it was too much. It worked."),
+                "Critics said it was too much. It worked."
+            ),
 
-            ["Spotlight Hog"] = new("actor",
+            ["Spotlight Hog"] = new(
+                "actor",
                 "Deal 6 Resolve damage. Gain 3 Composure. Gain 2 Hostility.",
-                "They can't look away. Neither can you."),
+                "They can't look away. Neither can you."
+            ),
 
-            ["High Stakes"] = new("actor",
+            ["High Stakes"] = new(
+                "actor",
                 "Discard your hand. Draw 3 cards.",
-                "Burn it down and start over."),
+                "Burn it down and start over."
+            ),
 
-            ["Ego Trip"] = new("actor",
+            ["Ego Trip"] = new(
+                "actor",
                 "Gain Composure equal to your Hostility. (Hostility is not reduced.)",
-                "Turn the wounds into weapons."),
+                "Turn the wounds into weapons."
+            ),
 
-            ["Fan Favorite"] = new("actor",
+            ["Fan Favorite"] = new(
+                "actor",
                 "Lose 3 Composure. Reduce Hostility by 3.",
-                "They love you. Remind yourself of that."),
+                "They love you. Remind yourself of that."
+            ),
         };
 
-        // ─── Editor Window ────────────────────────────────────────────────────────
+            #endregion
 
+        #region Editor Window
         [MenuItem("Tools/Crookedile/Fix Starter Card Data")]
         public static void ShowWindow()
         {
@@ -119,14 +164,15 @@ namespace Crookedile.Editor
             EditorGUILayout.Space();
 
             EditorGUILayout.HelpBox(
-                "This tool stamps all 19 starter card assets with:\n" +
-                "  • IsStarterCard = true\n" +
-                "  • Origin tag (faithleader / nepobaby / actor)\n" +
-                "  • Flavor text\n\n" +
-                "Note: Mechanical descriptions are now auto-generated from card effects at runtime.\n\n" +
-                "Cards are loaded from Assets/Resources/Cards/.\n" +
-                "Safe to run multiple times — idempotent.",
-                MessageType.Info);
+                "This tool stamps all 19 starter card assets with:\n"
+                    + "  • IsStarterCard = true\n"
+                    + "  • Origin tag (faithleader / nepobaby / actor)\n"
+                    + "  • Flavor text\n\n"
+                    + "Note: Mechanical descriptions are now auto-generated from card effects at runtime.\n\n"
+                    + "Cards are loaded from Assets/Resources/Cards/.\n"
+                    + "Safe to run multiple times — idempotent.",
+                MessageType.Info
+            );
 
             EditorGUILayout.Space();
 
@@ -139,8 +185,9 @@ namespace Crookedile.Editor
                 LogCardStatus();
         }
 
-        // ─── Fix Logic ────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Fix Logic
         private static void FixAllCards()
         {
             int fixed_count = 0;
@@ -149,7 +196,7 @@ namespace Crookedile.Editor
             foreach (var kvp in CardMetadata)
             {
                 string assetName = kvp.Key;
-                CardMeta meta    = kvp.Value;
+                CardMeta meta = kvp.Value;
 
                 string path = $"Assets/Resources/Cards/{assetName}.asset";
                 CardData card = AssetDatabase.LoadAssetAtPath<CardData>(path);
@@ -195,7 +242,8 @@ namespace Crookedile.Editor
                 if (!hasTag)
                 {
                     tagsProp.InsertArrayElementAtIndex(tagsProp.arraySize);
-                    tagsProp.GetArrayElementAtIndex(tagsProp.arraySize - 1).stringValue = meta.originTag;
+                    tagsProp.GetArrayElementAtIndex(tagsProp.arraySize - 1).stringValue =
+                        meta.originTag;
                     so.ApplyModifiedProperties();
                     changed = true;
                 }
@@ -212,9 +260,11 @@ namespace Crookedile.Editor
             AssetDatabase.Refresh();
 
             Debug.Log($"[CardDataFixer] Done. Fixed {fixed_count} cards. Missing: {missing}.");
-            EditorUtility.DisplayDialog("Card Data Fixer",
+            EditorUtility.DisplayDialog(
+                "Card Data Fixer",
                 $"Fixed {fixed_count} card(s).\nMissing: {missing} (check Console).",
-                "OK");
+                "OK"
+            );
         }
 
         private static void LogCardStatus()
@@ -231,22 +281,24 @@ namespace Crookedile.Editor
                     continue;
                 }
 
-                string status = $"  {kvp.Key}: " +
-                                $"IsStarter={card.IsStarterCard}, " +
-                                $"Tags=[{string.Join(",", card.Tags)}], " +
-                                $"Artwork={(card.Artwork == null ? "MISSING" : "OK")}";
+                string status =
+                    $"  {kvp.Key}: "
+                    + $"IsStarter={card.IsStarterCard}, "
+                    + $"Tags=[{string.Join(",", card.Tags)}], "
+                    + $"Artwork={(card.Artwork == null ? "MISSING" : "OK")}";
                 Debug.Log(status);
             }
         }
 
-        // ─── Helpers ──────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Helpers
         /// <summary>
         /// Sets a private serialized field on a ScriptableObject using SerializedObject.
         /// </summary>
         private static void SetField(ScriptableObject obj, string fieldName, object value)
         {
-            var so   = new SerializedObject(obj);
+            var so = new SerializedObject(obj);
             var prop = so.FindProperty(fieldName);
             if (prop == null)
             {
@@ -256,16 +308,23 @@ namespace Crookedile.Editor
 
             switch (value)
             {
-                case bool b:   prop.boolValue   = b; break;
-                case string s: prop.stringValue = s; break;
-                case int i:    prop.intValue    = i; break;
+                case bool b:
+                    prop.boolValue = b;
+                    break;
+                case string s:
+                    prop.stringValue = s;
+                    break;
+                case int i:
+                    prop.intValue = i;
+                    break;
             }
 
             so.ApplyModifiedProperties();
         }
 
-        // ─── Data ─────────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Data
         private readonly struct CardMeta
         {
             public readonly string originTag;
@@ -274,11 +333,12 @@ namespace Crookedile.Editor
 
             public CardMeta(string originTag, string description, string flavorText)
             {
-                this.originTag   = originTag;
+                this.originTag = originTag;
                 this.description = description;
-                this.flavorText  = flavorText;
+                this.flavorText = flavorText;
             }
         }
     }
 }
+        #endregion
 #endif

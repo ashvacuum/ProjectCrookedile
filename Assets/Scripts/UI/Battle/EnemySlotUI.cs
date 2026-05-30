@@ -1,12 +1,12 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using TMPro;
-using DG.Tweening;
-using Crookedile.Data;
+﻿using Crookedile.Data;
 using Crookedile.Data.Enemy;
 using Crookedile.Gameplay.Battle;
 using Crookedile.Utilities;
+using DG.Tweening;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Crookedile.UI.Battle
 {
@@ -19,32 +19,59 @@ namespace Crookedile.UI.Battle
     /// Designed to be used as a prefab: assign text/button/image references in the Inspector.
     /// </summary>
     [Debuggable("Card", LogLevel.Info)]
-    public class EnemySlotUI : MonoBehaviour,
-        IPointerEnterHandler,
-        IPointerExitHandler
+    public class EnemySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
-        [Header("Display")] [SerializeField] private TMP_Text nameText;
-        [SerializeField] private TMP_Text resolveText;
-        [Tooltip("Filled Image (fill method = Horizontal) driven by Resolve. Lerps smoothly when damaged.")]
-        [SerializeField] private Image resolveBarFill;
-        [SerializeField] private TMP_Text hostilityText;
-        [SerializeField] private TMP_Text composureText;
-        [SerializeField] private GameObject composureObject;
-        [SerializeField] private Image enemySprite;
-        [SerializeField] private EnemyIntentDisplay _intentDisplay;
-        [SerializeField] private StatusEffectPanelUI _statusEffectPanel;
+        [Header("Display")]
+        [SerializeField]
+        private TMP_Text nameText;
+
+        [SerializeField]
+        private TMP_Text resolveText;
+
+        [Tooltip(
+            "Filled Image (fill method = Horizontal) driven by Resolve. Lerps smoothly when damaged."
+        )]
+        [SerializeField]
+        private Image resolveBarFill;
+
+        [SerializeField]
+        private TMP_Text hostilityText;
+
+        [SerializeField]
+        private TMP_Text composureText;
+
+        [SerializeField]
+        private GameObject composureObject;
+
+        [SerializeField]
+        private Image enemySprite;
+
+        [SerializeField]
+        private EnemyIntentDisplay _intentDisplay;
+
+        [SerializeField]
+        private StatusEffectPanelUI _statusEffectPanel;
 
         [Header("HP Bar")]
         [Tooltip("How fast the HP bar lerps toward the target fill. Higher = snappier.")]
-        [SerializeField] private float barLerpSpeed = 8f;
+        [SerializeField]
+        private float barLerpSpeed = 8f;
 
         [Header("Name Hover")]
-        [Tooltip("Duration in seconds for the enemy name to fade in or out when the HP bar is hovered.")]
-        [SerializeField] private float _nameFadeDuration = 0.2f;
+        [Tooltip(
+            "Duration in seconds for the enemy name to fade in or out when the HP bar is hovered."
+        )]
+        [SerializeField]
+        private float _nameFadeDuration = 0.2f;
 
-        [SerializeField] private Image selectionHighlight;
-        [SerializeField] private Image dragDropHighlight;
-        [SerializeField] private GameObject defeatedOverlay;
+        [SerializeField]
+        private Image selectionHighlight;
+
+        [SerializeField]
+        private Image dragDropHighlight;
+
+        [SerializeField]
+        private GameObject defeatedOverlay;
 
         private int _enemyIndex;
         private BattleManager _battleManager;
@@ -72,70 +99,88 @@ namespace Crookedile.UI.Battle
             TargetedSlot = null;
         }
 
-        // ─── Initialization ───────────────────────────────────────────────────────
-
+        #region Initialization
         /// <summary>
         /// Called by BattleUI when spawning this slot. Must be called before the first frame.
         /// </summary>
-        public void Initialize(int index, BattleManager manager, OriginType playerOrigin, EnemyData enemyData)
+        public void Initialize(
+            int index,
+            BattleManager manager,
+            OriginType playerOrigin,
+            EnemyData enemyData
+        )
         {
             _enemyIndex = index;
             _battleManager = manager;
             _playerOrigin = playerOrigin;
 
-            if (defeatedOverlay != null) defeatedOverlay.SetActive(false);
-            if (selectionHighlight != null) selectionHighlight.enabled = false;
-            if (dragDropHighlight != null) dragDropHighlight.enabled = false;
+            if (defeatedOverlay != null)
+                defeatedOverlay.SetActive(false);
+            if (selectionHighlight != null)
+                selectionHighlight.enabled = false;
+            if (dragDropHighlight != null)
+                dragDropHighlight.enabled = false;
 
             // Name is always visible — no HP bar to hover over
-            if (nameText != null) nameText.alpha = 1f;
+            if (nameText != null)
+                nameText.alpha = 1f;
 
             _intentDisplay?.ShowIntent(null); // hidden until intent is declared
 
             _statusEffectPanel?.Clear(); // reset any icons left over from a previously pooled slot
             Refresh();
 
-            if (enemySprite != null) enemySprite.sprite = enemyData.Portrait;
+            if (enemySprite != null)
+                enemySprite.sprite = enemyData.Portrait;
         }
 
-        // ─── Public API ───────────────────────────────────────────────────────────
+        #endregion
 
+        #region Public API
         /// <summary>
         /// Reads the latest stats from BattleManager and updates all display elements.
         /// </summary>
         public void Refresh()
         {
-            if (_battleManager == null || _enemyIndex >= _battleManager.Enemies.Count) return;
+            if (_battleManager == null || _enemyIndex >= _battleManager.Enemies.Count)
+                return;
             var enemy = _battleManager.Enemies[_enemyIndex];
-            if (enemy.IsDefeated) return;
+            if (enemy.IsDefeated)
+                return;
 
-            if (nameText != null) nameText.SetText(enemy.EnemyData.EnemyName);
+            if (nameText != null)
+                nameText.SetText(enemy.EnemyData.EnemyName);
 
-            if(composureText != null)
-                composureText.SetText(enemy.Stats.CurrentComposure > 0 ? $"{enemy.Stats.CurrentComposure}" : string.Empty);
-            
-            if(composureObject != null)
+            if (composureText != null)
+                composureText.SetText(
+                    enemy.Stats.CurrentComposure > 0
+                        ? $"{enemy.Stats.CurrentComposure}"
+                        : string.Empty
+                );
+
+            if (composureObject != null)
                 composureObject.SetActive(enemy.Stats.CurrentComposure > 0);
 
-            if (hostilityText == null) return;
+            if (hostilityText == null)
+                return;
             var showExact = _playerOrigin == OriginType.Actor;
             var h = enemy.Stats.CurrentHostility;
 
-            hostilityText.text = showExact
-                ? $"Hostility: {h:+0;-0;0}"
-                : h < 0
-                    ? "Receptive"
-                    : h > 0
-                        ? "Hostile"
-                        : "Guarded";
+            hostilityText.text =
+                showExact ? $"Hostility: {h:+0;-0;0}"
+                : h < 0 ? "Receptive"
+                : h > 0 ? "Hostile"
+                : "Guarded";
 
-            hostilityText.color = h < 0 ? new Color(0.2f, 0.8f, 0.2f) // green  = receptive
+            hostilityText.color =
+                h < 0 ? new Color(0.2f, 0.8f, 0.2f) // green  = receptive
                 : h > 0 ? new Color(0.8f, 0.2f, 0.2f) // red    = hostile
                 : Color.white; // white  = neutral
 
             // Buff/debuff icons
             var effects = _battleManager?.Enemies[_enemyIndex]?.StatusEffects;
-            if (effects != null) _statusEffectPanel?.Refresh(effects);
+            if (effects != null)
+                _statusEffectPanel?.Refresh(effects);
         }
 
         /// <summary>
@@ -144,9 +189,10 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void UpdateIntent(EnemyMoveData move)
         {
-            var statusEffects = (_battleManager != null && _enemyIndex < _battleManager.Enemies.Count)
-                ? _battleManager.Enemies[_enemyIndex].StatusEffects
-                : null;
+            var statusEffects =
+                (_battleManager != null && _enemyIndex < _battleManager.Enemies.Count)
+                    ? _battleManager.Enemies[_enemyIndex].StatusEffects
+                    : null;
             var targetStatus = _battleManager?.PlayerStatusEffects;
             _intentDisplay?.ShowIntent(move, statusEffects, targetStatus);
         }
@@ -167,17 +213,26 @@ namespace Crookedile.UI.Battle
         public void MarkDefeated()
         {
             // Hide all live display elements
-            if (nameText       != null) nameText.gameObject.SetActive(false);
-            if (resolveText    != null) resolveText.gameObject.SetActive(false);
-            if (hostilityText  != null) hostilityText.gameObject.SetActive(false);
-            if (composureText  != null) composureText.gameObject.SetActive(false);
-            if (composureObject != null) composureObject.SetActive(false);
-            if (_intentDisplay != null) _intentDisplay.gameObject.SetActive(false);
-            if (selectionHighlight != null) selectionHighlight.enabled = false;
-            if (dragDropHighlight  != null) dragDropHighlight.enabled  = false;
+            if (nameText != null)
+                nameText.gameObject.SetActive(false);
+            if (resolveText != null)
+                resolveText.gameObject.SetActive(false);
+            if (hostilityText != null)
+                hostilityText.gameObject.SetActive(false);
+            if (composureText != null)
+                composureText.gameObject.SetActive(false);
+            if (composureObject != null)
+                composureObject.SetActive(false);
+            if (_intentDisplay != null)
+                _intentDisplay.gameObject.SetActive(false);
+            if (selectionHighlight != null)
+                selectionHighlight.enabled = false;
+            if (dragDropHighlight != null)
+                dragDropHighlight.enabled = false;
 
             // Show defeated state
-            if (defeatedOverlay != null) defeatedOverlay.SetActive(true);
+            if (defeatedOverlay != null)
+                defeatedOverlay.SetActive(true);
         }
 
         /// <summary>
@@ -204,17 +259,20 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void ClearIntent() => _intentDisplay?.ShowIntent(null);
 
-        // ─── Name Hover Fade ──────────────────────────────────────────────────────
+        #endregion
 
+        #region Name Hover Fade
         /// <summary>
         /// Fades the enemy name label in. Called by <see cref="HPBarHoverTrigger"/> on pointer-enter.
         /// </summary>
         public void ShowNameLabel()
         {
-            if (nameText == null || !nameText.gameObject.activeInHierarchy) return;
+            if (nameText == null || !nameText.gameObject.activeInHierarchy)
+                return;
             DOTween.Kill(nameText);
-            DOTween.To(() => nameText.alpha, x => nameText.alpha = x, 1f, _nameFadeDuration)
-                   .SetLink(gameObject);
+            DOTween
+                .To(() => nameText.alpha, x => nameText.alpha = x, 1f, _nameFadeDuration)
+                .SetLink(gameObject);
         }
 
         /// <summary>
@@ -222,14 +280,15 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void HideNameLabel()
         {
-            if (nameText == null) return;
+            if (nameText == null)
+                return;
             DOTween.Kill(nameText);
-            DOTween.To(() => nameText.alpha, x => nameText.alpha = x, 0f, _nameFadeDuration)
-                   .SetLink(gameObject);
+            DOTween
+                .To(() => nameText.alpha, x => nameText.alpha = x, 0f, _nameFadeDuration)
+                .SetLink(gameObject);
         }
 
-        // ─── HP Bar (resolve bar removed from prefab; Update kept null-safe) ──────
-
+        #region HP Bar (resolve bar removed from prefab; Update kept null-safe)
         private void Update()
         {
             // resolveBarFill has been removed from the enemy slot prefab.
@@ -237,20 +296,29 @@ namespace Crookedile.UI.Battle
             // on older prefabs doesn't cause errors.
         }
 
-        // ─── Targeting Handlers ───────────────────────────────────────────────────
+        #endregion
 
+        #region Targeting Handlers
         /// <summary>
         /// Sets this enemy as the focused target and plays the given card.
         /// Called by <c>CardButton.OnEndDrag</c> when the targeting arrow is released over this slot.
         /// </summary>
         public void PlayCardOnEnemy(CardButton card)
         {
-            if (_battleManager == null || card == null) return;
-            if (_enemyIndex < _battleManager.Enemies.Count &&
-                _battleManager.Enemies[_enemyIndex].IsDefeated) return;
+            if (_battleManager == null || card == null)
+                return;
+            if (
+                _enemyIndex < _battleManager.Enemies.Count
+                && _battleManager.Enemies[_enemyIndex].IsDefeated
+            )
+                return;
 
             LastTargetedRect = GetComponent<RectTransform>();
-            GameLogger.LogInfo("Card", $"'{card.CardData?.CardName}' targeted at enemy slot [{_enemyIndex}]  LastTargetedRect set", this);
+            GameLogger.LogInfo(
+                "Card",
+                $"'{card.CardData?.CardName}' targeted at enemy slot [{_enemyIndex}]  LastTargetedRect set",
+                this
+            );
             _battleManager.SetFocusedEnemy(_enemyIndex);
             card.PlayFromDrop();
         }
@@ -258,8 +326,10 @@ namespace Crookedile.UI.Battle
         /// <summary>Shows the targeting highlight when the arrow enters this slot during targeting mode.</summary>
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (!CardButton.IsTargeting) return;
-            if (dragDropHighlight != null) dragDropHighlight.enabled = true;
+            if (!CardButton.IsTargeting)
+                return;
+            if (dragDropHighlight != null)
+                dragDropHighlight.enabled = true;
             TargetedSlot = this;
             LastTargetedRect = GetComponent<RectTransform>();
             GameLogger.LogVerbose("Card", $"Arrow hovering enemy slot [{_enemyIndex}]", this);
@@ -268,16 +338,18 @@ namespace Crookedile.UI.Battle
         /// <summary>Hides the targeting highlight and clears this slot as the target when the cursor leaves.</summary>
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (dragDropHighlight != null) dragDropHighlight.enabled = false;
+            if (dragDropHighlight != null)
+                dragDropHighlight.enabled = false;
             if (TargetedSlot == this)
             {
                 GameLogger.LogVerbose("Card", $"Arrow left enemy slot [{_enemyIndex}]", this);
                 TargetedSlot = null;
             }
-        } 
+        }
 
-        // ─── Private ──────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Private
         private static void PulseTransform(Transform t)
         {
             t.DOKill();
@@ -285,3 +357,5 @@ namespace Crookedile.UI.Battle
         }
     }
 }
+        #endregion
+        #endregion

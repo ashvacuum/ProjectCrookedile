@@ -7,19 +7,22 @@ namespace Crookedile.Utilities
     {
         public static T GetRandomElement<T>(this List<T> list)
         {
-            if (list == null || list.Count == 0) return default;
+            if (list == null || list.Count == 0)
+                return default;
             return list[Random.Range(0, list.Count)];
         }
 
         public static T GetRandomElement<T>(this T[] array)
         {
-            if (array == null || array.Length == 0) return default;
+            if (array == null || array.Length == 0)
+                return default;
             return array[Random.Range(0, array.Length)];
         }
 
         public static void Shuffle<T>(this List<T> list)
         {
-            if (list == null || list.Count <= 1) return;
+            if (list == null || list.Count <= 1)
+                return;
 
             for (int i = list.Count - 1; i > 0; i--)
             {
@@ -37,7 +40,8 @@ namespace Crookedile.Utilities
 
         public static void SetAlpha(this SpriteRenderer sprite, float alpha)
         {
-            if (sprite == null) return;
+            if (sprite == null)
+                return;
             Color color = sprite.color;
             color.a = Mathf.Clamp01(alpha);
             sprite.color = color;
@@ -45,13 +49,15 @@ namespace Crookedile.Utilities
 
         public static void SetAlpha(this CanvasGroup canvasGroup, float alpha)
         {
-            if (canvasGroup == null) return;
+            if (canvasGroup == null)
+                return;
             canvasGroup.alpha = Mathf.Clamp01(alpha);
         }
 
         public static void DestroyChildren(this Transform transform)
         {
-            if (transform == null) return;
+            if (transform == null)
+                return;
 
             for (int i = transform.childCount - 1; i >= 0; i--)
             {
@@ -61,7 +67,8 @@ namespace Crookedile.Utilities
 
         public static void DestroyChildrenImmediate(this Transform transform)
         {
-            if (transform == null) return;
+            if (transform == null)
+                return;
 
             for (int i = transform.childCount - 1; i >= 0; i--)
             {

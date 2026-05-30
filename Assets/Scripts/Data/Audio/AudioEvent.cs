@@ -1,5 +1,5 @@
+﻿using Crookedile.Managers;
 using UnityEngine;
-using Crookedile.Managers;
 
 namespace Crookedile.Data.Audio
 {
@@ -22,28 +22,41 @@ namespace Crookedile.Data.Audio
     {
         [Header("Clip")]
         [Tooltip("The audio clip to play. Leave null to make this entry a no-op.")]
-        [SerializeField] private AudioClip _clip;
+        [SerializeField]
+        private AudioClip _clip;
 
-        [Tooltip("Volume scale applied on top of AudioManager's master/sfx volume settings. Ignored for music (music has its own volume track).")]
-        [SerializeField, Range(0f, 1f)] private float _volume = 1f;
+        [Tooltip(
+            "Volume scale applied on top of AudioManager's master/sfx volume settings. Ignored for music (music has its own volume track)."
+        )]
+        [SerializeField, Range(0f, 1f)]
+        private float _volume = 1f;
 
         [Header("Pitch (SFX only)")]
         [Tooltip("Base pitch multiplier (1 = normal speed). Ignored when _isMusic is true.")]
-        [SerializeField] private float _pitch = 1f;
+        [SerializeField]
+        private float _pitch = 1f;
 
-        [Tooltip("Random ± variance added to pitch each play, for natural variation. 0 = no variance.")]
-        [SerializeField, Range(0f, 0.5f)] private float _pitchVariance = 0f;
+        [Tooltip(
+            "Random ± variance added to pitch each play, for natural variation. 0 = no variance."
+        )]
+        [SerializeField, Range(0f, 0.5f)]
+        private float _pitchVariance = 0f;
 
         [Header("Music")]
-        [Tooltip("If true, Play() crossfades into looping background music instead of firing a one-shot SFX.\n" +
-                 "Tick this on AudioEvents that represent BGM tracks (battle theme, victory fanfare loop, etc.).")]
-        [SerializeField] private bool _isMusic = false;
+        [Tooltip(
+            "If true, Play() crossfades into looping background music instead of firing a one-shot SFX.\n"
+                + "Tick this on AudioEvents that represent BGM tracks (battle theme, victory fanfare loop, etc.)."
+        )]
+        [SerializeField]
+        private bool _isMusic = false;
 
-        [Tooltip("Crossfade duration in seconds when switching BGM. 0 = instant swap. Only used when _isMusic is true.")]
-        [SerializeField] private float _musicFadeDuration = 0f;
+        [Tooltip(
+            "Crossfade duration in seconds when switching BGM. 0 = instant swap. Only used when _isMusic is true."
+        )]
+        [SerializeField]
+        private float _musicFadeDuration = 0f;
 
-        // ─── Public API ───────────────────────────────────────────────────────
-
+        #region Public API
         /// <summary>
         /// Plays this event.
         /// • <c>_isMusic = false</c>: fires as a one-shot SFX with pitch/volume settings.
@@ -53,7 +66,8 @@ namespace Crookedile.Data.Audio
         /// </summary>
         public void Play()
         {
-            if (_clip == null || AudioManager.Instance == null) return;
+            if (_clip == null || AudioManager.Instance == null)
+                return;
 
             if (_isMusic)
             {
@@ -73,8 +87,10 @@ namespace Crookedile.Data.Audio
         /// <param name="fadeDuration">Total crossfade duration in seconds. 0 = instant swap.</param>
         public void PlayMusic(float fadeDuration = 0f)
         {
-            if (_clip == null || AudioManager.Instance == null) return;
+            if (_clip == null || AudioManager.Instance == null)
+                return;
             AudioManager.Instance.PlayMusic(_clip, true, fadeDuration);
         }
     }
 }
+        #endregion
