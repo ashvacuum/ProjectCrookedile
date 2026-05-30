@@ -73,11 +73,12 @@
         )
         {
             StatusEffectManager attackerMgr = ctx.GetStatusEffectManager(attacker);
-            StatusEffectManager targetMgr   = ctx.GetStatusEffectManager(target);
+            StatusEffectManager targetMgr = ctx.GetStatusEffectManager(target);
 
             int mod = attackerMgr?.ModifyDamageDealt(basePressure) ?? basePressure;
-            mod = targetMgr?.ModifyDamageTaken(mod, attacker, isAttackerPlayer: ctx.IsPlayerCard)
-                  ?? mod;
+            mod =
+                targetMgr?.ModifyDamageTaken(mod, attacker, isAttackerPlayer: ctx.IsPlayerCard)
+                ?? mod;
 
             // Hostile enemies amplify their opinion-meter pressure.
             if (!ctx.IsPlayerCard && attacker.CurrentHostility > 0)
@@ -87,14 +88,16 @@
             int remainder = target.AbsorbThroughComposure(mod);
             if (remainder > 0)
             {
-                EventBus.Publish(new DamageDealtEvent
-                {
-                    Amount           = remainder,
-                    IsToPlayer       = target == ctx.PlayerStats,
-                    AttackerName     = ctx.AttackerName,
-                    SourceEnemyIndex = ctx.IsPlayerCard ? -1 : ctx.AttackerEnemyIndex,
-                    TargetEnemyIndex = ctx.IsPlayerCard ? ctx.AttackerEnemyIndex : -1,
-                });
+                EventBus.Publish(
+                    new DamageDealtEvent
+                    {
+                        Amount = remainder,
+                        IsToPlayer = target == ctx.PlayerStats,
+                        AttackerName = ctx.AttackerName,
+                        SourceEnemyIndex = ctx.IsPlayerCard ? -1 : ctx.AttackerEnemyIndex,
+                        TargetEnemyIndex = ctx.IsPlayerCard ? ctx.AttackerEnemyIndex : -1,
+                    }
+                );
             }
 
             ctx.LastDamageDealt += remainder;
@@ -103,8 +106,11 @@
 
         // Keep the old name as a redirect so any call sites not yet updated still compile.
         protected static int ApplyResolveDamage(
-            BattleStats target, BattleStats attacker, int baseDamage, EffectExecutionContext ctx)
-            => ApplyPressure(target, attacker, baseDamage, ctx);
+            BattleStats target,
+            BattleStats attacker,
+            int baseDamage,
+            EffectExecutionContext ctx
+        ) => ApplyPressure(target, attacker, baseDamage, ctx);
 
         #endregion
 

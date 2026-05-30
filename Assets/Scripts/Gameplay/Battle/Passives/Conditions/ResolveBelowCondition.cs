@@ -20,7 +20,6 @@ namespace Crookedile.Gameplay.Battle
         public override bool Evaluate(PassiveEvaluationContext ctx) =>
             ctx.OpinionPercentage * 100f <= _percentThreshold;
 
-        public override string ConditionLabel =>
-            $"opinion is at or below {_percentThreshold}%";
+        public override string ConditionLabel => $"opinion is at or below {_percentThreshold}%";
     }
 }

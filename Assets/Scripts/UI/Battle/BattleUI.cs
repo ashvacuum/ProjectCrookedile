@@ -299,33 +299,40 @@ namespace Crookedile.UI.Battle
 
                 case BattleState.TurnStart:
                     handPanel?.ClearHand();
-                    if (endTurnButton != null) endTurnButton.interactable = false;
+                    if (endTurnButton != null)
+                        endTurnButton.interactable = false;
                     UpdateStatsDisplay();
                     break;
 
                 case BattleState.PlayerTurn:
                     handPanel?.RefreshNormalHand(battleManager, OnCardButtonClicked);
-                    if (endTurnButton != null) endTurnButton.interactable = !_cardChoiceActive;
+                    if (endTurnButton != null)
+                        endTurnButton.interactable = !_cardChoiceActive;
                     UpdateStatsDisplay();
                     UpdateBattleInfo();
                     break;
 
                 case BattleState.OpponentTurn:
                     handPanel?.ClearHand();
-                    if (endTurnButton != null)    endTurnButton.interactable = false;
-                    if (improviseButton != null)  improviseButton.gameObject.SetActive(false);
+                    if (endTurnButton != null)
+                        endTurnButton.interactable = false;
+                    if (improviseButton != null)
+                        improviseButton.gameObject.SetActive(false);
                     UpdateBattleInfo();
                     break;
 
                 case BattleState.TurnEnd:
-                    if (endTurnButton != null) endTurnButton.interactable = false;
+                    if (endTurnButton != null)
+                        endTurnButton.interactable = false;
                     UpdateStatsDisplay();
                     break;
 
                 case BattleState.BattleEnd:
                     handPanel?.ClearHand();
-                    if (endTurnButton != null)    endTurnButton.interactable = false;
-                    if (improviseButton != null)  improviseButton.gameObject.SetActive(false);
+                    if (endTurnButton != null)
+                        endTurnButton.interactable = false;
+                    if (improviseButton != null)
+                        improviseButton.gameObject.SetActive(false);
                     resultPanel?.Show(_lastBattleResult.isVictory);
                     UpdateStatsDisplay();
                     break;
@@ -591,8 +598,9 @@ namespace Crookedile.UI.Battle
         private void OnCardChoiceRequested(CardChoiceRequestedEvent evt)
         {
             _pendingCardChoice = evt;
-            _cardChoiceActive  = true;
-            if (endTurnButton != null) endTurnButton.interactable = false;
+            _cardChoiceActive = true;
+            if (endTurnButton != null)
+                endTurnButton.interactable = false;
             cardChoicePanel?.Open(evt.Title, evt.Choices, evt.RequiredCount, OnCardChoiceConfirmed);
         }
 
@@ -600,11 +608,11 @@ namespace Crookedile.UI.Battle
         {
             _pendingCardChoice?.OnConfirmed?.Invoke(selected);
             _pendingCardChoice = null;
-            _cardChoiceActive  = false;
+            _cardChoiceActive = false;
             cardChoicePanel?.Close();
-            if (endTurnButton != null) endTurnButton.interactable = true;
+            if (endTurnButton != null)
+                endTurnButton.interactable = true;
         }
-
 
         private void OnComposureChanged(ComposureChangedEvent evt) => UpdateStatsDisplay();
 
@@ -963,7 +971,6 @@ namespace Crookedile.UI.Battle
         }
 
         #endregion
-
     }
 }
         #endregion

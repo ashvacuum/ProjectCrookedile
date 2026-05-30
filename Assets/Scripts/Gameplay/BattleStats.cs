@@ -16,7 +16,9 @@ namespace Crookedile.Gameplay
     public class BattleStats
     {
         [Header("Composure")]
-        [Tooltip("Temporary shield. Absorbs incoming pressure before it touches the Opinion Meter.")]
+        [Tooltip(
+            "Temporary shield. Absorbs incoming pressure before it touches the Opinion Meter."
+        )]
         [SerializeField]
         private int _currentComposure;
 
@@ -42,11 +44,11 @@ namespace Crookedile.Gameplay
 
         #region Properties
 
-        public int  CurrentComposure     => _currentComposure;
-        public int  CurrentHostility     => _currentHostility;
-        public int  CurrentActionPoints  => _currentActionPoints;
-        public int  MaxActionPoints      => _maxActionPoints;
-        public int  ActionPointsNextTurn => _actionPointsNextTurn;
+        public int CurrentComposure => _currentComposure;
+        public int CurrentHostility => _currentHostility;
+        public int CurrentActionPoints => _currentActionPoints;
+        public int MaxActionPoints => _maxActionPoints;
+        public int ActionPointsNextTurn => _actionPointsNextTurn;
 
         /// <summary>
         /// Enemies are never "defeated" in the resolve sense — they persist until they leave
@@ -56,7 +58,7 @@ namespace Crookedile.Gameplay
         public bool IsDefeated => false;
 
         /// <summary>True when the enemy is actively hostile (positive hostility).</summary>
-        public bool IsHostile   => _currentHostility > 0;
+        public bool IsHostile => _currentHostility > 0;
 
         /// <summary>True when the enemy is receptive / de-escalated (negative hostility).</summary>
         public bool IsReceptive => _currentHostility < 0;
@@ -76,12 +78,12 @@ namespace Crookedile.Gameplay
         /// <summary>Creates stats for a player combatant.</summary>
         public BattleStats(int maxActionPoints, bool isPlayer = true)
         {
-            _maxActionPoints    = maxActionPoints;
+            _maxActionPoints = maxActionPoints;
             _currentActionPoints = maxActionPoints;
-            _currentComposure   = 0;
-            _currentHostility   = 0;
+            _currentComposure = 0;
+            _currentHostility = 0;
             _actionPointsNextTurn = 0;
-            _isPlayer           = isPlayer;
+            _isPlayer = isPlayer;
         }
 
         #endregion
@@ -94,20 +96,23 @@ namespace Crookedile.Gameplay
         /// </summary>
         public int AbsorbThroughComposure(int pressure)
         {
-            if (pressure <= 0) return 0;
+            if (pressure <= 0)
+                return 0;
 
             if (_currentComposure > 0)
             {
-                int absorbed   = Mathf.Min(pressure, _currentComposure);
+                int absorbed = Mathf.Min(pressure, _currentComposure);
                 int oldComposure = _currentComposure;
                 _currentComposure -= absorbed;
                 pressure -= absorbed;
-                EventBus.Publish(new ComposureChangedEvent
-                {
-                    OldValue = oldComposure,
-                    NewValue = _currentComposure,
-                    IsPlayer = _isPlayer,
-                });
+                EventBus.Publish(
+                    new ComposureChangedEvent
+                    {
+                        OldValue = oldComposure,
+                        NewValue = _currentComposure,
+                        IsPlayer = _isPlayer,
+                    }
+                );
             }
 
             return pressure;
@@ -118,27 +123,31 @@ namespace Crookedile.Gameplay
         {
             int old = _currentComposure;
             _currentComposure += amount;
-            EventBus.Publish(new ComposureChangedEvent
-            {
-                OldValue = old,
-                NewValue = _currentComposure,
-                IsPlayer = _isPlayer,
-            });
+            EventBus.Publish(
+                new ComposureChangedEvent
+                {
+                    OldValue = old,
+                    NewValue = _currentComposure,
+                    IsPlayer = _isPlayer,
+                }
+            );
         }
 
         /// <summary>Loses Composure stacks.</summary>
         public int LoseComposure(int amount)
         {
-            int old        = _currentComposure;
+            int old = _currentComposure;
             int loseAmount = Mathf.Min(amount, _currentComposure);
             _currentComposure -= loseAmount;
             if (loseAmount > 0)
-                EventBus.Publish(new ComposureChangedEvent
-                {
-                    OldValue = old,
-                    NewValue = _currentComposure,
-                    IsPlayer = _isPlayer,
-                });
+                EventBus.Publish(
+                    new ComposureChangedEvent
+                    {
+                        OldValue = old,
+                        NewValue = _currentComposure,
+                        IsPlayer = _isPlayer,
+                    }
+                );
             return loseAmount;
         }
 
@@ -148,12 +157,14 @@ namespace Crookedile.Gameplay
             int consumed = _currentComposure;
             _currentComposure = 0;
             if (consumed > 0)
-                EventBus.Publish(new ComposureChangedEvent
-                {
-                    OldValue = consumed,
-                    NewValue = 0,
-                    IsPlayer = _isPlayer,
-                });
+                EventBus.Publish(
+                    new ComposureChangedEvent
+                    {
+                        OldValue = consumed,
+                        NewValue = 0,
+                        IsPlayer = _isPlayer,
+                    }
+                );
             return consumed;
         }
 
@@ -173,12 +184,14 @@ namespace Crookedile.Gameplay
         {
             int old = _currentHostility;
             _currentHostility = Mathf.Min(_maxHostility, _currentHostility + amount);
-            EventBus.Publish(new HostilityChangedEvent
-            {
-                OldValue = old,
-                NewValue = _currentHostility,
-                IsPlayer = _isPlayer,
-            });
+            EventBus.Publish(
+                new HostilityChangedEvent
+                {
+                    OldValue = old,
+                    NewValue = _currentHostility,
+                    IsPlayer = _isPlayer,
+                }
+            );
         }
 
         /// <summary>Shifts hostility downward (more receptive).</summary>
@@ -187,12 +200,14 @@ namespace Crookedile.Gameplay
             int old = _currentHostility;
             _currentHostility = Mathf.Max(_minHostility, _currentHostility - amount);
             int actual = old - _currentHostility;
-            EventBus.Publish(new HostilityChangedEvent
-            {
-                OldValue = old,
-                NewValue = _currentHostility,
-                IsPlayer = _isPlayer,
-            });
+            EventBus.Publish(
+                new HostilityChangedEvent
+                {
+                    OldValue = old,
+                    NewValue = _currentHostility,
+                    IsPlayer = _isPlayer,
+                }
+            );
             return actual;
         }
 
@@ -202,12 +217,14 @@ namespace Crookedile.Gameplay
             int old = _currentHostility;
             _currentHostility = Mathf.Clamp(value, _minHostility, _maxHostility);
             if (old != _currentHostility)
-                EventBus.Publish(new HostilityChangedEvent
-                {
-                    OldValue = old,
-                    NewValue = _currentHostility,
-                    IsPlayer = _isPlayer,
-                });
+                EventBus.Publish(
+                    new HostilityChangedEvent
+                    {
+                        OldValue = old,
+                        NewValue = _currentHostility,
+                        IsPlayer = _isPlayer,
+                    }
+                );
         }
 
         #endregion
@@ -217,15 +234,18 @@ namespace Crookedile.Gameplay
         /// <summary>Spends Action Points to play a card.</summary>
         public bool SpendActionPoints(int cost)
         {
-            if (_currentActionPoints < cost) return false;
+            if (_currentActionPoints < cost)
+                return false;
             int old = _currentActionPoints;
             _currentActionPoints -= cost;
-            EventBus.Publish(new ActionPointsChangedEvent
-            {
-                OldValue = old,
-                NewValue = _currentActionPoints,
-                IsPlayer = _isPlayer,
-            });
+            EventBus.Publish(
+                new ActionPointsChangedEvent
+                {
+                    OldValue = old,
+                    NewValue = _currentActionPoints,
+                    IsPlayer = _isPlayer,
+                }
+            );
             return true;
         }
 
@@ -234,12 +254,14 @@ namespace Crookedile.Gameplay
         {
             int old = _currentActionPoints;
             _currentActionPoints = Mathf.Max(0, _currentActionPoints + amount);
-            EventBus.Publish(new ActionPointsChangedEvent
-            {
-                OldValue = old,
-                NewValue = _currentActionPoints,
-                IsPlayer = _isPlayer,
-            });
+            EventBus.Publish(
+                new ActionPointsChangedEvent
+                {
+                    OldValue = old,
+                    NewValue = _currentActionPoints,
+                    IsPlayer = _isPlayer,
+                }
+            );
         }
 
         /// <summary>Banks Action Points to gain at the start of next turn.</summary>
@@ -251,12 +273,14 @@ namespace Crookedile.Gameplay
             int old = _currentActionPoints;
             _currentActionPoints = Mathf.Max(0, _maxActionPoints + _actionPointsNextTurn);
             _actionPointsNextTurn = 0;
-            EventBus.Publish(new ActionPointsChangedEvent
-            {
-                OldValue = old,
-                NewValue = _currentActionPoints,
-                IsPlayer = _isPlayer,
-            });
+            EventBus.Publish(
+                new ActionPointsChangedEvent
+                {
+                    OldValue = old,
+                    NewValue = _currentActionPoints,
+                    IsPlayer = _isPlayer,
+                }
+            );
         }
 
         #endregion

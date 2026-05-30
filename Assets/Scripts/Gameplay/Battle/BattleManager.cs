@@ -277,7 +277,9 @@ namespace Crookedile.Gameplay.Battle
         {
             var previous = CurrentState;
             _stateMachine.ChangeState(newState);
-            EventBus.Publish(new BattleStateChangedEvent { Previous = previous, Current = newState });
+            EventBus.Publish(
+                new BattleStateChangedEvent { Previous = previous, Current = newState }
+            );
         }
 
         /// <summary>
@@ -898,25 +900,27 @@ namespace Crookedile.Gameplay.Battle
         public bool CheckVictoryConditions()
         {
             bool opinionCollapsed = _currentOpinion <= 0;
-            bool opinionMaxed     = _currentOpinion >= _maxOpinion;
+            bool opinionMaxed = _currentOpinion >= _maxOpinion;
 
             if (!opinionCollapsed && !opinionMaxed)
                 return false;
 
             _battleResult = new BattleResult
             {
-                isVictory            = opinionMaxed,
-                turnsToWin           = _currentTurn,
-                finalPlayerResolve   = 0,
+                isVictory = opinionMaxed,
+                turnsToWin = _currentTurn,
+                finalPlayerResolve = 0,
                 finalPlayerComposure = _playerStats.CurrentComposure,
                 finalPlayerHostility = _playerStats.CurrentHostility,
-                finalOpinion         = _currentOpinion,
-                wasJudgmentVictory   = false,
+                finalOpinion = _currentOpinion,
+                wasJudgmentVictory = false,
             };
 
-            GameLogger.LogInfo("BattleManager",
-                $"Battle ended: {(_battleResult.isVictory ? "Victory" : "Defeat")} " +
-                $"(opinion={_currentOpinion}) in {_currentTurn} turns");
+            GameLogger.LogInfo(
+                "BattleManager",
+                $"Battle ended: {(_battleResult.isVictory ? "Victory" : "Defeat")} "
+                    + $"(opinion={_currentOpinion}) in {_currentTurn} turns"
+            );
             return true;
         }
 

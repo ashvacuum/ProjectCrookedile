@@ -54,7 +54,7 @@ namespace Crookedile.Tests
             Debug.Log("--- Setting up test battle ---");
 
             // Initialize stats — resolve removed; use opinion-meter model
-            playerStats   = new BattleStats(maxActionPoints: 3, isPlayer: true);
+            playerStats = new BattleStats(maxActionPoints: 3, isPlayer: true);
             opponentStats = new BattleStats(maxActionPoints: 3, isPlayer: false);
 
             // Initialize deck managers with empty decks

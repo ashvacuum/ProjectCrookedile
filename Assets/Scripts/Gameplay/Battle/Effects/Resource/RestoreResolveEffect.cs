@@ -39,7 +39,8 @@ namespace Crookedile.Gameplay.Battle
                         : ctx.GetValue(_amountSource)
                 );
 
-            if (amount <= 0) return;
+            if (amount <= 0)
+                return;
 
             EventBus.Publish(new OpinionRaisedDirectlyEvent { Amount = amount });
             GameLogger.LogInfo<RestoreResolveEffect>($"Raised Opinion by {amount}");
