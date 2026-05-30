@@ -1,8 +1,8 @@
 ﻿using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Data;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -16,17 +16,20 @@ namespace Crookedile.Gameplay.Battle
     public class DealRandomDamageEffect : BattleEffect
     {
         [Tooltip("Who receives the damage.")]
-        [SerializeField] private TargetType _target = TargetType.Opponent;
+        [SerializeField]
+        private TargetType _target = TargetType.Opponent;
 
         public override TargetType Target => _target;
 
         [MinValue(1)]
         [Tooltip("Minimum damage (inclusive).")]
-        [SerializeField] private int _minDamage = 3;
+        [SerializeField]
+        private int _minDamage = 3;
 
         [MinValue(1)]
         [Tooltip("Maximum damage (inclusive).")]
-        [SerializeField] private int _maxDamage = 8;
+        [SerializeField]
+        private int _maxDamage = 8;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
@@ -37,6 +40,6 @@ namespace Crookedile.Gameplay.Battle
         }
 
         public override string GetDescription() =>
-            $"Deal {_minDamage}–{_maxDamage} damage to {_target}";
+            $"Raise Opinion by {_minDamage}–{_maxDamage} (through {_target}'s composure)";
     }
 }

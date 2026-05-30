@@ -25,7 +25,8 @@ namespace Crookedile.Gameplay.Battle
 
             ApplyGainComposure(ctx.Caster, hostileCount, ctx);
             GameLogger.LogInfo<ComposureEqualToHostilityEffect>(
-                $"Gained Composure equal to hostile enemy count ({hostileCount})");
+                $"Gained Composure equal to hostile enemy count ({hostileCount})"
+            );
         }
 
         public override string GetDescription() =>

@@ -9,7 +9,8 @@ namespace Crookedile.Gameplay.Battle
     {
         public override bool Matches(PassiveEventContext ctx)
         {
-            if (!ctx.Is<HealingAppliedEvent>()) return false;
+            if (!ctx.Is<HealingAppliedEvent>())
+                return false;
             return ctx.As<HealingAppliedEvent>().IsToPlayer;
         }
 

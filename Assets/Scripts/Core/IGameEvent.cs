@@ -21,7 +21,5 @@ namespace Crookedile.Core
     /// See <c>Assets/Scripts/Gameplay/Battle/BattleEvents.cs</c> for the full list of
     /// battle-system events with publisher and subscriber documentation.
     /// </summary>
-    public interface IGameEvent
-    {
-    }
+    public interface IGameEvent { }
 }

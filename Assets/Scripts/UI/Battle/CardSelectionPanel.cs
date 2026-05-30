@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Crookedile.Data;
+using Crookedile.Data.Cards;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Crookedile.Data.Cards;
 
 namespace Crookedile.UI.Battle
 {
@@ -21,32 +21,45 @@ namespace Crookedile.UI.Battle
     /// </summary>
     public class CardSelectionPanel : MonoBehaviour
     {
-        [SerializeField] private TMP_Text   titleText;
-        [SerializeField] private TMP_Text   selectionCountText;  // e.g. "2 to discard"
-        [SerializeField] private Transform  discardContainer;    // cards queued for discard
-        [SerializeField] private Button     discardButton;       // executes the discard
+        [SerializeField]
+        private TMP_Text titleText;
+
+        [SerializeField]
+        private TMP_Text selectionCountText; // e.g. "2 to discard"
+
+        [SerializeField]
+        private Transform discardContainer; // cards queued for discard
+
+        [SerializeField]
+        private Button discardButton; // executes the discard
 
         [Header("Fallback Prefabs (used only when BattlePoolManager singleton is absent)")]
-        [SerializeField] private CardButton _pressurePrefab;
-        [SerializeField] private CardButton _rhetoricPrefab;
-        [SerializeField] private CardButton _policyPrefab;
+        [SerializeField]
+        private CardButton _pressurePrefab;
 
-        // ─── Events ───────────────────────────────────────────────────────────────
+        [SerializeField]
+        private CardButton _rhetoricPrefab;
 
+        [SerializeField]
+        private CardButton _policyPrefab;
+
+        #region Events
         /// <summary>
         /// Fired when the player clicks a card in the selection zone to return it to hand.
         /// </summary>
         public event Action<CardData> OnCardReturnedToHand;
 
-        // ─── Per-session state ────────────────────────────────────────────────────
+        #endregion
 
-        private readonly List<CardData>   _selectedCards  = new List<CardData>();
+        #region Per-session state
+        private readonly List<CardData> _selectedCards = new List<CardData>();
         private readonly List<CardButton> _spawnedButtons = new List<CardButton>();
 
         private Action<List<CardData>> _onDiscard;
 
-        // ─── Lifecycle ────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Lifecycle
         private void Awake()
         {
             discardButton?.onClick.AddListener(OnDiscardClicked);
@@ -63,7 +76,8 @@ namespace Crookedile.UI.Battle
         {
             _onDiscard = onDiscard;
 
-            if (titleText != null) titleText.text = title;
+            if (titleText != null)
+                titleText.text = title;
 
             ClearDiscardZone();
             RefreshUI();
@@ -76,19 +90,31 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void AddToDiscard(CardData card)
         {
-            if (card == null) return;
+            if (card == null)
+                return;
 
             _selectedCards.Add(card);
 
-            CardButton button = BattlePoolManager.Instance != null
-                ? BattlePoolManager.Instance.RentCard(card.CardType, discardContainer)
-                : InstantiateFallback(card.CardType);
-            if (button == null) { _selectedCards.Remove(card); return; }
+            CardButton button =
+                BattlePoolManager.Instance != null
+                    ? BattlePoolManager.Instance.RentCard(card.CardType, discardContainer)
+                    : InstantiateFallback(card.CardType);
+            if (button == null)
+            {
+                _selectedCards.Remove(card);
+                return;
+            }
             // int.MaxValue AP → card displays as affordable (no grey tint)
             // Callback → return this card to hand when clicked
-            int baseCost = card.Costs != null && card.Costs.Count > 0 ? card.Costs[0].BaseAmount : 0;
-            button.Initialize(card, _spawnedButtons.Count, int.MaxValue, baseCost,
-                onClick: () => ReturnToHand(button, card));
+            int baseCost =
+                card.Costs != null && card.Costs.Count > 0 ? card.Costs[0].BaseAmount : 0;
+            button.Initialize(
+                card,
+                _spawnedButtons.Count,
+                int.MaxValue,
+                baseCost,
+                onClick: () => ReturnToHand(button, card)
+            );
 
             _spawnedButtons.Add(button);
 
@@ -110,14 +136,17 @@ namespace Crookedile.UI.Battle
             gameObject.SetActive(false);
         }
 
-        // ─── Internal ─────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Internal
         private void ReturnToHand(CardButton button, CardData card)
         {
             _selectedCards.Remove(card);
             _spawnedButtons.Remove(button);
-            if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnCard(button);
-            else Destroy(button.gameObject);
+            if (BattlePoolManager.Instance != null)
+                BattlePoolManager.Instance.ReturnCard(button);
+            else
+                Destroy(button.gameObject);
             OnCardReturnedToHand?.Invoke(card);
             RefreshUI();
         }
@@ -125,7 +154,7 @@ namespace Crookedile.UI.Battle
         private void OnDiscardClicked()
         {
             var toDiscard = new List<CardData>(_selectedCards);
-            var callback  = _onDiscard;
+            var callback = _onDiscard;
             Close();
             callback?.Invoke(toDiscard);
         }
@@ -140,9 +169,12 @@ namespace Crookedile.UI.Battle
         {
             foreach (var button in _spawnedButtons)
             {
-                if (button == null) continue;
-                if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnCard(button);
-                else Destroy(button.gameObject);
+                if (button == null)
+                    continue;
+                if (BattlePoolManager.Instance != null)
+                    BattlePoolManager.Instance.ReturnCard(button);
+                else
+                    Destroy(button.gameObject);
             }
 
             _spawnedButtons.Clear();
@@ -154,11 +186,13 @@ namespace Crookedile.UI.Battle
             CardButton prefab = cardType switch
             {
                 CardType.Rhetoric => _rhetoricPrefab,
-                CardType.Policy   => _policyPrefab,
-                _                 => _pressurePrefab,
+                CardType.Policy => _policyPrefab,
+                _ => _pressurePrefab,
             };
-            if (prefab == null) return null;
+            if (prefab == null)
+                return null;
             return Instantiate(prefab, discardContainer);
         }
     }
 }
+        #endregion

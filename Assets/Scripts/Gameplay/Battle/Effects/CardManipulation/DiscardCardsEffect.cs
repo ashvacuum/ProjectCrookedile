@@ -1,8 +1,8 @@
 ﻿using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Core;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -12,17 +12,20 @@ namespace Crookedile.Gameplay.Battle
     public class DiscardCardsEffect : BattleEffect
     {
         [MinValue(1)]
-        [SerializeField] private int _amount = 1;
+        [SerializeField]
+        private int _amount = 1;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            if (ctx.Deck == null) return;
-            int amount      = amountOverride ?? _amount;
-            int discarded   = 0;
+            if (ctx.Deck == null)
+                return;
+            int amount = amountOverride ?? _amount;
+            int discarded = 0;
             for (int i = 0; i < amount && ctx.Deck.HandCount > 0; i++)
             {
                 int idx = RandomHelper.Range(0, ctx.Deck.HandCount);
-                if (ctx.Deck.DiscardCard(ctx.Deck.Hand[idx])) discarded++;
+                if (ctx.Deck.DiscardCard(ctx.Deck.Hand[idx]))
+                    discarded++;
             }
             GameLogger.LogInfo<DiscardCardsEffect>($"Discarded {discarded} cards");
         }

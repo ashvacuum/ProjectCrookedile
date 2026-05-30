@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using UnityEngine;
 using Crookedile.Data.Battle;
 using Crookedile.Gameplay.Battle;
+using UnityEngine;
 
 namespace Crookedile.UI.Battle
 {
@@ -20,13 +20,16 @@ namespace Crookedile.UI.Battle
     public class StatusEffectPanelUI : MonoBehaviour
     {
         [Tooltip("ScriptableObject mapping StatusEffectType → icon sprite and tint color.")]
-        [SerializeField] private StatusEffectIconMapSO _iconMap;
+        [SerializeField]
+        private StatusEffectIconMapSO _iconMap;
 
         [Tooltip("Prefab with StatusEffectIconUI component (Image + optional TMP stack count).")]
-        [SerializeField] private GameObject _iconPrefab;
+        [SerializeField]
+        private GameObject _iconPrefab;
 
         [Tooltip("Parent transform (HorizontalLayoutGroup) that holds the icon instances.")]
-        [SerializeField] private Transform _container;
+        [SerializeField]
+        private Transform _container;
 
         private readonly Dictionary<StatusEffectType, StatusEffectIconUI> _active =
             new Dictionary<StatusEffectType, StatusEffectIconUI>();
@@ -40,10 +43,14 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void Refresh(StatusEffectManager effects)
         {
-            if (effects == null) return;
+            if (effects == null)
+                return;
             if (_iconMap == null)
             {
-                Debug.LogWarning($"[StatusEffectPanelUI] _iconMap is not assigned on {gameObject.name} — assign a StatusEffectIconMapSO in the Inspector.", this);
+                Debug.LogWarning(
+                    $"[StatusEffectPanelUI] _iconMap is not assigned on {gameObject.name} — assign a StatusEffectIconMapSO in the Inspector.",
+                    this
+                );
                 return;
             }
 
@@ -53,7 +60,8 @@ namespace Crookedile.UI.Battle
             foreach (StatusEffectType type in System.Enum.GetValues(typeof(StatusEffectType)))
             {
                 int stacks = effects.GetStacks(type);
-                if (stacks <= 0) continue;
+                if (stacks <= 0)
+                    continue;
 
                 seen.Add(type);
 
@@ -64,12 +72,15 @@ namespace Crookedile.UI.Battle
                 else
                 {
                     // New effect — create icon if we have a prefab and a map entry.
-                    if (_iconPrefab == null || _container == null) continue;
-                    if (!_iconMap.TryGet(type, out var icon, out var color)) continue;
+                    if (_iconPrefab == null || _container == null)
+                        continue;
+                    if (!_iconMap.TryGet(type, out var icon, out var color))
+                        continue;
 
-                    var go  = Instantiate(_iconPrefab, _container);
-                    var ui  = go.GetComponent<StatusEffectIconUI>();
-                    if (ui == null) continue;
+                    var go = Instantiate(_iconPrefab, _container);
+                    var ui = go.GetComponent<StatusEffectIconUI>();
+                    if (ui == null)
+                        continue;
 
                     ui.Setup(type, icon, color, stacks);
                     _active[type] = ui;
@@ -84,7 +95,8 @@ namespace Crookedile.UI.Battle
 
             foreach (var type in toRemove)
             {
-                if (_active[type] != null) Destroy(_active[type].gameObject);
+                if (_active[type] != null)
+                    Destroy(_active[type].gameObject);
                 _active.Remove(type);
             }
         }
@@ -93,7 +105,8 @@ namespace Crookedile.UI.Battle
         public void Clear()
         {
             foreach (var kvp in _active)
-                if (kvp.Value != null) Destroy(kvp.Value.gameObject);
+                if (kvp.Value != null)
+                    Destroy(kvp.Value.gameObject);
             _active.Clear();
         }
     }

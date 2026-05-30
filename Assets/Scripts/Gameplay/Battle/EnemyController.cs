@@ -1,8 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using Crookedile.Data.Enemy;
 using Crookedile.Gameplay;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -16,20 +16,23 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public class EnemyController
     {
-        // ─── Condition evaluators registry ───────────────────────────────────────
+        #region Condition evaluators registry
         // Add an entry here when introducing a new EnemyMoveCondition value —
         // no changes to IsMoveEligible() or any other method are needed.
 
-        private static readonly Dictionary<EnemyMoveCondition, IMoveConditionEvaluator> ConditionEvaluators
-            = new Dictionary<EnemyMoveCondition, IMoveConditionEvaluator>
+        private static readonly Dictionary<
+            EnemyMoveCondition,
+            IMoveConditionEvaluator
+        > ConditionEvaluators = new Dictionary<EnemyMoveCondition, IMoveConditionEvaluator>
         {
-            [EnemyMoveCondition.None]                 = new NoConditionEvaluator(),
+            [EnemyMoveCondition.None] = new NoConditionEvaluator(),
             [EnemyMoveCondition.OnlyIfNoMinionsAlive] = new NoMinionsAliveEvaluator(),
         };
 
-        // ─── State ────────────────────────────────────────────────────────────────
+        #endregion
 
-        private readonly EnemyData            _enemyData;
+        #region State
+        private readonly EnemyData _enemyData;
         private readonly IMovePatternSelector _moveSelector;
 
         // Hostile-this-turn tracking — used by BattleManager to award bonus card draws
@@ -61,8 +64,9 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public bool BecameHostileThisTurn { get; private set; }
 
-        // ─── Constructor ──────────────────────────────────────────────────────────
+        #endregion
 
+        #region Constructor
         public EnemyController(EnemyData enemyData)
         {
             _enemyData = enemyData;
@@ -71,13 +75,13 @@ namespace Crookedile.Gameplay.Battle
             // To add a new pattern, add an enum value + a new IMovePatternSelector class.
             _moveSelector = enemyData.MovePattern switch
             {
-                EnemyMovePattern.Sequential       => new SequentialMoveSelector(),
-                EnemyMovePattern.Random           => new RandomMoveSelector(),
+                EnemyMovePattern.Sequential => new SequentialMoveSelector(),
+                EnemyMovePattern.Random => new RandomMoveSelector(),
                 EnemyMovePattern.RandomSequential => new RandomSequentialMoveSelector(),
-                _                                 => new SequentialMoveSelector(),
+                _ => new SequentialMoveSelector(),
             };
 
-            Stats = new BattleStats(enemyData.MaxResolve, maxActionPoints: 0, isPlayer: false);
+            Stats = new BattleStats(maxActionPoints: 0, isPlayer: false);
             Stats.SetHostilityLimits(enemyData.MinHostility, enemyData.MaxHostility);
             Stats.SetHostility(enemyData.StartingHostility);
             StatusEffects = new StatusEffectManager(enemyData.EnemyName);
@@ -86,8 +90,9 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffects.ApplyStatusEffect(effect.Type, effect.Stacks, effect.DurationType);
         }
 
-        // ─── Public API ───────────────────────────────────────────────────────────
+        #endregion
 
+        #region Public API
         /// <summary>
         /// Selects and stores the next move according to the enemy's move pattern.
         /// Call this at the START of the player's turn (Slay the Spire timing) so the
@@ -110,9 +115,7 @@ namespace Crookedile.Gameplay.Battle
 
             // Filter out moves whose conditions aren't met right now.
             // Condition evaluation is fully encapsulated in the ConditionEvaluators registry.
-            var eligible = moves
-                .Where(m => IsMoveEligible(m, allEnemies))
-                .ToList();
+            var eligible = moves.Where(m => IsMoveEligible(m, allEnemies)).ToList();
 
             if (eligible.Count == 0)
             {
@@ -124,9 +127,11 @@ namespace Crookedile.Gameplay.Battle
             if (Stats.IsReceptive)
             {
                 var nonOffensiveMoves = eligible
-                    .Where(m => m.MoveType != EnemyMoveType.Attack
-                             && m.MoveType != EnemyMoveType.OffensiveBuff
-                             && m.MoveType != EnemyMoveType.DebuffAttack)
+                    .Where(m =>
+                        m.MoveType != EnemyMoveType.Attack
+                        && m.MoveType != EnemyMoveType.OffensiveBuff
+                        && m.MoveType != EnemyMoveType.DebuffAttack
+                    )
                     .ToList();
 
                 if (nonOffensiveMoves.Count > 0)
@@ -141,8 +146,9 @@ namespace Crookedile.Gameplay.Battle
             return CurrentIntent;
         }
 
-        // ─── Hostility Snapshot ───────────────────────────────────────────────────
+        #endregion
 
+        #region Hostility Snapshot
         /// <summary>
         /// Captures the enemy's current hostility as the baseline for this turn and resets
         /// <see cref="BecameHostileThisTurn"/>. Call at the START of each player turn,
@@ -150,8 +156,8 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void SnapshotHostilityForTurn()
         {
-            _hostilityAtTurnStart  = Stats.CurrentHostility;
-            BecameHostileThisTurn  = false;
+            _hostilityAtTurnStart = Stats.CurrentHostility;
+            BecameHostileThisTurn = false;
         }
 
         /// <summary>
@@ -166,8 +172,9 @@ namespace Crookedile.Gameplay.Battle
                 BecameHostileThisTurn = true;
         }
 
-        // ─── Private Helpers ──────────────────────────────────────────────────────
+        #endregion
 
+        #region Private Helpers
         /// <summary>
         /// Returns true if <paramref name="move"/> should be included in the selection pool
         /// this turn. Delegates to the <see cref="ConditionEvaluators"/> registry —
@@ -182,3 +189,4 @@ namespace Crookedile.Gameplay.Battle
         }
     }
 }
+        #endregion

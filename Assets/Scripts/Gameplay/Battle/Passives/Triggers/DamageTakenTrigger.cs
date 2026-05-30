@@ -9,7 +9,8 @@ namespace Crookedile.Gameplay.Battle
     {
         public override bool Matches(PassiveEventContext ctx)
         {
-            if (!ctx.Is<DamageDealtEvent>()) return false;
+            if (!ctx.Is<DamageDealtEvent>())
+                return false;
             var e = ctx.As<DamageDealtEvent>();
             return e.IsToPlayer && e.Amount > 0;
         }

@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using Crookedile.Data.Cards;
 using Crookedile.UI.Battle;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace Crookedile.UI.Reward
 {
@@ -29,29 +29,34 @@ namespace Crookedile.UI.Reward
     {
         [Header("UI References")]
         [Tooltip("Header text shown at the top of the panel (e.g. 'Choose a Card').")]
-        [SerializeField] private TMP_Text _titleText;
+        [SerializeField]
+        private TMP_Text _titleText;
 
         [Tooltip("Parent Transform for the offered card buttons. Use a GridLayoutGroup.")]
-        [SerializeField] private Transform _cardContainer;
+        [SerializeField]
+        private Transform _cardContainer;
 
         [Tooltip("Button that confirms the selection. Disabled until a card is chosen.")]
-        [SerializeField] private Button _confirmButton;
+        [SerializeField]
+        private Button _confirmButton;
 
         [Tooltip("Optional label on the confirm button ('Take Card').")]
-        [SerializeField] private TMP_Text _confirmButtonLabel;
+        [SerializeField]
+        private TMP_Text _confirmButtonLabel;
 
         [Tooltip("Button that skips the reward (calls onPick with null).")]
-        [SerializeField] private Button _skipButton;
+        [SerializeField]
+        private Button _skipButton;
 
-        // ─── Per-session state ────────────────────────────────────────────────
-
+        #region Per-session state
         private readonly List<CardButton> _spawnedButtons = new List<CardButton>();
-        private Action<CardData>          _onPick;
-        private CardData                  _selectedCard;
-        private CardButton                _selectedButton;
+        private Action<CardData> _onPick;
+        private CardData _selectedCard;
+        private CardButton _selectedButton;
 
-        // ─── Lifecycle ────────────────────────────────────────────────────────
+        #endregion
 
+        #region Lifecycle
         private void Awake()
         {
             _confirmButton?.onClick.AddListener(OnConfirmClicked);
@@ -59,8 +64,9 @@ namespace Crookedile.UI.Reward
             gameObject.SetActive(false);
         }
 
-        // ─── Public API ───────────────────────────────────────────────────────
+        #endregion
 
+        #region Public API
         /// <summary>
         /// Opens the reward screen and displays the given card offers.
         /// </summary>
@@ -71,13 +77,16 @@ namespace Crookedile.UI.Reward
         /// </param>
         public void Open(List<CardData> offers, Action<CardData> onPick)
         {
-            _onPick        = onPick;
-            _selectedCard  = null;
+            _onPick = onPick;
+            _selectedCard = null;
             _selectedButton = null;
 
-            if (_titleText != null)          _titleText.text          = "Choose a Card";
-            if (_confirmButtonLabel != null)  _confirmButtonLabel.text = "Take Card";
-            if (_confirmButton != null)       _confirmButton.interactable = false;
+            if (_titleText != null)
+                _titleText.text = "Choose a Card";
+            if (_confirmButtonLabel != null)
+                _confirmButtonLabel.text = "Take Card";
+            if (_confirmButton != null)
+                _confirmButton.interactable = false;
 
             ClearCards();
             SpawnOffers(offers);
@@ -91,41 +100,52 @@ namespace Crookedile.UI.Reward
         public void Close()
         {
             ClearCards();
-            _onPick         = null;
-            _selectedCard   = null;
+            _onPick = null;
+            _selectedCard = null;
             _selectedButton = null;
             gameObject.SetActive(false);
         }
 
-        // ─── Internal ─────────────────────────────────────────────────────────
+        #endregion
 
+        #region Internal
         private void SpawnOffers(List<CardData> offers)
         {
-            if (_cardContainer == null || offers == null) return;
+            if (_cardContainer == null || offers == null)
+                return;
 
             for (int i = 0; i < offers.Count; i++)
             {
                 CardData card = offers[i];
-                if (card == null) continue;
+                if (card == null)
+                    continue;
 
-                CardButton btn = BattlePoolManager.Instance != null
-                    ? BattlePoolManager.Instance.RentCard(card.CardType, _cardContainer)
-                    : null;
+                CardButton btn =
+                    BattlePoolManager.Instance != null
+                        ? BattlePoolManager.Instance.RentCard(card.CardType, _cardContainer)
+                        : null;
 
                 if (btn == null)
                 {
-                    Debug.LogWarning("[RewardScreen] BattlePoolManager.Instance is null or pool is empty. Card offer skipped.");
+                    Debug.LogWarning(
+                        "[RewardScreen] BattlePoolManager.Instance is null or pool is empty. Card offer skipped."
+                    );
                     continue;
                 }
 
-                int        baseCost     = card.Costs != null && card.Costs.Count > 0
-                                          ? card.Costs[0].BaseAmount : 0;
-                CardData   captured     = card;
-                CardButton capturedBtn  = btn;
+                int baseCost =
+                    card.Costs != null && card.Costs.Count > 0 ? card.Costs[0].BaseAmount : 0;
+                CardData captured = card;
+                CardButton capturedBtn = btn;
 
                 // int.MaxValue AP → always shown as affordable (no grey tint)
-                btn.Initialize(card, i, int.MaxValue, baseCost,
-                               onClick: () => SelectCard(captured, capturedBtn));
+                btn.Initialize(
+                    card,
+                    i,
+                    int.MaxValue,
+                    baseCost,
+                    onClick: () => SelectCard(captured, capturedBtn)
+                );
 
                 // Force layout so SetBasePosition gets the real slot position, not (0,0)
                 Canvas.ForceUpdateCanvases();
@@ -141,7 +161,7 @@ namespace Crookedile.UI.Reward
             if (_selectedButton != null)
                 _selectedButton.SetSelected(false);
 
-            _selectedCard   = card;
+            _selectedCard = card;
             _selectedButton = btn;
             btn.SetSelected(true);
 
@@ -151,10 +171,11 @@ namespace Crookedile.UI.Reward
 
         private void OnConfirmClicked()
         {
-            if (_selectedCard == null) return;
+            if (_selectedCard == null)
+                return;
 
-            CardData  pick     = _selectedCard;
-            var       callback = _onPick;
+            CardData pick = _selectedCard;
+            var callback = _onPick;
             Close();
             callback?.Invoke(pick);
         }
@@ -170,11 +191,15 @@ namespace Crookedile.UI.Reward
         {
             foreach (var btn in _spawnedButtons)
             {
-                if (btn == null) continue;
-                if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnCard(btn);
-                else Destroy(btn.gameObject);
+                if (btn == null)
+                    continue;
+                if (BattlePoolManager.Instance != null)
+                    BattlePoolManager.Instance.ReturnCard(btn);
+                else
+                    Destroy(btn.gameObject);
             }
             _spawnedButtons.Clear();
         }
     }
 }
+        #endregion

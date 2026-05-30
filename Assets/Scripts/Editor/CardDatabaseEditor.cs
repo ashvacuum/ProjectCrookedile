@@ -1,13 +1,13 @@
+﻿using System.Collections.Generic;
+using System.Linq;
 using Crookedile.Data;
+using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
+using Sirenix.OdinInspector.Editor;
+using Sirenix.Utilities;
+using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
-using Crookedile.Data.Cards;
-using Sirenix.OdinInspector.Editor;
-using Sirenix.Utilities.Editor;
-using Sirenix.Utilities;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Crookedile.Editor
 {
@@ -20,10 +20,10 @@ namespace Crookedile.Editor
         private SortMode currentSortMode = SortMode.Name;
         private bool sortDescending = false;
         private string searchFilter = "";
-        private CardType?   filterByType = null;
+        private CardType? filterByType = null;
         private CardRarity? filterByRarity = null;
         private OriginType? filterByOrigin = null;
-        private bool        filterStarterOnly = false;
+        private bool filterStarterOnly = false;
 
         // View mode
         private ViewMode viewMode = ViewMode.Statistics;
@@ -36,7 +36,7 @@ namespace Crookedile.Editor
             MostEffects,
             CheapestCost,
             Type,
-            Rarity
+            Rarity,
         }
 
         private enum ViewMode
@@ -47,7 +47,7 @@ namespace Crookedile.Editor
             LegacyEffects,
             InDevelopment,
             PassiveIssues,
-            EnemyAudit
+            EnemyAudit,
         }
 
         protected override void OnEnable()
@@ -59,7 +59,8 @@ namespace Crookedile.Editor
 
         public override void OnInspectorGUI()
         {
-            if (database == null) return;
+            if (database == null)
+                return;
 
             DrawHeader();
             DrawViewModeSelector();
@@ -133,31 +134,61 @@ namespace Crookedile.Editor
 
         private void DrawViewModeSelector()
         {
-            // ── Row 1: Browse ──────────────────────────────────────────────────
+            #region Row 1: Browse
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Toggle(viewMode == ViewMode.Statistics, "Statistics",
-                    SirenixGUIStyles.Button, GUILayout.Width(120), GUILayout.Height(25)))
+            if (
+                GUILayout.Toggle(
+                    viewMode == ViewMode.Statistics,
+                    "Statistics",
+                    SirenixGUIStyles.Button,
+                    GUILayout.Width(120),
+                    GUILayout.Height(25)
+                )
+            )
                 viewMode = ViewMode.Statistics;
 
-            if (GUILayout.Toggle(viewMode == ViewMode.CardBrowser, "Card Browser",
-                    SirenixGUIStyles.Button, GUILayout.Width(120), GUILayout.Height(25)))
+            if (
+                GUILayout.Toggle(
+                    viewMode == ViewMode.CardBrowser,
+                    "Card Browser",
+                    SirenixGUIStyles.Button,
+                    GUILayout.Width(120),
+                    GUILayout.Height(25)
+                )
+            )
             {
                 viewMode = ViewMode.CardBrowser;
                 RefreshFilteredCards();
             }
 
             int needsSetupCount = database.GetAll().Count(c => c.NeedsConfiguration);
-            string needsSetupLabel = needsSetupCount > 0 ? $"Needs Setup ({needsSetupCount})" : "Needs Setup";
-            if (GUILayout.Toggle(viewMode == ViewMode.NeedsSetup, needsSetupLabel,
-                    SirenixGUIStyles.Button, GUILayout.Width(150), GUILayout.Height(25)))
+            string needsSetupLabel =
+                needsSetupCount > 0 ? $"Needs Setup ({needsSetupCount})" : "Needs Setup";
+            if (
+                GUILayout.Toggle(
+                    viewMode == ViewMode.NeedsSetup,
+                    needsSetupLabel,
+                    SirenixGUIStyles.Button,
+                    GUILayout.Width(150),
+                    GUILayout.Height(25)
+                )
+            )
                 viewMode = ViewMode.NeedsSetup;
 
             int legacyCount = database.GetAll().Count(c => c.UsesLegacyEffects);
-            string legacyLabel = legacyCount > 0 ? $"Legacy Effects ({legacyCount})" : "Legacy Effects";
-            if (GUILayout.Toggle(viewMode == ViewMode.LegacyEffects, legacyLabel,
-                    SirenixGUIStyles.Button, GUILayout.Width(150), GUILayout.Height(25)))
+            string legacyLabel =
+                legacyCount > 0 ? $"Legacy Effects ({legacyCount})" : "Legacy Effects";
+            if (
+                GUILayout.Toggle(
+                    viewMode == ViewMode.LegacyEffects,
+                    legacyLabel,
+                    SirenixGUIStyles.Button,
+                    GUILayout.Width(150),
+                    GUILayout.Height(25)
+                )
+            )
                 viewMode = ViewMode.LegacyEffects;
 
             GUILayout.FlexibleSpace();
@@ -165,31 +196,55 @@ namespace Crookedile.Editor
 
             EditorGUILayout.Space(2);
 
-            // ── Row 2: Quality / Audit ─────────────────────────────────────────
+            #endregion
+
+            #region Row 2: Quality / Audit
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
             int devCount = database.GetAll().Count(c => c.IsInDevelopment);
             string devLabel = devCount > 0 ? $"In Development ({devCount})" : "In Development";
-            if (GUILayout.Toggle(viewMode == ViewMode.InDevelopment, devLabel,
-                    SirenixGUIStyles.Button, GUILayout.Width(150), GUILayout.Height(25)))
+            if (
+                GUILayout.Toggle(
+                    viewMode == ViewMode.InDevelopment,
+                    devLabel,
+                    SirenixGUIStyles.Button,
+                    GUILayout.Width(150),
+                    GUILayout.Height(25)
+                )
+            )
                 viewMode = ViewMode.InDevelopment;
 
             int passiveIssueCount = database.GetAll().Count(c => GetCardPassiveIssues(c).Count > 0);
-            string passiveLabel = passiveIssueCount > 0 ? $"Passive Issues ({passiveIssueCount})" : "Passive Issues";
-            if (GUILayout.Toggle(viewMode == ViewMode.PassiveIssues, passiveLabel,
-                    SirenixGUIStyles.Button, GUILayout.Width(150), GUILayout.Height(25)))
+            string passiveLabel =
+                passiveIssueCount > 0 ? $"Passive Issues ({passiveIssueCount})" : "Passive Issues";
+            if (
+                GUILayout.Toggle(
+                    viewMode == ViewMode.PassiveIssues,
+                    passiveLabel,
+                    SirenixGUIStyles.Button,
+                    GUILayout.Width(150),
+                    GUILayout.Height(25)
+                )
+            )
                 viewMode = ViewMode.PassiveIssues;
 
-            if (GUILayout.Toggle(viewMode == ViewMode.EnemyAudit, "Enemy Audit",
-                    SirenixGUIStyles.Button, GUILayout.Width(120), GUILayout.Height(25)))
+            if (
+                GUILayout.Toggle(
+                    viewMode == ViewMode.EnemyAudit,
+                    "Enemy Audit",
+                    SirenixGUIStyles.Button,
+                    GUILayout.Width(120),
+                    GUILayout.Height(25)
+                )
+            )
                 viewMode = ViewMode.EnemyAudit;
 
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
         }
 
-        #endregion
+            #endregion
 
         #region Statistics View
 
@@ -200,36 +255,44 @@ namespace Crookedile.Editor
 
             // Card Type Breakdown
             EditorGUILayout.Space(5);
-            DrawStatSection("Card Types", () =>
-            {
-                foreach (CardType type in System.Enum.GetValues(typeof(CardType)))
+            DrawStatSection(
+                "Card Types",
+                () =>
                 {
-                    int count = database.GetByType(type).Count;
-                    float percentage = database.Count > 0 ? (count / (float)database.Count) * 100f : 0f;
+                    foreach (CardType type in System.Enum.GetValues(typeof(CardType)))
+                    {
+                        int count = database.GetByType(type).Count;
+                        float percentage =
+                            database.Count > 0 ? (count / (float)database.Count) * 100f : 0f;
 
-                    GUILayout.BeginHorizontal();
-                    GUILayout.Label($"{type}:", GUILayout.Width(120));
-                    DrawProgressBar(count, database.Count, $"{count} ({percentage:F1}%)");
-                    GUILayout.EndHorizontal();
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Label($"{type}:", GUILayout.Width(120));
+                        DrawProgressBar(count, database.Count, $"{count} ({percentage:F1}%)");
+                        GUILayout.EndHorizontal();
+                    }
                 }
-            });
+            );
 
             EditorGUILayout.Space(10);
 
             // Rarity Breakdown
-            DrawStatSection("Rarity Distribution", () =>
-            {
-                foreach (CardRarity rarity in System.Enum.GetValues(typeof(CardRarity)))
+            DrawStatSection(
+                "Rarity Distribution",
+                () =>
                 {
-                    int count = database.GetByRarity(rarity).Count;
-                    float percentage = database.Count > 0 ? (count / (float)database.Count) * 100f : 0f;
+                    foreach (CardRarity rarity in System.Enum.GetValues(typeof(CardRarity)))
+                    {
+                        int count = database.GetByRarity(rarity).Count;
+                        float percentage =
+                            database.Count > 0 ? (count / (float)database.Count) * 100f : 0f;
 
-                    GUILayout.BeginHorizontal();
-                    GUILayout.Label($"{rarity}:", GUILayout.Width(120));
-                    DrawProgressBar(count, database.Count, $"{count} ({percentage:F1}%)");
-                    GUILayout.EndHorizontal();
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Label($"{rarity}:", GUILayout.Width(120));
+                        DrawProgressBar(count, database.Count, $"{count} ({percentage:F1}%)");
+                        GUILayout.EndHorizontal();
+                    }
                 }
-            });
+            );
 
             EditorGUILayout.Space(10);
 
@@ -271,7 +334,8 @@ namespace Crookedile.Editor
         private void DrawTopCards()
         {
             var allCards = database.GetAll();
-            if (allCards.Count == 0) return;
+            if (allCards.Count == 0)
+                return;
 
             SirenixEditorGUI.BeginVerticalList();
             GUILayout.Label("Notable Cards", EditorStyles.boldLabel);
@@ -282,7 +346,11 @@ namespace Crookedile.Editor
                 .FirstOrDefault();
             if (highestDamageCard != null && GetMaxDamage(highestDamageCard) > 0)
             {
-                DrawNotableCard("Highest Damage", highestDamageCard, $"{GetMaxDamage(highestDamageCard)} damage");
+                DrawNotableCard(
+                    "Highest Damage",
+                    highestDamageCard,
+                    $"{GetMaxDamage(highestDamageCard)} damage"
+                );
             }
 
             // Most Composure Gain
@@ -291,7 +359,11 @@ namespace Crookedile.Editor
                 .FirstOrDefault();
             if (mostComposureCard != null && GetMaxComposureGain(mostComposureCard) > 0)
             {
-                DrawNotableCard("Highest Composure", mostComposureCard, $"+{GetMaxComposureGain(mostComposureCard)} composure");
+                DrawNotableCard(
+                    "Highest Composure",
+                    mostComposureCard,
+                    $"+{GetMaxComposureGain(mostComposureCard)} composure"
+                );
             }
 
             // Most Effects
@@ -300,7 +372,11 @@ namespace Crookedile.Editor
                 .FirstOrDefault();
             if (mostEffectsCard != null && (mostEffectsCard.Effects?.Count ?? 0) > 0)
             {
-                DrawNotableCard("Most Effects", mostEffectsCard, $"{mostEffectsCard.Effects.Count} effects");
+                DrawNotableCard(
+                    "Most Effects",
+                    mostEffectsCard,
+                    $"{mostEffectsCard.Effects.Count} effects"
+                );
             }
 
             // Cheapest Card
@@ -328,7 +404,11 @@ namespace Crookedile.Editor
                 EditorGUIUtility.PingObject(card);
             }
 
-            GUILayout.Label($"({value})", SirenixGUIStyles.RightAlignedGreyMiniLabel, GUILayout.Width(100));
+            GUILayout.Label(
+                $"({value})",
+                SirenixGUIStyles.RightAlignedGreyMiniLabel,
+                GUILayout.Width(100)
+            );
             GUILayout.EndHorizontal();
         }
 
@@ -369,10 +449,10 @@ namespace Crookedile.Editor
 
             if (GUILayout.Button("Clear", GUILayout.Width(50)))
             {
-                searchFilter     = "";
-                filterByType     = null;
-                filterByRarity   = null;
-                filterByOrigin   = null;
+                searchFilter = "";
+                filterByType = null;
+                filterByRarity = null;
+                filterByOrigin = null;
                 filterStarterOnly = false;
                 RefreshFilteredCards();
                 GUI.FocusControl(null);
@@ -394,7 +474,13 @@ namespace Crookedile.Editor
 
             foreach (CardType type in System.Enum.GetValues(typeof(CardType)))
             {
-                if (GUILayout.Toggle(filterByType == type, type.ToString(), SirenixGUIStyles.MiniButton))
+                if (
+                    GUILayout.Toggle(
+                        filterByType == type,
+                        type.ToString(),
+                        SirenixGUIStyles.MiniButton
+                    )
+                )
                 {
                     if (filterByType != type)
                     {
@@ -420,7 +506,13 @@ namespace Crookedile.Editor
 
             foreach (CardRarity rarity in System.Enum.GetValues(typeof(CardRarity)))
             {
-                if (GUILayout.Toggle(filterByRarity == rarity, rarity.ToString(), SirenixGUIStyles.MiniButton))
+                if (
+                    GUILayout.Toggle(
+                        filterByRarity == rarity,
+                        rarity.ToString(),
+                        SirenixGUIStyles.MiniButton
+                    )
+                )
                 {
                     if (filterByRarity != rarity)
                     {
@@ -446,7 +538,13 @@ namespace Crookedile.Editor
 
             foreach (OriginType origin in System.Enum.GetValues(typeof(OriginType)))
             {
-                if (GUILayout.Toggle(filterByOrigin == origin, origin.ToString(), SirenixGUIStyles.MiniButton))
+                if (
+                    GUILayout.Toggle(
+                        filterByOrigin == origin,
+                        origin.ToString(),
+                        SirenixGUIStyles.MiniButton
+                    )
+                )
                 {
                     if (filterByOrigin != origin)
                     {
@@ -460,7 +558,12 @@ namespace Crookedile.Editor
             // Starter card filter
             GUILayout.BeginHorizontal();
             GUILayout.Label("Starter:", GUILayout.Width(60));
-            bool newStarterOnly = GUILayout.Toggle(filterStarterOnly, "Starter Only", SirenixGUIStyles.MiniButton, GUILayout.Width(90));
+            bool newStarterOnly = GUILayout.Toggle(
+                filterStarterOnly,
+                "Starter Only",
+                SirenixGUIStyles.MiniButton,
+                GUILayout.Width(90)
+            );
             if (newStarterOnly != filterStarterOnly)
             {
                 filterStarterOnly = newStarterOnly;
@@ -481,7 +584,10 @@ namespace Crookedile.Editor
             foreach (SortMode mode in System.Enum.GetValues(typeof(SortMode)))
             {
                 bool isActive = currentSortMode == mode;
-                string label = mode.ToString().Replace("Highest", "").Replace("Most", "").Replace("Cheapest", "");
+                string label = mode.ToString()
+                    .Replace("Highest", "")
+                    .Replace("Most", "")
+                    .Replace("Cheapest", "");
 
                 if (GUILayout.Toggle(isActive, label, SirenixGUIStyles.MiniButton))
                 {
@@ -492,7 +598,11 @@ namespace Crookedile.Editor
                     else
                     {
                         currentSortMode = mode;
-                        sortDescending = (mode == SortMode.HighestDamage || mode == SortMode.HighestComposure || mode == SortMode.MostEffects);
+                        sortDescending = (
+                            mode == SortMode.HighestDamage
+                            || mode == SortMode.HighestComposure
+                            || mode == SortMode.MostEffects
+                        );
                     }
                     RefreshFilteredCards();
                 }
@@ -518,15 +628,22 @@ namespace Crookedile.Editor
                 return;
             }
 
-            GUILayout.Label($"Showing {filteredCards.Count} card(s)", SirenixGUIStyles.CenteredGreyMiniLabel);
+            GUILayout.Label(
+                $"Showing {filteredCards.Count} card(s)",
+                SirenixGUIStyles.CenteredGreyMiniLabel
+            );
             EditorGUILayout.Space(5);
 
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.MaxHeight(400));
+            scrollPosition = EditorGUILayout.BeginScrollView(
+                scrollPosition,
+                GUILayout.MaxHeight(400)
+            );
 
             for (int i = 0; i < filteredCards.Count; i++)
             {
                 var card = filteredCards[i];
-                if (card == null) continue;
+                if (card == null)
+                    continue;
 
                 DrawCardEntry(card, i);
             }
@@ -537,7 +654,9 @@ namespace Crookedile.Editor
         private void DrawCardEntry(CardData card, int index)
         {
             bool isOdd = index % 2 == 1;
-            Color bgColor = isOdd ? new Color(0.25f, 0.25f, 0.25f, 0.3f) : new Color(0.2f, 0.2f, 0.2f, 0.2f);
+            Color bgColor = isOdd
+                ? new Color(0.25f, 0.25f, 0.25f, 0.3f)
+                : new Color(0.2f, 0.2f, 0.2f, 0.2f);
 
             // Pre-calculate values to avoid conditional GUI calls
             int cost = GetMinCost(card);
@@ -553,13 +672,24 @@ namespace Crookedile.Editor
                 EditorGUI.DrawRect(lineRect, bgColor);
             }
 
-            Rect contentRect = new Rect(lineRect.x + 5, lineRect.y + 2, lineRect.width - 10, lineRect.height - 4);
+            Rect contentRect = new Rect(
+                lineRect.x + 5,
+                lineRect.y + 2,
+                lineRect.width - 10,
+                lineRect.height - 4
+            );
 
             float xOffset = contentRect.x;
 
             // Card name button
             Rect nameRect = new Rect(xOffset, contentRect.y, 150, 20);
-            if (GUI.Button(nameRect, card.GetDisplayName(), SirenixGUIStyles.LeftAlignedWhiteMiniLabel))
+            if (
+                GUI.Button(
+                    nameRect,
+                    card.GetDisplayName(),
+                    SirenixGUIStyles.LeftAlignedWhiteMiniLabel
+                )
+            )
             {
                 Selection.activeObject = card;
                 EditorGUIUtility.PingObject(card);
@@ -567,29 +697,53 @@ namespace Crookedile.Editor
             xOffset += 155;
 
             // Type badge
-            DrawBadgeAtPosition(new Rect(xOffset, contentRect.y, 80, 18), card.CardType.ToString(), GetTypeColor(card.CardType));
+            DrawBadgeAtPosition(
+                new Rect(xOffset, contentRect.y, 80, 18),
+                card.CardType.ToString(),
+                GetTypeColor(card.CardType)
+            );
             xOffset += 85;
 
             // Rarity badge
-            DrawBadgeAtPosition(new Rect(xOffset, contentRect.y, 70, 18), card.Rarity.ToString(), GetRarityColor(card.Rarity));
+            DrawBadgeAtPosition(
+                new Rect(xOffset, contentRect.y, 70, 18),
+                card.Rarity.ToString(),
+                GetRarityColor(card.Rarity)
+            );
             xOffset += 75;
 
             // Cost
-            GUI.Label(new Rect(xOffset, contentRect.y, 50, 18), $"{cost} AP", SirenixGUIStyles.CenteredGreyMiniLabel);
+            GUI.Label(
+                new Rect(xOffset, contentRect.y, 50, 18),
+                $"{cost} AP",
+                SirenixGUIStyles.CenteredGreyMiniLabel
+            );
             xOffset += 55;
 
             // Effects count
-            GUI.Label(new Rect(xOffset, contentRect.y, 50, 18), $"{effectCount} FX", SirenixGUIStyles.CenteredGreyMiniLabel);
+            GUI.Label(
+                new Rect(xOffset, contentRect.y, 50, 18),
+                $"{effectCount} FX",
+                SirenixGUIStyles.CenteredGreyMiniLabel
+            );
             xOffset += 55;
 
             // Damage
             string damageText = damage > 0 ? $"{damage} DMG" : "";
-            GUI.Label(new Rect(xOffset, contentRect.y, 60, 18), damageText, SirenixGUIStyles.RightAlignedGreyMiniLabel);
+            GUI.Label(
+                new Rect(xOffset, contentRect.y, 60, 18),
+                damageText,
+                SirenixGUIStyles.RightAlignedGreyMiniLabel
+            );
             xOffset += 65;
 
             // Composure
             string composureText = composure > 0 ? $"+{composure} CMP" : "";
-            GUI.Label(new Rect(xOffset, contentRect.y, 70, 18), composureText, SirenixGUIStyles.RightAlignedGreyMiniLabel);
+            GUI.Label(
+                new Rect(xOffset, contentRect.y, 70, 18),
+                composureText,
+                SirenixGUIStyles.RightAlignedGreyMiniLabel
+            );
         }
 
         private void DrawBadgeAtPosition(Rect rect, string label, Color color)
@@ -608,16 +762,20 @@ namespace Crookedile.Editor
 
         private void RefreshFilteredCards()
         {
-            if (database == null) return;
+            if (database == null)
+                return;
 
             filteredCards = database.GetAll();
 
             // Apply filters
             if (!string.IsNullOrWhiteSpace(searchFilter))
             {
-                filteredCards = filteredCards.Where(c =>
-                    c.CardName.IndexOf(searchFilter, System.StringComparison.OrdinalIgnoreCase) >= 0
-                ).ToList();
+                filteredCards = filteredCards
+                    .Where(c =>
+                        c.CardName.IndexOf(searchFilter, System.StringComparison.OrdinalIgnoreCase)
+                        >= 0
+                    )
+                    .ToList();
             }
 
             if (filterByType.HasValue)
@@ -658,7 +816,7 @@ namespace Crookedile.Editor
                 SortMode.CheapestCost => cards.OrderBy(c => GetMinCost(c)),
                 SortMode.Type => cards.OrderBy(c => c.CardType),
                 SortMode.Rarity => cards.OrderBy(c => c.Rarity),
-                _ => cards.OrderBy(c => c.CardName)
+                _ => cards.OrderBy(c => c.CardName),
             };
 
             if (sortDescending)
@@ -675,7 +833,8 @@ namespace Crookedile.Editor
 
         private int GetMaxDamage(CardData card)
         {
-            if (card?.Effects == null) return 0;
+            if (card?.Effects == null)
+                return 0;
 
             int maxDamage = 0;
             foreach (var effect in card.Effects)
@@ -697,12 +856,16 @@ namespace Crookedile.Editor
 
         private int GetMaxComposureGain(CardData card)
         {
-            if (card?.Effects == null) return 0;
+            if (card?.Effects == null)
+                return 0;
 
             int totalComposure = 0;
             foreach (var effect in card.Effects)
             {
-                if (effect.Category == EffectCategory.Resource && effect.ResourceType == ResourceEffectType.GainComposure)
+                if (
+                    effect.Category == EffectCategory.Resource
+                    && effect.ResourceType == ResourceEffectType.GainComposure
+                )
                 {
                     totalComposure += effect.ResourceAmount;
                 }
@@ -712,7 +875,8 @@ namespace Crookedile.Editor
 
         private int GetMinCost(CardData card)
         {
-            if (card?.Costs == null || card.Costs.Count == 0) return 0;
+            if (card?.Costs == null || card.Costs.Count == 0)
+                return 0;
 
             int minCost = int.MaxValue;
             foreach (var cost in card.Costs)
@@ -731,10 +895,10 @@ namespace Crookedile.Editor
             {
                 CardType.Pressure => new Color(0.3f, 0.8f, 0.3f),
                 CardType.Rhetoric => new Color(0.9f, 0.3f, 0.3f),
-                CardType.Policy   => new Color(0.3f, 0.5f, 0.9f),
-                CardType.Status   => new Color(0.6f, 0.3f, 0.85f),
-                CardType.Curse    => new Color(0.4f, 0.1f, 0.1f),
-                _                 => Color.grey
+                CardType.Policy => new Color(0.3f, 0.5f, 0.9f),
+                CardType.Status => new Color(0.6f, 0.3f, 0.85f),
+                CardType.Curse => new Color(0.4f, 0.1f, 0.1f),
+                _ => Color.grey,
             };
         }
 
@@ -745,7 +909,7 @@ namespace Crookedile.Editor
                 CardRarity.Basic => new Color(0.6f, 0.6f, 0.6f),
                 CardRarity.Enhanced => new Color(0.4f, 0.7f, 1f),
                 CardRarity.Rare => new Color(0.9f, 0.7f, 0.2f),
-                _ => Color.grey
+                _ => Color.grey,
             };
         }
 
@@ -755,14 +919,15 @@ namespace Crookedile.Editor
 
         private void DrawNeedsSetupView()
         {
-            var incompleteCards = database.GetAll()
+            var incompleteCards = database
+                .GetAll()
                 .Where(c => c.NeedsConfiguration)
                 .OrderBy(c => c.CardName)
                 .ToList();
 
             SirenixEditorGUI.BeginBox();
 
-            // ── Header ──────────────────────────────────────────────────────
+            #region Header
             SirenixEditorGUI.BeginBoxHeader();
             GUILayout.BeginHorizontal();
 
@@ -770,7 +935,10 @@ namespace Crookedile.Editor
             {
                 var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
                 labelStyle.normal.textColor = new Color(1f, 0.65f, 0f); // orange
-                GUILayout.Label($"⚠  {incompleteCards.Count} card(s) need Inspector setup", labelStyle);
+                GUILayout.Label(
+                    $"⚠  {incompleteCards.Count} card(s) need Inspector setup",
+                    labelStyle
+                );
             }
             else
             {
@@ -780,23 +948,30 @@ namespace Crookedile.Editor
             }
 
             GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();          // close header horizontal
+            GUILayout.EndHorizontal(); // close header horizontal
             SirenixEditorGUI.EndBoxHeader();
 
             EditorGUILayout.Space(5);
 
-            // ── Card List ────────────────────────────────────────────────────
+            #endregion
+
+            #region Card List
             if (incompleteCards.Count == 0)
             {
                 EditorGUILayout.Space(10);
-                GUILayout.Label("Nothing left to configure. Nice work!", SirenixGUIStyles.CenteredGreyMiniLabel);
+                GUILayout.Label(
+                    "Nothing left to configure. Nice work!",
+                    SirenixGUIStyles.CenteredGreyMiniLabel
+                );
                 EditorGUILayout.Space(10);
                 SirenixEditorGUI.EndBox();
                 return;
             }
 
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition,
-                GUILayout.MaxHeight(500));
+            scrollPosition = EditorGUILayout.BeginScrollView(
+                scrollPosition,
+                GUILayout.MaxHeight(500)
+            );
 
             foreach (var card in incompleteCards)
             {
@@ -806,7 +981,10 @@ namespace Crookedile.Editor
                 // Card name + type pill
                 GUILayout.BeginVertical();
                 GUILayout.Label(card.CardName, EditorStyles.boldLabel);
-                GUILayout.Label($"{card.CardType}  ·  {card.Rarity}", SirenixGUIStyles.LeftAlignedGreyLabel);
+                GUILayout.Label(
+                    $"{card.CardType}  ·  {card.Rarity}",
+                    SirenixGUIStyles.LeftAlignedGreyLabel
+                );
                 GUILayout.EndVertical();
 
                 GUILayout.FlexibleSpace();
@@ -835,14 +1013,17 @@ namespace Crookedile.Editor
 
         private void DrawLegacyEffectsView()
         {
-            var legacyCards = database.GetAll()
+            var legacyCards = database
+                .GetAll()
                 .Where(c => c.UsesLegacyEffects)
                 .OrderBy(c => c.CardName)
                 .ToList();
 
             SirenixEditorGUI.BeginBox();
 
-            // ── Header ──────────────────────────────────────────────────────
+            #endregion
+
+            #region Header
             SirenixEditorGUI.BeginBoxHeader();
             GUILayout.BeginHorizontal();
 
@@ -850,7 +1031,10 @@ namespace Crookedile.Editor
             {
                 var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
                 labelStyle.normal.textColor = new Color(1f, 0.65f, 0f); // orange
-                GUILayout.Label($"⚠  {legacyCards.Count} card(s) still using legacy CardEffect system", labelStyle);
+                GUILayout.Label(
+                    $"⚠  {legacyCards.Count} card(s) still using legacy CardEffect system",
+                    labelStyle
+                );
             }
             else
             {
@@ -865,25 +1049,37 @@ namespace Crookedile.Editor
 
             EditorGUILayout.Space(5);
 
-            // ── Empty state ──────────────────────────────────────────────────
+            #endregion
+
+            #region Empty state
             if (legacyCards.Count == 0)
             {
                 EditorGUILayout.Space(10);
-                GUILayout.Label("Migration complete. Nothing left to convert!", SirenixGUIStyles.CenteredGreyMiniLabel);
+                GUILayout.Label(
+                    "Migration complete. Nothing left to convert!",
+                    SirenixGUIStyles.CenteredGreyMiniLabel
+                );
                 EditorGUILayout.Space(10);
                 SirenixEditorGUI.EndBox();
                 return;
             }
 
-            // ── Migration hint ───────────────────────────────────────────────
+            #endregion
+
+            #region Migration hint
             EditorGUILayout.HelpBox(
                 "Run  Crookedile → Tools → Migrate Effects to New System  to auto-convert these cards.",
-                MessageType.Info);
+                MessageType.Info
+            );
             EditorGUILayout.Space(4);
 
-            // ── Card List ────────────────────────────────────────────────────
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition,
-                GUILayout.MaxHeight(500));
+            #endregion
+
+            #region Card List
+            scrollPosition = EditorGUILayout.BeginScrollView(
+                scrollPosition,
+                GUILayout.MaxHeight(500)
+            );
 
             foreach (var card in legacyCards)
             {
@@ -895,7 +1091,8 @@ namespace Crookedile.Editor
                 GUILayout.Label(card.CardName, EditorStyles.boldLabel);
                 GUILayout.Label(
                     $"{card.CardType}  ·  {card.Rarity}  ·  {card.Effects.Count} legacy effect(s)",
-                    SirenixGUIStyles.LeftAlignedGreyLabel);
+                    SirenixGUIStyles.LeftAlignedGreyLabel
+                );
                 GUILayout.EndVertical();
 
                 GUILayout.FlexibleSpace();
@@ -919,14 +1116,17 @@ namespace Crookedile.Editor
 
         private void DrawInDevelopmentView()
         {
-            var devCards = database.GetAll()
+            var devCards = database
+                .GetAll()
                 .Where(c => c.IsInDevelopment)
                 .OrderBy(c => c.CardName)
                 .ToList();
 
             SirenixEditorGUI.BeginBox();
 
-            // ── Header ──────────────────────────────────────────────────────
+            #endregion
+
+            #region Header
             SirenixEditorGUI.BeginBoxHeader();
             GUILayout.BeginHorizontal();
 
@@ -934,7 +1134,10 @@ namespace Crookedile.Editor
             {
                 var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
                 labelStyle.normal.textColor = new Color(1f, 0.65f, 0f); // orange
-                GUILayout.Label($"⚠  {devCards.Count} card(s) have no artwork assigned", labelStyle);
+                GUILayout.Label(
+                    $"⚠  {devCards.Count} card(s) have no artwork assigned",
+                    labelStyle
+                );
             }
             else
             {
@@ -949,25 +1152,37 @@ namespace Crookedile.Editor
 
             EditorGUILayout.Space(5);
 
-            // ── Empty state ──────────────────────────────────────────────────
+            #endregion
+
+            #region Empty state
             if (devCards.Count == 0)
             {
                 EditorGUILayout.Space(10);
-                GUILayout.Label("All cards have artwork and are ready for gameplay.", SirenixGUIStyles.CenteredGreyMiniLabel);
+                GUILayout.Label(
+                    "All cards have artwork and are ready for gameplay.",
+                    SirenixGUIStyles.CenteredGreyMiniLabel
+                );
                 EditorGUILayout.Space(10);
                 SirenixEditorGUI.EndBox();
                 return;
             }
 
-            // ── Info note ────────────────────────────────────────────────────
+            #endregion
+
+            #region Info note
             EditorGUILayout.HelpBox(
                 "These cards are excluded from reward pools and card-choice panels until artwork is assigned.",
-                MessageType.Info);
+                MessageType.Info
+            );
             EditorGUILayout.Space(4);
 
-            // ── Card List ────────────────────────────────────────────────────
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition,
-                GUILayout.MaxHeight(500));
+            #endregion
+
+            #region Card List
+            scrollPosition = EditorGUILayout.BeginScrollView(
+                scrollPosition,
+                GUILayout.MaxHeight(500)
+            );
 
             foreach (var card in devCards)
             {
@@ -977,7 +1192,10 @@ namespace Crookedile.Editor
                 // Card name + type + rarity
                 GUILayout.BeginVertical();
                 GUILayout.Label(card.CardName, EditorStyles.boldLabel);
-                GUILayout.Label($"{card.CardType}  ·  {card.Rarity}", SirenixGUIStyles.LeftAlignedGreyLabel);
+                GUILayout.Label(
+                    $"{card.CardType}  ·  {card.Rarity}",
+                    SirenixGUIStyles.LeftAlignedGreyLabel
+                );
                 GUILayout.EndVertical();
 
                 GUILayout.FlexibleSpace();
@@ -999,13 +1217,14 @@ namespace Crookedile.Editor
             SirenixEditorGUI.EndBox();
         }
 
-        #endregion
+            #endregion
 
         #region Passive Issues View
 
         private void DrawPassiveIssuesView()
         {
-            var cardsWithIssues = database.GetAll()
+            var cardsWithIssues = database
+                .GetAll()
                 .Select(c => (card: c, issues: GetCardPassiveIssues(c)))
                 .Where(x => x.issues.Count > 0)
                 .OrderBy(x => x.card.CardName)
@@ -1013,7 +1232,9 @@ namespace Crookedile.Editor
 
             SirenixEditorGUI.BeginBox();
 
-            // ── Header ──────────────────────────────────────────────────────
+        #endregion
+
+            #region Header
             SirenixEditorGUI.BeginBoxHeader();
             GUILayout.BeginHorizontal();
 
@@ -1021,7 +1242,10 @@ namespace Crookedile.Editor
             {
                 var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
                 labelStyle.normal.textColor = new Color(1f, 0.65f, 0f);
-                GUILayout.Label($"⚠  {cardsWithIssues.Count} card(s) have passive or behavior issues", labelStyle);
+                GUILayout.Label(
+                    $"⚠  {cardsWithIssues.Count} card(s) have passive or behavior issues",
+                    labelStyle
+                );
             }
             else
             {
@@ -1039,20 +1263,29 @@ namespace Crookedile.Editor
             if (cardsWithIssues.Count == 0)
             {
                 EditorGUILayout.Space(10);
-                GUILayout.Label("No passive or behavior issues found.", SirenixGUIStyles.CenteredGreyMiniLabel);
+                GUILayout.Label(
+                    "No passive or behavior issues found.",
+                    SirenixGUIStyles.CenteredGreyMiniLabel
+                );
                 EditorGUILayout.Space(10);
                 SirenixEditorGUI.EndBox();
                 return;
             }
 
             EditorGUILayout.HelpBox(
-                "Cards listed here either have no behavior at all, or have passives that are misconfigured " +
-                "(missing trigger, no effects). Unplayable cards (Curse / Status) with empty effects are expected.",
-                MessageType.Info);
+                "Cards listed here either have no behavior at all, or have passives that are misconfigured "
+                    + "(missing trigger, no effects). Unplayable cards (Curse / Status) with empty effects are expected.",
+                MessageType.Info
+            );
             EditorGUILayout.Space(4);
 
-            // ── Card list ────────────────────────────────────────────────────
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.MaxHeight(500));
+            #endregion
+
+            #region Card list
+            scrollPosition = EditorGUILayout.BeginScrollView(
+                scrollPosition,
+                GUILayout.MaxHeight(500)
+            );
 
             foreach (var (card, issues) in cardsWithIssues)
             {
@@ -1061,7 +1294,10 @@ namespace Crookedile.Editor
 
                 GUILayout.BeginVertical();
                 GUILayout.Label(card.CardName, EditorStyles.boldLabel);
-                GUILayout.Label($"{card.CardType}  ·  {card.Rarity}", SirenixGUIStyles.LeftAlignedGreyLabel);
+                GUILayout.Label(
+                    $"{card.CardType}  ·  {card.Rarity}",
+                    SirenixGUIStyles.LeftAlignedGreyLabel
+                );
                 GUILayout.EndVertical();
 
                 GUILayout.FlexibleSpace();
@@ -1093,16 +1329,17 @@ namespace Crookedile.Editor
         {
             var issues = new List<string>();
 
-            bool hasNewEffects    = card.NewEffects != null && card.NewEffects.Count > 0;
-            bool hasLegacyEffects = card.Effects    != null && card.Effects.Count    > 0;
-            bool hasPassives      = card.Passives   != null && card.Passives.Count   > 0;
+            bool hasNewEffects = card.NewEffects != null && card.NewEffects.Count > 0;
+            bool hasLegacyEffects = card.Effects != null && card.Effects.Count > 0;
+            bool hasPassives = card.Passives != null && card.Passives.Count > 0;
 
             // Card with no behavior at all (and can theoretically be played)
             if (!hasNewEffects && !hasLegacyEffects && !hasPassives && !card.IsUnplayable)
                 issues.Add("No effects or passives — card has no behavior when played");
 
             // Per-passive checks
-            if (card.Passives == null) return issues;
+            if (card.Passives == null)
+                return issues;
 
             for (int i = 0; i < card.Passives.Count; i++)
             {
@@ -1117,27 +1354,35 @@ namespace Crookedile.Editor
                     issues.Add($"Passive '{passive.Name}': no trigger set — will never fire");
 
                 if (passive.Effects == null || passive.Effects.Count == 0)
-                    issues.Add($"Passive '{passive.Name}': has trigger but no effects — fires silently");
+                    issues.Add(
+                        $"Passive '{passive.Name}': has trigger but no effects — fires silently"
+                    );
             }
 
             return issues;
         }
 
-        #endregion
+            #endregion
 
         #region Enemy Audit View
 
         private void DrawEnemyAuditView()
         {
             // Load all enemy and move assets from the project
-            var enemies = AssetDatabase.FindAssets("t:EnemyData")
-                .Select(g => AssetDatabase.LoadAssetAtPath<EnemyData>(AssetDatabase.GUIDToAssetPath(g)))
+            var enemies = AssetDatabase
+                .FindAssets("t:EnemyData")
+                .Select(g =>
+                    AssetDatabase.LoadAssetAtPath<EnemyData>(AssetDatabase.GUIDToAssetPath(g))
+                )
                 .Where(e => e != null)
                 .OrderBy(e => e.EnemyName)
                 .ToList();
 
-            var moves = AssetDatabase.FindAssets("t:EnemyMoveData")
-                .Select(g => AssetDatabase.LoadAssetAtPath<EnemyMoveData>(AssetDatabase.GUIDToAssetPath(g)))
+            var moves = AssetDatabase
+                .FindAssets("t:EnemyMoveData")
+                .Select(g =>
+                    AssetDatabase.LoadAssetAtPath<EnemyMoveData>(AssetDatabase.GUIDToAssetPath(g))
+                )
                 .Where(m => m != null)
                 .OrderBy(m => m.MoveName)
                 .ToList();
@@ -1156,7 +1401,9 @@ namespace Crookedile.Editor
 
             SirenixEditorGUI.BeginBox();
 
-            // ── Header ──────────────────────────────────────────────────────
+        #endregion
+
+            #region Header
             SirenixEditorGUI.BeginBoxHeader();
             GUILayout.BeginHorizontal();
 
@@ -1166,18 +1413,24 @@ namespace Crookedile.Editor
                 labelStyle.normal.textColor = new Color(1f, 0.65f, 0f);
                 GUILayout.Label(
                     $"⚠  {enemiesWithIssues.Count} enemy issue(s)  ·  {movesWithIssues.Count} move issue(s)",
-                    labelStyle);
+                    labelStyle
+                );
             }
             else
             {
                 var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
                 labelStyle.normal.textColor = new Color(0.4f, 0.85f, 0.4f);
-                GUILayout.Label($"✓  All {enemies.Count} enemies and {moves.Count} moves are ready", labelStyle);
+                GUILayout.Label(
+                    $"✓  All {enemies.Count} enemies and {moves.Count} moves are ready",
+                    labelStyle
+                );
             }
 
             GUILayout.FlexibleSpace();
-            GUILayout.Label($"{enemies.Count} enemies  ·  {moves.Count} moves",
-                SirenixGUIStyles.RightAlignedGreyMiniLabel);
+            GUILayout.Label(
+                $"{enemies.Count} enemies  ·  {moves.Count} moves",
+                SirenixGUIStyles.RightAlignedGreyMiniLabel
+            );
             GUILayout.EndHorizontal();
             SirenixEditorGUI.EndBoxHeader();
 
@@ -1186,16 +1439,23 @@ namespace Crookedile.Editor
             if (totalIssues == 0)
             {
                 EditorGUILayout.Space(10);
-                GUILayout.Label("All enemies and moves are ready for gameplay.",
-                    SirenixGUIStyles.CenteredGreyMiniLabel);
+                GUILayout.Label(
+                    "All enemies and moves are ready for gameplay.",
+                    SirenixGUIStyles.CenteredGreyMiniLabel
+                );
                 EditorGUILayout.Space(10);
                 SirenixEditorGUI.EndBox();
                 return;
             }
 
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.MaxHeight(500));
+            scrollPosition = EditorGUILayout.BeginScrollView(
+                scrollPosition,
+                GUILayout.MaxHeight(500)
+            );
 
-            // ── Enemy issues ─────────────────────────────────────────────────
+            #endregion
+
+            #region Enemy issues
             if (enemiesWithIssues.Count > 0)
             {
                 GUILayout.Label("Enemies", EditorStyles.boldLabel);
@@ -1209,8 +1469,9 @@ namespace Crookedile.Editor
                     GUILayout.BeginVertical();
                     GUILayout.Label(enemy.EnemyName, EditorStyles.boldLabel);
                     GUILayout.Label(
-                        $"Resolve: {enemy.MaxResolve}  ·  Moves: {enemy.Moves?.Count ?? 0}",
-                        SirenixGUIStyles.LeftAlignedGreyLabel);
+                        $"Moves: {enemy.Moves?.Count ?? 0}",
+                        SirenixGUIStyles.LeftAlignedGreyLabel
+                    );
                     GUILayout.EndVertical();
 
                     GUILayout.FlexibleSpace();
@@ -1233,7 +1494,9 @@ namespace Crookedile.Editor
                 EditorGUILayout.Space(8);
             }
 
-            // ── Move issues ──────────────────────────────────────────────────
+            #endregion
+
+            #region Move issues
             if (movesWithIssues.Count > 0)
             {
                 GUILayout.Label("Enemy Moves", EditorStyles.boldLabel);
@@ -1289,11 +1552,10 @@ namespace Crookedile.Editor
             {
                 for (int i = 0; i < enemy.Moves.Count; i++)
                     if (enemy.Moves[i] == null)
-                        issues.Add($"Move slot [{i}] is null — will cause a NullReferenceException at runtime");
+                        issues.Add(
+                            $"Move slot [{i}] is null — will cause a NullReferenceException at runtime"
+                        );
             }
-
-            if (enemy.MaxResolve <= 0)
-                issues.Add($"MaxResolve is {enemy.MaxResolve} — enemy will be instantly defeated");
 
             return issues;
         }
@@ -1309,19 +1571,21 @@ namespace Crookedile.Editor
             if (string.IsNullOrWhiteSpace(move.IntentDescription))
                 issues.Add("No intent description — player cannot see what this move will do");
 
-            bool hasNewEffects    = move.NewEffects != null && move.NewEffects.Count > 0;
-            bool hasLegacyEffects = move.Effects    != null && move.Effects.Count    > 0;
+            bool hasNewEffects = move.NewEffects != null && move.NewEffects.Count > 0;
+            bool hasLegacyEffects = move.Effects != null && move.Effects.Count > 0;
 
             if (!hasNewEffects && !hasLegacyEffects && move.MoveType != EnemyMoveType.SummonMinion)
                 issues.Add("No effects defined — move resolves but does nothing");
 
             if (move.MoveType == EnemyMoveType.SummonMinion && move.MinionToSummon == null)
-                issues.Add("SummonMinion move has no MinionToSummon set — summon will silently fail");
+                issues.Add(
+                    "SummonMinion move has no MinionToSummon set — summon will silently fail"
+                );
 
             return issues;
         }
 
-        #endregion
+            #endregion
 
         #region Validation
 
@@ -1363,9 +1627,9 @@ namespace Crookedile.Editor
                 if (hasIssues)
                 {
                     issueCount++;
-                    string displayName = string.IsNullOrWhiteSpace(card.CardName) ?
-                        $"[Unnamed Card - {card.ID.Substring(0, 8)}]" :
-                        card.CardName;
+                    string displayName = string.IsNullOrWhiteSpace(card.CardName)
+                        ? $"[Unnamed Card - {card.ID.Substring(0, 8)}]"
+                        : card.CardName;
                     report.AppendLine($"Card: {displayName}");
                     report.Append(cardIssues.ToString());
                     report.AppendLine();
@@ -1376,20 +1640,29 @@ namespace Crookedile.Editor
             {
                 report.AppendLine("All cards passed validation!");
                 Debug.Log(report.ToString());
-                EditorUtility.DisplayDialog("Card Validation",
+                EditorUtility.DisplayDialog(
+                    "Card Validation",
                     $"All {allCards.Count} cards passed validation!",
-                    "OK");
+                    "OK"
+                );
             }
             else
             {
-                report.Insert(0, $"Found {issueCount} card(s) with issues out of {allCards.Count} total cards.\n\n");
+                report.Insert(
+                    0,
+                    $"Found {issueCount} card(s) with issues out of {allCards.Count} total cards.\n\n"
+                );
                 Debug.LogWarning(report.ToString());
-                EditorUtility.DisplayDialog("Card Validation",
+                EditorUtility.DisplayDialog(
+                    "Card Validation",
                     $"Found {issueCount} card(s) with issues.\nCheck the Console for details.",
-                    "OK");
+                    "OK"
+                );
             }
         }
 
         #endregion
     }
 }
+        #endregion
+        #endregion

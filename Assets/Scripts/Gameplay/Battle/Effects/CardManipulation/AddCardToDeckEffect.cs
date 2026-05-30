@@ -1,8 +1,8 @@
 ﻿using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -13,15 +13,18 @@ namespace Crookedile.Gameplay.Battle
     {
         [Required]
         [Tooltip("The card to add to the draw pile.")]
-        [SerializeField] private CardData _card;
+        [SerializeField]
+        private CardData _card;
 
         [MinValue(1)]
         [Tooltip("How many copies to add.")]
-        [SerializeField] private int _amount = 1;
+        [SerializeField]
+        private int _amount = 1;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            if (ctx.Deck == null) return;
+            if (ctx.Deck == null)
+                return;
             if (_card == null)
             {
                 GameLogger.LogWarning<AddCardToDeckEffect>("No card specified — no-op");
@@ -34,8 +37,9 @@ namespace Crookedile.Gameplay.Battle
         public override string GetDescription()
         {
             string name = _card != null ? _card.CardName : "???";
-            return _amount == 1 ? $"Add {name} to your deck"
-                                : $"Add {_amount}x {name} to your deck";
+            return _amount == 1
+                ? $"Add {name} to your deck"
+                : $"Add {_amount}x {name} to your deck";
         }
     }
 }

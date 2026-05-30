@@ -13,21 +13,22 @@ namespace Crookedile.Gameplay.Battle
     public class PlayerHasStatusCondition : PassiveConditionBase
     {
         [Tooltip("The status type to check for on the player.")]
-        [SerializeField] private StatusEffectType _statusType = StatusEffectType.Confused;
+        [SerializeField]
+        private StatusEffectType _statusType = StatusEffectType.Confused;
 
         [Tooltip("Minimum stack count required.")]
         [MinValue(1)]
-        [SerializeField] private int _minStacks = 1;
+        [SerializeField]
+        private int _minStacks = 1;
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
-            if (ctx.PlayerStatusEffects == null) return false;
+            if (ctx.PlayerStatusEffects == null)
+                return false;
             return ctx.PlayerStatusEffects.GetStacks(_statusType) >= _minStacks;
         }
 
         public override string ConditionLabel =>
-            _minStacks <= 1
-                ? $"you have {_statusType}"
-                : $"you have {_minStacks}+ {_statusType}";
+            _minStacks <= 1 ? $"you have {_statusType}" : $"you have {_minStacks}+ {_statusType}";
     }
 }

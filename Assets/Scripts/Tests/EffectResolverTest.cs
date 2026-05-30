@@ -1,9 +1,9 @@
-using UnityEngine;
-using Crookedile.Gameplay.Battle;
+using System.Collections.Generic;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
-using System.Collections.Generic;
 using Crookedile.Gameplay;
+using Crookedile.Gameplay.Battle;
+using UnityEngine;
 
 namespace Crookedile.Tests
 {
@@ -14,7 +14,8 @@ namespace Crookedile.Tests
     public class EffectResolverTest : MonoBehaviour
     {
         [Header("Test Settings")]
-        [SerializeField] private bool runTestsOnStart = false;
+        [SerializeField]
+        private bool runTestsOnStart = false;
 
         private BattleStats playerStats;
         private BattleStats opponentStats;
@@ -52,9 +53,9 @@ namespace Crookedile.Tests
         {
             Debug.Log("--- Setting up test battle ---");
 
-            // Initialize stats
-            playerStats = new BattleStats(maxResolve: 20, maxActionPoints: 3);
-            opponentStats = new BattleStats(maxResolve: 20, maxActionPoints: 3);
+            // Initialize stats — resolve removed; use opinion-meter model
+            playerStats   = new BattleStats(maxActionPoints: 3, isPlayer: true);
+            opponentStats = new BattleStats(maxActionPoints: 3, isPlayer: false);
 
             // Initialize deck managers with empty decks
             List<CardData> emptyDeck = new List<CardData>();
@@ -67,90 +68,47 @@ namespace Crookedile.Tests
             Debug.Log($"Opponent: {opponentStats.GetStatusString()}");
         }
 
+        // TODO: Rewrite damage tests for the opinion-meter model.
+        // Cards no longer deal resolve damage — they raise the opinion meter through the
+        // target's composure shield (via DamageDealtEvent → BattleManager.RaiseOpinion).
+        // Tests need a BattleManager mock or an EventBus listener to assert opinion changes.
+
         [ContextMenu("Test: Basic Damage")]
         public void TestBasicDamage()
         {
-            Debug.Log("\n--- TEST: Basic Damage ---");
-            SetupTestBattle();
-
-            // Create a simple damage effect
-            CardEffect damageEffect = CreateDamageEffect(5);
-            CardData testCard = CreateTestCard("Test Attack", damageEffect);
-
-            int initialResolve = opponentStats.CurrentResolve;
-            effectResolver.ResolveCardEffects(testCard, isPlayerCard: true);
-
-            int damageTaken = initialResolve - opponentStats.CurrentResolve;
-            Debug.Log($"Expected: 5 damage | Actual: {damageTaken} damage");
-            Debug.Assert(damageTaken == 5, "Basic damage test failed!");
-            Debug.Log("✓ PASSED");
+            Debug.Log("\n--- TEST: Basic Damage (TODO: update for opinion model) ---");
         }
 
         [ContextMenu("Test: Composure Damage Bonus")]
         public void TestComposureDamageBonus()
         {
-            Debug.Log("\n--- TEST: Composure Damage Bonus ---");
+            Debug.Log("\n--- TEST: Composure as Opinion Shield ---");
             SetupTestBattle();
-
-            // Give player 3 Composure
-            playerStats.GainComposure(3);
-
-            // Deal 5 base damage (should be 5 + 3 = 8 total)
-            CardEffect damageEffect = CreateDamageEffect(5);
-            CardData testCard = CreateTestCard("Test Attack", damageEffect);
-
-            int initialResolve = opponentStats.CurrentResolve;
-            effectResolver.ResolveCardEffects(testCard, isPlayerCard: true);
-
-            int damageTaken = initialResolve - opponentStats.CurrentResolve;
-            Debug.Log($"Expected: 8 damage (5 base + 3 Composure) | Actual: {damageTaken} damage");
-            Debug.Assert(damageTaken == 8, "Composure bonus test failed!");
+            opponentStats.GainComposure(3);
+            // 5 pressure vs 3 composure → 3 absorbed, 2 reaches opinion meter
+            int remainder = opponentStats.AbsorbThroughComposure(5);
+            Debug.Log($"Expected: 2 remaining after 3 composure absorbed | Actual: {remainder}");
+            Debug.Assert(remainder == 2, "Composure absorption test failed!");
+            Debug.Assert(opponentStats.CurrentComposure == 0, "Composure should be depleted!");
             Debug.Log("✓ PASSED");
         }
 
         [ContextMenu("Test: Hostility Damage Multiplier")]
         public void TestHostilityDamageMultiplier()
         {
-            Debug.Log("\n--- TEST: Hostility Damage Multiplier ---");
+            Debug.Log("\n--- TEST: Hostility Multiplier ---");
             SetupTestBattle();
-
-            // Give player 2 Hostility (1 + 2 * 0.5 = 2.0x multiplier)
-            playerStats.GainHostility(2);
-
-            Debug.Log($"Player Hostility: {playerStats.CurrentHostility} (Multiplier: {playerStats.HostilityDamageMultiplier:F2}x)");
-
-            // Opponent deals 5 damage to player (should be 5 * 2.0 = 10)
-            int damage = playerStats.DamageResolveWithHostility(5);
-
-            Debug.Log($"Expected: 10 damage (5 base * 2.0x) | Actual: {damage} damage");
-            Debug.Assert(damage == 10, "Hostility multiplier test failed!");
+            opponentStats.GainHostility(2);
+            float mult = opponentStats.HostilityDamageMultiplier;
+            Debug.Log($"Hostility 2 → multiplier: {mult:F2}x (expected 2.0x)");
+            Debug.Assert(Mathf.Approximately(mult, 2.0f), "Hostility multiplier wrong!");
             Debug.Log("✓ PASSED");
         }
 
         [ContextMenu("Test: Status Effect Damage Modifiers")]
         public void TestStatusEffectDamageModifiers()
         {
-            Debug.Log("\n--- TEST: Status Effect Damage Modifiers ---");
-            SetupTestBattle();
-
-            // Apply Strength +2 to player
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Strength, 2);
-
-            // Apply Vulnerable to opponent
-            effectResolver.OpponentStatusEffects.ApplyStatusEffect(StatusEffectType.Vulnerable, 1);
-
-            // Deal 10 base damage
-            // Should be: 10 + 2 (Strength) = 12, then 12 * 1.5 (Vulnerable) = 18
-            CardEffect damageEffect = CreateDamageEffect(10);
-            CardData testCard = CreateTestCard("Test Attack", damageEffect);
-
-            int initialResolve = opponentStats.CurrentResolve;
-            effectResolver.ResolveCardEffects(testCard, isPlayerCard: true);
-
-            int damageTaken = initialResolve - opponentStats.CurrentResolve;
-            Debug.Log($"Expected: 18 damage (10 base + 2 Strength, then * 1.5 Vulnerable) | Actual: {damageTaken} damage");
-            Debug.Assert(damageTaken == 18, "Status effect damage modifier test failed!");
-            Debug.Log("✓ PASSED");
+            Debug.Log("\n--- TEST: Status Effect Damage Modifiers (TODO: opinion model) ---");
         }
 
         [ContextMenu("Test: Composure Gain With Modifiers")]
@@ -168,7 +126,9 @@ namespace Crookedile.Tests
 
             effectResolver.ResolveCardEffects(testCard, isPlayerCard: true);
 
-            Debug.Log($"Expected: 7 Composure (5 base + 2 Dexterity) | Actual: {playerStats.CurrentComposure} Composure");
+            Debug.Log(
+                $"Expected: 7 Composure (5 base + 2 Dexterity) | Actual: {playerStats.CurrentComposure} Composure"
+            );
             Debug.Assert(playerStats.CurrentComposure == 7, "Composure gain modifier test failed!");
             Debug.Log("✓ PASSED");
         }
@@ -214,8 +174,9 @@ namespace Crookedile.Tests
             // Apply Regeneration (heal at end of turn)
             effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Regeneration, 2);
 
-            // Damage player first to see regeneration
-            playerStats.DamageResolve(5);
+            // Absorb 5 composure (simulates incoming pressure)
+            playerStats.GainComposure(5);
+            playerStats.AbsorbThroughComposure(5);
 
             Debug.Log($"Before turn end: {playerStats.GetStatusString()}");
 
@@ -223,14 +184,16 @@ namespace Crookedile.Tests
             effectResolver.PlayerStatusEffects.OnTurnEnd(playerStats);
 
             Debug.Log($"After turn end: {playerStats.GetStatusString()}");
-            Debug.Log("Expected: -3 Resolve from Scandal, +2 from Regeneration = -1 net");
+            Debug.Log("Scandal lowers opinion; Regeneration raises opinion (see EventBus logs)");
 
             // Test Ritual (gain Composure at start of turn)
             effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Ritual, 2);
             effectResolver.PlayerStatusEffects.OnTurnStart(playerStats);
 
             Debug.Log($"After turn start: {playerStats.GetStatusString()}");
-            Debug.Log($"Expected: +2 Composure from Ritual | Actual: {playerStats.CurrentComposure} Composure");
+            Debug.Log(
+                $"Expected: +2 Composure from Ritual | Actual: {playerStats.CurrentComposure} Composure"
+            );
 
             Debug.Log("✓ PASSED");
         }
@@ -242,10 +205,22 @@ namespace Crookedile.Tests
             // Using reflection to create CardEffect since it has complex setup
             // In real usage, CardEffects would be created through Unity Editor
             var effect = new CardEffect();
-            var categoryField = typeof(CardEffect).GetField("_category", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var targetField = typeof(CardEffect).GetField("_target", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var damageTypeField = typeof(CardEffect).GetField("_damageType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var damageAmountField = typeof(CardEffect).GetField("_damageAmount", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var categoryField = typeof(CardEffect).GetField(
+                "_category",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
+            var targetField = typeof(CardEffect).GetField(
+                "_target",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
+            var damageTypeField = typeof(CardEffect).GetField(
+                "_damageType",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
+            var damageAmountField = typeof(CardEffect).GetField(
+                "_damageAmount",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
 
             categoryField?.SetValue(effect, EffectCategory.Damage);
             targetField?.SetValue(effect, TargetType.Opponent);
@@ -258,9 +233,18 @@ namespace Crookedile.Tests
         private CardEffect CreateComposureEffect(int amount)
         {
             var effect = new CardEffect();
-            var categoryField = typeof(CardEffect).GetField("_category", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var resourceTypeField = typeof(CardEffect).GetField("_resourceType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var resourceAmountField = typeof(CardEffect).GetField("_resourceAmount", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var categoryField = typeof(CardEffect).GetField(
+                "_category",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
+            var resourceTypeField = typeof(CardEffect).GetField(
+                "_resourceType",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
+            var resourceAmountField = typeof(CardEffect).GetField(
+                "_resourceAmount",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
 
             categoryField?.SetValue(effect, EffectCategory.Resource);
             resourceTypeField?.SetValue(effect, ResourceEffectType.GainComposure);
@@ -275,9 +259,18 @@ namespace Crookedile.Tests
             CardData card = ScriptableObject.CreateInstance<CardData>();
 
             // Set fields using reflection
-            var nameField = typeof(CardData).GetField("_cardName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var effectsField = typeof(CardData).GetField("_effects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var costsField = typeof(CardData).GetField("_costs", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var nameField = typeof(CardData).GetField(
+                "_cardName",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
+            var effectsField = typeof(CardData).GetField(
+                "_effects",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
+            var costsField = typeof(CardData).GetField(
+                "_costs",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
 
             nameField?.SetValue(card, name);
             effectsField?.SetValue(card, new List<CardEffect>(effects));

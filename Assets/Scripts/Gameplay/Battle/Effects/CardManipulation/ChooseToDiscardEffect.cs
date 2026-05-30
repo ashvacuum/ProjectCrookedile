@@ -1,10 +1,10 @@
 ﻿using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -18,14 +18,17 @@ namespace Crookedile.Gameplay.Battle
     {
         [MinValue(1)]
         [Tooltip("Number of cards to discard.")]
-        [SerializeField] private int _amount = 1;
+        [SerializeField]
+        private int _amount = 1;
 
         [Tooltip("How the card(s) to discard are selected.")]
-        [SerializeField] private CardSelectionMode _selectionMode = CardSelectionMode.PlayerChoice;
+        [SerializeField]
+        private CardSelectionMode _selectionMode = CardSelectionMode.PlayerChoice;
 
         [ShowIf("@_selectionMode == CardSelectionMode.RandomByType")]
         [Tooltip("Card type to filter for when using Random By Type.")]
-        [SerializeField] private CardType _filterType = CardType.Pressure;
+        [SerializeField]
+        private CardType _filterType = CardType.Pressure;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
@@ -35,20 +38,34 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
 
-            int    count = Mathf.Min(_amount, ctx.Deck.HandCount);
-            string title = count == 1 ? "Choose a card to Discard" : $"Choose {count} cards to Discard";
-            ResolveCardSelection(ctx.Deck.Hand, _selectionMode, _filterType, title, count,
-                chosen => { foreach (var card in chosen) ctx.Deck.DiscardCard(card); });
+            int count = Mathf.Min(_amount, ctx.Deck.HandCount);
+            string title =
+                count == 1 ? "Choose a card to Discard" : $"Choose {count} cards to Discard";
+            ResolveCardSelection(
+                ctx.Deck.Hand,
+                _selectionMode,
+                _filterType,
+                title,
+                count,
+                chosen =>
+                {
+                    foreach (var card in chosen)
+                        ctx.Deck.DiscardCard(card);
+                }
+            );
         }
 
         public override string GetDescription()
         {
             if (_selectionMode == CardSelectionMode.PlayerChoice)
-                return _amount == 1 ? "Choose a card to discard" : $"Choose {_amount} cards to discard";
+                return _amount == 1
+                    ? "Choose a card to discard"
+                    : $"Choose {_amount} cards to discard";
 
-            string suffix = _selectionMode == CardSelectionMode.RandomAny
-                ? "a random card"
-                : $"a random {_filterType} card";
+            string suffix =
+                _selectionMode == CardSelectionMode.RandomAny
+                    ? "a random card"
+                    : $"a random {_filterType} card";
             return $"Discard {suffix}";
         }
     }

@@ -7,7 +7,12 @@ namespace Crookedile.Utilities
     {
         public static T WeightedRandom<T>(List<T> items, List<float> weights)
         {
-            if (items == null || weights == null || items.Count == 0 || items.Count != weights.Count)
+            if (
+                items == null
+                || weights == null
+                || items.Count == 0
+                || items.Count != weights.Count
+            )
             {
                 Debug.LogError("Invalid weighted random parameters");
                 return default;

@@ -9,7 +9,8 @@ namespace Crookedile.Gameplay.Battle
     {
         public override bool Matches(PassiveEventContext ctx)
         {
-            if (!ctx.Is<TurnEndedEvent>()) return false;
+            if (!ctx.Is<TurnEndedEvent>())
+                return false;
             return ctx.As<TurnEndedEvent>().WasPlayerTurn;
         }
 

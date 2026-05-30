@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,40 +17,52 @@ namespace Crookedile.UI.Battle
     public class BattleResultPanel : MonoBehaviour
     {
         [Header("Result Panels")]
-        [SerializeField] private GameObject victoryPanel;
-        [SerializeField] private GameObject defeatPanel;
+        [SerializeField]
+        private GameObject victoryPanel;
+
+        [SerializeField]
+        private GameObject defeatPanel;
 
         [Header("Buttons")]
-        [Tooltip("Continue button shown inside the victory panel. Fires OnContinueClicked when pressed.")]
-        [SerializeField] private Button _continueButton;
+        [Tooltip(
+            "Continue button shown inside the victory panel. Fires OnContinueClicked when pressed."
+        )]
+        [SerializeField]
+        private Button _continueButton;
 
-        // ── Events ────────────────────────────────────────────────────────────
-
+        #region Events
         /// <summary>Fired when the player presses Continue after a victory.</summary>
         public event Action OnContinueClicked;
 
-        // ── Lifecycle ─────────────────────────────────────────────────────────
+        #endregion
 
+        #region Lifecycle
         private void Awake()
         {
             _continueButton?.onClick.AddListener(() => OnContinueClicked?.Invoke());
             Hide();
         }
 
-        // ── Public API ────────────────────────────────────────────────────────
+        #endregion
 
+        #region Public API
         /// <summary>Shows the victory or defeat panel based on <paramref name="isVictory"/>.</summary>
         public void Show(bool isVictory)
         {
-            if (victoryPanel != null) victoryPanel.SetActive(isVictory);
-            if (defeatPanel  != null) defeatPanel.SetActive(!isVictory);
+            if (victoryPanel != null)
+                victoryPanel.SetActive(isVictory);
+            if (defeatPanel != null)
+                defeatPanel.SetActive(!isVictory);
         }
 
         /// <summary>Hides both panels.</summary>
         public void Hide()
         {
-            if (victoryPanel != null) victoryPanel.SetActive(false);
-            if (defeatPanel  != null) defeatPanel.SetActive(false);
+            if (victoryPanel != null)
+                victoryPanel.SetActive(false);
+            if (defeatPanel != null)
+                defeatPanel.SetActive(false);
         }
     }
 }
+        #endregion

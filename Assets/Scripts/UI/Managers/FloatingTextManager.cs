@@ -1,8 +1,8 @@
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using Crookedile.Core;
 using Crookedile.UI;
 using Crookedile.Utilities;
+using UnityEngine;
 
 namespace Crookedile.Managers
 {
@@ -19,30 +19,37 @@ namespace Crookedile.Managers
     [Debuggable("FloatingText", LogLevel.Warning)]
     public class FloatingTextManager : Singleton<FloatingTextManager>
     {
-        // ─── Inspector Fields ─────────────────────────────────────────────────
-
+        #region Inspector Fields
         [Header("Canvas")]
-        [Tooltip("Screen Space – Overlay canvas that floating text is spawned into. " +
-                 "Should be the same canvas used by VFXManager.")]
-        [SerializeField] private Canvas _vfxCanvas;
+        [Tooltip(
+            "Screen Space – Overlay canvas that floating text is spawned into. "
+                + "Should be the same canvas used by VFXManager."
+        )]
+        [SerializeField]
+        private Canvas _vfxCanvas;
 
         [Header("Prefab")]
         [Tooltip("Prefab with a FloatingText component (TMP_Text child + RectTransform).")]
-        [SerializeField] private GameObject _floatingTextPrefab;
+        [SerializeField]
+        private GameObject _floatingTextPrefab;
 
         [Header("Pooling")]
         [Tooltip("Instances pre-instantiated at startup to avoid Instantiate spikes during play.")]
-        [SerializeField] private int _initialPoolSize = 10;
+        [SerializeField]
+        private int _initialPoolSize = 10;
 
-        // ─── Runtime State ────────────────────────────────────────────────────
+        #endregion
 
+        #region Runtime State
         private readonly Queue<GameObject> _pool = new Queue<GameObject>();
 
-        // ─── Lifecycle ────────────────────────────────────────────────────────
+        #endregion
 
+        #region Lifecycle
         protected override void OnAwake()
         {
-            if (_floatingTextPrefab == null) return;
+            if (_floatingTextPrefab == null)
+                return;
             for (int i = 0; i < _initialPoolSize; i++)
             {
                 var instance = Instantiate(_floatingTextPrefab);
@@ -51,8 +58,9 @@ namespace Crookedile.Managers
             }
         }
 
-        // ─── Public API ───────────────────────────────────────────────────────
+        #endregion
 
+        #region Public API
         /// <summary>
         /// Spawns a floating text label at <paramref name="target"/>'s canvas position.
         /// The text animates upward and fades out, then returns to pool automatically.
@@ -60,10 +68,12 @@ namespace Crookedile.Managers
         /// </summary>
         public void Show(string text, RectTransform target, Color color)
         {
-            if (_vfxCanvas == null || _floatingTextPrefab == null) return;
+            if (_vfxCanvas == null || _floatingTextPrefab == null)
+                return;
 
             GameObject instance = GetFromPool();
-            if (instance == null) return;
+            if (instance == null)
+                return;
 
             instance.transform.SetParent(_vfxCanvas.transform, worldPositionStays: false);
 
@@ -71,16 +81,24 @@ namespace Crookedile.Managers
             var rt = instance.GetComponent<RectTransform>();
             if (rt != null)
             {
-                Camera cam = _vfxCanvas.renderMode == RenderMode.ScreenSpaceOverlay
-                    ? null
-                    : _vfxCanvas.worldCamera;
+                Camera cam =
+                    _vfxCanvas.renderMode == RenderMode.ScreenSpaceOverlay
+                        ? null
+                        : _vfxCanvas.worldCamera;
 
                 Vector2 canvasLocalPos = Vector2.zero;
                 if (target != null)
                 {
-                    Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(cam, target.position);
+                    Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(
+                        cam,
+                        target.position
+                    );
                     RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                        (RectTransform)_vfxCanvas.transform, screenPos, cam, out canvasLocalPos);
+                        (RectTransform)_vfxCanvas.transform,
+                        screenPos,
+                        cam,
+                        out canvasLocalPos
+                    );
                 }
                 rt.anchoredPosition = canvasLocalPos;
             }
@@ -98,14 +116,16 @@ namespace Crookedile.Managers
             }
         }
 
-        // ─── Pool Helpers ─────────────────────────────────────────────────────
+        #endregion
 
+        #region Pool Helpers
         private GameObject GetFromPool()
         {
             while (_pool.Count > 0)
             {
                 var candidate = _pool.Dequeue();
-                if (candidate != null) return candidate;
+                if (candidate != null)
+                    return candidate;
             }
             // Pool exhausted — instantiate a fresh instance.
             return _floatingTextPrefab != null ? Instantiate(_floatingTextPrefab) : null;
@@ -113,9 +133,11 @@ namespace Crookedile.Managers
 
         private void ReturnToPool(GameObject instance)
         {
-            if (instance == null) return;
+            if (instance == null)
+                return;
             instance.SetActive(false);
             _pool.Enqueue(instance);
         }
     }
 }
+        #endregion

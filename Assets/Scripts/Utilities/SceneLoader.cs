@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
+using Crookedile.Core;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Crookedile.Core;
 
 namespace Crookedile.Utilities
 {

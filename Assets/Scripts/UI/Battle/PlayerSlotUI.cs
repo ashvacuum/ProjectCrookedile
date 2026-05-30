@@ -1,8 +1,8 @@
+﻿using Crookedile.Gameplay.Battle;
+using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using DG.Tweening;
-using Crookedile.Gameplay.Battle;
 
 namespace Crookedile.UI.Battle
 {
@@ -25,28 +25,37 @@ namespace Crookedile.UI.Battle
     {
         [Header("Display")]
         [Tooltip("Character portrait image for the active player origin.")]
-        [SerializeField] private Image _portrait;
+        [SerializeField]
+        private Image _portrait;
 
-        [SerializeField] private TMP_Text _resolveText;
+        [SerializeField]
+        private TMP_Text _resolveText;
 
-        [Tooltip("Filled Image (fill method = Horizontal) driven by Resolve. Lerps smoothly when damaged.")]
-        [SerializeField] private Image _resolveBarFill;
+        [Tooltip(
+            "Filled Image (fill method = Horizontal) driven by Resolve. Lerps smoothly when damaged."
+        )]
+        [SerializeField]
+        private Image _resolveBarFill;
 
-        [SerializeField] private TMP_Text _composureText;
+        [SerializeField]
+        private TMP_Text _composureText;
 
         [Tooltip("GameObject wrapping the composure display — hidden when composure is 0.")]
-        [SerializeField] private GameObject _composureObject;
+        [SerializeField]
+        private GameObject _composureObject;
 
-        [SerializeField] private TMP_Text _apText;
+        [SerializeField]
+        private TMP_Text _apText;
 
-        [SerializeField] private StatusEffectPanelUI _statusEffectPanel;
+        [SerializeField]
+        private StatusEffectPanelUI _statusEffectPanel;
 
         [Header("HP Bar")]
         [Tooltip("Duration in seconds for the Resolve bar to animate to its new fill.")]
-        [SerializeField] private float _barAnimDuration = 0.3f;
+        [SerializeField]
+        private float _barAnimDuration = 0.3f;
 
-        // ─── Runtime State ────────────────────────────────────────────────────────
-
+        #region Runtime State
         private BattleManager _battleManager;
         private float _targetFill = 1f;
 
@@ -57,8 +66,9 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public RectTransform SlotRect => (RectTransform)transform;
 
-        // ─── Initialization ───────────────────────────────────────────────────────
+        #endregion
 
+        #region Initialization
         /// <summary>
         /// Called by <see cref="BattleUI"/> on <c>BattleStartedEvent</c>.
         /// Stores the manager reference, sets the portrait sprite, and snaps the bar to full
@@ -74,41 +84,53 @@ namespace Crookedile.UI.Battle
             Refresh();
 
             // Snap bar to full on spawn.
-            if (_resolveBarFill != null) _resolveBarFill.fillAmount = _targetFill;
+            if (_resolveBarFill != null)
+                _resolveBarFill.fillAmount = _targetFill;
         }
 
-        // ─── Public API ───────────────────────────────────────────────────────────
+        #endregion
 
+        #region Public API
         /// <summary>
         /// Reads the latest stats from BattleManager and updates all display elements.
         /// Called by <see cref="BattleUI.UpdateStatsDisplay"/> each time player stats change.
         /// </summary>
         public void Refresh()
         {
-            if (_battleManager == null) return;
+            if (_battleManager == null)
+                return;
             var stats = _battleManager.PlayerStats;
-            if (stats == null) return;
+            if (stats == null)
+                return;
 
-            _targetFill = stats.MaxResolve > 0
-                ? (float)stats.CurrentResolve / stats.MaxResolve
-                : 0f;
+            // Bar shows composure as a rough visual; text shows the raw composure value.
+            // The opinion meter is handled by OpinionMeterUI.
+            const int composureBarMax = 20;
+            _targetFill = Mathf.Clamp01((float)stats.CurrentComposure / composureBarMax);
 
             if (_resolveBarFill != null)
             {
                 DOTween.Kill(_resolveBarFill);
-                DOTween.To(() => _resolveBarFill.fillAmount, x => _resolveBarFill.fillAmount = x,
-                           _targetFill, _barAnimDuration)
-                       .SetEase(Ease.OutQuad)
-                       .SetLink(gameObject);
+                DOTween
+                    .To(
+                        () => _resolveBarFill.fillAmount,
+                        x => _resolveBarFill.fillAmount = x,
+                        _targetFill,
+                        _barAnimDuration
+                    )
+                    .SetEase(Ease.OutQuad)
+                    .SetLink(gameObject);
             }
 
             if (_resolveText != null)
-                _resolveText.SetText($"{stats.CurrentResolve}/{stats.MaxResolve}");
+                _resolveText.SetText($"Composure: {stats.CurrentComposure}");
 
             // Composure — hide panel entirely when zero
             int composure = stats.CurrentComposure;
-            if (_composureText   != null) _composureText.SetText(composure > 0 ? composure.ToString() : string.Empty);
-            if (_composureObject != null) _composureObject.SetActive(composure > 0);
+            if (_composureText != null)
+                _composureText.SetText(composure > 0 ? composure.ToString() : string.Empty);
+            if (_composureObject != null)
+                _composureObject.SetActive(composure > 0);
 
             // Action Points
             if (_apText != null)
@@ -117,6 +139,6 @@ namespace Crookedile.UI.Battle
             // Buff / debuff icons
             _statusEffectPanel?.Refresh(_battleManager.PlayerStatusEffects);
         }
-
     }
 }
+        #endregion

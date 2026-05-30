@@ -8,6 +8,7 @@ namespace Crookedile.Gameplay.Battle
     public class EnemySummonedTrigger : PassiveTriggerBase
     {
         public override bool Matches(PassiveEventContext ctx) => ctx.Is<EnemySummonedEvent>();
+
         public override string TriggerLabel => "When an enemy is summoned";
     }
 }

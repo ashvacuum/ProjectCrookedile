@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Crookedile.Data;
+using Crookedile.Data.Cards;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Crookedile.Data.Cards;
 
 namespace Crookedile.UI.Battle
 {
@@ -30,35 +30,49 @@ namespace Crookedile.UI.Battle
     {
         [Header("UI References")]
         [Tooltip("Text displayed at the top of the panel (e.g. 'Choose a card from Discard').")]
-        [SerializeField] private TMP_Text  titleText;
+        [SerializeField]
+        private TMP_Text titleText;
 
-        [Tooltip("Parent Transform where CardButton instances are spawned. Assign a GridLayoutGroup child.")]
-        [SerializeField] private Transform cardContainer;
+        [Tooltip(
+            "Parent Transform where CardButton instances are spawned. Assign a GridLayoutGroup child."
+        )]
+        [SerializeField]
+        private Transform cardContainer;
 
         [Header("Fallback Prefabs (used only when BattlePoolManager singleton is absent)")]
-        [SerializeField] private CardButton _pressurePrefab;
-        [SerializeField] private CardButton _rhetoricPrefab;
-        [SerializeField] private CardButton _policyPrefab;
+        [SerializeField]
+        private CardButton _pressurePrefab;
+
+        [SerializeField]
+        private CardButton _rhetoricPrefab;
+
+        [SerializeField]
+        private CardButton _policyPrefab;
 
         [Tooltip("Activates once the player has selected exactly RequiredCount cards.")]
-        [SerializeField] private Button    confirmButton;
+        [SerializeField]
+        private Button confirmButton;
 
         [Tooltip("Text on the confirm button — updated to show 'Confirm (1/1)' etc.")]
-        [SerializeField] private TMP_Text  confirmButtonText;
+        [SerializeField]
+        private TMP_Text confirmButtonText;
 
-        [Tooltip("Optional cancel button — passes an empty list to the callback (no-op for all effects).")]
-        [SerializeField] private Button    cancelButton;
+        [Tooltip(
+            "Optional cancel button — passes an empty list to the callback (no-op for all effects)."
+        )]
+        [SerializeField]
+        private Button cancelButton;
 
-        // ─── Per-session state ────────────────────────────────────────────────────
-
-        private readonly List<CardData>   _selected       = new List<CardData>();
+        #region Per-session state
+        private readonly List<CardData> _selected = new List<CardData>();
         private readonly List<CardButton> _spawnedButtons = new List<CardButton>();
 
-        private int                        _requiredCount;
-        private Action<List<CardData>>     _onConfirmed;
+        private int _requiredCount;
+        private Action<List<CardData>> _onConfirmed;
 
-        // ─── Lifecycle ────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Lifecycle
         private void Awake()
         {
             confirmButton?.onClick.AddListener(OnConfirmClicked);
@@ -72,13 +86,18 @@ namespace Crookedile.UI.Battle
         /// they can confirm. <paramref name="onConfirmed"/> is invoked with the selection
         /// (or an empty list on cancel).
         /// </summary>
-        public void Open(string title, IReadOnlyList<CardData> choices,
-                         int requiredCount, Action<List<CardData>> onConfirmed)
+        public void Open(
+            string title,
+            IReadOnlyList<CardData> choices,
+            int requiredCount,
+            Action<List<CardData>> onConfirmed
+        )
         {
             _requiredCount = requiredCount;
-            _onConfirmed   = onConfirmed;
+            _onConfirmed = onConfirmed;
 
-            if (titleText != null) titleText.text = title;
+            if (titleText != null)
+                titleText.text = title;
 
             ClearCards();
             SpawnCards(choices);
@@ -93,33 +112,48 @@ namespace Crookedile.UI.Battle
             gameObject.SetActive(false);
         }
 
-        // ─── Internal ─────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Internal
         private void SpawnCards(IReadOnlyList<CardData> choices)
         {
-            if (cardContainer == null || choices == null) return;
-            if (BattlePoolManager.Instance == null && _pressurePrefab == null && _rhetoricPrefab == null && _policyPrefab == null) return;
+            if (cardContainer == null || choices == null)
+                return;
+            if (
+                BattlePoolManager.Instance == null
+                && _pressurePrefab == null
+                && _rhetoricPrefab == null
+                && _policyPrefab == null
+            )
+                return;
 
             for (int i = 0; i < choices.Count; i++)
             {
                 CardData card = choices[i];
-                if (card == null) continue;
+                if (card == null)
+                    continue;
 
-                CardButton btn = BattlePoolManager.Instance != null
-                    ? BattlePoolManager.Instance.RentCard(card.CardType, cardContainer)
-                    : InstantiateFallback(card.CardType);
+                CardButton btn =
+                    BattlePoolManager.Instance != null
+                        ? BattlePoolManager.Instance.RentCard(card.CardType, cardContainer)
+                        : InstantiateFallback(card.CardType);
 
-                if (btn == null) continue;
+                if (btn == null)
+                    continue;
 
-                int   baseCost = card.Costs != null && card.Costs.Count > 0
-                    ? card.Costs[0].BaseAmount : 0;
-                int   capturedIndex = i;
+                int baseCost =
+                    card.Costs != null && card.Costs.Count > 0 ? card.Costs[0].BaseAmount : 0;
+                int capturedIndex = i;
                 CardButton capturedBtn = btn;
 
                 // AP = MaxValue so the card never shows as unaffordable in this picker context.
-                btn.Initialize(card, capturedIndex, int.MaxValue,
-                               effectiveCost: baseCost,
-                               onClick: () => OnCardClicked(card, capturedBtn));
+                btn.Initialize(
+                    card,
+                    capturedIndex,
+                    int.MaxValue,
+                    effectiveCost: baseCost,
+                    onClick: () => OnCardClicked(card, capturedBtn)
+                );
 
                 // Force layout so SetBasePosition receives the real slot position.
                 Canvas.ForceUpdateCanvases();
@@ -134,10 +168,11 @@ namespace Crookedile.UI.Battle
             CardButton prefab = cardType switch
             {
                 CardType.Rhetoric => _rhetoricPrefab,
-                CardType.Policy   => _policyPrefab,
-                _                 => _pressurePrefab,
+                CardType.Policy => _policyPrefab,
+                _ => _pressurePrefab,
             };
-            if (prefab == null) return null;
+            if (prefab == null)
+                return null;
             return Instantiate(prefab, cardContainer);
         }
 
@@ -162,10 +197,11 @@ namespace Crookedile.UI.Battle
 
         private void OnConfirmClicked()
         {
-            if (_selected.Count != _requiredCount) return;   // guard — button should be disabled anyway
+            if (_selected.Count != _requiredCount)
+                return; // guard — button should be disabled anyway
 
             var confirmed = new List<CardData>(_selected);
-            var callback  = _onConfirmed;
+            var callback = _onConfirmed;
             Close();
             callback?.Invoke(confirmed);
         }
@@ -174,7 +210,7 @@ namespace Crookedile.UI.Battle
         {
             var callback = _onConfirmed;
             Close();
-            callback?.Invoke(new List<CardData>());   // empty list = no-op
+            callback?.Invoke(new List<CardData>()); // empty list = no-op
         }
 
         private void RefreshConfirmButton()
@@ -191,9 +227,12 @@ namespace Crookedile.UI.Battle
         {
             foreach (var btn in _spawnedButtons)
             {
-                if (btn == null) continue;
-                if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnCard(btn);
-                else Destroy(btn.gameObject);
+                if (btn == null)
+                    continue;
+                if (BattlePoolManager.Instance != null)
+                    BattlePoolManager.Instance.ReturnCard(btn);
+                else
+                    Destroy(btn.gameObject);
             }
 
             _spawnedButtons.Clear();
@@ -201,3 +240,4 @@ namespace Crookedile.UI.Battle
         }
     }
 }
+        #endregion

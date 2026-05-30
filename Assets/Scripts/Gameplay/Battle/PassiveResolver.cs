@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Crookedile.Core;
 using Crookedile.Data;
@@ -22,42 +22,45 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public class PassiveResolver : IDisposable
     {
-        private readonly OriginPassive _passive;     // null if origin has no passive asset
-        private readonly BattleStats   _playerStats;
-        private DeckManager            _deck;
+        private readonly OriginPassive _passive;
+        private readonly BattleStats _playerStats;
+        private DeckManager _deck;
+        private Func<float> _getOpinionPercentage;
 
         private int _playerTurnNumber = 0;
 
-        // ── BattlePassive collection ───────────────────────────────────────────
+        #region BattlePassive collection
+        private readonly List<BattlePassive> _allPassives;
+        private readonly EffectResolver _effectResolver;
+        private IReadOnlyList<EnemyController> _enemies;
+        private StatusEffectManager _playerStatusEffects;
 
-        private readonly List<BattlePassive>           _allPassives;
-        private readonly EffectResolver                _effectResolver;
-        private          IReadOnlyList<EnemyController> _enemies;
-        private          StatusEffectManager            _playerStatusEffects;
+        #endregion
 
-        // ── Lambda references for unconditional new-system subscriptions ──────
+        #region Lambda references for unconditional new-system subscriptions
         // Stored as fields so that Dispose() can unsubscribe them correctly.
 
-        private readonly Action<TurnStartedEvent>          _onTurnStarted;
-        private readonly Action<TurnEndedEvent>            _onTurnEnded;
-        private readonly Action<BattleEndedEvent>          _onBattleEnded;
-        private readonly Action<CardPlayedEvent>           _onCardPlayed;
-        private readonly Action<CardDrawnEvent>            _onCardDrawn;
-        private readonly Action<CardDiscardedEvent>        _onCardDiscarded;
-        private readonly Action<CardExhaustedEvent>        _onCardExhausted;
-        private readonly Action<CardRetainedEvent>         _onCardRetained;
-        private readonly Action<CardRecoveredEvent>        _onCardRecovered;
-        private readonly Action<CardUpgradedEvent>         _onCardUpgraded;
-        private readonly Action<DamageDealtEvent>          _onDamageDealt;
-        private readonly Action<HealingAppliedEvent>       _onHealingApplied;
-        private readonly Action<StatusEffectAppliedEvent>  _onStatusEffectApplied;
-        private readonly Action<ComposureChangedEvent>     _onComposureChanged;
-        private readonly Action<EnemyDefeatedEvent>        _onEnemyDefeated;
-        private readonly Action<EnemySummonedEvent>        _onEnemySummoned;
-        private readonly Action<EnemyActingEvent>          _onEnemyActing;
+        private readonly Action<TurnStartedEvent> _onTurnStarted;
+        private readonly Action<TurnEndedEvent> _onTurnEnded;
+        private readonly Action<BattleEndedEvent> _onBattleEnded;
+        private readonly Action<CardPlayedEvent> _onCardPlayed;
+        private readonly Action<CardDrawnEvent> _onCardDrawn;
+        private readonly Action<CardDiscardedEvent> _onCardDiscarded;
+        private readonly Action<CardExhaustedEvent> _onCardExhausted;
+        private readonly Action<CardRetainedEvent> _onCardRetained;
+        private readonly Action<CardRecoveredEvent> _onCardRecovered;
+        private readonly Action<CardUpgradedEvent> _onCardUpgraded;
+        private readonly Action<DamageDealtEvent> _onDamageDealt;
+        private readonly Action<HealingAppliedEvent> _onHealingApplied;
+        private readonly Action<StatusEffectAppliedEvent> _onStatusEffectApplied;
+        private readonly Action<ComposureChangedEvent> _onComposureChanged;
+        private readonly Action<EnemyDefeatedEvent> _onEnemyDefeated;
+        private readonly Action<EnemySummonedEvent> _onEnemySummoned;
+        private readonly Action<EnemyActingEvent> _onEnemyActing;
 
-        // ─── Constructor ──────────────────────────────────────────────────────
+        #endregion
 
+        #region Constructor
         /// <summary>
         /// Creates a PassiveResolver for the given origin passive and player state.
         /// </summary>
@@ -67,43 +70,47 @@ namespace Crookedile.Gameplay.Battle
         /// <param name="enemies">All active enemies (for condition evaluation).</param>
         /// <param name="playerStatusEffects">Player's status manager (for condition evaluation).</param>
         public PassiveResolver(
-            OriginPassive                  passive,
-            BattleStats                    playerStats,
-            EffectResolver                 effectResolver,
-            IReadOnlyList<EnemyController> enemies            = null,
-            StatusEffectManager            playerStatusEffects = null)
+            OriginPassive passive,
+            BattleStats playerStats,
+            EffectResolver effectResolver,
+            IReadOnlyList<EnemyController> enemies = null,
+            StatusEffectManager playerStatusEffects = null,
+            Func<float> getOpinionPercentage = null
+        )
         {
-            _passive             = passive;
-            _playerStats         = playerStats;
-            _effectResolver      = effectResolver;
-            _enemies             = enemies     ?? Array.Empty<EnemyController>();
+            _passive = passive;
+            _playerStats = playerStats;
+            _effectResolver = effectResolver;
+            _enemies = enemies ?? Array.Empty<EnemyController>();
             _playerStatusEffects = playerStatusEffects;
-            _allPassives         = new List<BattlePassive>();
+            _getOpinionPercentage = getOpinionPercentage ?? (() => 0f);
+            _allPassives = new List<BattlePassive>();
 
             // Initialise stored lambdas (required so Dispose can unsubscribe exact same delegate)
-            _onTurnStarted         = e => DispatchEvent(e);
-            _onTurnEnded           = e => DispatchEvent(e);
-            _onBattleEnded         = e => DispatchEvent(e);
-            _onCardPlayed          = e => DispatchEvent(e);
-            _onCardDrawn           = e => DispatchEvent(e);
-            _onCardDiscarded       = e => DispatchEvent(e);
-            _onCardExhausted       = e => DispatchEvent(e);
-            _onCardRetained        = e => DispatchEvent(e);
-            _onCardRecovered       = e => DispatchEvent(e);
-            _onCardUpgraded        = e => DispatchEvent(e);
-            _onDamageDealt         = e => DispatchEvent(e);
-            _onHealingApplied      = e => DispatchEvent(e);
+            _onTurnStarted = e => DispatchEvent(e);
+            _onTurnEnded = e => DispatchEvent(e);
+            _onBattleEnded = e => DispatchEvent(e);
+            _onCardPlayed = e => DispatchEvent(e);
+            _onCardDrawn = e => DispatchEvent(e);
+            _onCardDiscarded = e => DispatchEvent(e);
+            _onCardExhausted = e => DispatchEvent(e);
+            _onCardRetained = e => DispatchEvent(e);
+            _onCardRecovered = e => DispatchEvent(e);
+            _onCardUpgraded = e => DispatchEvent(e);
+            _onDamageDealt = e => DispatchEvent(e);
+            _onHealingApplied = e => DispatchEvent(e);
             _onStatusEffectApplied = e => DispatchEvent(e);
-            _onComposureChanged    = e => DispatchEvent(e);
-            _onEnemyDefeated       = e => DispatchEvent(e);
-            _onEnemySummoned       = e => DispatchEvent(e);
-            _onEnemyActing         = e => DispatchEvent(e);
+            _onComposureChanged = e => DispatchEvent(e);
+            _onEnemyDefeated = e => DispatchEvent(e);
+            _onEnemySummoned = e => DispatchEvent(e);
+            _onEnemyActing = e => DispatchEvent(e);
 
             SubscribeToAllEventsForNewSystem();
         }
 
-        // ─── EventBus wiring ──────────────────────────────────────────────────
+        #endregion
 
+        #region EventBus wiring
         private void SubscribeToAllEventsForNewSystem()
         {
             // Subscribe unconditionally to every known event type.
@@ -162,8 +169,7 @@ namespace Crookedile.Gameplay.Battle
             UnsubscribeFromAllEventsForNewSystem();
         }
 
-        // ─── New-system: registration ─────────────────────────────────────────
-
+        #region New-system: registration
         /// <summary>
         /// Collects all <see cref="BattlePassive"/> entries from the origin passive and
         /// every card in the player's deck, resets their runtime state, and fires BattleStart
@@ -178,22 +184,30 @@ namespace Crookedile.Gameplay.Battle
             if (_passive?.Passives != null)
             {
                 foreach (var bp in _passive.Passives)
-                    if (bp != null) _allPassives.Add(bp);
+                    if (bp != null)
+                        _allPassives.Add(bp);
             }
 
             // Card passives — all cards in the full deck (draw pile + hand + discard).
             // Exhaust pile is excluded: exhausted cards leave active play for the battle duration.
             if (deck != null)
             {
-                var zones = new IReadOnlyList<CardData>[] { deck.DrawPile, deck.Hand, deck.DiscardPile };
+                var zones = new IReadOnlyList<CardData>[]
+                {
+                    deck.DrawPile,
+                    deck.Hand,
+                    deck.DiscardPile,
+                };
                 foreach (var zone in zones)
                 {
                     foreach (var card in zone)
                     {
                         var cardPassives = card?.GetPassives();
-                        if (cardPassives == null) continue;
+                        if (cardPassives == null)
+                            continue;
                         foreach (var bp in cardPassives)
-                            if (bp != null) _allPassives.Add(bp);
+                            if (bp != null)
+                                _allPassives.Add(bp);
                     }
                 }
             }
@@ -203,27 +217,33 @@ namespace Crookedile.Gameplay.Battle
                 bp.ResetForBattle();
 
             GameLogger.LogInfo<PassiveResolver>(
-                $"Registered {_allPassives.Count} BattlePassive(s) for this battle.");
+                $"Registered {_allPassives.Count} BattlePassive(s) for this battle."
+            );
         }
 
-        // ─── New-system: dispatch ─────────────────────────────────────────────
+        #endregion
 
+        #region New-system: dispatch
         /// <summary>
         /// Boxes <paramref name="evt"/> and dispatches to all registered BattlePassives.
         /// Each passive handles its own trigger matching, condition evaluation, and effect execution.
         /// </summary>
-        private void DispatchEvent<T>(T evt) where T : struct, IGameEvent
+        private void DispatchEvent<T>(T evt)
+            where T : struct, IGameEvent
         {
-            if (_allPassives.Count == 0 || _effectResolver == null) return;
+            if (_allPassives.Count == 0 || _effectResolver == null)
+                return;
 
-            var evtCtx  = new PassiveEventContext(evt);
+            var evtCtx = new PassiveEventContext(evt);
             var evalCtx = new PassiveEvaluationContext(
                 _playerStats,
                 _deck,
                 _enemies,
                 _playerStatusEffects,
                 _playerTurnNumber,
-                evtCtx);
+                evtCtx,
+                _getOpinionPercentage()
+            );
 
             foreach (var passive in _allPassives)
             {
@@ -244,7 +264,10 @@ namespace Crookedile.Gameplay.Battle
         /// <c>LastComposureLost</c> — mirroring the values card effects accumulate during
         /// in-resolution execution.
         /// </summary>
-        private static void EnrichContextFromEvent(PassiveEventContext evtCtx, EffectExecutionContext execCtx)
+        private static void EnrichContextFromEvent(
+            PassiveEventContext evtCtx,
+            EffectExecutionContext execCtx
+        )
         {
             if (evtCtx.Is<DamageDealtEvent>())
             {
@@ -260,10 +283,12 @@ namespace Crookedile.Gameplay.Battle
             }
             else if (evtCtx.Is<ComposureChangedEvent>())
             {
-                var e     = evtCtx.As<ComposureChangedEvent>();
+                var e = evtCtx.As<ComposureChangedEvent>();
                 int delta = e.NewValue - e.OldValue;
-                if (delta > 0) execCtx.LastComposureGained =  delta;
-                else if (delta < 0) execCtx.LastComposureLost = -delta;
+                if (delta > 0)
+                    execCtx.LastComposureGained = delta;
+                else if (delta < 0)
+                    execCtx.LastComposureLost = -delta;
             }
             else if (evtCtx.Is<EnemyDefeatedEvent>())
             {
@@ -271,8 +296,9 @@ namespace Crookedile.Gameplay.Battle
             }
         }
 
-        // ─── Direct-call hooks (invoked by BattleManager) ─────────────────────
+        #endregion
 
+        #region Direct-call hooks (invoked by BattleManager)
         /// <summary>
         /// Called once after the opening hand is dealt.
         /// Registers card passives, then dispatches a synthetic BattleStartedEvent so
@@ -299,3 +325,5 @@ namespace Crookedile.Gameplay.Battle
         }
     }
 }
+        #endregion
+        #endregion

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Crookedile.UI.Battle
 {
@@ -19,21 +19,25 @@ namespace Crookedile.UI.Battle
         public static CardTargetingArrow Instance { get; private set; }
 
         [Tooltip("Stretched Image that forms the line body. Pivot must be (0, 0.5).")]
-        [SerializeField] private RectTransform _line;
+        [SerializeField]
+        private RectTransform _line;
 
         [Tooltip("Optional arrow sprite placed at the end point. Can be null.")]
-        [SerializeField] private RectTransform _arrowHead;
+        [SerializeField]
+        private RectTransform _arrowHead;
 
-        [Tooltip("Root Canvas RectTransform — used to convert world positions to canvas-local space.")]
-        [SerializeField] private RectTransform _canvasRect;
+        [Tooltip(
+            "Root Canvas RectTransform — used to convert world positions to canvas-local space."
+        )]
+        [SerializeField]
+        private RectTransform _canvasRect;
 
         private RectTransform _startRect;
         private RectTransform _snapTarget;
-        private Camera        _eventCamera;
-        private Vector2       _currentScreenPos;
+        private Camera _eventCamera;
+        private Vector2 _currentScreenPos;
 
-        // ─── Lifecycle ────────────────────────────────────────────────────────────
-
+        #region Lifecycle
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -47,11 +51,13 @@ namespace Crookedile.UI.Battle
 
         private void OnDestroy()
         {
-            if (Instance == this) Instance = null;
+            if (Instance == this)
+                Instance = null;
         }
 
-        // ─── Public API ───────────────────────────────────────────────────────────
+        #endregion
 
+        #region Public API
         /// <summary>
         /// Activates the targeting arrow. The line starts at the given card's position.
         /// </summary>
@@ -59,9 +65,9 @@ namespace Crookedile.UI.Battle
         /// <param name="eventCamera">Event camera from PointerEventData; null for Overlay canvas.</param>
         public void Show(RectTransform startRect, Camera eventCamera)
         {
-            _startRect        = startRect;
-            _snapTarget       = null;
-            _eventCamera      = eventCamera;
+            _startRect = startRect;
+            _snapTarget = null;
+            _eventCamera = eventCamera;
             _currentScreenPos = Vector2.zero;
             SetVisible(true);
         }
@@ -69,7 +75,7 @@ namespace Crookedile.UI.Battle
         /// <summary>Deactivates the targeting arrow.</summary>
         public void Hide()
         {
-            _startRect  = null;
+            _startRect = null;
             _snapTarget = null;
             SetVisible(false);
         }
@@ -99,11 +105,13 @@ namespace Crookedile.UI.Battle
             RefreshArrow();
         }
 
-        // ─── Private ──────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Private
         private void RefreshArrow()
         {
-            if (_line == null || _startRect == null || _canvasRect == null) return;
+            if (_line == null || _startRect == null || _canvasRect == null)
+                return;
 
             Vector2 start = CanvasLocalOf(_startRect.position);
             Vector2 end;
@@ -115,22 +123,26 @@ namespace Crookedile.UI.Battle
             else
             {
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    _canvasRect, _currentScreenPos, _eventCamera, out end);
+                    _canvasRect,
+                    _currentScreenPos,
+                    _eventCamera,
+                    out end
+                );
             }
 
-            Vector2 dir      = end - start;
-            float   distance = dir.magnitude;
-            float   angle    = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            Vector2 dir = end - start;
+            float distance = dir.magnitude;
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
             // Stretch the line from start toward end.
-            _line.localPosition    = new Vector3(start.x, start.y, 0f);
-            _line.sizeDelta        = new Vector2(distance, _line.sizeDelta.y);
+            _line.localPosition = new Vector3(start.x, start.y, 0f);
+            _line.sizeDelta = new Vector2(distance, _line.sizeDelta.y);
             _line.localEulerAngles = new Vector3(0f, 0f, angle);
 
             // Place and rotate the arrowhead at the end point.
             if (_arrowHead != null)
             {
-                _arrowHead.localPosition    = new Vector3(end.x, end.y, 0f);
+                _arrowHead.localPosition = new Vector3(end.x, end.y, 0f);
                 _arrowHead.localEulerAngles = new Vector3(0f, 0f, angle);
             }
         }
@@ -142,8 +154,11 @@ namespace Crookedile.UI.Battle
 
         private void SetVisible(bool visible)
         {
-            if (_line     != null) _line.gameObject.SetActive(visible);
-            if (_arrowHead != null) _arrowHead.gameObject.SetActive(visible);
+            if (_line != null)
+                _line.gameObject.SetActive(visible);
+            if (_arrowHead != null)
+                _arrowHead.gameObject.SetActive(visible);
         }
     }
 }
+        #endregion

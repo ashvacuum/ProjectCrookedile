@@ -11,7 +11,8 @@ namespace Crookedile.Utilities
         void OnExit();
     }
 
-    public class StateMachine<T> where T : Enum
+    public class StateMachine<T>
+        where T : Enum
     {
         private Dictionary<T, IState> _states = new Dictionary<T, IState>();
         private IState _currentState;
@@ -24,7 +25,10 @@ namespace Crookedile.Utilities
         {
             if (_states.ContainsKey(stateType))
             {
-                GameLogger.LogWarning("Core", $"State {stateType} already registered. Overwriting.");
+                GameLogger.LogWarning(
+                    "Core",
+                    $"State {stateType} already registered. Overwriting."
+                );
             }
             _states[stateType] = state;
         }
@@ -37,7 +41,10 @@ namespace Crookedile.Utilities
                 return;
             }
 
-            if (_currentState != null && EqualityComparer<T>.Default.Equals(_currentStateType, newStateType))
+            if (
+                _currentState != null
+                && EqualityComparer<T>.Default.Equals(_currentStateType, newStateType)
+            )
             {
                 return; // Already in this state
             }
@@ -65,7 +72,9 @@ namespace Crookedile.Utilities
     public abstract class State : IState
     {
         public virtual void OnEnter() { }
+
         public virtual void OnUpdate() { }
+
         public virtual void OnExit() { }
     }
 }

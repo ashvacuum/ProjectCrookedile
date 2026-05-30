@@ -1,12 +1,12 @@
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using TMPro;
-using DG.Tweening;
+﻿using System.Collections.Generic;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 using Crookedile.Gameplay.Battle;
+using DG.Tweening;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Crookedile.UI.Battle
 {
@@ -30,84 +30,103 @@ namespace Crookedile.UI.Battle
     /// NOTE: The intentPanel's background Image must have Raycast Target = true for
     /// hover events to fire.
     /// </summary>
-    public class EnemyIntentDisplay : MonoBehaviour,
-                                      IPointerEnterHandler,
-                                      IPointerExitHandler
+    public class EnemyIntentDisplay : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [Header("Intent Panel")]
         [Tooltip("Root panel GameObject. Shown when intent is known; hidden at battle start.")]
-        [SerializeField] private GameObject intentPanel;
+        [SerializeField]
+        private GameObject intentPanel;
 
         [Header("Move Info")]
         [Tooltip("Icon representing the move type (sword for Attack, shield for Defend, etc.)")]
-        [SerializeField] private Image intentIcon;
+        [SerializeField]
+        private Image intentIcon;
 
         [Tooltip("Move name text, e.g. 'Aggressive Debate'")]
-        [SerializeField] private TMP_Text intentNameText;
+        [SerializeField]
+        private TMP_Text intentNameText;
 
-        [Tooltip("When false the move-name label is hidden (still data-set so the tooltip works). " +
-                 "Enable in the Inspector if you want the text visible on screen.")]
-        [SerializeField] private bool _showMoveName = false;
+        [Tooltip(
+            "When false the move-name label is hidden (still data-set so the tooltip works). "
+                + "Enable in the Inspector if you want the text visible on screen."
+        )]
+        [SerializeField]
+        private bool _showMoveName = false;
 
         [Tooltip("Intent description text, e.g. 'Will deal 8 damage'")]
-        [SerializeField] private TMP_Text intentDescText;
+        [SerializeField]
+        private TMP_Text intentDescText;
 
-        [Tooltip("Size of the per-hit damage value in multi-hit previews, as a percentage of " +
-                 "the base text size. E.g. 70 renders '4\u00d72' as '4\u00d7<size=70%>2</size>'. " +
-                 "Set to 100 to disable sub-sizing.")]
+        [Tooltip(
+            "Size of the per-hit damage value in multi-hit previews, as a percentage of "
+                + "the base text size. E.g. 70 renders '4\u00d72' as '4\u00d7<size=70%>2</size>'. "
+                + "Set to 100 to disable sub-sizing."
+        )]
         [Range(40, 100)]
-        [SerializeField] private int _multiHitSubTextSize = 70;
+        [SerializeField]
+        private int _multiHitSubTextSize = 70;
 
         [Header("Move Type Badge")]
         [Tooltip("Background image whose colour changes to reflect the move type")]
-        [SerializeField] private Image intentTypeBadge;
+        [SerializeField]
+        private Image intentTypeBadge;
 
         [Header("Intent Theme")]
-        [Tooltip("ScriptableObject mapping each EnemyMoveType to a Sprite and Color. " +
-                 "Create via: Assets → Create → Crookedile → Enemy → Intent Theme")]
-        [SerializeField] private EnemyIntentTheme intentTheme;
+        [Tooltip(
+            "ScriptableObject mapping each EnemyMoveType to a Sprite and Color. "
+                + "Create via: Assets → Create → Crookedile → Enemy → Intent Theme"
+        )]
+        [SerializeField]
+        private EnemyIntentTheme intentTheme;
 
         [Header("Bob Animation")]
         [Tooltip("Pixels the intent panel travels up and down per sine cycle.")]
-        [SerializeField] private float _bobAmplitude = 4f;
+        [SerializeField]
+        private float _bobAmplitude = 4f;
 
         [Tooltip("Bob cycles per second.")]
-        [SerializeField] private float _bobSpeed = 0.9f;
+        [SerializeField]
+        private float _bobSpeed = 0.9f;
 
         [Header("Damage Text Punch")]
         [Tooltip("Pixels the damage-number text snaps upward the instant intent is revealed.")]
-        [SerializeField] private float _punchRise = 10f;
+        [SerializeField]
+        private float _punchRise = 10f;
 
         [Tooltip("Seconds to reach the peak of the punch.")]
-        [SerializeField] private float _punchRiseDuration = 0.06f;
+        [SerializeField]
+        private float _punchRiseDuration = 0.06f;
 
         [Tooltip("Seconds to ease back to the resting position after the peak.")]
-        [SerializeField] private float _punchFallDuration = 0.35f;
+        [SerializeField]
+        private float _punchFallDuration = 0.35f;
 
         private EnemyMoveData _currentMove;
 
         // Bob state
-        private float         _bobPhase;        // random per-instance offset so enemies don't sync
-        private bool          _isBobbing;
+        private float _bobPhase; // random per-instance offset so enemies don't sync
+        private bool _isBobbing;
         private RectTransform _intentPanelRect;
-        private Vector2       _bobAnchor;       // panel's designed anchoredPosition (captured in Awake)
+        private Vector2 _bobAnchor; // panel's designed anchoredPosition (captured in Awake)
 
         // Punch animation state
         private RectTransform _descTextRect;
-        private Vector2       _descTextAnchor;  // desc text's authored anchoredPosition (captured in Awake)
-
-        // ─── Unity Lifecycle ──────────────────────────────────────────────────────
-
+        private Vector2 _descTextAnchor; // desc text's authored anchoredPosition (captured in Awake)
+        #region Unity Lifecycle
         private void Awake()
         {
             // Cache the RectTransform and remember the panel's authored resting position
             // before SetPanelVisible hides it — so the bob has a stable origin.
-            _intentPanelRect = intentPanel != null ? intentPanel.GetComponent<RectTransform>() : null;
-            if (_intentPanelRect != null) _bobAnchor = _intentPanelRect.anchoredPosition;
+            _intentPanelRect =
+                intentPanel != null ? intentPanel.GetComponent<RectTransform>() : null;
+            if (_intentPanelRect != null)
+                _bobAnchor = _intentPanelRect.anchoredPosition;
 
             // Cache the desc text rect so the punch coroutine has a stable resting origin.
-            _descTextRect = intentDescText != null ? intentDescText.GetComponent<RectTransform>() : null;
-            if (_descTextRect != null) _descTextAnchor = _descTextRect.anchoredPosition;
+            _descTextRect =
+                intentDescText != null ? intentDescText.GetComponent<RectTransform>() : null;
+            if (_descTextRect != null)
+                _descTextAnchor = _descTextRect.anchoredPosition;
 
             // Random phase offset keeps multiple enemies from bobbing in unison
             _bobPhase = Random.Range(0f, Mathf.PI * 2f);
@@ -117,15 +136,21 @@ namespace Crookedile.UI.Battle
 
         private void Update()
         {
-            if (!_isBobbing || _intentPanelRect == null) return;
-            float yOffset = Mathf.Sin(Time.time * _bobSpeed * Mathf.PI * 2f + _bobPhase) * _bobAmplitude;
+            if (!_isBobbing || _intentPanelRect == null)
+                return;
+            float yOffset =
+                Mathf.Sin(Time.time * _bobSpeed * Mathf.PI * 2f + _bobPhase) * _bobAmplitude;
             _intentPanelRect.anchoredPosition = _bobAnchor + new Vector2(0f, yOffset);
         }
 
-        // ─── Display ──────────────────────────────────────────────────────────────
+        #endregion
 
-        public void ShowIntent(EnemyMoveData move, StatusEffectManager attackerStatus = null,
-                               StatusEffectManager targetStatus = null)
+        #region Display
+        public void ShowIntent(
+            EnemyMoveData move,
+            StatusEffectManager attackerStatus = null,
+            StatusEffectManager targetStatus = null
+        )
         {
             _currentMove = move;
 
@@ -138,34 +163,35 @@ namespace Crookedile.UI.Battle
             SetPanelVisible(true);
 
             // Look up icon and colour from the theme asset (fallback: no icon, white badge)
-            var (icon, color) = intentTheme != null
-                ? intentTheme.GetVisual(move.MoveType)
-                : (null, Color.white);
+            var (icon, color) =
+                intentTheme != null ? intentTheme.GetVisual(move.MoveType) : (null, Color.white);
 
             // Icon
             if (intentIcon != null)
             {
-                intentIcon.sprite  = icon;
+                intentIcon.sprite = icon;
                 intentIcon.enabled = icon != null;
             }
 
             // Text — always store the name so the tooltip can read it; visibility is optional
             if (intentNameText != null)
             {
-                intentNameText.text    = move.MoveName;
+                intentNameText.text = move.MoveName;
                 intentNameText.enabled = _showMoveName;
             }
 
             if (intentDescText != null)
             {
-                bool isOffensive = move.MoveType == EnemyMoveType.Attack
-                                || move.MoveType == EnemyMoveType.OffensiveBuff
-                                || move.MoveType == EnemyMoveType.DebuffAttack;
+                bool isOffensive =
+                    move.MoveType == EnemyMoveType.Attack
+                    || move.MoveType == EnemyMoveType.OffensiveBuff
+                    || move.MoveType == EnemyMoveType.DebuffAttack;
                 string preview = isOffensive
                     ? BuildDamagePreview(move, attackerStatus, targetStatus, _multiHitSubTextSize)
                     : string.Empty;
                 intentDescText.text = preview;
-                if (!string.IsNullOrEmpty(preview)) TriggerDescPunch();
+                if (!string.IsNullOrEmpty(preview))
+                    TriggerDescPunch();
             }
 
             // Colour badge by move type
@@ -173,12 +199,15 @@ namespace Crookedile.UI.Battle
                 intentTypeBadge.color = color;
         }
 
-        // ─── Pointer Events ───────────────────────────────────────────────────────
+        #endregion
 
+        #region Pointer Events
         public void OnPointerEnter(PointerEventData _)
         {
-            if (_currentMove == null || BattleTooltipUI.Instance == null) return;
-            if (string.IsNullOrEmpty(_currentMove.Description)) return;
+            if (_currentMove == null || BattleTooltipUI.Instance == null)
+                return;
+            if (string.IsNullOrEmpty(_currentMove.Description))
+                return;
             BattleTooltipUI.Instance.Show(_currentMove.MoveName, _currentMove.Description);
         }
 
@@ -187,8 +216,9 @@ namespace Crookedile.UI.Battle
             BattleTooltipUI.Instance?.Hide();
         }
 
-        // ─── Damage Preview ───────────────────────────────────────────────────────
+        #endregion
 
+        #region Damage Preview
         /// <summary>
         /// Builds the intent description string shown beneath the move name.
         /// Supports multi-hit: equal fixed-damage effects → "N×&lt;size=X%&gt;amount&lt;/size&gt;";
@@ -196,31 +226,37 @@ namespace Crookedile.UI.Battle
         /// Falls back to summing for single or mixed effects (existing behaviour).
         /// Returns empty string if no damage effects are present.
         /// </summary>
-        private static string BuildDamagePreview(EnemyMoveData move,
-                                                   StatusEffectManager attackerStatus,
-                                                   StatusEffectManager targetStatus,
-                                                   int multiHitSubTextSize = 70)
+        private static string BuildDamagePreview(
+            EnemyMoveData move,
+            StatusEffectManager attackerStatus,
+            StatusEffectManager targetStatus,
+            int multiHitSubTextSize = 70
+        )
         {
             // Collect damage effects
             var dmgEffects = new List<CardEffect>();
             foreach (var e in move.Effects)
-                if (e.Category == EffectCategory.Damage) dmgEffects.Add(e);
+                if (e.Category == EffectCategory.Damage)
+                    dmgEffects.Add(e);
 
-            if (dmgEffects.Count == 0) return string.Empty;
+            if (dmgEffects.Count == 0)
+                return string.Empty;
 
             // Two-step preview: attacker mods (Strength/Weakened/Exposed) then target mods
             // (Vulnerable/Plated/Intangible). Neither step has side effects.
             static int Preview(int raw, StatusEffectManager atk, StatusEffectManager tgt)
             {
                 int d = atk != null ? atk.PreviewDamageDealt(raw) : raw;
-                    d = tgt != null ? tgt.PreviewDamageTaken(d)   : d;
+                d = tgt != null ? tgt.PreviewDamageTaken(d) : d;
                 return Mathf.Max(0, d);
             }
 
             // Multi-hit: all effects are identical FixedDamage → "N×amount"
-            if (dmgEffects.Count > 1
+            if (
+                dmgEffects.Count > 1
                 && dmgEffects.TrueForAll(e => e.DamageType == DamageType.FixedDamage)
-                && dmgEffects.TrueForAll(e => e.DamageAmount == dmgEffects[0].DamageAmount))
+                && dmgEffects.TrueForAll(e => e.DamageAmount == dmgEffects[0].DamageAmount)
+            )
             {
                 int adj = Preview(dmgEffects[0].DamageAmount, attackerStatus, targetStatus);
                 return adj > 0
@@ -229,10 +265,14 @@ namespace Crookedile.UI.Battle
             }
 
             // Multi-hit: all effects are identical RandomDamage → "N×min-max"
-            if (dmgEffects.Count > 1
+            if (
+                dmgEffects.Count > 1
                 && dmgEffects.TrueForAll(e => e.DamageType == DamageType.RandomDamage)
-                && dmgEffects.TrueForAll(e => e.RandomDamageMin == dmgEffects[0].RandomDamageMin
-                                           && e.RandomDamageMax == dmgEffects[0].RandomDamageMax))
+                && dmgEffects.TrueForAll(e =>
+                    e.RandomDamageMin == dmgEffects[0].RandomDamageMin
+                    && e.RandomDamageMax == dmgEffects[0].RandomDamageMax
+                )
+            )
             {
                 int adjMin = Preview(dmgEffects[0].RandomDamageMin, attackerStatus, targetStatus);
                 int adjMax = Preview(dmgEffects[0].RandomDamageMax, attackerStatus, targetStatus);
@@ -241,8 +281,11 @@ namespace Crookedile.UI.Battle
 
             // Single or mixed effects — sum as before
             int fixedTotal = 0;
-            int randMin = 0, randMax = 0;
-            bool hasFixed = false, hasRandom = false, hasComposure = false;
+            int randMin = 0,
+                randMax = 0;
+            bool hasFixed = false,
+                hasRandom = false,
+                hasComposure = false;
 
             foreach (var effect in dmgEffects)
             {
@@ -263,8 +306,10 @@ namespace Crookedile.UI.Battle
                 }
             }
 
-            if (!hasFixed && !hasRandom && !hasComposure) return string.Empty;
-            if (hasComposure) return hasFixed ? $"{fixedTotal}+" : "?";
+            if (!hasFixed && !hasRandom && !hasComposure)
+                return string.Empty;
+            if (hasComposure)
+                return hasFixed ? $"{fixedTotal}+" : "?";
 
             // Apply full two-step preview pipeline
             if (hasRandom)
@@ -288,25 +333,40 @@ namespace Crookedile.UI.Battle
             if (!visible)
             {
                 // Snap both the panel and the desc text back to their resting positions
-                if (_intentPanelRect != null) _intentPanelRect.anchoredPosition = _bobAnchor;
-                if (_descTextRect    != null) _descTextRect.anchoredPosition    = _descTextAnchor;
+                if (_intentPanelRect != null)
+                    _intentPanelRect.anchoredPosition = _bobAnchor;
+                if (_descTextRect != null)
+                    _descTextRect.anchoredPosition = _descTextAnchor;
 
                 // Kill any in-progress punch and snap back to rest
                 _descTextRect?.DOKill();
             }
         }
 
-        // ─── Punch Animation ──────────────────────────────────────────────────────
+        #endregion
 
+        #region Punch Animation
         private void TriggerDescPunch()
         {
-            if (_descTextRect == null) return;
+            if (_descTextRect == null)
+                return;
             _descTextRect.DOKill();
             _descTextRect.anchoredPosition = _descTextAnchor;
             // Phase 1: fast linear rise; Phase 2: quadratic ease-out fall
-            DOTween.Sequence().SetLink(gameObject)
-                .Append(_descTextRect.DOAnchorPosY(_descTextAnchor.y + _punchRise, _punchRiseDuration).SetEase(Ease.Linear))
-                .Append(_descTextRect.DOAnchorPosY(_descTextAnchor.y, _punchFallDuration).SetEase(Ease.OutQuad));
+            DOTween
+                .Sequence()
+                .SetLink(gameObject)
+                .Append(
+                    _descTextRect
+                        .DOAnchorPosY(_descTextAnchor.y + _punchRise, _punchRiseDuration)
+                        .SetEase(Ease.Linear)
+                )
+                .Append(
+                    _descTextRect
+                        .DOAnchorPosY(_descTextAnchor.y, _punchFallDuration)
+                        .SetEase(Ease.OutQuad)
+                );
         }
     }
 }
+        #endregion

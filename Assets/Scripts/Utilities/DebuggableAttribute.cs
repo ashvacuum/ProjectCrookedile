@@ -8,7 +8,10 @@ namespace Crookedile.Utilities
         public string Category { get; private set; }
         public LogLevel DefaultLogLevel { get; private set; }
 
-        public DebuggableAttribute(string category = "Default", LogLevel defaultLogLevel = LogLevel.Info)
+        public DebuggableAttribute(
+            string category = "Default",
+            LogLevel defaultLogLevel = LogLevel.Info
+        )
         {
             Category = category;
             DefaultLogLevel = defaultLogLevel;

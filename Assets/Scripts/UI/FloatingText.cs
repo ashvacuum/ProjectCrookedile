@@ -1,6 +1,6 @@
-using UnityEngine;
-using TMPro;
 using DG.Tweening;
+using TMPro;
+using UnityEngine;
 
 namespace Crookedile.UI
 {
@@ -14,16 +14,20 @@ namespace Crookedile.UI
     /// </summary>
     public class FloatingText : MonoBehaviour
     {
-        [SerializeField] private TMP_Text _text;
+        [SerializeField]
+        private TMP_Text _text;
 
         [Tooltip("Total time (seconds) the text is visible before fully fading out.")]
-        [SerializeField] private float _duration = 1.2f;
+        [SerializeField]
+        private float _duration = 1.2f;
 
         [Tooltip("Pixels the text rises over its lifetime.")]
-        [SerializeField] private float _risePixels = 60f;
+        [SerializeField]
+        private float _risePixels = 60f;
 
         [Tooltip("Fraction of _duration spent fading out (0–1). E.g. 0.4 = last 40% fades out).")]
-        [SerializeField] private float _fadeFraction = 0.4f;
+        [SerializeField]
+        private float _fadeFraction = 0.4f;
 
         /// <summary>Assigned by FloatingTextManager. Invoked when the animation ends so
         /// the instance is returned to pool.</summary>
@@ -41,21 +45,29 @@ namespace Crookedile.UI
         {
             if (_text != null)
             {
-                _text.text  = text;
+                _text.text = text;
                 _text.color = color;
             }
 
             DOTween.Kill(gameObject);
 
-            Vector2 startPos    = _rt.anchoredPosition;
-            Color   startColor  = _text != null ? _text.color : Color.white;
-            Color   fadeColor   = new Color(startColor.r, startColor.g, startColor.b, 0f);
-            float   fadeStart   = _duration * (1f - _fadeFraction);
-            float   fadeDuration = _duration - fadeStart;
+            Vector2 startPos = _rt.anchoredPosition;
+            Color startColor = _text != null ? _text.color : Color.white;
+            Color fadeColor = new Color(startColor.r, startColor.g, startColor.b, 0f);
+            float fadeStart = _duration * (1f - _fadeFraction);
+            float fadeDuration = _duration - fadeStart;
 
-            DOTween.Sequence().SetLink(gameObject)
-                .Append(_rt.DOAnchorPos(startPos + Vector2.up * _risePixels, _duration).SetEase(Ease.Linear))
-                .Insert(fadeStart, DOTween.To(() => _text.color, x => _text.color = x, fadeColor, fadeDuration))
+            DOTween
+                .Sequence()
+                .SetLink(gameObject)
+                .Append(
+                    _rt.DOAnchorPos(startPos + Vector2.up * _risePixels, _duration)
+                        .SetEase(Ease.Linear)
+                )
+                .Insert(
+                    fadeStart,
+                    DOTween.To(() => _text.color, x => _text.color = x, fadeColor, fadeDuration)
+                )
                 .OnComplete(Finish);
         }
 

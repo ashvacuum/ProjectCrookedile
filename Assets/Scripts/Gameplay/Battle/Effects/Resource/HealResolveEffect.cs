@@ -1,10 +1,10 @@
 ﻿using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -20,17 +20,27 @@ namespace Crookedile.Gameplay.Battle
         [Tooltip("Opinion to raise. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]
         [MinValue(1)]
-        [SerializeField] private int _amount = 5;
+        [SerializeField]
+        private int _amount = 5;
 
-        [Tooltip("Where to read the amount from at runtime. FixedAmount uses the authored Amount field.")]
-        [SerializeField] private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
+        [Tooltip(
+            "Where to read the amount from at runtime. FixedAmount uses the authored Amount field."
+        )]
+        [SerializeField]
+        private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            int amount = amountOverride
-                ?? (_amountSource == EffectContextValue.FixedAmount ? _amount : ctx.GetValue(_amountSource));
+            int amount =
+                amountOverride
+                ?? (
+                    _amountSource == EffectContextValue.FixedAmount
+                        ? _amount
+                        : ctx.GetValue(_amountSource)
+                );
 
-            if (amount <= 0) return;
+            if (amount <= 0)
+                return;
 
             EventBus.Publish(new OpinionRaisedDirectlyEvent { Amount = amount });
             GameLogger.LogInfo<HealResolveEffect>($"Raised Opinion by {amount}");
@@ -38,9 +48,10 @@ namespace Crookedile.Gameplay.Battle
 
         public override string GetDescription()
         {
-            string amountStr = _amountSource == EffectContextValue.FixedAmount
-                ? _amount.ToString()
-                : _amountSource.ToString();
+            string amountStr =
+                _amountSource == EffectContextValue.FixedAmount
+                    ? _amount.ToString()
+                    : _amountSource.ToString();
             return $"Raise Opinion by {amountStr}";
         }
     }

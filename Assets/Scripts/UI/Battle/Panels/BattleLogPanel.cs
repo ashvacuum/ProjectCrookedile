@@ -1,7 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 namespace Crookedile.UI.Battle
 {
@@ -14,14 +14,18 @@ namespace Crookedile.UI.Battle
     public class BattleLogPanel : MonoBehaviour
     {
         [Header("Log Display")]
-        [SerializeField] private TMP_Text   battleLogText;
-        [SerializeField] private ScrollRect battleLogScrollRect;
-        [SerializeField] private int        maxLogLines = 20;
+        [SerializeField]
+        private TMP_Text battleLogText;
+
+        [SerializeField]
+        private ScrollRect battleLogScrollRect;
+
+        [SerializeField]
+        private int maxLogLines = 20;
 
         private readonly List<string> _lines = new List<string>();
 
-        // ── Public API ────────────────────────────────────────────────────────
-
+        #region Public API
         /// <summary>
         /// Appends a new line to the battle log and auto-scrolls to the bottom.
         /// Older lines are trimmed when the buffer exceeds <c>maxLogLines</c>.
@@ -40,14 +44,17 @@ namespace Crookedile.UI.Battle
         public void Clear()
         {
             _lines.Clear();
-            if (battleLogText != null) battleLogText.text = string.Empty;
+            if (battleLogText != null)
+                battleLogText.text = string.Empty;
         }
 
-        // ── Private ───────────────────────────────────────────────────────────
+        #endregion
 
+        #region Private
         private void Flush()
         {
-            if (battleLogText == null) return;
+            if (battleLogText == null)
+                return;
 
             battleLogText.text = string.Join("\n", _lines);
 
@@ -59,3 +66,4 @@ namespace Crookedile.UI.Battle
         }
     }
 }
+        #endregion

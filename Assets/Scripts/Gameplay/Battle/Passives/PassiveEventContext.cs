@@ -21,17 +21,19 @@ namespace Crookedile.Gameplay.Battle
 
         public PassiveEventContext(IGameEvent evt)
         {
-            _rawEvent  = evt;          // boxing — structs become objects
-            EventType  = evt.GetType();
+            _rawEvent = evt; // boxing — structs become objects
+            EventType = evt.GetType();
         }
 
         /// <summary>Returns true if the wrapped event is of type <typeparamref name="T"/>.</summary>
-        public bool Is<T>() where T : struct, IGameEvent => EventType == typeof(T);
+        public bool Is<T>()
+            where T : struct, IGameEvent => EventType == typeof(T);
 
         /// <summary>
         /// Returns the wrapped event cast to <typeparamref name="T"/>.
         /// Returns <c>default(T)</c> if the event is a different type.
         /// </summary>
-        public T As<T>() where T : struct, IGameEvent => Is<T>() ? (T)_rawEvent : default;
+        public T As<T>()
+            where T : struct, IGameEvent => Is<T>() ? (T)_rawEvent : default;
     }
 }

@@ -1,7 +1,7 @@
+﻿using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace Crookedile.UI.Battle
 {
@@ -21,58 +21,68 @@ namespace Crookedile.UI.Battle
         public static BattleTooltipUI Instance { get; private set; }
 
         [Tooltip("Root canvas — used for screen-to-local cursor conversion.")]
-        [SerializeField] private Canvas        _canvas;
+        [SerializeField]
+        private Canvas _canvas;
 
         [Tooltip("Panel RectTransform that is shown/hidden and repositioned each frame.")]
-        [SerializeField] private RectTransform _panel;
+        [SerializeField]
+        private RectTransform _panel;
 
         [Tooltip("Optional icon image. Hidden when Show() is called without an icon.")]
-        [SerializeField] private Image         _icon;
+        [SerializeField]
+        private Image _icon;
 
         [Tooltip("Title / name line.")]
-        [SerializeField] private TMP_Text      _titleTxt;
+        [SerializeField]
+        private TMP_Text _titleTxt;
 
         [Tooltip("Description / body text.")]
-        [SerializeField] private TMP_Text      _descTxt;
+        [SerializeField]
+        private TMP_Text _descTxt;
 
         [Tooltip("Optional extra line (e.g. 'Stacks: 3'). Hidden when Show() passes null/empty.")]
-        [SerializeField] private TMP_Text      _extraTxt;
+        [SerializeField]
+        private TMP_Text _extraTxt;
 
         [Tooltip("Pixel offset from the cursor position to the top-left corner of the panel.")]
-        [SerializeField] private Vector2       _cursorOffset = new Vector2(12f, -12f);
+        [SerializeField]
+        private Vector2 _cursorOffset = new Vector2(12f, -12f);
 
-        // ─── Lifecycle ────────────────────────────────────────────────────────────
-
+        #region Lifecycle
         private void Awake()
         {
             Instance = this;
-            if (_panel != null) _panel.gameObject.SetActive(false);
+            if (_panel != null)
+                _panel.gameObject.SetActive(false);
         }
 
         private void OnDestroy()
         {
-            if (Instance == this) Instance = null;
+            if (Instance == this)
+                Instance = null;
         }
 
         private void Update()
         {
-            if (_panel == null || !_panel.gameObject.activeSelf) return;
+            if (_panel == null || !_panel.gameObject.activeSelf)
+                return;
 
-            Vector2 mousePos = Mouse.current != null
-                ? Mouse.current.position.ReadValue()
-                : Vector2.zero;
+            Vector2 mousePos =
+                Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
 
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 (RectTransform)_canvas.transform,
                 mousePos,
                 _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera,
-                out var localPoint);
+                out var localPoint
+            );
 
             _panel.anchoredPosition = localPoint + _cursorOffset;
         }
 
-        // ─── Public API ───────────────────────────────────────────────────────────
+        #endregion
 
+        #region Public API
         /// <summary>
         /// Show the tooltip near the cursor.
         /// </summary>
@@ -81,11 +91,18 @@ namespace Crookedile.UI.Battle
         /// <param name="icon">Optional icon sprite — element hidden when null.</param>
         /// <param name="iconColor">Tint applied to the icon; defaults to white when <c>default</c>.</param>
         /// <param name="extraLine">Optional footer line (e.g. "Stacks: 3") — element hidden when null/empty.</param>
-        public void Show(string title, string description,
-                         Sprite icon = null, Color iconColor = default, string extraLine = null)
+        public void Show(
+            string title,
+            string description,
+            Sprite icon = null,
+            Color iconColor = default,
+            string extraLine = null
+        )
         {
-            if (_titleTxt != null) _titleTxt.text = title;
-            if (_descTxt  != null) _descTxt.text  = description;
+            if (_titleTxt != null)
+                _titleTxt.text = title;
+            if (_descTxt != null)
+                _descTxt.text = description;
 
             if (_icon != null)
             {
@@ -94,7 +111,7 @@ namespace Crookedile.UI.Battle
                 if (hasIcon)
                 {
                     _icon.sprite = icon;
-                    _icon.color  = iconColor == default ? Color.white : iconColor;
+                    _icon.color = iconColor == default ? Color.white : iconColor;
                 }
             }
 
@@ -102,16 +119,20 @@ namespace Crookedile.UI.Battle
             {
                 bool hasExtra = !string.IsNullOrEmpty(extraLine);
                 _extraTxt.gameObject.SetActive(hasExtra);
-                if (hasExtra) _extraTxt.text = extraLine;
+                if (hasExtra)
+                    _extraTxt.text = extraLine;
             }
 
-            if (_panel != null) _panel.gameObject.SetActive(true);
+            if (_panel != null)
+                _panel.gameObject.SetActive(true);
         }
 
         /// <summary>Hides the tooltip panel immediately.</summary>
         public void Hide()
         {
-            if (_panel != null) _panel.gameObject.SetActive(false);
+            if (_panel != null)
+                _panel.gameObject.SetActive(false);
         }
     }
 }
+        #endregion

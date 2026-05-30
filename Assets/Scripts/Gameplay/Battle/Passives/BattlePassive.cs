@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using UnityEngine;
 using Crookedile.Utilities;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -26,7 +26,8 @@ namespace Crookedile.Gameplay.Battle
     public class BattlePassive
     {
         [Tooltip("Display name used in logs and tooltips.")]
-        [SerializeField] private string _name = "New Passive";
+        [SerializeField]
+        private string _name = "New Passive";
 
         [Tooltip("Which battle event causes this passive to attempt to fire.")]
         [SerializeReference]
@@ -37,30 +38,32 @@ namespace Crookedile.Gameplay.Battle
         private List<PassiveConditionBase> _conditions = new List<PassiveConditionBase>();
 
         [Tooltip("If true, this passive fires exactly once per battle then goes silent.")]
-        [SerializeField] private bool _oneShot;
+        [SerializeField]
+        private bool _oneShot;
 
         [Tooltip("Effects executed when the passive fires. Reuses the BattleEffect hierarchy.")]
         [SerializeReference]
         private List<BattleEffect> _effects = new List<BattleEffect>();
 
-        // ── Runtime state (not serialized) ────────────────────────────────────
-
+        #region Runtime state (not serialized)
         /// <summary>True after a one-shot passive has fired. Reset via <see cref="ResetForBattle"/>.</summary>
         public bool Spent { get; private set; }
 
         /// <summary>Total trigger fires this battle for this passive (used by NthEventCondition).</summary>
         private int _fireCount;
 
-        // ── Properties ────────────────────────────────────────────────────────
+        #endregion
 
-        public string                         Name       => _name;
-        public PassiveTriggerBase             Trigger    => _trigger;
+        #region Properties
+        public string Name => _name;
+        public PassiveTriggerBase Trigger => _trigger;
         public IReadOnlyList<PassiveConditionBase> Conditions => _conditions;
-        public bool                           OneShot    => _oneShot;
-        public IReadOnlyList<BattleEffect>    Effects    => _effects;
+        public bool OneShot => _oneShot;
+        public IReadOnlyList<BattleEffect> Effects => _effects;
 
-        // ── Core Dispatch ─────────────────────────────────────────────────────
+        #endregion
 
+        #region Core Dispatch
         /// <summary>
         /// Attempts to fire this passive against the current event and runtime state.
         /// </summary>
@@ -69,13 +72,18 @@ namespace Crookedile.Gameplay.Battle
         /// <param name="execCtx">Execution context used by BattleEffect.Execute.</param>
         /// <returns>True if the passive fired; false if the trigger did not match, the
         /// one-shot guard was active, or a condition failed.</returns>
-        public bool TryFire(PassiveEventContext evtCtx,
-                            PassiveEvaluationContext evalCtx,
-                            EffectExecutionContext execCtx)
+        public bool TryFire(
+            PassiveEventContext evtCtx,
+            PassiveEvaluationContext evalCtx,
+            EffectExecutionContext execCtx
+        )
         {
-            if (_trigger == null)           return false;
-            if (!_trigger.Matches(evtCtx)) return false;
-            if (_oneShot && Spent)         return false;
+            if (_trigger == null)
+                return false;
+            if (!_trigger.Matches(evtCtx))
+                return false;
+            if (_oneShot && Spent)
+                return false;
 
             // Update fire count and expose it to conditions (e.g. NthEvent)
             _fireCount++;
@@ -83,16 +91,19 @@ namespace Crookedile.Gameplay.Battle
 
             // All conditions must pass
             foreach (var cond in _conditions)
-                if (cond != null && !cond.Evaluate(evalCtx)) return false;
+                if (cond != null && !cond.Evaluate(evalCtx))
+                    return false;
 
             // Commit one-shot guard before running effects to prevent re-entry
-            if (_oneShot) Spent = true;
+            if (_oneShot)
+                Spent = true;
 
             foreach (var effect in _effects)
                 effect?.Execute(execCtx);
 
             GameLogger.LogInfo<BattlePassive>(
-                $"[Passive: {_name}] fired (fire #{_fireCount}{(_oneShot ? ", one-shot" : "")})");
+                $"[Passive: {_name}] fired (fire #{_fireCount}{(_oneShot ? ", one-shot" : "")})"
+            );
 
             return true;
         }
@@ -102,7 +113,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void ResetForBattle()
         {
-            Spent      = false;
+            Spent = false;
             _fireCount = 0;
         }
 
@@ -118,7 +129,8 @@ namespace Crookedile.Gameplay.Battle
                 sb.Append(" if ");
                 for (int i = 0; i < _conditions.Count; i++)
                 {
-                    if (i > 0) sb.Append(" and ");
+                    if (i > 0)
+                        sb.Append(" and ");
                     sb.Append(_conditions[i]?.ConditionLabel ?? "?");
                 }
             }
@@ -129,7 +141,8 @@ namespace Crookedile.Gameplay.Battle
             {
                 for (int i = 0; i < _effects.Count; i++)
                 {
-                    if (i > 0) sb.Append(". ");
+                    if (i > 0)
+                        sb.Append(". ");
                     sb.Append(_effects[i]?.GetDescription() ?? "?");
                 }
             }
@@ -138,9 +151,11 @@ namespace Crookedile.Gameplay.Battle
                 sb.Append("(no effects)");
             }
 
-            if (_oneShot) sb.Append(" (once per battle)");
+            if (_oneShot)
+                sb.Append(" (once per battle)");
 
             return sb.ToString();
         }
     }
 }
+        #endregion

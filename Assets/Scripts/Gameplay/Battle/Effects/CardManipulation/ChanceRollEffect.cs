@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Core;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -21,12 +21,14 @@ namespace Crookedile.Gameplay.Battle
     {
         [Range(1, 100)]
         [Tooltip("Percentage probability (1–100) that the nested effects will fire.")]
-        [SerializeField] private int _chancePercent = 50;
+        [SerializeField]
+        private int _chancePercent = 50;
 
         [SerializeReference]
         [Tooltip("Effects to execute when the roll succeeds.")]
         [ListDrawerSettings(ShowFoldout = true)]
-        [SerializeField] private List<BattleEffect> _effects = new List<BattleEffect>();
+        [SerializeField]
+        private List<BattleEffect> _effects = new List<BattleEffect>();
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
@@ -37,7 +39,8 @@ namespace Crookedile.Gameplay.Battle
             }
 
             GameLogger.LogInfo<ChanceRollEffect>(
-                $"Chance roll succeeded ({_chancePercent}%) — resolving {_effects.Count} effect(s)");
+                $"Chance roll succeeded ({_chancePercent}%) — resolving {_effects.Count} effect(s)"
+            );
 
             foreach (var child in _effects)
                 child?.Execute(ctx, amountOverride);

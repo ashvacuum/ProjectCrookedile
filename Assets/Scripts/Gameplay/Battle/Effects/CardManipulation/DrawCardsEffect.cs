@@ -1,8 +1,8 @@
 ﻿using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Core;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -12,13 +12,15 @@ namespace Crookedile.Gameplay.Battle
     public class DrawCardsEffect : BattleEffect
     {
         [MinValue(1)]
-        [SerializeField] private int _amount = 1;
+        [SerializeField]
+        private int _amount = 1;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            if (ctx.Deck == null) return; // enemies have no deck
+            if (ctx.Deck == null)
+                return; // enemies have no deck
             int amount = amountOverride ?? _amount;
-            int drawn  = ctx.Deck.DrawCards(amount);
+            int drawn = ctx.Deck.DrawCards(amount);
             GameLogger.LogInfo<DrawCardsEffect>($"Drew {drawn} cards");
         }
 

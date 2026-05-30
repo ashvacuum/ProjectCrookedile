@@ -1,8 +1,8 @@
 ﻿using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Core;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -12,7 +12,8 @@ namespace Crookedile.Gameplay.Battle
     public class ReduceHostilityEffect : BattleEffect
     {
         [MinValue(1)]
-        [SerializeField] private int _amount = 2;
+        [SerializeField]
+        private int _amount = 2;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {

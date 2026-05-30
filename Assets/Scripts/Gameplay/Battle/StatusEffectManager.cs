@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using Crookedile.Core;
 using Crookedile.Utilities;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -27,7 +27,11 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Applies a status effect. Stacks if already present, otherwise adds new.
         /// </summary>
-        public void ApplyStatusEffect(StatusEffectType type, int stacks, StatusDurationType durationType = StatusDurationType.DecreasePerTurn)
+        public void ApplyStatusEffect(
+            StatusEffectType type,
+            int stacks,
+            StatusDurationType durationType = StatusDurationType.DecreasePerTurn
+        )
         {
             StatusEffect existing = _activeEffects.FirstOrDefault(e => e.Type == type);
 
@@ -36,7 +40,9 @@ namespace Crookedile.Gameplay.Battle
                 // Stunned is non-stackable: a second application is ignored entirely.
                 if (type == StatusEffectType.Stunned)
                 {
-                    GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {type} already active — re-application ignored");
+                    GameLogger.LogInfo<StatusEffectManager>(
+                        $"{_ownerName}: {type} already active — re-application ignored"
+                    );
                     return;
                 }
 
@@ -48,11 +54,15 @@ namespace Crookedile.Gameplay.Battle
                 if (existing.Stacks == 0)
                 {
                     _activeEffects.Remove(existing);
-                    GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {type} neutralised — removed");
+                    GameLogger.LogInfo<StatusEffectManager>(
+                        $"{_ownerName}: {type} neutralised — removed"
+                    );
                     return;
                 }
 
-                GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {type} stacked {stacks:+0;-0} (now {existing.Stacks} stacks)");
+                GameLogger.LogInfo<StatusEffectManager>(
+                    $"{_ownerName}: {type} stacked {stacks:+0;-0} (now {existing.Stacks} stacks)"
+                );
             }
             else
             {
@@ -63,9 +73,11 @@ namespace Crookedile.Gameplay.Battle
                 {
                     StatusDurationType.Permanent => "permanent",
                     StatusDurationType.RemoveEndOfTurn => "until end of turn",
-                    _ => $"{stacks} stacks"
+                    _ => $"{stacks} stacks",
                 };
-                GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Applied {type} ({durationText})");
+                GameLogger.LogInfo<StatusEffectManager>(
+                    $"{_ownerName}: Applied {type} ({durationText})"
+                );
             }
         }
 
@@ -93,11 +105,15 @@ namespace Crookedile.Gameplay.Battle
                 if (effect.ReduceStacks(amount))
                 {
                     _activeEffects.Remove(effect);
-                    GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {type} depleted and removed");
+                    GameLogger.LogInfo<StatusEffectManager>(
+                        $"{_ownerName}: {type} depleted and removed"
+                    );
                 }
                 else
                 {
-                    GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {type} reduced by {amount} stacks (now {effect.Stacks})");
+                    GameLogger.LogInfo<StatusEffectManager>(
+                        $"{_ownerName}: {type} reduced by {amount} stacks (now {effect.Stacks})"
+                    );
                 }
             }
         }
@@ -179,7 +195,9 @@ namespace Crookedile.Gameplay.Battle
             foreach (StatusEffect effect in _activeEffects)
                 TriggerEffectWithStats(effect, StatusTriggerTiming.OnTurnStart, ownerStats);
 
-            GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Turn start status effects triggered");
+            GameLogger.LogInfo<StatusEffectManager>(
+                $"{_ownerName}: Turn start status effects triggered"
+            );
         }
 
         /// <summary>
@@ -198,7 +216,9 @@ namespace Crookedile.Gameplay.Battle
                 if (effect.DurationType == StatusDurationType.RemoveEndOfTurn)
                 {
                     toRemove.Add(effect);
-                    GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {effect.Type} removed (end of turn)");
+                    GameLogger.LogInfo<StatusEffectManager>(
+                        $"{_ownerName}: {effect.Type} removed (end of turn)"
+                    );
                 }
                 else if (effect.DurationType == StatusDurationType.DecreasePerTurn)
                 {
@@ -206,11 +226,15 @@ namespace Crookedile.Gameplay.Battle
                     if (effect.DecrementStack())
                     {
                         toRemove.Add(effect);
-                        GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {effect.Type} depleted and removed");
+                        GameLogger.LogInfo<StatusEffectManager>(
+                            $"{_ownerName}: {effect.Type} depleted and removed"
+                        );
                     }
                     else
                     {
-                        GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {effect.Type} reduced to {effect.Stacks} stacks");
+                        GameLogger.LogInfo<StatusEffectManager>(
+                            $"{_ownerName}: {effect.Type} reduced to {effect.Stacks} stacks"
+                        );
                     }
                 }
             }
@@ -221,7 +245,6 @@ namespace Crookedile.Gameplay.Battle
                 _activeEffects.Remove(effect);
             }
         }
-
 
         /// <summary>
         /// Called when the player's turn begins. Removes all effects with
@@ -236,7 +259,9 @@ namespace Crookedile.Gameplay.Battle
             foreach (var e in toRemove)
             {
                 _activeEffects.Remove(e);
-                GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: {e.Type} removed (player turn start)");
+                GameLogger.LogInfo<StatusEffectManager>(
+                    $"{_ownerName}: {e.Type} removed (player turn start)"
+                );
             }
         }
 
@@ -268,7 +293,11 @@ namespace Crookedile.Gameplay.Battle
         /// <paramref name="isAttackerPlayer"/> is forwarded to the <see cref="DamageDealtEvent"/>
         /// published when Thorns reflects the hit to the Opinion Meter.
         /// </summary>
-        public int ModifyDamageTaken(int baseDamage, BattleStats attackerStats, bool isAttackerPlayer = false)
+        public int ModifyDamageTaken(
+            int baseDamage,
+            BattleStats attackerStats,
+            bool isAttackerPlayer = false
+        )
         {
             float finalDamage = baseDamage;
 
@@ -304,15 +333,18 @@ namespace Crookedile.Gameplay.Battle
             if (thornsStacks > 0)
             {
                 GameLogger.LogInfo<StatusEffectManager>(
-                    $"{_ownerName}: Thorns reflected {thornsStacks} to Opinion Meter");
-                EventBus.Publish(new DamageDealtEvent
-                {
-                    Amount           = thornsStacks,
-                    IsToPlayer       = isAttackerPlayer,
-                    AttackerName     = _ownerName,
-                    SourceEnemyIndex = -1,
-                    TargetEnemyIndex = -1,
-                });
+                    $"{_ownerName}: Thorns reflected {thornsStacks} to Opinion Meter"
+                );
+                EventBus.Publish(
+                    new DamageDealtEvent
+                    {
+                        Amount = thornsStacks,
+                        IsToPlayer = isAttackerPlayer,
+                        AttackerName = _ownerName,
+                        SourceEnemyIndex = -1,
+                        TargetEnemyIndex = -1,
+                    }
+                );
             }
 
             return Mathf.Max(0, Mathf.RoundToInt(finalDamage));
@@ -328,7 +360,7 @@ namespace Crookedile.Gameplay.Battle
             final += GetStacks(StatusEffectType.Strength);
             final -= GetStacks(StatusEffectType.Weakened);
             if (HasEffect(StatusEffectType.Exposed))
-                final *= 2;                     // show doubled — Exposed will fire on the actual hit
+                final *= 2; // show doubled — Exposed will fire on the actual hit
             return Mathf.Max(0, final);
         }
 
@@ -350,7 +382,7 @@ namespace Crookedile.Gameplay.Battle
                 final += attackerHostility * rattled;
             final -= GetStacks(StatusEffectType.Plated);
             if (HasEffect(StatusEffectType.Intangible))
-                final = 1;                      // show 1 — Intangible stack consumed on actual hit
+                final = 1; // show 1 — Intangible stack consumed on actual hit
             return Mathf.Max(0, Mathf.RoundToInt(final));
         }
 
@@ -402,7 +434,8 @@ namespace Crookedile.Gameplay.Battle
         private void TriggerEffect(StatusEffect effect, StatusTriggerTiming timing)
         {
             // Effects that don't need stats
-            if (GetEffectTiming(effect.Type) != timing) return;
+            if (GetEffectTiming(effect.Type) != timing)
+                return;
 
             switch (effect.Type)
             {
@@ -413,28 +446,43 @@ namespace Crookedile.Gameplay.Battle
             }
         }
 
-        private void TriggerEffectWithStats(StatusEffect effect, StatusTriggerTiming timing, BattleStats ownerStats)
+        private void TriggerEffectWithStats(
+            StatusEffect effect,
+            StatusTriggerTiming timing,
+            BattleStats ownerStats
+        )
         {
-            if (GetEffectTiming(effect.Type) != timing) return;
+            if (GetEffectTiming(effect.Type) != timing)
+                return;
 
             switch (effect.Type)
             {
                 case StatusEffectType.Scandal:
-                    // Take damage at end of turn
-                    ownerStats.DamageResolve(effect.Stacks);
-                    GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Scandal dealt {effect.Stacks} damage");
+                    // Scandal lowers the opinion meter (through composure shield).
+                    int scandalRemainder = ownerStats.AbsorbThroughComposure(effect.Stacks);
+                    if (scandalRemainder > 0)
+                        EventBus.Publish(new DamageDealtEvent
+                        {
+                            Amount = scandalRemainder, IsToPlayer = true,
+                            AttackerName = "Scandal", SourceEnemyIndex = -1, TargetEnemyIndex = -1,
+                        });
+                    GameLogger.LogInfo<StatusEffectManager>(
+                        $"{_ownerName}: Scandal lowered opinion by {scandalRemainder}");
                     break;
 
                 case StatusEffectType.Regeneration:
-                    // Heal at end of turn
-                    ownerStats.RestoreResolve(effect.Stacks);
-                    GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Regeneration healed {effect.Stacks} Resolve");
+                    // Regeneration raises the opinion meter directly.
+                    EventBus.Publish(new OpinionRaisedDirectlyEvent { Amount = effect.Stacks });
+                    GameLogger.LogInfo<StatusEffectManager>(
+                        $"{_ownerName}: Regeneration raised opinion by {effect.Stacks}");
                     break;
 
                 case StatusEffectType.Ritual:
                     // Gain Composure at start of turn
                     ownerStats.GainComposure(effect.Stacks);
-                    GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Ritual granted {effect.Stacks} Composure");
+                    GameLogger.LogInfo<StatusEffectManager>(
+                        $"{_ownerName}: Ritual granted {effect.Stacks} Composure"
+                    );
                     break;
             }
         }
@@ -446,7 +494,7 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Scandal => StatusTriggerTiming.OnTurnEnd,
                 StatusEffectType.Regeneration => StatusTriggerTiming.OnTurnEnd,
                 StatusEffectType.Ritual => StatusTriggerTiming.OnTurnStart,
-                _ => StatusTriggerTiming.Passive
+                _ => StatusTriggerTiming.Passive,
             };
         }
 
@@ -462,9 +510,9 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Scandal => true,
                 StatusEffectType.Confused => true,
                 StatusEffectType.Silenced => true,
-                StatusEffectType.Stunned  => true,
-                StatusEffectType.Rattled  => true,
-                _ => false
+                StatusEffectType.Stunned => true,
+                StatusEffectType.Rattled => true,
+                _ => false,
             };
         }
 

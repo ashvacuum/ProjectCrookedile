@@ -12,8 +12,11 @@ namespace Crookedile.Gameplay.Battle
     {
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
-            if (ctx.Enemies == null) return false;
-            return ctx.Enemies.Any(e => e != null && e.StatusEffects != null && e.StatusEffects.HasAnyBuff());
+            if (ctx.Enemies == null)
+                return false;
+            return ctx.Enemies.Any(e =>
+                e != null && e.StatusEffects != null && e.StatusEffects.HasAnyBuff()
+            );
         }
 
         public override string ConditionLabel => "an enemy has a buff";

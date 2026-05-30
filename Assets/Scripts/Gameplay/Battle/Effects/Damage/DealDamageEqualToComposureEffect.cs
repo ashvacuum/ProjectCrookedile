@@ -1,6 +1,6 @@
 ﻿using System;
-using UnityEngine;
 using Crookedile.Data;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -13,7 +13,8 @@ namespace Crookedile.Gameplay.Battle
     public class DealDamageEqualToComposureEffect : BattleEffect
     {
         [Tooltip("Who receives the damage.")]
-        [SerializeField] private TargetType _target = TargetType.Opponent;
+        [SerializeField]
+        private TargetType _target = TargetType.Opponent;
 
         public override TargetType Target => _target;
 
@@ -25,6 +26,6 @@ namespace Crookedile.Gameplay.Battle
         }
 
         public override string GetDescription() =>
-            $"Deal damage equal to your Composure to {_target}";
+            $"Raise Opinion equal to your Composure (through {_target}'s composure)";
     }
 }

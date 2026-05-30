@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using Crookedile.Data.Enemy;
+using UnityEngine;
 
 namespace Crookedile.Data
 {
@@ -36,7 +36,9 @@ namespace Crookedile.Data
             public int startingOpinion = 50;
         }
 
-        [Tooltip("Ordered list of encounters. Player fights them in sequence, collecting rewards between each.")]
+        [Tooltip(
+            "Ordered list of encounters. Player fights them in sequence, collecting rewards between each."
+        )]
         public List<BattleRound> rounds = new List<BattleRound>();
 
         /// <summary>Number of rounds defined in this session.</summary>
@@ -47,7 +49,8 @@ namespace Crookedile.Data
         /// </summary>
         public BattleRound GetRound(int index)
         {
-            if (rounds == null || index < 0 || index >= rounds.Count) return null;
+            if (rounds == null || index < 0 || index >= rounds.Count)
+                return null;
             return rounds[index];
         }
 
@@ -65,7 +68,8 @@ namespace Crookedile.Data
         public List<List<EnemyData>> BuildBattleQueue()
         {
             var queue = new List<List<EnemyData>>();
-            if (rounds == null) return queue;
+            if (rounds == null)
+                return queue;
             foreach (var round in rounds)
             {
                 if (round != null)

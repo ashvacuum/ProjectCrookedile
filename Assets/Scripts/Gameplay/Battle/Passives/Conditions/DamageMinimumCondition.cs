@@ -14,11 +14,13 @@ namespace Crookedile.Gameplay.Battle
     {
         [Tooltip("The passive fires only if the triggering damage amount is at least this value.")]
         [MinValue(1)]
-        [SerializeField] private int _minAmount = 5;
+        [SerializeField]
+        private int _minAmount = 5;
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
-            if (!ctx.EventCtx.Is<DamageDealtEvent>()) return true; // not a damage event — don't block
+            if (!ctx.EventCtx.Is<DamageDealtEvent>())
+                return true; // not a damage event — don't block
             return ctx.EventCtx.As<DamageDealtEvent>().Amount >= _minAmount;
         }
 

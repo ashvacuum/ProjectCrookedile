@@ -1,8 +1,8 @@
+﻿using Crookedile.Core;
+using Crookedile.Gameplay.Battle;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Crookedile.Core;
-using Crookedile.Gameplay.Battle;
 
 namespace Crookedile.UI.Battle
 {
@@ -17,32 +17,39 @@ namespace Crookedile.UI.Battle
     {
         [Header("Opinion Bar")]
         [Tooltip("Filled Image (fill method = Horizontal) representing current opinion.")]
-        [SerializeField] private Image _barFill;
+        [SerializeField]
+        private Image _barFill;
 
         [Tooltip("Text label showing 'Opinion: X / Y'.")]
-        [SerializeField] private TMP_Text _valueText;
+        [SerializeField]
+        private TMP_Text _valueText;
 
         [Tooltip("RectTransform anchored at 50% of the bar width — marks the win threshold.")]
-        [SerializeField] private RectTransform _thresholdMarker;
+        [SerializeField]
+        private RectTransform _thresholdMarker;
 
         [Header("Turn Countdown")]
         [Tooltip("Text label showing 'Turn X / Y' or hidden when there is no turn limit.")]
-        [SerializeField] private TMP_Text _turnsText;
+        [SerializeField]
+        private TMP_Text _turnsText;
 
         [Tooltip("Color applied to the turns text when 2 or fewer turns remain.")]
-        [SerializeField] private Color _urgentColor = new Color(0.9f, 0.2f, 0.2f);
+        [SerializeField]
+        private Color _urgentColor = new Color(0.9f, 0.2f, 0.2f);
 
         [Tooltip("Normal color for the turns text.")]
-        [SerializeField] private Color _normalColor = Color.white;
+        [SerializeField]
+        private Color _normalColor = Color.white;
 
         [Tooltip("Color applied to the opinion bar when opinion falls below 30%.")]
-        [SerializeField] private Color _dangerBarColor = new Color(0.85f, 0.2f, 0.2f);
+        [SerializeField]
+        private Color _dangerBarColor = new Color(0.85f, 0.2f, 0.2f);
 
         [Tooltip("Normal opinion bar fill color.")]
-        [SerializeField] private Color _normalBarColor = new Color(0.2f, 0.75f, 0.35f);
+        [SerializeField]
+        private Color _normalBarColor = new Color(0.2f, 0.75f, 0.35f);
 
-        // ─── Public API ───────────────────────────────────────────────────────────
-
+        #region Public API
         /// <summary>
         /// Updates the opinion bar fill and text, and refreshes the turn countdown.
         /// Call from <see cref="BattleUI"/> in response to <see cref="OpinionChangedEvent"/>
@@ -55,7 +62,7 @@ namespace Crookedile.UI.Battle
             if (_barFill != null)
             {
                 _barFill.fillAmount = pct;
-                _barFill.color      = pct < 0.30f ? _dangerBarColor : _normalBarColor;
+                _barFill.color = pct < 0.30f ? _dangerBarColor : _normalBarColor;
             }
 
             if (_valueText != null)
@@ -64,11 +71,13 @@ namespace Crookedile.UI.Battle
             RefreshTurnCountdown(turnsElapsed, maxTurns);
         }
 
-        // ─── Private ──────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Private
         private void RefreshTurnCountdown(int turnsElapsed, int maxTurns)
         {
-            if (_turnsText == null) return;
+            if (_turnsText == null)
+                return;
 
             if (maxTurns <= 0)
             {
@@ -79,8 +88,10 @@ namespace Crookedile.UI.Battle
             _turnsText.gameObject.SetActive(true);
 
             int remaining = Mathf.Max(0, maxTurns - turnsElapsed);
-            _turnsText.text  = $"Judgment: Turn {turnsElapsed} / {maxTurns}";
+            _turnsText.text = $"Judgment: Turn {turnsElapsed} / {maxTurns}";
             _turnsText.color = remaining <= 2 ? _urgentColor : _normalColor;
         }
+
+        #endregion
     }
 }

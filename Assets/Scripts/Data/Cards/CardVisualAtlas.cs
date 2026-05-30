@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Crookedile.Data.Cards
 {
@@ -12,17 +12,23 @@ namespace Crookedile.Data.Cards
     {
         [Header("Atlas Settings")]
         [Tooltip("The texture atlas containing all card art")]
-        [SerializeField] private Texture2D atlasTexture;
+        [SerializeField]
+        private Texture2D atlasTexture;
 
         [Tooltip("Number of cards horizontally in the atlas")]
-        [SerializeField] private int columns = 6;
+        [SerializeField]
+        private int columns = 6;
 
         [Tooltip("Number of cards vertically in the atlas")]
-        [SerializeField] private int rows = 7;
+        [SerializeField]
+        private int rows = 7;
 
         [Header("Card Mappings")]
-        [Tooltip("Maps card IDs to their atlas index (0 = top-left, incrementing left-to-right, top-to-bottom)")]
-        [SerializeField] private List<CardAtlasEntry> cardMappings = new List<CardAtlasEntry>();
+        [Tooltip(
+            "Maps card IDs to their atlas index (0 = top-left, incrementing left-to-right, top-to-bottom)"
+        )]
+        [SerializeField]
+        private List<CardAtlasEntry> cardMappings = new List<CardAtlasEntry>();
 
         private Dictionary<string, Rect> uvCache;
 
@@ -118,7 +124,9 @@ namespace Crookedile.Data.Cards
             [Tooltip("The card's unique ID (from CardData)")]
             public string cardId;
 
-            [Tooltip("Index in the atlas (0 = top-left, incrementing left-to-right, top-to-bottom)")]
+            [Tooltip(
+                "Index in the atlas (0 = top-left, incrementing left-to-right, top-to-bottom)"
+            )]
             public int atlasIndex;
 
             [Tooltip("Optional reference to the CardData for easy lookup")]

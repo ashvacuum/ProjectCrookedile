@@ -14,24 +14,24 @@ namespace Crookedile.Data
         [Tooltip("Faith Leader - Composure combo specialist, +1 card draw at start")]
         public OriginBattleStats faithLeaderStats = new OriginBattleStats
         {
-            maxResolve = 85,        // Standard Resolve (HP)
-            maxActionPoints = 3     // Standard AP
+            maxResolve = 85, // Standard Resolve (HP)
+            maxActionPoints = 3, // Standard AP
         };
 
         [Header("Nepo Baby")]
         [Tooltip("Nepo Baby - Resource manipulation, starts with 4 AP instead of 3")]
         public OriginBattleStats nepoBabyStats = new OriginBattleStats
         {
-            maxResolve = 70,        // Standard Resolve (HP)
-            maxActionPoints = 3     // Extra action point (Family Connections passive)
+            maxResolve = 70, // Standard Resolve (HP)
+            maxActionPoints = 3, // Extra action point (Family Connections passive)
         };
 
         [Header("Actor (Celebrity)")]
         [Tooltip("Actor - Risk/reward specialist, first card each turn costs 1 less AP")]
         public OriginBattleStats actorStats = new OriginBattleStats
         {
-            maxResolve = 96,        // Standard Resolve (HP)
-            maxActionPoints = 3     // Standard AP
+            maxResolve = 96, // Standard Resolve (HP)
+            maxActionPoints = 3, // Standard AP
         };
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Crookedile.Data
                 OriginType.FaithLeader => faithLeaderStats,
                 OriginType.NepoBaby => nepoBabyStats,
                 OriginType.Actor => actorStats,
-                _ => new OriginBattleStats { maxResolve = 20, maxActionPoints = 3 }
+                _ => new OriginBattleStats { maxResolve = 20, maxActionPoints = 3 },
             };
         }
     }

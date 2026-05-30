@@ -15,10 +15,11 @@ namespace Crookedile.Gameplay.Battle
     {
         [Tooltip("The passive fires every N-th trigger event.")]
         [MinValue(2)]
-        [SerializeField] private int _n = 3;
+        [SerializeField]
+        private int _n = 3;
 
-        public override bool Evaluate(PassiveEvaluationContext ctx)
-            => _n >= 2 && ctx.TriggerFireCount % _n == 0;
+        public override bool Evaluate(PassiveEvaluationContext ctx) =>
+            _n >= 2 && ctx.TriggerFireCount % _n == 0;
 
         public override string ConditionLabel => $"every {_n}th time";
     }
