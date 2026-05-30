@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Crookedile.Core;
 using Crookedile.Utilities;
 
@@ -10,6 +10,7 @@ namespace Crookedile.Gameplay.Battle
     /// Rewards the player for maintaining a hostile crowd — each aggressor converts to defence.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class ComposureEqualToHostilityEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
@@ -7,6 +7,7 @@ namespace Crookedile.Gameplay.Battle
     /// Passes when the player's hand card count satisfies the configured comparison.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class HandSizeCondition : PassiveConditionBase
     {
         [Tooltip("How to compare the current hand size against the threshold.")]

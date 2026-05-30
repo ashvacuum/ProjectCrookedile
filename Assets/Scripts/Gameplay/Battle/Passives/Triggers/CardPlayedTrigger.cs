@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Crookedile.Data;
 using UnityEngine;
 using Sirenix.OdinInspector;
@@ -11,6 +11,7 @@ namespace Crookedile.Gameplay.Battle
     /// Optionally filters to a specific <see cref="CardType"/> (e.g. only Pressure cards).
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class CardPlayedTrigger : PassiveTriggerBase
     {
         [Tooltip("Enable to restrict this trigger to cards of a specific type.")]

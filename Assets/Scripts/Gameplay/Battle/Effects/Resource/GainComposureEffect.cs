@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Data;
@@ -11,6 +11,7 @@ namespace Crookedile.Gameplay.Battle
     /// The amount can be sourced from the runtime context (e.g. equal to last damage dealt).
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class GainComposureEffect : BattleEffect
     {
         [Tooltip("Base Composure to gain. Ignored when Amount Source is not Fixed.")]

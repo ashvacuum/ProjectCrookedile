@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 using Crookedile.Core;
-using Crookedile.Managers;
 using Crookedile.Utilities;
 
 namespace Crookedile.UI.Battle
@@ -38,6 +38,10 @@ namespace Crookedile.UI.Battle
         [Tooltip("Root battle canvas. The discarding card is re-parented here so it can\n" +
                  "fly past the hand-container clip boundary without being cropped.")]
         [SerializeField] private Canvas _rootCanvas;
+
+        [Tooltip("Intermediate parent for cards during draw/discard animations — sits outside " +
+                 "the hand container so cards aren't clipped.")]
+        [SerializeField] private Transform _cardHandParent;
 
         [Tooltip("Seconds between successive card launches in a draw batch.\n" +
                  "Set to 0 to launch all cards simultaneously.")]
@@ -81,7 +85,19 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void AnimateDiscardOut(CardButton btn, Action onComplete)
         {
-            StartCoroutine(DiscardFlyRoutine(btn, onComplete));
+            btn.enabled = false;
+            if (btn.TryGetComponent<CanvasGroup>(out var cg))
+                cg.blocksRaycasts = false;
+
+            if (_cardHandParent != null)
+                btn.transform.SetParent(_cardHandParent, false);
+
+            DOVirtual.DelayedCall(_discardDuration, () =>
+            {
+                GameLogger.LogVerbose("Card", $"Discard animation complete for '{btn.CardData?.CardName}'", this);
+                btn.enabled = true;
+                onComplete?.Invoke();
+            }).SetLink(gameObject);
         }
 
         // ─── Card Grant API ───────────────────────────────────────────────────────
@@ -95,7 +111,41 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void AnimateCardGranted(CardButton btn, Transform targetZone, Action onArrival)
         {
-            StartCoroutine(CardGrantedRoutine(btn, targetZone, onArrival));
+            btn.enabled = false;
+            if (btn.TryGetComponent<CanvasGroup>(out var cg))
+                cg.blocksRaycasts = false;
+
+            var rt = btn.GetComponent<RectTransform>();
+            if (_rootCanvas != null)
+                btn.transform.SetParent(_rootCanvas.transform, false);
+            rt.anchoredPosition = Vector2.zero;
+            btn.transform.localScale = Vector3.zero;
+            btn.gameObject.SetActive(true);
+
+            Vector3 endPos = targetZone != null ? targetZone.position : btn.transform.position;
+
+            DOTween.Sequence().SetLink(gameObject)
+                // Phase 1: pop scale-in with overshoot (0 → 1.1 → 1.0)
+                .Append(btn.transform.DOScale(1.1f, _grantScaleInDuration * 0.8f).SetEase(Ease.Linear))
+                .Append(btn.transform.DOScale(1f,   _grantScaleInDuration * 0.2f).SetEase(Ease.Linear))
+                // Phase 2: hold; play feedback at the start
+                .AppendCallback(() =>
+                {
+                    GameLogger.LogInfo("Card", $"Grant animation holding for '{btn.CardData?.CardName}'", this);
+                })
+                .AppendInterval(_grantHoldDuration)
+                // Phase 3: fly to zone while shrinking (ease-in² = accelerates toward zone)
+                .Append(btn.transform.DOMove(endPos, _grantFlyDuration).SetEase(Ease.InQuad))
+                .Join(btn.transform.DOScale(0f, _grantFlyDuration))
+                .OnComplete(() =>
+                {
+                    btn.gameObject.SetActive(false);
+                    btn.transform.localScale = Vector3.one;
+                    btn.enabled = true;
+                    if (cg != null) cg.blocksRaycasts = true;
+                    GameLogger.LogInfo("Card", $"Grant animation complete for '{btn.CardData?.CardName}'", this);
+                    onArrival?.Invoke();
+                });
         }
 
         // ─── Internal — Draw ──────────────────────────────────────────────────────
@@ -120,15 +170,15 @@ namespace Crookedile.UI.Battle
             {
                 if (btn == null) continue;
                 
-                if (_rootCanvas != null)
-                    btn.transform.SetParent(FeedbackManager.Instance.CardHandParent, false);
+                if (_cardHandParent != null)
+                    btn.transform.SetParent(_cardHandParent, false);
 
-                FeedbackManager.Instance.Play("DrawHand");
-                GameLogger.LogVerbose("Card", $"Draw feedback played for '{btn.CardData?.CardName}'", this);
+                GameLogger.LogVerbose("Card", $"Draw animation started for '{btn.CardData?.CardName}'", this);
                 btn.gameObject.SetActive(true);
                 yield return new WaitForSeconds(_drawStaggerDelay);
-                btn.transform.localScale = Vector3.one;
+                btn.transform.localScale = Vector3.zero;
                 btn.transform.SetParent(container, false);
+                btn.transform.DOScale(Vector3.one, 0.18f).SetEase(Ease.OutBack);
                 btn.transform.SetSiblingIndex(0);   // enter behind all existing cards; ArrangeCards restores proper z-order
                 container.GetComponent<CardHandLayout>()?.ArrangeCards(buttons);
             }
@@ -136,89 +186,5 @@ namespace Crookedile.UI.Battle
             container.GetComponent<CardHandLayout>()?.ArrangeCards(buttons);
         }
 
-        // ─── Internal — Discard ───────────────────────────────────────────────────
-
-        private IEnumerator DiscardFlyRoutine(CardButton btn, Action onComplete)
-        {
-            // Disable CardButton so its Update() lerp doesn't fight our position coroutine.
-            btn.enabled = false;
-
-            GameLogger.LogInfo("Card", $"Discard animation started for '{btn.CardData?.CardName}'", this);
-
-            // Re-parent to root canvas PRESERVING world position so the card stays visually
-            // in place. worldPositionStays: true avoids anchor / coordinate-space mismatch
-            // and means we can lerp transform.position directly without any conversion.
-            if (_rootCanvas != null)
-                btn.transform.SetParent(FeedbackManager.Instance.CardHandParent, false);
-            // Prevent hover / drag interactions while flying.
-            if (btn.TryGetComponent<CanvasGroup>(out var cg))
-                cg.blocksRaycasts = false;
-
-            FeedbackManager.Instance.Play("DiscardHand");
-
-            yield return new WaitForSeconds(_discardDuration);
-            GameLogger.LogVerbose("Card", $"Discard animation complete for '{btn.CardData?.CardName}'", this);
-            btn.enabled = true;
-            onComplete?.Invoke();
-        }
-
-        // ─── Internal — Card Grant ────────────────────────────────────────────────
-
-        private IEnumerator CardGrantedRoutine(CardButton btn, Transform targetZone, Action onArrival)
-        {
-            btn.enabled = false;
-            if (btn.TryGetComponent<CanvasGroup>(out var cg))
-                cg.blocksRaycasts = false;
-
-            // Place at screen center, invisible, parented to the root canvas overlay.
-            var rt = btn.GetComponent<RectTransform>();
-            if (_rootCanvas != null)
-                btn.transform.SetParent(_rootCanvas.transform, false);
-            rt.anchoredPosition = Vector2.zero;
-            btn.transform.localScale = Vector3.zero;
-            btn.gameObject.SetActive(true);
-
-            // Phase 1 — pop scale-in with a slight overshoot (0 → 1.1 → 1.0).
-            float t = 0f;
-            while (t < _grantScaleInDuration)
-            {
-                t += Time.deltaTime;
-                float frac  = Mathf.Clamp01(t / _grantScaleInDuration);
-                // Overshoot peaks at 80% of the phase, then settles to 1.
-                float scale = frac < 0.8f
-                    ? Mathf.Lerp(0f, 1.1f, frac / 0.8f)
-                    : Mathf.Lerp(1.1f, 1f, (frac - 0.8f) / 0.2f);
-                btn.transform.localScale = Vector3.one * scale;
-                yield return null;
-            }
-            btn.transform.localScale = Vector3.one;
-
-            // Phase 2 — hold: play feedback then wait so the player can read the card.
-            FeedbackManager.Instance?.Play("GrantCard");
-            GameLogger.LogInfo("Card", $"Grant animation holding for '{btn.CardData?.CardName}'", this);
-            yield return new WaitForSeconds(_grantHoldDuration);
-
-            // Phase 3 — fly to target zone while shrinking (ease-in² → accelerates toward zone).
-            Vector3 startPos = btn.transform.position;
-            Vector3 endPos   = targetZone != null ? targetZone.position : startPos;
-            t = 0f;
-            while (t < _grantFlyDuration)
-            {
-                t += Time.deltaTime;
-                float frac  = Mathf.Clamp01(t / _grantFlyDuration);
-                float eased = frac * frac;   // ease-in: card accelerates toward zone
-                btn.transform.position   = Vector3.Lerp(startPos, endPos, eased);
-                btn.transform.localScale = Vector3.one * (1f - frac);
-                yield return null;
-            }
-
-            btn.gameObject.SetActive(false);
-            btn.transform.localScale = Vector3.one;   // reset for pool reuse
-            btn.enabled = true;
-            if (cg != null) cg.blocksRaycasts = true;
-
-            GameLogger.LogInfo("Card", $"Grant animation complete for '{btn.CardData?.CardName}'", this);
-            onArrival?.Invoke();
-        }
     }
 }

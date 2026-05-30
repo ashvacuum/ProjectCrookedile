@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 
 namespace Crookedile.Gameplay.Battle
@@ -7,6 +7,7 @@ namespace Crookedile.Gameplay.Battle
     /// Passes when at least one active enemy has at least one debuff status effect.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class EnemyHasAnyDebuffCondition : PassiveConditionBase
     {
         public override bool Evaluate(PassiveEvaluationContext ctx)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
@@ -16,6 +16,7 @@ namespace Crookedile.Gameplay.Battle
     /// need for the <c>[SerializeReference] List&lt;CardEffect&gt;</c> workaround.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class ChanceRollEffect : BattleEffect
     {
         [Range(1, 100)]

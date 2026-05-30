@@ -22,6 +22,7 @@ namespace Crookedile.Gameplay.Battle
     /// <see cref="ResetForBattle"/> at the start of each battle.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class BattlePassive
     {
         [Tooltip("Display name used in logs and tooltips.")]

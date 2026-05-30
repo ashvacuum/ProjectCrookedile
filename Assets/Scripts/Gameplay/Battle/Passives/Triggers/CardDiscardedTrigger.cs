@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Fires when the player discards a card (not via exhaust).</summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class CardDiscardedTrigger : PassiveTriggerBase
     {
         public override bool Matches(PassiveEventContext ctx)

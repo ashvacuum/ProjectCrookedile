@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -13,6 +13,7 @@ namespace Crookedile.Gameplay.Battle
     /// (e.g. equal to the last damage dealt — lifesteal-style chaining).
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class DealDamageEffect : BattleEffect
     {
         [Tooltip("Who receives the damage.")]

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Crookedile.Data;
 using UnityEngine;
 
@@ -13,6 +13,7 @@ namespace Crookedile.Gameplay.Battle
     /// This condition is useful when combining with other conditions in a list.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class IfStatusTypeCondition : PassiveConditionBase
     {
         [Tooltip("The passive fires only if the triggering event applied this status type.")]

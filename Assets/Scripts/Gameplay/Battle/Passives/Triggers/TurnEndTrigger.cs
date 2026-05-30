@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Fires at the end of each player turn.</summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class TurnEndTrigger : PassiveTriggerBase
     {
         public override bool Matches(PassiveEventContext ctx)

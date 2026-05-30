@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Fires when the player takes resolve damage greater than zero.</summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class DamageTakenTrigger : PassiveTriggerBase
     {
         public override bool Matches(PassiveEventContext ctx)

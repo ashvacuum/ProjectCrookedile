@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -9,6 +9,7 @@ namespace Crookedile.Gameplay.Battle
     /// Example: threshold 50 means the player is at half health or lower.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class ResolveBelowCondition : PassiveConditionBase
     {
         [Tooltip("Fire only when current resolve is at or below this percentage of max resolve.")]

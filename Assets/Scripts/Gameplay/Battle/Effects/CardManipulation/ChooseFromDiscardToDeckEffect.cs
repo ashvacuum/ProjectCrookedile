@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -8,6 +8,7 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Player chooses cards from their discard pile and shuffles them back into the draw pile.</summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class ChooseFromDiscardToDeckEffect : BattleEffect
     {
         [MinValue(1)]

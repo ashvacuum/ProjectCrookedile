@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Data.Cards;
@@ -8,6 +8,7 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Adds one or more copies of a specific card to the player's draw pile.</summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class AddCardToDeckEffect : BattleEffect
     {
         [Required]

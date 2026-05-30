@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 using System;
+using DG.Tweening;
 using MoreMountains.Feedbacks;
 using Crookedile.Data.Cards;
 using Crookedile.Data;
@@ -69,8 +70,8 @@ namespace Crookedile.UI.Battle
         [Header("Hover Behaviour")] [Tooltip("How much to scale up on hover (1.1 = 10% bigger)")] [SerializeField]
         private float hoverScale = 1.12f;
 
-        [Tooltip("How fast the scale animates")] [SerializeField]
-        private float hoverLerpSpeed = 12f;
+        [Tooltip("Duration in seconds for hover scale/lift/rotation tweens.")] [SerializeField]
+        private float hoverTweenDuration = 0.15f;
 
         [Tooltip("Gap in pixels between the card's bottom edge and the screen bottom when hovered. " +
                  "All cards share this height regardless of their arc position.")]
@@ -145,10 +146,7 @@ namespace Crookedile.UI.Battle
 
         private Vector3 baseScale;
         private Vector3 basePosition;
-        private Vector3 targetScale;
-        private Vector3 targetPosition;
         private Quaternion baseRotation;
-        private Quaternion targetRotation;
 
         private int baseSiblingIndex;
 
@@ -188,28 +186,9 @@ namespace Crookedile.UI.Battle
 
         private void Awake()
         {
-            baseScale = Vector3.one;
+            baseScale    = Vector3.one;
             basePosition = transform.localPosition;
-            targetScale = Vector3.one;
-            targetPosition = basePosition;
             baseRotation = transform.localRotation;
-            targetRotation = baseRotation;
-        }
-
-        private void Update()
-        {
-            // Smooth hover scale, lift, and rotation.
-            // Position and rotation lerps are skipped until SetBasePosition() has been called —
-            // this prevents cards spawned inside layout groups from animating before the layout
-            // pass has assigned their real slot positions and arc-tilt angles.
-            transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * hoverLerpSpeed);
-            if (_basePositionSet)
-            {
-                transform.localPosition =
-                    Vector3.Lerp(transform.localPosition, targetPosition, Time.deltaTime * hoverLerpSpeed);
-                transform.localRotation = Quaternion.Lerp(transform.localRotation, targetRotation,
-                    Time.deltaTime * hoverLerpSpeed);
-            }
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
@@ -231,13 +210,11 @@ namespace Crookedile.UI.Battle
             _isCostDiscounted = isCostDiscounted;
             isPlayable = !forceUnplayable && CanAfford(currentActionPoints);
 
-            baseScale = Vector3.one;
-            basePosition = transform.localPosition;
-            targetScale = baseScale;
-            targetPosition = basePosition;
-            baseRotation = transform.localRotation;
-            targetRotation = baseRotation;
-            _basePositionSet = false; // cleared until SetBasePosition() is called by the layout
+            transform.DOKill();
+            baseScale        = Vector3.one;
+            basePosition     = transform.localPosition;
+            baseRotation     = transform.localRotation;
+            _basePositionSet = false;
 
             UpdateDisplay();
         }
@@ -274,10 +251,11 @@ namespace Crookedile.UI.Battle
         {
             basePosition = localPos;
             baseRotation = Quaternion.Euler(0f, 0f, -angleDeg);
-            if (!isHovered)
+            if (!isHovered && _basePositionSet)
             {
-                targetPosition = localPos;
-                targetRotation = baseRotation;
+                transform.DOKill();
+                transform.DOLocalMove(localPos, hoverTweenDuration).SetEase(Ease.OutQuad);
+                transform.DOLocalRotateQuaternion(baseRotation, hoverTweenDuration).SetEase(Ease.OutQuad);
             }
         }
 
@@ -289,19 +267,10 @@ namespace Crookedile.UI.Battle
         public void SetBasePosition(Vector3 position)
         {
             _basePositionSet = true;
-            basePosition = position;
-
-            // Capture the arc-tilt rotation that CardHandLayout wrote to localRotation
-            // immediately before calling this method. This is the card's canonical resting angle.
-            baseRotation = transform.localRotation;
-
-            // Only update targets if not mid-hover; otherwise the card would snap back
-            // to its new base values while the player is still mousing over it.
-            if (!isHovered)
-            {
-                targetPosition = position;
-                targetRotation = baseRotation;
-            }
+            basePosition     = position;
+            // Capture the arc-tilt rotation that CardHandLayout wrote to localRotation.
+            baseRotation     = transform.localRotation;
+            // Card is already at this position (placed by ApplyToCard). Just record the base.
         }
 
         /// <summary>
@@ -336,17 +305,16 @@ namespace Crookedile.UI.Battle
             if (isHovered || _isDragging) return;
             isHovered = true;
 
-            targetScale    = baseScale * hoverScale;
-            targetPosition = new Vector3(basePosition.x, ComputeHoverY(), basePosition.z);
-            targetRotation = Quaternion.identity; // straighten the arc tilt on hover
+            transform.DOKill();
+            transform.DOScale(baseScale * hoverScale, hoverTweenDuration).SetEase(Ease.OutQuad);
+            transform.DOLocalMove(new Vector3(basePosition.x, ComputeHoverY(), basePosition.z),
+                                  hoverTweenDuration).SetEase(Ease.OutQuad);
+            transform.DOLocalRotateQuaternion(Quaternion.identity, hoverTweenDuration).SetEase(Ease.OutQuad);
 
             // Bring this card in front of all its neighbours while hovered.
-            // CardHandLayout.SetSiblingOrder() restores natural z-order on the next hand rebuild.
             transform.SetAsLastSibling();
 
             hoverEnterFeedback?.PlayFeedbacks();
-
-            // Fan the hand apart from this card — left neighbours shift left, right shift right.
             GetComponentInParent<CardHandLayout>()?.SetHoverSpread(true, this);
         }
 
@@ -355,16 +323,13 @@ namespace Crookedile.UI.Battle
             if (!isHovered) return;
             isHovered = false;
 
-            targetScale    = baseScale;
-            targetPosition = basePosition;
-            targetRotation = baseRotation; // return to arc tilt
+            transform.DOKill();
+            transform.DOScale(baseScale, hoverTweenDuration).SetEase(Ease.OutQuad);
+            transform.DOLocalMove(basePosition, hoverTweenDuration).SetEase(Ease.OutQuad);
+            transform.DOLocalRotateQuaternion(baseRotation, hoverTweenDuration).SetEase(Ease.OutQuad);
             transform.SetSiblingIndex(baseSiblingIndex);
 
             hoverExitFeedback?.PlayFeedbacks();
-
-            // Restore the hand to its original width.
-            // SetHoverSpread(false) calls SetLayoutTarget on all cards, which (since !isHovered
-            // is now true for this card too) also corrects targetPosition to the un-spread base.
             GetComponentInParent<CardHandLayout>()?.SetHoverSpread(false);
         }
 
@@ -406,9 +371,10 @@ namespace Crookedile.UI.Battle
             GameLogger.LogInfo("Card", $"Drag started: {cardData?.CardName}", this);
 
             // Clear hover state; card stays at its arc position (no re-parenting or cursor-follow).
-            isHovered      = false;
-            targetScale    = baseScale;
-            targetRotation = Quaternion.identity;
+            isHovered = false;
+            transform.DOKill();
+            transform.DOScale(baseScale, hoverTweenDuration).SetEase(Ease.OutQuad);
+            transform.DOLocalRotateQuaternion(Quaternion.identity, hoverTweenDuration).SetEase(Ease.OutQuad);
 
             // Drag bypasses OnPointerExit so we must collapse the spread manually here.
             GetComponentInParent<CardHandLayout>()?.SetHoverSpread(false);
@@ -474,17 +440,19 @@ namespace Crookedile.UI.Battle
                 else
                 {
                     GameLogger.LogWarning("Card", $"Single-target '{cardData?.CardName}' released in empty space — cancelled", this);
-                    targetPosition = basePosition;
-                    targetScale = baseScale;
-                    targetRotation = baseRotation;
+                    transform.DOKill();
+                    transform.DOLocalMove(basePosition, hoverTweenDuration).SetEase(Ease.OutQuad);
+                    transform.DOScale(baseScale, hoverTweenDuration).SetEase(Ease.OutQuad);
+                    transform.DOLocalRotateQuaternion(baseRotation, hoverTweenDuration).SetEase(Ease.OutQuad);
                 }
             }
             else
             {
                 GameLogger.LogVerbose("Card", $"Drag ended below threshold for '{cardData?.CardName}' — cancelled", this);
-                targetPosition = basePosition;
-                targetScale = baseScale;
-                targetRotation = baseRotation;
+                transform.DOKill();
+                transform.DOLocalMove(basePosition, hoverTweenDuration).SetEase(Ease.OutQuad);
+                transform.DOScale(baseScale, hoverTweenDuration).SetEase(Ease.OutQuad);
+                transform.DOLocalRotateQuaternion(baseRotation, hoverTweenDuration).SetEase(Ease.OutQuad);
             }
         }
 
@@ -506,8 +474,9 @@ namespace Crookedile.UI.Battle
             _isTargeting = true;
             IsTargeting = true;
 
-            targetScale = baseScale * hoverScale;
-            targetRotation = Quaternion.identity;
+            transform.DOKill();
+            transform.DOScale(baseScale * hoverScale, hoverTweenDuration).SetEase(Ease.OutQuad);
+            transform.DOLocalRotateQuaternion(Quaternion.identity, hoverTweenDuration).SetEase(Ease.OutQuad);
 
             var rt = GetComponent<RectTransform>();
             CardTargetingArrow.Instance?.Show(rt, eventData.pressEventCamera);
@@ -519,7 +488,8 @@ namespace Crookedile.UI.Battle
             _isTargeting = false;
             IsTargeting = false;
 
-            targetScale = baseScale;
+            transform.DOKill();
+            transform.DOScale(baseScale, hoverTweenDuration).SetEase(Ease.OutQuad);
 
             CardTargetingArrow.Instance?.Hide();
             EnemySlotUI.ClearTargetedSlot();
@@ -696,6 +666,7 @@ namespace Crookedile.UI.Battle
 
         private void OnDestroy()
         {
+            transform.DOKill();
             if (DraggedCard == this) DraggedCard = null;
             if (_isTargeting)
             {

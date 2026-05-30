@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Crookedile.Core;
@@ -20,6 +20,7 @@ namespace Crookedile.Gameplay.Battle
     /// post-play rearrange pass, no extra UI refresh logic is required.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class MakeAllCardsFreeNextPlayEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)

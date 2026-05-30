@@ -198,6 +198,28 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
+    /// Published by <c>BattleManager</c> when a card with a VFX asset is played.
+    /// The UI layer subscribes, spawns the VFX animation, and fires
+    /// <see cref="CardVFXApplyEffectsEvent"/> at the hit frame and
+    /// <see cref="CardVFXCompleteEvent"/> when the animation finishes.
+    /// </summary>
+    public struct CardPlayVFXRequestedEvent : IGameEvent
+    {
+        public CardData Card;
+        public int[]    AmountOverrides;
+    }
+
+    /// <summary>
+    /// Published by the UI VFX layer at the animation's hit frame.
+    /// <c>BattleManager</c> subscribes and calls <c>ApplyCardEffects</c> on receipt.
+    /// </summary>
+    public struct CardVFXApplyEffectsEvent : IGameEvent
+    {
+        public CardData Card;
+        public int[]    AmountOverrides;
+    }
+
+    /// <summary>
     /// Published by <c>DeckManager.DiscardCard()</c> when a card moves from hand to the discard pile.
     /// </summary>
     public struct CardDiscardedEvent : IGameEvent

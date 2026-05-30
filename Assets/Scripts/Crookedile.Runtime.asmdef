@@ -1,0 +1,17 @@
+{
+    "name": "Crookedile.Runtime",
+    "rootNamespace": "Crookedile.Gameplay",
+    "references": [
+        "Crookedile.Core",
+        "Crookedile.Utilities"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

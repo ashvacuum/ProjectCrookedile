@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Crookedile.Data;
 
@@ -9,6 +9,7 @@ namespace Crookedile.Gameplay.Battle
     /// All damage modifiers (Strength, Vulnerable, Hostility multiplier) still apply.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class DealDamageEqualToComposureEffect : BattleEffect
     {
         [Tooltip("Who receives the damage.")]

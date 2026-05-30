@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
@@ -13,6 +13,7 @@ namespace Crookedile.Gameplay.Battle
     /// when and how often this fires (e.g. TurnStartTrigger each turn).
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class DiscardHandAndRedrawEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -11,6 +11,7 @@ namespace Crookedile.Gameplay.Battle
     /// just-discarded cards back into their hand via the CardChoicePanel.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class DiscardHandEffect : BattleEffect
     {
         [MinValue(0)]

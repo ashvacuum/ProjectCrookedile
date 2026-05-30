@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -16,6 +16,7 @@ namespace Crookedile.Gameplay.Battle
     /// when the source is a player card/passive.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class RaiseAllOpponentsHostilityEffect : BattleEffect
     {
         [MinValue(1)]

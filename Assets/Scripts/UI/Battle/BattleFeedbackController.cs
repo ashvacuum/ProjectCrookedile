@@ -3,6 +3,7 @@ using UnityEngine;
 using Crookedile.Core;
 using Crookedile.Gameplay.Battle;
 using Crookedile.Data.Audio;
+using Crookedile.Data.VFX;
 using Crookedile.Managers;
 
 namespace Crookedile.UI.Battle
@@ -54,6 +55,7 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<ComposureChangedEvent>(OnComposureChanged);
             EventBus.Subscribe<EnemyHostilityChangedEvent>(OnHostilityChanged);
             EventBus.Subscribe<ActionPointsChangedEvent>(OnAPChanged);
+            EventBus.Subscribe<CardPlayVFXRequestedEvent>(OnCardPlayVFXRequested);
         }
 
         private void OnDisable()
@@ -75,6 +77,7 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<ComposureChangedEvent>(OnComposureChanged);
             EventBus.Unsubscribe<EnemyHostilityChangedEvent>(OnHostilityChanged);
             EventBus.Unsubscribe<ActionPointsChangedEvent>(OnAPChanged);
+            EventBus.Unsubscribe<CardPlayVFXRequestedEvent>(OnCardPlayVFXRequested);
         }
 
         // ─── Event Handlers ───────────────────────────────────────────────────
@@ -154,6 +157,31 @@ namespace Crookedile.UI.Battle
                 VFXManager.Instance?.Play(evt.Move.MoveVFX, _battleUI?.PlayerSlotTransform);
         }
 
+        private void OnCardPlayVFXRequested(CardPlayVFXRequestedEvent evt)
+        {
+            // Resolve VFX spawn target: prefer the last-targeted enemy slot, fall back to the card's origin rect.
+            var vfxTarget = EnemySlotUI.LastTargetedRect ?? CardButton.LastPlayedRect;
+
+            var vfx = VFXManager.Instance?.PlayAndSetInstance(evt.Card.CardVFX,
+                vfxTarget,
+                new BattleVFXContext
+                {
+                    OnApplyEffects = () => EventBus.Publish(new CardVFXApplyEffectsEvent
+                    {
+                        Card            = evt.Card,
+                        AmountOverrides = evt.AmountOverrides
+                    }),
+                    OnComplete = () => EventBus.Publish(new CardVFXCompleteEvent { Card = evt.Card })
+                });
+
+            if (vfx == null)
+            {
+                // VFX failed to spawn — fire both events immediately so BattleManager isn't left blocked.
+                EventBus.Publish(new CardVFXApplyEffectsEvent { Card = evt.Card, AmountOverrides = evt.AmountOverrides });
+                EventBus.Publish(new CardVFXCompleteEvent { Card = evt.Card });
+            }
+        }
+
         private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
             => Play(BattleAudioTrigger.EnemyIntentDeclared, _battleUI?.GetEnemySlotTransform(evt.EnemyIndex));
 
@@ -188,8 +216,8 @@ namespace Crookedile.UI.Battle
 
             if (entry.Visual != null)
             {
-                if (target != null) entry.Visual.Play(target);
-                else                entry.Visual.Play();
+                if (target != null) VFXManager.Instance?.Play(entry.Visual, target);
+                else                VFXManager.Instance?.Play(entry.Visual, (RectTransform)null);
             }
         }
     }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -9,6 +9,7 @@ namespace Crookedile.Gameplay.Battle
     /// passes only if the damage amount in the triggering event is at least the configured minimum.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class DamageMinimumCondition : PassiveConditionBase
     {
         [Tooltip("The passive fires only if the triggering damage amount is at least this value.")]

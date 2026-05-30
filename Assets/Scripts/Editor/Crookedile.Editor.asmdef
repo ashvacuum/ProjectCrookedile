@@ -1,0 +1,20 @@
+{
+    "name": "Crookedile.Editor",
+    "rootNamespace": "Crookedile.Editor",
+    "references": [
+        "Crookedile.Core",
+        "Crookedile.Utilities",
+        "Crookedile.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

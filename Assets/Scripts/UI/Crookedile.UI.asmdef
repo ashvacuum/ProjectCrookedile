@@ -1,0 +1,23 @@
+{
+    "name": "Crookedile.UI",
+    "rootNamespace": "Crookedile.UI",
+    "references": [
+        "Crookedile.Core",
+        "Crookedile.Utilities",
+        "Crookedile.Runtime",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "Unity.InputSystem",
+        "DOTween.Modules",
+        "MoreMountains.Tools"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
