@@ -257,11 +257,11 @@ namespace Crookedile.Gameplay.Battle
             // Assemble BattleSetup
             var setup = new BattleSetup
             {
-                playerOrigin    = playerOrigin,
-                originStats     = originStats,
-                playerDeck      = playerDeck,
-                enemies         = battleEnemies,
-                maxTurns        = roundMaxTurns > 0 ? roundMaxTurns : (int?)null,
+                playerOrigin = playerOrigin,
+                originStats = originStats,
+                playerDeck = playerDeck,
+                enemies = battleEnemies,
+                maxTurns = roundMaxTurns > 0 ? roundMaxTurns : (int?)null,
                 startingOpinion = roundStartOpinion,
             };
 

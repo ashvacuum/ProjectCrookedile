@@ -637,36 +637,46 @@ namespace Crookedile.Gameplay.Battle
         )
         {
             StatusEffectManager attackerStatusMgr = GetStatusEffectManager(attacker);
-            StatusEffectManager targetStatusMgr   = GetStatusEffectManager(target);
+            StatusEffectManager targetStatusMgr = GetStatusEffectManager(target);
 
-            int modifiedDamage = attackerStatusMgr != null
-                ? attackerStatusMgr.ModifyDamageDealt(rawDamage) : rawDamage;
+            int modifiedDamage =
+                attackerStatusMgr != null
+                    ? attackerStatusMgr.ModifyDamageDealt(rawDamage)
+                    : rawDamage;
 
-            modifiedDamage = targetStatusMgr != null
-                ? targetStatusMgr.ModifyDamageTaken(modifiedDamage, attacker,
-                    isAttackerPlayer: attacker == _playerStats)
-                : modifiedDamage;
+            modifiedDamage =
+                targetStatusMgr != null
+                    ? targetStatusMgr.ModifyDamageTaken(
+                        modifiedDamage,
+                        attacker,
+                        isAttackerPlayer: attacker == _playerStats
+                    )
+                    : modifiedDamage;
 
             if (attacker != _playerStats && attacker.CurrentHostility > 0)
                 modifiedDamage = Mathf.RoundToInt(
-                    modifiedDamage * Mathf.Max(0.1f, attacker.HostilityDamageMultiplier));
+                    modifiedDamage * Mathf.Max(0.1f, attacker.HostilityDamageMultiplier)
+                );
 
             // Composure absorbs first; remainder reaches the opinion meter.
             int remainder = target.AbsorbThroughComposure(modifiedDamage);
             GameLogger.LogInfo<EffectResolver>(
-                $"Pressure {remainder} reached opinion (raw: {rawDamage}, modified: {modifiedDamage})");
+                $"Pressure {remainder} reached opinion (raw: {rawDamage}, modified: {modifiedDamage})"
+            );
 
             if (remainder > 0)
             {
                 bool isPlayerAttacking = attacker == _playerStats;
-                EventBus.Publish(new DamageDealtEvent
-                {
-                    Amount           = remainder,
-                    IsToPlayer       = target == _playerStats,
-                    AttackerName     = isPlayerAttacking ? "Player" : _attackerName,
-                    SourceEnemyIndex = isPlayerAttacking ? -1 : _attackerEnemyIndex,
-                    TargetEnemyIndex = isPlayerAttacking ? _attackerEnemyIndex : -1,
-                });
+                EventBus.Publish(
+                    new DamageDealtEvent
+                    {
+                        Amount = remainder,
+                        IsToPlayer = target == _playerStats,
+                        AttackerName = isPlayerAttacking ? "Player" : _attackerName,
+                        SourceEnemyIndex = isPlayerAttacking ? -1 : _attackerEnemyIndex,
+                        TargetEnemyIndex = isPlayerAttacking ? _attackerEnemyIndex : -1,
+                    }
+                );
             }
 
             if (ctx != null)

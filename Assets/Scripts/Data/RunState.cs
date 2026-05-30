@@ -132,7 +132,8 @@ namespace Crookedile.Data
         }
 
         /// <summary>Records that the current battle was won (advances meta state).</summary>
-        public void RecordBattleVictory() { /* meta popularity update deferred */ }
+        public void RecordBattleVictory() { /* meta popularity update deferred */
+        }
 
         /// <summary>
         /// Advances to the next battle in <see cref="BattleQueue"/>.

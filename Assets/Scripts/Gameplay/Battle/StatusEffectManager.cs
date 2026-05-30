@@ -461,20 +461,27 @@ namespace Crookedile.Gameplay.Battle
                     // Scandal lowers the opinion meter (through composure shield).
                     int scandalRemainder = ownerStats.AbsorbThroughComposure(effect.Stacks);
                     if (scandalRemainder > 0)
-                        EventBus.Publish(new DamageDealtEvent
-                        {
-                            Amount = scandalRemainder, IsToPlayer = true,
-                            AttackerName = "Scandal", SourceEnemyIndex = -1, TargetEnemyIndex = -1,
-                        });
+                        EventBus.Publish(
+                            new DamageDealtEvent
+                            {
+                                Amount = scandalRemainder,
+                                IsToPlayer = true,
+                                AttackerName = "Scandal",
+                                SourceEnemyIndex = -1,
+                                TargetEnemyIndex = -1,
+                            }
+                        );
                     GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: Scandal lowered opinion by {scandalRemainder}");
+                        $"{_ownerName}: Scandal lowered opinion by {scandalRemainder}"
+                    );
                     break;
 
                 case StatusEffectType.Regeneration:
                     // Regeneration raises the opinion meter directly.
                     EventBus.Publish(new OpinionRaisedDirectlyEvent { Amount = effect.Stacks });
                     GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: Regeneration raised opinion by {effect.Stacks}");
+                        $"{_ownerName}: Regeneration raised opinion by {effect.Stacks}"
+                    );
                     break;
 
                 case StatusEffectType.Ritual:
