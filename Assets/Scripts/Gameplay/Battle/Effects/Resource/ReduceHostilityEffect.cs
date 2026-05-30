@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -8,6 +8,7 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Reduces the focused enemy's Hostility by the given amount.</summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class ReduceHostilityEffect : BattleEffect
     {
         [MinValue(1)]

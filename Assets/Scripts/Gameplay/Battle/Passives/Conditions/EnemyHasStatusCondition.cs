@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using Crookedile.Data;
 using Sirenix.OdinInspector;
@@ -11,6 +11,7 @@ namespace Crookedile.Gameplay.Battle
     /// at least the required number of stacks.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class EnemyHasStatusCondition : PassiveConditionBase
     {
         [Tooltip("The status type to check for on any enemy.")]

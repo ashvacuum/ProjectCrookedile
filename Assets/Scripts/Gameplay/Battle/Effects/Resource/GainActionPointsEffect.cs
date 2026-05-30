@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -8,6 +8,7 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Grants Action Points to the caster immediately this turn.</summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class GainActionPointsEffect : BattleEffect
     {
         [SerializeField] private int _amount = 1;

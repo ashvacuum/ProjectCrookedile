@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Data;
@@ -12,6 +12,7 @@ namespace Crookedile.Gameplay.Battle
     /// Confused randomises authored fixed amounts, not pre-authored random ranges.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class DealRandomDamageEffect : BattleEffect
     {
         [Tooltip("Who receives the damage.")]

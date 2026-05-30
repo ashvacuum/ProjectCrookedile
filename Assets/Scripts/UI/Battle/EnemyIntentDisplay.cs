@@ -1,9 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using DG.Tweening;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 using Crookedile.Gameplay.Battle;
@@ -93,7 +93,6 @@ namespace Crookedile.UI.Battle
         private Vector2       _bobAnchor;       // panel's designed anchoredPosition (captured in Awake)
 
         // Punch animation state
-        private Coroutine     _punchCoroutine;
         private RectTransform _descTextRect;
         private Vector2       _descTextAnchor;  // desc text's authored anchoredPosition (captured in Awake)
 
@@ -292,8 +291,8 @@ namespace Crookedile.UI.Battle
                 if (_intentPanelRect != null) _intentPanelRect.anchoredPosition = _bobAnchor;
                 if (_descTextRect    != null) _descTextRect.anchoredPosition    = _descTextAnchor;
 
-                // Stop any in-progress punch so re-show starts from a clean state
-                if (_punchCoroutine != null) { StopCoroutine(_punchCoroutine); _punchCoroutine = null; }
+                // Kill any in-progress punch and snap back to rest
+                _descTextRect?.DOKill();
             }
         }
 
@@ -302,40 +301,12 @@ namespace Crookedile.UI.Battle
         private void TriggerDescPunch()
         {
             if (_descTextRect == null) return;
-            if (_punchCoroutine != null) StopCoroutine(_punchCoroutine);
-            _punchCoroutine = StartCoroutine(PunchDescCoroutine());
-        }
-
-        /// <summary>
-        /// Phase 1 — sudden rise: linearly reaches the peak in <see cref="_punchRiseDuration"/> seconds.
-        /// Phase 2 — gradual fall: quadratic ease-out (fast start, slow finish) back to the resting position.
-        /// </summary>
-        private IEnumerator PunchDescCoroutine()
-        {
-            // Phase 1: fast rise to peak
-            float t = 0f;
-            while (t < _punchRiseDuration)
-            {
-                t += Time.deltaTime;
-                float frac = Mathf.Clamp01(t / _punchRiseDuration);
-                _descTextRect.anchoredPosition = _descTextAnchor + new Vector2(0f, frac * _punchRise);
-                yield return null;
-            }
-            _descTextRect.anchoredPosition = _descTextAnchor + new Vector2(0f, _punchRise);
-
-            // Phase 2: gradual ease-out fall — (1-t)² decelerates from fast to still
-            t = 0f;
-            while (t < _punchFallDuration)
-            {
-                t += Time.deltaTime;
-                float frac      = Mathf.Clamp01(t / _punchFallDuration);
-                float remaining = (1f - frac) * (1f - frac);   // 1 → 0 with deceleration
-                _descTextRect.anchoredPosition = _descTextAnchor + new Vector2(0f, _punchRise * remaining);
-                yield return null;
-            }
-
+            _descTextRect.DOKill();
             _descTextRect.anchoredPosition = _descTextAnchor;
-            _punchCoroutine = null;
+            // Phase 1: fast linear rise; Phase 2: quadratic ease-out fall
+            DOTween.Sequence().SetLink(gameObject)
+                .Append(_descTextRect.DOAnchorPosY(_descTextAnchor.y + _punchRise, _punchRiseDuration).SetEase(Ease.Linear))
+                .Append(_descTextRect.DOAnchorPosY(_descTextAnchor.y, _punchFallDuration).SetEase(Ease.OutQuad));
         }
     }
 }

@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Fires when the player exhausts a card (removed from battle for good).</summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class CardExhaustedTrigger : PassiveTriggerBase
     {
         public override bool Matches(PassiveEventContext ctx)

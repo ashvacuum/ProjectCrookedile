@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Fires when a new enemy (minion) is summoned during the battle.</summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class EnemySummonedTrigger : PassiveTriggerBase
     {
         public override bool Matches(PassiveEventContext ctx) => ctx.Is<EnemySummonedEvent>();

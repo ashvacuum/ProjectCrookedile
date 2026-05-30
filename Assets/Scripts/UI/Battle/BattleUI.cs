@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Gameplay.Battle;
@@ -30,30 +31,34 @@ namespace Crookedile.UI.Battle
     public class BattleUI : MonoBehaviour
     {
         // ── Panels (extracted subsystems) ─────────────────────────────────────
-        [Header("Panels")]
-        [Tooltip("Manages card hand display and object pool.")]
-        [SerializeField] private HandPanel         handPanel;
-        [Tooltip("Battle log text + auto-scroll.")]
-        [SerializeField] private BattleLogPanel    logPanel;
-        [Tooltip("Victory / defeat result panels.")]
-        [SerializeField] private BattleResultPanel resultPanel;
+        [Header("Panels")] [Tooltip("Manages card hand display and object pool.")] [SerializeField]
+        private HandPanel handPanel;
+
+        [Tooltip("Battle log text + auto-scroll.")] [SerializeField]
+        private BattleLogPanel logPanel;
+
+        [Tooltip("Victory / defeat result panels.")] [SerializeField]
+        private BattleResultPanel resultPanel;
 
         // ── Enemy Slots ───────────────────────────────────────────────────────
-        [Header("Enemy Slots")]
-        [Tooltip("Parent transform that enemy slot panels are spawned into.")]
-        [SerializeField] private Transform  enemySlotContainer;
-        [Tooltip("Prefab with an EnemySlotUI component — instantiated once per enemy.")]
-        [SerializeField] private GameObject enemySlotPrefab;
+        [Header("Enemy Slots")] [Tooltip("Parent transform that enemy slot panels are spawned into.")] [SerializeField]
+        private Transform enemySlotContainer;
+
+        [Tooltip("Prefab with an EnemySlotUI component — instantiated once per enemy.")] [SerializeField]
+        private GameObject enemySlotPrefab;
 
         // ── VFX Anchors ───────────────────────────────────────────────────────
         [Header("VFX Anchors")]
         [Tooltip("RectTransform of the player stats panel — fallback VFX target when PlayerSlotUI is not assigned.")]
-        [field: SerializeField] public RectTransform PlayerStatsPanel { get; private set; }
+        [field: SerializeField]
+        public RectTransform PlayerStatsPanel { get; private set; }
 
         // ── Player Slot ───────────────────────────────────────────────────────
         [Header("Player Slot")]
-        [Tooltip("PlayerSlotUI instance in the scene. Provides the portrait, health bar, and VFX anchor for player-targeted effects.")]
-        [SerializeField] private PlayerSlotUI _playerSlotUI;
+        [Tooltip(
+            "PlayerSlotUI instance in the scene. Provides the portrait, health bar, and VFX anchor for player-targeted effects.")]
+        [SerializeField]
+        private PlayerSlotUI _playerSlotUI;
 
         /// <summary>
         /// RectTransform anchor at the player slot — preferred target for VFX and floating damage numbers.
@@ -65,63 +70,78 @@ namespace Crookedile.UI.Battle
         // ── Opinion Meter ─────────────────────────────────────────────────────
         [Header("Opinion Meter")]
         [Tooltip("OpinionMeterUI instance in the scene — shows the shared opinion bar and turn countdown.")]
-        [SerializeField] private OpinionMeterUI _opinionMeterUI;
+        [SerializeField]
+        private OpinionMeterUI _opinionMeterUI;
 
         // ── Battle Info ───────────────────────────────────────────────────────
-        [Header("Battle Info")]
-        [SerializeField] private TMP_Text turnNumberText;
+        [Header("Battle Info")] [SerializeField]
+        private TMP_Text turnNumberText;
+
         [SerializeField] private TMP_Text phaseText;
-        [Tooltip("Seconds the turn/phase label stays fully visible before fading.")]
-        [SerializeField] private float _battleInfoHoldTime = 1.5f;
-        [Tooltip("Seconds the fade-out takes after the hold delay.")]
-        [SerializeField] private float _battleInfoFadeTime = 0.5f;
+
+        [Tooltip("Seconds the turn/phase label stays fully visible before fading.")] [SerializeField]
+        private float _battleInfoHoldTime = 1.5f;
+
+        [Tooltip("Seconds the fade-out takes after the hold delay.")] [SerializeField]
+        private float _battleInfoFadeTime = 0.5f;
 
         // ── Controls ──────────────────────────────────────────────────────────
-        [Header("Controls")]
-        [SerializeField] private Button endTurnButton;
-        [Tooltip("Actor passive — shown on the Actor's first player turn only.")]
-        [SerializeField] private Button             improviseButton;
-        [Tooltip("Card selection modal shared by Improvise and ChooseFromDiscard effects.")]
-        [SerializeField] private CardSelectionPanel cardSelectionPanel;
-        [Tooltip("General-purpose interactive card picker for card-choice effects (ChooseFromDiscard, Upgrade, Retain, etc.).")]
-        [SerializeField] private CardChoicePanel    cardChoicePanel;
+        [Header("Controls")] [SerializeField] private Button endTurnButton;
+
+        [Tooltip("Actor passive — shown on the Actor's first player turn only.")] [SerializeField]
+        private Button improviseButton;
+
+        [Tooltip("Card selection modal shared by Improvise and ChooseFromDiscard effects.")] [SerializeField]
+        private CardSelectionPanel cardSelectionPanel;
+
+        [Tooltip(
+            "General-purpose interactive card picker for card-choice effects (ChooseFromDiscard, Upgrade, Retain, etc.).")]
+        [SerializeField]
+        private CardChoicePanel cardChoicePanel;
 
         // ── Card Zone Buttons ─────────────────────────────────────────────────
-        [Header("Card Zone Buttons")]
-        [SerializeField] private Button   discardZoneButton;
-        [SerializeField] private Button   exhaustZoneButton;
-        [SerializeField] private Button   deckZoneButton;
+        [Header("Card Zone Buttons")] [SerializeField]
+        private Button discardZoneButton;
+
+        [SerializeField] private Button exhaustZoneButton;
+        [SerializeField] private Button deckZoneButton;
         [SerializeField] private TMP_Text discardCountText;
         [SerializeField] private TMP_Text exhaustCountText;
         [SerializeField] private TMP_Text deckCountText;
 
-        [Header("Card Zone Panel")]
-        [SerializeField] private CardZonePanel cardZonePanel;
+        [Header("Card Zone Panel")] [SerializeField]
+        private CardZonePanel cardZonePanel;
 
         [Header("Reward")]
         [Tooltip("CardDatabase ScriptableObject used to generate post-battle card offers.")]
-        [SerializeField] private CardDatabase  _cardDatabase;
+        [SerializeField]
+        private CardDatabase _cardDatabase;
+
         [Tooltip("Reward screen overlay panel (starts inactive). Shown after a victory Continue click.")]
-        [SerializeField] private RewardScreen  _rewardScreen;
+        [SerializeField]
+        private RewardScreen _rewardScreen;
 
         [Header("Card Grant Animation")]
         [Tooltip("Seconds for the zone count text to scale up on card grant arrival.")]
-        [SerializeField] private float _countPunchDuration = 0.25f;
-        [Tooltip("Scale multiplier applied to the count text at the peak of the punch.")]
-        [SerializeField] private float _countPunchScale = 1.4f;
+        [SerializeField]
+        private float _countPunchDuration = 0.25f;
+
+        [Tooltip("Scale multiplier applied to the count text at the peak of the punch.")] [SerializeField]
+        private float _countPunchScale = 1.4f;
 
         // ── Runtime ───────────────────────────────────────────────────────────
-        private BattleManager               battleManager;
+        private BattleManager battleManager;
         private StateMachine<BattleUIState> _fsm;
-        private BattleResult                _lastBattleResult;
-        private List<EnemySlotUI>           _enemySlots = new List<EnemySlotUI>();
-        private CardChoiceRequestedEvent    _pendingCardChoice;
-        private bool                        _handRefreshPending;
+        private BattleResult _lastBattleResult;
+        private List<EnemySlotUI> _enemySlots = new List<EnemySlotUI>();
+        private CardChoiceRequestedEvent _pendingCardChoice;
+        private bool _handRefreshPending;
+
         /// <summary>Card button extracted from hand on CardPlayedEvent, waiting for VFX to finish before animating to discard.</summary>
-        private CardButton                  _pendingDiscardButton;
-        private HashSet<CardData>           _pendingDrawnCards = new HashSet<CardData>();
-        private Coroutine                   _battleInfoFade;
-        private Coroutine                   _countPunchCoroutine;
+        private CardButton _pendingDiscardButton;
+
+        private HashSet<CardData> _pendingDrawnCards = new HashSet<CardData>();
+        private Sequence _battleInfoFadeSeq;
 
         #region Initialization
 
@@ -132,7 +152,7 @@ namespace Crookedile.UI.Battle
 
         }
 
-        private void OnEnable()  => SubscribeToEvents();
+        private void OnEnable() => SubscribeToEvents();
         private void OnDisable() => UnsubscribeFromEvents();
 
         private void SubscribeToEvents()
@@ -206,10 +226,10 @@ namespace Crookedile.UI.Battle
 
             // Build FSM — state classes are inner private classes below.
             _fsm = new StateMachine<BattleUIState>();
-            _fsm.RegisterState(BattleUIState.Idle,                new IdleBattleUIState(this));
-            _fsm.RegisterState(BattleUIState.PlayerTurn,          new PlayerTurnBattleUIState(this));
-_fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceBattleUIState(this));
-            _fsm.RegisterState(BattleUIState.BattleEnd,           new BattleEndBattleUIState(this));
+            _fsm.RegisterState(BattleUIState.Idle, new IdleBattleUIState(this));
+            _fsm.RegisterState(BattleUIState.PlayerTurn, new PlayerTurnBattleUIState(this));
+            _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceBattleUIState(this));
+            _fsm.RegisterState(BattleUIState.BattleEnd, new BattleEndBattleUIState(this));
             _fsm.ChangeState(BattleUIState.Idle);
 
             UpdateStatsDisplay();
@@ -254,7 +274,8 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
                 // Extract the card from hand immediately so the layout closes the gap,
                 // but hold it — the discard animation fires in OnCardVFXComplete so the
                 // sequence is: VFX resolves → card flies to discard → new draws appear.
-                GameLogger.LogInfo("Card", $"Extracted '{evt.Card.CardName}' from hand — awaiting VFX complete before discard");
+                GameLogger.LogInfo("Card",
+                    $"Extracted '{evt.Card.CardName}' from hand — awaiting VFX complete before discard");
                 _pendingDiscardButton = handPanel?.ExtractCard(evt.Card);
             }
             else
@@ -284,7 +305,8 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
 
                 CardFlyAnimator.Instance?.AnimateDiscardOut(btn, () =>
                 {
-                    GameLogger.LogInfo("Card", $"Discard animation done for '{btn.CardData?.CardName}' — returning to pool and refreshing hand");
+                    GameLogger.LogInfo("Card",
+                        $"Discard animation done for '{btn.CardData?.CardName}' — returning to pool and refreshing hand");
                     BattlePoolManager.Instance?.ReturnCard(btn);
 
                     // Refresh hand AFTER discard so any drawn cards appear once the discard lands.
@@ -298,7 +320,8 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
             else
             {
                 // No card to discard (no-VFX card that was already handled, or edge case).
-                GameLogger.LogWarning("Card", $"CardVFXComplete for '{evt.Card?.CardName}' but no pending discard button found");
+                GameLogger.LogWarning("Card",
+                    $"CardVFXComplete for '{evt.Card?.CardName}' but no pending discard button found");
                 if (!_handRefreshPending)
                 {
                     _handRefreshPending = true;
@@ -309,9 +332,9 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
 
         private void OnCardDrawn(CardDrawnEvent evt)
         {
-            if (!evt.IsPlayer) return;              // enemy draws don't affect the player's hand panel
-            _pendingDrawnCards.Add(evt.Card);       // track which cards are new this batch
-            if (_handRefreshPending) return;        // coroutine already running — just add to batch
+            if (!evt.IsPlayer) return; // enemy draws don't affect the player's hand panel
+            _pendingDrawnCards.Add(evt.Card); // track which cards are new this batch
+            if (_handRefreshPending) return; // coroutine already running — just add to batch
             _handRefreshPending = true;
             StartCoroutine(RefreshHandNextFrame());
         }
@@ -319,8 +342,8 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
         private void OnCardGranted(CardGrantedEvent evt)
         {
             if (!evt.IsPlayer) return;
-            Transform target  = evt.ToDiscard ? discardZoneButton.transform : deckZoneButton.transform;
-            TMP_Text  counter = evt.ToDiscard ? discardCountText            : deckCountText;
+            Transform target = evt.ToDiscard ? discardZoneButton.transform : deckZoneButton.transform;
+            TMP_Text counter = evt.ToDiscard ? discardCountText : deckCountText;
             StartCoroutine(CardGrantedAnimationSequence(evt.Card, target, counter));
         }
 
@@ -334,10 +357,11 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
 
         private IEnumerator RefreshHandNextFrame()
         {
-            yield return null;  // wait one frame so all draw events from one effect batch together
+            yield return null; // wait one frame so all draw events from one effect batch together
             _handRefreshPending = false;
             var drawn = _pendingDrawnCards.Count > 0
-                ? new HashSet<CardData>(_pendingDrawnCards) : null;
+                ? new HashSet<CardData>(_pendingDrawnCards)
+                : null;
             _pendingDrawnCards.Clear();
 
             // If cards were drawn, merge them in and animate only the new ones;
@@ -362,7 +386,7 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
                 yield break;
             }
 
-            int ap   = battleManager?.PlayerStats.CurrentActionPoints ?? 0;
+            int ap = battleManager?.PlayerStats.CurrentActionPoints ?? 0;
             int cost = battleManager?.GetEffectiveCardCost(card) ?? 1;
             btn.Initialize(card, 0, ap, cost, forceUnplayable: true);
 
@@ -381,39 +405,12 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
         private void PunchCountText(TMP_Text text)
         {
             if (text == null) return;
-            if (_countPunchCoroutine != null) StopCoroutine(_countPunchCoroutine);
-            _countPunchCoroutine = StartCoroutine(CountTextPunchRoutine(text));
-        }
-
-        private IEnumerator CountTextPunchRoutine(TMP_Text text)
-        {
-            if (text == null) yield break;
-
-            float halfDuration = _countPunchDuration * 0.5f;
-
-            // Scale up
-            float t = 0f;
-            while (t < halfDuration)
-            {
-                t += Time.deltaTime;
-                float frac = Mathf.Clamp01(t / halfDuration);
-                text.transform.localScale = Vector3.one * Mathf.Lerp(1f, _countPunchScale, frac);
-                yield return null;
-            }
-
-            // Ease-out back to 1 — (1-t)² decelerates to a smooth stop
-            t = 0f;
-            while (t < halfDuration)
-            {
-                t += Time.deltaTime;
-                float frac      = Mathf.Clamp01(t / halfDuration);
-                float remaining = (1f - frac) * (1f - frac);
-                text.transform.localScale = Vector3.one * Mathf.Lerp(1f, _countPunchScale, remaining);
-                yield return null;
-            }
-
-            text.transform.localScale = Vector3.one;
-            _countPunchCoroutine = null;
+            text.transform.DOKill();
+            text.transform.DOScale(Vector3.one * _countPunchScale, _countPunchDuration * 0.5f)
+                .SetEase(Ease.OutQuad)
+                .OnComplete(() => text.transform.DOScale(Vector3.one, _countPunchDuration * 0.5f)
+                    .SetEase(Ease.InQuad))
+                .SetLink(gameObject);
         }
 
         private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
@@ -473,8 +470,9 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
             _fsm?.ChangeState(BattleUIState.WaitingForCardChoice);
         }
 
-        private void OnResolveChanged(ResolveChangedEvent evt)         => UpdateStatsDisplay();
-        private void OnComposureChanged(ComposureChangedEvent evt)      => UpdateStatsDisplay();
+        private void OnResolveChanged(ResolveChangedEvent evt) => UpdateStatsDisplay();
+        private void OnComposureChanged(ComposureChangedEvent evt) => UpdateStatsDisplay();
+
         private void OnStatusEffectApplied(StatusEffectAppliedEvent evt)
         {
             UpdateStatsDisplay();
@@ -561,7 +559,7 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
             {
                 if (discardCountText != null) discardCountText.text = deck.DiscardCount.ToString();
                 if (exhaustCountText != null) exhaustCountText.text = deck.ExhaustCount.ToString();
-                if (deckCountText    != null) deckCountText.text    = deck.DeckCount.ToString();
+                if (deckCountText != null) deckCountText.text = deck.DeckCount.ToString();
             }
         }
 
@@ -571,39 +569,31 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
 
             if (turnNumberText != null)
             {
-                turnNumberText.text  = $"Turn: {battleManager.CurrentTurn}";
+                turnNumberText.text = $"Turn: {battleManager.CurrentTurn}";
                 turnNumberText.alpha = 1f;
             }
 
             if (phaseText != null)
             {
                 string turnOwner = battleManager.IsPlayerTurn ? "Player" : "Opponent";
-                phaseText.text  = $"{battleManager.CurrentState} ({turnOwner})";
+                phaseText.text = $"{battleManager.CurrentState} ({turnOwner})";
                 phaseText.alpha = 1f;
             }
 
             // Restart the fade — cancel any in-progress fade so the text shows fully first.
-            if (_battleInfoFade != null) StopCoroutine(_battleInfoFade);
-            _battleInfoFade = StartCoroutine(FadeBattleInfo());
-        }
-
-        private IEnumerator FadeBattleInfo()
-        {
-            yield return new WaitForSeconds(_battleInfoHoldTime);
-
-            float elapsed = 0f;
-            while (elapsed < _battleInfoFadeTime)
-            {
-                elapsed += Time.deltaTime;
-                float alpha = 1f - Mathf.Clamp01(elapsed / _battleInfoFadeTime);
-                if (turnNumberText != null) turnNumberText.alpha = alpha;
-                if (phaseText      != null) phaseText.alpha      = alpha;
-                yield return null;
-            }
-
-            if (turnNumberText != null) turnNumberText.alpha = 0f;
-            if (phaseText      != null) phaseText.alpha      = 0f;
-            _battleInfoFade = null;
+            _battleInfoFadeSeq?.Kill();
+            _battleInfoFadeSeq = DOTween.Sequence().SetLink(gameObject)
+                .AppendInterval(_battleInfoHoldTime)
+                .AppendCallback(() =>
+                {
+                    if (turnNumberText != null)
+                        DOTween.To(() => turnNumberText.alpha, x => turnNumberText.alpha = x,
+                            0f, _battleInfoFadeTime).SetLink(gameObject);
+                    if (phaseText != null)
+                        DOTween.To(() => phaseText.alpha, x => phaseText.alpha = x,
+                            0f, _battleInfoFadeTime).SetLink(gameObject);
+                    _battleInfoFadeSeq = null;
+                });
         }
 
         #endregion
@@ -619,6 +609,7 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
                 if (BattlePoolManager.Instance != null) BattlePoolManager.Instance.ReturnSlot(slot);
                 else Destroy(slot.gameObject);
             }
+
             _enemySlots.Clear();
 
             if (enemySlotContainer == null || battleManager == null) return;
@@ -654,7 +645,8 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
 
             if (slot != null)
             {
-                slot.Initialize(index, battleManager, battleManager.PlayerOrigin, battleManager.Enemies[index].EnemyData);
+                slot.Initialize(index, battleManager, battleManager.PlayerOrigin,
+                    battleManager.Enemies[index].EnemyData);
                 _enemySlots.Add(slot);
             }
         }
@@ -686,7 +678,8 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
 
         private void OnCardButtonClicked(CardData card, int handIndex)
         {
-            GameLogger.LogInfo("Card", $"OnCardButtonClicked: '{card?.CardName}' [handIndex={handIndex}]  battleManager={(battleManager != null ? "set" : "null")}  IsPlayerTurn={battleManager?.IsPlayerTurn}");
+            GameLogger.LogInfo("Card",
+                $"OnCardButtonClicked: '{card?.CardName}' [handIndex={handIndex}]  battleManager={(battleManager != null ? "set" : "null")}  IsPlayerTurn={battleManager?.IsPlayerTurn}");
             if (battleManager != null && battleManager.IsPlayerTurn)
             {
                 GameLogger.LogInfo("Card", $"Publishing PlayCardRequestedEvent for '{card?.CardName}'");
@@ -694,7 +687,8 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
             }
             else
             {
-                GameLogger.LogWarning("Card", $"Card play blocked in BattleUI — battleManager={(battleManager != null ? "set" : "null")}  IsPlayerTurn={battleManager?.IsPlayerTurn}");
+                GameLogger.LogWarning("Card",
+                    $"Card play blocked in BattleUI — battleManager={(battleManager != null ? "set" : "null")}  IsPlayerTurn={battleManager?.IsPlayerTurn}");
             }
         }
 
@@ -770,6 +764,7 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
                 int j = Random.Range(0, i + 1);
                 (display[i], display[j]) = (display[j], display[i]);
             }
+
             cardZonePanel.Open("Draw Pile", display);
         }
 
@@ -792,7 +787,7 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
             public override void OnEnter()
             {
                 _ui.handPanel?.ClearHand();
-                if (_ui.endTurnButton  != null) _ui.endTurnButton.interactable = false;
+                if (_ui.endTurnButton != null) _ui.endTurnButton.interactable = false;
                 if (_ui.improviseButton != null) _ui.improviseButton.gameObject.SetActive(false);
                 _ui.UpdateStatsDisplay();
             }
@@ -868,7 +863,7 @@ _fsm.RegisterState(BattleUIState.WaitingForCardChoice, new WaitingForCardChoiceB
             {
                 _ui.resultPanel?.Show(_ui._lastBattleResult.isVictory);
                 _ui.handPanel?.ClearHand();
-                if (_ui.endTurnButton   != null) _ui.endTurnButton.interactable = false;
+                if (_ui.endTurnButton != null) _ui.endTurnButton.interactable = false;
                 if (_ui.improviseButton != null) _ui.improviseButton.gameObject.SetActive(false);
                 _ui.UpdateStatsDisplay();
             }

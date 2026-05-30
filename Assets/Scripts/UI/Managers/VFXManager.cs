@@ -10,14 +10,9 @@ using Crookedile.UI;
 namespace Crookedile.Managers
 {
     /// <summary>
-    /// Centralised VFX service for UI-space visual effects. Handles two types:
-    ///
-    ///   1. <b>Feel feedbacks</b> — delegates to <see cref="FeedbackManager"/> for shake,
-    ///      scale-punch, and tween animations on existing UI elements (RectTransform-aware).
-    ///
-    ///   2. <b>Animated Images</b> — spawns pooled instances of a single shared VFX prefab
-    ///      onto <see cref="_vfxCanvas"/> at the target element's canvas position, then plays
-    ///      the Animator state specified by <see cref="VFXEvent.AnimationStateName"/>.
+    /// Centralised VFX service for UI-space visual effects. Spawns pooled instances of a
+    /// single shared VFX prefab onto <see cref="_vfxCanvas"/> at the target element's canvas
+    /// position, then plays the Animator state specified by <see cref="VFXEvent.AnimationStateName"/>.
     ///      Each instance carries a <see cref="VFXAnimatedImage"/> that self-deactivates (via
     ///      an <c>OnAnimationComplete</c> AnimationEvent on the clip's last frame), returning
     ///      it to pool automatically.
@@ -85,7 +80,6 @@ namespace Crookedile.Managers
         public void Play(VFXEvent evt, RectTransform target)
         {
             if (evt == null) return;
-            PlayFeel(evt, target);
             if (!string.IsNullOrEmpty(evt.AnimationStateName))
                 SpawnAnimatedImageAt(evt.AnimationStateName, target, evt.Offset);
         }
@@ -97,41 +91,27 @@ namespace Crookedile.Managers
         public void Play(VFXEvent evt, Transform target)
         {
             if (evt == null) return;
-
-            // Redirect to the RectTransform overload — it handles canvas-space placement correctly.
             if (target is RectTransform rt) { Play(evt, rt); return; }
-
-            // For non-UI transforms: play Feel (no position override) and spawn at canvas center.
-            PlayFeel(evt, target);
             if (!string.IsNullOrEmpty(evt.AnimationStateName))
                 SpawnAnimatedImageAt(evt.AnimationStateName, null, evt.Offset);
         }
 
-        /// <summary>
-        /// Plays a VFX event at an explicit world-space position.
-        /// The world point is converted to canvas space; Feel plays without a transform target.
-        /// </summary>
+        /// <summary>Plays a VFX event at an explicit world-space position.</summary>
         public void PlayAtWorld(VFXEvent evt, Vector3 worldPos)
         {
             if (evt == null) return;
-
-            if (!string.IsNullOrEmpty(evt.FeedbackId))
-                FeedbackManager.Instance?.Play(evt.FeedbackId);
-
             if (!string.IsNullOrEmpty(evt.AnimationStateName))
                 SpawnAnimatedImageAtWorld(evt.AnimationStateName, worldPos, evt.Offset);
         }
 
         /// <summary>
         /// Plays a VFX event and returns the spawned <see cref="VFXAnimatedImage"/> so the caller
-        /// can inject a <see cref="BattleVFXContext"/> for animation-event-driven effect timing
-        /// (e.g. damage lands at the hit frame rather than immediately on card play).
+        /// can inject a <see cref="BattleVFXContext"/> for animation-event-driven effect timing.
         /// Returns null if <paramref name="evt"/> has no <see cref="VFXEvent.AnimationStateName"/>.
         /// </summary>
         public VFXAnimatedImage PlayAndGetInstance(VFXEvent evt, RectTransform target)
         {
             if (evt == null) return null;
-            PlayFeel(evt, target);
             if (string.IsNullOrEmpty(evt.AnimationStateName)) return null;
             return SpawnAnimatedImageAt(evt.AnimationStateName, target, evt.Offset);
         }
@@ -139,21 +119,8 @@ namespace Crookedile.Managers
         public VFXAnimatedImage PlayAndSetInstance(VFXEvent evt, RectTransform target, BattleVFXContext context)
         {
             if (evt == null) return null;
-            PlayFeel(evt, target);
             if (string.IsNullOrEmpty(evt.AnimationStateName)) return null;
             return SpawnAnimatedImageAt(evt.AnimationStateName, target, evt.Offset, context);
-        }
-
-        // ─── Internal — Feel ──────────────────────────────────────────────────
-
-        private void PlayFeel(VFXEvent evt, Transform target)
-        {
-            if (string.IsNullOrEmpty(evt.FeedbackId) || FeedbackManager.Instance == null) return;
-
-            if (target != null)
-                FeedbackManager.Instance.Play(evt.FeedbackId, target);
-            else
-                FeedbackManager.Instance.Play(evt.FeedbackId);
         }
 
         // ─── Internal — Animated Image Spawn ─────────────────────────────────

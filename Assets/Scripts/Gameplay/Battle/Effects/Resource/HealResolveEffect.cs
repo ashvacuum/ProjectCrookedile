@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -14,6 +14,7 @@ namespace Crookedile.Gameplay.Battle
     /// without dealing damage — rallying speeches, concessions, crowd appeals, etc.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class HealResolveEffect : BattleEffect
     {
         [Tooltip("Opinion to raise. Ignored when Amount Source is not Fixed.")]

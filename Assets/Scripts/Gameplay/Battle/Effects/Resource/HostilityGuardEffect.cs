@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -32,6 +32,7 @@ namespace Crookedile.Gameplay.Battle
     /// "If all enemies are receptive — draw 2 cards" without bespoke effect classes per combination.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class HostilityGuardEffect : BattleEffect
     {
         [Tooltip("The condition that must be true for the inner effects to execute.")]

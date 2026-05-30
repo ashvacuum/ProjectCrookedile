@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -13,6 +13,7 @@ namespace Crookedile.Gameplay.Battle
     /// Supports player-choice, random-any, and random-by-type modes.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class ReduceCardCostEffect : BattleEffect
     {
         [MinValue(1)]

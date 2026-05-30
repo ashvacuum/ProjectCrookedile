@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -14,6 +14,7 @@ namespace Crookedile.Gameplay.Battle
     /// Cards with no upgrade version are excluded from the candidate pool.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class UpgradeCardThisBattleEffect : BattleEffect
     {
         [Tooltip("How the card to upgrade is selected.")]

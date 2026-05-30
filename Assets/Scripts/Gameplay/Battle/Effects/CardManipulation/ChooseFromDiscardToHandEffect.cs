@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -7,6 +7,7 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Player chooses cards from their discard pile and returns them to hand.</summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class ChooseFromDiscardToHandEffect : BattleEffect
     {
         [MinValue(1)]

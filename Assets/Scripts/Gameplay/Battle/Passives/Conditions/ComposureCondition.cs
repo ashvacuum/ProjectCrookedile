@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
@@ -7,6 +7,7 @@ namespace Crookedile.Gameplay.Battle
     /// Passes when the player's composure stack count satisfies the configured comparison.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class ComposureCondition : PassiveConditionBase
     {
         [Tooltip("How to compare the player's composure against the threshold.")]

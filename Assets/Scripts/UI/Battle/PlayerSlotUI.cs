@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using Crookedile.Gameplay.Battle;
 
 namespace Crookedile.UI.Battle
@@ -41,8 +42,8 @@ namespace Crookedile.UI.Battle
         [SerializeField] private StatusEffectPanelUI _statusEffectPanel;
 
         [Header("HP Bar")]
-        [Tooltip("How fast the Resolve bar lerps toward the target fill. Higher = snappier.")]
-        [SerializeField] private float _barLerpSpeed = 8f;
+        [Tooltip("Duration in seconds for the Resolve bar to animate to its new fill.")]
+        [SerializeField] private float _barAnimDuration = 0.3f;
 
         // ─── Runtime State ────────────────────────────────────────────────────────
 
@@ -88,10 +89,18 @@ namespace Crookedile.UI.Battle
             var stats = _battleManager.PlayerStats;
             if (stats == null) return;
 
-            // Resolve bar target (lerped in Update)
             _targetFill = stats.MaxResolve > 0
                 ? (float)stats.CurrentResolve / stats.MaxResolve
                 : 0f;
+
+            if (_resolveBarFill != null)
+            {
+                DOTween.Kill(_resolveBarFill);
+                DOTween.To(() => _resolveBarFill.fillAmount, x => _resolveBarFill.fillAmount = x,
+                           _targetFill, _barAnimDuration)
+                       .SetEase(Ease.OutQuad)
+                       .SetLink(gameObject);
+            }
 
             if (_resolveText != null)
                 _resolveText.SetText($"{stats.CurrentResolve}/{stats.MaxResolve}");
@@ -109,14 +118,5 @@ namespace Crookedile.UI.Battle
             _statusEffectPanel?.Refresh(_battleManager.PlayerStatusEffects);
         }
 
-        // ─── HP Bar ───────────────────────────────────────────────────────────────
-
-        private void Update()
-        {
-            if (_resolveBarFill == null) return;
-            if (Mathf.Approximately(_resolveBarFill.fillAmount, _targetFill)) return;
-            _resolveBarFill.fillAmount = Mathf.Lerp(
-                _resolveBarFill.fillAmount, _targetFill, Time.deltaTime * _barLerpSpeed);
-        }
     }
 }

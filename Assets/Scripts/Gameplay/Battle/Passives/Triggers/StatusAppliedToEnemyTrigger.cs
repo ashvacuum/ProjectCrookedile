@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Crookedile.Data;
 using UnityEngine;
 using Sirenix.OdinInspector;
@@ -10,6 +10,7 @@ namespace Crookedile.Gameplay.Battle
     /// Optionally filters to a specific <see cref="StatusEffectType"/>.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class StatusAppliedToEnemyTrigger : PassiveTriggerBase
     {
         [Tooltip("Enable to restrict to a specific status type.")]

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -10,6 +10,7 @@ namespace Crookedile.Gameplay.Battle
     /// The fire count is tracked per passive (not globally).
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class NthEventCondition : PassiveConditionBase
     {
         [Tooltip("The passive fires every N-th trigger event.")]

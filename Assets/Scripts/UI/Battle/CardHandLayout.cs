@@ -1,6 +1,6 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 
 namespace Crookedile.UI.Battle
 {
@@ -74,7 +74,7 @@ namespace Crookedile.UI.Battle
 
         // ─── Runtime ──────────────────────────────────────────────────────────────
 
-        private Coroutine _lerpCoroutine;
+        private Sequence _lerpSequence;
 
         // Hover spread — cached card list so SetHoverSpread() can recompute without parameters
         private List<CardButton> _cachedCards    = new List<CardButton>();
@@ -100,12 +100,11 @@ namespace Crookedile.UI.Battle
             int count = cards.Count;
             if (count == 0) return;
 
-            // Cancel any in-progress lerp before starting a new arrangement.
-            if (_lerpCoroutine != null)
-            {
-                StopCoroutine(_lerpCoroutine);
-                _lerpCoroutine = null;
-            }
+            // Cancel any in-progress animation before starting a new arrangement.
+            _lerpSequence?.Kill();
+            _lerpSequence = null;
+            foreach (var card in cards)
+                if (card != null) card.transform.DOKill();
 
             // Compute target transforms for every card.
             var targets = new List<(CardButton btn, Vector3 pos, float angle)>(count);
@@ -128,7 +127,7 @@ namespace Crookedile.UI.Battle
             SetSiblingOrder(cards);
 
             if (animated && lerpDuration > 0f)
-                _lerpCoroutine = StartCoroutine(LerpCardsCoroutine(targets));
+                StartLerpSequence(targets);
             else
                 foreach (var (btn, pos, angle) in targets)
                     ApplyToCard(btn, pos, angle);
@@ -192,37 +191,22 @@ namespace Crookedile.UI.Battle
 
         // ─── Helpers ──────────────────────────────────────────────────────────────
 
-        private IEnumerator LerpCardsCoroutine(List<(CardButton btn, Vector3 targetPos, float targetAngle)> targets)
+        private void StartLerpSequence(List<(CardButton btn, Vector3 targetPos, float targetAngle)> targets)
         {
-            // Snapshot starting transforms.
-            var startPos = new Vector3[targets.Count];
-            var startRot = new Quaternion[targets.Count];
-            for (int i = 0; i < targets.Count; i++)
-            {
-                RectTransform rt = targets[i].btn.GetComponent<RectTransform>();
-                startPos[i] = rt.localPosition;
-                startRot[i] = rt.localRotation;
-            }
-
-            float elapsed = 0f;
-            while (elapsed < lerpDuration)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / lerpDuration));
-                for (int i = 0; i < targets.Count; i++)
-                {
-                    RectTransform rt = targets[i].btn.GetComponent<RectTransform>();
-                    rt.localPosition = Vector3.Lerp(startPos[i], targets[i].targetPos, t);
-                    rt.localRotation = Quaternion.Lerp(startRot[i], Quaternion.Euler(0f, 0f, -targets[i].targetAngle), t);
-                }
-                yield return null;
-            }
-
-            // Snap to exact final values and register base positions for hover.
+            _lerpSequence = DOTween.Sequence().SetLink(gameObject);
             foreach (var (btn, pos, angle) in targets)
-                ApplyToCard(btn, pos, angle);
-
-            _lerpCoroutine = null;
+            {
+                var rt = btn.GetComponent<RectTransform>();
+                _lerpSequence.Join(rt.DOLocalMove(pos, lerpDuration).SetEase(Ease.InOutSine));
+                _lerpSequence.Join(rt.DOLocalRotate(new Vector3(0f, 0f, -angle), lerpDuration, RotateMode.Fast)
+                                     .SetEase(Ease.InOutSine));
+            }
+            _lerpSequence.OnComplete(() =>
+            {
+                foreach (var (btn, pos, angle) in targets)
+                    ApplyToCard(btn, pos, angle);
+                _lerpSequence = null;
+            });
         }
 
         /// <summary>Apply position + rotation to one card and update its hover base.</summary>

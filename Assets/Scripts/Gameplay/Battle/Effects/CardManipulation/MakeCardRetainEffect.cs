@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -13,6 +13,7 @@ namespace Crookedile.Gameplay.Battle
     /// being discarded. Supports player-choice, random-any, and random-by-type modes.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class MakeCardRetainEffect : BattleEffect
     {
         [Tooltip("How the card to retain is selected.")]

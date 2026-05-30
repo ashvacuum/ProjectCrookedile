@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
@@ -8,6 +8,7 @@ namespace Crookedile.Gameplay.Battle
     /// Examples: "only on turn 1" (Equals, 1) or "first 3 turns" (AtMost, 3).
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class TurnNumberCondition : PassiveConditionBase
     {
         [Tooltip("How to compare the current player turn number against the threshold.")]

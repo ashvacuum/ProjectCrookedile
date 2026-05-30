@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -12,6 +12,7 @@ namespace Crookedile.Gameplay.Battle
     /// Stacks and duration are configured per instance.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class ApplyStatusEffect : BattleEffect
     {
         [Tooltip("Who receives the status effect.")]

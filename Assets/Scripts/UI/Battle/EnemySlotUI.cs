@@ -1,8 +1,8 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using DG.Tweening;
 using Crookedile.Data;
 using Crookedile.Data.Enemy;
 using Crookedile.Gameplay.Battle;
@@ -50,7 +50,6 @@ namespace Crookedile.UI.Battle
         private BattleManager _battleManager;
         private OriginType _playerOrigin;
         private float _targetFill = 1f;
-        private Coroutine _nameFadeCoroutine;
 
         /// <summary>The enemy slot currently targeted by the card targeting arrow, or null.</summary>
         public static EnemySlotUI TargetedSlot { get; private set; }
@@ -187,7 +186,7 @@ namespace Crookedile.UI.Battle
         public void PulseHostility()
         {
             if (hostilityText != null)
-                StartCoroutine(PulseTransform(hostilityText.transform));
+                PulseTransform(hostilityText.transform);
         }
 
         /// <summary>
@@ -196,7 +195,7 @@ namespace Crookedile.UI.Battle
         public void PulseIntent()
         {
             if (_intentDisplay != null)
-                StartCoroutine(PulseTransform(_intentDisplay.transform));
+                PulseTransform(_intentDisplay.transform);
         }
 
         /// <summary>
@@ -213,8 +212,9 @@ namespace Crookedile.UI.Battle
         public void ShowNameLabel()
         {
             if (nameText == null || !nameText.gameObject.activeInHierarchy) return;
-            if (_nameFadeCoroutine != null) StopCoroutine(_nameFadeCoroutine);
-            _nameFadeCoroutine = StartCoroutine(FadeNameAlpha(nameText.alpha, 1f));
+            DOTween.Kill(nameText);
+            DOTween.To(() => nameText.alpha, x => nameText.alpha = x, 1f, _nameFadeDuration)
+                   .SetLink(gameObject);
         }
 
         /// <summary>
@@ -223,22 +223,9 @@ namespace Crookedile.UI.Battle
         public void HideNameLabel()
         {
             if (nameText == null) return;
-            if (_nameFadeCoroutine != null) StopCoroutine(_nameFadeCoroutine);
-            _nameFadeCoroutine = StartCoroutine(FadeNameAlpha(nameText.alpha, 0f));
-        }
-
-        private IEnumerator FadeNameAlpha(float from, float to)
-        {
-            if (nameText == null) yield break;
-            float elapsed = 0f;
-            while (elapsed < _nameFadeDuration)
-            {
-                elapsed     += Time.deltaTime;
-                nameText.alpha = Mathf.Lerp(from, to, elapsed / _nameFadeDuration);
-                yield return null;
-            }
-            nameText.alpha    = to;
-            _nameFadeCoroutine = null;
+            DOTween.Kill(nameText);
+            DOTween.To(() => nameText.alpha, x => nameText.alpha = x, 0f, _nameFadeDuration)
+                   .SetLink(gameObject);
         }
 
         // ─── HP Bar (resolve bar removed from prefab; Update kept null-safe) ──────
@@ -291,12 +278,10 @@ namespace Crookedile.UI.Battle
 
         // ─── Private ──────────────────────────────────────────────────────────────
 
-        private IEnumerator PulseTransform(Transform t)
+        private static void PulseTransform(Transform t)
         {
-            Vector3 original = t.localScale;
-            t.localScale = original * 1.2f;
-            yield return new WaitForSeconds(0.15f);
-            t.localScale = original;
+            t.DOKill();
+            t.DOPunchScale(Vector3.one * 0.2f, 0.3f, 1, 0f).SetLink(t.gameObject);
         }
     }
 }

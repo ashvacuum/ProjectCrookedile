@@ -7,9 +7,6 @@ using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 using Crookedile.Data.VFX;
-using Crookedile.Managers;
-using Crookedile.UI;
-using Crookedile.UI.Battle;
 using Crookedile.Utilities;
 
 namespace Crookedile.Gameplay.Battle
@@ -126,6 +123,8 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Subscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
             EventBus.Subscribe<DamageDealtEvent>(OnDamageDealtForOpinion);
             EventBus.Subscribe<OpinionRaisedDirectlyEvent>(OnOpinionRaisedDirectly);
+            EventBus.Subscribe<CardVFXApplyEffectsEvent>(OnCardVFXApplyEffects);
+            EventBus.Subscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
         }
 
         private void UnsubscribeFromEvents()
@@ -134,6 +133,8 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Unsubscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
             EventBus.Unsubscribe<DamageDealtEvent>(OnDamageDealtForOpinion);
             EventBus.Unsubscribe<OpinionRaisedDirectlyEvent>(OnOpinionRaisedDirectly);
+            EventBus.Unsubscribe<CardVFXApplyEffectsEvent>(OnCardVFXApplyEffects);
+            EventBus.Unsubscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
         }
 
         private void InitializeStateMachine()
@@ -304,7 +305,7 @@ namespace Crookedile.Gameplay.Battle
                 GameLogger.LogWarning<BattleManager>($"Card play blocked: IsPlayerTurn={_isPlayerTurn}  State={CurrentState}");
                 return;
             }
-            PlayCard(evt.Card, evt.HandIndex, CardButton.LastPlayedRect);
+            PlayCard(evt.Card, evt.HandIndex);
         }
 
         /// <summary>
@@ -325,6 +326,21 @@ namespace Crookedile.Gameplay.Battle
         private void OnOpinionRaisedDirectly(OpinionRaisedDirectlyEvent evt)
         {
             RaiseOpinion(evt.Amount);
+        }
+
+        private void OnCardVFXApplyEffects(CardVFXApplyEffectsEvent evt)
+        {
+            GameLogger.LogInfo<BattleManager>($"VFX ApplyEffects fired for '{evt.Card?.CardName}'");
+            ApplyCardEffects(evt.Card, evt.AmountOverrides);
+        }
+
+        private void OnCardVFXComplete(CardVFXCompleteEvent evt)
+        {
+            if (_vfxInFlight)
+            {
+                GameLogger.LogInfo<BattleManager>($"VFX complete for '{evt.Card?.CardName}' — unblocking input");
+                _vfxInFlight = false;
+            }
         }
 
         #endregion
@@ -374,8 +390,7 @@ namespace Crookedile.Gameplay.Battle
         #region Card Playing
 
         /// <summary>Plays a card from the player's hand.</summary>
-        /// <param name="sourceRect">The card button's RectTransform — used as the VFX spawn origin.</param>
-        private void PlayCard(CardData card, int handIndex, RectTransform sourceRect)
+        private void PlayCard(CardData card, int handIndex)
         {
             BattleStats stats = _playerStats;
 
@@ -402,39 +417,15 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
             // PassiveResolver listens to CardPlayedEvent via EventBus — no direct call needed
 
-            // Target VFX at the enemy slot rather than the card — the card will be discarded
-            // shortly after play, and parenting VFX to it would kill the animation early.
-            var vfxTarget = EnemySlotUI.LastTargetedRect ?? sourceRect;
-            GameLogger.LogInfo<BattleManager>($"Player played: {card.CardName}  vfxTarget={(vfxTarget != null ? vfxTarget.name : "none")}");
+            GameLogger.LogInfo<BattleManager>($"Player played: {card.CardName}  hasVFX={(card.CardVFX != null)}");
 
             if (card.CardVFX != null)
             {
-                // VFX path: spawn the animation and defer effect resolution to the hit-frame event.
+                // VFX path: ask the UI layer to play the animation.
+                // It will publish CardVFXApplyEffectsEvent at the hit frame and
+                // CardVFXCompleteEvent when done; we handle both via subscriptions.
                 _vfxInFlight = true;
-                var vfx = VFXManager.Instance?.PlayAndSetInstance(card.CardVFX,
-                    vfxTarget,
-                    new BattleVFXContext
-                    {
-                        OnApplyEffects = () =>
-                        {
-                            GameLogger.LogInfo<BattleManager>($"VFX ApplyEffects fired for '{card.CardName}'");
-                            ApplyCardEffects(card, amountOverrides);
-                        },
-                        OnComplete = () =>
-                        {
-                            GameLogger.LogInfo<BattleManager>($"VFX complete for '{card.CardName}' — unblocking input, signalling discard");
-                            _vfxInFlight = false;
-                            EventBus.Publish(new CardVFXCompleteEvent { Card = card });
-                        }
-                    });
-
-                if (vfx == null)
-                {
-                    GameLogger.LogWarning<BattleManager>($"VFX failed to spawn for '{card.CardName}' — resolving immediately");
-                    _vfxInFlight = false;
-                    ApplyCardEffects(card, amountOverrides);
-                    EventBus.Publish(new CardVFXCompleteEvent { Card = card });
-                }
+                EventBus.Publish(new CardPlayVFXRequestedEvent { Card = card, AmountOverrides = amountOverrides });
             }
             else
             {
@@ -459,6 +450,8 @@ namespace Crookedile.Gameplay.Battle
 
             ApplyPolicyHostilityShifts(card);
             ApplySingleTargetHostilityRaise(card);
+            foreach (var enemy in _enemies)
+                enemy.CheckBecameHostile();
             CheckAndAdvanceFocusAfterCardPlay();
             TriggerMomentum();
 
@@ -1139,7 +1132,7 @@ namespace Crookedile.Gameplay.Battle
                     if (_manager._maxTurns > 0 && _manager._playerTurnsElapsed >= _manager._maxTurns)
                     {
                         // Judgment — outcome decided by majority opinion
-                        bool isVictory = _manager._currentOpinion > _manager._maxOpinion / 2;
+                        bool isVictory = _manager._currentOpinion >= _manager._maxOpinion / 2;
                         int threshold  = _manager._maxOpinion / 2;
 
                         _manager._battleResult = new BattleResult

@@ -1,6 +1,6 @@
-using System.Collections;
 using UnityEngine;
 using TMPro;
+using DG.Tweening;
 
 namespace Crookedile.UI
 {
@@ -44,39 +44,19 @@ namespace Crookedile.UI
                 _text.text  = text;
                 _text.color = color;
             }
-            StopAllCoroutines();
-            StartCoroutine(AnimateRoutine());
-        }
 
-        private IEnumerator AnimateRoutine()
-        {
-            if (_text == null) { Finish(); yield break; }
+            DOTween.Kill(gameObject);
 
-            Vector2 startPos  = _rt.anchoredPosition;
-            Vector2 endPos    = startPos + Vector2.up * _risePixels;
-            Color   startColor = _text.color;
-            Color   fadeColor  = new Color(startColor.r, startColor.g, startColor.b, 0f);
+            Vector2 startPos    = _rt.anchoredPosition;
+            Color   startColor  = _text != null ? _text.color : Color.white;
+            Color   fadeColor   = new Color(startColor.r, startColor.g, startColor.b, 0f);
+            float   fadeStart   = _duration * (1f - _fadeFraction);
+            float   fadeDuration = _duration - fadeStart;
 
-            float elapsed   = 0f;
-            float fadeStart = _duration * (1f - _fadeFraction);
-
-            while (elapsed < _duration)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / _duration);
-
-                _rt.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
-
-                if (elapsed >= fadeStart)
-                {
-                    float fadeT = Mathf.Clamp01((elapsed - fadeStart) / (_duration - fadeStart));
-                    _text.color = Color.Lerp(startColor, fadeColor, fadeT);
-                }
-
-                yield return null;
-            }
-
-            Finish();
+            DOTween.Sequence().SetLink(gameObject)
+                .Append(_rt.DOAnchorPos(startPos + Vector2.up * _risePixels, _duration).SetEase(Ease.Linear))
+                .Insert(fadeStart, DOTween.To(() => _text.color, x => _text.color = x, fadeColor, fadeDuration))
+                .OnComplete(Finish);
         }
 
         private void Finish()
@@ -89,7 +69,7 @@ namespace Crookedile.UI
 
         private void OnDisable()
         {
-            StopAllCoroutines();
+            DOTween.Kill(gameObject);
             OnComplete = null;
         }
     }

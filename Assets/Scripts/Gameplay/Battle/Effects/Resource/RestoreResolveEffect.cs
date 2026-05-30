@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -14,6 +14,7 @@ namespace Crookedile.Gameplay.Battle
     /// For audience-facing opinion recovery, use <see cref="HealResolveEffect"/> instead.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class RestoreResolveEffect : BattleEffect
     {
         [Tooltip("Base Resolve to restore. Ignored when Amount Source is not Fixed.")]

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Core;
@@ -11,6 +11,7 @@ namespace Crookedile.Gameplay.Battle
     /// Higher Hostility increases the enemy's damage multiplier.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class RaiseTargetHostilityEffect : BattleEffect
     {
         [MinValue(1)]

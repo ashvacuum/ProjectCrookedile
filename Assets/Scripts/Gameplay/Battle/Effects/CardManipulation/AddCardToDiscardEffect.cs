@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Crookedile.Data.Cards;
@@ -9,6 +9,7 @@ namespace Crookedile.Gameplay.Battle
     /// <summary>Adds one or more copies of a specific card directly to the player's discard pile.
     /// Typically used for status or curse cards granted by enemy effects.</summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class AddCardToDiscardEffect : BattleEffect
     {
         [Required]

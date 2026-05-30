@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Crookedile.Data;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -9,6 +9,7 @@ namespace Crookedile.Gameplay.Battle
     /// Passes when the player has the specified status effect with at least the required stacks.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class PlayerHasStatusCondition : PassiveConditionBase
     {
         [Tooltip("The status type to check for on the player.")]
