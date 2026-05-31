@@ -34,7 +34,7 @@ namespace Crookedile.Editor
 
             ["Blessing"] = new(
                 "faithleader",
-                "Deal damage equal to your Composure. Consume all Composure.",
+                "Raise Opinion equal to your Support. Consume all Support.",
                 "The congregation holds its breath."
             ),
 
@@ -46,13 +46,13 @@ namespace Crookedile.Editor
 
             ["Deflect"] = new(
                 "faithleader",
-                "Gain 3 Composure. Reduce Hostility by 1.",
+                "Gain 3 Support. Reduce Hostility by 1.",
                 "Grace under fire."
             ),
 
             ["Gather Thoughts"] = new(
                 "faithleader",
-                "Gain 4 Composure.",
+                "Gain 4 Support.",
                 "A moment of quiet before the storm."
             ),
 
@@ -97,7 +97,7 @@ namespace Crookedile.Editor
 
             ["Trust Fund"] = new(
                 "nepobaby",
-                "Gain 2 Composure. Gain 1 Action Point this turn.",
+                "Gain 2 Support. Gain 1 Action Point this turn.",
                 "Family always provides."
             ),
 
@@ -124,7 +124,7 @@ namespace Crookedile.Editor
 
             ["Spotlight Hog"] = new(
                 "actor",
-                "Deal 6 Resolve damage. Gain 3 Composure. Gain 2 Hostility.",
+                "Deal 6 Resolve damage. Gain 3 Support. Gain 2 Hostility.",
                 "They can't look away. Neither can you."
             ),
 
@@ -136,13 +136,13 @@ namespace Crookedile.Editor
 
             ["Ego Trip"] = new(
                 "actor",
-                "Gain Composure equal to your Hostility. (Hostility is not reduced.)",
+                "Gain Support equal to your Hostility. (Hostility is not reduced.)",
                 "Turn the wounds into weapons."
             ),
 
             ["Fan Favorite"] = new(
                 "actor",
-                "Lose 3 Composure. Reduce Hostility by 3.",
+                "Lose 3 Support. Reduce Hostility by 3.",
                 "They love you. Remind yourself of that."
             ),
         };

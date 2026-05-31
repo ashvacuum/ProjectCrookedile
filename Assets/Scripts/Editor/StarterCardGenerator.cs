@@ -103,12 +103,12 @@ namespace Crookedile.Editor
                     name: "Blessing",
                     type: CardType.Pressure,
                     rarity: CardRarity.Basic,
-                    description: "Convert all Composure into a powerful burst of conviction.",
+                    description: "Convert all Support into a powerful burst of conviction.",
                     cost: 1,
                     effects: new CardEffect[]
                     {
-                        CreateDamageEqualToComposureEffect(),
-                        CreateConsumeAllComposureEffect(),
+                        CreateRaiseOpinionEqualToShieldEffect(),
+                        CreateConsumeAllShieldEffect(),
                     }
                 );
             }
@@ -141,7 +141,7 @@ namespace Crookedile.Editor
                 cost: 1,
                 effects: new CardEffect[]
                 {
-                    CreateGainComposureEffect(3),
+                    CreateGainShieldEffect(3),
                     CreateReduceHostilityEffect(1),
                 }
             );
@@ -154,7 +154,7 @@ namespace Crookedile.Editor
                 rarity: CardRarity.Basic,
                 description: "Center yourself and build inner strength.",
                 cost: 1,
-                effects: new CardEffect[] { CreateGainComposureEffect(4) }
+                effects: new CardEffect[] { CreateGainShieldEffect(4) }
             );
         }
 
@@ -261,7 +261,7 @@ namespace Crookedile.Editor
                 cost: 0,
                 effects: new CardEffect[]
                 {
-                    CreateGainComposureEffect(2),
+                    CreateGainShieldEffect(2),
                     CreateGainActionPointsEffect(1),
                 }
             );
@@ -337,7 +337,7 @@ namespace Crookedile.Editor
                     effects: new CardEffect[]
                     {
                         CreateDamageEffect(6),
-                        CreateGainComposureEffect(3),
+                        CreateGainShieldEffect(3),
                         CreateReduceHostilityEffect(2),
                     }
                 );
@@ -366,7 +366,7 @@ namespace Crookedile.Editor
                 rarity: CardRarity.Basic,
                 description: "Convert your bad reputation into confidence.",
                 cost: 1,
-                effects: new CardEffect[] { CreateComposureEqualToHostilityEffect() }
+                effects: new CardEffect[] { CreateShieldEqualToHostilityEffect() }
             );
 
             // 7. Fan Favorite x1
@@ -379,7 +379,7 @@ namespace Crookedile.Editor
                 cost: 1,
                 effects: new CardEffect[]
                 {
-                    CreateLoseComposureEffect(3),
+                    CreateLoseShieldEffect(3),
                     CreateReduceHostilityEffect(3),
                 }
             );
@@ -392,7 +392,7 @@ namespace Crookedile.Editor
         private static void GenerateFaithLeaderRewardPool(string path)
         {
             #region BASIC
-            // Sermon — Gain 3 Composure, Draw 1
+            // Sermon — Gain 3 Support, Draw 1
             CreateCard(
                 path: $"{path}/Sermon.asset",
                 name: "Sermon",
@@ -401,10 +401,10 @@ namespace Crookedile.Editor
                 cost: 1,
                 description: "Share your conviction. Build inner strength and keep the ideas flowing.",
                 tags: new[] { "faithleader" },
-                effects: new CardEffect[] { CreateGainComposureEffect(3), CreateDrawCardsEffect(1) }
+                effects: new CardEffect[] { CreateGainShieldEffect(3), CreateDrawCardsEffect(1) }
             );
 
-            // Preach — Deal 4 damage, Gain 3 Composure
+            // Preach — Deal 4 damage, Gain 3 Support
             CreateCard(
                 path: $"{path}/Preach.asset",
                 name: "Preach",
@@ -413,22 +413,22 @@ namespace Crookedile.Editor
                 cost: 1,
                 description: "Press your moral argument. Your conviction grows as you speak.",
                 tags: new[] { "faithleader" },
-                effects: new CardEffect[] { CreateDamageEffect(4), CreateGainComposureEffect(3) }
+                effects: new CardEffect[] { CreateDamageEffect(4), CreateGainShieldEffect(3) }
             );
 
-            // Righteous Fury — Deal 4 damage, Lose 3 Composure
+            // Righteous Fury — Deal 4 damage, Lose 3 Support
             CreateCard(
                 path: $"{path}/RighteousFury.asset",
                 name: "Righteous Fury",
                 type: CardType.Rhetoric,
                 rarity: CardRarity.Basic,
                 cost: 1,
-                description: "Channel your outrage into an attack. Composure gives way to righteous anger.",
+                description: "Channel your outrage into an attack. Support gives way to righteous anger.",
                 tags: new[] { "faithleader" },
-                effects: new CardEffect[] { CreateDamageEffect(4), CreateLoseComposureEffect(3) }
+                effects: new CardEffect[] { CreateDamageEffect(4), CreateLoseShieldEffect(3) }
             );
 
-            // Moral High Ground — Gain 3 Composure, Reduce Hostility 1
+            // Moral High Ground — Gain 3 Support, Reduce Hostility 1
             // NOTE: 'Retain' mechanic requires the new BattleEffect system — configure in Unity Editor.
             CreateCard(
                 path: $"{path}/MoralHighGround.asset",
@@ -441,7 +441,7 @@ namespace Crookedile.Editor
                 configNotes: "Add RetainThisCard effect + configure Retain behaviour via Inspector.",
                 effects: new CardEffect[]
                 {
-                    CreateGainComposureEffect(3),
+                    CreateGainShieldEffect(3),
                     CreateReduceHostilityEffect(1),
                 }
             );
@@ -463,7 +463,7 @@ namespace Crookedile.Editor
             #endregion
 
             #region ENHANCED
-            // Prayer — Gain 5 Composure (+ Add Blessed to hand via Inspector)
+            // Prayer — Gain 5 Support (+ Add Blessed to hand via Inspector)
             CreateCard(
                 path: $"{path}/Prayer.asset",
                 name: "Prayer",
@@ -473,10 +473,10 @@ namespace Crookedile.Editor
                 description: "A moment of reflection. Gain strength and receive a divine token.",
                 tags: new[] { "faithleader" },
                 configNotes: "Add AddCardToHand 'Blessed' effect via Inspector.",
-                effects: new CardEffect[] { CreateGainComposureEffect(5) }
+                effects: new CardEffect[] { CreateGainShieldEffect(5) }
             );
 
-            // Congregation — Draw 3, Gain 9 Composure (approximated as 3 per card drawn)
+            // Congregation — Draw 3, Gain 9 Support (approximated as 3 per card drawn)
             CreateCard(
                 path: $"{path}/Congregation.asset",
                 name: "Congregation",
@@ -485,20 +485,20 @@ namespace Crookedile.Editor
                 cost: 2,
                 description: "Rally your followers. Draw strength from the crowd.",
                 tags: new[] { "faithleader" },
-                effects: new CardEffect[] { CreateDrawCardsEffect(3), CreateGainComposureEffect(9) }
+                effects: new CardEffect[] { CreateDrawCardsEffect(3), CreateGainShieldEffect(9) }
             );
 
-            // Holy Patience — Gain 6 Composure (Retain + conditional gain via Inspector)
+            // Holy Patience — Gain 6 Support (Retain + conditional gain via Inspector)
             CreateCard(
                 path: $"{path}/HolyPatience.asset",
                 name: "Holy Patience",
                 type: CardType.Pressure,
                 rarity: CardRarity.Enhanced,
                 cost: 1,
-                description: "Wait for the right moment. Retain. At end of turn, if still in hand: gain 6 Composure.",
+                description: "Wait for the right moment. Retain. At end of turn, if still in hand: gain 6 Support.",
                 tags: new[] { "faithleader" },
-                configNotes: "Add RetainThisCard effect + TurnEndTrigger passive: GainComposure 6 via Inspector.",
-                effects: new CardEffect[] { CreateGainComposureEffect(6) }
+                configNotes: "Add RetainThisCard effect + TurnEndTrigger passive: GainShield 6 via Inspector.",
+                effects: new CardEffect[] { CreateGainShieldEffect(6) }
             );
 
             // Excommunicate — Deal 5 damage (+ Apply Weakened 2 + Vulnerable 1 via Inspector)
@@ -514,36 +514,36 @@ namespace Crookedile.Editor
                 effects: new CardEffect[] { CreateDamageEffect(5) }
             );
 
-            // Pastoral Care — Gain 4 Composure (+ Heal 10 Resolve via Inspector)
+            // Pastoral Care — Gain 4 Support (+ Heal 10 Resolve via Inspector)
             CreateCard(
                 path: $"{path}/PastoralCare.asset",
                 name: "Pastoral Care",
                 type: CardType.Policy,
                 rarity: CardRarity.Enhanced,
                 cost: 2,
-                description: "Tend to your own wounds and steady your resolve. Heal 10 Resolve. Gain 4 Composure.",
+                description: "Tend to your own wounds and steady your resolve. Heal 10 Resolve. Gain 4 Support.",
                 tags: new[] { "faithleader" },
                 configNotes: "Add HealResolveEffect (amount 10) via Inspector.",
-                effects: new CardEffect[] { CreateGainComposureEffect(4) }
+                effects: new CardEffect[] { CreateGainShieldEffect(4) }
             );
 
             #endregion
 
             #region RARE
-            // Holy Alliance — Gain 6 Composure + Reduce Hostility 3
-            // NOTE: "Double current Composure" requires new BattleEffect — configure in Inspector.
+            // Holy Alliance — Gain 6 Support + Reduce Hostility 3
+            // NOTE: "Double current Support" requires new BattleEffect — configure in Inspector.
             CreateCard(
                 path: $"{path}/HolyAlliance.asset",
                 name: "Holy Alliance",
                 type: CardType.Policy,
                 rarity: CardRarity.Rare,
                 cost: 2,
-                description: "Rally powerful allies. Double your current Composure. Reduce Hostility 3.",
+                description: "Rally powerful allies. Double your current Support. Reduce Hostility 3.",
                 tags: new[] { "faithleader" },
-                configNotes: "Replace GainComposure effect with DoubleCurrentComposureEffect via Inspector.",
+                configNotes: "Replace GainShield effect with DoubleCurrentShieldEffect via Inspector.",
                 effects: new CardEffect[]
                 {
-                    CreateGainComposureEffect(6),
+                    CreateGainShieldEffect(6),
                     CreateReduceHostilityEffect(3),
                 }
             );
@@ -576,7 +576,7 @@ namespace Crookedile.Editor
                 effects: new CardEffect[] { CreateDrawCardsEffect(3) }
             );
 
-            // Absolution — Exhaust hand, Gain 6 Composure per card exhausted, Draw 3
+            // Absolution — Exhaust hand, Gain 6 Support per card exhausted, Draw 3
             // NOTE: Full version uses ExhaustHand + scale per card. Simplified for now.
             CreateCard(
                 path: $"{path}/Absolution.asset",
@@ -584,18 +584,18 @@ namespace Crookedile.Editor
                 type: CardType.Policy,
                 rarity: CardRarity.Rare,
                 cost: 2,
-                description: "Sacrifice everything. Exhaust your hand. Gain 6 Composure per card exhausted. Draw 3.",
+                description: "Sacrifice everything. Exhaust your hand. Gain 6 Support per card exhausted. Draw 3.",
                 tags: new[] { "faithleader" },
-                configNotes: "Change DiscardCards to ExhaustHandEffect; replace flat GainComposure with GainComposurePerExhaustedCard (6 per card) via Inspector.",
+                configNotes: "Change DiscardCards to ExhaustHandEffect; replace flat GainShield with GainShieldPerExhaustedCard (6 per card) via Inspector.",
                 effects: new CardEffect[]
                 {
                     CreateDiscardCardsEffect(99),
-                    CreateGainComposureEffect(6),
+                    CreateGainShieldEffect(6),
                     CreateDrawCardsEffect(3),
                 }
             );
 
-            // Martyrdom — Lose all Resolve except 1, Gain Composure = Resolve lost
+            // Martyrdom — Lose all Resolve except 1, Gain Support = Resolve lost
             // NOTE: Full effect is very complex — configure via Inspector.
             CreateCard(
                 path: $"{path}/Martyrdom.asset",
@@ -603,9 +603,9 @@ namespace Crookedile.Editor
                 type: CardType.Policy,
                 rarity: CardRarity.Rare,
                 cost: 0,
-                description: "Give everything. Lose all Resolve except 1. Gain Composure equal to Resolve lost.",
+                description: "Give everything. Lose all Resolve except 1. Gain Support equal to Resolve lost.",
                 tags: new[] { "faithleader" },
-                configNotes: "Replace DealDamage with LoseAllResolveExceptOneEffect + GainComposureEqualToResolveLostEffect via Inspector.",
+                configNotes: "Replace DealDamage with LoseAllResolveExceptOneEffect + GainShieldEqualToResolveLostEffect via Inspector.",
                 effects: new CardEffect[] { CreateDamageEffect(8) }
             );
         }
@@ -620,7 +620,7 @@ namespace Crookedile.Editor
 
         private static void GenerateFaithLeaderTokenCards(string path)
         {
-            // Blessed — Pressure, 0 AP: Gain 3 Composure, Exhaust
+            // Blessed — Pressure, 0 AP: Gain 3 Support, Exhaust
             // Generated by: Prayer
             CreateCard(
                 path: $"{path}/Blessed.asset",
@@ -628,11 +628,11 @@ namespace Crookedile.Editor
                 type: CardType.Pressure,
                 rarity: CardRarity.Basic,
                 cost: 0,
-                description: "A divine gift. Gain 3 Composure. Exhaust.",
+                description: "A divine gift. Gain 3 Support. Exhaust.",
                 tags: new[] { "faithleader" },
                 isUnplayable: false,
                 configNotes: "Add ExhaustThisCard effect via Inspector.",
-                effects: new CardEffect[] { CreateGainComposureEffect(3) }
+                effects: new CardEffect[] { CreateGainShieldEffect(3) }
             );
 
             // Fervor — Pressure, 0 AP: Next Blessing deals double damage, Exhaust
@@ -683,19 +683,19 @@ namespace Crookedile.Editor
 
         private static void GenerateFaithLeaderStatusCards(string path)
         {
-            // Unnerved — Status, 0 AP: Lose 5 Composure, Exhaust
-            // General: no origin tag. Brutally punishes Composure builds.
+            // Unnerved — Status, 0 AP: Lose 5 Support, Exhaust
+            // General: no origin tag. Brutally punishes Support builds.
             CreateCard(
                 path: $"{path}/Unnerved.asset",
                 name: "Unnerved",
                 type: CardType.Status,
                 rarity: CardRarity.Basic,
                 cost: 0,
-                description: "Your confidence cracks. Lose 5 Composure. Exhaust.",
+                description: "Your confidence cracks. Lose 5 Support. Exhaust.",
                 tags: null,
                 isUnplayable: false,
                 configNotes: "Add ExhaustThisCard effect via Inspector.",
-                effects: new CardEffect[] { CreateLoseComposureEffect(5) }
+                effects: new CardEffect[] { CreateLoseShieldEffect(5) }
             );
 
             // Hounded — Status, 0 AP: Lose 4 Resolve, Exhaust
@@ -740,17 +740,17 @@ namespace Crookedile.Editor
             // require BattlePassive configuration in the Inspector — the generator creates
             // the card shells with descriptions only.
 
-            // Crisis of Faith — lose 4 Composure at end of turn if in hand
+            // Crisis of Faith — lose 4 Support at end of turn if in hand
             CreateCard(
                 path: $"{path}/CrisisOfFaith.asset",
                 name: "Crisis of Faith",
                 type: CardType.Curse,
                 rarity: CardRarity.Basic,
                 cost: 0,
-                description: "Doubt creeps in. Lose 4 Composure at end of turn while held.",
+                description: "Doubt creeps in. Lose 4 Support at end of turn while held.",
                 tags: new[] { "faithleader" },
                 isUnplayable: true,
-                configNotes: "Add TurnEndTrigger passive: LoseComposureEffect (amount 4) via Inspector.",
+                configNotes: "Add TurnEndTrigger passive: LoseShieldEffect (amount 4) via Inspector.",
                 effects: new CardEffect[] { }
             );
 
@@ -782,17 +782,17 @@ namespace Crookedile.Editor
                 effects: new CardEffect[] { }
             );
 
-            // Doubt — lose 4 Composure on draw
+            // Doubt — lose 4 Support on draw
             CreateCard(
                 path: $"{path}/Doubt.asset",
                 name: "Doubt",
                 type: CardType.Curse,
                 rarity: CardRarity.Basic,
                 cost: 0,
-                description: "Uncertainty strikes the moment this enters your hand. On draw: lose 4 Composure.",
+                description: "Uncertainty strikes the moment this enters your hand. On draw: lose 4 Support.",
                 tags: new[] { "faithleader" },
                 isUnplayable: true,
-                configNotes: "Add CardDrawnTrigger passive: LoseComposureEffect (amount 4) via Inspector.",
+                configNotes: "Add CardDrawnTrigger passive: LoseShieldEffect (amount 4) via Inspector.",
                 effects: new CardEffect[] { }
             );
         }
@@ -905,50 +905,50 @@ namespace Crookedile.Editor
             );
         }
 
-        private static CardEffect CreateDamageEqualToComposureEffect()
+        private static CardEffect CreateRaiseOpinionEqualToShieldEffect()
         {
             return CreateEffect(
                 EffectCategory.Damage,
                 TargetType.Opponent,
-                damageType: DamageType.DamageEqualToComposure
+                damageType: DamageType.DamageEqualToShield
             );
         }
 
-        private static CardEffect CreateGainComposureEffect(int amount)
+        private static CardEffect CreateGainShieldEffect(int amount)
         {
             return CreateEffect(
                 EffectCategory.Resource,
                 TargetType.Self,
-                resourceType: ResourceEffectType.GainComposure,
+                resourceType: ResourceEffectType.GainShield,
                 resourceAmount: amount
             );
         }
 
-        private static CardEffect CreateLoseComposureEffect(int amount)
+        private static CardEffect CreateLoseShieldEffect(int amount)
         {
             return CreateEffect(
                 EffectCategory.Resource,
                 TargetType.Self,
-                resourceType: ResourceEffectType.LoseComposure,
+                resourceType: ResourceEffectType.LoseShield,
                 resourceAmount: amount
             );
         }
 
-        private static CardEffect CreateConsumeAllComposureEffect()
+        private static CardEffect CreateConsumeAllShieldEffect()
         {
             return CreateEffect(
                 EffectCategory.Resource,
                 TargetType.Self,
-                resourceType: ResourceEffectType.ConsumeAllComposure
+                resourceType: ResourceEffectType.ConsumeAllShield
             );
         }
 
-        private static CardEffect CreateComposureEqualToHostilityEffect()
+        private static CardEffect CreateShieldEqualToHostilityEffect()
         {
             return CreateEffect(
                 EffectCategory.Resource,
                 TargetType.Self,
-                resourceType: ResourceEffectType.ComposureEqualToHostility
+                resourceType: ResourceEffectType.ShieldEqualToHostility
             );
         }
 
@@ -1009,7 +1009,7 @@ namespace Crookedile.Editor
             int damageAmount = 0,
             int randomMin = 0,
             int randomMax = 0,
-            ResourceEffectType resourceType = ResourceEffectType.GainComposure,
+            ResourceEffectType resourceType = ResourceEffectType.GainShield,
             int resourceAmount = 0,
             CardManipulationType cardManipType = CardManipulationType.DrawCards,
             int cardAmount = 0

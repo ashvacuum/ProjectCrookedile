@@ -285,7 +285,7 @@ namespace Crookedile.UI.Battle
                 randMax = 0;
             bool hasFixed = false,
                 hasRandom = false,
-                hasComposure = false;
+                hasShield = false;
 
             foreach (var effect in dmgEffects)
             {
@@ -300,15 +300,15 @@ namespace Crookedile.UI.Battle
                         randMax += effect.RandomDamageMax;
                         hasRandom = true;
                         break;
-                    case DamageType.DamageEqualToComposure:
-                        hasComposure = true;
+                    case DamageType.DamageEqualToShield:
+                        hasShield = true;
                         break;
                 }
             }
 
-            if (!hasFixed && !hasRandom && !hasComposure)
+            if (!hasFixed && !hasRandom && !hasShield)
                 return string.Empty;
-            if (hasComposure)
+            if (hasShield)
                 return hasFixed ? $"{fixedTotal}+" : "?";
 
             // Apply full two-step preview pipeline

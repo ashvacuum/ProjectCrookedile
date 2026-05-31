@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 4
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: 'Uncertainty strikes the moment this enters your hand. Lose 4 Composure
-    on draw. (Configure OnDraw passive: LoseComposure 4 via Inspector.)'
+  _description: 'Uncertainty strikes the moment this enters your hand. Lose 4 Support
+    on draw. (Configure OnDraw passive: LoseShield 4 via Inspector.)'
   _flavorText: 
   _costs:
   - _costType: 0

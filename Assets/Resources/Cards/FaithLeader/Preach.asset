@@ -96,7 +96,7 @@ MonoBehaviour:
         _amount: 4
         _amountSource: 0
     - rid: 4738608375284105340
-      type: {class: GainComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: GainShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: 
         _amount: 3

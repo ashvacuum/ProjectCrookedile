@@ -28,26 +28,26 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private RectTransform _thresholdMarker;
 
-        [Header("Composure Shields")]
+        [Header("Shields (Support / Denial)")]
         [Tooltip(
-            "Left shield RectTransform — player composure (resists opinion drops). "
-                + "Width scales with composure value."
+            "Left shield RectTransform — player Support (resists opinion drops). "
+                + "Width scales with Support value."
         )]
         [SerializeField]
         private RectTransform _playerShield;
 
         [Tooltip(
-            "Right shield RectTransform — focused enemy composure (resists opinion rises). "
-                + "Width scales with composure value."
+            "Right shield RectTransform — focused enemy Denial (resists opinion rises). "
+                + "Width scales with Denial value."
         )]
         [SerializeField]
         private RectTransform _enemyShield;
 
-        [Tooltip("Composure value that maps to maximum shield width.")]
+        [Tooltip("Shield value that maps to maximum shield width.")]
         [SerializeField]
         private int _shieldFullValue = 20;
 
-        [Tooltip("Maximum shield width in pixels at _shieldFullValue composure.")]
+        [Tooltip("Maximum shield width in pixels at _shieldFullValue Shield.")]
         [SerializeField]
         private float _shieldMaxWidth = 60f;
 
@@ -75,18 +75,18 @@ namespace Crookedile.UI.Battle
         #region Public API
         /// <summary>
         /// Updates the opinion bar fill and text, refreshes the turn countdown,
-        /// and sizes the composure shields on each side.
-        /// Call from <see cref="BattleUI"/> in response to opinion / composure / turn events.
+        /// and sizes the Support/Denial shields on each side.
+        /// Call from <see cref="BattleUI"/> in response to opinion / shield / turn events.
         /// </summary>
-        /// <param name="playerComposure">Player's current composure — sizes the left shield.</param>
-        /// <param name="enemyComposure">Focused enemy's current composure — sizes the right shield.</param>
+        /// <param name="playerSupport">Player's current Support — sizes the left shield.</param>
+        /// <param name="enemyDenial">Focused enemy's current Denial — sizes the right shield.</param>
         public void Refresh(
             int currentOpinion,
             int maxOpinion,
             int turnsElapsed,
             int maxTurns,
-            int playerComposure = 0,
-            int enemyComposure = 0
+            int playerSupport = 0,
+            int enemyDenial = 0
         )
         {
             float pct = maxOpinion > 0 ? (float)currentOpinion / maxOpinion : 0f;
@@ -101,24 +101,24 @@ namespace Crookedile.UI.Battle
                 _valueText.text = $"Opinion: {currentOpinion} / {maxOpinion}";
 
             RefreshTurnCountdown(turnsElapsed, maxTurns);
-            SizeShield(_playerShield, playerComposure);
-            SizeShield(_enemyShield, enemyComposure);
+            SizeShield(_playerShield, playerSupport);
+            SizeShield(_enemyShield, enemyDenial);
         }
 
         #endregion
 
         #region Private
-        private void SizeShield(RectTransform shield, int composure)
+        private void SizeShield(RectTransform shield, int stacks)
         {
             if (shield == null)
                 return;
             float w =
                 _shieldFullValue > 0
-                    ? Mathf.Clamp01((float)composure / _shieldFullValue) * _shieldMaxWidth
+                    ? Mathf.Clamp01((float)stacks / _shieldFullValue) * _shieldMaxWidth
                     : 0f;
             var size = shield.sizeDelta;
             shield.sizeDelta = new Vector2(w, size.y);
-            shield.gameObject.SetActive(composure > 0);
+            shield.gameObject.SetActive(stacks > 0);
         }
 
         private void RefreshTurnCountdown(int turnsElapsed, int maxTurns)

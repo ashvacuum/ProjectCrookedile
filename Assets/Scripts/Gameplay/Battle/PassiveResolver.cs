@@ -53,7 +53,7 @@ namespace Crookedile.Gameplay.Battle
         private readonly Action<DamageDealtEvent> _onDamageDealt;
         private readonly Action<HealingAppliedEvent> _onHealingApplied;
         private readonly Action<StatusEffectAppliedEvent> _onStatusEffectApplied;
-        private readonly Action<ComposureChangedEvent> _onComposureChanged;
+        private readonly Action<ShieldChangedEvent> _onShieldChanged;
         private readonly Action<EnemyDefeatedEvent> _onEnemyDefeated;
         private readonly Action<EnemySummonedEvent> _onEnemySummoned;
         private readonly Action<EnemyActingEvent> _onEnemyActing;
@@ -100,7 +100,7 @@ namespace Crookedile.Gameplay.Battle
             _onDamageDealt = e => DispatchEvent(e);
             _onHealingApplied = e => DispatchEvent(e);
             _onStatusEffectApplied = e => DispatchEvent(e);
-            _onComposureChanged = e => DispatchEvent(e);
+            _onShieldChanged = e => DispatchEvent(e);
             _onEnemyDefeated = e => DispatchEvent(e);
             _onEnemySummoned = e => DispatchEvent(e);
             _onEnemyActing = e => DispatchEvent(e);
@@ -132,7 +132,7 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Subscribe(_onDamageDealt);
             EventBus.Subscribe(_onHealingApplied);
             EventBus.Subscribe(_onStatusEffectApplied);
-            EventBus.Subscribe(_onComposureChanged);
+            EventBus.Subscribe(_onShieldChanged);
 
             EventBus.Subscribe(_onEnemyDefeated);
             EventBus.Subscribe(_onEnemySummoned);
@@ -156,7 +156,7 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Unsubscribe(_onDamageDealt);
             EventBus.Unsubscribe(_onHealingApplied);
             EventBus.Unsubscribe(_onStatusEffectApplied);
-            EventBus.Unsubscribe(_onComposureChanged);
+            EventBus.Unsubscribe(_onShieldChanged);
 
             EventBus.Unsubscribe(_onEnemyDefeated);
             EventBus.Unsubscribe(_onEnemySummoned);
@@ -260,8 +260,8 @@ namespace Crookedile.Gameplay.Battle
         /// Populates the accumulated result fields on <paramref name="execCtx"/> from the
         /// data carried by the triggering event. This allows passive <see cref="BattleEffect"/>
         /// entries to use <see cref="EffectContextValue"/> sources such as
-        /// <c>LastDamageDealt</c>, <c>LastHealAmount</c>, <c>LastComposureGained</c>, and
-        /// <c>LastComposureLost</c> — mirroring the values card effects accumulate during
+        /// <c>LastDamageDealt</c>, <c>LastHealAmount</c>, <c>LastShieldGained</c>, and
+        /// <c>LastShieldLost</c> — mirroring the values card effects accumulate during
         /// in-resolution execution.
         /// </summary>
         private static void EnrichContextFromEvent(
@@ -281,14 +281,14 @@ namespace Crookedile.Gameplay.Battle
                 if (e.IsToPlayer)
                     execCtx.LastHealAmount = e.Amount;
             }
-            else if (evtCtx.Is<ComposureChangedEvent>())
+            else if (evtCtx.Is<ShieldChangedEvent>())
             {
-                var e = evtCtx.As<ComposureChangedEvent>();
+                var e = evtCtx.As<ShieldChangedEvent>();
                 int delta = e.NewValue - e.OldValue;
                 if (delta > 0)
-                    execCtx.LastComposureGained = delta;
+                    execCtx.LastShieldGained = delta;
                 else if (delta < 0)
-                    execCtx.LastComposureLost = -delta;
+                    execCtx.LastShieldLost = -delta;
             }
             else if (evtCtx.Is<EnemyDefeatedEvent>())
             {

@@ -103,9 +103,9 @@ namespace Crookedile.UI.Battle
                 return;
 
             if (playerResolveText != null)
-                playerResolveText.text = $"Composure: {stats.CurrentComposure}";
+                playerResolveText.text = $"Support: {stats.CurrentShield}";
             if (playerComposureText != null)
-                playerComposureText.text = $"Composure: {stats.CurrentComposure}";
+                playerComposureText.text = $"Support: {stats.CurrentShield}";
             if (playerHostilityText != null)
                 playerHostilityText.text =
                     $"Hostility: {stats.CurrentHostility} ({stats.HostilityDamageMultiplier:F1}x)";
@@ -120,9 +120,9 @@ namespace Crookedile.UI.Battle
                 return;
 
             if (opponentResolveText != null)
-                opponentResolveText.text = $"Composure: {stats.CurrentComposure}";
+                opponentResolveText.text = $"Denial: {stats.CurrentShield}";
             if (opponentComposureText != null)
-                opponentComposureText.text = $"Composure: {stats.CurrentComposure}";
+                opponentComposureText.text = $"Denial: {stats.CurrentShield}";
             if (opponentHostilityText != null)
                 opponentHostilityText.text = $"Hostility: {stats.CurrentHostility}";
             if (opponentAPText != null)

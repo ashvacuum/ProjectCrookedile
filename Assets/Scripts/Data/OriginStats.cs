@@ -11,7 +11,7 @@ namespace Crookedile.Data
     public class OriginStats : ScriptableObject
     {
         [Header("Faith Leader (Religious)")]
-        [Tooltip("Faith Leader - Composure combo specialist, +1 card draw at start")]
+        [Tooltip("Faith Leader - Support/shield specialist, +1 card draw at start")]
         public OriginBattleStats faithLeaderStats = new OriginBattleStats
         {
             maxResolve = 85, // Standard Resolve (HP)

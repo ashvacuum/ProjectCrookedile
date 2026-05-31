@@ -40,8 +40,8 @@ namespace Crookedile.Data.Audio
         EnemyHostilityChanged,
 
         // Resources
-        ComposureGained,
-        ComposureLost,
+        ShieldGained,
+        ShieldLost,
         APSpent,
         APGained,
     }

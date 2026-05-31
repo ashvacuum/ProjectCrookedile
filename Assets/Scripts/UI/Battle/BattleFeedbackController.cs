@@ -58,7 +58,7 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             EventBus.Subscribe<EnemyActingEvent>(OnEnemyActing);
             EventBus.Subscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
-            EventBus.Subscribe<ComposureChangedEvent>(OnComposureChanged);
+            EventBus.Subscribe<ShieldChangedEvent>(OnShieldChanged);
             EventBus.Subscribe<EnemyHostilityChangedEvent>(OnHostilityChanged);
             EventBus.Subscribe<ActionPointsChangedEvent>(OnAPChanged);
             EventBus.Subscribe<CardPlayVFXRequestedEvent>(OnCardPlayVFXRequested);
@@ -80,7 +80,7 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             EventBus.Unsubscribe<EnemyActingEvent>(OnEnemyActing);
             EventBus.Unsubscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
-            EventBus.Unsubscribe<ComposureChangedEvent>(OnComposureChanged);
+            EventBus.Unsubscribe<ShieldChangedEvent>(OnShieldChanged);
             EventBus.Unsubscribe<EnemyHostilityChangedEvent>(OnHostilityChanged);
             EventBus.Unsubscribe<ActionPointsChangedEvent>(OnAPChanged);
             EventBus.Unsubscribe<CardPlayVFXRequestedEvent>(OnCardPlayVFXRequested);
@@ -214,11 +214,11 @@ namespace Crookedile.UI.Battle
                 _battleUI?.GetEnemySlotTransform(evt.EnemyIndex)
             );
 
-        private void OnComposureChanged(ComposureChangedEvent evt) =>
+        private void OnShieldChanged(ShieldChangedEvent evt) =>
             Play(
                 evt.NewValue > evt.OldValue
-                    ? BattleAudioTrigger.ComposureGained
-                    : BattleAudioTrigger.ComposureLost
+                    ? BattleAudioTrigger.ShieldGained
+                    : BattleAudioTrigger.ShieldLost
             );
 
         private void OnHostilityChanged(EnemyHostilityChangedEvent evt) =>

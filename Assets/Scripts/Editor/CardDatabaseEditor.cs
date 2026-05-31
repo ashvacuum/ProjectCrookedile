@@ -32,7 +32,7 @@ namespace Crookedile.Editor
         {
             Name,
             HighestDamage,
-            HighestComposure,
+            HighestShield,
             MostEffects,
             CheapestCost,
             Type,
@@ -353,16 +353,16 @@ namespace Crookedile.Editor
                 );
             }
 
-            // Most Composure Gain
-            var mostComposureCard = allCards
-                .OrderByDescending(c => GetMaxComposureGain(c))
+            // Most Shield Gain
+            var mostShieldCard = allCards
+                .OrderByDescending(c => GetMaxShieldGain(c))
                 .FirstOrDefault();
-            if (mostComposureCard != null && GetMaxComposureGain(mostComposureCard) > 0)
+            if (mostShieldCard != null && GetMaxShieldGain(mostShieldCard) > 0)
             {
                 DrawNotableCard(
-                    "Highest Composure",
-                    mostComposureCard,
-                    $"+{GetMaxComposureGain(mostComposureCard)} composure"
+                    "Highest Shield",
+                    mostShieldCard,
+                    $"+{GetMaxShieldGain(mostShieldCard)} shield"
                 );
             }
 
@@ -600,7 +600,7 @@ namespace Crookedile.Editor
                         currentSortMode = mode;
                         sortDescending = (
                             mode == SortMode.HighestDamage
-                            || mode == SortMode.HighestComposure
+                            || mode == SortMode.HighestShield
                             || mode == SortMode.MostEffects
                         );
                     }
@@ -662,7 +662,7 @@ namespace Crookedile.Editor
             int cost = GetMinCost(card);
             int effectCount = card.Effects?.Count ?? 0;
             int damage = GetMaxDamage(card);
-            int composure = GetMaxComposureGain(card);
+            int shield = GetMaxShieldGain(card);
 
             // Use a simple rect approach instead of nested Begin/End
             Rect lineRect = EditorGUILayout.GetControlRect(GUILayout.Height(24));
@@ -737,8 +737,8 @@ namespace Crookedile.Editor
             );
             xOffset += 65;
 
-            // Composure
-            string composureText = composure > 0 ? $"+{composure} CMP" : "";
+            // Shield
+            string composureText = shield > 0 ? $"+{shield} SHD" : "";
             GUI.Label(
                 new Rect(xOffset, contentRect.y, 70, 18),
                 composureText,
@@ -811,7 +811,7 @@ namespace Crookedile.Editor
             {
                 SortMode.Name => cards.OrderBy(c => c.CardName),
                 SortMode.HighestDamage => cards.OrderBy(c => GetMaxDamage(c)),
-                SortMode.HighestComposure => cards.OrderBy(c => GetMaxComposureGain(c)),
+                SortMode.HighestShield => cards.OrderBy(c => GetMaxShieldGain(c)),
                 SortMode.MostEffects => cards.OrderBy(c => c.Effects?.Count ?? 0),
                 SortMode.CheapestCost => cards.OrderBy(c => GetMinCost(c)),
                 SortMode.Type => cards.OrderBy(c => c.CardType),
@@ -854,23 +854,23 @@ namespace Crookedile.Editor
             return maxDamage;
         }
 
-        private int GetMaxComposureGain(CardData card)
+        private int GetMaxShieldGain(CardData card)
         {
             if (card?.Effects == null)
                 return 0;
 
-            int totalComposure = 0;
+            int total = 0;
             foreach (var effect in card.Effects)
             {
                 if (
                     effect.Category == EffectCategory.Resource
-                    && effect.ResourceType == ResourceEffectType.GainComposure
+                    && effect.ResourceType == ResourceEffectType.GainShield
                 )
                 {
-                    totalComposure += effect.ResourceAmount;
+                    total += effect.ResourceAmount;
                 }
             }
-            return totalComposure;
+            return total;
         }
 
         private int GetMinCost(CardData card)

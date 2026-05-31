@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 2
   _rarity: 2
   _artwork: {fileID: 0}
-  _description: Rally powerful allies. Your resolve doubles. (Replace GainComposure
-    with 'DoubleComposure' effect via Inspector.)
+  _description: Rally powerful allies. Your resolve doubles. (Replace GainShield
+    with 'DoubleSupport' effect via Inspector.)
   _flavorText: 
   _costs:
   - _costType: 1
@@ -90,7 +90,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608375284105331
-      type: {class: GainComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: GainShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: 
         _amount: 6

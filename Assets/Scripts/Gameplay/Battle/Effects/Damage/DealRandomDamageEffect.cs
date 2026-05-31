@@ -40,6 +40,6 @@ namespace Crookedile.Gameplay.Battle
         }
 
         public override string GetDescription() =>
-            $"Raise Opinion by {_minDamage}–{_maxDamage} (through {_target}'s composure)";
+            $"Raise Opinion by {_minDamage}–{_maxDamage} (through {_target}'s Denial)";
     }
 }

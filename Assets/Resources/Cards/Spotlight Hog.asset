@@ -17,7 +17,7 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: 412cfd2df8c5ca74b837c99a165f6a8b, type: 3}
-  _description: Deal 6 Resolve damage. Gain 3 Composure. Reduce 2 Hostility.
+  _description: Deal 6 Resolve damage. Gain 3 Support. Reduce 2 Hostility.
   _flavorText: They can't look away. Neither can you.
   _costs:
   - _costType: 1
@@ -116,7 +116,7 @@ MonoBehaviour:
         _amount: 6
         _amountSource: 0
     - rid: 4738608336531357816
-      type: {class: GainComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: GainShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: 
         _amount: 3

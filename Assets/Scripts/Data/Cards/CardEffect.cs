@@ -146,7 +146,7 @@ namespace Crookedile.Data.Cards
             {
                 { "Fixed Damage", DamageType.FixedDamage },
                 { "Random Damage (Actor)", DamageType.RandomDamage },
-                { "Damage = Composure (Faith Leader)", DamageType.DamageEqualToComposure },
+                { "Damage = Shield (Faith Leader)", DamageType.DamageEqualToShield },
             };
         }
 
@@ -154,13 +154,10 @@ namespace Crookedile.Data.Cards
         {
             return new ValueDropdownList<ResourceEffectType>
             {
-                { "Composure/Gain Composure", ResourceEffectType.GainComposure },
-                { "Composure/Lose Composure", ResourceEffectType.LoseComposure },
-                { "Composure/Consume All Composure", ResourceEffectType.ConsumeAllComposure },
-                {
-                    "Composure/Composure = Hostility (Actor)",
-                    ResourceEffectType.ComposureEqualToHostility
-                },
+                { "Shield/Gain Shield (Support)", ResourceEffectType.GainShield },
+                { "Shield/Lose Shield (Support)", ResourceEffectType.LoseShield },
+                { "Shield/Consume All Shield", ResourceEffectType.ConsumeAllShield },
+                { "Shield/Shield = Hostility (Actor)", ResourceEffectType.ShieldEqualToHostility },
                 { "Hostility/Reduce Hostility", ResourceEffectType.ReduceHostility },
                 { "Hostility/Raise Target Hostility", ResourceEffectType.RaiseTargetHostility },
                 { "Action Points/Gain AP (This Turn)", ResourceEffectType.GainActionPoints },
@@ -207,21 +204,21 @@ namespace Crookedile.Data.Cards
             {
                 { "Debuffs/Weakened (Deal X less damage)", StatusEffectType.Weakened },
                 { "Debuffs/Vulnerable (Take 50% more damage)", StatusEffectType.Vulnerable },
-                { "Debuffs/Frail (Gain 25% less Composure)", StatusEffectType.Frail },
+                { "Debuffs/Frail (Gain 25% less Shield)", StatusEffectType.Frail },
                 { "Debuffs/Entangled (Cards cost +1 AP)", StatusEffectType.Entangled },
                 { "Debuffs/Exposed (Next attack double damage)", StatusEffectType.Exposed },
                 { "Debuffs/Scandal (Take X damage per turn)", StatusEffectType.Scandal },
                 { "Debuffs/Confused (Random card +1 AP)", StatusEffectType.Confused },
                 { "Debuffs/Silenced (Can't play Manipulate)", StatusEffectType.Silenced },
                 { "Buffs/Strength (Deal X more damage)", StatusEffectType.Strength },
-                { "Buffs/Dexterity (Gain X more Composure)", StatusEffectType.Dexterity },
+                { "Buffs/Dexterity (Gain X more Shield)", StatusEffectType.Dexterity },
                 { "Buffs/Focus (Cards cost X less AP)", StatusEffectType.Focus },
                 { "Buffs/Energized (Draw X cards next turn)", StatusEffectType.Energized },
                 { "Buffs/Plated (Reduce damage by X)", StatusEffectType.Plated },
                 { "Buffs/Regeneration (Heal X per turn)", StatusEffectType.Regeneration },
                 { "Buffs/Intangible (Take 1 damage only)", StatusEffectType.Intangible },
                 { "Buffs/Thorns (Deal X back when hit)", StatusEffectType.Thorns },
-                { "Special/Ritual (Gain X Composure per turn)", StatusEffectType.Ritual },
+                { "Special/Ritual (Gain X Shield per turn)", StatusEffectType.Ritual },
                 { "Special/Momentum (X damage per card)", StatusEffectType.Momentum },
                 { "Special/Echo (Next card plays twice)", StatusEffectType.Echo },
             };
@@ -252,8 +249,8 @@ namespace Crookedile.Data.Cards
         {
             return _category == EffectCategory.Resource
                 && (
-                    _resourceType == ResourceEffectType.GainComposure
-                    || _resourceType == ResourceEffectType.LoseComposure
+                    _resourceType == ResourceEffectType.GainShield
+                    || _resourceType == ResourceEffectType.LoseShield
                     || _resourceType == ResourceEffectType.ReduceHostility
                     || _resourceType == ResourceEffectType.RaiseTargetHostility
                     || _resourceType == ResourceEffectType.GainActionPoints
@@ -265,8 +262,8 @@ namespace Crookedile.Data.Cards
 
         /// <summary>
         /// AmountSource is only meaningful for effect types that have a single authored numeric amount.
-        /// Hides for RandomDamage (min/max ranges), DamageEqualToComposure, ConsumeAllComposure,
-        /// ComposureEqualToHostility, and all CardManipulation / StatusEffect types.
+        /// Hides for RandomDamage (min/max ranges), DamageEqualToShield, ConsumeAllShield,
+        /// ShieldEqualToHostility, and all CardManipulation / StatusEffect types.
         /// </summary>
         private bool ShowAmountSource()
         {
@@ -274,8 +271,8 @@ namespace Crookedile.Data.Cards
                 return _damageType == DamageType.FixedDamage;
             if (_category == EffectCategory.Resource)
             {
-                return _resourceType == ResourceEffectType.GainComposure
-                    || _resourceType == ResourceEffectType.LoseComposure
+                return _resourceType == ResourceEffectType.GainShield
+                    || _resourceType == ResourceEffectType.LoseShield
                     || _resourceType == ResourceEffectType.ReduceHostility
                     || _resourceType == ResourceEffectType.RaiseTargetHostility
                     || _resourceType == ResourceEffectType.GainActionPoints
@@ -442,7 +439,7 @@ namespace Crookedile.Data.Cards
                 DamageType.FixedDamage => $"Deal {_damageAmount} Resolve damage{targetStr}",
                 DamageType.RandomDamage =>
                     $"Deal {_randomDamageRange.x}-{_randomDamageRange.y} random damage{targetStr}",
-                DamageType.DamageEqualToComposure => $"Deal damage = Composure{targetStr}",
+                DamageType.DamageEqualToShield => $"Raise Opinion = Support{targetStr}",
                 _ => "Unknown damage",
             };
         }
@@ -451,10 +448,10 @@ namespace Crookedile.Data.Cards
         {
             return _resourceType switch
             {
-                ResourceEffectType.GainComposure => $"Gain {_resourceAmount} Composure",
-                ResourceEffectType.LoseComposure => $"Lose {_resourceAmount} Composure",
-                ResourceEffectType.ConsumeAllComposure => "Consume all Composure",
-                ResourceEffectType.ComposureEqualToHostility => "Gain Composure = Hostility",
+                ResourceEffectType.GainShield => $"Gain {_resourceAmount} Support",
+                ResourceEffectType.LoseShield => $"Lose {_resourceAmount} Support",
+                ResourceEffectType.ConsumeAllShield => "Consume all Support",
+                ResourceEffectType.ShieldEqualToHostility => "Gain Support = Hostile enemies",
                 ResourceEffectType.ReduceHostility => $"Reduce {_resourceAmount} Hostility",
                 ResourceEffectType.RaiseTargetHostility =>
                     $"Raise target Hostility by {_resourceAmount}",
@@ -570,15 +567,15 @@ namespace Crookedile.Data.Cards
     {
         FixedDamage,
         RandomDamage,
-        DamageEqualToComposure,
+        DamageEqualToShield, // was DamageEqualToComposure — integer value preserved for .asset compat
     }
 
     public enum ResourceEffectType
     {
-        GainComposure = 0,
-        LoseComposure = 1,
-        ConsumeAllComposure = 2,
-        ComposureEqualToHostility = 3,
+        GainShield = 0, // was GainComposure
+        LoseShield = 1, // was LoseComposure
+        ConsumeAllShield = 2, // was ConsumeAllComposure
+        ShieldEqualToHostility = 3, // was ComposureEqualToHostility
 
         // 4 intentionally skipped — GainHostility was here; removed to preserve .asset serialization
         ReduceHostility = 5,

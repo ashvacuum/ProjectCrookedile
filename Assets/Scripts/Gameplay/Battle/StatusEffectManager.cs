@@ -387,22 +387,22 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Modifies Composure gained based on active effects.
+        /// Modifies Shield gained based on active effects (Dexterity/Frail).
         /// </summary>
-        public int ModifyComposureGained(int baseComposure)
+        public int ModifyShieldGained(int baseShield)
         {
-            float finalComposure = baseComposure;
+            float finalShield = baseShield;
 
             // Apply Dexterity (buff)
-            finalComposure += GetStacks(StatusEffectType.Dexterity);
+            finalShield += GetStacks(StatusEffectType.Dexterity);
 
             // Apply Frail (debuff, -25%)
             if (HasEffect(StatusEffectType.Frail))
             {
-                finalComposure *= 0.75f;
+                finalShield *= 0.75f;
             }
 
-            return Mathf.Max(0, Mathf.RoundToInt(finalComposure));
+            return Mathf.Max(0, Mathf.RoundToInt(finalShield));
         }
 
         /// <summary>
@@ -458,8 +458,8 @@ namespace Crookedile.Gameplay.Battle
             switch (effect.Type)
             {
                 case StatusEffectType.Scandal:
-                    // Scandal lowers the opinion meter (through composure shield).
-                    int scandalRemainder = ownerStats.AbsorbThroughComposure(effect.Stacks);
+                    // Scandal lowers the opinion meter (through the owner's Shield).
+                    int scandalRemainder = ownerStats.AbsorbThroughShield(effect.Stacks);
                     if (scandalRemainder > 0)
                         EventBus.Publish(
                             new DamageDealtEvent
@@ -485,10 +485,10 @@ namespace Crookedile.Gameplay.Battle
                     break;
 
                 case StatusEffectType.Ritual:
-                    // Gain Composure at start of turn
-                    ownerStats.GainComposure(effect.Stacks);
+                    // Gain Shield at start of turn
+                    ownerStats.GainShield(effect.Stacks);
                     GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: Ritual granted {effect.Stacks} Composure"
+                        $"{_ownerName}: Ritual granted {effect.Stacks} Shield"
                     );
                     break;
             }
