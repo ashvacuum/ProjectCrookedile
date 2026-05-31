@@ -119,6 +119,8 @@ namespace Crookedile.Gameplay
                     IsPlayer = _isPlayer,
                 }
             );
+            if (old < _maxHostility && _currentHostility == _maxHostility)
+                EventBus.Publish(new EnemyMaxedHostilityEvent());
         }
 
         /// <summary>Shifts hostility downward (more receptive). No-op when Hardened.</summary>

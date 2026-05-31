@@ -1,5 +1,3 @@
-﻿using Crookedile.Core;
-using Crookedile.Gameplay.Battle;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,79 +5,65 @@ using UnityEngine.UI;
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Displays the shared Opinion Meter and the Judgment turn countdown.
-    /// Place one instance in the battle scene and wire it through <see cref="BattleUI"/>.
+    /// Displays the shared Opinion Meter as three side-by-side elements inside a HorizontalLayoutGroup:
+    ///   [PlayerShield] [BarFill] [EnemyShield]
+    /// Widths are proportional to the bar container's total width. The background track (a sibling Image)
+    /// shows through the unfilled portion on the right.
     ///
-    /// The meter fills left-to-right: left = 0% opinion, right = 100%.
-    /// A threshold marker sits at 50% — opinion must exceed this for a Judgment victory.
+    /// HorizontalLayoutGroup on _barContainer must have childControlWidth and childForceExpandWidth disabled.
     /// </summary>
     public class OpinionMeterUI : MonoBehaviour
     {
-        [Header("Opinion Bar")]
-        [Tooltip("Filled Image (fill method = Horizontal) representing current opinion.")]
+        [Header("Bar Container")]
+        [Tooltip("RectTransform with HorizontalLayoutGroup — parent of PlayerShield, BarFill, EnemyShield.")]
+        [SerializeField]
+        private RectTransform _barContainer;
+
+        [Header("Bar Elements")]
+        [Tooltip("Left Image — Player Support. Width = support / maxOpinion * totalWidth, clamped to opinionWidth.")]
+        [SerializeField]
+        private RectTransform _playerShield;
+
+        [Tooltip("Middle Image — plain Image (not fill-method). Width = opinionWidth − playerShieldWidth.")]
         [SerializeField]
         private Image _barFill;
+
+        [Tooltip("Right Image — Enemy Denial. Width = denial / maxOpinion * totalWidth, clamped to unfilled width.")]
+        [SerializeField]
+        private RectTransform _enemyShield;
+
+        [Header("Overlays")]
+        [Tooltip("RectTransform pinned at 50% of bar width — marks the Judgment win threshold.")]
+        [SerializeField]
+        private RectTransform _thresholdMarker;
 
         [Tooltip("Text label showing 'Opinion: X / Y'.")]
         [SerializeField]
         private TMP_Text _valueText;
 
-        [Tooltip("RectTransform anchored at 50% of the bar width — marks the win threshold.")]
-        [SerializeField]
-        private RectTransform _thresholdMarker;
-
-        [Header("Shields (Support / Denial)")]
-        [Tooltip(
-            "Left shield RectTransform — player Support (resists opinion drops). "
-                + "Width scales with Support value."
-        )]
-        [SerializeField]
-        private RectTransform _playerShield;
-
-        [Tooltip(
-            "Right shield RectTransform — focused enemy Denial (resists opinion rises). "
-                + "Width scales with Denial value."
-        )]
-        [SerializeField]
-        private RectTransform _enemyShield;
-
-        [Tooltip("Shield value that maps to maximum shield width.")]
-        [SerializeField]
-        private int _shieldFullValue = 20;
-
-        [Tooltip("Maximum shield width in pixels at _shieldFullValue Shield.")]
-        [SerializeField]
-        private float _shieldMaxWidth = 60f;
-
-        [Header("Turn Countdown")]
-        [Tooltip("Text label showing 'Turn X / Y' or hidden when there is no turn limit.")]
+        [Tooltip("Text label showing 'Judgment: Turn X / Y'. Hidden when there is no turn limit.")]
         [SerializeField]
         private TMP_Text _turnsText;
 
-        [Tooltip("Color applied to the turns text when 2 or fewer turns remain.")]
-        [SerializeField]
-        private Color _urgentColor = new Color(0.9f, 0.2f, 0.2f);
-
-        [Tooltip("Normal color for the turns text.")]
-        [SerializeField]
-        private Color _normalColor = Color.white;
-
-        [Tooltip("Color applied to the opinion bar when opinion falls below 30%.")]
-        [SerializeField]
-        private Color _dangerBarColor = new Color(0.85f, 0.2f, 0.2f);
-
-        [Tooltip("Normal opinion bar fill color.")]
+        [Header("Colors")]
         [SerializeField]
         private Color _normalBarColor = new Color(0.2f, 0.75f, 0.35f);
 
+        [SerializeField]
+        private Color _dangerBarColor = new Color(0.85f, 0.2f, 0.2f);
+
+        [SerializeField]
+        private Color _normalColor = Color.white;
+
+        [SerializeField]
+        private Color _urgentColor = new Color(0.9f, 0.2f, 0.2f);
+
         #region Public API
+
         /// <summary>
-        /// Updates the opinion bar fill and text, refreshes the turn countdown,
-        /// and sizes the Support/Denial shields on each side.
-        /// Call from <see cref="BattleUI"/> in response to opinion / shield / turn events.
+        /// Recalculates all three element widths and updates text labels.
+        /// Call from BattleUI in response to opinion / shield / turn events.
         /// </summary>
-        /// <param name="playerSupport">Player's current Support — sizes the left shield.</param>
-        /// <param name="enemyDenial">Focused enemy's current Denial — sizes the right shield.</param>
         public void Refresh(
             int currentOpinion,
             int maxOpinion,
@@ -89,36 +73,48 @@ namespace Crookedile.UI.Battle
             int enemyDenial = 0
         )
         {
-            float pct = maxOpinion > 0 ? (float)currentOpinion / maxOpinion : 0f;
+            if (_barContainer == null)
+                return;
+
+            float total = _barContainer.rect.width;
+            float pct = maxOpinion > 0 ? Mathf.Clamp01((float)currentOpinion / maxOpinion) : 0f;
+
+            float opinionWidth = pct * total;
+            float unfilledWidth = total - opinionWidth;
+
+            float playerShieldWidth = maxOpinion > 0
+                ? Mathf.Min((float)playerSupport / maxOpinion * total, opinionWidth)
+                : 0f;
+            float barFillWidth = opinionWidth - playerShieldWidth;
+            float enemyShieldWidth = maxOpinion > 0
+                ? Mathf.Min((float)enemyDenial / maxOpinion * total, unfilledWidth)
+                : 0f;
+
+            SetWidth(_playerShield, playerShieldWidth);
+            if (_barFill != null)
+                SetWidth(_barFill.rectTransform, barFillWidth);
+            SetWidth(_enemyShield, enemyShieldWidth);
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(_barContainer);
 
             if (_barFill != null)
-            {
-                _barFill.fillAmount = pct;
                 _barFill.color = pct < 0.30f ? _dangerBarColor : _normalBarColor;
-            }
 
             if (_valueText != null)
                 _valueText.text = $"Opinion: {currentOpinion} / {maxOpinion}";
 
             RefreshTurnCountdown(turnsElapsed, maxTurns);
-            SizeShield(_playerShield, playerSupport);
-            SizeShield(_enemyShield, enemyDenial);
         }
 
         #endregion
 
         #region Private
-        private void SizeShield(RectTransform shield, int stacks)
+
+        private static void SetWidth(RectTransform rt, float width)
         {
-            if (shield == null)
+            if (rt == null)
                 return;
-            float w =
-                _shieldFullValue > 0
-                    ? Mathf.Clamp01((float)stacks / _shieldFullValue) * _shieldMaxWidth
-                    : 0f;
-            var size = shield.sizeDelta;
-            shield.sizeDelta = new Vector2(w, size.y);
-            shield.gameObject.SetActive(stacks > 0);
+            rt.sizeDelta = new Vector2(Mathf.Max(0f, width), rt.sizeDelta.y);
         }
 
         private void RefreshTurnCountdown(int turnsElapsed, int maxTurns)
@@ -133,7 +129,6 @@ namespace Crookedile.UI.Battle
             }
 
             _turnsText.gameObject.SetActive(true);
-
             int remaining = Mathf.Max(0, maxTurns - turnsElapsed);
             _turnsText.text = $"Judgment: Turn {turnsElapsed} / {maxTurns}";
             _turnsText.color = remaining <= 2 ? _urgentColor : _normalColor;

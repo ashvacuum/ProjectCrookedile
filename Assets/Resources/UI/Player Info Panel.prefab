@@ -59,7 +59,7 @@ MonoBehaviour:
   _composureObject: {fileID: 8948558621149025622}
   _apText: {fileID: 4179024183063719468}
   _statusEffectPanel: {fileID: 232680388058893544}
-  _barLerpSpeed: 8
+  _barAnimDuration: 0.3
 --- !u!1 &246275843062256880
 GameObject:
   m_ObjectHideFlags: 0
@@ -1880,7 +1880,7 @@ GameObject:
   - component: {fileID: 2514194798749336198}
   - component: {fileID: 3566681854964537727}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Hp bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
