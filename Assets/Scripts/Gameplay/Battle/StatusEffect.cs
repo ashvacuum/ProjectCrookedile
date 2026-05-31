@@ -86,7 +86,7 @@ namespace Crookedile.Gameplay.Battle
                 // Debuffs
                 StatusEffectType.Weakened => "Deal X less damage.",
                 StatusEffectType.Vulnerable => "Take 50% more damage.",
-                StatusEffectType.Frail => "Gain 25% less Composure.",
+                StatusEffectType.Frail => "Gain 25% less Shield.",
                 StatusEffectType.Entangled => "All cards cost +1 AP.",
                 StatusEffectType.Exposed => "Next attack against this target deals double damage.",
                 StatusEffectType.Scandal => "Take X damage at end of turn (like Poison).",
@@ -98,7 +98,7 @@ namespace Crookedile.Gameplay.Battle
                     "Take bonus damage equal to attacker Hostility per stack (reduced if attacker is Receptive).",
                 // Buffs
                 StatusEffectType.Strength => "Deal X more damage.",
-                StatusEffectType.Dexterity => "Gain X more Composure per card played.",
+                StatusEffectType.Dexterity => "Gain X more Shield per card played.",
                 StatusEffectType.Focus => "Cards cost X less AP (this turn only).",
                 StatusEffectType.Energized => "Cards cost X less AP this turn.",
                 StatusEffectType.Plated => "Reduce incoming damage by X.",
@@ -106,7 +106,7 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Intangible => "Take only 1 damage from all attacks.",
                 StatusEffectType.Thorns => "Reflect X to the Opinion Meter when hit.",
                 // Special
-                StatusEffectType.Ritual => "Gain X Composure at the start of each turn.",
+                StatusEffectType.Ritual => "Gain X Shield at the start of each turn.",
                 StatusEffectType.Momentum =>
                     "Deal X damage to a random enemy per card played this turn.",
                 StatusEffectType.Echo => "The next card played is resolved twice.",
@@ -134,7 +134,7 @@ namespace Crookedile.Gameplay.Battle
         // DEBUFFS (Negative)
         Weakened, // Deal X less damage
         Vulnerable, // Take 50% more damage (opinion meter)
-        Frail, // Gain X% less Composure (usually 25%)
+        Frail, // Gain X% less Shield (usually 25%)
         Entangled, // Cards cost +1 AP
         Exposed, // Next attack deals double damage
         Scandal, // Take X damage at end of turn (like Poison)
@@ -145,7 +145,7 @@ namespace Crookedile.Gameplay.Battle
 
         // BUFFS (Positive)
         Strength, // Deal X more damage
-        Dexterity, // Gain X more Composure per card
+        Dexterity, // Gain X more Shield per card
         Focus, // Cards cost X less AP (this turn only)
         Energized, // Cards cost X less AP this turn
         Plated, // Reduce incoming damage by X
@@ -154,7 +154,7 @@ namespace Crookedile.Gameplay.Battle
         Thorns, // Reflect X to Opinion Meter when hit (no Resolve damage)
 
         // SPECIAL
-        Ritual, // Gain X Composure at start of turn
+        Ritual, // Gain X Shield at start of turn
         Momentum, // Deal X damage to a random enemy per card played this turn
         Echo, // Next card is played twice
     }
@@ -169,7 +169,7 @@ namespace Crookedile.Gameplay.Battle
         OnDamageDealt, // When dealing damage
         OnDamageTaken, // When taking damage
         OnCardPlayed, // When playing a card
-        OnComposureGain, // When gaining Composure
+        OnShieldGain, // When gaining Shield
         Passive, // Always active (modifier to stats)
     }
 

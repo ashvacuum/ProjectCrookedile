@@ -55,7 +55,7 @@ namespace Crookedile.Editor
         private int _playerActionPoints = 3;
 
         [FoldoutGroup("Player Stats")]
-        [LabelText("Composure")]
+        [LabelText("Support")]
         [PropertyRange(0, 50)]
         [SerializeField]
         private int _playerComposure = 0;
@@ -85,7 +85,7 @@ namespace Crookedile.Editor
         private int _opponentActionPoints = 3;
 
         [FoldoutGroup("Opponent Stats")]
-        [LabelText("Composure")]
+        [LabelText("Denial")]
         [PropertyRange(0, 50)]
         [SerializeField]
         private int _opponentComposure = 0;
@@ -189,15 +189,15 @@ namespace Crookedile.Editor
             // Setup battle stats
             BattleStats playerStats = CreateBattleStats(_playerActionPoints);
             if (_playerComposure > 0)
-                playerStats.GainComposure(_playerComposure);
+                playerStats.GainShield(_playerComposure);
             if (_playerHostility > 0)
                 playerStats.GainHostility(_playerHostility);
 
             BattleStats opponentStats = CreateBattleStats(_opponentActionPoints);
 
-            // Set composure and hostility
+            // Set shield and hostility
             if (_opponentComposure > 0)
-                opponentStats.GainComposure(_opponentComposure);
+                opponentStats.GainShield(_opponentComposure);
             if (_opponentHostility > 0)
                 opponentStats.GainHostility(_opponentHostility);
 
@@ -333,11 +333,9 @@ namespace Crookedile.Editor
         private void LogBattleState(string name, BattleStats stats, DeckManager deck)
         {
             Debug.Log($"<b>{name}:</b>");
-            Debug.Log($"  Composure: {stats.CurrentComposure}");
+            Debug.Log($"  Shield: {stats.CurrentShield}");
             Debug.Log($"  Action Points: {stats.CurrentActionPoints}/{stats.MaxActionPoints}");
-            Debug.Log(
-                $"  Composure: {stats.CurrentComposure} | Hostility: {stats.CurrentHostility}"
-            );
+            Debug.Log($"  Shield: {stats.CurrentShield} | Hostility: {stats.CurrentHostility}");
             Debug.Log(
                 $"  Hand: {deck.HandCount} | Draw: {deck.DeckCount} | Discard: {deck.DiscardCount}"
             );
@@ -357,8 +355,8 @@ namespace Crookedile.Editor
         }
 
         [HorizontalGroup("Presets")]
-        [Button("High Composure Test")]
-        private void PresetHighComposure()
+        [Button("High Shield Test")]
+        private void PresetHighShield()
         {
             _playerComposure = 15;
             _opponentComposure = 15;

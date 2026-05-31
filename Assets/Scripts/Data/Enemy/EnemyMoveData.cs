@@ -16,14 +16,14 @@ namespace Crookedile.Data.Enemy
     public enum EnemyMoveType
     {
         Attack = 0, // Pure damage or debuffs to the player
-        Defend = 1, // Gains Composure or heals itself
+        Defend = 1, // Gains Shield or heals itself
         Buff = 2, // Applies a self-buff only
         Debuff = 3, // Applies a debuff to the player without direct damage
         OffensiveBuff = 4, // Attacks AND buffs itself in the same move
         DebuffAttack = 5, // Debuffs the player AND deals damage
         SummonMinion = 6, // Spawns a new enemy mid-battle (enemy-exclusive)
         Idle = 7, // Does nothing this turn — waits or holds position
-        DefendOpinion = 8, // Gains Composure to shield the opinion meter from the player's pressure
+        DefendOpinion = 8, // Gains Denial to shield the opinion meter from the player's pressure
         RileOthers = 9, // Raises the other enemies' Hostility, amplifying their attacks
     }
 
@@ -64,7 +64,7 @@ namespace Crookedile.Data.Enemy
         [Header("Intent")]
         [Tooltip(
             "Short description shown to the player before the enemy acts. "
-                + "e.g. 'Will deal 8 damage' or 'Will gain 4 Composure'"
+                + "e.g. 'Will deal 8 damage' or 'Will gain 4 Denial'"
         )]
         [TextArea(2, 3)]
         [SerializeField]

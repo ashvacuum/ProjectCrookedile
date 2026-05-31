@@ -8,7 +8,7 @@ namespace Crookedile.UI.Battle
 {
     /// <summary>
     /// UI panel representing the player character in battle.
-    /// Displays Resolve bar, Composure, AP, and active buff/debuff icons.
+    /// Displays the Support bar, AP, and active buff/debuff icons.
     /// Mirrors the visual structure of <see cref="EnemySlotUI"/> but omits
     /// enemy-specific elements (hostility, intent display, targeting highlights).
     ///
@@ -40,7 +40,7 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private TMP_Text _composureText;
 
-        [Tooltip("GameObject wrapping the composure display — hidden when composure is 0.")]
+        [Tooltip("GameObject wrapping the Support display — hidden when Support is 0.")]
         [SerializeField]
         private GameObject _composureObject;
 
@@ -103,10 +103,10 @@ namespace Crookedile.UI.Battle
             if (stats == null)
                 return;
 
-            // Bar shows composure as a rough visual; text shows the raw composure value.
-            // The opinion meter is handled by OpinionMeterUI.
-            const int composureBarMax = 20;
-            _targetFill = Mathf.Clamp01((float)stats.CurrentComposure / composureBarMax);
+            // Bar shows Support as a rough visual; text shows the raw value.
+            // The opinion meter handles the shield widget via OpinionMeterUI.
+            const int supportBarMax = 20;
+            _targetFill = Mathf.Clamp01((float)stats.CurrentShield / supportBarMax);
 
             if (_resolveBarFill != null)
             {
@@ -123,14 +123,14 @@ namespace Crookedile.UI.Battle
             }
 
             if (_resolveText != null)
-                _resolveText.SetText($"Composure: {stats.CurrentComposure}");
+                _resolveText.SetText($"Support: {stats.CurrentShield}");
 
-            // Composure — hide panel entirely when zero
-            int composure = stats.CurrentComposure;
+            // Support — hide panel entirely when zero
+            int support = stats.CurrentShield;
             if (_composureText != null)
-                _composureText.SetText(composure > 0 ? composure.ToString() : string.Empty);
+                _composureText.SetText(support > 0 ? support.ToString() : string.Empty);
             if (_composureObject != null)
-                _composureObject.SetActive(composure > 0);
+                _composureObject.SetActive(support > 0);
 
             // Action Points
             if (_apText != null)

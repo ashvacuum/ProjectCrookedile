@@ -365,7 +365,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Drives the Opinion Meter from the existing damage pipeline.
         /// Enemy damage lowers opinion; player damage to enemies raises it.
-        /// Composure naturally shields opinion because DamageDealtEvent reports post-Composure amounts.
+        /// Shield naturally buffers opinion because DamageDealtEvent reports post-shield amounts.
         /// </summary>
         private void OnDamageDealtForOpinion(DamageDealtEvent evt)
         {
@@ -575,7 +575,7 @@ namespace Crookedile.Gameplay.Battle
                     Target = execCtx.Target,
                     LastDamageDealt = execCtx.LastDamageDealt,
                     LastHealAmount = execCtx.LastHealAmount,
-                    LastComposureGained = execCtx.LastComposureGained,
+                    LastShieldGained = execCtx.LastShieldGained,
                     LastTargetDied = execCtx.LastTargetDied,
                     ShouldExhaust = execCtx.ShouldExhaust,
                 };
@@ -851,8 +851,8 @@ namespace Crookedile.Gameplay.Battle
                 return;
 
             var target = living[UnityEngine.Random.Range(0, living.Count)];
-            // Momentum presses the opinion meter (through the enemy's composure shield).
-            int momentumActual = target.Stats.AbsorbThroughComposure(stacks);
+            // Momentum presses the opinion meter (through the enemy's Denial shield).
+            int momentumActual = target.Stats.AbsorbThroughShield(stacks);
             GameLogger.LogInfo<BattleManager>(
                 $"Momentum raised opinion by {momentumActual} vs {target.EnemyData.EnemyName}"
             );
@@ -910,7 +910,7 @@ namespace Crookedile.Gameplay.Battle
                 isVictory = opinionMaxed,
                 turnsToWin = _currentTurn,
                 finalPlayerResolve = 0,
-                finalPlayerComposure = _playerStats.CurrentComposure,
+                finalPlayerSupport = _playerStats.CurrentShield,
                 finalPlayerHostility = _playerStats.CurrentHostility,
                 finalOpinion = _currentOpinion,
                 wasJudgmentVictory = false,
@@ -959,10 +959,10 @@ namespace Crookedile.Gameplay.Battle
         {
             if (_isPlayerTurn)
             {
-                // Composure decays at the start of each turn before anything else fires.
-                // Ritual (OnTurnStart: gain Composure) then grants fresh Composure on top of the cleared slate.
-                // A future relic could check a flag here and skip ConsumeAllComposure().
-                _playerStats.ConsumeAllComposure();
+                // Shield decays at the start of each turn before anything else fires.
+                // Ritual (OnTurnStart: gain Shield) then grants fresh Shield on top of the cleared slate.
+                // A future relic could check a flag here and skip ConsumeAllShield().
+                _playerStats.ConsumeAllShield();
                 _playerStats.StartTurn();
                 _effectResolver.PlayerStatusEffects.OnTurnStart(_playerStats);
 
@@ -987,7 +987,7 @@ namespace Crookedile.Gameplay.Battle
                 {
                     if (enemy.IsDefeated)
                         continue;
-                    enemy.Stats.ConsumeAllComposure();
+                    enemy.Stats.ConsumeAllShield();
                     enemy.Stats.StartTurn();
                     enemy.StatusEffects.OnTurnStart(enemy.Stats);
                 }
@@ -1335,7 +1335,7 @@ namespace Crookedile.Gameplay.Battle
                             isVictory = isVictory,
                             turnsToWin = _manager._currentTurn,
                             finalPlayerResolve = 0,
-                            finalPlayerComposure = _manager._playerStats.CurrentComposure,
+                            finalPlayerSupport = _manager._playerStats.CurrentShield,
                             finalPlayerHostility = _manager._playerStats.CurrentHostility,
                             finalOpinion = _manager._currentOpinion,
                             wasJudgmentVictory = isVictory,
@@ -1435,7 +1435,7 @@ namespace Crookedile.Gameplay.Battle
         public bool isVictory;
         public int turnsToWin;
         public int finalPlayerResolve;
-        public int finalPlayerComposure;
+        public int finalPlayerSupport;
         public int finalPlayerHostility;
         public int finalOpinion;
         public bool wasJudgmentVictory;

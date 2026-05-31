@@ -219,7 +219,7 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             EventBus.Subscribe<EnemySummonedEvent>(OnEnemySummoned);
             EventBus.Subscribe<CardChoiceRequestedEvent>(OnCardChoiceRequested);
-            EventBus.Subscribe<ComposureChangedEvent>(OnComposureChanged);
+            EventBus.Subscribe<ShieldChangedEvent>(OnShieldChanged);
             EventBus.Subscribe<DamageDealtEvent>(OnDamageDealt);
             EventBus.Subscribe<EnemyActingEvent>(OnEnemyActing);
             EventBus.Subscribe<CardDrawnEvent>(OnCardDrawn);
@@ -246,7 +246,7 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             EventBus.Unsubscribe<EnemySummonedEvent>(OnEnemySummoned);
             EventBus.Unsubscribe<CardChoiceRequestedEvent>(OnCardChoiceRequested);
-            EventBus.Unsubscribe<ComposureChangedEvent>(OnComposureChanged);
+            EventBus.Unsubscribe<ShieldChangedEvent>(OnShieldChanged);
             EventBus.Unsubscribe<DamageDealtEvent>(OnDamageDealt);
             EventBus.Unsubscribe<EnemyActingEvent>(OnEnemyActing);
             EventBus.Unsubscribe<CardDrawnEvent>(OnCardDrawn);
@@ -614,7 +614,7 @@ namespace Crookedile.UI.Battle
                 endTurnButton.interactable = true;
         }
 
-        private void OnComposureChanged(ComposureChangedEvent evt)
+        private void OnShieldChanged(ShieldChangedEvent evt)
         {
             UpdateStatsDisplay();
             RefreshOpinionMeter();
@@ -681,8 +681,8 @@ namespace Crookedile.UI.Battle
                 battleManager.MaxOpinion,
                 battleManager.PlayerTurnsElapsed,
                 battleManager.MaxTurns,
-                battleManager.PlayerStats?.CurrentComposure ?? 0,
-                battleManager.OpponentStats?.CurrentComposure ?? 0
+                battleManager.PlayerStats?.CurrentShield ?? 0,
+                battleManager.OpponentStats?.CurrentShield ?? 0
             );
         }
 
@@ -724,7 +724,7 @@ namespace Crookedile.UI.Battle
                     deckCountText.text = deck.DeckCount.ToString();
             }
 
-            // Refresh opinion meter so the enemy composure shield follows the focused enemy.
+            // Refresh opinion meter so the enemy Denial shield follows the focused enemy.
             RefreshOpinionMeter();
         }
 

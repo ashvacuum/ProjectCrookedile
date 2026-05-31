@@ -57,16 +57,16 @@ namespace Crookedile.Data
         ResolveHeal, // Restore your Resolve (HP)
         RandomDamage, // Deal random damage (Actor All or Nothing)
 
-        // Composure (Offensive Buff)
-        GainComposure, // Build Composure stacks (+damage)
-        LoseComposure, // Lose Composure stacks
-        ResolveDamageEqualToComposure, // Deal damage = Composure (Faith Leader Blessing)
-        ConsumeAllComposure, // Remove all Composure stacks
+        // Shield — Support (player) / Denial (enemy)
+        GainShield, // Gain Shield stacks
+        LoseShield, // Lose Shield stacks
+        RaiseOpinionEqualToShield, // Raise Opinion = your Shield (Faith Leader Blessing)
+        ConsumeAllShield, // Remove all Shield stacks
 
         // Hostility (Self-Inflicted Debuff)
         GainHostility, // Gain Hostility (opponent deals more damage)
         ReduceHostility, // Reduce Hostility stacks
-        ComposureEqualToHostility, // Gain Composure = Hostility (Actor Ego Trip)
+        ShieldEqualToHostility, // Gain Shield = number of Hostile enemies (Actor Ego Trip)
 
         // Resource Types
         GainActionPoints, // Gain extra action points this turn
@@ -77,7 +77,7 @@ namespace Crookedile.Data
         // Status Effects - Debuffs
         ApplyWeakened, // Deal X less damage
         ApplyVulnerable, // Take 50% more damage
-        ApplyFrail, // Gain 25% less Composure
+        ApplyFrail, // Gain 25% less Shield
         ApplyEntangled, // Cards cost +1 AP
         ApplyExposed, // Next attack deals double damage
         ApplyScandal, // Take X damage at end of turn
@@ -86,7 +86,7 @@ namespace Crookedile.Data
 
         // Status Effects - Buffs
         ApplyStrength, // Deal X more damage
-        ApplyDexterity, // Gain X more Composure per card
+        ApplyDexterity, // Gain X more Shield per card
         ApplyFocus, // Cards cost X less AP (this turn only)
         ApplyEnergized, // Draw X extra cards next turn
         ApplyPlated, // Reduce incoming damage by X
@@ -96,7 +96,7 @@ namespace Crookedile.Data
 
         // Status Effects - Special
         ApplyBlock, // Temporary damage reduction
-        ApplyRitual, // Gain X Composure at start of turn
+        ApplyRitual, // Gain X Shield at start of turn
         ApplyMomentum, // Gain X damage per card played this turn
         ApplyEcho, // Next card is played twice
 
@@ -159,7 +159,7 @@ namespace Crookedile.Data
     public enum BattleResourceType
     {
         Resolve, // HP - Both player and opponent have this (reduce to 0 = win/lose)
-        Composure, // Offensive buff - Each stack = +1 damage (consumed on attack)
+        Shield, // Support (player) / Denial (enemy) — temporary buffer against opinion changes
         Hostility, // Self-inflicted debuff - Opponent deals more damage based on this
         ActionPoints, // Energy to play cards each turn (3-4 depending on origin)
     }
@@ -230,9 +230,9 @@ namespace Crookedile.Data
         FixedAmount, // 0 — use the inspector-authored value (shows fixed amount fields)
         LastDamageDealt, // 1 — ctx.LastDamageDealt  — e.g. lifesteal
         LastHealAmount, // 2 — ctx.LastHealAmount
-        LastComposureGained, // 3 — ctx.LastComposureGained
-        LastComposureLost, // 4 — ctx.LastComposureLost — e.g. bonus damage equal to composure spent
-        CurrentComposure, // 5 — caster.CurrentComposure at time of trigger
+        LastShieldGained, // 3 — ctx.LastShieldGained
+        LastShieldLost, // 4 — ctx.LastShieldLost — e.g. bonus damage equal to shield spent
+        CurrentShield, // 5 — caster.CurrentShield at time of trigger
         CurrentHostility, // 6 — focused target.CurrentHostility at time of trigger
         None, // 7 — return 0; hides fixed amount fields (use when amount is irrelevant)
         HostileEnemyCount, // 8 — number of living enemies with Hostility > 0

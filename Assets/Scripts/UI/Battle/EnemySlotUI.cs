@@ -12,7 +12,7 @@ namespace Crookedile.UI.Battle
 {
     /// <summary>
     /// UI panel representing one enemy in a multi-enemy room.
-    /// Displays the enemy's name, hostility state, composure, and current intent.
+    /// Displays the enemy's name, hostility state, Denial shield, and current intent.
     /// Clicking the panel focuses this enemy as the player's target.
     ///
     /// Spawned at runtime by BattleUI.BuildEnemySlots() for each enemy in the battle.
@@ -75,6 +75,7 @@ namespace Crookedile.UI.Battle
         private int _enemyIndex;
         private BattleManager _battleManager;
         private OriginType _playerOrigin;
+
         /// <summary>The enemy slot currently targeted by the card targeting arrow, or null.</summary>
         public static EnemySlotUI TargetedSlot { get; private set; }
 
@@ -150,22 +151,22 @@ namespace Crookedile.UI.Battle
 
             if (composureText != null)
                 composureText.SetText(
-                    enemy.Stats.CurrentComposure > 0
-                        ? $"{enemy.Stats.CurrentComposure}"
-                        : string.Empty
+                    enemy.Stats.CurrentShield > 0 ? $"{enemy.Stats.CurrentShield}" : string.Empty
                 );
 
             if (composureObject != null)
-                composureObject.SetActive(enemy.Stats.CurrentComposure > 0);
+                composureObject.SetActive(enemy.Stats.CurrentShield > 0);
 
             // Hostility split bar
             var h = enemy.Stats.CurrentHostility;
-            float posT = enemy.EnemyData.MaxHostility > 0
-                ? Mathf.Clamp01((float)Mathf.Max(0, h) / enemy.EnemyData.MaxHostility)
-                : 0f;
-            float negT = enemy.EnemyData.MinHostility < 0
-                ? Mathf.Clamp01((float)Mathf.Max(0, -h) / -enemy.EnemyData.MinHostility)
-                : 0f;
+            float posT =
+                enemy.EnemyData.MaxHostility > 0
+                    ? Mathf.Clamp01((float)Mathf.Max(0, h) / enemy.EnemyData.MaxHostility)
+                    : 0f;
+            float negT =
+                enemy.EnemyData.MinHostility < 0
+                    ? Mathf.Clamp01((float)Mathf.Max(0, -h) / -enemy.EnemyData.MinHostility)
+                    : 0f;
 
             TweenFill(_hostileFill, posT);
             TweenFill(_receptiveFill, negT);
@@ -241,11 +242,10 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void PulseHostility()
         {
-            var target = _hostileFill != null && _hostileFill.fillAmount > 0
-                ? _hostileFill.transform
-                : _receptiveFill != null && _receptiveFill.fillAmount > 0
-                    ? _receptiveFill.transform
-                    : _hostileFill?.transform.parent ?? _hostileFill?.transform;
+            var target =
+                _hostileFill != null && _hostileFill.fillAmount > 0 ? _hostileFill.transform
+                : _receptiveFill != null && _receptiveFill.fillAmount > 0 ? _receptiveFill.transform
+                : _hostileFill?.transform.parent ?? _hostileFill?.transform;
             if (target != null)
                 PulseTransform(target);
         }
@@ -293,6 +293,8 @@ namespace Crookedile.UI.Battle
                 .To(() => nameText.alpha, x => nameText.alpha = x, 0f, _nameFadeDuration)
                 .SetLink(gameObject);
         }
+
+        #endregion
 
         #region Targeting Handlers
         /// <summary>

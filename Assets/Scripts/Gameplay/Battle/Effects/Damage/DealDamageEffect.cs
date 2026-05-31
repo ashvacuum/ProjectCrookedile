@@ -56,7 +56,7 @@ namespace Crookedile.Gameplay.Battle
                 _amountSource == EffectContextValue.FixedAmount
                     ? _amount.ToString()
                     : _amountSource.ToString();
-            return $"Raise Opinion by {amountStr} (through {_target}'s composure)";
+            return $"Raise Opinion by {amountStr} (through {_target}'s Denial)";
         }
     }
 }

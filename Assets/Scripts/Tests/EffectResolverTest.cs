@@ -39,10 +39,10 @@ namespace Crookedile.Tests
             SetupTestBattle();
 
             TestBasicDamage();
-            TestComposureDamageBonus();
+            TestShieldAbsorption();
             TestHostilityDamageMultiplier();
             TestStatusEffectDamageModifiers();
-            TestComposureGainWithModifiers();
+            TestShieldGainWithModifiers();
             TestCardCostModifiers();
             TestTurnBasedStatusEffects();
 
@@ -79,17 +79,17 @@ namespace Crookedile.Tests
             Debug.Log("\n--- TEST: Basic Damage (TODO: update for opinion model) ---");
         }
 
-        [ContextMenu("Test: Composure Damage Bonus")]
-        public void TestComposureDamageBonus()
+        [ContextMenu("Test: Shield Absorption")]
+        public void TestShieldAbsorption()
         {
-            Debug.Log("\n--- TEST: Composure as Opinion Shield ---");
+            Debug.Log("\n--- TEST: Shield (Denial) as Opinion Buffer ---");
             SetupTestBattle();
-            opponentStats.GainComposure(3);
-            // 5 pressure vs 3 composure → 3 absorbed, 2 reaches opinion meter
-            int remainder = opponentStats.AbsorbThroughComposure(5);
-            Debug.Log($"Expected: 2 remaining after 3 composure absorbed | Actual: {remainder}");
-            Debug.Assert(remainder == 2, "Composure absorption test failed!");
-            Debug.Assert(opponentStats.CurrentComposure == 0, "Composure should be depleted!");
+            opponentStats.GainShield(3);
+            // 5 pressure vs 3 shield → 3 absorbed, 2 reaches opinion meter
+            int remainder = opponentStats.AbsorbThroughShield(5);
+            Debug.Log($"Expected: 2 remaining after 3 shield absorbed | Actual: {remainder}");
+            Debug.Assert(remainder == 2, "Shield absorption test failed!");
+            Debug.Assert(opponentStats.CurrentShield == 0, "Shield should be depleted!");
             Debug.Log("✓ PASSED");
         }
 
@@ -111,25 +111,25 @@ namespace Crookedile.Tests
             Debug.Log("\n--- TEST: Status Effect Damage Modifiers (TODO: opinion model) ---");
         }
 
-        [ContextMenu("Test: Composure Gain With Modifiers")]
-        public void TestComposureGainWithModifiers()
+        [ContextMenu("Test: Shield Gain With Modifiers")]
+        public void TestShieldGainWithModifiers()
         {
-            Debug.Log("\n--- TEST: Composure Gain With Modifiers ---");
+            Debug.Log("\n--- TEST: Shield Gain With Modifiers ---");
             SetupTestBattle();
 
             // Apply Dexterity +2 to player
             effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Dexterity, 2);
 
-            // Gain 5 Composure (should be 5 + 2 = 7)
-            CardEffect composureEffect = CreateComposureEffect(5);
-            CardData testCard = CreateTestCard("Test Composure Gain", composureEffect);
+            // Gain 5 Shield (should be 5 + 2 = 7)
+            CardEffect shieldEffect = CreateShieldEffect(5);
+            CardData testCard = CreateTestCard("Test Shield Gain", shieldEffect);
 
             effectResolver.ResolveCardEffects(testCard, isPlayerCard: true);
 
             Debug.Log(
-                $"Expected: 7 Composure (5 base + 2 Dexterity) | Actual: {playerStats.CurrentComposure} Composure"
+                $"Expected: 7 Shield (5 base + 2 Dexterity) | Actual: {playerStats.CurrentShield} Shield"
             );
-            Debug.Assert(playerStats.CurrentComposure == 7, "Composure gain modifier test failed!");
+            Debug.Assert(playerStats.CurrentShield == 7, "Shield gain modifier test failed!");
             Debug.Log("✓ PASSED");
         }
 
@@ -174,9 +174,9 @@ namespace Crookedile.Tests
             // Apply Regeneration (heal at end of turn)
             effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Regeneration, 2);
 
-            // Absorb 5 composure (simulates incoming pressure)
-            playerStats.GainComposure(5);
-            playerStats.AbsorbThroughComposure(5);
+            // Give and absorb 5 shield (simulates incoming pressure)
+            playerStats.GainShield(5);
+            playerStats.AbsorbThroughShield(5);
 
             Debug.Log($"Before turn end: {playerStats.GetStatusString()}");
 
@@ -186,13 +186,13 @@ namespace Crookedile.Tests
             Debug.Log($"After turn end: {playerStats.GetStatusString()}");
             Debug.Log("Scandal lowers opinion; Regeneration raises opinion (see EventBus logs)");
 
-            // Test Ritual (gain Composure at start of turn)
+            // Test Ritual (gain Shield at start of turn)
             effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Ritual, 2);
             effectResolver.PlayerStatusEffects.OnTurnStart(playerStats);
 
             Debug.Log($"After turn start: {playerStats.GetStatusString()}");
             Debug.Log(
-                $"Expected: +2 Composure from Ritual | Actual: {playerStats.CurrentComposure} Composure"
+                $"Expected: +2 Shield from Ritual | Actual: {playerStats.CurrentShield} Shield"
             );
 
             Debug.Log("✓ PASSED");
@@ -230,7 +230,7 @@ namespace Crookedile.Tests
             return effect;
         }
 
-        private CardEffect CreateComposureEffect(int amount)
+        private CardEffect CreateShieldEffect(int amount)
         {
             var effect = new CardEffect();
             var categoryField = typeof(CardEffect).GetField(
@@ -247,7 +247,7 @@ namespace Crookedile.Tests
             );
 
             categoryField?.SetValue(effect, EffectCategory.Resource);
-            resourceTypeField?.SetValue(effect, ResourceEffectType.GainComposure);
+            resourceTypeField?.SetValue(effect, ResourceEffectType.GainShield);
             resourceAmountField?.SetValue(effect, amount);
 
             return effect;

@@ -79,11 +79,11 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Total Resolve healing applied by this card's effects.</summary>
         public int LastHealAmount { get; set; }
 
-        /// <summary>Total Composure gained by this card's effects.</summary>
-        public int LastComposureGained { get; set; }
+        /// <summary>Total Shield gained by this card's effects.</summary>
+        public int LastShieldGained { get; set; }
 
-        /// <summary>Total Composure lost by this card's effects.</summary>
-        public int LastComposureLost { get; set; }
+        /// <summary>Total Shield lost by this card's effects.</summary>
+        public int LastShieldLost { get; set; }
 
         /// <summary>True if any target's Resolve reached 0 during this card's resolution.</summary>
         public bool LastTargetDied { get; set; }
@@ -252,9 +252,9 @@ namespace Crookedile.Gameplay.Battle
             {
                 EffectContextValue.LastDamageDealt => LastDamageDealt,
                 EffectContextValue.LastHealAmount => LastHealAmount,
-                EffectContextValue.LastComposureGained => LastComposureGained,
-                EffectContextValue.LastComposureLost => LastComposureLost,
-                EffectContextValue.CurrentComposure => Caster?.CurrentComposure ?? 0,
+                EffectContextValue.LastShieldGained => LastShieldGained,
+                EffectContextValue.LastShieldLost => LastShieldLost,
+                EffectContextValue.CurrentShield => Caster?.CurrentShield ?? 0,
                 EffectContextValue.CurrentHostility => Target?.CurrentHostility ?? 0,
                 EffectContextValue.HostileEnemyCount => CountLivingEnemies(e => e.Stats.IsHostile),
                 EffectContextValue.ReceptiveEnemyCount => CountLivingEnemies(e =>

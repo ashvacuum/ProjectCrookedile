@@ -227,8 +227,8 @@ namespace Crookedile.Editor
                         SetField(e, "_maxDamage", le.RandomDamageMax);
                     });
 
-                case DamageType.DamageEqualToComposure:
-                    return Make<DealDamageEqualToComposureEffect>(e =>
+                case DamageType.DamageEqualToShield:
+                    return Make<RaiseOpinionEqualToShieldEffect>(e =>
                         SetField(e, "_target", le.Target)
                     );
 
@@ -244,23 +244,21 @@ namespace Crookedile.Editor
         {
             switch (le.ResourceType)
             {
-                case ResourceEffectType.GainComposure:
-                    return Make<GainComposureEffect>(e =>
+                case ResourceEffectType.GainShield:
+                    return Make<GainShieldEffect>(e =>
                     {
                         SetField(e, "_amount", le.ResourceAmount);
                         SetField(e, "_amountSource", le.AmountSource);
                     });
 
-                case ResourceEffectType.LoseComposure:
-                    return Make<LoseComposureEffect>(e =>
-                        SetField(e, "_amount", le.ResourceAmount)
-                    );
+                case ResourceEffectType.LoseShield:
+                    return Make<LoseShieldEffect>(e => SetField(e, "_amount", le.ResourceAmount));
 
-                case ResourceEffectType.ConsumeAllComposure:
-                    return Make<ConsumeAllComposureEffect>(_ => { });
+                case ResourceEffectType.ConsumeAllShield:
+                    return Make<ConsumeAllShieldEffect>(_ => { });
 
-                case ResourceEffectType.ComposureEqualToHostility:
-                    return Make<ComposureEqualToHostilityEffect>(_ => { });
+                case ResourceEffectType.ShieldEqualToHostility:
+                    return Make<ShieldEqualToHostilityEffect>(_ => { });
 
                 case ResourceEffectType.ReduceHostility:
                     return Make<ReduceHostilityEffect>(e =>

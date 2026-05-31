@@ -60,11 +60,11 @@
         #region Shared pressure helpers
         /// <summary>
         /// Applies opinion-meter pressure from <paramref name="attacker"/> to <paramref name="target"/>.
-        /// The target's composure absorbs first; the remainder is published as
+        /// The target's shield absorbs first; the remainder is published as
         /// <see cref="DamageDealtEvent"/> which BattleManager routes to the opinion meter.
         /// Hostile-enemy multiplier still applies when enemies attack.
         /// </summary>
-        /// <returns>Post-composure pressure that reached the opinion meter.</returns>
+        /// <returns>Post-shield pressure that reached the opinion meter.</returns>
         protected static int ApplyPressure(
             BattleStats target,
             BattleStats attacker,
@@ -84,8 +84,8 @@
             if (!ctx.IsPlayerCard && attacker.CurrentHostility > 0)
                 mod = Mathf.RoundToInt(mod * Mathf.Max(0.1f, attacker.HostilityDamageMultiplier));
 
-            // Composure absorbs first — the remainder is what actually hits the opinion meter.
-            int remainder = target.AbsorbThroughComposure(mod);
+            // Shield absorbs first — the remainder is what actually hits the opinion meter.
+            int remainder = target.AbsorbThroughShield(mod);
             if (remainder > 0)
             {
                 EventBus.Publish(
@@ -114,36 +114,36 @@
 
         #endregion
 
-        #region Shared composure helpers
+        #region Shared shield helpers
         /// <summary>
-        /// Applies Composure gain to <paramref name="target"/>, respecting Dexterity/Frail
-        /// status modifiers. Accumulates <see cref="EffectExecutionContext.LastComposureGained"/>.
+        /// Applies Shield gain to <paramref name="target"/>, respecting Dexterity/Frail
+        /// status modifiers. Accumulates <see cref="EffectExecutionContext.LastShieldGained"/>.
         /// </summary>
-        protected static void ApplyGainComposure(
+        protected static void ApplyGainShield(
             BattleStats target,
             int amount,
             EffectExecutionContext ctx
         )
         {
             StatusEffectManager mgr = ctx.GetStatusEffectManager(target);
-            int modified = mgr?.ModifyComposureGained(amount) ?? amount;
-            target.GainComposure(modified);
-            ctx.LastComposureGained += modified;
+            int modified = mgr?.ModifyShieldGained(amount) ?? amount;
+            target.GainShield(modified);
+            ctx.LastShieldGained += modified;
         }
 
         /// <summary>
-        /// Removes Composure from <paramref name="target"/> and accumulates
-        /// <see cref="EffectExecutionContext.LastComposureLost"/>.
+        /// Removes Shield from <paramref name="target"/> and accumulates
+        /// <see cref="EffectExecutionContext.LastShieldLost"/>.
         /// </summary>
-        /// <returns>Actual Composure removed after clamping.</returns>
-        protected static int ApplyLoseComposure(
+        /// <returns>Actual Shield removed after clamping.</returns>
+        protected static int ApplyLoseShield(
             BattleStats target,
             int amount,
             EffectExecutionContext ctx
         )
         {
-            int actual = target.LoseComposure(amount);
-            ctx.LastComposureLost += actual;
+            int actual = target.LoseShield(amount);
+            ctx.LastShieldLost += actual;
             return actual;
         }
 

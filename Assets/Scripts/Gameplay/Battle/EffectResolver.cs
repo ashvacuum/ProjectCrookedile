@@ -466,8 +466,8 @@ namespace Crookedile.Gameplay.Battle
                     );
                     break;
 
-                case DamageType.DamageEqualToComposure:
-                    ApplyResolveDamageEqualToComposure(target, attacker, ctx);
+                case DamageType.DamageEqualToShield:
+                    ApplyRaiseOpinionEqualToShield(target, attacker, ctx);
                     break;
             }
         }
@@ -485,20 +485,20 @@ namespace Crookedile.Gameplay.Battle
 
             switch (effect.ResourceType)
             {
-                case ResourceEffectType.GainComposure:
-                    ApplyGainComposure(caster, GetAmount(), ctx);
+                case ResourceEffectType.GainShield:
+                    ApplyGainShield(caster, GetAmount(), ctx);
                     break;
 
-                case ResourceEffectType.LoseComposure:
-                    ApplyLoseComposure(caster, GetAmount());
+                case ResourceEffectType.LoseShield:
+                    ApplyLoseShield(caster, GetAmount());
                     break;
 
-                case ResourceEffectType.ConsumeAllComposure:
-                    ApplyConsumeAllComposure(caster);
+                case ResourceEffectType.ConsumeAllShield:
+                    ApplyConsumeAllShield(caster);
                     break;
 
-                case ResourceEffectType.ComposureEqualToHostility:
-                    ApplyComposureEqualToHostility(caster, ctx);
+                case ResourceEffectType.ShieldEqualToHostility:
+                    ApplyShieldEqualToHostility(caster, ctx);
                     break;
 
                 // Opponent-scoped: reduce/raise the *target's* hostility, not the caster's.
@@ -626,8 +626,8 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>
         /// Shared pressure pipeline: applies status modifiers + hostility multiplier,
-        /// absorbs through target's composure, then publishes DamageDealtEvent with the
-        /// post-composure remainder so BattleManager can route it to the opinion meter.
+        /// absorbs through target's shield, then publishes DamageDealtEvent with the
+        /// post-shield remainder so BattleManager can route it to the opinion meter.
         /// </summary>
         private void ApplyDamagePipeline(
             BattleStats target,
@@ -658,8 +658,8 @@ namespace Crookedile.Gameplay.Battle
                     modifiedDamage * Mathf.Max(0.1f, attacker.HostilityDamageMultiplier)
                 );
 
-            // Composure absorbs first; remainder reaches the opinion meter.
-            int remainder = target.AbsorbThroughComposure(modifiedDamage);
+            // Shield absorbs first; remainder reaches the opinion meter.
+            int remainder = target.AbsorbThroughShield(modifiedDamage);
             GameLogger.LogInfo<EffectResolver>(
                 $"Pressure {remainder} reached opinion (raw: {rawDamage}, modified: {modifiedDamage})"
             );
@@ -720,47 +720,44 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
-        #region Composure
+        #region Shield
 
-        private void ApplyGainComposure(BattleStats target, int amount, EffectContext ctx = null)
+        private void ApplyGainShield(BattleStats target, int amount, EffectContext ctx = null)
         {
-            // Apply Composure gain modifiers (Dexterity, Frail)
             StatusEffectManager targetStatusMgr = GetStatusEffectManager(target);
             int modifiedAmount =
-                targetStatusMgr != null ? targetStatusMgr.ModifyComposureGained(amount) : amount;
+                targetStatusMgr != null ? targetStatusMgr.ModifyShieldGained(amount) : amount;
 
-            target.GainComposure(modifiedAmount);
-            GameLogger.LogInfo<EffectResolver>(
-                $"Gained {modifiedAmount} Composure (base: {amount})"
-            );
+            target.GainShield(modifiedAmount);
+            GameLogger.LogInfo<EffectResolver>($"Gained {modifiedAmount} Shield (base: {amount})");
 
             if (ctx != null)
-                ctx.LastComposureGained += modifiedAmount;
+                ctx.LastShieldGained += modifiedAmount;
         }
 
-        private void ApplyLoseComposure(BattleStats target, int amount)
+        private void ApplyLoseShield(BattleStats target, int amount)
         {
-            int actualLoss = target.LoseComposure(amount);
-            GameLogger.LogInfo<EffectResolver>($"Lost {actualLoss} Composure");
+            int actualLoss = target.LoseShield(amount);
+            GameLogger.LogInfo<EffectResolver>($"Lost {actualLoss} Shield");
         }
 
-        private void ApplyResolveDamageEqualToComposure(
+        private void ApplyRaiseOpinionEqualToShield(
             BattleStats target,
             BattleStats attacker,
             EffectContext ctx = null
         )
         {
-            int composure = attacker.CurrentComposure;
+            int shield = attacker.CurrentShield;
             GameLogger.LogInfo<EffectResolver>(
-                $"Damage-equal-to-Composure: raw value = {composure}"
+                $"Raise-Opinion-equal-to-Shield: raw value = {shield}"
             );
-            ApplyDamagePipeline(target, attacker, composure, ctx);
+            ApplyDamagePipeline(target, attacker, shield, ctx);
         }
 
-        private void ApplyConsumeAllComposure(BattleStats caster)
+        private void ApplyConsumeAllShield(BattleStats caster)
         {
-            int consumed = caster.ConsumeAllComposure();
-            GameLogger.LogInfo<EffectResolver>($"Consumed {consumed} Composure");
+            int consumed = caster.ConsumeAllShield();
+            GameLogger.LogInfo<EffectResolver>($"Consumed {consumed} Shield");
         }
 
         #endregion
@@ -781,7 +778,7 @@ namespace Crookedile.Gameplay.Battle
             );
         }
 
-        private void ApplyComposureEqualToHostility(BattleStats caster, EffectContext ctx = null)
+        private void ApplyShieldEqualToHostility(BattleStats caster, EffectContext ctx = null)
         {
             int hostileCount = 0;
             if (_allEnemies != null)
@@ -789,10 +786,9 @@ namespace Crookedile.Gameplay.Battle
                     if (!enemy.IsDefeated && enemy.Stats.IsHostile)
                         hostileCount++;
 
-            // Route through ApplyGainComposure so Dexterity/Frail modifiers are respected
-            ApplyGainComposure(caster, hostileCount, ctx);
+            ApplyGainShield(caster, hostileCount, ctx);
             GameLogger.LogInfo<EffectResolver>(
-                $"Gained Composure equal to hostile enemy count ({hostileCount})"
+                $"Gained Shield equal to hostile enemy count ({hostileCount})"
             );
         }
 

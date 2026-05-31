@@ -8,19 +8,21 @@ namespace Crookedile.Gameplay
     /// <summary>
     /// Tracks all battle-specific stats for a single combatant (player or opponent).
     /// Opinion-meter model — there is no HP. Resources:
-    ///   Composure  — temporary shield that absorbs opinion-meter changes before they land.
+    ///   Shield     — temporary buffer that absorbs opinion-meter changes before they land.
+    ///                Displayed as "Support" for the player, "Denial" for enemies.
     ///   Hostility  — bidirectional axis: positive = hostile (attacks harder), negative = receptive (may skip/shift).
     ///   Action Points — energy to play cards (player only; enemies use 0).
     /// </summary>
     [Serializable]
     public class BattleStats
     {
-        [Header("Composure")]
+        [Header("Shield (Support / Denial)")]
         [Tooltip(
-            "Temporary shield. Absorbs incoming pressure before it touches the Opinion Meter."
+            "Temporary shield. Absorbs incoming pressure before it touches the Opinion Meter. "
+                + "Shown as Support for the player, Denial for enemies."
         )]
         [SerializeField]
-        private int _currentComposure;
+        private int _currentShield;
 
         [Header("Hostility")]
         [Tooltip("Bidirectional hostility axis. >0 = hostile, <0 = receptive, 0 = neutral.")]
@@ -44,7 +46,7 @@ namespace Crookedile.Gameplay
 
         #region Properties
 
-        public int CurrentComposure => _currentComposure;
+        public int CurrentShield => _currentShield;
         public int CurrentHostility => _currentHostility;
         public int CurrentActionPoints => _currentActionPoints;
         public int MaxActionPoints => _maxActionPoints;
@@ -80,7 +82,7 @@ namespace Crookedile.Gameplay
         {
             _maxActionPoints = maxActionPoints;
             _currentActionPoints = maxActionPoints;
-            _currentComposure = 0;
+            _currentShield = 0;
             _currentHostility = 0;
             _actionPointsNextTurn = 0;
             _isPlayer = isPlayer;
@@ -88,28 +90,28 @@ namespace Crookedile.Gameplay
 
         #endregion
 
-        #region Composure Management
+        #region Shield Management (Support for player, Denial for enemies)
 
         /// <summary>
-        /// Absorbs incoming pressure through the composure shield.
+        /// Absorbs incoming pressure through the shield.
         /// Returns the remainder that was NOT absorbed — this is what affects the opinion meter.
         /// </summary>
-        public int AbsorbThroughComposure(int pressure)
+        public int AbsorbThroughShield(int pressure)
         {
             if (pressure <= 0)
                 return 0;
 
-            if (_currentComposure > 0)
+            if (_currentShield > 0)
             {
-                int absorbed = Mathf.Min(pressure, _currentComposure);
-                int oldComposure = _currentComposure;
-                _currentComposure -= absorbed;
+                int absorbed = Mathf.Min(pressure, _currentShield);
+                int oldShield = _currentShield;
+                _currentShield -= absorbed;
                 pressure -= absorbed;
                 EventBus.Publish(
-                    new ComposureChangedEvent
+                    new ShieldChangedEvent
                     {
-                        OldValue = oldComposure,
-                        NewValue = _currentComposure,
+                        OldValue = oldShield,
+                        NewValue = _currentShield,
                         IsPlayer = _isPlayer,
                     }
                 );
@@ -118,47 +120,47 @@ namespace Crookedile.Gameplay
             return pressure;
         }
 
-        /// <summary>Gains Composure stacks (defensive shield).</summary>
-        public void GainComposure(int amount)
+        /// <summary>Gains Shield stacks (Support for player, Denial for enemies).</summary>
+        public void GainShield(int amount)
         {
-            int old = _currentComposure;
-            _currentComposure += amount;
+            int old = _currentShield;
+            _currentShield += amount;
             EventBus.Publish(
-                new ComposureChangedEvent
+                new ShieldChangedEvent
                 {
                     OldValue = old,
-                    NewValue = _currentComposure,
+                    NewValue = _currentShield,
                     IsPlayer = _isPlayer,
                 }
             );
         }
 
-        /// <summary>Loses Composure stacks.</summary>
-        public int LoseComposure(int amount)
+        /// <summary>Loses Shield stacks.</summary>
+        public int LoseShield(int amount)
         {
-            int old = _currentComposure;
-            int loseAmount = Mathf.Min(amount, _currentComposure);
-            _currentComposure -= loseAmount;
+            int old = _currentShield;
+            int loseAmount = Mathf.Min(amount, _currentShield);
+            _currentShield -= loseAmount;
             if (loseAmount > 0)
                 EventBus.Publish(
-                    new ComposureChangedEvent
+                    new ShieldChangedEvent
                     {
                         OldValue = old,
-                        NewValue = _currentComposure,
+                        NewValue = _currentShield,
                         IsPlayer = _isPlayer,
                     }
                 );
             return loseAmount;
         }
 
-        /// <summary>Consumes all Composure stacks.</summary>
-        public int ConsumeAllComposure()
+        /// <summary>Consumes all Shield stacks.</summary>
+        public int ConsumeAllShield()
         {
-            int consumed = _currentComposure;
-            _currentComposure = 0;
+            int consumed = _currentShield;
+            _currentShield = 0;
             if (consumed > 0)
                 EventBus.Publish(
-                    new ComposureChangedEvent
+                    new ShieldChangedEvent
                     {
                         OldValue = consumed,
                         NewValue = 0,
@@ -294,7 +296,7 @@ namespace Crookedile.Gameplay
                 RefreshActionPoints();
         }
 
-        /// <summary>Called at the end of a turn (composure persists; cleared by next-turn start).</summary>
+        /// <summary>Called at the end of a turn (shield persists; cleared by next-turn start).</summary>
         public void EndTurn() { }
 
         #endregion
@@ -302,7 +304,7 @@ namespace Crookedile.Gameplay
         #region Utility
 
         public string GetStatusString() =>
-            $"Composure: {_currentComposure} | "
+            $"Shield: {_currentShield} | "
             + $"Hostility: {_currentHostility} ({HostilityDamageMultiplier:F2}x) | "
             + $"AP: {_currentActionPoints}/{_maxActionPoints}";
 

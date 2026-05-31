@@ -65,8 +65,8 @@ using Crookedile.Data.Enemy;
 //   ResolveChangedEvent      Publisher: BattleStats (DamageResolve / RestoreResolve)
 //                            Subscribers: BattleUI health bar
 //
-//   ComposureChangedEvent    Publisher: BattleStats (GainComposure / LoseComposure)
-//                            Subscribers: BattleUI composure display
+//   ShieldChangedEvent       Publisher: BattleStats (GainShield / LoseShield)
+//                            Subscribers: BattleUI Support/Denial display
 //
 //   HostilityChangedEvent    Publisher: BattleStats (GainHostility / ReduceHostility)
 //                            Subscribers: BattleUI hostility bar, EnemySlotUI
@@ -314,7 +314,7 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public struct DamageDealtEvent : IGameEvent
     {
-        /// <summary>Actual Resolve damage dealt after composure reduction and hostility multiplier.</summary>
+        /// <summary>Actual opinion pressure applied after shield absorption and hostility multiplier.</summary>
         public int Amount;
 
         /// <summary>True = player is the damage target; false = an enemy is the target.</summary>
@@ -397,18 +397,18 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by <c>BattleStats</c> whenever Composure stacks change (gained or lost).
-    /// Composure reduces incoming Resolve damage while stacks remain.
+    /// Published by <c>BattleStats</c> whenever Shield stacks change (gained or lost).
+    /// Shield absorbs opinion-meter pressure before it lands. Shown as Support (player) or Denial (enemy).
     /// </summary>
-    public struct ComposureChangedEvent : IGameEvent
+    public struct ShieldChangedEvent : IGameEvent
     {
-        /// <summary>Composure stack count before the change.</summary>
+        /// <summary>Shield stack count before the change.</summary>
         public int OldValue;
 
-        /// <summary>Composure stack count after the change.</summary>
+        /// <summary>Shield stack count after the change.</summary>
         public int NewValue;
 
-        /// <summary>True = the player's Composure changed; false = an enemy's Composure changed.</summary>
+        /// <summary>True = player's Support changed; false = an enemy's Denial changed.</summary>
         public bool IsPlayer;
     }
 

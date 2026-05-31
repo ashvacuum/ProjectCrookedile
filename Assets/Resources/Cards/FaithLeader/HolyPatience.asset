@@ -18,7 +18,7 @@ MonoBehaviour:
   _rarity: 1
   _artwork: {fileID: 0}
   _description: Wait for the right moment. Holding this card rewards patience. (Add
-    MakeCardRetain + end-of-turn 6 Composure trigger via Inspector.)
+    MakeCardRetain + end-of-turn 6 Support trigger via Inspector.)
   _flavorText: 
   _costs:
   - _costType: 1
@@ -68,7 +68,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608375284105333
-      type: {class: GainComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: GainShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: 
         _amount: 6

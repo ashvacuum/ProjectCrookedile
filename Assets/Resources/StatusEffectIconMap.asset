@@ -27,7 +27,7 @@ MonoBehaviour:
     icon: {fileID: -949628480, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
-    description: Reduces Composure Gained by 25%
+    description: Reduces Shield Gained by 25%
   - type: 3
     icon: {fileID: -1455384912, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
@@ -77,7 +77,7 @@ MonoBehaviour:
     icon: {fileID: 113071119, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
-    description: Provides 3 Composure at the end of turn.
+    description: Provides 3 Shield at the end of turn.
   - type: 13
     icon: {fileID: 610889023, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}

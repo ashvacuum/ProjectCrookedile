@@ -48,7 +48,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>The enemy definition this controller operates on.</summary>
         public EnemyData EnemyData => _enemyData;
 
-        /// <summary>Battle stats for this enemy (Resolve, Composure, Hostility).</summary>
+        /// <summary>Battle stats for this enemy (Denial shield, Hostility).</summary>
         public BattleStats Stats { get; }
 
         /// <summary>Status effect manager for this enemy.</summary>

@@ -1,17 +1,21 @@
-﻿using System;
+using System;
 using Crookedile.Core;
 using Crookedile.Utilities;
 
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Grants Composure equal to the number of currently Hostile enemies (Hostility > 0).
+    /// Grants Shield equal to the number of currently Hostile enemies (Hostility > 0).
     /// Dexterity/Frail modifiers still apply to the gained amount.
-    /// Rewards the player for maintaining a hostile crowd — each aggressor converts to defence.
     /// </summary>
     [Serializable]
-    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class ComposureEqualToHostilityEffect : BattleEffect
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(
+        true,
+        "Crookedile.Gameplay.Battle",
+        "Assembly-CSharp",
+        "ComposureEqualToHostilityEffect"
+    )]
+    public class ShieldEqualToHostilityEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
@@ -23,13 +27,13 @@ namespace Crookedile.Gameplay.Battle
                         hostileCount++;
             }
 
-            ApplyGainComposure(ctx.Caster, hostileCount, ctx);
-            GameLogger.LogInfo<ComposureEqualToHostilityEffect>(
-                $"Gained Composure equal to hostile enemy count ({hostileCount})"
+            ApplyGainShield(ctx.Caster, hostileCount, ctx);
+            GameLogger.LogInfo<ShieldEqualToHostilityEffect>(
+                $"Gained Shield equal to hostile enemy count ({hostileCount})"
             );
         }
 
         public override string GetDescription() =>
-            "Gain Composure equal to the number of Hostile enemies";
+            "Gain Support equal to the number of Hostile enemies";
     }
 }
