@@ -614,7 +614,11 @@ namespace Crookedile.UI.Battle
                 endTurnButton.interactable = true;
         }
 
-        private void OnComposureChanged(ComposureChangedEvent evt) => UpdateStatsDisplay();
+        private void OnComposureChanged(ComposureChangedEvent evt)
+        {
+            UpdateStatsDisplay();
+            RefreshOpinionMeter();
+        }
 
         private void OnStatusEffectApplied(StatusEffectAppliedEvent evt)
         {
@@ -676,7 +680,9 @@ namespace Crookedile.UI.Battle
                 battleManager.CurrentOpinion,
                 battleManager.MaxOpinion,
                 battleManager.PlayerTurnsElapsed,
-                battleManager.MaxTurns
+                battleManager.MaxTurns,
+                battleManager.PlayerStats?.CurrentComposure ?? 0,
+                battleManager.OpponentStats?.CurrentComposure ?? 0
             );
         }
 
@@ -717,6 +723,9 @@ namespace Crookedile.UI.Battle
                 if (deckCountText != null)
                     deckCountText.text = deck.DeckCount.ToString();
             }
+
+            // Refresh opinion meter so the enemy composure shield follows the focused enemy.
+            RefreshOpinionMeter();
         }
 
         internal void UpdateBattleInfo()
