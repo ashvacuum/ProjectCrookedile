@@ -87,7 +87,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608336531357818
-      type: {class: GainShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: GainShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 2

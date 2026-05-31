@@ -665,7 +665,7 @@ namespace Crookedile.Gameplay.Battle
                     Target = execCtx.Target,
                     LastDamageDealt = execCtx.LastDamageDealt,
                     LastHealAmount = execCtx.LastHealAmount,
-                    LastShieldGained = execCtx.LastShieldGained,
+                    LastShieldGained = execCtx.LastSupportGained,
                     LastTargetDied = execCtx.LastTargetDied,
                     ShouldExhaust = execCtx.ShouldExhaust,
                 };

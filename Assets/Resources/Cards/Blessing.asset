@@ -70,25 +70,25 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608336531357791
-      type: {class: RaiseOpinionEqualToShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: RaiseOpinionEqualToShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _target: 1
     - rid: 4738608357276909571
-      type: {class: RaiseOpinionEqualToShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: RaiseOpinionEqualToShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _target: 1
     - rid: 4738608357276909574
-      type: {class: ConsumeAllShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: ConsumeAllShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
     - rid: 4738608357276909575
-      type: {class: ConsumeAllShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: ConsumeAllShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
     - rid: 4738608357276909576
-      type: {class: GainShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: GainShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 3

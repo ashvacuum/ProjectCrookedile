@@ -73,6 +73,9 @@ using Crookedile.Data.Enemy;
 //   HostilityChangedEvent    Publisher: BattleStats (GainHostility / ReduceHostility)
 //                            Subscribers: BattleUI hostility bar, EnemySlotUI
 //
+//   EnemyMaxedHostilityEvent Publisher: BattleStats (GainHostility — only on below-max → max transition)
+//                            Subscribers: PassiveResolver (EnemyMaxedHostilityTrigger)
+//
 #endregion
 
 #region Opinion Meter
@@ -435,6 +438,13 @@ namespace Crookedile.Gameplay.Battle
         /// Note: in current design the player's hostility stays 0 — this flag is reserved for symmetry.</summary>
         public bool IsPlayer;
     }
+
+    /// <summary>
+    /// Published by <c>BattleStats</c> when an enemy's hostility crosses from below-max to max
+    /// for the first time in a given raise. Does not re-fire if already at max.
+    /// Subscribers use this to grant bonuses (e.g. draw an extra card) when an enemy becomes fully hostile.
+    /// </summary>
+    public struct EnemyMaxedHostilityEvent : IGameEvent { }
 
     #endregion
 
