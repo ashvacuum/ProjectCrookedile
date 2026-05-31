@@ -1,37 +1,29 @@
-﻿using System;
-using Crookedile.Core;
+using System;
 using Crookedile.Data;
-using Crookedile.Data.Cards;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Deals a fixed amount of Resolve damage to one or more targets.
-    /// The amount can optionally be sourced from the runtime <see cref="EffectExecutionContext"/>
-    /// (e.g. equal to the last damage dealt — lifesteal-style chaining).
+    /// Applies pressure to the shared Opinion Meter by a fixed or context-sourced amount.
+    /// Player cards raise opinion (routed through Denial); enemy cards lower opinion (routed through Support).
+    /// Direction is determined by <see cref="EffectExecutionContext.IsPlayerCard"/> — no target field needed.
     /// </summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class DealDamageEffect : BattleEffect
     {
-        [Tooltip("Who receives the damage.")]
-        [SerializeField]
-        private TargetType _target = TargetType.Opponent;
-
-        public override TargetType Target => _target;
-
-        [Tooltip("Base damage amount. Ignored when Amount Source is not Fixed.")]
+        [Tooltip("Base pressure amount. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]
         [MinValue(1)]
         [SerializeField]
         private int _amount = 5;
 
         [Tooltip(
-            "Where to read the damage amount from at runtime.\n"
+            "Where to read the pressure amount from at runtime.\n"
                 + "FixedAmount = use the authored Amount field.\n"
-                + "Other options read accumulated values from the effect context (e.g. LastDamageDealt for lifesteal)."
+                + "Other options read accumulated values from the effect context (e.g. LastDamageDealt for chaining)."
         )]
         [SerializeField]
         private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
@@ -46,8 +38,8 @@ namespace Crookedile.Gameplay.Battle
                         : ctx.GetValue(_amountSource)
                 );
 
-            foreach (var (target, _) in ctx.GetTargets(_target))
-                ApplyResolveDamage(target, ctx.Caster, baseDamage, ctx);
+            BattleStats pressureTarget = ctx.IsPlayerCard ? ctx.Target : ctx.PlayerStats;
+            ApplyPressure(pressureTarget, ctx.Caster, baseDamage, ctx);
         }
 
         public override string GetDescription()
@@ -56,7 +48,7 @@ namespace Crookedile.Gameplay.Battle
                 _amountSource == EffectContextValue.FixedAmount
                     ? _amount.ToString()
                     : _amountSource.ToString();
-            return $"Raise Opinion by {amountStr} (through {_target}'s Denial)";
+            return $"Apply {amountStr} pressure to the Opinion Meter";
         }
     }
 }

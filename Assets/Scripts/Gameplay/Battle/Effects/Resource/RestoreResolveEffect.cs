@@ -8,10 +8,10 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Restores Resolve (HP) to the caster. Does not affect the Opinion Meter.
-    /// Use this for effects that literally keep the player alive — recovery cards,
-    /// Regeneration-style passives, or lifesteal chains off LastDamageDealt.
-    /// For audience-facing opinion recovery, use <see cref="HealResolveEffect"/> instead.
+    /// Directly raises the Opinion Meter by a fixed or context-sourced amount, bypassing Denial,
+    /// and records the amount in <c>ctx.LastHealAmount</c> for downstream effect chaining.
+    /// Use when a subsequent effect needs to read how much opinion was restored (e.g. lifegain → shield).
+    /// For raises that don't need chaining, use <see cref="HealResolveEffect"/> instead.
     /// </summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
