@@ -7,9 +7,8 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Grants Shield to the caster (shown as Support for the player, Denial for enemies).
-    /// Respects Dexterity/Frail status modifiers.
-    /// The amount can be sourced from the runtime context (e.g. equal to last damage dealt).
+    /// Grants session-level Support (player) or Denial (enemy) depending on who casts it.
+    /// Respects Dexterity/Frail modifiers when the player gains Support.
     /// </summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(
@@ -20,15 +19,13 @@ namespace Crookedile.Gameplay.Battle
     )]
     public class GainShieldEffect : BattleEffect
     {
-        [Tooltip("Base Shield to gain. Ignored when Amount Source is not Fixed.")]
+        [Tooltip("Base amount to gain. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]
         [MinValue(1)]
         [SerializeField]
         private int _amount = 3;
 
-        [Tooltip(
-            "Where to read the Shield amount from at runtime. FixedAmount uses the authored Amount field."
-        )]
+        [Tooltip("Where to read the amount from at runtime.")]
         [SerializeField]
         private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
 
@@ -41,7 +38,11 @@ namespace Crookedile.Gameplay.Battle
                         ? _amount
                         : ctx.GetValue(_amountSource)
                 );
-            ApplyGainShield(ctx.Caster, amount, ctx);
+
+            if (ctx.IsPlayerCard)
+                ApplyGainSupport(amount, ctx);
+            else
+                ApplyGainDenial(amount, ctx);
         }
 
         public override string GetDescription()

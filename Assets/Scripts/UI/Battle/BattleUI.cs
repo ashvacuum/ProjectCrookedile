@@ -219,7 +219,8 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             EventBus.Subscribe<EnemySummonedEvent>(OnEnemySummoned);
             EventBus.Subscribe<CardChoiceRequestedEvent>(OnCardChoiceRequested);
-            EventBus.Subscribe<ShieldChangedEvent>(OnShieldChanged);
+            EventBus.Subscribe<SupportChangedEvent>(OnSupportChanged);
+            EventBus.Subscribe<DenialChangedEvent>(OnDenialChanged);
             EventBus.Subscribe<DamageDealtEvent>(OnDamageDealt);
             EventBus.Subscribe<EnemyActingEvent>(OnEnemyActing);
             EventBus.Subscribe<CardDrawnEvent>(OnCardDrawn);
@@ -246,7 +247,8 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             EventBus.Unsubscribe<EnemySummonedEvent>(OnEnemySummoned);
             EventBus.Unsubscribe<CardChoiceRequestedEvent>(OnCardChoiceRequested);
-            EventBus.Unsubscribe<ShieldChangedEvent>(OnShieldChanged);
+            EventBus.Unsubscribe<SupportChangedEvent>(OnSupportChanged);
+            EventBus.Unsubscribe<DenialChangedEvent>(OnDenialChanged);
             EventBus.Unsubscribe<DamageDealtEvent>(OnDamageDealt);
             EventBus.Unsubscribe<EnemyActingEvent>(OnEnemyActing);
             EventBus.Unsubscribe<CardDrawnEvent>(OnCardDrawn);
@@ -614,11 +616,9 @@ namespace Crookedile.UI.Battle
                 endTurnButton.interactable = true;
         }
 
-        private void OnShieldChanged(ShieldChangedEvent evt)
-        {
-            UpdateStatsDisplay();
-            RefreshOpinionMeter();
-        }
+        private void OnSupportChanged(SupportChangedEvent evt) => RefreshOpinionMeter();
+
+        private void OnDenialChanged(DenialChangedEvent evt) => RefreshOpinionMeter();
 
         private void OnStatusEffectApplied(StatusEffectAppliedEvent evt)
         {
@@ -681,8 +681,8 @@ namespace Crookedile.UI.Battle
                 battleManager.MaxOpinion,
                 battleManager.PlayerTurnsElapsed,
                 battleManager.MaxTurns,
-                battleManager.PlayerStats?.CurrentShield ?? 0,
-                battleManager.OpponentStats?.CurrentShield ?? 0
+                battleManager.CurrentSupport,
+                battleManager.CurrentDenial
             );
         }
 
@@ -724,7 +724,7 @@ namespace Crookedile.UI.Battle
                     deckCountText.text = deck.DeckCount.ToString();
             }
 
-            // Refresh opinion meter so the enemy Denial shield follows the focused enemy.
+            // Refresh opinion meter so Support/Denial shields stay in sync.
             RefreshOpinionMeter();
         }
 

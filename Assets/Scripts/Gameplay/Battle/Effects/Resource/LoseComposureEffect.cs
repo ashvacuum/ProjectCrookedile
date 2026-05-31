@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
-    /// <summary>Removes Shield from the caster.</summary>
+    /// <summary>Removes Support from the session shield by the given amount.</summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(
         true,
@@ -23,8 +23,12 @@ namespace Crookedile.Gameplay.Battle
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             int amount = amountOverride ?? _amount;
-            int actual = ApplyLoseShield(ctx.Caster, amount, ctx);
-            GameLogger.LogInfo<LoseShieldEffect>($"Lost {actual} Shield");
+            if (ctx.BattleManager == null)
+                return;
+            int actual = Mathf.Min(amount, ctx.BattleManager.CurrentSupport);
+            if (actual > 0)
+                ctx.BattleManager.AbsorbThroughSupport(actual);
+            GameLogger.LogInfo<LoseShieldEffect>($"Lost {actual} Support");
         }
 
         public override string GetDescription() => $"Lose {_amount} Support";

@@ -52,7 +52,7 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.LastHealAmount => LastHealAmount,
                 EffectContextValue.LastShieldGained => LastShieldGained,
                 EffectContextValue.LastShieldLost => LastShieldLost,
-                EffectContextValue.CurrentShield => Caster?.CurrentShield ?? 0,
+                EffectContextValue.CurrentShield => 0, // CurrentShield removed — use BattleManager.CurrentSupport
                 EffectContextValue.CurrentHostility => Target?.CurrentHostility ?? 0,
                 _ => 0, // FixedAmount — use authored value
             };

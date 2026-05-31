@@ -84,8 +84,8 @@
             if (!ctx.IsPlayerCard && attacker.CurrentHostility > 0)
                 mod = Mathf.RoundToInt(mod * Mathf.Max(0.1f, attacker.HostilityDamageMultiplier));
 
-            // Shield absorbs first — the remainder is what actually hits the opinion meter.
-            int remainder = target.AbsorbThroughShield(mod);
+            // BattleManager.OnDamageDealtForOpinion routes through Support/Denial session shields.
+            int remainder = mod;
             if (remainder > 0)
             {
                 EventBus.Publish(
@@ -114,37 +114,20 @@
 
         #endregion
 
-        #region Shared shield helpers
-        /// <summary>
-        /// Applies Shield gain to <paramref name="target"/>, respecting Dexterity/Frail
-        /// status modifiers. Accumulates <see cref="EffectExecutionContext.LastShieldGained"/>.
-        /// </summary>
-        protected static void ApplyGainShield(
-            BattleStats target,
-            int amount,
-            EffectExecutionContext ctx
-        )
+        #region Session shield helpers
+
+        protected static void ApplyGainSupport(int amount, EffectExecutionContext ctx)
         {
-            StatusEffectManager mgr = ctx.GetStatusEffectManager(target);
-            int modified = mgr?.ModifyShieldGained(amount) ?? amount;
-            target.GainShield(modified);
-            ctx.LastShieldGained += modified;
+            if (ctx.BattleManager == null)
+                return;
+            int modified = ctx.PlayerStatusEffects?.ModifySupportGained(amount) ?? amount;
+            ctx.BattleManager.GainSupport(modified);
+            ctx.LastSupportGained += modified;
         }
 
-        /// <summary>
-        /// Removes Shield from <paramref name="target"/> and accumulates
-        /// <see cref="EffectExecutionContext.LastShieldLost"/>.
-        /// </summary>
-        /// <returns>Actual Shield removed after clamping.</returns>
-        protected static int ApplyLoseShield(
-            BattleStats target,
-            int amount,
-            EffectExecutionContext ctx
-        )
+        protected static void ApplyGainDenial(int amount, EffectExecutionContext ctx)
         {
-            int actual = target.LoseShield(amount);
-            ctx.LastShieldLost += actual;
-            return actual;
+            ctx.BattleManager?.GainDenial(amount);
         }
 
         #endregion

@@ -84,7 +84,7 @@ namespace Crookedile.Gameplay.Battle
             Stats = new BattleStats(maxActionPoints: 0, isPlayer: false);
             Stats.SetHostilityLimits(enemyData.MinHostility, enemyData.MaxHostility);
             Stats.SetHostility(enemyData.StartingHostility);
-            StatusEffects = new StatusEffectManager(enemyData.EnemyName);
+            StatusEffects = new StatusEffectManager(enemyData.EnemyName, Stats);
 
             foreach (var effect in enemyData.StartingEffects)
                 StatusEffects.ApplyStatusEffect(effect.Type, effect.Stacks, effect.DurationType);

@@ -74,6 +74,10 @@ namespace Crookedile.Gameplay.Battle
         private int _maxTurns; // 0 = no limit
         private int _playerTurnsElapsed;
 
+        // Session shields — decay at turn start before Ritual refills them
+        private int _currentSupport; // absorbs opinion drops (enemy attacks)
+        private int _currentDenial; // absorbs opinion rises (player cards)
+
         // Battle result
         private BattleResult _battleResult;
 
@@ -111,6 +115,10 @@ namespace Crookedile.Gameplay.Battle
         public int PlayerTurnsElapsed => _playerTurnsElapsed;
         public float OpinionPercentage =>
             _maxOpinion > 0 ? (float)_currentOpinion / _maxOpinion : 0f;
+
+        // Session shields
+        public int CurrentSupport => _currentSupport;
+        public int CurrentDenial => _currentDenial;
 
         #endregion
 
@@ -202,7 +210,8 @@ namespace Crookedile.Gameplay.Battle
                 _playerStats,
                 FocusedEnemy.Stats,
                 _playerDeck,
-                _enemies
+                _enemies,
+                this
             );
 
             // Passive resolver — find the asset matching this run's origin (null-safe: no passive if asset missing)
@@ -219,7 +228,8 @@ namespace Crookedile.Gameplay.Battle
                 _effectResolver,
                 _enemies,
                 _effectResolver.PlayerStatusEffects,
-                () => OpinionPercentage
+                () => OpinionPercentage,
+                this
             );
             // Event subscriptions are managed internally by PassiveResolver via EventBus
 
@@ -363,16 +373,22 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Drives the Opinion Meter from the existing damage pipeline.
-        /// Enemy damage lowers opinion; player damage to enemies raises it.
-        /// Shield naturally buffers opinion because DamageDealtEvent reports post-shield amounts.
+        /// Routes DamageDealtEvent through the appropriate session shield then to the opinion meter.
+        /// Enemy attacks go through Support before lowering opinion.
+        /// Player cards go through Denial before raising opinion.
         /// </summary>
         private void OnDamageDealtForOpinion(DamageDealtEvent evt)
         {
             if (evt.IsToPlayer)
-                LowerOpinion(evt.Amount);
+            {
+                int remainder = AbsorbThroughSupport(evt.Amount);
+                LowerOpinion(remainder);
+            }
             else
-                RaiseOpinion(evt.Amount);
+            {
+                int remainder = AbsorbThroughDenial(evt.Amount);
+                RaiseOpinion(remainder);
+            }
         }
 
         /// <summary>
@@ -452,6 +468,80 @@ namespace Crookedile.Gameplay.Battle
                     WasRaisedByPlayer = false,
                 }
             );
+        }
+
+        #endregion
+
+        #region Session Shields (Support / Denial)
+
+        public void GainSupport(int amount)
+        {
+            if (amount <= 0)
+                return;
+            int old = _currentSupport;
+            _currentSupport += amount;
+            EventBus.Publish(
+                new SupportChangedEvent { OldValue = old, NewValue = _currentSupport }
+            );
+        }
+
+        public void GainDenial(int amount)
+        {
+            if (amount <= 0)
+                return;
+            int old = _currentDenial;
+            _currentDenial += amount;
+            EventBus.Publish(new DenialChangedEvent { OldValue = old, NewValue = _currentDenial });
+        }
+
+        /// <summary>
+        /// Absorbs incoming enemy pressure through the Support buffer.
+        /// Returns the remainder that reaches the opinion meter.
+        /// </summary>
+        public int AbsorbThroughSupport(int pressure)
+        {
+            if (pressure <= 0 || _currentSupport <= 0)
+                return pressure;
+            int absorbed = Mathf.Min(pressure, _currentSupport);
+            int old = _currentSupport;
+            _currentSupport -= absorbed;
+            EventBus.Publish(
+                new SupportChangedEvent { OldValue = old, NewValue = _currentSupport }
+            );
+            return pressure - absorbed;
+        }
+
+        /// <summary>
+        /// Absorbs incoming player card pressure through the Denial buffer.
+        /// Returns the remainder that reaches the opinion meter.
+        /// </summary>
+        public int AbsorbThroughDenial(int pressure)
+        {
+            if (pressure <= 0 || _currentDenial <= 0)
+                return pressure;
+            int absorbed = Mathf.Min(pressure, _currentDenial);
+            int old = _currentDenial;
+            _currentDenial -= absorbed;
+            EventBus.Publish(new DenialChangedEvent { OldValue = old, NewValue = _currentDenial });
+            return pressure - absorbed;
+        }
+
+        private void ConsumeAllSupport()
+        {
+            if (_currentSupport <= 0)
+                return;
+            int old = _currentSupport;
+            _currentSupport = 0;
+            EventBus.Publish(new SupportChangedEvent { OldValue = old, NewValue = 0 });
+        }
+
+        private void ConsumeAllDenial()
+        {
+            if (_currentDenial <= 0)
+                return;
+            int old = _currentDenial;
+            _currentDenial = 0;
+            EventBus.Publish(new DenialChangedEvent { OldValue = old, NewValue = 0 });
         }
 
         #endregion
@@ -851,8 +941,8 @@ namespace Crookedile.Gameplay.Battle
                 return;
 
             var target = living[UnityEngine.Random.Range(0, living.Count)];
-            // Momentum presses the opinion meter (through the enemy's Denial shield).
-            int momentumActual = target.Stats.AbsorbThroughShield(stacks);
+            // Momentum presses the opinion meter (through session Denial).
+            int momentumActual = AbsorbThroughDenial(stacks);
             GameLogger.LogInfo<BattleManager>(
                 $"Momentum raised opinion by {momentumActual} vs {target.EnemyData.EnemyName}"
             );
@@ -910,7 +1000,7 @@ namespace Crookedile.Gameplay.Battle
                 isVictory = opinionMaxed,
                 turnsToWin = _currentTurn,
                 finalPlayerResolve = 0,
-                finalPlayerSupport = _playerStats.CurrentShield,
+                finalPlayerSupport = _currentSupport,
                 finalPlayerHostility = _playerStats.CurrentHostility,
                 finalOpinion = _currentOpinion,
                 wasJudgmentVictory = false,
@@ -957,18 +1047,21 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Runs start-of-turn effects for the current combatant(s).</summary>
         public void StartTurn()
         {
+            // Session shields decay at the start of every turn, then Ritual refills them.
+            ConsumeAllSupport();
+            ConsumeAllDenial();
+
             if (_isPlayerTurn)
             {
-                // Shield decays at the start of each turn before anything else fires.
-                // Ritual (OnTurnStart: gain Shield) then grants fresh Shield on top of the cleared slate.
-                // A future relic could check a flag here and skip ConsumeAllShield().
-                _playerStats.ConsumeAllShield();
                 _playerStats.StartTurn();
                 _effectResolver.PlayerStatusEffects.OnTurnStart(_playerStats);
 
+                // Ritual grants Support each turn.
+                int ritual = _effectResolver.PlayerStatusEffects.GetStacks(StatusEffectType.Ritual);
+                if (ritual > 0)
+                    GainSupport(ritual);
+
                 // Remove player-turn-start duration effects from all living enemies (e.g. Stunned).
-                // This must run after enemy actions have resolved, ensuring a stunned enemy
-                // skips its turn and is only un-stunned once the player regains control.
                 foreach (var enemy in _enemies)
                 {
                     if (!enemy.IsDefeated)
@@ -987,9 +1080,13 @@ namespace Crookedile.Gameplay.Battle
                 {
                     if (enemy.IsDefeated)
                         continue;
-                    enemy.Stats.ConsumeAllShield();
                     enemy.Stats.StartTurn();
                     enemy.StatusEffects.OnTurnStart(enemy.Stats);
+
+                    // Enemy Ritual grants Denial.
+                    int ritual = enemy.StatusEffects.GetStacks(StatusEffectType.Ritual);
+                    if (ritual > 0)
+                        GainDenial(ritual);
                 }
             }
         }
@@ -1335,7 +1432,7 @@ namespace Crookedile.Gameplay.Battle
                             isVictory = isVictory,
                             turnsToWin = _manager._currentTurn,
                             finalPlayerResolve = 0,
-                            finalPlayerSupport = _manager._playerStats.CurrentShield,
+                            finalPlayerSupport = _manager._currentSupport,
                             finalPlayerHostility = _manager._playerStats.CurrentHostility,
                             finalOpinion = _manager._currentOpinion,
                             wasJudgmentVictory = isVictory,

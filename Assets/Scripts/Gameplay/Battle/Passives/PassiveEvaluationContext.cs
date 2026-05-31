@@ -39,6 +39,9 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Current opinion meter as a 0–1 fraction. Used by opinion-threshold conditions.</summary>
         public float OpinionPercentage { get; }
 
+        /// <summary>Active BattleManager — provides session-level stats (Support, Denial).</summary>
+        public BattleManager BattleManager { get; }
+
         public PassiveEvaluationContext(
             BattleStats playerStats,
             DeckManager deck,
@@ -46,7 +49,8 @@ namespace Crookedile.Gameplay.Battle
             StatusEffectManager playerStatusEffects,
             int playerTurnNumber,
             PassiveEventContext eventCtx,
-            float opinionPercentage = 0f
+            float opinionPercentage = 0f,
+            BattleManager battleManager = null
         )
         {
             PlayerStats = playerStats;
@@ -56,6 +60,7 @@ namespace Crookedile.Gameplay.Battle
             PlayerTurnNumber = playerTurnNumber;
             EventCtx = eventCtx;
             OpinionPercentage = opinionPercentage;
+            BattleManager = battleManager;
         }
     }
 }

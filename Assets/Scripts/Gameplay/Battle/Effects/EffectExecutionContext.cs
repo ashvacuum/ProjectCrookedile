@@ -49,6 +49,12 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>All battle enemies — used for multi-target resolution.</summary>
         public IReadOnlyList<EnemyController> AllEnemies { get; }
 
+        /// <summary>
+        /// The active BattleManager — used by effects that operate on session-level stats
+        /// (Support, Denial, Opinion) rather than per-combatant stats.
+        /// </summary>
+        public BattleManager BattleManager { get; }
+
         /// <summary>Status manager for the caster.</summary>
         public StatusEffectManager CasterStatusEffects { get; }
 
@@ -79,11 +85,11 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Total Resolve healing applied by this card's effects.</summary>
         public int LastHealAmount { get; set; }
 
-        /// <summary>Total Shield gained by this card's effects.</summary>
-        public int LastShieldGained { get; set; }
+        /// <summary>Total Support gained by this card's effects.</summary>
+        public int LastSupportGained { get; set; }
 
-        /// <summary>Total Shield lost by this card's effects.</summary>
-        public int LastShieldLost { get; set; }
+        /// <summary>Total Support lost by this card's effects.</summary>
+        public int LastSupportLost { get; set; }
 
         /// <summary>True if any target's Resolve reached 0 during this card's resolution.</summary>
         public bool LastTargetDied { get; set; }
@@ -107,6 +113,7 @@ namespace Crookedile.Gameplay.Battle
             StatusEffectManager casterStatusEffects,
             StatusEffectManager targetStatusEffects,
             StatusEffectManager playerStatusEffects,
+            BattleManager battleManager = null,
             string attackerName = "Player",
             int attackerEnemyIndex = -1
         )
@@ -120,6 +127,7 @@ namespace Crookedile.Gameplay.Battle
             CasterStatusEffects = casterStatusEffects;
             TargetStatusEffects = targetStatusEffects;
             PlayerStatusEffects = playerStatusEffects;
+            BattleManager = battleManager;
             AttackerName = attackerName;
             AttackerEnemyIndex = attackerEnemyIndex;
         }
@@ -252,9 +260,9 @@ namespace Crookedile.Gameplay.Battle
             {
                 EffectContextValue.LastDamageDealt => LastDamageDealt,
                 EffectContextValue.LastHealAmount => LastHealAmount,
-                EffectContextValue.LastShieldGained => LastShieldGained,
-                EffectContextValue.LastShieldLost => LastShieldLost,
-                EffectContextValue.CurrentShield => Caster?.CurrentShield ?? 0,
+                EffectContextValue.LastShieldGained => LastSupportGained,
+                EffectContextValue.LastShieldLost => LastSupportLost,
+                EffectContextValue.CurrentShield => BattleManager?.CurrentSupport ?? 0,
                 EffectContextValue.CurrentHostility => Target?.CurrentHostility ?? 0,
                 EffectContextValue.HostileEnemyCount => CountLivingEnemies(e => e.Stats.IsHostile),
                 EffectContextValue.ReceptiveEnemyCount => CountLivingEnemies(e =>

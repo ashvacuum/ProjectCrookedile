@@ -53,7 +53,8 @@ namespace Crookedile.Gameplay.Battle
         private readonly Action<DamageDealtEvent> _onDamageDealt;
         private readonly Action<HealingAppliedEvent> _onHealingApplied;
         private readonly Action<StatusEffectAppliedEvent> _onStatusEffectApplied;
-        private readonly Action<ShieldChangedEvent> _onShieldChanged;
+        private readonly Action<SupportChangedEvent> _onSupportChanged;
+        private readonly Action<DenialChangedEvent> _onDenialChanged;
         private readonly Action<EnemyDefeatedEvent> _onEnemyDefeated;
         private readonly Action<EnemySummonedEvent> _onEnemySummoned;
         private readonly Action<EnemyActingEvent> _onEnemyActing;
@@ -69,13 +70,16 @@ namespace Crookedile.Gameplay.Battle
         /// <param name="effectResolver">Creates <see cref="EffectExecutionContext"/> for BattleEffect execution.</param>
         /// <param name="enemies">All active enemies (for condition evaluation).</param>
         /// <param name="playerStatusEffects">Player's status manager (for condition evaluation).</param>
+        private BattleManager _battleManager;
+
         public PassiveResolver(
             OriginPassive passive,
             BattleStats playerStats,
             EffectResolver effectResolver,
             IReadOnlyList<EnemyController> enemies = null,
             StatusEffectManager playerStatusEffects = null,
-            Func<float> getOpinionPercentage = null
+            Func<float> getOpinionPercentage = null,
+            BattleManager battleManager = null
         )
         {
             _passive = passive;
@@ -84,6 +88,7 @@ namespace Crookedile.Gameplay.Battle
             _enemies = enemies ?? Array.Empty<EnemyController>();
             _playerStatusEffects = playerStatusEffects;
             _getOpinionPercentage = getOpinionPercentage ?? (() => 0f);
+            _battleManager = battleManager;
             _allPassives = new List<BattlePassive>();
 
             // Initialise stored lambdas (required so Dispose can unsubscribe exact same delegate)
@@ -100,7 +105,8 @@ namespace Crookedile.Gameplay.Battle
             _onDamageDealt = e => DispatchEvent(e);
             _onHealingApplied = e => DispatchEvent(e);
             _onStatusEffectApplied = e => DispatchEvent(e);
-            _onShieldChanged = e => DispatchEvent(e);
+            _onSupportChanged = e => DispatchEvent(e);
+            _onDenialChanged = e => DispatchEvent(e);
             _onEnemyDefeated = e => DispatchEvent(e);
             _onEnemySummoned = e => DispatchEvent(e);
             _onEnemyActing = e => DispatchEvent(e);
@@ -132,7 +138,8 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Subscribe(_onDamageDealt);
             EventBus.Subscribe(_onHealingApplied);
             EventBus.Subscribe(_onStatusEffectApplied);
-            EventBus.Subscribe(_onShieldChanged);
+            EventBus.Subscribe(_onSupportChanged);
+            EventBus.Subscribe(_onDenialChanged);
 
             EventBus.Subscribe(_onEnemyDefeated);
             EventBus.Subscribe(_onEnemySummoned);
@@ -156,7 +163,8 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Unsubscribe(_onDamageDealt);
             EventBus.Unsubscribe(_onHealingApplied);
             EventBus.Unsubscribe(_onStatusEffectApplied);
-            EventBus.Unsubscribe(_onShieldChanged);
+            EventBus.Unsubscribe(_onSupportChanged);
+            EventBus.Unsubscribe(_onDenialChanged);
 
             EventBus.Unsubscribe(_onEnemyDefeated);
             EventBus.Unsubscribe(_onEnemySummoned);
@@ -242,7 +250,8 @@ namespace Crookedile.Gameplay.Battle
                 _playerStatusEffects,
                 _playerTurnNumber,
                 evtCtx,
-                _getOpinionPercentage()
+                _getOpinionPercentage(),
+                _battleManager
             );
 
             foreach (var passive in _allPassives)
@@ -281,14 +290,14 @@ namespace Crookedile.Gameplay.Battle
                 if (e.IsToPlayer)
                     execCtx.LastHealAmount = e.Amount;
             }
-            else if (evtCtx.Is<ShieldChangedEvent>())
+            else if (evtCtx.Is<SupportChangedEvent>())
             {
-                var e = evtCtx.As<ShieldChangedEvent>();
+                var e = evtCtx.As<SupportChangedEvent>();
                 int delta = e.NewValue - e.OldValue;
                 if (delta > 0)
-                    execCtx.LastShieldGained = delta;
+                    execCtx.LastSupportGained = delta;
                 else if (delta < 0)
-                    execCtx.LastShieldLost = -delta;
+                    execCtx.LastSupportLost = -delta;
             }
             else if (evtCtx.Is<EnemyDefeatedEvent>())
             {

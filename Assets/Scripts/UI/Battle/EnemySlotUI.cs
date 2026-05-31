@@ -29,12 +29,6 @@ namespace Crookedile.UI.Battle
         private TMP_Text hostilityText;
 
         [SerializeField]
-        private TMP_Text composureText;
-
-        [SerializeField]
-        private GameObject composureObject;
-
-        [SerializeField]
         private Image enemySprite;
 
         [SerializeField]
@@ -149,14 +143,6 @@ namespace Crookedile.UI.Battle
             if (nameText != null)
                 nameText.SetText(enemy.EnemyData.EnemyName);
 
-            if (composureText != null)
-                composureText.SetText(
-                    enemy.Stats.CurrentShield > 0 ? $"{enemy.Stats.CurrentShield}" : string.Empty
-                );
-
-            if (composureObject != null)
-                composureObject.SetActive(enemy.Stats.CurrentShield > 0);
-
             // Hostility split bar
             var h = enemy.Stats.CurrentHostility;
             float posT =
@@ -220,10 +206,6 @@ namespace Crookedile.UI.Battle
                 nameText.gameObject.SetActive(false);
             if (hostilityText != null)
                 hostilityText.gameObject.SetActive(false);
-            if (composureText != null)
-                composureText.gameObject.SetActive(false);
-            if (composureObject != null)
-                composureObject.SetActive(false);
             if (_intentDisplay != null)
                 _intentDisplay.gameObject.SetActive(false);
             if (selectionHighlight != null)

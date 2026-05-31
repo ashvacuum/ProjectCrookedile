@@ -25,9 +25,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
-            if (ctx.PlayerStats == null)
-                return false;
-            int shield = ctx.PlayerStats.CurrentShield;
+            int shield = ctx.BattleManager?.CurrentSupport ?? 0;
             return _comparison switch
             {
                 ComparisonType.AtLeast => shield >= _value,

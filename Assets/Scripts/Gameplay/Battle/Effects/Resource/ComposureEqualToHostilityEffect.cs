@@ -5,8 +5,8 @@ using Crookedile.Utilities;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Grants Shield equal to the number of currently Hostile enemies (Hostility > 0).
-    /// Dexterity/Frail modifiers still apply to the gained amount.
+    /// Grants session Support equal to the number of currently Hostile enemies.
+    /// Dexterity/Frail modifiers apply.
     /// </summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(
@@ -21,15 +21,13 @@ namespace Crookedile.Gameplay.Battle
         {
             int hostileCount = 0;
             if (ctx.AllEnemies != null)
-            {
                 foreach (var enemy in ctx.AllEnemies)
                     if (!enemy.IsDefeated && enemy.Stats.IsHostile)
                         hostileCount++;
-            }
 
-            ApplyGainShield(ctx.Caster, hostileCount, ctx);
+            ApplyGainSupport(hostileCount, ctx);
             GameLogger.LogInfo<ShieldEqualToHostilityEffect>(
-                $"Gained Shield equal to hostile enemy count ({hostileCount})"
+                $"Gained Support equal to hostile enemy count ({hostileCount})"
             );
         }
 

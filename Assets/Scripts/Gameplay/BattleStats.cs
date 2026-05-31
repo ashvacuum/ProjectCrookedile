@@ -6,24 +6,16 @@ using UnityEngine;
 namespace Crookedile.Gameplay
 {
     /// <summary>
-    /// Tracks all battle-specific stats for a single combatant (player or opponent).
-    /// Opinion-meter model — there is no HP. Resources:
-    ///   Shield     — temporary buffer that absorbs opinion-meter changes before they land.
-    ///                Displayed as "Support" for the player, "Denial" for enemies.
-    ///   Hostility  — bidirectional axis: positive = hostile (attacks harder), negative = receptive (may skip/shift).
-    ///   Action Points — energy to play cards (player only; enemies use 0).
+    /// Tracks per-combatant battle stats.
+    /// Opinion-meter model — there is no HP. Session-level buffers (Support, Denial) live on BattleManager.
+    ///   Hostility  — enemy-only bidirectional axis: positive = hostile, negative = receptive.
+    ///   Action Points — player-only energy to play cards.
+    ///   Hardened   — flag: ReduceHostility is a no-op (won't listen to reason).
+    ///   Fanatic    — flag: GainHostility is a no-op (can't be riled up).
     /// </summary>
     [Serializable]
     public class BattleStats
     {
-        [Header("Shield (Support / Denial)")]
-        [Tooltip(
-            "Temporary shield. Absorbs incoming pressure before it touches the Opinion Meter. "
-                + "Shown as Support for the player, Denial for enemies."
-        )]
-        [SerializeField]
-        private int _currentShield;
-
         [Header("Hostility")]
         [Tooltip("Bidirectional hostility axis. >0 = hostile, <0 = receptive, 0 = neutral.")]
         [SerializeField]
@@ -46,7 +38,11 @@ namespace Crookedile.Gameplay
 
         #region Properties
 
-        public int CurrentShield => _currentShield;
+        /// <summary>ReduceHostility is a no-op while true (won't listen to reason).</summary>
+        public bool IsHardened { get; private set; }
+
+        /// <summary>GainHostility is a no-op while true (can't be riled up).</summary>
+        public bool IsFanatic { get; private set; }
         public int CurrentHostility => _currentHostility;
         public int CurrentActionPoints => _currentActionPoints;
         public int MaxActionPoints => _maxActionPoints;
@@ -82,7 +78,6 @@ namespace Crookedile.Gameplay
         {
             _maxActionPoints = maxActionPoints;
             _currentActionPoints = maxActionPoints;
-            _currentShield = 0;
             _currentHostility = 0;
             _actionPointsNextTurn = 0;
             _isPlayer = isPlayer;
@@ -90,85 +85,13 @@ namespace Crookedile.Gameplay
 
         #endregion
 
-        #region Shield Management (Support for player, Denial for enemies)
+        #region Hardened / Fanatic
 
-        /// <summary>
-        /// Absorbs incoming pressure through the shield.
-        /// Returns the remainder that was NOT absorbed — this is what affects the opinion meter.
-        /// </summary>
-        public int AbsorbThroughShield(int pressure)
-        {
-            if (pressure <= 0)
-                return 0;
+        /// <summary>Sets whether this combatant ignores hostility reductions (Hardened status).</summary>
+        public void SetHardened(bool value) => IsHardened = value;
 
-            if (_currentShield > 0)
-            {
-                int absorbed = Mathf.Min(pressure, _currentShield);
-                int oldShield = _currentShield;
-                _currentShield -= absorbed;
-                pressure -= absorbed;
-                EventBus.Publish(
-                    new ShieldChangedEvent
-                    {
-                        OldValue = oldShield,
-                        NewValue = _currentShield,
-                        IsPlayer = _isPlayer,
-                    }
-                );
-            }
-
-            return pressure;
-        }
-
-        /// <summary>Gains Shield stacks (Support for player, Denial for enemies).</summary>
-        public void GainShield(int amount)
-        {
-            int old = _currentShield;
-            _currentShield += amount;
-            EventBus.Publish(
-                new ShieldChangedEvent
-                {
-                    OldValue = old,
-                    NewValue = _currentShield,
-                    IsPlayer = _isPlayer,
-                }
-            );
-        }
-
-        /// <summary>Loses Shield stacks.</summary>
-        public int LoseShield(int amount)
-        {
-            int old = _currentShield;
-            int loseAmount = Mathf.Min(amount, _currentShield);
-            _currentShield -= loseAmount;
-            if (loseAmount > 0)
-                EventBus.Publish(
-                    new ShieldChangedEvent
-                    {
-                        OldValue = old,
-                        NewValue = _currentShield,
-                        IsPlayer = _isPlayer,
-                    }
-                );
-            return loseAmount;
-        }
-
-        /// <summary>Consumes all Shield stacks.</summary>
-        public int ConsumeAllShield()
-        {
-            int consumed = _currentShield;
-            _currentShield = 0;
-            if (consumed > 0)
-                EventBus.Publish(
-                    new ShieldChangedEvent
-                    {
-                        OldValue = consumed,
-                        NewValue = 0,
-                        IsPlayer = _isPlayer,
-                    }
-                );
-            return consumed;
-        }
+        /// <summary>Sets whether this combatant ignores hostility gains (Fanatic status).</summary>
+        public void SetFanatic(bool value) => IsFanatic = value;
 
         #endregion
 
@@ -181,9 +104,11 @@ namespace Crookedile.Gameplay
             _maxHostility = max;
         }
 
-        /// <summary>Shifts hostility upward (more hostile).</summary>
+        /// <summary>Shifts hostility upward (more hostile). No-op when Fanatic.</summary>
         public void GainHostility(int amount)
         {
+            if (IsFanatic)
+                return;
             int old = _currentHostility;
             _currentHostility = Mathf.Min(_maxHostility, _currentHostility + amount);
             EventBus.Publish(
@@ -196,9 +121,11 @@ namespace Crookedile.Gameplay
             );
         }
 
-        /// <summary>Shifts hostility downward (more receptive).</summary>
+        /// <summary>Shifts hostility downward (more receptive). No-op when Hardened.</summary>
         public int ReduceHostility(int amount)
         {
+            if (IsHardened)
+                return 0;
             int old = _currentHostility;
             _currentHostility = Mathf.Max(_minHostility, _currentHostility - amount);
             int actual = old - _currentHostility;
@@ -296,7 +223,7 @@ namespace Crookedile.Gameplay
                 RefreshActionPoints();
         }
 
-        /// <summary>Called at the end of a turn (shield persists; cleared by next-turn start).</summary>
+        /// <summary>Called at the end of a turn.</summary>
         public void EndTurn() { }
 
         #endregion
@@ -304,8 +231,7 @@ namespace Crookedile.Gameplay
         #region Utility
 
         public string GetStatusString() =>
-            $"Shield: {_currentShield} | "
-            + $"Hostility: {_currentHostility} ({HostilityDamageMultiplier:F2}x) | "
+            $"Hostility: {_currentHostility} ({HostilityDamageMultiplier:F2}x) | "
             + $"AP: {_currentActionPoints}/{_maxActionPoints}";
 
         #endregion

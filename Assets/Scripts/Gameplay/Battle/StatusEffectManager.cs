@@ -14,12 +14,14 @@ namespace Crookedile.Gameplay.Battle
     {
         private List<StatusEffect> _activeEffects = new List<StatusEffect>();
         private string _ownerName; // For logging
+        private BattleStats _owner; // Optional — used to sync Hardened/Fanatic flags
 
         public IReadOnlyList<StatusEffect> ActiveEffects => _activeEffects;
 
-        public StatusEffectManager(string ownerName)
+        public StatusEffectManager(string ownerName, BattleStats owner = null)
         {
             _ownerName = ownerName;
+            _owner = owner;
         }
 
         #region Apply/Remove Effects
@@ -79,6 +81,16 @@ namespace Crookedile.Gameplay.Battle
                     $"{_ownerName}: Applied {type} ({durationText})"
                 );
             }
+
+            SyncHostilityFlags();
+        }
+
+        private void SyncHostilityFlags()
+        {
+            if (_owner == null)
+                return;
+            _owner.SetHardened(HasEffect(StatusEffectType.Hardened));
+            _owner.SetFanatic(HasEffect(StatusEffectType.Fanatic));
         }
 
         /// <summary>
@@ -91,6 +103,7 @@ namespace Crookedile.Gameplay.Battle
             {
                 _activeEffects.Remove(effect);
                 GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Removed {type}");
+                SyncHostilityFlags();
             }
         }
 
@@ -387,22 +400,15 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Modifies Shield gained based on active effects (Dexterity/Frail).
+        /// Modifies Support gained based on active effects (Dexterity/Frail).
         /// </summary>
-        public int ModifyShieldGained(int baseShield)
+        public int ModifySupportGained(int baseSupport)
         {
-            float finalShield = baseShield;
-
-            // Apply Dexterity (buff)
-            finalShield += GetStacks(StatusEffectType.Dexterity);
-
-            // Apply Frail (debuff, -25%)
+            float final = baseSupport;
+            final += GetStacks(StatusEffectType.Dexterity);
             if (HasEffect(StatusEffectType.Frail))
-            {
-                finalShield *= 0.75f;
-            }
-
-            return Mathf.Max(0, Mathf.RoundToInt(finalShield));
+                final *= 0.75f;
+            return Mathf.Max(0, Mathf.RoundToInt(final));
         }
 
         /// <summary>
@@ -458,21 +464,19 @@ namespace Crookedile.Gameplay.Battle
             switch (effect.Type)
             {
                 case StatusEffectType.Scandal:
-                    // Scandal lowers the opinion meter (through the owner's Shield).
-                    int scandalRemainder = ownerStats.AbsorbThroughShield(effect.Stacks);
-                    if (scandalRemainder > 0)
-                        EventBus.Publish(
-                            new DamageDealtEvent
-                            {
-                                Amount = scandalRemainder,
-                                IsToPlayer = true,
-                                AttackerName = "Scandal",
-                                SourceEnemyIndex = -1,
-                                TargetEnemyIndex = -1,
-                            }
-                        );
+                    // Routes through DamageDealtEvent → BattleManager absorbs through Support → LowerOpinion.
+                    EventBus.Publish(
+                        new DamageDealtEvent
+                        {
+                            Amount = effect.Stacks,
+                            IsToPlayer = true,
+                            AttackerName = "Scandal",
+                            SourceEnemyIndex = -1,
+                            TargetEnemyIndex = -1,
+                        }
+                    );
                     GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: Scandal lowered opinion by {scandalRemainder}"
+                        $"{_ownerName}: Scandal applied {effect.Stacks} opinion pressure"
                     );
                     break;
 
@@ -483,14 +487,7 @@ namespace Crookedile.Gameplay.Battle
                         $"{_ownerName}: Regeneration raised opinion by {effect.Stacks}"
                     );
                     break;
-
-                case StatusEffectType.Ritual:
-                    // Gain Shield at start of turn
-                    ownerStats.GainShield(effect.Stacks);
-                    GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: Ritual granted {effect.Stacks} Shield"
-                    );
-                    break;
+                // Ritual handled by BattleManager.StartTurn — reads stacks directly and calls GainSupport/GainDenial.
             }
         }
 
@@ -500,7 +497,7 @@ namespace Crookedile.Gameplay.Battle
             {
                 StatusEffectType.Scandal => StatusTriggerTiming.OnTurnEnd,
                 StatusEffectType.Regeneration => StatusTriggerTiming.OnTurnEnd,
-                StatusEffectType.Ritual => StatusTriggerTiming.OnTurnStart,
+                // Ritual: handled by BattleManager.StartTurn directly; no trigger needed here.
                 _ => StatusTriggerTiming.Passive,
             };
         }
@@ -519,6 +516,8 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Silenced => true,
                 StatusEffectType.Stunned => true,
                 StatusEffectType.Rattled => true,
+                StatusEffectType.Hardened => true,
+                StatusEffectType.Fanatic => true,
                 _ => false,
             };
         }
