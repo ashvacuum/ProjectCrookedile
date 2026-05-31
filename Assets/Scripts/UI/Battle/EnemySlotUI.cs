@@ -12,7 +12,7 @@ namespace Crookedile.UI.Battle
 {
     /// <summary>
     /// UI panel representing one enemy in a multi-enemy room.
-    /// Displays the enemy's name, Resolve, hostility state, and current intent.
+    /// Displays the enemy's name, hostility state, composure, and current intent.
     /// Clicking the panel focuses this enemy as the player's target.
     ///
     /// Spawned at runtime by BattleUI.BuildEnemySlots() for each enemy in the battle.
@@ -24,15 +24,6 @@ namespace Crookedile.UI.Battle
         [Header("Display")]
         [SerializeField]
         private TMP_Text nameText;
-
-        [SerializeField]
-        private TMP_Text resolveText;
-
-        [Tooltip(
-            "Filled Image (fill method = Horizontal) driven by Resolve. Lerps smoothly when damaged."
-        )]
-        [SerializeField]
-        private Image resolveBarFill;
 
         [SerializeField]
         private TMP_Text hostilityText;
@@ -52,10 +43,18 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private StatusEffectPanelUI _statusEffectPanel;
 
-        [Header("HP Bar")]
-        [Tooltip("How fast the HP bar lerps toward the target fill. Higher = snappier.")]
+        [Header("Hostility Bar")]
+        [Tooltip("Right-half fill — grows rightward as hostility goes positive. Tint red/orange.")]
         [SerializeField]
-        private float barLerpSpeed = 8f;
+        private Image _hostileFill;
+
+        [Tooltip("Left-half fill — grows leftward as hostility goes negative. Tint green.")]
+        [SerializeField]
+        private Image _receptiveFill;
+
+        [Tooltip("Seconds for the hostility bar fills to tween to their new amount.")]
+        [SerializeField]
+        private float _hostilityBarDuration = 0.25f;
 
         [Header("Name Hover")]
         [Tooltip(
@@ -76,8 +75,6 @@ namespace Crookedile.UI.Battle
         private int _enemyIndex;
         private BattleManager _battleManager;
         private OriginType _playerOrigin;
-        private float _targetFill = 1f;
-
         /// <summary>The enemy slot currently targeted by the card targeting arrow, or null.</summary>
         public static EnemySlotUI TargetedSlot { get; private set; }
 
@@ -161,21 +158,26 @@ namespace Crookedile.UI.Battle
             if (composureObject != null)
                 composureObject.SetActive(enemy.Stats.CurrentComposure > 0);
 
-            if (hostilityText == null)
-                return;
-            var showExact = _playerOrigin == OriginType.Actor;
+            // Hostility split bar
             var h = enemy.Stats.CurrentHostility;
+            float posT = enemy.EnemyData.MaxHostility > 0
+                ? Mathf.Clamp01((float)Mathf.Max(0, h) / enemy.EnemyData.MaxHostility)
+                : 0f;
+            float negT = enemy.EnemyData.MinHostility < 0
+                ? Mathf.Clamp01((float)Mathf.Max(0, -h) / -enemy.EnemyData.MinHostility)
+                : 0f;
 
-            hostilityText.text =
-                showExact ? $"Hostility: {h:+0;-0;0}"
-                : h < 0 ? "Receptive"
-                : h > 0 ? "Hostile"
-                : "Guarded";
+            TweenFill(_hostileFill, posT);
+            TweenFill(_receptiveFill, negT);
 
-            hostilityText.color =
-                h < 0 ? new Color(0.2f, 0.8f, 0.2f) // green  = receptive
-                : h > 0 ? new Color(0.8f, 0.2f, 0.2f) // red    = hostile
-                : Color.white; // white  = neutral
+            // Optional exact-value label — shown only for Actor origin
+            if (hostilityText != null)
+            {
+                bool showExact = _playerOrigin == OriginType.Actor;
+                hostilityText.gameObject.SetActive(showExact);
+                if (showExact)
+                    hostilityText.text = $"{h:+0;-0;0}";
+            }
 
             // Buff/debuff icons
             var effects = _battleManager?.Enemies[_enemyIndex]?.StatusEffects;
@@ -215,8 +217,6 @@ namespace Crookedile.UI.Battle
             // Hide all live display elements
             if (nameText != null)
                 nameText.gameObject.SetActive(false);
-            if (resolveText != null)
-                resolveText.gameObject.SetActive(false);
             if (hostilityText != null)
                 hostilityText.gameObject.SetActive(false);
             if (composureText != null)
@@ -236,12 +236,18 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
-        /// Briefly scales the hostility text up to signal a change.
+        /// Briefly scales the hostility bar to signal a change.
+        /// Punches the active bar half (or the bar root if both are inactive).
         /// </summary>
         public void PulseHostility()
         {
-            if (hostilityText != null)
-                PulseTransform(hostilityText.transform);
+            var target = _hostileFill != null && _hostileFill.fillAmount > 0
+                ? _hostileFill.transform
+                : _receptiveFill != null && _receptiveFill.fillAmount > 0
+                    ? _receptiveFill.transform
+                    : _hostileFill?.transform.parent ?? _hostileFill?.transform;
+            if (target != null)
+                PulseTransform(target);
         }
 
         /// <summary>
@@ -287,16 +293,6 @@ namespace Crookedile.UI.Battle
                 .To(() => nameText.alpha, x => nameText.alpha = x, 0f, _nameFadeDuration)
                 .SetLink(gameObject);
         }
-
-        #region HP Bar (resolve bar removed from prefab; Update kept null-safe)
-        private void Update()
-        {
-            // resolveBarFill has been removed from the enemy slot prefab.
-            // This method is kept as a no-op so any remaining [SerializeField] reference
-            // on older prefabs doesn't cause errors.
-        }
-
-        #endregion
 
         #region Targeting Handlers
         /// <summary>
@@ -355,7 +351,18 @@ namespace Crookedile.UI.Battle
             t.DOKill();
             t.DOPunchScale(Vector3.one * 0.2f, 0.3f, 1, 0f).SetLink(t.gameObject);
         }
+
+        private void TweenFill(Image img, float target)
+        {
+            if (img == null)
+                return;
+            DOTween.Kill(img);
+            DOTween
+                .To(() => img.fillAmount, x => img.fillAmount = x, target, _hostilityBarDuration)
+                .SetEase(Ease.OutQuad)
+                .SetLink(gameObject);
+        }
+
+        #endregion
     }
 }
-        #endregion
-        #endregion
