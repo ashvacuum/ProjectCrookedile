@@ -8,7 +8,8 @@ namespace Crookedile.UI.Battle
 {
     /// <summary>
     /// UI panel representing the player character in battle.
-    /// Displays the Support bar, AP, and active buff/debuff icons.
+    /// Displays the player's AP and active buff/debuff icons.
+    /// Support/Denial are session-level and shown on OpinionMeterUI.
     /// Mirrors the visual structure of <see cref="EnemySlotUI"/> but omits
     /// enemy-specific elements (hostility, intent display, targeting highlights).
     ///
@@ -103,11 +104,8 @@ namespace Crookedile.UI.Battle
             if (stats == null)
                 return;
 
-            // Bar shows Support as a rough visual; text shows the raw value.
-            // The opinion meter handles the shield widget via OpinionMeterUI.
-            const int supportBarMax = 20;
-            _targetFill = Mathf.Clamp01((float)stats.CurrentShield / supportBarMax);
-
+            // Support/Denial are session-level — shown on OpinionMeterUI, not here.
+            // Hide the bar and composure panel if wired up in the prefab.
             if (_resolveBarFill != null)
             {
                 DOTween.Kill(_resolveBarFill);
@@ -115,22 +113,18 @@ namespace Crookedile.UI.Battle
                     .To(
                         () => _resolveBarFill.fillAmount,
                         x => _resolveBarFill.fillAmount = x,
-                        _targetFill,
+                        0f,
                         _barAnimDuration
                     )
                     .SetEase(Ease.OutQuad)
                     .SetLink(gameObject);
             }
-
             if (_resolveText != null)
-                _resolveText.SetText($"Support: {stats.CurrentShield}");
-
-            // Support — hide panel entirely when zero
-            int support = stats.CurrentShield;
+                _resolveText.SetText(string.Empty);
             if (_composureText != null)
-                _composureText.SetText(support > 0 ? support.ToString() : string.Empty);
+                _composureText.SetText(string.Empty);
             if (_composureObject != null)
-                _composureObject.SetActive(support > 0);
+                _composureObject.SetActive(false);
 
             // Action Points
             if (_apText != null)

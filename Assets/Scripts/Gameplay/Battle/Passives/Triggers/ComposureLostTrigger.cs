@@ -2,7 +2,7 @@ using System;
 
 namespace Crookedile.Gameplay.Battle
 {
-    /// <summary>Fires when the player loses any Shield (Support) stacks.</summary>
+    /// <summary>Fires when the session's Support decreases.</summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(
         true,
@@ -14,10 +14,10 @@ namespace Crookedile.Gameplay.Battle
     {
         public override bool Matches(PassiveEventContext ctx)
         {
-            if (!ctx.Is<ShieldChangedEvent>())
+            if (!ctx.Is<SupportChangedEvent>())
                 return false;
-            var e = ctx.As<ShieldChangedEvent>();
-            return e.IsPlayer && e.NewValue < e.OldValue;
+            var e = ctx.As<SupportChangedEvent>();
+            return e.NewValue < e.OldValue;
         }
 
         public override string TriggerLabel => "When you lose Support";

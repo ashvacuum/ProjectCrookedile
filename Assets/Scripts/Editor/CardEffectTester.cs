@@ -188,16 +188,13 @@ namespace Crookedile.Editor
 
             // Setup battle stats
             BattleStats playerStats = CreateBattleStats(_playerActionPoints);
-            if (_playerComposure > 0)
-                playerStats.GainShield(_playerComposure);
+            // Support/Denial are session-level; no per-stat shield in tester.
             if (_playerHostility > 0)
                 playerStats.GainHostility(_playerHostility);
 
             BattleStats opponentStats = CreateBattleStats(_opponentActionPoints);
 
-            // Set shield and hostility
-            if (_opponentComposure > 0)
-                opponentStats.GainShield(_opponentComposure);
+            // Set hostility
             if (_opponentHostility > 0)
                 opponentStats.GainHostility(_opponentHostility);
 
@@ -333,9 +330,8 @@ namespace Crookedile.Editor
         private void LogBattleState(string name, BattleStats stats, DeckManager deck)
         {
             Debug.Log($"<b>{name}:</b>");
-            Debug.Log($"  Shield: {stats.CurrentShield}");
             Debug.Log($"  Action Points: {stats.CurrentActionPoints}/{stats.MaxActionPoints}");
-            Debug.Log($"  Shield: {stats.CurrentShield} | Hostility: {stats.CurrentHostility}");
+            Debug.Log($"  Hostility: {stats.CurrentHostility}");
             Debug.Log(
                 $"  Hand: {deck.HandCount} | Draw: {deck.DeckCount} | Discard: {deck.DiscardCount}"
             );

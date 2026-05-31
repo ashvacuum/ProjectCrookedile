@@ -65,8 +65,10 @@ using Crookedile.Data.Enemy;
 //   ResolveChangedEvent      Publisher: BattleStats (DamageResolve / RestoreResolve)
 //                            Subscribers: BattleUI health bar
 //
-//   ShieldChangedEvent       Publisher: BattleStats (GainShield / LoseShield)
-//                            Subscribers: BattleUI Support/Denial display
+//   SupportChangedEvent      Publisher: BattleManager (GainSupport / AbsorbThroughSupport)
+//                            Subscribers: BattleUI Support display
+//   DenialChangedEvent       Publisher: BattleManager (GainDenial / AbsorbThroughDenial)
+//                            Subscribers: BattleUI Denial display
 //
 //   HostilityChangedEvent    Publisher: BattleStats (GainHostility / ReduceHostility)
 //                            Subscribers: BattleUI hostility bar, EnemySlotUI
@@ -397,19 +399,23 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by <c>BattleStats</c> whenever Shield stacks change (gained or lost).
-    /// Shield absorbs opinion-meter pressure before it lands. Shown as Support (player) or Denial (enemy).
+    /// Published by <c>BattleManager</c> whenever the session's Support buffer changes.
+    /// Support absorbs opinion drops before they reach the opinion meter.
     /// </summary>
-    public struct ShieldChangedEvent : IGameEvent
+    public struct SupportChangedEvent : IGameEvent
     {
-        /// <summary>Shield stack count before the change.</summary>
         public int OldValue;
-
-        /// <summary>Shield stack count after the change.</summary>
         public int NewValue;
+    }
 
-        /// <summary>True = player's Support changed; false = an enemy's Denial changed.</summary>
-        public bool IsPlayer;
+    /// <summary>
+    /// Published by <c>BattleManager</c> whenever the session's Denial buffer changes.
+    /// Denial absorbs opinion rises before they reach the opinion meter.
+    /// </summary>
+    public struct DenialChangedEvent : IGameEvent
+    {
+        public int OldValue;
+        public int NewValue;
     }
 
     /// <summary>

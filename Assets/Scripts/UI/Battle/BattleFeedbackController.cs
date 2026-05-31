@@ -58,7 +58,8 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             EventBus.Subscribe<EnemyActingEvent>(OnEnemyActing);
             EventBus.Subscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
-            EventBus.Subscribe<ShieldChangedEvent>(OnShieldChanged);
+            EventBus.Subscribe<SupportChangedEvent>(OnSupportChanged);
+            EventBus.Subscribe<DenialChangedEvent>(OnDenialChanged);
             EventBus.Subscribe<EnemyHostilityChangedEvent>(OnHostilityChanged);
             EventBus.Subscribe<ActionPointsChangedEvent>(OnAPChanged);
             EventBus.Subscribe<CardPlayVFXRequestedEvent>(OnCardPlayVFXRequested);
@@ -80,7 +81,8 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             EventBus.Unsubscribe<EnemyActingEvent>(OnEnemyActing);
             EventBus.Unsubscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
-            EventBus.Unsubscribe<ShieldChangedEvent>(OnShieldChanged);
+            EventBus.Unsubscribe<SupportChangedEvent>(OnSupportChanged);
+            EventBus.Unsubscribe<DenialChangedEvent>(OnDenialChanged);
             EventBus.Unsubscribe<EnemyHostilityChangedEvent>(OnHostilityChanged);
             EventBus.Unsubscribe<ActionPointsChangedEvent>(OnAPChanged);
             EventBus.Unsubscribe<CardPlayVFXRequestedEvent>(OnCardPlayVFXRequested);
@@ -214,7 +216,14 @@ namespace Crookedile.UI.Battle
                 _battleUI?.GetEnemySlotTransform(evt.EnemyIndex)
             );
 
-        private void OnShieldChanged(ShieldChangedEvent evt) =>
+        private void OnSupportChanged(SupportChangedEvent evt) =>
+            Play(
+                evt.NewValue > evt.OldValue
+                    ? BattleAudioTrigger.ShieldGained
+                    : BattleAudioTrigger.ShieldLost
+            );
+
+        private void OnDenialChanged(DenialChangedEvent evt) =>
             Play(
                 evt.NewValue > evt.OldValue
                     ? BattleAudioTrigger.ShieldGained

@@ -32,17 +32,21 @@ namespace Crookedile.Gameplay.Battle
         // All battle events are published via EventBus — no C# event wiring required.
         // See BattleEvents.cs for the full event catalogue.
 
+        private BattleManager _battleManager;
+
         public EffectResolver(
             BattleStats playerStats,
             BattleStats opponentStats,
             DeckManager playerDeck,
-            IReadOnlyList<EnemyController> allEnemies = null
+            IReadOnlyList<EnemyController> allEnemies = null,
+            BattleManager battleManager = null
         )
         {
             _playerStats = playerStats;
             _opponentStats = opponentStats;
             _playerDeck = playerDeck;
             _allEnemies = allEnemies;
+            _battleManager = battleManager;
             _playerStatusEffects = new StatusEffectManager("Player");
             _opponentStatusEffects = new StatusEffectManager("Opponent");
         }
@@ -102,6 +106,7 @@ namespace Crookedile.Gameplay.Battle
                 casterStatusEffects: casterStatus,
                 targetStatusEffects: targetStatus,
                 playerStatusEffects: _playerStatusEffects,
+                battleManager: _battleManager,
                 attackerName: isPlayerCard ? "Player" : _attackerName,
                 attackerEnemyIndex: isPlayerCard ? -1 : _attackerEnemyIndex
             );
@@ -467,7 +472,7 @@ namespace Crookedile.Gameplay.Battle
                     break;
 
                 case DamageType.DamageEqualToShield:
-                    ApplyRaiseOpinionEqualToShield(target, attacker, ctx);
+                    ApplyRaiseOpinionEqualToSupport(target, attacker, ctx);
                     break;
             }
         }
@@ -486,19 +491,19 @@ namespace Crookedile.Gameplay.Battle
             switch (effect.ResourceType)
             {
                 case ResourceEffectType.GainShield:
-                    ApplyGainShield(caster, GetAmount(), ctx);
+                    ApplyGainSupport(GetAmount(), ctx);
                     break;
 
                 case ResourceEffectType.LoseShield:
-                    ApplyLoseShield(caster, GetAmount());
+                    ApplyConsumeAllSupport(); // lose = consume all for now
                     break;
 
                 case ResourceEffectType.ConsumeAllShield:
-                    ApplyConsumeAllShield(caster);
+                    ApplyConsumeAllSupport();
                     break;
 
                 case ResourceEffectType.ShieldEqualToHostility:
-                    ApplyShieldEqualToHostility(caster, ctx);
+                    ApplySupportEqualToHostility(ctx);
                     break;
 
                 // Opponent-scoped: reduce/raise the *target's* hostility, not the caster's.
@@ -658,8 +663,8 @@ namespace Crookedile.Gameplay.Battle
                     modifiedDamage * Mathf.Max(0.1f, attacker.HostilityDamageMultiplier)
                 );
 
-            // Shield absorbs first; remainder reaches the opinion meter.
-            int remainder = target.AbsorbThroughShield(modifiedDamage);
+            // BattleManager.OnDamageDealtForOpinion routes through Support/Denial session shields.
+            int remainder = modifiedDamage;
             GameLogger.LogInfo<EffectResolver>(
                 $"Pressure {remainder} reached opinion (raw: {rawDamage}, modified: {modifiedDamage})"
             );
@@ -720,44 +725,55 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
-        #region Shield
+        #region Session Shields (Support / Denial)
 
-        private void ApplyGainShield(BattleStats target, int amount, EffectContext ctx = null)
+        private void ApplyGainSupport(int amount, EffectContext ctx = null)
         {
-            StatusEffectManager targetStatusMgr = GetStatusEffectManager(target);
-            int modifiedAmount =
-                targetStatusMgr != null ? targetStatusMgr.ModifyShieldGained(amount) : amount;
-
-            target.GainShield(modifiedAmount);
-            GameLogger.LogInfo<EffectResolver>($"Gained {modifiedAmount} Shield (base: {amount})");
-
-            if (ctx != null)
-                ctx.LastShieldGained += modifiedAmount;
+            if (_battleManager == null)
+                return;
+            int modified = _playerStatusEffects?.ModifySupportGained(amount) ?? amount;
+            _battleManager.GainSupport(modified);
+            GameLogger.LogInfo<EffectResolver>($"Gained {modified} Support (base: {amount})");
         }
 
-        private void ApplyLoseShield(BattleStats target, int amount)
+        private void ApplyGainDenial(int amount)
         {
-            int actualLoss = target.LoseShield(amount);
-            GameLogger.LogInfo<EffectResolver>($"Lost {actualLoss} Shield");
+            _battleManager?.GainDenial(amount);
+            GameLogger.LogInfo<EffectResolver>($"Gained {amount} Denial");
         }
 
-        private void ApplyRaiseOpinionEqualToShield(
+        private void ApplyRaiseOpinionEqualToSupport(
             BattleStats target,
             BattleStats attacker,
             EffectContext ctx = null
         )
         {
-            int shield = attacker.CurrentShield;
-            GameLogger.LogInfo<EffectResolver>(
-                $"Raise-Opinion-equal-to-Shield: raw value = {shield}"
-            );
-            ApplyDamagePipeline(target, attacker, shield, ctx);
+            int support = _battleManager?.CurrentSupport ?? 0;
+            GameLogger.LogInfo<EffectResolver>($"Raise-Opinion-equal-to-Support: {support}");
+            ApplyDamagePipeline(target, attacker, support, ctx);
         }
 
-        private void ApplyConsumeAllShield(BattleStats caster)
+        private void ApplyConsumeAllSupport()
         {
-            int consumed = caster.ConsumeAllShield();
-            GameLogger.LogInfo<EffectResolver>($"Consumed {consumed} Shield");
+            if (_battleManager == null)
+                return;
+            int support = _battleManager.CurrentSupport;
+            if (support > 0)
+                _battleManager.AbsorbThroughSupport(support);
+            GameLogger.LogInfo<EffectResolver>($"Consumed {support} Support");
+        }
+
+        private void ApplySupportEqualToHostility(EffectContext ctx = null)
+        {
+            int hostileCount = 0;
+            if (_allEnemies != null)
+                foreach (var enemy in _allEnemies)
+                    if (!enemy.IsDefeated && enemy.Stats.IsHostile)
+                        hostileCount++;
+            ApplyGainSupport(hostileCount, ctx);
+            GameLogger.LogInfo<EffectResolver>(
+                $"Gained Support equal to hostile count ({hostileCount})"
+            );
         }
 
         #endregion
@@ -775,20 +791,6 @@ namespace Crookedile.Gameplay.Battle
             target.GainHostility(amount);
             GameLogger.LogInfo<EffectResolver>(
                 $"Raised target Hostility by {amount} (now {target.CurrentHostility})"
-            );
-        }
-
-        private void ApplyShieldEqualToHostility(BattleStats caster, EffectContext ctx = null)
-        {
-            int hostileCount = 0;
-            if (_allEnemies != null)
-                foreach (var enemy in _allEnemies)
-                    if (!enemy.IsDefeated && enemy.Stats.IsHostile)
-                        hostileCount++;
-
-            ApplyGainShield(caster, hostileCount, ctx);
-            GameLogger.LogInfo<EffectResolver>(
-                $"Gained Shield equal to hostile enemy count ({hostileCount})"
             );
         }
 
