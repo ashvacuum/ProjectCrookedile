@@ -8,9 +8,10 @@ using UnityEngine;
 namespace Crookedile.Data.Enemy
 {
     /// <summary>
-    /// Seven broad categories of enemy intent, used to drive the intent display
-    /// (icon and colour) and give the player a quick read on what the enemy is about to do.
+    /// Enemy intent categories, used to drive the intent display (icon and colour) and give
+    /// the player a quick read on what the enemy is about to do.
     /// Integer assignments are explicit to preserve existing .asset serialization.
+    /// When adding new values, always append with the next integer — never reorder.
     /// </summary>
     public enum EnemyMoveType
     {
@@ -21,6 +22,9 @@ namespace Crookedile.Data.Enemy
         OffensiveBuff = 4, // Attacks AND buffs itself in the same move
         DebuffAttack = 5, // Debuffs the player AND deals damage
         SummonMinion = 6, // Spawns a new enemy mid-battle (enemy-exclusive)
+        Idle = 7, // Does nothing this turn — waits or holds position
+        DefendOpinion = 8, // Gains Composure to shield the opinion meter from the player's pressure
+        RileOthers = 9, // Raises the other enemies' Hostility, amplifying their attacks
     }
 
     /// <summary>
