@@ -428,7 +428,7 @@ MonoBehaviour:
   enemySlotPrefab: {fileID: 5129716837229297804, guid: 27b4f0d6ccdeff948896ca6804495b83, type: 3}
   <PlayerStatsPanel>k__BackingField: {fileID: 1468479633}
   _playerSlotUI: {fileID: 7925704348922541647}
-  _opinionMeterUI: {fileID: 0}
+  _opinionMeterUI: {fileID: 766848211377123526}
   turnNumberText: {fileID: 734630775}
   phaseText: {fileID: 448978346}
   _battleInfoHoldTime: 1.5
@@ -702,105 +702,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
---- !u!1 &1214345573
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1214345574}
-  - component: {fileID: 1214345577}
-  - component: {fileID: 1214345576}
-  - component: {fileID: 1214345575}
-  m_Layer: 5
-  m_Name: OpinionMeter
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1214345574
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1214345573}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1961816016}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1214345575
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1214345573}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cdc20163eb54a3b4487824abe73f1e91, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Crookedile.UI::Crookedile.UI.Battle.OpinionMeterUI
-  _barContainer: {fileID: 0}
-  _playerShield: {fileID: 0}
-  _barFill: {fileID: 0}
-  _enemyShield: {fileID: 0}
-  _thresholdMarker: {fileID: 0}
-  _valueText: {fileID: 0}
-  _turnsText: {fileID: 0}
-  _normalBarColor: {r: 0.2, g: 0.75, b: 0.35, a: 1}
-  _dangerBarColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  _normalColor: {r: 1, g: 1, b: 1, a: 1}
-  _urgentColor: {r: 0.9, g: 0.2, b: 0.2, a: 1}
---- !u!114 &1214345576
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1214345573}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1214345577
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1214345573}
-  m_CullTransparentMesh: 1
 --- !u!114 &1224944589 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7148481838938390221, guid: bbc6d84d5274fd042b29d78e732f18ef, type: 3}
@@ -1220,7 +1121,6 @@ RectTransform:
   - {fileID: 170161651}
   - {fileID: 398085186}
   - {fileID: 6430115861513654553}
-  - {fileID: 1214345574}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1457,6 +1357,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d7cc6ce76b653a74d9b98e6e07594184, type: 3}
+--- !u!114 &766848211377123526 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4917915736057821627, guid: d7cc6ce76b653a74d9b98e6e07594184, type: 3}
+  m_PrefabInstance: {fileID: 766848211377123525}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdc20163eb54a3b4487824abe73f1e91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Crookedile.UI::Crookedile.UI.Battle.OpinionMeterUI
 --- !u!1001 &2717102462982758907
 PrefabInstance:
   m_ObjectHideFlags: 0

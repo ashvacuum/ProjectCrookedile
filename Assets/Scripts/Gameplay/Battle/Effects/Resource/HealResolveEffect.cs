@@ -9,9 +9,10 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Directly raises the Opinion Meter by a fixed or context-sourced amount.
-    /// Does not affect Resolve. Use this for cards that win the crowd over
-    /// without dealing damage — rallying speeches, concessions, crowd appeals, etc.
+    /// Directly raises the Opinion Meter by a fixed or context-sourced amount, bypassing Denial.
+    /// Use for cards that win the crowd over without going through the damage pipeline —
+    /// rallying speeches, concessions, crowd appeals, etc.
+    /// Does not set <c>ctx.LastHealAmount</c>; use <see cref="RestoreResolveEffect"/> if chaining off that value.
     /// </summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
