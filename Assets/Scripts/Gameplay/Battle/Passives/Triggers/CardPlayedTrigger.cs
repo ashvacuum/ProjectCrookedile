@@ -35,6 +35,8 @@ namespace Crookedile.Gameplay.Battle
             return true;
         }
 
+        public override Type EventType => typeof(CardPlayedEvent);
+
         public override string TriggerLabel =>
             _filterByType ? $"When you play a {_filterType} card" : "When you play a card";
     }

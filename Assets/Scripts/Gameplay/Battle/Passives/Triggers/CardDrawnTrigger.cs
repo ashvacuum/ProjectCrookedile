@@ -14,6 +14,8 @@ namespace Crookedile.Gameplay.Battle
             return ctx.As<CardDrawnEvent>().IsPlayer;
         }
 
+        public override Type EventType => typeof(CardDrawnEvent);
+
         public override string TriggerLabel => "When you draw a card";
     }
 }

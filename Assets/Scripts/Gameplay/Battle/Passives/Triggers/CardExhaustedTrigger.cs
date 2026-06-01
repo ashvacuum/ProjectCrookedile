@@ -14,6 +14,8 @@ namespace Crookedile.Gameplay.Battle
             return ctx.As<CardExhaustedEvent>().IsPlayer;
         }
 
+        public override Type EventType => typeof(CardExhaustedEvent);
+
         public override string TriggerLabel => "When you exhaust a card";
     }
 }

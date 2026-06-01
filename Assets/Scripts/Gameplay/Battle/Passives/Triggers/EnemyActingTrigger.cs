@@ -9,6 +9,8 @@ namespace Crookedile.Gameplay.Battle
     {
         public override bool Matches(PassiveEventContext ctx) => ctx.Is<EnemyActingEvent>();
 
+        public override Type EventType => typeof(EnemyActingEvent);
+
         public override string TriggerLabel => "When an enemy acts";
     }
 }

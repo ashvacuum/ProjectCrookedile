@@ -9,6 +9,8 @@ namespace Crookedile.Gameplay.Battle
     {
         public override bool Matches(PassiveEventContext ctx) => ctx.Is<BattleEndedEvent>();
 
+        public override Type EventType => typeof(BattleEndedEvent);
+
         public override string TriggerLabel => "At battle end";
     }
 }

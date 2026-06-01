@@ -20,6 +20,8 @@ namespace Crookedile.Gameplay.Battle
             return e.NewValue < e.OldValue;
         }
 
+        public override Type EventType => typeof(SupportChangedEvent);
+
         public override string TriggerLabel => "When you lose Support";
     }
 }

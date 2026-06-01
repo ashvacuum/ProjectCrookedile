@@ -8,6 +8,8 @@ namespace Crookedile.Gameplay.Battle
     {
         public override bool Matches(PassiveEventContext ctx) => ctx.Is<EnemyMaxedHostilityEvent>();
 
+        public override Type EventType => typeof(EnemyMaxedHostilityEvent);
+
         public override string TriggerLabel => "When an enemy maxes out their hostility";
     }
 }
