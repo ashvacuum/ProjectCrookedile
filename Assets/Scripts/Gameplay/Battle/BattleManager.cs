@@ -392,8 +392,8 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Raises the Opinion Meter directly from effects that do not deal Resolve damage
-        /// (e.g. <c>HealResolveEffect</c> reworked as a crowd-appeal effect).
+        /// Raises the Opinion Meter directly, bypassing the pressure pipeline.
+        /// Used by <c>HealResolveEffect</c> and <c>RestoreResolveEffect</c>.
         /// </summary>
         private void OnOpinionRaisedDirectly(OpinionRaisedDirectlyEvent evt)
         {
@@ -999,7 +999,6 @@ namespace Crookedile.Gameplay.Battle
             {
                 isVictory = opinionMaxed,
                 turnsToWin = _currentTurn,
-                finalPlayerResolve = 0,
                 finalPlayerSupport = _currentSupport,
                 finalPlayerHostility = _playerStats.CurrentHostility,
                 finalOpinion = _currentOpinion,
@@ -1431,7 +1430,6 @@ namespace Crookedile.Gameplay.Battle
                         {
                             isVictory = isVictory,
                             turnsToWin = _manager._currentTurn,
-                            finalPlayerResolve = 0,
                             finalPlayerSupport = _manager._currentSupport,
                             finalPlayerHostility = _manager._playerStats.CurrentHostility,
                             finalOpinion = _manager._currentOpinion,
@@ -1500,13 +1498,6 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>All enemies present in this room (1–5). Order = display order.</summary>
         public List<EnemyData> enemies = new List<EnemyData>();
 
-        /// <summary>
-        /// Optional starting Resolve (HP) for the player this battle.
-        /// When <c>null</c> the player starts at full HP from <see cref="GetPlayerStats"/>.
-        /// Set this to carry HP damage over from a previous battle in the same run.
-        /// </summary>
-        public int? initialPlayerResolve;
-
         /// <summary>Maximum number of player turns before Judgment is called. 0 = no limit.</summary>
         public int? maxTurns;
 
@@ -1521,7 +1512,7 @@ namespace Crookedile.Gameplay.Battle
         {
             return originStats != null
                 ? originStats.GetStatsForOrigin(playerOrigin)
-                : new OriginBattleStats { maxResolve = 20, maxActionPoints = 3 };
+                : new OriginBattleStats { maxActionPoints = 3 };
         }
     }
 
@@ -1531,7 +1522,6 @@ namespace Crookedile.Gameplay.Battle
     {
         public bool isVictory;
         public int turnsToWin;
-        public int finalPlayerResolve;
         public int finalPlayerSupport;
         public int finalPlayerHostility;
         public int finalOpinion;

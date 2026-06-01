@@ -197,7 +197,7 @@ namespace Crookedile.UI.Battle
 
         /// <summary>
         /// Shows the defeated overlay and disables the select button.
-        /// Called when this enemy's Resolve reaches zero.
+        /// Called when this enemy is removed from active combat.
         /// </summary>
         public void MarkDefeated()
         {

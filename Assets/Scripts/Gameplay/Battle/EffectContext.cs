@@ -7,15 +7,15 @@ namespace Crookedile.Gameplay.Battle
     /// Created once per card play and passed through every resolver sub-call so that
     /// triggered effects can read values produced by earlier base effects.
     ///
-    /// Example: a lifesteal triggered effect reads <see cref="LastDamageDealt"/> to know
-    /// how much Resolve to restore to the caster.
+    /// Example: a triggered effect reads <see cref="LastDamageDealt"/> to chain
+    /// off the pressure applied by an earlier base effect.
     /// </summary>
     public class EffectContext
     {
-        /// <summary>Total Resolve damage dealt to any target(s) by this card's base effects.</summary>
+        /// <summary>Total opinion-meter pressure applied by this card's base effects.</summary>
         public int LastDamageDealt { get; set; }
 
-        /// <summary>Total Resolve healing applied by this card's base effects.</summary>
+        /// <summary>Total Opinion raised directly by this card's base effects.</summary>
         public int LastHealAmount { get; set; }
 
         /// <summary>Total Shield gained by this card's base effects.</summary>
@@ -24,7 +24,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Total Shield lost by this card's base effects.</summary>
         public int LastShieldLost { get; set; }
 
-        /// <summary>True if any target's Resolve reached 0 during this card's resolution.</summary>
+        /// <summary>True if any target was defeated during this card's resolution.</summary>
         public bool LastTargetDied { get; set; }
 
         /// <summary>The BattleStats of the card's caster (set at card-play time).</summary>

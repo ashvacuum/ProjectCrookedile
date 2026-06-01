@@ -62,19 +62,24 @@ using Crookedile.Data.Enemy;
 //   ActionPointsChangedEvent Publisher: BattleStats (GainActionPoints / PayCost)
 //                            Subscribers: BattleUI AP display
 //
-//   ResolveChangedEvent      Publisher: BattleStats (DamageResolve / RestoreResolve)
-//                            Subscribers: BattleUI health bar
-//
 //   SupportChangedEvent      Publisher: BattleManager (GainSupport / AbsorbThroughSupport)
 //                            Subscribers: BattleUI Support display
 //   DenialChangedEvent       Publisher: BattleManager (GainDenial / AbsorbThroughDenial)
 //                            Subscribers: BattleUI Denial display
 //
-//   HostilityChangedEvent    Publisher: BattleStats (GainHostility / ReduceHostility)
-//                            Subscribers: BattleUI hostility bar, EnemySlotUI
+//   HostilityChangedEvent      Publisher: BattleStats (any hostility change)
+//                              Subscribers: BattleUI hostility bar, EnemySlotUI
 //
-//   EnemyMaxedHostilityEvent Publisher: BattleStats (GainHostility — only on below-max → max transition)
-//                            Subscribers: PassiveResolver (EnemyMaxedHostilityTrigger)
+//   EnemyMaxedHostilityEvent   Publisher: BattleStats (below-max → max)
+//                              Subscribers: PassiveResolver (EnemyMaxedHostilityTrigger)
+//   EnemyMaxedReceptiveEvent   Publisher: BattleStats (above-min → min)
+//                              Subscribers: PassiveResolver (EnemyMaxedReceptiveTrigger)
+//   EnemyBecameHostileEvent    Publisher: BattleStats (≤0 → >0 crossing)
+//                              Subscribers: PassiveResolver (EnemyBecameHostileTrigger)
+//   EnemyBecameReceptiveEvent  Publisher: BattleStats (≥0 → <0 crossing)
+//                              Subscribers: PassiveResolver (EnemyBecameReceptiveTrigger)
+//   EnemyNeutralizedEvent      Publisher: BattleStats (non-zero → 0)
+//                              Subscribers: PassiveResolver (EnemyNeutralizedTrigger)
 //
 #endregion
 
@@ -314,7 +319,7 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by <c>EffectResolver</c> whenever Resolve damage is successfully dealt (after all modifiers).
+    /// Published by <c>BattleEffect.ApplyPressure</c> whenever opinion-meter pressure is applied (after all modifiers).
     /// Only fires when <c>Amount &gt; 0</c>.
     /// </summary>
     public struct DamageDealtEvent : IGameEvent
@@ -338,12 +343,12 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by <c>EffectResolver</c> whenever Resolve healing is applied.
+    /// Published when Opinion is raised directly (bypassing the Denial pipeline).
     /// Only fires when <c>Amount &gt; 0</c>.
     /// </summary>
     public struct HealingAppliedEvent : IGameEvent
     {
-        /// <summary>Amount of Resolve restored (capped by max Resolve).</summary>
+        /// <summary>Amount of Opinion restored directly.</summary>
         public int Amount;
 
         /// <summary>True = player received the healing; false = an enemy received it.</summary>
@@ -386,22 +391,6 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by <c>BattleStats</c> whenever Resolve changes (damage or healing).
-    /// Used by the UI to update health bars reactively.
-    /// </summary>
-    public struct ResolveChangedEvent : IGameEvent
-    {
-        /// <summary>Resolve value before the change.</summary>
-        public int OldValue;
-
-        /// <summary>Resolve value after the change (clamped to [0, MaxResolve]).</summary>
-        public int NewValue;
-
-        /// <summary>True = the player's Resolve changed; false = an enemy's Resolve changed.</summary>
-        public bool IsPlayer;
-    }
-
-    /// <summary>
     /// Published by <c>BattleManager</c> whenever the session's Support buffer changes.
     /// Support absorbs opinion drops before they reach the opinion meter.
     /// </summary>
@@ -424,7 +413,7 @@ namespace Crookedile.Gameplay.Battle
     /// <summary>
     /// Published by <c>BattleStats</c> whenever an <em>enemy's</em> Hostility number changes.
     /// Hostility is an enemy-only stat — negative = receptive, zero = neutral, positive = hostile.
-    /// Hostility multiplies incoming Resolve damage; the player does not have a Hostility value.
+    /// Hostility multiplies incoming opinion-meter pressure; the player does not have a Hostility value.
     /// </summary>
     public struct HostilityChangedEvent : IGameEvent
     {
@@ -439,12 +428,20 @@ namespace Crookedile.Gameplay.Battle
         public bool IsPlayer;
     }
 
-    /// <summary>
-    /// Published by <c>BattleStats</c> when an enemy's hostility crosses from below-max to max
-    /// for the first time in a given raise. Does not re-fire if already at max.
-    /// Subscribers use this to grant bonuses (e.g. draw an extra card) when an enemy becomes fully hostile.
-    /// </summary>
+    /// <summary>Published when an enemy's hostility crosses from below-max to max. Does not re-fire if already at max.</summary>
     public struct EnemyMaxedHostilityEvent : IGameEvent { }
+
+    /// <summary>Published when an enemy's hostility crosses from above-min to min. Does not re-fire if already at min.</summary>
+    public struct EnemyMaxedReceptiveEvent : IGameEvent { }
+
+    /// <summary>Published when an enemy's hostility crosses from ≤0 to >0 (first step into hostile territory).</summary>
+    public struct EnemyBecameHostileEvent : IGameEvent { }
+
+    /// <summary>Published when an enemy's hostility crosses from ≥0 to &lt;0 (first step into receptive territory).</summary>
+    public struct EnemyBecameReceptiveEvent : IGameEvent { }
+
+    /// <summary>Published when an enemy's hostility returns to exactly 0 from any non-zero value.</summary>
+    public struct EnemyNeutralizedEvent : IGameEvent { }
 
     #endregion
 
@@ -502,7 +499,7 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by effects that directly raise the Opinion Meter without dealing Resolve damage
+    /// Published by effects that directly raise the Opinion Meter without going through the pressure pipeline
     /// (e.g. rallying speeches, crowd appeals). <c>BattleManager</c> subscribes and calls
     /// <c>RaiseOpinion</c> on receipt.
     /// </summary>
@@ -560,8 +557,8 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by <c>BattleManager</c> the moment an enemy's Resolve reaches zero.
-    /// The enemy is removed from active combat after this event fires.
+    /// Published by <c>BattleManager</c> when an enemy is removed from active combat.
+    /// In the opinion-meter model this fires on explicit defeat conditions, not HP reaching zero.
     /// </summary>
     public struct EnemyDefeatedEvent : IGameEvent
     {

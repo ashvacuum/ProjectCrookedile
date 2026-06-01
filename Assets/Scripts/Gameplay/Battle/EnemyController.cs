@@ -54,7 +54,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Status effect manager for this enemy.</summary>
         public StatusEffectManager StatusEffects { get; }
 
-        /// <summary>True when this enemy's Resolve has reached zero.</summary>
+        /// <summary>True when this enemy has been removed from active combat.</summary>
         public bool IsDefeated => Stats.IsDefeated;
 
         /// <summary>

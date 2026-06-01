@@ -102,7 +102,7 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Focus => "Cards cost X less AP (this turn only).",
                 StatusEffectType.Energized => "Cards cost X less AP this turn.",
                 StatusEffectType.Plated => "Reduce incoming damage by X.",
-                StatusEffectType.Regeneration => "Heal X Resolve at end of turn.",
+                StatusEffectType.Regeneration => "Raise Opinion by X at the end of each turn.",
                 StatusEffectType.Intangible => "Take only 1 damage from all attacks.",
                 StatusEffectType.Thorns => "Reflect X to the Opinion Meter when hit.",
                 // Special
@@ -151,9 +151,9 @@ namespace Crookedile.Gameplay.Battle
         Focus, // Cards cost X less AP (this turn only)
         Energized, // Cards cost X less AP this turn
         Plated, // Reduce incoming damage by X
-        Regeneration, // Heal X Resolve at end of turn
+        Regeneration, // Raise Opinion by X at end of turn
         Intangible, // Take only 1 damage from attacks (duration-based)
-        Thorns, // Reflect X to Opinion Meter when hit (no Resolve damage)
+        Thorns, // Reflect X pressure to the Opinion Meter when hit
 
         // SPECIAL
         Ritual, // Gain X Support at start of turn

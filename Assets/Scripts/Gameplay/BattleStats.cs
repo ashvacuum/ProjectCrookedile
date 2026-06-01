@@ -55,6 +55,9 @@ namespace Crookedile.Gameplay
         /// </summary>
         public bool IsDefeated => false;
 
+        public int MaxHostility => _maxHostility;
+        public int MinHostility => _minHostility;
+
         /// <summary>True when the enemy is actively hostile (positive hostility).</summary>
         public bool IsHostile => _currentHostility > 0;
 
@@ -111,16 +114,7 @@ namespace Crookedile.Gameplay
                 return;
             int old = _currentHostility;
             _currentHostility = Mathf.Min(_maxHostility, _currentHostility + amount);
-            EventBus.Publish(
-                new HostilityChangedEvent
-                {
-                    OldValue = old,
-                    NewValue = _currentHostility,
-                    IsPlayer = _isPlayer,
-                }
-            );
-            if (old < _maxHostility && _currentHostility == _maxHostility)
-                EventBus.Publish(new EnemyMaxedHostilityEvent());
+            PublishHostilityEvents(old, _currentHostility);
         }
 
         /// <summary>Shifts hostility downward (more receptive). No-op when Hardened.</summary>
@@ -130,32 +124,44 @@ namespace Crookedile.Gameplay
                 return 0;
             int old = _currentHostility;
             _currentHostility = Mathf.Max(_minHostility, _currentHostility - amount);
-            int actual = old - _currentHostility;
-            EventBus.Publish(
-                new HostilityChangedEvent
-                {
-                    OldValue = old,
-                    NewValue = _currentHostility,
-                    IsPlayer = _isPlayer,
-                }
-            );
-            return actual;
+            PublishHostilityEvents(old, _currentHostility);
+            return old - _currentHostility;
         }
 
-        /// <summary>Sets hostility to an exact value (used for enemy initialisation).</summary>
+        /// <summary>
+        /// Sets hostility to an exact value, bypassing Hardened/Fanatic.
+        /// Used for initialisation and direct mood-setting effects.
+        /// </summary>
         public void SetHostility(int value)
         {
             int old = _currentHostility;
             _currentHostility = Mathf.Clamp(value, _minHostility, _maxHostility);
             if (old != _currentHostility)
-                EventBus.Publish(
-                    new HostilityChangedEvent
-                    {
-                        OldValue = old,
-                        NewValue = _currentHostility,
-                        IsPlayer = _isPlayer,
-                    }
-                );
+                PublishHostilityEvents(old, _currentHostility);
+        }
+
+        /// <summary>Publishes HostilityChangedEvent and any boundary/state-transition events.</summary>
+        private void PublishHostilityEvents(int oldValue, int newValue)
+        {
+            EventBus.Publish(
+                new HostilityChangedEvent
+                {
+                    OldValue = oldValue,
+                    NewValue = newValue,
+                    IsPlayer = _isPlayer,
+                }
+            );
+
+            if (oldValue < _maxHostility && newValue == _maxHostility)
+                EventBus.Publish(new EnemyMaxedHostilityEvent());
+            if (oldValue > _minHostility && newValue == _minHostility)
+                EventBus.Publish(new EnemyMaxedReceptiveEvent());
+            if (oldValue <= 0 && newValue > 0)
+                EventBus.Publish(new EnemyBecameHostileEvent());
+            if (oldValue >= 0 && newValue < 0)
+                EventBus.Publish(new EnemyBecameReceptiveEvent());
+            if (oldValue != 0 && newValue == 0)
+                EventBus.Publish(new EnemyNeutralizedEvent());
         }
 
         #endregion

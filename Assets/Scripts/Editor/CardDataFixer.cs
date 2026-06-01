@@ -28,7 +28,7 @@ namespace Crookedile.Editor
             #region Faith Leader
             ["Find Common Ground"] = new(
                 "faithleader",
-                "Deal 3 Resolve damage.",
+                "Apply 3 pressure.",
                 "Sometimes all it takes is a smile."
             ),
 
@@ -40,7 +40,7 @@ namespace Crookedile.Editor
 
             ["Accusation"] = new(
                 "faithleader",
-                "Deal 4 Resolve damage. Gain 1 Hostility.",
+                "Apply 4 pressure. Gain 1 Hostility.",
                 "Righteous anger, barely contained."
             ),
 
@@ -59,21 +59,17 @@ namespace Crookedile.Editor
             #endregion
 
             #region Nepo Baby
-            ["Family Name"] = new(
-                "nepobaby",
-                "Deal 3 Resolve damage.",
-                "Do you know who my father is?"
-            ),
+            ["Family Name"] = new("nepobaby", "Apply 3 pressure.", "Do you know who my father is?"),
 
             ["Inherited Privelege"] = new(
                 "nepobaby", // asset typo — keep as-is
-                "Deal 5 Resolve damage. Draw 1 card.",
+                "Apply 5 pressure. Draw 1 card.",
                 "Some doors open themselves."
             ),
 
             ["Pull Strings"] = new(
                 "nepobaby",
-                "Deal 4 Resolve damage. Gain 1 Hostility.",
+                "Apply 4 pressure. Gain 1 Hostility.",
                 "Everyone has a price. Yours is just lower."
             ),
 
@@ -106,25 +102,25 @@ namespace Crookedile.Editor
             #region Actor
             ["Charming Gambit"] = new(
                 "actor",
-                "Deal 3 Resolve damage. 50% chance: Draw 1 card.",
+                "Apply 3 pressure. 50% chance: Draw 1 card.",
                 "High risk, higher cheekbones."
             ),
 
             ["All or Nothing"] = new(
                 "actor",
-                "Deal 3–9 Resolve damage (random).",
+                "Apply 3–9 pressure (random).",
                 "Every performance is a gamble."
             ),
 
             ["Bold Accusation"] = new(
                 "actor",
-                "Deal 5 Resolve damage. Gain 2 Hostility.",
+                "Apply 5 pressure. Gain 2 Hostility.",
                 "Critics said it was too much. It worked."
             ),
 
             ["Spotlight Hog"] = new(
                 "actor",
-                "Deal 6 Resolve damage. Gain 3 Support. Gain 2 Hostility.",
+                "Apply 6 pressure. Gain 3 Support. Gain 2 Hostility.",
                 "They can't look away. Neither can you."
             ),
 

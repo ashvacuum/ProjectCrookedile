@@ -69,8 +69,7 @@ namespace Crookedile.Tests
         }
 
         // TODO: Rewrite damage tests for the opinion-meter model.
-        // Cards no longer deal resolve damage — they raise the opinion meter through the
-        // target's composure shield (via DamageDealtEvent → BattleManager.RaiseOpinion).
+        // Cards apply pressure to the opinion meter via DamageDealtEvent → BattleManager.
         // Tests need a BattleManager mock or an EventBus listener to assert opinion changes.
 
         [ContextMenu("Test: Basic Damage")]

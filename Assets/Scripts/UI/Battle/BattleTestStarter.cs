@@ -26,8 +26,8 @@ namespace Crookedile.Gameplay.Battle
         private OriginType playerOrigin = OriginType.FaithLeader;
 
         [Tooltip(
-            "OriginStats ScriptableObject — controls player Resolve/AP per origin. "
-                + "If null, defaults to 20 Resolve / 3 AP."
+            "OriginStats ScriptableObject — controls player AP and portrait per origin. "
+                + "If null, defaults to 3 AP."
         )]
         [SerializeField]
         private OriginStats originStats;
@@ -194,17 +194,8 @@ namespace Crookedile.Gameplay.Battle
                     Debug.Log("[BattleTestStarter] No session assigned — single-round fallback.");
                 }
 
-                // Starting HP: first battle always starts at the class's max HP.
-                int initialResolve =
-                    originStats != null
-                        ? originStats.GetStatsForOrigin(playerOrigin).maxResolve
-                        : 20;
-
-                RunState.Create(playerOrigin, playerDeck, initialResolve, battleQueue);
-                Debug.Log(
-                    $"[BattleTestStarter] RunState created for origin: {playerOrigin} "
-                        + $"({initialResolve} Resolve)"
-                );
+                RunState.Create(playerOrigin, playerDeck, battleQueue);
+                Debug.Log($"[BattleTestStarter] RunState created for origin: {playerOrigin}");
             }
             else
             {
