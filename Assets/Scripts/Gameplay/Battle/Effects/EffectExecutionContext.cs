@@ -79,10 +79,10 @@ namespace Crookedile.Gameplay.Battle
         #endregion
 
         #region Accumulated results (mutable during resolution)
-        /// <summary>Total Resolve damage dealt to any target(s) by this card's effects.</summary>
+        /// <summary>Total opinion-meter pressure applied by this card's effects.</summary>
         public int LastDamageDealt { get; set; }
 
-        /// <summary>Total Resolve healing applied by this card's effects.</summary>
+        /// <summary>Total Opinion raised directly by this card's effects.</summary>
         public int LastHealAmount { get; set; }
 
         /// <summary>Total Support gained by this card's effects.</summary>
@@ -91,7 +91,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Total Support lost by this card's effects.</summary>
         public int LastSupportLost { get; set; }
 
-        /// <summary>True if any target's Resolve reached 0 during this card's resolution.</summary>
+        /// <summary>True if any target was defeated during this card's resolution.</summary>
         public bool LastTargetDied { get; set; }
 
         /// <summary>

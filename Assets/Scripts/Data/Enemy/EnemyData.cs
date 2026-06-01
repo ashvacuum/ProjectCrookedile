@@ -42,16 +42,6 @@ namespace Crookedile.Data.Enemy
 
         #endregion
 
-        #region Stats
-        [Header("Stats")]
-        [Tooltip("Starting and maximum Resolve (HP equivalent). Reaches 0 = enemy defeated.")]
-        [SerializeField]
-        private int _maxResolve = 30;
-
-        // Note: Enemies have no Action Points or deck — those systems are player-only.
-
-        #endregion
-
         #region Hostility
         [Header("Hostility")]
         [Tooltip(
@@ -118,7 +108,6 @@ namespace Crookedile.Data.Enemy
         #region Properties
         public string EnemyName => _enemyName;
         public Sprite Portrait => _portrait;
-        public int MaxResolve => _maxResolve;
         public int StartingHostility => _startingHostility;
         public int MaxHostility => _maxHostility;
         public int MinHostility => _minHostility;

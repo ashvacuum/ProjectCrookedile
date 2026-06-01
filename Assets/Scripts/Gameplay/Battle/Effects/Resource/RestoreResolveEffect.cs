@@ -17,7 +17,7 @@ namespace Crookedile.Gameplay.Battle
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class RestoreResolveEffect : BattleEffect
     {
-        [Tooltip("Base Resolve to restore. Ignored when Amount Source is not Fixed.")]
+        [Tooltip("Amount of Opinion to raise directly. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]
         [MinValue(1)]
         [SerializeField]

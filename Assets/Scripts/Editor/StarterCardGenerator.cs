@@ -514,14 +514,14 @@ namespace Crookedile.Editor
                 effects: new CardEffect[] { CreateDamageEffect(5) }
             );
 
-            // Pastoral Care — Gain 4 Support (+ Heal 10 Resolve via Inspector)
+            // Pastoral Care — Gain 4 Support (+ Raise Opinion by 10 via Inspector)
             CreateCard(
                 path: $"{path}/PastoralCare.asset",
                 name: "Pastoral Care",
                 type: CardType.Policy,
                 rarity: CardRarity.Enhanced,
                 cost: 2,
-                description: "Tend to your own wounds and steady your resolve. Heal 10 Resolve. Gain 4 Support.",
+                description: "Tend to your own wounds and steady your resolve. Raise Opinion by 10. Gain 4 Support.",
                 tags: new[] { "faithleader" },
                 configNotes: "Add HealResolveEffect (amount 10) via Inspector.",
                 effects: new CardEffect[] { CreateGainShieldEffect(4) }
@@ -595,7 +595,7 @@ namespace Crookedile.Editor
                 }
             );
 
-            // Martyrdom — Lose all Resolve except 1, Gain Support = Resolve lost
+            // Martyrdom — Lose all Opinion except 1, Gain Support = Resolve lost
             // NOTE: Full effect is very complex — configure via Inspector.
             CreateCard(
                 path: $"{path}/Martyrdom.asset",
@@ -603,7 +603,7 @@ namespace Crookedile.Editor
                 type: CardType.Policy,
                 rarity: CardRarity.Rare,
                 cost: 0,
-                description: "Give everything. Lose all Resolve except 1. Gain Support equal to Resolve lost.",
+                description: "Give everything. Lose all Opinion except 1. Gain Support equal to Opinion lost.",
                 tags: new[] { "faithleader" },
                 configNotes: "Replace DealDamage with LoseAllResolveExceptOneEffect + GainShieldEqualToResolveLostEffect via Inspector.",
                 effects: new CardEffect[] { CreateDamageEffect(8) }
@@ -698,7 +698,7 @@ namespace Crookedile.Editor
                 effects: new CardEffect[] { CreateLoseShieldEffect(5) }
             );
 
-            // Hounded — Status, 0 AP: Lose 4 Resolve, Exhaust
+            // Hounded — Status, 0 AP: Lose 4 Opinion, Exhaust
             // General: no origin tag. On play costs HP; at end of turn ALL enemies gain 3 Hostility.
             // Wire TurnEndTrigger → RaiseAllOpponentsHostilityEffect(3) in Inspector.
             CreateCard(
@@ -707,7 +707,7 @@ namespace Crookedile.Editor
                 type: CardType.Status,
                 rarity: CardRarity.Basic,
                 cost: 0,
-                description: "They close in from every side. Lose 4 Resolve. Exhaust.\nEnd of turn while held: all enemies gain 3 Hostility.",
+                description: "They close in from every side. Lose 4 Opinion. Exhaust.\nEnd of turn while held: all enemies gain 3 Hostility.",
                 tags: null,
                 isUnplayable: false,
                 configNotes: "Add ExhaustThisCard effect + TurnEndTrigger passive: RaiseAllOpponentsHostilityEffect (amount 3) via Inspector.",
@@ -761,7 +761,7 @@ namespace Crookedile.Editor
                 type: CardType.Curse,
                 rarity: CardRarity.Basic,
                 cost: 0,
-                description: "The headlines hurt. Lose 3 Resolve at start of turn while held.",
+                description: "The headlines hurt. Lose 3 Opinion at start of turn while held.",
                 tags: new[] { "faithleader" },
                 isUnplayable: true,
                 configNotes: "Add TurnStartTrigger passive: DamageResolveEffect (amount 3) via Inspector.",

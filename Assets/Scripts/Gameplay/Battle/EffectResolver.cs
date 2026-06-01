@@ -259,7 +259,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         /// <param name="ctx">
         /// Optional EffectContext from the enclosing card resolution. When provided,
-        /// damage/heal/composure amounts are written to it so triggered effects can react.
+        /// pressure/opinion-raised/support amounts are written to it so triggered effects can react.
         /// Pass null for enemy move effects (no triggered-effect evaluation needed).
         /// </param>
         /// <param name="amountOverride">

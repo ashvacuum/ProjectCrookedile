@@ -2,46 +2,33 @@ using Crookedile.Core;
 using Crookedile.Gameplay.Battle;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Pure stats reader — displays Resolve, Composure, Hostility, and AP for both
-    /// combatants as a lightweight overlay.
-    ///
-    /// This component is intentionally limited to stat display.  End-turn input,
-    /// improvise controls, and battle result panels are owned by <c>BattleUI</c> and its
-    /// FSM states.  If the scene needs a result display on this overlay, assign the
-    /// shared <c>BattleResultPanel</c> component to the <c>resultPanel</c> field.
+    /// Debug/prototype stats overlay — displays the live battle state as plain text.
+    /// Shows Opinion, Support, Denial, player AP, focused enemy hostility, and turn/phase info.
+    /// Not intended as production UI; sized and positioned for editor testing.
     /// </summary>
     public class BattleStatsOverlay : MonoBehaviour
     {
-        [Header("Player Stats")]
+        [Header("Opinion Meter")]
         [SerializeField]
-        private TMP_Text playerResolveText;
+        private TMP_Text opinionText;
 
         [SerializeField]
-        private TMP_Text playerComposureText;
+        private TMP_Text supportText;
 
         [SerializeField]
-        private TMP_Text playerHostilityText;
+        private TMP_Text denialText;
 
+        [Header("Player")]
         [SerializeField]
         private TMP_Text playerAPText;
 
-        [Header("Opponent Stats")]
+        [Header("Focused Enemy")]
         [SerializeField]
-        private TMP_Text opponentResolveText;
-
-        [SerializeField]
-        private TMP_Text opponentComposureText;
-
-        [SerializeField]
-        private TMP_Text opponentHostilityText;
-
-        [SerializeField]
-        private TMP_Text opponentAPText;
+        private TMP_Text focusedEnemyHostilityText;
 
         [Header("Battle Info")]
         [SerializeField]
@@ -91,46 +78,29 @@ namespace Crookedile.UI.Battle
         {
             if (battleManager == null)
                 return;
-            UpdatePlayerStats();
-            UpdateOpponentStats();
-            UpdateBattleInfo();
-        }
 
-        private void UpdatePlayerStats()
-        {
-            var stats = battleManager.PlayerStats;
-            if (stats == null)
-                return;
+            if (opinionText != null)
+                opinionText.text =
+                    $"Opinion: {battleManager.CurrentOpinion} / {battleManager.MaxOpinion}";
 
-            if (playerResolveText != null)
-                playerResolveText.text = $"AP: {stats.CurrentActionPoints}/{stats.MaxActionPoints}";
-            if (playerComposureText != null)
-                playerComposureText.text = "";
-            if (playerHostilityText != null)
-                playerHostilityText.text =
-                    $"Hostility: {stats.CurrentHostility} ({stats.HostilityDamageMultiplier:F1}x)";
-            if (playerAPText != null)
-                playerAPText.text = $"AP: {stats.CurrentActionPoints}/{stats.MaxActionPoints}";
-        }
+            if (supportText != null)
+                supportText.text = $"Support: {battleManager.CurrentSupport}";
 
-        private void UpdateOpponentStats()
-        {
-            var stats = battleManager.OpponentStats;
-            if (stats == null)
-                return;
+            if (denialText != null)
+                denialText.text = $"Denial: {battleManager.CurrentDenial}";
 
-            if (opponentResolveText != null)
-                opponentResolveText.text = $"Hostility: {stats.CurrentHostility}";
-            if (opponentComposureText != null)
-                opponentComposureText.text = "";
-            if (opponentHostilityText != null)
-                opponentHostilityText.text = $"Hostility: {stats.CurrentHostility}";
-            if (opponentAPText != null)
-                opponentAPText.text = $"AP: {stats.CurrentActionPoints}/{stats.MaxActionPoints}";
-        }
+            var playerStats = battleManager.PlayerStats;
+            if (playerAPText != null && playerStats != null)
+                playerAPText.text =
+                    $"AP: {playerStats.CurrentActionPoints}/{playerStats.MaxActionPoints}";
 
-        private void UpdateBattleInfo()
-        {
+            var enemyStats = battleManager.OpponentStats;
+            if (focusedEnemyHostilityText != null)
+                focusedEnemyHostilityText.text =
+                    enemyStats != null
+                        ? $"Hostility: {enemyStats.CurrentHostility} ({enemyStats.HostilityDamageMultiplier:F1}x)"
+                        : "Hostility: —";
+
             if (turnInfoText != null)
             {
                 string turnOwner = battleManager.IsPlayerTurn ? "Your Turn" : "Opponent's Turn";

@@ -35,15 +35,6 @@ namespace Crookedile.Data
 
         #endregion
 
-        #region HP carry-over
-        /// <summary>
-        /// The player's Resolve (HP) at the end of the last battle.
-        /// 0 means the value hasn't been set yet (first battle of run should use max HP).
-        /// </summary>
-        public int CurrentResolve { get; private set; }
-
-        #endregion
-
         #region Battle queue
         /// <summary>
         /// Ordered list of enemy groups — one per encounter.
@@ -78,7 +69,6 @@ namespace Crookedile.Data
         /// </summary>
         /// <param name="origin">The origin the player selected.</param>
         /// <param name="starterDeck">Initial deck cards (shallow copy is taken).</param>
-        /// <param name="initialResolve">Starting HP for the run (typically the class's max HP).</param>
         /// <param name="battleQueue">
         /// Optional ordered list of enemy groups (one per round).
         /// Pass <c>null</c> for a single-round session where <c>BattleTestStarter</c>
@@ -87,7 +77,6 @@ namespace Crookedile.Data
         public static RunState Create(
             OriginType origin,
             List<CardData> starterDeck,
-            int initialResolve,
             List<List<EnemyData>> battleQueue = null
         )
         {
@@ -95,7 +84,6 @@ namespace Crookedile.Data
             {
                 Origin = origin,
                 Deck = starterDeck != null ? new List<CardData>(starterDeck) : new List<CardData>(),
-                CurrentResolve = Mathf.Max(0, initialResolve),
                 CurrentBattleIndex = 0,
                 BattleQueue = battleQueue,
             };

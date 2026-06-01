@@ -40,7 +40,7 @@
         /// <summary>
         /// Executes this effect using the provided execution context.
         /// The context carries all dependencies (caster, target, deck, status managers)
-        /// and accumulates results (damage dealt, healing applied, composure gained) for
+        /// and accumulates results (pressure applied, opinion raised, support gained) for
         /// triggered effects to read.
         /// </summary>
         /// <param name="ctx">Shared context for this card/move resolution.</param>

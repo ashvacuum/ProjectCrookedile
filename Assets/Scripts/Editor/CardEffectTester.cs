@@ -37,28 +37,19 @@ namespace Crookedile.Editor
 
         [Title("Battle Simulation")]
         [FoldoutGroup("Player Stats")]
-        [LabelText("Resolve")]
-        [PropertyRange(0, 100)]
-        [SerializeField]
-        private int _playerResolve = 20;
-
-        [FoldoutGroup("Player Stats")]
-        [LabelText("Max Resolve")]
-        [PropertyRange(1, 100)]
-        [SerializeField]
-        private int _playerMaxResolve = 20;
-
-        [FoldoutGroup("Player Stats")]
         [LabelText("Action Points")]
         [PropertyRange(0, 10)]
         [SerializeField]
         private int _playerActionPoints = 3;
 
         [FoldoutGroup("Player Stats")]
-        [LabelText("Support")]
+        [Tooltip(
+            "Starting Support for the test. Session-level — set directly on BattleManager in a real battle."
+        )]
+        [LabelText("Starting Support")]
         [PropertyRange(0, 50)]
         [SerializeField]
-        private int _playerComposure = 0;
+        private int _playerSupport = 0;
 
         [FoldoutGroup("Player Stats")]
         [LabelText("Hostility")]
@@ -67,28 +58,19 @@ namespace Crookedile.Editor
         private int _playerHostility = 0;
 
         [FoldoutGroup("Opponent Stats")]
-        [LabelText("Resolve")]
-        [PropertyRange(0, 100)]
-        [SerializeField]
-        private int _opponentResolve = 20;
-
-        [FoldoutGroup("Opponent Stats")]
-        [LabelText("Max Resolve")]
-        [PropertyRange(1, 100)]
-        [SerializeField]
-        private int _opponentMaxResolve = 20;
-
-        [FoldoutGroup("Opponent Stats")]
         [LabelText("Action Points")]
         [PropertyRange(0, 10)]
         [SerializeField]
         private int _opponentActionPoints = 3;
 
         [FoldoutGroup("Opponent Stats")]
-        [LabelText("Denial")]
+        [Tooltip(
+            "Starting Denial for the test. Session-level — set directly on BattleManager in a real battle."
+        )]
+        [LabelText("Starting Denial")]
         [PropertyRange(0, 50)]
         [SerializeField]
-        private int _opponentComposure = 0;
+        private int _opponentDenial = 0;
 
         [FoldoutGroup("Opponent Stats")]
         [LabelText("Hostility")]
@@ -266,16 +248,12 @@ namespace Crookedile.Editor
         {
             _cardToTest = null;
 
-            _playerResolve = 20;
-            _playerMaxResolve = 20;
             _playerActionPoints = 3;
-            _playerComposure = 0;
+            _playerSupport = 0;
             _playerHostility = 0;
 
-            _opponentResolve = 20;
-            _opponentMaxResolve = 20;
             _opponentActionPoints = 3;
-            _opponentComposure = 0;
+            _opponentDenial = 0;
             _opponentHostility = 0;
 
             _playerStatusEffects.Clear();
@@ -343,19 +321,11 @@ namespace Crookedile.Editor
 
         [Title("Quick Presets")]
         [HorizontalGroup("Presets")]
-        [Button("Low Health Test")]
-        private void PresetLowHealth()
+        [Button("High Support Test")]
+        private void PresetHighSupport()
         {
-            _playerResolve = 3;
-            _opponentResolve = 3;
-        }
-
-        [HorizontalGroup("Presets")]
-        [Button("High Shield Test")]
-        private void PresetHighShield()
-        {
-            _playerComposure = 15;
-            _opponentComposure = 15;
+            _playerSupport = 15;
+            _opponentDenial = 15;
         }
 
         [HorizontalGroup("Presets")]
