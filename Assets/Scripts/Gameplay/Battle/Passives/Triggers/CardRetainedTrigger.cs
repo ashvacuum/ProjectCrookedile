@@ -14,6 +14,8 @@ namespace Crookedile.Gameplay.Battle
             return ctx.As<CardRetainedEvent>().IsPlayer;
         }
 
+        public override Type EventType => typeof(CardRetainedEvent);
+
         public override string TriggerLabel => "When you retain a card";
     }
 }

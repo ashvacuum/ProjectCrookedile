@@ -14,6 +14,8 @@ namespace Crookedile.Gameplay.Battle
             return ctx.As<CardUpgradedEvent>().IsPlayer;
         }
 
+        public override Type EventType => typeof(CardUpgradedEvent);
+
         public override string TriggerLabel => "When you upgrade a card";
     }
 }

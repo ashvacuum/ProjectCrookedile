@@ -14,6 +14,8 @@ namespace Crookedile.Gameplay.Battle
             return ctx.As<TurnEndedEvent>().WasPlayerTurn;
         }
 
+        public override Type EventType => typeof(TurnEndedEvent);
+
         public override string TriggerLabel => "At turn end";
     }
 }

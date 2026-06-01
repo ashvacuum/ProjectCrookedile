@@ -31,6 +31,13 @@ namespace Crookedile.Gameplay.Battle
 
         #region BattlePassive collection
         private readonly List<BattlePassive> _allPassives;
+
+        // Passives bucketed by the System.Type of the event their trigger listens for. Lets
+        // DispatchEvent<T> visit only passives that can possibly match typeof(T) — and skip all
+        // context allocation when no passive listens for the event. Rebuilt by RegisterCardPassives.
+        private readonly Dictionary<Type, List<BattlePassive>> _passivesByEvent =
+            new Dictionary<Type, List<BattlePassive>>();
+
         private readonly EffectResolver _effectResolver;
         private IReadOnlyList<EnemyController> _enemies;
         private StatusEffectManager _playerStatusEffects;
@@ -220,9 +227,24 @@ namespace Crookedile.Gameplay.Battle
                 }
             }
 
-            // Reset all passives so they're fresh for this battle
+            // Reset all passives so they're fresh for this battle, and bucket them by the event
+            // type their trigger listens for so DispatchEvent can skip non-matching passives.
+            _passivesByEvent.Clear();
             foreach (var bp in _allPassives)
+            {
                 bp.ResetForBattle();
+
+                var eventType = bp.Trigger?.EventType;
+                if (eventType == null)
+                    continue; // a passive with no trigger can never fire — leave it unbucketed
+
+                if (!_passivesByEvent.TryGetValue(eventType, out var bucket))
+                {
+                    bucket = new List<BattlePassive>();
+                    _passivesByEvent[eventType] = bucket;
+                }
+                bucket.Add(bp);
+            }
 
             GameLogger.LogInfo<PassiveResolver>(
                 $"Registered {_allPassives.Count} BattlePassive(s) for this battle."
@@ -239,7 +261,16 @@ namespace Crookedile.Gameplay.Battle
         private void DispatchEvent<T>(T evt)
             where T : struct, IGameEvent
         {
-            if (_allPassives.Count == 0 || _effectResolver == null)
+            if (_effectResolver == null)
+                return;
+
+            // Only passives whose trigger listens for this exact event type can fire. If none do,
+            // bail before allocating any context — most events have no listening passive.
+            if (
+                !_passivesByEvent.TryGetValue(typeof(T), out var bucket)
+                || bucket == null
+                || bucket.Count == 0
+            )
                 return;
 
             var evtCtx = new PassiveEventContext(evt);
@@ -254,7 +285,7 @@ namespace Crookedile.Gameplay.Battle
                 _battleManager
             );
 
-            foreach (var passive in _allPassives)
+            foreach (var passive in bucket)
             {
                 // Fresh execution context per passive prevents state bleed between passives.
                 // Enrich it with values from the triggering event so passive effects can use

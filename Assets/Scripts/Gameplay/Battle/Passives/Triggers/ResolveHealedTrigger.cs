@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 
 namespace Crookedile.Gameplay.Battle
 {
-    /// <summary>Fires when the player's resolve is healed (restored).</summary>
+    /// <summary>Fires when Opinion is raised directly (via HealResolveEffect / RestoreResolveEffect).</summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class ResolveHealedTrigger : PassiveTriggerBase
+    public class OpinionHealedTrigger : PassiveTriggerBase
     {
         public override bool Matches(PassiveEventContext ctx)
         {
@@ -14,6 +14,8 @@ namespace Crookedile.Gameplay.Battle
             return ctx.As<HealingAppliedEvent>().IsToPlayer;
         }
 
-        public override string TriggerLabel => "When your resolve is healed";
+        public override Type EventType => typeof(HealingAppliedEvent);
+
+        public override string TriggerLabel => "When Opinion is raised directly";
     }
 }

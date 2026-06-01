@@ -34,6 +34,8 @@ namespace Crookedile.Gameplay.Battle
             return true;
         }
 
+        public override Type EventType => typeof(StatusEffectAppliedEvent);
+
         public override string TriggerLabel =>
             _filterByStatus
                 ? $"When you apply {_filterStatus} to an enemy"

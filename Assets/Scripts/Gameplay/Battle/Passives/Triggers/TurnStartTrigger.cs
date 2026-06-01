@@ -14,6 +14,8 @@ namespace Crookedile.Gameplay.Battle
             return ctx.As<TurnStartedEvent>().IsPlayerTurn;
         }
 
+        public override Type EventType => typeof(TurnStartedEvent);
+
         public override string TriggerLabel => "At turn start";
     }
 }

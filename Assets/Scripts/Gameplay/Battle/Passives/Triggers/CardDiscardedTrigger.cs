@@ -14,6 +14,8 @@ namespace Crookedile.Gameplay.Battle
             return ctx.As<CardDiscardedEvent>().IsPlayer;
         }
 
+        public override Type EventType => typeof(CardDiscardedEvent);
+
         public override string TriggerLabel => "When you discard a card";
     }
 }
