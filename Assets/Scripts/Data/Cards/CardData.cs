@@ -62,21 +62,10 @@ namespace Crookedile.Data.Cards
         private List<CardCost> _costs = new List<CardCost>();
 
         [Header("Effects")]
-        [Tooltip(
-            "New polymorphic effect list — use this for all newly authored cards. "
-                + "Add effects via the + button; each subclass shows only its own fields."
-        )]
+        [Tooltip("Polymorphic effect list. Add effects via the + button.")]
         [SerializeReference]
         [SerializeField]
-        private List<BattleEffect> _newEffects = new List<BattleEffect>();
-
-        [Tooltip(
-            "Legacy effect list — kept for backwards compatibility during migration. "
-                + "Run Crookedile / Tools / Migrate Effects to convert. Do not author new effects here."
-        )]
-        [FoldoutGroup("Legacy Effects (Migration)")]
-        [SerializeField]
-        private List<CardEffect> _effects = new List<CardEffect>();
+        private List<BattleEffect> _effects = new List<BattleEffect>();
 
         [Header("Card Passives")]
         [Tooltip(
@@ -206,15 +195,8 @@ namespace Crookedile.Data.Cards
         /// <summary>List of costs required to play this card.</summary>
         public List<CardCost> Costs => _costs;
 
-        /// <summary>
-        /// Polymorphic effect list for this card.
-        /// Returns <c>_newEffects</c> when populated (new system); falls back to the legacy
-        /// <c>_effects</c> list during the migration window.
-        /// </summary>
-        public List<BattleEffect> NewEffects => _newEffects;
-
-        /// <summary>Legacy effect list — read by the migration tool and the old EffectResolver path.</summary>
-        public List<CardEffect> Effects => _effects;
+        /// <summary>Polymorphic effect list for this card.</summary>
+        public List<BattleEffect> Effects => _effects;
 
         /// <summary>Is this card currently in its upgraded state?</summary>
         public bool IsUpgraded => _isUpgraded;
@@ -287,15 +269,6 @@ namespace Crookedile.Data.Cards
         /// Human-readable description of what still needs to be configured in the Unity Inspector.
         /// </summary>
         public string ConfigurationNotes => _configurationNotes;
-
-        /// <summary>
-        /// True if this card still has legacy <see cref="CardEffect"/> entries and no new
-        /// <see cref="BattleEffect"/> entries. Used by the editor to surface un-migrated cards.
-        /// </summary>
-        public bool UsesLegacyEffects =>
-            _effects != null
-            && _effects.Count > 0
-            && (_newEffects == null || _newEffects.Count == 0);
 
         /// <summary>
         /// True if this card has no artwork assigned and is therefore not yet ready for gameplay.
@@ -388,15 +361,15 @@ namespace Crookedile.Data.Cards
         }
 
         /// <summary>
-        /// Gets the new polymorphic effects to use, respecting upgrade state.
+        /// Gets the polymorphic effects to use, respecting upgrade state.
         /// Returns <see cref="_upgradedEffects"/> when upgraded and the list is non-empty;
-        /// falls back to base <see cref="_newEffects"/> otherwise.
+        /// falls back to base <see cref="_effects"/> otherwise.
         /// </summary>
         public List<BattleEffect> GetNewEffects(bool useUpgraded = true)
         {
             if (useUpgraded && _isUpgraded && _upgradedEffects.Count > 0)
                 return _upgradedEffects;
-            return _newEffects;
+            return _effects;
         }
 
         /// <summary>
@@ -411,9 +384,6 @@ namespace Crookedile.Data.Cards
             return _passives;
         }
 
-        /// <summary>Gets the legacy effects for this card.</summary>
-        public List<CardEffect> GetEffects(bool useUpgraded = true) => _effects;
-
         /// <summary>
         /// Gets the description for this card.
         /// Returns the manual override if set, otherwise auto-generates from the card's effects.
@@ -424,36 +394,23 @@ namespace Crookedile.Data.Cards
         /// <summary>
         /// Builds a description string by concatenating <see cref="BattleEffect.GetDescription"/>
         /// from all effects. Uses the new BattleEffect system first, falls back to legacy
-        /// CardEffect descriptions. Returns an empty string if no effects are present.
+        /// effect descriptions. Returns an empty string if no effects are present.
         /// </summary>
         private string BuildAutoDescription()
         {
-            // New BattleEffect system takes priority
-            if (_newEffects != null && _newEffects.Count > 0)
-            {
-                var parts = new System.Collections.Generic.List<string>(_newEffects.Count);
-                foreach (var e in _newEffects)
-                {
-                    if (e == null)
-                        continue;
-                    string d = e.GetDescription();
-                    if (!string.IsNullOrEmpty(d))
-                        parts.Add(d);
-                }
-                if (parts.Count > 0)
-                    return string.Join(". ", parts);
-            }
+            if (_effects == null || _effects.Count == 0)
+                return string.Empty;
 
-            // Legacy CardEffect fallback
-            if (_effects != null && _effects.Count > 0)
+            var parts = new System.Collections.Generic.List<string>(_effects.Count);
+            foreach (var e in _effects)
             {
-                var parts = new System.Collections.Generic.List<string>(_effects.Count);
-                foreach (var e in _effects)
-                    parts.Add(e.GetDescription());
-                return string.Join(". ", parts);
+                if (e == null)
+                    continue;
+                string d = e.GetDescription();
+                if (!string.IsNullOrEmpty(d))
+                    parts.Add(d);
             }
-
-            return string.Empty;
+            return parts.Count > 0 ? string.Join(". ", parts) : string.Empty;
         }
 
         /// <summary>Gets the artwork for this card.</summary>

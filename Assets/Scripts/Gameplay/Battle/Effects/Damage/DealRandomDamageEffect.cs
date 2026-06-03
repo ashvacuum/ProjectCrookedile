@@ -34,6 +34,14 @@ namespace Crookedile.Gameplay.Battle
             ApplyPressure(pressureTarget, ctx.Caster, rolled, ctx);
         }
 
+        public override DamagePreview? GetDamagePreview() =>
+            new DamagePreview
+            {
+                Type = DamagePreviewType.Random,
+                MinAmount = _minDamage,
+                MaxAmount = _maxDamage,
+            };
+
         public override string GetDescription() =>
             $"Apply {_minDamage}–{_maxDamage} pressure to the Opinion Meter";
     }

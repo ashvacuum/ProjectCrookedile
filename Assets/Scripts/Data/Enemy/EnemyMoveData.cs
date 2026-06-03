@@ -40,7 +40,7 @@ namespace Crookedile.Data.Enemy
 
     /// <summary>
     /// One scripted move an enemy can perform on their turn.
-    /// Effects reuse the existing CardEffect system — EffectResolver handles them
+    /// Effects use the polymorphic BattleEffect system — EffectResolver handles them
     /// with isPlayerCard=false (enemy is caster, player is target).
     ///
     /// Create via: Right-click → Crookedile / Enemy / Enemy Move
@@ -74,21 +74,10 @@ namespace Crookedile.Data.Enemy
 
         #region Effects
         [Header("Effects")]
-        [Tooltip(
-            "New polymorphic effect list — use this for all newly authored enemy moves. "
-                + "Avoid CardManipulation effects — enemies have no deck (ctx.Deck will be null)."
-        )]
+        [Tooltip("Polymorphic effect list. Avoid CardManipulation effects — enemies have no deck.")]
         [SerializeReference]
         [SerializeField]
-        private List<BattleEffect> _newEffects = new List<BattleEffect>();
-
-        [Tooltip(
-            "Legacy effect list — kept for backwards compatibility during migration. "
-                + "Run Crookedile / Tools / Migrate Effects to convert. Do not author new effects here."
-        )]
-        [FoldoutGroup("Legacy Effects (Migration)")]
-        [SerializeField]
-        private List<CardEffect> _effects = new List<CardEffect>();
+        private List<BattleEffect> _effects = new List<BattleEffect>();
 
         #endregion
 
@@ -136,14 +125,8 @@ namespace Crookedile.Data.Enemy
         public EnemyMoveType MoveType => _moveType;
         public string IntentDescription => _intentDescription;
 
-        /// <summary>
-        /// Polymorphic effect list for this enemy move.
-        /// Returns <c>_newEffects</c> when populated; falls back to an empty list during migration.
-        /// </summary>
-        public List<BattleEffect> NewEffects => _newEffects;
-
-        /// <summary>Legacy effect list — read by the migration tool and old resolver path.</summary>
-        public IReadOnlyList<CardEffect> Effects => _effects;
+        /// <summary>Polymorphic effect list for this enemy move.</summary>
+        public List<BattleEffect> Effects => _effects;
 
         /// <summary>
         /// Auto-generated hover tooltip text — one line per effect.
@@ -153,19 +136,12 @@ namespace Crookedile.Data.Enemy
         {
             get
             {
-                if (_newEffects != null && _newEffects.Count > 0)
-                {
-                    var lines = new string[_newEffects.Count];
-                    for (int i = 0; i < _newEffects.Count; i++)
-                        lines[i] = _newEffects[i]?.GetDescription() ?? string.Empty;
-                    return string.Join("\n", lines);
-                }
                 if (_effects == null || _effects.Count == 0)
                     return string.Empty;
-                var legacyLines = new string[_effects.Count];
+                var lines = new string[_effects.Count];
                 for (int i = 0; i < _effects.Count; i++)
-                    legacyLines[i] = _effects[i].GetDescription();
-                return string.Join("\n", legacyLines);
+                    lines[i] = _effects[i]?.GetDescription() ?? string.Empty;
+                return string.Join("\n", lines);
             }
         }
         public VFXEvent MoveVFX => _moveVFX;

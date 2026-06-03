@@ -12,7 +12,7 @@ namespace Crookedile.Gameplay.Battle
     /// targets, read battle state, and accumulate results for triggered effects.
     ///
     /// Created once per card/move by <see cref="EffectResolver.CreateContext"/>.
-    /// Replaces the old split between the resolver's injected fields and <see cref="EffectContext"/>.
+    /// Carries all dependencies and accumulated state for effect resolution.
     /// </summary>
     public class EffectExecutionContext
     {
@@ -41,8 +41,10 @@ namespace Crookedile.Gameplay.Battle
 
         #region Services / dependencies
         /// <summary>
-        /// The player's deck. <b>Null for enemy moves</b> — card manipulation effects
-        /// must guard against null and return early.
+        /// The player's deck — the only deck in the game, so this is the target of all card
+        /// manipulation regardless of caster. Enemy moves use it too (e.g. shuffling a curse into
+        /// the player's deck, forcing a discard). Only null in test harnesses with no deck;
+        /// effects still guard against null and return early.
         /// </summary>
         public DeckManager Deck { get; }
 
@@ -260,9 +262,9 @@ namespace Crookedile.Gameplay.Battle
             {
                 EffectContextValue.LastDamageDealt => LastDamageDealt,
                 EffectContextValue.LastHealAmount => LastHealAmount,
-                EffectContextValue.LastShieldGained => LastSupportGained,
-                EffectContextValue.LastShieldLost => LastSupportLost,
-                EffectContextValue.CurrentShield => BattleManager?.CurrentSupport ?? 0,
+                EffectContextValue.LastSupportGained => LastSupportGained,
+                EffectContextValue.LastSupportLost => LastSupportLost,
+                EffectContextValue.CurrentSupport => BattleManager?.CurrentSupport ?? 0,
                 EffectContextValue.CurrentHostility => Target?.CurrentHostility ?? 0,
                 EffectContextValue.HostileEnemyCount => CountLivingEnemies(e => e.Stats.IsHostile),
                 EffectContextValue.ReceptiveEnemyCount => CountLivingEnemies(e =>

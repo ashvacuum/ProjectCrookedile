@@ -42,6 +42,11 @@ namespace Crookedile.Gameplay.Battle
             ApplyPressure(pressureTarget, ctx.Caster, baseDamage, ctx);
         }
 
+        public override DamagePreview? GetDamagePreview() =>
+            _amountSource == EffectContextValue.FixedAmount
+                ? new DamagePreview { Type = DamagePreviewType.Fixed, Amount = _amount }
+                : null;
+
         public override string GetDescription()
         {
             string amountStr =
