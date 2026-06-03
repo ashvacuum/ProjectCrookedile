@@ -68,15 +68,10 @@ namespace Crookedile.Gameplay.Battle
         private int _playerTurnNumber = 0; // counts only the player's turns (for Actor Improvise)
         private bool _isPlayerTurn = true;
 
-        // Opinion Meter — shared battle resource driven by damage events
-        private int _currentOpinion;
-        private int _maxOpinion = 100;
+        // Opinion Meter + session shields — single owner of the shared battle resources.
+        private OpinionLedger _opinion;
         private int _maxTurns; // 0 = no limit
         private int _playerTurnsElapsed;
-
-        // Session shields — decay at turn start before Ritual refills them
-        private int _currentSupport; // absorbs opinion drops (enemy attacks)
-        private int _currentDenial; // absorbs opinion rises (player cards)
 
         // Battle result
         private BattleResult _battleResult;
@@ -108,17 +103,16 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Maps hand index to randomized effect amounts while the player has Confused. Empty when not confused.</summary>
         public IReadOnlyDictionary<int, int[]> ConfusedOverrides => _confusedOverrides;
 
-        // Opinion Meter
-        public int CurrentOpinion => _currentOpinion;
-        public int MaxOpinion => _maxOpinion;
+        // Opinion Meter + session shields — owned by OpinionLedger; these expose it read-only.
+        /// <summary>The shared opinion/Support/Denial ledger. Effects call this directly for opinion pressure.</summary>
+        public OpinionLedger Opinion => _opinion;
+        public int CurrentOpinion => _opinion?.CurrentOpinion ?? 0;
+        public int MaxOpinion => _opinion?.MaxOpinion ?? 0;
         public int MaxTurns => _maxTurns;
         public int PlayerTurnsElapsed => _playerTurnsElapsed;
-        public float OpinionPercentage =>
-            _maxOpinion > 0 ? (float)_currentOpinion / _maxOpinion : 0f;
-
-        // Session shields
-        public int CurrentSupport => _currentSupport;
-        public int CurrentDenial => _currentDenial;
+        public float OpinionPercentage => _opinion?.OpinionPercentage ?? 0f;
+        public int CurrentSupport => _opinion?.CurrentSupport ?? 0;
+        public int CurrentDenial => _opinion?.CurrentDenial ?? 0;
 
         #endregion
 
@@ -140,8 +134,6 @@ namespace Crookedile.Gameplay.Battle
         {
             EventBus.Subscribe<EndTurnRequestedEvent>(OnEndTurnRequested);
             EventBus.Subscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
-            EventBus.Subscribe<DamageDealtEvent>(OnDamageDealtForOpinion);
-            EventBus.Subscribe<OpinionRaisedDirectlyEvent>(OnOpinionRaisedDirectly);
             EventBus.Subscribe<CardVFXApplyEffectsEvent>(OnCardVFXApplyEffects);
             EventBus.Subscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
         }
@@ -150,8 +142,6 @@ namespace Crookedile.Gameplay.Battle
         {
             EventBus.Unsubscribe<EndTurnRequestedEvent>(OnEndTurnRequested);
             EventBus.Unsubscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
-            EventBus.Unsubscribe<DamageDealtEvent>(OnDamageDealtForOpinion);
-            EventBus.Unsubscribe<OpinionRaisedDirectlyEvent>(OnOpinionRaisedDirectly);
             EventBus.Unsubscribe<CardVFXApplyEffectsEvent>(OnCardVFXApplyEffects);
             EventBus.Unsubscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
         }
@@ -192,6 +182,9 @@ namespace Crookedile.Gameplay.Battle
                 if (enemyData != null)
                     _enemies.Add(new EnemyController(enemyData));
             }
+            // Register each enemy's roster index so its BattleStats can stamp hostility events.
+            for (int i = 0; i < _enemies.Count; i++)
+                _enemies[i].Stats.SetOwnerEnemyIndex(i);
             _focusedEnemyIndex = 0;
 
             if (_enemies.Count == 0)
@@ -242,10 +235,14 @@ namespace Crookedile.Gameplay.Battle
             // the first move.
             _isPlayerTurn = false;
 
-            // Opinion Meter
-            _maxOpinion = setup.maxOpinion ?? 100;
+            // Opinion Meter + session shields
+            int maxOpinion = setup.maxOpinion ?? 100;
             _maxTurns = setup.maxTurns ?? 0;
-            _currentOpinion = setup.startingOpinion ?? _maxOpinion / 2;
+            _opinion = new OpinionLedger(
+                maxOpinion,
+                setup.startingOpinion ?? maxOpinion / 2,
+                onOpinionMaxed: () => CheckAndEndBattleIfOver()
+            );
 
             EventBus.Publish(new BattleStartedEvent { Setup = setup });
             TransitionToState(BattleState.Initialize);
@@ -318,6 +315,7 @@ namespace Crookedile.Gameplay.Battle
                 var controller = new EnemyController(data);
                 int newIndex = _enemies.Count;
                 _enemies.Add(controller);
+                controller.Stats.SetOwnerEnemyIndex(newIndex);
 
                 EventBus.Publish(
                     new EnemySummonedEvent { EnemyData = data, EnemyIndex = newIndex }
@@ -372,34 +370,6 @@ namespace Crookedile.Gameplay.Battle
             PlayCard(evt.Card, evt.HandIndex);
         }
 
-        /// <summary>
-        /// Routes DamageDealtEvent through the appropriate session shield then to the opinion meter.
-        /// Enemy attacks go through Support before lowering opinion.
-        /// Player cards go through Denial before raising opinion.
-        /// </summary>
-        private void OnDamageDealtForOpinion(DamageDealtEvent evt)
-        {
-            if (evt.IsToPlayer)
-            {
-                int remainder = AbsorbThroughSupport(evt.Amount);
-                LowerOpinion(remainder);
-            }
-            else
-            {
-                int remainder = AbsorbThroughDenial(evt.Amount);
-                RaiseOpinion(remainder);
-            }
-        }
-
-        /// <summary>
-        /// Raises the Opinion Meter directly, bypassing the pressure pipeline.
-        /// Used by <c>HealResolveEffect</c> and <c>RestoreResolveEffect</c>.
-        /// </summary>
-        private void OnOpinionRaisedDirectly(OpinionRaisedDirectlyEvent evt)
-        {
-            RaiseOpinion(evt.Amount);
-        }
-
         private void OnCardVFXApplyEffects(CardVFXApplyEffectsEvent evt)
         {
             GameLogger.LogInfo<BattleManager>($"VFX ApplyEffects fired for '{evt.Card?.CardName}'");
@@ -419,130 +389,19 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
-        #region Opinion Meter
+        #region Opinion Meter / Session Shields (delegates to OpinionLedger)
 
-        /// <summary>
-        /// Raises the Opinion Meter by <paramref name="amount"/>, clamped to MaxOpinion.
-        /// Published by player damage to enemies.
-        /// </summary>
-        public void RaiseOpinion(int amount)
-        {
-            if (amount <= 0)
-                return;
-            int old = _currentOpinion;
-            _currentOpinion = Mathf.Min(_currentOpinion + amount, _maxOpinion);
-            if (_currentOpinion == old)
-                return;
-            EventBus.Publish(
-                new OpinionChangedEvent
-                {
-                    OldValue = old,
-                    NewValue = _currentOpinion,
-                    MaxValue = _maxOpinion,
-                    WasRaisedByPlayer = true,
-                }
-            );
-            // Instant win when opinion is fully won over.
-            if (_currentOpinion >= _maxOpinion)
-                CheckAndEndBattleIfOver();
-        }
+        /// <summary>Raises the Opinion Meter directly (bypassing Denial). Used by heal/rally effects.</summary>
+        public void RaiseOpinion(int amount) => _opinion?.RaiseDirect(amount);
 
-        /// <summary>
-        /// Lowers the Opinion Meter by <paramref name="amount"/>, clamped to 0.
-        /// Published by enemy damage to player.
-        /// </summary>
-        public void LowerOpinion(int amount)
-        {
-            if (amount <= 0)
-                return;
-            int old = _currentOpinion;
-            _currentOpinion = Mathf.Max(_currentOpinion - amount, 0);
-            if (_currentOpinion == old)
-                return;
-            EventBus.Publish(
-                new OpinionChangedEvent
-                {
-                    OldValue = old,
-                    NewValue = _currentOpinion,
-                    MaxValue = _maxOpinion,
-                    WasRaisedByPlayer = false,
-                }
-            );
-        }
+        /// <summary>Grants session Support (absorbs future opinion drops).</summary>
+        public void GainSupport(int amount) => _opinion?.GainSupport(amount);
 
-        #endregion
+        /// <summary>Grants session Denial (absorbs future opinion rises).</summary>
+        public void GainDenial(int amount) => _opinion?.GainDenial(amount);
 
-        #region Session Shields (Support / Denial)
-
-        public void GainSupport(int amount)
-        {
-            if (amount <= 0)
-                return;
-            int old = _currentSupport;
-            _currentSupport += amount;
-            EventBus.Publish(
-                new SupportChangedEvent { OldValue = old, NewValue = _currentSupport }
-            );
-        }
-
-        public void GainDenial(int amount)
-        {
-            if (amount <= 0)
-                return;
-            int old = _currentDenial;
-            _currentDenial += amount;
-            EventBus.Publish(new DenialChangedEvent { OldValue = old, NewValue = _currentDenial });
-        }
-
-        /// <summary>
-        /// Absorbs incoming enemy pressure through the Support buffer.
-        /// Returns the remainder that reaches the opinion meter.
-        /// </summary>
-        public int AbsorbThroughSupport(int pressure)
-        {
-            if (pressure <= 0 || _currentSupport <= 0)
-                return pressure;
-            int absorbed = Mathf.Min(pressure, _currentSupport);
-            int old = _currentSupport;
-            _currentSupport -= absorbed;
-            EventBus.Publish(
-                new SupportChangedEvent { OldValue = old, NewValue = _currentSupport }
-            );
-            return pressure - absorbed;
-        }
-
-        /// <summary>
-        /// Absorbs incoming player card pressure through the Denial buffer.
-        /// Returns the remainder that reaches the opinion meter.
-        /// </summary>
-        public int AbsorbThroughDenial(int pressure)
-        {
-            if (pressure <= 0 || _currentDenial <= 0)
-                return pressure;
-            int absorbed = Mathf.Min(pressure, _currentDenial);
-            int old = _currentDenial;
-            _currentDenial -= absorbed;
-            EventBus.Publish(new DenialChangedEvent { OldValue = old, NewValue = _currentDenial });
-            return pressure - absorbed;
-        }
-
-        private void ConsumeAllSupport()
-        {
-            if (_currentSupport <= 0)
-                return;
-            int old = _currentSupport;
-            _currentSupport = 0;
-            EventBus.Publish(new SupportChangedEvent { OldValue = old, NewValue = 0 });
-        }
-
-        private void ConsumeAllDenial()
-        {
-            if (_currentDenial <= 0)
-                return;
-            int old = _currentDenial;
-            _currentDenial = 0;
-            EventBus.Publish(new DenialChangedEvent { OldValue = old, NewValue = 0 });
-        }
+        /// <summary>Drains session Support (used by "lose Support" effects). Returns amount removed.</summary>
+        public int SpendSupport(int amount) => _opinion?.SpendSupport(amount) ?? 0;
 
         #endregion
 
@@ -604,7 +463,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         private void ApplyCardEffects(CardData card, int[] amountOverrides)
         {
-            var ctx = ResolveCardEffectsDispatch(card, amountOverrides);
+            var ctx = _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides);
 
             // If any effect flagged exhaust, move the card from discard → exhaust pile now
             // (PlayCardAtIndex already moved it hand → discard before effects resolved).
@@ -639,42 +498,10 @@ namespace Crookedile.Gameplay.Battle
                     }
                 );
                 GameLogger.LogInfo<BattleManager>($"Echo triggered — replaying {card.CardName}");
-                ResolveCardEffectsDispatch(card, null);
+                _effectResolver.ResolveCardEffects(card, isPlayerCard: true);
                 CheckAndAdvanceFocusAfterCardPlay();
                 CheckAndEndBattleIfOver();
             }
-        }
-
-        /// <summary>
-        /// Routes card effect resolution to the new polymorphic path when the card has
-        /// <see cref="CardData.NewEffects"/>, otherwise falls back to the legacy path.
-        /// Returns a unified <see cref="EffectContext"/> so callers stay path-agnostic.
-        /// </summary>
-        private EffectContext ResolveCardEffectsDispatch(CardData card, int[] amountOverrides)
-        {
-            if (card.NewEffects != null && card.NewEffects.Count > 0)
-            {
-                var execCtx = _effectResolver.ResolveCardEffectsNew(
-                    card,
-                    isPlayerCard: true,
-                    amountOverrides
-                );
-                return new EffectContext
-                {
-                    Caster = execCtx.Caster,
-                    Target = execCtx.Target,
-                    LastDamageDealt = execCtx.LastDamageDealt,
-                    LastHealAmount = execCtx.LastHealAmount,
-                    LastShieldGained = execCtx.LastSupportGained,
-                    LastTargetDied = execCtx.LastTargetDied,
-                    ShouldExhaust = execCtx.ShouldExhaust,
-                };
-            }
-            return _effectResolver.ResolveCardEffects(
-                card,
-                isPlayerCard: true,
-                amountOverrides: amountOverrides
-            );
         }
 
         private bool CanPlayCard(CardData card, BattleStats stats)
@@ -725,9 +552,8 @@ namespace Crookedile.Gameplay.Battle
             if (card.CardType != CardType.Policy)
                 return;
 
-            for (int i = 0; i < _enemies.Count; i++)
+            foreach (var enemy in _enemies)
             {
-                var enemy = _enemies[i];
                 if (enemy.IsDefeated)
                     continue;
 
@@ -738,21 +564,11 @@ namespace Crookedile.Gameplay.Battle
                 if (shift == 0)
                     continue;
 
-                int old = enemy.Stats.CurrentHostility;
+                // BattleStats publishes the indexed HostilityChangedEvent itself.
                 if (shift > 0)
                     enemy.Stats.GainHostility(shift);
                 else
                     enemy.Stats.ReduceHostility(-shift);
-
-                if (enemy.Stats.CurrentHostility != old)
-                    EventBus.Publish(
-                        new EnemyHostilityChangedEvent
-                        {
-                            OldValue = old,
-                            NewValue = enemy.Stats.CurrentHostility,
-                            EnemyIndex = i,
-                        }
-                    );
             }
         }
 
@@ -766,21 +582,7 @@ namespace Crookedile.Gameplay.Battle
         {
             bool isSingleTarget = false;
 
-            // Check new polymorphic effects
-            if (card.NewEffects != null)
-            {
-                foreach (var effect in card.NewEffects)
-                {
-                    if (effect.Target == TargetType.Opponent)
-                    {
-                        isSingleTarget = true;
-                        break;
-                    }
-                }
-            }
-
-            // Fall back to legacy effects if new effects didn't match
-            if (!isSingleTarget && card.Effects != null)
+            if (card.Effects != null)
             {
                 foreach (var effect in card.Effects)
                 {
@@ -797,25 +599,16 @@ namespace Crookedile.Gameplay.Battle
             if (FocusedEnemy == null || FocusedEnemy.IsDefeated)
                 return;
 
+            // BattleStats publishes the indexed HostilityChangedEvent itself.
             int old = FocusedEnemy.Stats.CurrentHostility;
             FocusedEnemy.Stats.GainHostility(1);
             FocusedEnemy.CheckBecameHostile();
 
             if (FocusedEnemy.Stats.CurrentHostility != old)
-            {
-                EventBus.Publish(
-                    new EnemyHostilityChangedEvent
-                    {
-                        OldValue = old,
-                        NewValue = FocusedEnemy.Stats.CurrentHostility,
-                        EnemyIndex = _focusedEnemyIndex,
-                    }
-                );
                 GameLogger.LogInfo<BattleManager>(
                     $"Single-target card '{card.CardName}' raised hostility on [{_focusedEnemyIndex}] "
                         + $"{FocusedEnemy.EnemyData.EnemyName}: {old} → {FocusedEnemy.Stats.CurrentHostility}"
                 );
-            }
         }
 
         private static int GetPolicyHostilityShift(PolicyLean lean, DemographicValues values)
@@ -941,24 +734,17 @@ namespace Crookedile.Gameplay.Battle
                 return;
 
             var target = living[UnityEngine.Random.Range(0, living.Count)];
-            // Momentum presses the opinion meter (through session Denial).
-            int momentumActual = AbsorbThroughDenial(stacks);
+            // Momentum presses the opinion meter through the ledger (absorbs once, then raises opinion).
             GameLogger.LogInfo<BattleManager>(
-                $"Momentum raised opinion by {momentumActual} vs {target.EnemyData.EnemyName}"
+                $"Momentum pressing opinion by {stacks} vs {target.EnemyData.EnemyName}"
             );
-            if (momentumActual > 0)
-            {
-                EventBus.Publish(
-                    new DamageDealtEvent
-                    {
-                        Amount = momentumActual,
-                        IsToPlayer = false,
-                        AttackerName = "Player",
-                        SourceEnemyIndex = -1,
-                        TargetEnemyIndex = _enemies.IndexOf(target),
-                    }
-                );
-            }
+            _opinion.ApplyPressure(
+                stacks,
+                toPlayer: false,
+                attackerName: "Player",
+                sourceEnemyIndex: -1,
+                targetEnemyIndex: _enemies.IndexOf(target)
+            );
         }
 
         /// <summary>
@@ -989,8 +775,8 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Checks if the battle has ended and caches the result.</summary>
         public bool CheckVictoryConditions()
         {
-            bool opinionCollapsed = _currentOpinion <= 0;
-            bool opinionMaxed = _currentOpinion >= _maxOpinion;
+            bool opinionCollapsed = _opinion.CurrentOpinion <= 0;
+            bool opinionMaxed = _opinion.CurrentOpinion >= _opinion.MaxOpinion;
 
             if (!opinionCollapsed && !opinionMaxed)
                 return false;
@@ -999,16 +785,16 @@ namespace Crookedile.Gameplay.Battle
             {
                 isVictory = opinionMaxed,
                 turnsToWin = _currentTurn,
-                finalPlayerSupport = _currentSupport,
+                finalPlayerSupport = _opinion.CurrentSupport,
                 finalPlayerHostility = _playerStats.CurrentHostility,
-                finalOpinion = _currentOpinion,
+                finalOpinion = _opinion.CurrentOpinion,
                 wasJudgmentVictory = false,
             };
 
             GameLogger.LogInfo(
                 "BattleManager",
                 $"Battle ended: {(_battleResult.isVictory ? "Victory" : "Defeat")} "
-                    + $"(opinion={_currentOpinion}) in {_currentTurn} turns"
+                    + $"(opinion={_opinion.CurrentOpinion}) in {_currentTurn} turns"
             );
             return true;
         }
@@ -1047,8 +833,7 @@ namespace Crookedile.Gameplay.Battle
         public void StartTurn()
         {
             // Session shields decay at the start of every turn, then Ritual refills them.
-            ConsumeAllSupport();
-            ConsumeAllDenial();
+            _opinion.DecayShields();
 
             if (_isPlayerTurn)
             {
@@ -1096,6 +881,8 @@ namespace Crookedile.Gameplay.Battle
             if (_isPlayerTurn)
             {
                 _playerStats.EndTurn();
+                // Apply opinion-affecting statuses (read at current stacks) before OnTurnEnd decrements.
+                ApplyTurnEndOpinionStatuses(_effectResolver.PlayerStatusEffects);
                 _effectResolver.PlayerStatusEffects.OnTurnEnd(_playerStats);
                 _playerDeck.EndTurn();
             }
@@ -1106,9 +893,33 @@ namespace Crookedile.Gameplay.Battle
                     if (enemy.IsDefeated)
                         continue;
                     enemy.Stats.EndTurn();
+                    ApplyTurnEndOpinionStatuses(enemy.StatusEffects);
                     enemy.StatusEffects.OnTurnEnd(enemy.Stats);
                 }
             }
+        }
+
+        /// <summary>
+        /// Applies turn-end statuses that move the Opinion Meter, routed through the ledger directly
+        /// (no EventBus round-trip). Mirrors the Ritual pattern in <see cref="StartTurn"/>:
+        /// BattleManager owns opinion, so it reads the stacks and applies the change itself.
+        /// Called before the manager's OnTurnEnd decrements the stacks.
+        /// </summary>
+        private void ApplyTurnEndOpinionStatuses(StatusEffectManager mgr)
+        {
+            int scandal = mgr.GetStacks(StatusEffectType.Scandal);
+            if (scandal > 0)
+                _opinion.ApplyPressure(
+                    scandal,
+                    toPlayer: true,
+                    attackerName: "Scandal",
+                    sourceEnemyIndex: -1,
+                    targetEnemyIndex: -1
+                );
+
+            int regen = mgr.GetStacks(StatusEffectType.Regeneration);
+            if (regen > 0)
+                _opinion.RaiseDirect(regen);
         }
 
         #endregion
@@ -1339,9 +1150,7 @@ namespace Crookedile.Gameplay.Battle
                     );
                     var move = enemy.CurrentIntent;
                     yield return _manager.StartCoroutine(
-                        (move?.NewEffects != null && move.NewEffects.Count > 0)
-                            ? _manager._effectResolver.ResolveEnemyMoveEffectsNew(move)
-                            : _manager._effectResolver.ResolveEnemyMoveEffects(move)
+                        _manager._effectResolver.ResolveEnemyMoveEffects(move)
                     );
 
                     // If the player was killed by this move, end the battle immediately
@@ -1423,30 +1232,31 @@ namespace Crookedile.Gameplay.Battle
                     )
                     {
                         // Judgment — outcome decided by majority opinion
-                        bool isVictory = _manager._currentOpinion >= _manager._maxOpinion / 2;
-                        int threshold = _manager._maxOpinion / 2;
+                        var ledger = _manager._opinion;
+                        int threshold = ledger.MaxOpinion / 2;
+                        bool isVictory = ledger.CurrentOpinion >= threshold;
 
                         _manager._battleResult = new BattleResult
                         {
                             isVictory = isVictory,
                             turnsToWin = _manager._currentTurn,
-                            finalPlayerSupport = _manager._currentSupport,
+                            finalPlayerSupport = ledger.CurrentSupport,
                             finalPlayerHostility = _manager._playerStats.CurrentHostility,
-                            finalOpinion = _manager._currentOpinion,
+                            finalOpinion = ledger.CurrentOpinion,
                             wasJudgmentVictory = isVictory,
                         };
 
                         EventBus.Publish(
                             new JudgmentEvent
                             {
-                                FinalOpinion = _manager._currentOpinion,
+                                FinalOpinion = ledger.CurrentOpinion,
                                 Threshold = threshold,
                                 IsVictory = isVictory,
                             }
                         );
 
                         GameLogger.LogInfo<BattleManager>(
-                            $"Judgment! Opinion {_manager._currentOpinion}/{_manager._maxOpinion} — {(isVictory ? "VICTORY" : "DEFEAT")}"
+                            $"Judgment! Opinion {ledger.CurrentOpinion}/{ledger.MaxOpinion} — {(isVictory ? "VICTORY" : "DEFEAT")}"
                         );
 
                         _manager.TransitionToState(BattleState.BattleEnd);

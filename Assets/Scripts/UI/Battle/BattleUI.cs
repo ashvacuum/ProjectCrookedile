@@ -215,7 +215,7 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<CardPlayedEvent>(OnCardPlayed);
             EventBus.Subscribe<BattleEndedEvent>(OnBattleEnded);
             EventBus.Subscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
-            EventBus.Subscribe<EnemyHostilityChangedEvent>(OnEnemyHostilityChanged);
+            EventBus.Subscribe<HostilityChangedEvent>(OnHostilityChanged);
             EventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             EventBus.Subscribe<EnemySummonedEvent>(OnEnemySummoned);
             EventBus.Subscribe<CardChoiceRequestedEvent>(OnCardChoiceRequested);
@@ -243,7 +243,7 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<CardPlayedEvent>(OnCardPlayed);
             EventBus.Unsubscribe<BattleEndedEvent>(OnBattleEnded);
             EventBus.Unsubscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
-            EventBus.Unsubscribe<EnemyHostilityChangedEvent>(OnEnemyHostilityChanged);
+            EventBus.Unsubscribe<HostilityChangedEvent>(OnHostilityChanged);
             EventBus.Unsubscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             EventBus.Unsubscribe<EnemySummonedEvent>(OnEnemySummoned);
             EventBus.Unsubscribe<CardChoiceRequestedEvent>(OnCardChoiceRequested);
@@ -551,13 +551,13 @@ namespace Crookedile.UI.Battle
                 _enemySlots[evt.EnemyIndex]?.UpdateIntent(evt.Move);
         }
 
-        private void OnEnemyHostilityChanged(EnemyHostilityChangedEvent evt)
+        private void OnHostilityChanged(HostilityChangedEvent evt)
         {
-            if (evt.EnemyIndex < _enemySlots.Count)
-            {
-                _enemySlots[evt.EnemyIndex]?.Refresh();
-                _enemySlots[evt.EnemyIndex]?.PulseHostility();
-            }
+            // Player hostility (index -1) has no slot; only refresh real enemy slots.
+            if (evt.EnemyIndex < 0 || evt.EnemyIndex >= _enemySlots.Count)
+                return;
+            _enemySlots[evt.EnemyIndex]?.Refresh();
+            _enemySlots[evt.EnemyIndex]?.PulseHostility();
         }
 
         private void OnEnemyDefeated(EnemyDefeatedEvent evt)

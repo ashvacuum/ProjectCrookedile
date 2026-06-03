@@ -300,8 +300,8 @@ namespace Crookedile.Gameplay.Battle
         /// Populates the accumulated result fields on <paramref name="execCtx"/> from the
         /// data carried by the triggering event. This allows passive <see cref="BattleEffect"/>
         /// entries to use <see cref="EffectContextValue"/> sources such as
-        /// <c>LastDamageDealt</c>, <c>LastHealAmount</c>, <c>LastShieldGained</c>, and
-        /// <c>LastShieldLost</c> — mirroring the values card effects accumulate during
+        /// <c>LastDamageDealt</c>, <c>LastHealAmount</c>, <c>LastSupportGained</c>, and
+        /// <c>LastSupportLost</c> — mirroring the values card effects accumulate during
         /// in-resolution execution.
         /// </summary>
         private static void EnrichContextFromEvent(

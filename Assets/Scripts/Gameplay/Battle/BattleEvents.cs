@@ -44,9 +44,6 @@ using Crookedile.Data.Enemy;
 #endregion
 
 #region Effects
-//   EffectAppliedEvent       Publisher: EffectResolver (per card effect)
-//                            Subscribers: BattleUI (future), analytics
-//
 //   DamageDealtEvent         Publisher: EffectResolver
 //                            Subscribers: BattleUI combat log
 //
@@ -62,9 +59,9 @@ using Crookedile.Data.Enemy;
 //   ActionPointsChangedEvent Publisher: BattleStats (GainActionPoints / PayCost)
 //                            Subscribers: BattleUI AP display
 //
-//   SupportChangedEvent      Publisher: BattleManager (GainSupport / AbsorbThroughSupport)
+//   SupportChangedEvent      Publisher: OpinionLedger (gain / absorb / decay)
 //                            Subscribers: BattleUI Support display
-//   DenialChangedEvent       Publisher: BattleManager (GainDenial / AbsorbThroughDenial)
+//   DenialChangedEvent       Publisher: OpinionLedger (gain / absorb / decay)
 //                            Subscribers: BattleUI Denial display
 //
 //   HostilityChangedEvent      Publisher: BattleStats (any hostility change)
@@ -84,7 +81,7 @@ using Crookedile.Data.Enemy;
 #endregion
 
 #region Opinion Meter
-//   OpinionChangedEvent        Publisher: BattleManager (RaiseOpinion / LowerOpinion)
+//   OpinionChangedEvent        Publisher: OpinionLedger (Raise / Lower)
 //                              Subscribers: BattleUI (OpinionMeterUI)
 //
 //   JudgmentEvent              Publisher: BattleManager (TurnEndState — turn limit reached)
@@ -102,8 +99,7 @@ using Crookedile.Data.Enemy;
 //   EnemyIntentDeclaredEvent   Publisher: EnemyController (at start of player turn)
 //                              Subscribers: BattleUI (EnemySlotUI)
 //
-//   EnemyHostilityChangedEvent Publisher: BattleManager.PlayCard (policy hostility shift)
-//                              Subscribers: BattleUI (EnemySlotUI)
+//   (Hostility changes flow through HostilityChangedEvent — see Resources section above.)
 //
 //   EnemyDefeatedEvent         Publisher: BattleManager
 //                              Subscribers: BattleUI, BattleManager (focus auto-advance)
@@ -113,7 +109,6 @@ using Crookedile.Data.Enemy;
 //
 #endregion
 
-#region Player Input
 //   EndTurnRequestedEvent    Publisher: BattleUI end-turn button
 //                            Subscribers: BattleManager
 //
@@ -304,27 +299,14 @@ namespace Crookedile.Gameplay.Battle
 
     #region Effect Events
 
-    /// <summary>
-    /// Published by <c>EffectResolver</c> once per <see cref="CardEffect"/> after it resolves.
-    /// Fires regardless of target or effect type — useful for analytics, achievement tracking,
-    /// and implementing triggered card effects that react to specific effect types.
-    /// </summary>
-    public struct EffectAppliedEvent : IGameEvent
-    {
-        /// <summary>The individual card effect that was applied (type, amount, target, etc.).</summary>
-        public CardEffect Effect;
-
-        /// <summary>True = the effect was applied by/for the player; false = by/for an enemy.</summary>
-        public bool IsPlayer;
-    }
 
     /// <summary>
-    /// Published by <c>BattleEffect.ApplyPressure</c> whenever opinion-meter pressure is applied (after all modifiers).
-    /// Only fires when <c>Amount &gt; 0</c>.
+    /// Published by <c>OpinionLedger.ApplyPressure</c> whenever opinion-meter pressure is applied
+    /// (after all modifiers, as a notification before the meter mutates). Only fires when <c>Amount &gt; 0</c>.
     /// </summary>
     public struct DamageDealtEvent : IGameEvent
     {
-        /// <summary>Actual opinion pressure applied after shield absorption and hostility multiplier.</summary>
+        /// <summary>Opinion pressure applied after modifiers/hostility, before session-shield absorption.</summary>
         public int Amount;
 
         /// <summary>True = player is the damage target; false = an enemy is the target.</summary>
@@ -426,22 +408,47 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>True = the player's hostility changed; false = an enemy's hostility changed.
         /// Note: in current design the player's hostility stays 0 — this flag is reserved for symmetry.</summary>
         public bool IsPlayer;
+
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> whose hostility changed, or -1 for the player.
+        /// This is the single authoritative hostility event — every hostility change (cards, enemy moves,
+        /// policy shifts, mood effects) flows through it, so the UI can refresh the correct enemy slot.</summary>
+        public int EnemyIndex;
     }
 
     /// <summary>Published when an enemy's hostility crosses from below-max to max. Does not re-fire if already at max.</summary>
-    public struct EnemyMaxedHostilityEvent : IGameEvent { }
+    public struct EnemyMaxedHostilityEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that maxed out.</summary>
+        public int EnemyIndex;
+    }
 
     /// <summary>Published when an enemy's hostility crosses from above-min to min. Does not re-fire if already at min.</summary>
-    public struct EnemyMaxedReceptiveEvent : IGameEvent { }
+    public struct EnemyMaxedReceptiveEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that bottomed out.</summary>
+        public int EnemyIndex;
+    }
 
     /// <summary>Published when an enemy's hostility crosses from ≤0 to >0 (first step into hostile territory).</summary>
-    public struct EnemyBecameHostileEvent : IGameEvent { }
+    public struct EnemyBecameHostileEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that became hostile.</summary>
+        public int EnemyIndex;
+    }
 
     /// <summary>Published when an enemy's hostility crosses from ≥0 to &lt;0 (first step into receptive territory).</summary>
-    public struct EnemyBecameReceptiveEvent : IGameEvent { }
+    public struct EnemyBecameReceptiveEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that became receptive.</summary>
+        public int EnemyIndex;
+    }
 
     /// <summary>Published when an enemy's hostility returns to exactly 0 from any non-zero value.</summary>
-    public struct EnemyNeutralizedEvent : IGameEvent { }
+    public struct EnemyNeutralizedEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that was neutralized.</summary>
+        public int EnemyIndex;
+    }
 
     #endregion
 
@@ -499,17 +506,6 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by effects that directly raise the Opinion Meter without going through the pressure pipeline
-    /// (e.g. rallying speeches, crowd appeals). <c>BattleManager</c> subscribes and calls
-    /// <c>RaiseOpinion</c> on receipt.
-    /// </summary>
-    public struct OpinionRaisedDirectlyEvent : IGameEvent
-    {
-        /// <summary>Amount to raise the Opinion Meter by.</summary>
-        public int Amount;
-    }
-
-    /// <summary>
     /// Published by <c>BattleManager.OpponentTurnState</c> when a receptive enemy
     /// rolls to skip their action this turn.
     /// </summary>
@@ -537,22 +533,6 @@ namespace Crookedile.Gameplay.Battle
         public EnemyMoveData Move;
 
         /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that declared this intent.</summary>
-        public int EnemyIndex;
-    }
-
-    /// <summary>
-    /// Published by <c>BattleManager.PlayCard()</c> when a card's policy lean shifts an enemy's Hostility.
-    /// Negative = moved toward receptive; positive = moved toward hostile.
-    /// </summary>
-    public struct EnemyHostilityChangedEvent : IGameEvent
-    {
-        /// <summary>Hostility value before the card was played.</summary>
-        public int OldValue;
-
-        /// <summary>Hostility value after applying the card's policy-lean shift.</summary>
-        public int NewValue;
-
-        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> whose hostility shifted.</summary>
         public int EnemyIndex;
     }
 
@@ -699,4 +679,3 @@ namespace Crookedile.Gameplay.Battle
 
     #endregion
 }
-#endregion

@@ -42,7 +42,7 @@ namespace Crookedile.Gameplay.Battle
             if (amount <= 0)
                 return;
 
-            EventBus.Publish(new OpinionRaisedDirectlyEvent { Amount = amount });
+            ctx.BattleManager?.RaiseOpinion(amount);
             GameLogger.LogInfo<RestoreResolveEffect>($"Raised Opinion by {amount}");
             ctx.LastHealAmount += amount;
         }

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Crookedile.Core;
 using Crookedile.Utilities;
 using UnityEngine;
 
@@ -24,6 +23,9 @@ namespace Crookedile.Gameplay.Battle
         private BattleStats _owner; // Optional — used to sync Hardened/Fanatic flags
 
         public IReadOnlyList<StatusEffect> ActiveEffects => _activeEffects;
+
+        /// <summary>Display name of this manager's owner (used for combat-log attribution, e.g. Thorns).</summary>
+        public string OwnerName => _ownerName;
 
         public StatusEffectManager(string ownerName, BattleStats owner = null)
         {
@@ -206,33 +208,29 @@ namespace Crookedile.Gameplay.Battle
         #region Trigger Effects
 
         /// <summary>
-        /// Called at the start of turn. Triggers turn-start effects and decrements stacks.
+        /// Called at the start of turn. (Opinion-affecting turn statuses — Ritual, Scandal,
+        /// Regeneration — are applied by BattleManager, which owns the meter.)
         /// </summary>
         public void OnTurnStart(BattleStats ownerStats)
         {
-            foreach (StatusEffect effect in _activeEffects)
-                TriggerEffectWithStats(effect, StatusTriggerTiming.OnTurnStart, ownerStats);
-
             GameLogger.LogInfo<StatusEffectManager>(
                 $"{_ownerName}: Turn start status effects triggered"
             );
         }
 
         /// <summary>
-        /// Called at the end of turn. Triggers turn-end effects and decrements stacks.
+        /// Called at the end of turn. Handles duration decay/removal. (Opinion-affecting turn
+        /// statuses are applied by BattleManager before this runs.)
         /// </summary>
         public void OnTurnEnd(BattleStats ownerStats)
         {
-            // Single in-place pass preserving forward trigger order. When an effect is removed we
-            // don't advance the index (the next element slides into the current slot), so removal
-            // is O(1) per element and there's no separate toRemove list.
+            // Single in-place pass. When an effect is removed we don't advance the index (the next
+            // element slides into the current slot), so removal is O(1) per element with no
+            // separate toRemove list.
             int i = 0;
             while (i < _activeEffects.Count)
             {
                 StatusEffect effect = _activeEffects[i];
-
-                // Trigger turn-end effects
-                TriggerEffectWithStats(effect, StatusTriggerTiming.OnTurnEnd, ownerStats);
 
                 // Handle duration types
                 if (effect.DurationType == StatusDurationType.RemoveEndOfTurn)
@@ -311,14 +309,17 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Modifies damage taken based on active effects.
-        /// <paramref name="isAttackerPlayer"/> is forwarded to the <see cref="DamageDealtEvent"/>
-        /// published when Thorns reflects the hit to the Opinion Meter.
+        /// Modifies damage taken based on active effects. Pure with respect to the Opinion Meter —
+        /// the Thorns reflection is returned via <paramref name="thornsReflected"/> for the caller
+        /// to route through the ledger, rather than published from here.
         /// </summary>
+        /// <param name="isAttackerPlayer">Forwarded by the caller to direct the reflected pressure.</param>
+        /// <param name="thornsReflected">Opinion pressure to reflect back at the attacker (0 if no Thorns).</param>
         public int ModifyDamageTaken(
             int baseDamage,
             BattleStats attackerStats,
-            bool isAttackerPlayer = false
+            bool isAttackerPlayer,
+            out int thornsReflected
         )
         {
             float finalDamage = baseDamage;
@@ -348,26 +349,12 @@ namespace Crookedile.Gameplay.Battle
                 RemoveStacks(StatusEffectType.Intangible, 1);
             }
 
-            // Apply Thorns — reflects incoming pressure back as Opinion gain.
-            // isAttackerPlayer = false when an enemy attacked the player, so IsToPlayer = false
-            // routes to RaiseOpinion in BattleManager (the defender looks good hitting back).
-            int thornsStacks = GetStacks(StatusEffectType.Thorns);
-            if (thornsStacks > 0)
-            {
+            // Thorns reflects incoming pressure back; the caller applies it via the ledger.
+            thornsReflected = GetStacks(StatusEffectType.Thorns);
+            if (thornsReflected > 0)
                 GameLogger.LogInfo<StatusEffectManager>(
-                    $"{_ownerName}: Thorns reflected {thornsStacks} to Opinion Meter"
+                    $"{_ownerName}: Thorns reflecting {thornsReflected} to Opinion Meter"
                 );
-                EventBus.Publish(
-                    new DamageDealtEvent
-                    {
-                        Amount = thornsStacks,
-                        IsToPlayer = isAttackerPlayer,
-                        AttackerName = _ownerName,
-                        SourceEnemyIndex = -1,
-                        TargetEnemyIndex = -1,
-                    }
-                );
-            }
 
             return Mathf.Max(0, Mathf.RoundToInt(finalDamage));
         }
@@ -465,71 +452,6 @@ namespace Crookedile.Gameplay.Battle
             StatusEffect effect = _activeEffects[index];
             _activeEffects.RemoveAt(index);
             _byType.Remove(effect.Type);
-        }
-
-        private void TriggerEffect(StatusEffect effect, StatusTriggerTiming timing)
-        {
-            // Effects that don't need stats
-            if (GetEffectTiming(effect.Type) != timing)
-                return;
-
-            switch (effect.Type)
-            {
-                // Most effects are handled in Modify methods above
-                // This is for pure trigger-based effects
-                default:
-                    break;
-            }
-        }
-
-        private void TriggerEffectWithStats(
-            StatusEffect effect,
-            StatusTriggerTiming timing,
-            BattleStats ownerStats
-        )
-        {
-            if (GetEffectTiming(effect.Type) != timing)
-                return;
-
-            switch (effect.Type)
-            {
-                case StatusEffectType.Scandal:
-                    // Routes through DamageDealtEvent → BattleManager absorbs through Support → LowerOpinion.
-                    EventBus.Publish(
-                        new DamageDealtEvent
-                        {
-                            Amount = effect.Stacks,
-                            IsToPlayer = true,
-                            AttackerName = "Scandal",
-                            SourceEnemyIndex = -1,
-                            TargetEnemyIndex = -1,
-                        }
-                    );
-                    GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: Scandal applied {effect.Stacks} opinion pressure"
-                    );
-                    break;
-
-                case StatusEffectType.Regeneration:
-                    // Regeneration raises the opinion meter directly.
-                    EventBus.Publish(new OpinionRaisedDirectlyEvent { Amount = effect.Stacks });
-                    GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: Regeneration raised opinion by {effect.Stacks}"
-                    );
-                    break;
-                // Ritual handled by BattleManager.StartTurn — reads stacks directly and calls GainSupport/GainDenial.
-            }
-        }
-
-        private StatusTriggerTiming GetEffectTiming(StatusEffectType type)
-        {
-            return type switch
-            {
-                StatusEffectType.Scandal => StatusTriggerTiming.OnTurnEnd,
-                StatusEffectType.Regeneration => StatusTriggerTiming.OnTurnEnd,
-                // Ritual: handled by BattleManager.StartTurn directly; no trigger needed here.
-                _ => StatusTriggerTiming.Passive,
-            };
         }
 
         private bool IsDebuff(StatusEffectType type)

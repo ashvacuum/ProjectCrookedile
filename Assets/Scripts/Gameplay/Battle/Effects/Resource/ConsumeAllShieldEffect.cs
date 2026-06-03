@@ -18,9 +18,7 @@ namespace Crookedile.Gameplay.Battle
         {
             if (ctx.BattleManager == null)
                 return;
-            int support = ctx.BattleManager.CurrentSupport;
-            if (support > 0)
-                ctx.BattleManager.AbsorbThroughSupport(support);
+            int support = ctx.BattleManager.SpendSupport(ctx.BattleManager.CurrentSupport);
             ctx.LastSupportLost += support;
             GameLogger.LogInfo<ConsumeAllShieldEffect>($"Consumed {support} Support");
         }
