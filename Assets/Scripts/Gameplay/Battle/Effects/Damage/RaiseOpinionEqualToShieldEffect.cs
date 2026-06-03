@@ -23,6 +23,9 @@ namespace Crookedile.Gameplay.Battle
             ApplyPressure(ctx.Target, ctx.Caster, support, ctx);
         }
 
+        public override DamagePreview? GetDamagePreview() =>
+            new DamagePreview { Type = DamagePreviewType.EqualToShield };
+
         public override string GetDescription() => "Raise Opinion equal to your Support";
     }
 }

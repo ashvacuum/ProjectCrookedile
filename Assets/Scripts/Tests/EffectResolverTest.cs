@@ -164,7 +164,10 @@ namespace Crookedile.Tests
             effectResolver.PlayerStatusEffects.OnTurnEnd(playerStats);
 
             Debug.Log($"After turn end: {playerStats.GetStatusString()}");
-            Debug.Log("Scandal lowers opinion; Regeneration raises opinion (see EventBus logs)");
+            Debug.Log(
+                "Scandal/Regeneration opinion effects are applied by BattleManager (OpinionLedger), "
+                    + "not by StatusEffectManager — this unit tester only decrements their stacks."
+            );
 
             // Test Ritual (gain Shield at start of turn)
             effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Ritual, 2);
@@ -180,65 +183,32 @@ namespace Crookedile.Tests
 
         #region Helper Methods
 
-        private CardEffect CreateDamageEffect(int amount)
+        private BattleEffect CreateDamageEffect(int amount)
         {
-            // Using reflection to create CardEffect since it has complex setup
-            // In real usage, CardEffects would be created through Unity Editor
-            var effect = new CardEffect();
-            var categoryField = typeof(CardEffect).GetField(
-                "_category",
+            var effect = new DealDamageEffect();
+            var amountField = typeof(DealDamageEffect).GetField(
+                "_amount",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
             );
-            var targetField = typeof(CardEffect).GetField(
-                "_target",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
-            );
-            var damageTypeField = typeof(CardEffect).GetField(
-                "_damageType",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
-            );
-            var damageAmountField = typeof(CardEffect).GetField(
-                "_damageAmount",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
-            );
-
-            categoryField?.SetValue(effect, EffectCategory.Damage);
-            targetField?.SetValue(effect, TargetType.Opponent);
-            damageTypeField?.SetValue(effect, DamageType.FixedDamage);
-            damageAmountField?.SetValue(effect, amount);
-
+            amountField?.SetValue(effect, amount);
             return effect;
         }
 
-        private CardEffect CreateShieldEffect(int amount)
+        private BattleEffect CreateShieldEffect(int amount)
         {
-            var effect = new CardEffect();
-            var categoryField = typeof(CardEffect).GetField(
-                "_category",
+            var effect = new GainShieldEffect();
+            var amountField = typeof(GainShieldEffect).GetField(
+                "_amount",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
             );
-            var resourceTypeField = typeof(CardEffect).GetField(
-                "_resourceType",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
-            );
-            var resourceAmountField = typeof(CardEffect).GetField(
-                "_resourceAmount",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
-            );
-
-            categoryField?.SetValue(effect, EffectCategory.Resource);
-            resourceTypeField?.SetValue(effect, ResourceEffectType.GainShield);
-            resourceAmountField?.SetValue(effect, amount);
-
+            amountField?.SetValue(effect, amount);
             return effect;
         }
 
-        private CardData CreateTestCard(string name, params CardEffect[] effects)
+        private CardData CreateTestCard(string name, params BattleEffect[] effects)
         {
-            // Create a ScriptableObject instance for testing
             CardData card = ScriptableObject.CreateInstance<CardData>();
 
-            // Set fields using reflection
             var nameField = typeof(CardData).GetField(
                 "_cardName",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
@@ -253,7 +223,7 @@ namespace Crookedile.Tests
             );
 
             nameField?.SetValue(card, name);
-            effectsField?.SetValue(card, new List<CardEffect>(effects));
+            effectsField?.SetValue(card, new List<BattleEffect>(effects));
             costsField?.SetValue(card, new List<CardCost>());
 
             return card;

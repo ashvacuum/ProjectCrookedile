@@ -76,7 +76,10 @@ namespace Crookedile.Core
         public static void Publish<T>(T gameEvent)
             where T : IGameEvent
         {
-            if (gameEvent == null)
+            // Null-guard only reference-type events. The typeof(T).IsValueType test is a JIT
+            // constant, so for struct events (the vast majority) this whole branch is elided —
+            // avoiding the box that a bare `gameEvent == null` would emit on every publish.
+            if (!typeof(T).IsValueType && gameEvent == null)
                 return;
 
             var eventType = typeof(T);

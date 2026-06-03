@@ -29,6 +29,10 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
 
+        /// <summary>Authored fixed Support amount, for editor/preview display. 0 when context-sourced.</summary>
+        public int PreviewSupportAmount =>
+            _amountSource == EffectContextValue.FixedAmount ? _amount : 0;
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             int amount =

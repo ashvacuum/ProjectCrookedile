@@ -187,6 +187,6 @@ namespace Crookedile.Gameplay.Battle
 
             return evaluator.IsMet(move, allEnemies, this);
         }
+        #endregion
     }
 }
-        #endregion

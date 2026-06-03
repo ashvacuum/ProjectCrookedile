@@ -60,7 +60,7 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
             EventBus.Subscribe<SupportChangedEvent>(OnSupportChanged);
             EventBus.Subscribe<DenialChangedEvent>(OnDenialChanged);
-            EventBus.Subscribe<EnemyHostilityChangedEvent>(OnHostilityChanged);
+            EventBus.Subscribe<HostilityChangedEvent>(OnHostilityChanged);
             EventBus.Subscribe<ActionPointsChangedEvent>(OnAPChanged);
             EventBus.Subscribe<CardPlayVFXRequestedEvent>(OnCardPlayVFXRequested);
         }
@@ -83,7 +83,7 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
             EventBus.Unsubscribe<SupportChangedEvent>(OnSupportChanged);
             EventBus.Unsubscribe<DenialChangedEvent>(OnDenialChanged);
-            EventBus.Unsubscribe<EnemyHostilityChangedEvent>(OnHostilityChanged);
+            EventBus.Unsubscribe<HostilityChangedEvent>(OnHostilityChanged);
             EventBus.Unsubscribe<ActionPointsChangedEvent>(OnAPChanged);
             EventBus.Unsubscribe<CardPlayVFXRequestedEvent>(OnCardPlayVFXRequested);
         }
@@ -230,11 +230,16 @@ namespace Crookedile.UI.Battle
                     : BattleAudioTrigger.ShieldLost
             );
 
-        private void OnHostilityChanged(EnemyHostilityChangedEvent evt) =>
+        private void OnHostilityChanged(HostilityChangedEvent evt)
+        {
+            // Player hostility (index -1) has no enemy slot to anchor the cue to.
+            if (evt.EnemyIndex < 0)
+                return;
             Play(
                 BattleAudioTrigger.EnemyHostilityChanged,
                 _battleUI?.GetEnemySlotTransform(evt.EnemyIndex)
             );
+        }
 
         private void OnAPChanged(ActionPointsChangedEvent evt)
         {

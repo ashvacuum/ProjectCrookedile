@@ -8,6 +8,21 @@
     using Crookedile.Utilities;
     using UnityEngine;
 
+    public enum DamagePreviewType
+    {
+        Fixed,
+        Random,
+        EqualToShield,
+    }
+
+    public struct DamagePreview
+    {
+        public DamagePreviewType Type;
+        public int Amount;
+        public int MinAmount;
+        public int MaxAmount;
+    }
+
     /// <summary>
     /// Abstract base class for all battle effects in the Crookedile effect system.
     ///
@@ -38,6 +53,25 @@
         public virtual TargetType Target => TargetType.Self;
 
         /// <summary>
+        /// Returns damage preview data for intent display. Non-damage effects return null.
+        /// Override in damage subclasses to expose their amounts without executing.
+        /// </summary>
+        public virtual DamagePreview? GetDamagePreview() => null;
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// Editor-only health check: yields human-readable configuration problems with this effect
+        /// (e.g. an unset required reference that would make it silently no-op). Empty when correctly
+        /// configured. Override in subclasses that have required fields. Consumed by the Card Database
+        /// health view so the database is provably consistent. Stripped from player builds.
+        /// </summary>
+        public virtual IEnumerable<string> GetConfigurationIssues()
+        {
+            yield break;
+        }
+#endif
+
+        /// <summary>
         /// Executes this effect using the provided execution context.
         /// The context carries all dependencies (caster, target, deck, status managers)
         /// and accumulates results (pressure applied, opinion raised, support gained) for
@@ -60,11 +94,12 @@
         #region Shared pressure helpers
         /// <summary>
         /// Applies opinion-meter pressure from <paramref name="attacker"/> to <paramref name="target"/>.
-        /// The target's shield absorbs first; the remainder is published as
-        /// <see cref="DamageDealtEvent"/> which BattleManager routes to the opinion meter.
-        /// Hostile-enemy multiplier still applies when enemies attack.
+        /// Routes through <see cref="OpinionLedger.ApplyPressure"/> which absorbs through the session
+        /// shield, moves the meter, and publishes <see cref="DamageDealtEvent"/> as a notification.
+        /// Hostile-enemy multiplier still applies when enemies attack. Thorns on the target reflects
+        /// pressure back through the same ledger.
         /// </summary>
-        /// <returns>Post-shield pressure that reached the opinion meter.</returns>
+        /// <returns>Pressure that reached the opinion meter, pre session-shield absorption.</returns>
         protected static int ApplyPressure(
             BattleStats target,
             BattleStats attacker,
@@ -76,32 +111,85 @@
             StatusEffectManager targetMgr = ctx.GetStatusEffectManager(target);
 
             int mod = attackerMgr?.ModifyDamageDealt(basePressure) ?? basePressure;
-            mod =
-                targetMgr?.ModifyDamageTaken(mod, attacker, isAttackerPlayer: ctx.IsPlayerCard)
-                ?? mod;
+            int thornsReflected = 0;
+            if (targetMgr != null)
+                mod = targetMgr.ModifyDamageTaken(
+                    mod,
+                    attacker,
+                    isAttackerPlayer: ctx.IsPlayerCard,
+                    thornsReflected: out thornsReflected
+                );
 
             // Hostile enemies amplify their opinion-meter pressure.
+            // HostilityDamageMultiplier already floors at 0.1, so no extra clamp needed.
             if (!ctx.IsPlayerCard && attacker.CurrentHostility > 0)
-                mod = Mathf.RoundToInt(mod * Mathf.Max(0.1f, attacker.HostilityDamageMultiplier));
+                mod = Mathf.RoundToInt(mod * attacker.HostilityDamageMultiplier);
 
-            // BattleManager.OnDamageDealtForOpinion routes through Support/Denial session shields.
-            int remainder = mod;
-            if (remainder > 0)
+            // Thorns reflects back at the attacker's side first (preserving prior ordering).
+            if (thornsReflected > 0)
+                RoutePressure(
+                    ctx,
+                    thornsReflected,
+                    toPlayer: ctx.IsPlayerCard,
+                    attackerName: targetMgr?.OwnerName ?? "Thorns",
+                    sourceEnemyIndex: -1,
+                    targetEnemyIndex: -1
+                );
+
+            RoutePressure(
+                ctx,
+                mod,
+                toPlayer: target == ctx.PlayerStats,
+                attackerName: ctx.AttackerName,
+                sourceEnemyIndex: ctx.IsPlayerCard ? -1 : ctx.AttackerEnemyIndex,
+                targetEnemyIndex: ctx.IsPlayerCard ? ctx.AttackerEnemyIndex : -1
+            );
+
+            ctx.LastDamageDealt += mod;
+            return mod;
+        }
+
+        /// <summary>
+        /// Sends opinion pressure through the battle's <see cref="OpinionLedger"/> (the command path).
+        /// When no BattleManager is present (e.g. the unit-test harness), falls back to publishing
+        /// the notification only — there is no meter to move.
+        /// </summary>
+        private static void RoutePressure(
+            EffectExecutionContext ctx,
+            int amount,
+            bool toPlayer,
+            string attackerName,
+            int sourceEnemyIndex,
+            int targetEnemyIndex
+        )
+        {
+            if (amount <= 0)
+                return;
+
+            OpinionLedger ledger = ctx.BattleManager?.Opinion;
+            if (ledger != null)
+            {
+                ledger.ApplyPressure(
+                    amount,
+                    toPlayer,
+                    attackerName,
+                    sourceEnemyIndex,
+                    targetEnemyIndex
+                );
+            }
+            else
             {
                 EventBus.Publish(
                     new DamageDealtEvent
                     {
-                        Amount = remainder,
-                        IsToPlayer = target == ctx.PlayerStats,
-                        AttackerName = ctx.AttackerName,
-                        SourceEnemyIndex = ctx.IsPlayerCard ? -1 : ctx.AttackerEnemyIndex,
-                        TargetEnemyIndex = ctx.IsPlayerCard ? ctx.AttackerEnemyIndex : -1,
+                        Amount = amount,
+                        IsToPlayer = toPlayer,
+                        AttackerName = attackerName,
+                        SourceEnemyIndex = sourceEnemyIndex,
+                        TargetEnemyIndex = targetEnemyIndex,
                     }
                 );
             }
-
-            ctx.LastDamageDealt += remainder;
-            return remainder;
         }
 
         // Keep the old name as a redirect so any call sites not yet updated still compile.
@@ -192,6 +280,6 @@
                 onResolved?.Invoke(chosen);
             }
         }
+        #endregion
     }
 }
-        #endregion

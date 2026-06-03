@@ -25,9 +25,7 @@ namespace Crookedile.Gameplay.Battle
             int amount = amountOverride ?? _amount;
             if (ctx.BattleManager == null)
                 return;
-            int actual = Mathf.Min(amount, ctx.BattleManager.CurrentSupport);
-            if (actual > 0)
-                ctx.BattleManager.AbsorbThroughSupport(actual);
+            int actual = ctx.BattleManager.SpendSupport(amount);
             GameLogger.LogInfo<LoseShieldEffect>($"Lost {actual} Support");
         }
 

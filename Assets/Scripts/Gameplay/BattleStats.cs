@@ -36,6 +36,10 @@ namespace Crookedile.Gameplay
 
         private bool _isPlayer;
 
+        // Index into BattleManager.Enemies, set by BattleManager once this enemy joins the
+        // roster. -1 for the player (and for an enemy mid-construction, before it's registered).
+        private int _ownerEnemyIndex = -1;
+
         #region Properties
 
         /// <summary>ReduceHostility is a no-op while true (won't listen to reason).</summary>
@@ -57,6 +61,9 @@ namespace Crookedile.Gameplay
 
         public int MaxHostility => _maxHostility;
         public int MinHostility => _minHostility;
+
+        /// <summary>Index into BattleManager.Enemies for this combatant, or -1 for the player.</summary>
+        public int OwnerEnemyIndex => _ownerEnemyIndex;
 
         /// <summary>True when the enemy is actively hostile (positive hostility).</summary>
         public bool IsHostile => _currentHostility > 0;
@@ -99,6 +106,9 @@ namespace Crookedile.Gameplay
         #endregion
 
         #region Hostility Management
+
+        /// <summary>Registers this combatant's index into BattleManager.Enemies. Called once the enemy joins the roster.</summary>
+        public void SetOwnerEnemyIndex(int index) => _ownerEnemyIndex = index;
 
         /// <summary>Sets per-enemy hostility clamps. Called by EnemyController after construction.</summary>
         public void SetHostilityLimits(int min, int max)
@@ -149,19 +159,20 @@ namespace Crookedile.Gameplay
                     OldValue = oldValue,
                     NewValue = newValue,
                     IsPlayer = _isPlayer,
+                    EnemyIndex = _ownerEnemyIndex,
                 }
             );
 
             if (oldValue < _maxHostility && newValue == _maxHostility)
-                EventBus.Publish(new EnemyMaxedHostilityEvent());
+                EventBus.Publish(new EnemyMaxedHostilityEvent { EnemyIndex = _ownerEnemyIndex });
             if (oldValue > _minHostility && newValue == _minHostility)
-                EventBus.Publish(new EnemyMaxedReceptiveEvent());
+                EventBus.Publish(new EnemyMaxedReceptiveEvent { EnemyIndex = _ownerEnemyIndex });
             if (oldValue <= 0 && newValue > 0)
-                EventBus.Publish(new EnemyBecameHostileEvent());
+                EventBus.Publish(new EnemyBecameHostileEvent { EnemyIndex = _ownerEnemyIndex });
             if (oldValue >= 0 && newValue < 0)
-                EventBus.Publish(new EnemyBecameReceptiveEvent());
+                EventBus.Publish(new EnemyBecameReceptiveEvent { EnemyIndex = _ownerEnemyIndex });
             if (oldValue != 0 && newValue == 0)
-                EventBus.Publish(new EnemyNeutralizedEvent());
+                EventBus.Publish(new EnemyNeutralizedEvent { EnemyIndex = _ownerEnemyIndex });
         }
 
         #endregion
