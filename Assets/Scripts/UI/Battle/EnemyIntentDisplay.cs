@@ -233,13 +233,16 @@ namespace Crookedile.UI.Battle
             int multiHitSubTextSize = 70
         )
         {
-            // Collect damage effects
-            var dmgEffects = new List<CardEffect>();
+            // Collect damage previews from BattleEffect subclasses
+            var previews = new List<DamagePreview>();
             foreach (var e in move.Effects)
-                if (e.Category == EffectCategory.Damage)
-                    dmgEffects.Add(e);
+            {
+                var p = e?.GetDamagePreview();
+                if (p.HasValue)
+                    previews.Add(p.Value);
+            }
 
-            if (dmgEffects.Count == 0)
+            if (previews.Count == 0)
                 return string.Empty;
 
             // Two-step preview: attacker mods (Strength/Weakened/Exposed) then target mods
@@ -251,35 +254,34 @@ namespace Crookedile.UI.Battle
                 return Mathf.Max(0, d);
             }
 
-            // Multi-hit: all effects are identical FixedDamage → "N×amount"
+            // Multi-hit: all identical fixed → "N×amount"
             if (
-                dmgEffects.Count > 1
-                && dmgEffects.TrueForAll(e => e.DamageType == DamageType.FixedDamage)
-                && dmgEffects.TrueForAll(e => e.DamageAmount == dmgEffects[0].DamageAmount)
+                previews.Count > 1
+                && previews.TrueForAll(p => p.Type == DamagePreviewType.Fixed)
+                && previews.TrueForAll(p => p.Amount == previews[0].Amount)
             )
             {
-                int adj = Preview(dmgEffects[0].DamageAmount, attackerStatus, targetStatus);
+                int adj = Preview(previews[0].Amount, attackerStatus, targetStatus);
                 return adj > 0
-                    ? $"{dmgEffects.Count}\u00d7<size={multiHitSubTextSize}%>{adj}</size>"
+                    ? $"{previews.Count}\u00d7<size={multiHitSubTextSize}%>{adj}</size>"
                     : string.Empty;
             }
 
-            // Multi-hit: all effects are identical RandomDamage → "N×min-max"
+            // Multi-hit: all identical random → "N×min-max"
             if (
-                dmgEffects.Count > 1
-                && dmgEffects.TrueForAll(e => e.DamageType == DamageType.RandomDamage)
-                && dmgEffects.TrueForAll(e =>
-                    e.RandomDamageMin == dmgEffects[0].RandomDamageMin
-                    && e.RandomDamageMax == dmgEffects[0].RandomDamageMax
+                previews.Count > 1
+                && previews.TrueForAll(p => p.Type == DamagePreviewType.Random)
+                && previews.TrueForAll(p =>
+                    p.MinAmount == previews[0].MinAmount && p.MaxAmount == previews[0].MaxAmount
                 )
             )
             {
-                int adjMin = Preview(dmgEffects[0].RandomDamageMin, attackerStatus, targetStatus);
-                int adjMax = Preview(dmgEffects[0].RandomDamageMax, attackerStatus, targetStatus);
-                return $"{dmgEffects.Count}\u00d7<size={multiHitSubTextSize}%>{adjMin}-{adjMax}</size>";
+                int adjMin = Preview(previews[0].MinAmount, attackerStatus, targetStatus);
+                int adjMax = Preview(previews[0].MaxAmount, attackerStatus, targetStatus);
+                return $"{previews.Count}\u00d7<size={multiHitSubTextSize}%>{adjMin}-{adjMax}</size>";
             }
 
-            // Single or mixed effects — sum as before
+            // Single or mixed — sum
             int fixedTotal = 0;
             int randMin = 0,
                 randMax = 0;
@@ -287,20 +289,20 @@ namespace Crookedile.UI.Battle
                 hasRandom = false,
                 hasShield = false;
 
-            foreach (var effect in dmgEffects)
+            foreach (var p in previews)
             {
-                switch (effect.DamageType)
+                switch (p.Type)
                 {
-                    case DamageType.FixedDamage:
-                        fixedTotal += effect.DamageAmount;
+                    case DamagePreviewType.Fixed:
+                        fixedTotal += p.Amount;
                         hasFixed = true;
                         break;
-                    case DamageType.RandomDamage:
-                        randMin += effect.RandomDamageMin;
-                        randMax += effect.RandomDamageMax;
+                    case DamagePreviewType.Random:
+                        randMin += p.MinAmount;
+                        randMax += p.MaxAmount;
                         hasRandom = true;
                         break;
-                    case DamageType.DamageEqualToShield:
+                    case DamagePreviewType.EqualToShield:
                         hasShield = true;
                         break;
                 }

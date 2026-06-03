@@ -15,6 +15,17 @@ namespace Crookedile.Data
     }
 
     /// <summary>
+    /// How a card-manipulation effect picks which card(s) it acts on.
+    /// (Ordinals are serialized on effect assets — do not reorder.)
+    /// </summary>
+    public enum CardSelectionMode
+    {
+        PlayerChoice, // 0 — prompt the player via CardChoiceRequestedEvent
+        RandomAny, // 1 — pick randomly from the whole pool
+        RandomByType, // 2 — filter by a CardType, then pick randomly
+    }
+
+    /// <summary>
     /// Card rarity determines acquisition chance, power level, and visual frame.
     /// </summary>
     public enum CardRarity
@@ -230,9 +241,9 @@ namespace Crookedile.Data
         FixedAmount, // 0 — use the inspector-authored value (shows fixed amount fields)
         LastDamageDealt, // 1 — ctx.LastDamageDealt  — e.g. lifesteal
         LastHealAmount, // 2 — ctx.LastHealAmount
-        LastShieldGained, // 3 — ctx.LastShieldGained
-        LastShieldLost, // 4 — ctx.LastShieldLost — e.g. bonus damage equal to shield spent
-        CurrentShield, // 5 — caster.CurrentShield at time of trigger
+        LastSupportGained, // 3 — ctx.LastSupportGained
+        LastSupportLost, // 4 — ctx.LastSupportLost — e.g. bonus pressure equal to Support spent
+        CurrentSupport, // 5 — session CurrentSupport at time of trigger
         CurrentHostility, // 6 — focused target.CurrentHostility at time of trigger
         None, // 7 — return 0; hides fixed amount fields (use when amount is irrelevant)
         HostileEnemyCount, // 8 — number of living enemies with Hostility > 0
