@@ -3,6 +3,7 @@ using System.Linq;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
+using Crookedile.Gameplay.Battle;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
@@ -11,8 +12,12 @@ using UnityEngine;
 
 namespace Crookedile.Editor
 {
-    [CustomEditor(typeof(CardDatabase))]
-    public class CardDatabaseEditor : OdinEditor
+    /// <summary>
+    /// Dockable dashboard window for browsing, auditing, and health-checking the card database.
+    /// Open via menu: Crookedile → Card Database. Per-card effect editing still happens in the
+    /// Odin inspector on each CardData asset (use "Inspect Asset" to jump there).
+    /// </summary>
+    public class CardDatabaseWindow : EditorWindow
     {
         private CardDatabase database;
         private Vector2 scrollPosition;
@@ -44,23 +49,60 @@ namespace Crookedile.Editor
             Statistics,
             CardBrowser,
             NeedsSetup,
-            LegacyEffects,
             InDevelopment,
-            PassiveIssues,
+            CardHealth,
             EnemyAudit,
         }
 
-        protected override void OnEnable()
+        [MenuItem("Crookedile/Card Database")]
+        public static void ShowWindow()
         {
-            base.OnEnable();
-            database = (CardDatabase)target;
-            RefreshFilteredCards();
+            var window = GetWindow<CardDatabaseWindow>("Card Database");
+            window.minSize = new Vector2(560, 420);
+            window.Show();
         }
 
-        public override void OnInspectorGUI()
+        private void OnEnable()
+        {
+            LoadDatabase();
+        }
+
+        // Refresh when the window regains focus so external edits (new cards, changed effects)
+        // are reflected without reopening.
+        private void OnFocus()
+        {
+            if (database != null)
+                RefreshFilteredCards();
+        }
+
+        /// <summary>Finds the CardDatabase asset in the project (first match) and caches it.</summary>
+        private void LoadDatabase()
         {
             if (database == null)
+            {
+                string[] guids = AssetDatabase.FindAssets("t:CardDatabase");
+                if (guids.Length > 0)
+                    database = AssetDatabase.LoadAssetAtPath<CardDatabase>(
+                        AssetDatabase.GUIDToAssetPath(guids[0])
+                    );
+            }
+            if (database != null)
+                RefreshFilteredCards();
+        }
+
+        private void OnGUI()
+        {
+            if (database == null)
+            {
+                EditorGUILayout.Space(10);
+                EditorGUILayout.HelpBox(
+                    "No CardDatabase asset found in the project. Create one, then reopen this window.",
+                    MessageType.Warning
+                );
+                if (GUILayout.Button("Search again", GUILayout.Height(30)))
+                    LoadDatabase();
                 return;
+            }
 
             DrawHeader();
             DrawViewModeSelector();
@@ -78,22 +120,16 @@ namespace Crookedile.Editor
                 case ViewMode.NeedsSetup:
                     DrawNeedsSetupView();
                     break;
-                case ViewMode.LegacyEffects:
-                    DrawLegacyEffectsView();
-                    break;
                 case ViewMode.InDevelopment:
                     DrawInDevelopmentView();
                     break;
-                case ViewMode.PassiveIssues:
-                    DrawPassiveIssuesView();
+                case ViewMode.CardHealth:
+                    DrawCardHealthView();
                     break;
                 case ViewMode.EnemyAudit:
                     DrawEnemyAuditView();
                     break;
             }
-
-            EditorGUILayout.Space(10);
-            DrawDefaultInspector();
         }
 
         #region Header
@@ -125,6 +161,12 @@ namespace Crookedile.Editor
             {
                 ValidateCardDatabase(database);
                 GUI.FocusControl(null);
+            }
+
+            if (GUILayout.Button("Inspect Asset", GUILayout.Height(35)))
+            {
+                Selection.activeObject = database;
+                EditorGUIUtility.PingObject(database);
             }
 
             GUILayout.EndHorizontal();
@@ -177,20 +219,6 @@ namespace Crookedile.Editor
             )
                 viewMode = ViewMode.NeedsSetup;
 
-            int legacyCount = database.GetAll().Count(c => c.UsesLegacyEffects);
-            string legacyLabel =
-                legacyCount > 0 ? $"Legacy Effects ({legacyCount})" : "Legacy Effects";
-            if (
-                GUILayout.Toggle(
-                    viewMode == ViewMode.LegacyEffects,
-                    legacyLabel,
-                    SirenixGUIStyles.Button,
-                    GUILayout.Width(150),
-                    GUILayout.Height(25)
-                )
-            )
-                viewMode = ViewMode.LegacyEffects;
-
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
@@ -215,19 +243,19 @@ namespace Crookedile.Editor
             )
                 viewMode = ViewMode.InDevelopment;
 
-            int passiveIssueCount = database.GetAll().Count(c => GetCardPassiveIssues(c).Count > 0);
-            string passiveLabel =
-                passiveIssueCount > 0 ? $"Passive Issues ({passiveIssueCount})" : "Passive Issues";
+            int healthIssueCount = database.GetAll().Count(c => GetCardIssues(c).Count > 0);
+            string healthLabel =
+                healthIssueCount > 0 ? $"Card Health ({healthIssueCount})" : "Card Health";
             if (
                 GUILayout.Toggle(
-                    viewMode == ViewMode.PassiveIssues,
-                    passiveLabel,
+                    viewMode == ViewMode.CardHealth,
+                    healthLabel,
                     SirenixGUIStyles.Button,
                     GUILayout.Width(150),
                     GUILayout.Height(25)
                 )
             )
-                viewMode = ViewMode.PassiveIssues;
+                viewMode = ViewMode.CardHealth;
 
             if (
                 GUILayout.Toggle(
@@ -291,6 +319,34 @@ namespace Crookedile.Editor
                         DrawProgressBar(count, database.Count, $"{count} ({percentage:F1}%)");
                         GUILayout.EndHorizontal();
                     }
+                }
+            );
+
+            EditorGUILayout.Space(10);
+
+            // Database Health — live consistency summary
+            DrawStatSection(
+                "Database Health",
+                () =>
+                {
+                    var all = database.GetAll();
+                    int unhealthy = all.Count(c => GetCardIssues(c).Count > 0);
+                    int needsSetup = all.Count(c => c.NeedsConfiguration);
+                    int inDev = all.Count(c => c.IsInDevelopment);
+
+                    var healthStyle = new GUIStyle(EditorStyles.boldLabel);
+                    healthStyle.normal.textColor =
+                        unhealthy > 0 ? new Color(1f, 0.65f, 0f) : new Color(0.4f, 0.85f, 0.4f);
+                    GUILayout.Label(
+                        unhealthy > 0
+                            ? $"⚠  {unhealthy} card(s) with configuration issues — see Card Health"
+                            : "✓  All cards pass configuration checks",
+                        healthStyle
+                    );
+                    GUILayout.Label(
+                        $"Needs setup: {needsSetup}    ·    In development: {inDev}",
+                        SirenixGUIStyles.LeftAlignedGreyLabel
+                    );
                 }
             );
 
@@ -839,17 +895,12 @@ namespace Crookedile.Editor
             int maxDamage = 0;
             foreach (var effect in card.Effects)
             {
-                if (effect.Category == EffectCategory.Damage)
-                {
-                    if (effect.DamageType == DamageType.FixedDamage)
-                    {
-                        maxDamage = Mathf.Max(maxDamage, effect.DamageAmount);
-                    }
-                    else if (effect.DamageType == DamageType.RandomDamage)
-                    {
-                        maxDamage = Mathf.Max(maxDamage, effect.RandomDamageMax);
-                    }
-                }
+                var preview = effect?.GetDamagePreview();
+                if (!preview.HasValue)
+                    continue;
+                var p = preview.Value;
+                int amount = p.Type == DamagePreviewType.Random ? p.MaxAmount : p.Amount;
+                maxDamage = Mathf.Max(maxDamage, amount);
             }
             return maxDamage;
         }
@@ -862,13 +913,8 @@ namespace Crookedile.Editor
             int total = 0;
             foreach (var effect in card.Effects)
             {
-                if (
-                    effect.Category == EffectCategory.Resource
-                    && effect.ResourceType == ResourceEffectType.GainShield
-                )
-                {
-                    total += effect.ResourceAmount;
-                }
+                if (effect is GainShieldEffect shield)
+                    total += shield.PreviewSupportAmount;
             }
             return total;
         }
@@ -1011,109 +1057,6 @@ namespace Crookedile.Editor
             SirenixEditorGUI.EndBox();
         }
 
-        private void DrawLegacyEffectsView()
-        {
-            var legacyCards = database
-                .GetAll()
-                .Where(c => c.UsesLegacyEffects)
-                .OrderBy(c => c.CardName)
-                .ToList();
-
-            SirenixEditorGUI.BeginBox();
-
-            #endregion
-
-            #region Header
-            SirenixEditorGUI.BeginBoxHeader();
-            GUILayout.BeginHorizontal();
-
-            if (legacyCards.Count > 0)
-            {
-                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
-                labelStyle.normal.textColor = new Color(1f, 0.65f, 0f); // orange
-                GUILayout.Label(
-                    $"⚠  {legacyCards.Count} card(s) still using legacy CardEffect system",
-                    labelStyle
-                );
-            }
-            else
-            {
-                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
-                labelStyle.normal.textColor = new Color(0.4f, 0.85f, 0.4f); // green
-                GUILayout.Label("✓  All cards use the new BattleEffect system", labelStyle);
-            }
-
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-            SirenixEditorGUI.EndBoxHeader();
-
-            EditorGUILayout.Space(5);
-
-            #endregion
-
-            #region Empty state
-            if (legacyCards.Count == 0)
-            {
-                EditorGUILayout.Space(10);
-                GUILayout.Label(
-                    "Migration complete. Nothing left to convert!",
-                    SirenixGUIStyles.CenteredGreyMiniLabel
-                );
-                EditorGUILayout.Space(10);
-                SirenixEditorGUI.EndBox();
-                return;
-            }
-
-            #endregion
-
-            #region Migration hint
-            EditorGUILayout.HelpBox(
-                "Run  Crookedile → Tools → Migrate Effects to New System  to auto-convert these cards.",
-                MessageType.Info
-            );
-            EditorGUILayout.Space(4);
-
-            #endregion
-
-            #region Card List
-            scrollPosition = EditorGUILayout.BeginScrollView(
-                scrollPosition,
-                GUILayout.MaxHeight(500)
-            );
-
-            foreach (var card in legacyCards)
-            {
-                SirenixEditorGUI.BeginVerticalList();
-                GUILayout.BeginHorizontal();
-
-                // Card name + type + effect count
-                GUILayout.BeginVertical();
-                GUILayout.Label(card.CardName, EditorStyles.boldLabel);
-                GUILayout.Label(
-                    $"{card.CardType}  ·  {card.Rarity}  ·  {card.Effects.Count} legacy effect(s)",
-                    SirenixGUIStyles.LeftAlignedGreyLabel
-                );
-                GUILayout.EndVertical();
-
-                GUILayout.FlexibleSpace();
-
-                // Select button
-                if (GUILayout.Button("Select", GUILayout.Width(60), GUILayout.Height(30)))
-                {
-                    Selection.activeObject = card;
-                    EditorGUIUtility.PingObject(card);
-                }
-
-                GUILayout.EndHorizontal();
-                SirenixEditorGUI.EndVerticalList();
-                EditorGUILayout.Space(4);
-            }
-
-            EditorGUILayout.EndScrollView();
-
-            SirenixEditorGUI.EndBox();
-        }
-
         private void DrawInDevelopmentView()
         {
             var devCards = database
@@ -1221,18 +1164,16 @@ namespace Crookedile.Editor
 
         #region Passive Issues View
 
-        private void DrawPassiveIssuesView()
+        private void DrawCardHealthView()
         {
             var cardsWithIssues = database
                 .GetAll()
-                .Select(c => (card: c, issues: GetCardPassiveIssues(c)))
+                .Select(c => (card: c, issues: GetCardIssues(c)))
                 .Where(x => x.issues.Count > 0)
                 .OrderBy(x => x.card.CardName)
                 .ToList();
 
             SirenixEditorGUI.BeginBox();
-
-        #endregion
 
             #region Header
             SirenixEditorGUI.BeginBoxHeader();
@@ -1243,7 +1184,7 @@ namespace Crookedile.Editor
                 var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
                 labelStyle.normal.textColor = new Color(1f, 0.65f, 0f);
                 GUILayout.Label(
-                    $"⚠  {cardsWithIssues.Count} card(s) have passive or behavior issues",
+                    $"⚠  {cardsWithIssues.Count} card(s) need attention",
                     labelStyle
                 );
             }
@@ -1251,7 +1192,7 @@ namespace Crookedile.Editor
             {
                 var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
                 labelStyle.normal.textColor = new Color(0.4f, 0.85f, 0.4f);
-                GUILayout.Label("✓  All card passives and effects are configured", labelStyle);
+                GUILayout.Label("✓  All cards, effects, and passives are configured", labelStyle);
             }
 
             GUILayout.FlexibleSpace();
@@ -1264,7 +1205,7 @@ namespace Crookedile.Editor
             {
                 EditorGUILayout.Space(10);
                 GUILayout.Label(
-                    "No passive or behavior issues found.",
+                    "No configuration issues found across the database.",
                     SirenixGUIStyles.CenteredGreyMiniLabel
                 );
                 EditorGUILayout.Space(10);
@@ -1273,8 +1214,9 @@ namespace Crookedile.Editor
             }
 
             EditorGUILayout.HelpBox(
-                "Cards listed here either have no behavior at all, or have passives that are misconfigured "
-                    + "(missing trigger, no effects). Unplayable cards (Curse / Status) with empty effects are expected.",
+                "Cards listed here have a configuration problem: no behavior at all, a null entry in an "
+                    + "effect/passive list, an effect missing a required reference, or a passive with no "
+                    + "trigger/effects. Unplayable cards (Curse / Status) with empty effects are expected.",
                 MessageType.Info
             );
             EditorGUILayout.Space(4);
@@ -1322,41 +1264,76 @@ namespace Crookedile.Editor
         }
 
         /// <summary>
-        /// Returns a list of human-readable issues for a card's passive and effect configuration.
-        /// An empty list means the card is clean.
+        /// Single source of truth for a card's configuration health. Returns human-readable issues
+        /// across the new polymorphic systems — effects and passives, including null list entries
+        /// and per-effect required-reference checks via <see cref="BattleEffect.GetConfigurationIssues"/>.
+        /// An empty list means the card is clean. Used by both the Card Health view and the Validate action.
         /// </summary>
-        private static List<string> GetCardPassiveIssues(CardData card)
+        private static List<string> GetCardIssues(CardData card)
         {
             var issues = new List<string>();
 
-            bool hasNewEffects = card.NewEffects != null && card.NewEffects.Count > 0;
-            bool hasLegacyEffects = card.Effects != null && card.Effects.Count > 0;
+            bool hasEffects = card.Effects != null && card.Effects.Count > 0;
             bool hasPassives = card.Passives != null && card.Passives.Count > 0;
 
             // Card with no behavior at all (and can theoretically be played)
-            if (!hasNewEffects && !hasLegacyEffects && !hasPassives && !card.IsUnplayable)
+            if (!hasEffects && !hasPassives && !card.IsUnplayable)
                 issues.Add("No effects or passives — card has no behavior when played");
 
-            // Per-passive checks
-            if (card.Passives == null)
-                return issues;
-
-            for (int i = 0; i < card.Passives.Count; i++)
+            // Per-effect checks (null entries + each effect's own configuration issues)
+            if (card.Effects != null)
             {
-                var passive = card.Passives[i];
-                if (passive == null)
+                for (int i = 0; i < card.Effects.Count; i++)
                 {
-                    issues.Add($"Passive [{i}]: null entry in list");
-                    continue;
+                    var effect = card.Effects[i];
+                    if (effect == null)
+                    {
+                        issues.Add($"Effect [{i}]: null entry in list");
+                        continue;
+                    }
+                    foreach (var issue in effect.GetConfigurationIssues())
+                        issues.Add($"Effect '{effect.GetType().Name}': {issue}");
                 }
+            }
 
-                if (passive.Trigger == null)
-                    issues.Add($"Passive '{passive.Name}': no trigger set — will never fire");
+            // Per-passive checks
+            if (card.Passives != null)
+            {
+                for (int i = 0; i < card.Passives.Count; i++)
+                {
+                    var passive = card.Passives[i];
+                    if (passive == null)
+                    {
+                        issues.Add($"Passive [{i}]: null entry in list");
+                        continue;
+                    }
 
-                if (passive.Effects == null || passive.Effects.Count == 0)
-                    issues.Add(
-                        $"Passive '{passive.Name}': has trigger but no effects — fires silently"
-                    );
+                    if (passive.Trigger == null)
+                        issues.Add($"Passive '{passive.Name}': no trigger set — will never fire");
+
+                    if (passive.Effects == null || passive.Effects.Count == 0)
+                    {
+                        issues.Add(
+                            $"Passive '{passive.Name}': has trigger but no effects — fires silently"
+                        );
+                    }
+                    else
+                    {
+                        for (int j = 0; j < passive.Effects.Count; j++)
+                        {
+                            var pe = passive.Effects[j];
+                            if (pe == null)
+                            {
+                                issues.Add($"Passive '{passive.Name}' effect [{j}]: null entry");
+                                continue;
+                            }
+                            foreach (var issue in pe.GetConfigurationIssues())
+                                issues.Add(
+                                    $"Passive '{passive.Name}' effect '{pe.GetType().Name}': {issue}"
+                                );
+                        }
+                    }
+                }
             }
 
             return issues;
@@ -1571,10 +1548,9 @@ namespace Crookedile.Editor
             if (string.IsNullOrWhiteSpace(move.IntentDescription))
                 issues.Add("No intent description — player cannot see what this move will do");
 
-            bool hasNewEffects = move.NewEffects != null && move.NewEffects.Count > 0;
-            bool hasLegacyEffects = move.Effects != null && move.Effects.Count > 0;
+            bool hasEffects = move.Effects != null && move.Effects.Count > 0;
 
-            if (!hasNewEffects && !hasLegacyEffects && move.MoveType != EnemyMoveType.SummonMinion)
+            if (!hasEffects && move.MoveType != EnemyMoveType.SummonMinion)
                 issues.Add("No effects defined — move resolves but does nothing");
 
             if (move.MoveType == EnemyMoveType.SummonMinion && move.MinionToSummon == null)
@@ -1617,10 +1593,10 @@ namespace Crookedile.Editor
                     hasIssues = true;
                 }
 
-                // Check for empty effects
-                if (card.Effects == null || card.Effects.Count == 0)
+                // Effect/passive configuration health — same source of truth as the Card Health view.
+                foreach (var issue in GetCardIssues(card))
                 {
-                    cardIssues.AppendLine("  - No effects defined");
+                    cardIssues.AppendLine($"  - {issue}");
                     hasIssues = true;
                 }
 
@@ -1664,5 +1640,6 @@ namespace Crookedile.Editor
         #endregion
     }
 }
+        #endregion
         #endregion
         #endregion

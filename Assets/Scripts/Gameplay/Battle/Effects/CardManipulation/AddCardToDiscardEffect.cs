@@ -44,5 +44,13 @@ namespace Crookedile.Gameplay.Battle
                 ? $"Add {name} to your discard"
                 : $"Add {_amount}x {name} to your discard";
         }
+
+#if UNITY_EDITOR
+        public override System.Collections.Generic.IEnumerable<string> GetConfigurationIssues()
+        {
+            if (_card == null)
+                yield return "No card assigned — effect will do nothing";
+        }
+#endif
     }
 }
