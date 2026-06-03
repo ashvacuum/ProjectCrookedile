@@ -43,5 +43,13 @@ namespace Crookedile.Gameplay.Battle
                 ? $"Add {name} to your hand"
                 : $"Add {_amount}x {name} to your hand";
         }
+
+#if UNITY_EDITOR
+        public override System.Collections.Generic.IEnumerable<string> GetConfigurationIssues()
+        {
+            if (_card == null)
+                yield return "No card assigned — effect will do nothing";
+        }
+#endif
     }
 }
