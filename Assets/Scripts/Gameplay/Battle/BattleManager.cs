@@ -35,6 +35,13 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private float _perEnemyAttackDelay = 0.5f;
 
+        [Tooltip(
+            "Opinion lost at the end of each player turn while the room is an echo chamber "
+                + "(every enemy receptive). 0 disables decay."
+        )]
+        [SerializeField]
+        private int _echoChamberDecayPerTurn = 5;
+
         [Header("Origin Passives")]
         [Tooltip("Assign all three OriginPassive assets here (FaithLeader, NepoBaby, Actor).")]
         [SerializeField]
@@ -72,6 +79,9 @@ namespace Crookedile.Gameplay.Battle
         private OpinionLedger _opinion;
         private int _maxTurns; // 0 = no limit
         private int _playerTurnsElapsed;
+
+        // Cached echo-chamber state, so transitions can publish EchoChamberChangedEvent once.
+        private bool _echoChamberActive;
 
         // Battle result
         private BattleResult _battleResult;
@@ -241,8 +251,11 @@ namespace Crookedile.Gameplay.Battle
             _opinion = new OpinionLedger(
                 maxOpinion,
                 setup.startingOpinion ?? maxOpinion / 2,
-                onOpinionMaxed: () => CheckAndEndBattleIfOver()
+                onOpinionMaxed: () => CheckAndEndBattleIfOver(),
+                isEchoChamber: IsEchoChamber
             );
+            // Start "inactive" so the first state refresh announces an opening chamber, if any.
+            _echoChamberActive = false;
 
             EventBus.Publish(new BattleStartedEvent { Setup = setup });
             TransitionToState(BattleState.Initialize);
@@ -405,6 +418,42 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
+        #region Echo Chamber
+
+        /// <summary>
+        /// True when the room is an echo chamber: at least one enemy is present and EVERY living
+        /// enemy is receptive (hostility &lt; 0). A single neutral or hostile enemy breaks it.
+        /// While active, opinion gains are halved and the meter decays each player turn.
+        /// </summary>
+        public bool IsEchoChamber()
+        {
+            bool anyLiving = false;
+            foreach (var enemy in _enemies)
+            {
+                if (enemy.IsDefeated)
+                    continue;
+                anyLiving = true;
+                if (!enemy.Stats.IsReceptive)
+                    return false;
+            }
+            return anyLiving;
+        }
+
+        /// <summary>Recomputes echo-chamber state and publishes a transition event only when it changes.</summary>
+        private void RefreshEchoChamberState()
+        {
+            bool now = IsEchoChamber();
+            if (now == _echoChamberActive)
+                return;
+            _echoChamberActive = now;
+            EventBus.Publish(new EchoChamberChangedEvent { Active = now });
+            GameLogger.LogInfo<BattleManager>(
+                now ? "Echo chamber formed — opinion gains halved, meter will decay." : "Echo chamber broken."
+            );
+        }
+
+        #endregion
+
         #region Card Playing
 
         /// <summary>Plays a card from the player's hand.</summary>
@@ -476,6 +525,9 @@ namespace Crookedile.Gameplay.Battle
                 enemy.CheckBecameHostile();
             CheckAndAdvanceFocusAfterCardPlay();
             TriggerMomentum();
+
+            // The card may have shifted the room in or out of an echo chamber — notify the UI live.
+            RefreshEchoChamberState();
 
             // Immediately end the battle if all enemies are dead (or player died e.g. from Thorns).
             if (CheckAndEndBattleIfOver())
@@ -873,6 +925,10 @@ namespace Crookedile.Gameplay.Battle
                         GainDenial(ritual);
                 }
             }
+
+            // Surface the echo-chamber state at the top of each turn (enemy moves may have
+            // changed the room; halving/decay always use the live IsEchoChamber() check).
+            RefreshEchoChamberState();
         }
 
         /// <summary>Runs end-of-turn effects for the current combatant(s).</summary>
@@ -884,6 +940,17 @@ namespace Crookedile.Gameplay.Battle
                 // Apply opinion-affecting statuses (read at current stacks) before OnTurnEnd decrements.
                 ApplyTurnEndOpinionStatuses(_effectResolver.PlayerStatusEffects);
                 _effectResolver.PlayerStatusEffects.OnTurnEnd(_playerStats);
+
+                // Echo-chamber decay — bleeds sentiment while the whole room is receptive.
+                // Checked after the player's full turn, so breaking the chamber this turn avoids it.
+                if (_echoChamberDecayPerTurn > 0 && IsEchoChamber())
+                {
+                    _opinion.DecayOpinion(_echoChamberDecayPerTurn);
+                    GameLogger.LogInfo<BattleManager>(
+                        $"Echo chamber decay: -{_echoChamberDecayPerTurn} opinion"
+                    );
+                }
+
                 _playerDeck.EndTurn();
             }
             else

@@ -232,6 +232,7 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<TurnLimitUpdatedEvent>(OnTurnLimitUpdated);
             EventBus.Subscribe<JudgmentEvent>(OnJudgment);
             EventBus.Subscribe<EnemySkippedTurnEvent>(OnEnemySkippedTurn);
+            EventBus.Subscribe<EchoChamberChangedEvent>(OnEchoChamberChanged);
         }
 
         private void UnsubscribeFromEvents()
@@ -260,6 +261,7 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<TurnLimitUpdatedEvent>(OnTurnLimitUpdated);
             EventBus.Unsubscribe<JudgmentEvent>(OnJudgment);
             EventBus.Unsubscribe<EnemySkippedTurnEvent>(OnEnemySkippedTurn);
+            EventBus.Unsubscribe<EchoChamberChangedEvent>(OnEchoChamberChanged);
         }
 
         /// <summary>
@@ -670,6 +672,15 @@ namespace Crookedile.UI.Battle
         private void OnEnemySkippedTurn(EnemySkippedTurnEvent evt)
         {
             logPanel?.AddEntry($"{evt.EnemyName} held back this turn.");
+        }
+
+        private void OnEchoChamberChanged(EchoChamberChangedEvent evt)
+        {
+            logPanel?.AddEntry(
+                evt.Active
+                    ? "Echo chamber! The room agrees with you — opinion gains are halved and your lead will bleed. Provoke someone."
+                    : "Echo chamber broken — the room has a dissenter again."
+            );
         }
 
         private void RefreshOpinionMeter()
