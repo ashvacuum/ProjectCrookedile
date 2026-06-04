@@ -220,6 +220,31 @@ namespace Crookedile.Gameplay.Battle
                     }
                     break;
 
+                case TargetType.Adjacent:
+                    // Focused enemy + immediate living neighbours (the player has no row neighbours).
+                    if (IsPlayerCard && AllEnemies != null && Target != null && Target.OwnerEnemyIndex >= 0)
+                    {
+                        int idx = Target.OwnerEnemyIndex;
+                        AddEnemyAt(pairs, idx - 1);
+                        AddEnemyAt(pairs, idx);
+                        AddEnemyAt(pairs, idx + 1);
+                    }
+                    else
+                    {
+                        pairs.Add((Target, TargetStatusEffects));
+                    }
+                    break;
+
+                case TargetType.AllHostile:
+                    // The hostile dissenters in the crowd (the enemy row), regardless of caster.
+                    AddLivingEnemiesWhere(pairs, e => e.Stats.IsHostile);
+                    break;
+
+                case TargetType.AllReceptive:
+                    // The receptive supporters in the crowd (the enemy row), regardless of caster.
+                    AddLivingEnemiesWhere(pairs, e => e.Stats.IsReceptive);
+                    break;
+
                 default:
                     GameLogger.LogWarning<EffectExecutionContext>(
                         $"Unhandled TargetType {targetType} — falling back to Opponent"
@@ -229,6 +254,29 @@ namespace Crookedile.Gameplay.Battle
             }
 
             return pairs;
+        }
+
+        /// <summary>Adds the living enemy at <paramref name="index"/> (if in range) to the target list.</summary>
+        private void AddEnemyAt(List<(BattleStats, StatusEffectManager)> pairs, int index)
+        {
+            if (AllEnemies == null || index < 0 || index >= AllEnemies.Count)
+                return;
+            var enemy = AllEnemies[index];
+            if (!enemy.IsDefeated)
+                pairs.Add((enemy.Stats, enemy.StatusEffects));
+        }
+
+        /// <summary>Adds every living enemy matching <paramref name="predicate"/> to the target list.</summary>
+        private void AddLivingEnemiesWhere(
+            List<(BattleStats, StatusEffectManager)> pairs,
+            System.Func<EnemyController, bool> predicate
+        )
+        {
+            if (AllEnemies == null)
+                return;
+            foreach (var enemy in AllEnemies)
+                if (!enemy.IsDefeated && predicate(enemy))
+                    pairs.Add((enemy.Stats, enemy.StatusEffects));
         }
 
         /// <summary>
