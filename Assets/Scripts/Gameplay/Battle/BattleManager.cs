@@ -42,6 +42,13 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private int _echoChamberDecayPerTurn = 5;
 
+        [Tooltip(
+            "Support gained at the start of the player turn per receptive enemy (reading a friendly "
+                + "room — the mirror to hostile enemies granting bonus draws). 0 disables."
+        )]
+        [SerializeField]
+        private int _supportPerReceptiveEnemy = 1;
+
         [Header("Turncoat (receptive → hostile betrayal)")]
         [Tooltip("Turncoat stacks applied to a betrayer. Each stack adds bonus pressure and fades 1/turn.")]
         [SerializeField]
@@ -998,6 +1005,19 @@ namespace Crookedile.Gameplay.Battle
                 int ritual = _effectResolver.PlayerStatusEffects.GetStacks(StatusEffectType.Ritual);
                 if (ritual > 0)
                     GainSupport(ritual);
+
+                // Receptive crowd grants Support — the mirror to hostile enemies granting bonus
+                // draws. A friendly room cushions your standing (but a fully-receptive room still
+                // bleeds via the echo chamber, since decay bypasses Support).
+                if (_supportPerReceptiveEnemy > 0)
+                {
+                    int receptive = 0;
+                    foreach (var enemy in _enemies)
+                        if (!enemy.IsDefeated && enemy.Stats.IsReceptive)
+                            receptive++;
+                    if (receptive > 0)
+                        GainSupport(receptive * _supportPerReceptiveEnemy);
+                }
 
                 // Remove player-turn-start duration effects from all living enemies (e.g. Stunned).
                 foreach (var enemy in _enemies)
