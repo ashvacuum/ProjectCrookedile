@@ -1260,83 +1260,28 @@ namespace Crookedile.Gameplay.Battle
                 // Capture count before the loop so summoned enemies act next turn, not this one.
                 int enemyCount = _manager._enemies.Count;
 
+                // Two-pass resolution. Pass 1: modifier intents (e.g. RileOthers) resolve first so
+                // their board changes — amplifying allies' hostility, summoning bodies — land before
+                // the direct hits. Pass 2: direct intents (attacks, shields) resolve left to right.
                 for (int i = 0; i < enemyCount; i++)
                 {
-                    var enemy = _manager._enemies[i];
-                    if (enemy.IsDefeated || enemy.CurrentIntent == null)
-                        continue;
-
-                    // Stunned enemies skip their entire action for this turn.
-                    if (enemy.StatusEffects.HasEffect(StatusEffectType.Stunned))
+                    var intent = _manager._enemies[i].CurrentIntent;
+                    if (intent != null && IsModifierIntent(intent.MoveType))
                     {
-                        GameLogger.LogInfo<BattleManager>(
-                            $"Enemy [{i}] {enemy.EnemyData.EnemyName} is Stunned — skipping action"
-                        );
-                        continue;
+                        yield return _manager.StartCoroutine(ResolveSingleEnemyAction(i));
+                        if (_manager.CurrentState == BattleState.BattleEnd)
+                            yield break;
                     }
+                }
 
-                    // Receptive enemies have a chance to hold back (20% per negative hostility stack).
-                    if (enemy.Stats.IsReceptive)
+                for (int i = 0; i < enemyCount; i++)
+                {
+                    var intent = _manager._enemies[i].CurrentIntent;
+                    if (intent != null && !IsModifierIntent(intent.MoveType))
                     {
-                        float skipChance = Mathf.Clamp01(
-                            Mathf.Abs(enemy.Stats.CurrentHostility) * 0.20f
-                        );
-                        if (UnityEngine.Random.value < skipChance)
-                        {
-                            GameLogger.LogInfo<BattleManager>(
-                                $"Enemy [{i}] {enemy.EnemyData.EnemyName} is Receptive — held back "
-                                    + $"(skip chance {skipChance:P0})"
-                            );
-                            EventBus.Publish(
-                                new EnemySkippedTurnEvent
-                                {
-                                    EnemyIndex = i,
-                                    EnemyName = enemy.EnemyData.EnemyName,
-                                }
-                            );
-                            continue;
-                        }
-                    }
-
-                    // Signal the UI: this enemy is about to act (shake + highlight intent panel)
-                    EventBus.Publish(
-                        new EnemyActingEvent { EnemyIndex = i, Move = enemy.CurrentIntent }
-                    );
-
-                    // Brief pause so the player sees the signal before damage lands
-                    yield return new WaitForSeconds(_manager._perEnemyAttackDelay);
-
-                    GameLogger.LogInfo<BattleManager>(
-                        $"Enemy [{i}] {enemy.EnemyData.EnemyName} executes: {enemy.CurrentIntent.MoveName}"
-                    );
-
-                    // Temporarily point EffectResolver at this enemy as the caster
-                    _manager._effectResolver.SetFocusedOpponent(
-                        enemy.Stats,
-                        enemy.StatusEffects,
-                        i,
-                        enemy.EnemyData.EnemyName
-                    );
-                    var move = enemy.CurrentIntent;
-                    yield return _manager.StartCoroutine(
-                        _manager._effectResolver.ResolveEnemyMoveEffects(move)
-                    );
-
-                    // If the player was killed by this move, end the battle immediately
-                    // so remaining enemies don't continue acting.
-                    if (_manager.CheckAndEndBattleIfOver())
-                        yield break;
-
-                    // Handle SummonMinion moves after normal effects resolve
-                    if (
-                        enemy.CurrentIntent.MoveType == EnemyMoveType.SummonMinion
-                        && enemy.CurrentIntent.MinionToSummon != null
-                    )
-                    {
-                        _manager.SummonMinions(
-                            enemy.CurrentIntent.MinionToSummon,
-                            enemy.CurrentIntent.MinionCount
-                        );
+                        yield return _manager.StartCoroutine(ResolveSingleEnemyAction(i));
+                        if (_manager.CurrentState == BattleState.BattleEnd)
+                            yield break;
                     }
                 }
 
@@ -1351,6 +1296,87 @@ namespace Crookedile.Gameplay.Battle
 
                 _manager.TransitionToState(BattleState.TurnEnd);
             }
+
+            /// <summary>
+            /// Resolves one enemy's declared action: stun / receptive-skip checks, the acting
+            /// signal + pause, effect resolution, and SummonMinion handling. Ends the battle early
+            /// (transitioning to BattleEnd) if the player is defeated mid-action — callers should
+            /// stop once <see cref="CurrentState"/> is BattleEnd.
+            /// </summary>
+            private IEnumerator ResolveSingleEnemyAction(int i)
+            {
+                var enemy = _manager._enemies[i];
+                if (enemy.IsDefeated || enemy.CurrentIntent == null)
+                    yield break;
+
+                // Stunned enemies skip their entire action for this turn.
+                if (enemy.StatusEffects.HasEffect(StatusEffectType.Stunned))
+                {
+                    GameLogger.LogInfo<BattleManager>(
+                        $"Enemy [{i}] {enemy.EnemyData.EnemyName} is Stunned — skipping action"
+                    );
+                    yield break;
+                }
+
+                // Receptive enemies have a chance to hold back (20% per negative hostility stack).
+                if (enemy.Stats.IsReceptive)
+                {
+                    float skipChance = Mathf.Clamp01(Mathf.Abs(enemy.Stats.CurrentHostility) * 0.20f);
+                    if (UnityEngine.Random.value < skipChance)
+                    {
+                        GameLogger.LogInfo<BattleManager>(
+                            $"Enemy [{i}] {enemy.EnemyData.EnemyName} is Receptive — held back "
+                                + $"(skip chance {skipChance:P0})"
+                        );
+                        EventBus.Publish(
+                            new EnemySkippedTurnEvent
+                            {
+                                EnemyIndex = i,
+                                EnemyName = enemy.EnemyData.EnemyName,
+                            }
+                        );
+                        yield break;
+                    }
+                }
+
+                // Signal the UI: this enemy is about to act (shake + highlight intent panel)
+                EventBus.Publish(new EnemyActingEvent { EnemyIndex = i, Move = enemy.CurrentIntent });
+
+                // Brief pause so the player sees the signal before damage lands
+                yield return new WaitForSeconds(_manager._perEnemyAttackDelay);
+
+                GameLogger.LogInfo<BattleManager>(
+                    $"Enemy [{i}] {enemy.EnemyData.EnemyName} executes: {enemy.CurrentIntent.MoveName}"
+                );
+
+                // Temporarily point EffectResolver at this enemy as the caster
+                _manager._effectResolver.SetFocusedOpponent(
+                    enemy.Stats,
+                    enemy.StatusEffects,
+                    i,
+                    enemy.EnemyData.EnemyName
+                );
+                var move = enemy.CurrentIntent;
+                yield return _manager.StartCoroutine(
+                    _manager._effectResolver.ResolveEnemyMoveEffects(move)
+                );
+
+                // If the player was defeated by this move, end the battle before any further actions.
+                if (_manager.CheckAndEndBattleIfOver())
+                    yield break;
+
+                // Handle SummonMinion moves after normal effects resolve.
+                if (move.MoveType == EnemyMoveType.SummonMinion && move.MinionToSummon != null)
+                    _manager.SummonMinions(move.MinionToSummon, move.MinionCount);
+            }
+
+            /// <summary>
+            /// Modifier intents reshape the board (other enemies / new bodies) and resolve before
+            /// direct intents so their effects apply this turn. Add future board-modifiers (e.g. Sway)
+            /// here.
+            /// </summary>
+            private static bool IsModifierIntent(EnemyMoveType type) =>
+                type == EnemyMoveType.RileOthers || type == EnemyMoveType.SummonMinion;
         }
 
         /// <summary>Turn End State — cleanup effects, check victory, advance.</summary>
