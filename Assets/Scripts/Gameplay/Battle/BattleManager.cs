@@ -516,6 +516,7 @@ namespace Crookedile.Gameplay.Battle
                             StatusType = StatusEffectType.Turncoat,
                             Stacks = _turncoatStacks,
                             IsToPlayer = false,
+                            EnemyIndex = idx,
                         }
                     );
                 }
@@ -656,6 +657,7 @@ namespace Crookedile.Gameplay.Battle
                         StatusType = StatusEffectType.Echo,
                         Stacks = -1,
                         IsToPlayer = true,
+                        EnemyIndex = -1,
                     }
                 );
                 GameLogger.LogInfo<BattleManager>($"Echo triggered — replaying {card.CardName}");

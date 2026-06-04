@@ -628,21 +628,15 @@ namespace Crookedile.UI.Battle
         {
             UpdateStatsDisplay();
 
-            // When Stunned is applied to an enemy, immediately hide their intent display.
-            // The enemy can't act this turn, so showing a planned move would be misleading.
-            if (evt.StatusType == StatusEffectType.Stunned && !evt.IsToPlayer && evt.Stacks > 0)
+            // Refresh the specific enemy slot so its status display reflects the change.
+            if (!evt.IsToPlayer && evt.EnemyIndex >= 0 && evt.EnemyIndex < _enemySlots.Count)
             {
-                for (int i = 0; i < _enemySlots.Count; i++)
-                {
-                    if (
-                        battleManager != null
-                        && i < battleManager.Enemies.Count
-                        && battleManager
-                            .Enemies[i]
-                            .StatusEffects.HasEffect(StatusEffectType.Stunned)
-                    )
-                        _enemySlots[i]?.ClearIntent();
-                }
+                _enemySlots[evt.EnemyIndex]?.Refresh();
+
+                // Silencing an enemy (Stunned) neutralises its turn — clear the intent immediately
+                // so the player sees the threat is handled rather than a move that will never fire.
+                if (evt.StatusType == StatusEffectType.Stunned && evt.Stacks > 0)
+                    _enemySlots[evt.EnemyIndex]?.ClearIntent();
             }
         }
 

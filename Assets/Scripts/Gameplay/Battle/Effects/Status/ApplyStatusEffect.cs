@@ -52,6 +52,7 @@ namespace Crookedile.Gameplay.Battle
                         StatusType = _statusType,
                         Stacks = stacks,
                         IsToPlayer = targetStats == ctx.PlayerStats,
+                        EnemyIndex = targetStats.OwnerEnemyIndex,
                     }
                 );
             }
