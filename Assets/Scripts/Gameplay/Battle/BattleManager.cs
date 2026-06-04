@@ -42,6 +42,19 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private int _echoChamberDecayPerTurn = 5;
 
+        [Header("Turncoat (receptive → hostile betrayal)")]
+        [Tooltip("Turncoat stacks applied to a betrayer. Each stack adds bonus pressure and fades 1/turn.")]
+        [SerializeField]
+        private int _turncoatStacks = 2;
+
+        [Tooltip("Opinion lost when an enemy turns coat (the crowd notices the betrayal). 0 disables.")]
+        [SerializeField]
+        private int _turncoatOpinionHit = 3;
+
+        [Tooltip("Hostility added to each immediate neighbour when an enemy turns coat. 0 disables contagion.")]
+        [SerializeField]
+        private int _turncoatAdjacentNudge = 1;
+
         [Header("Origin Passives")]
         [Tooltip("Assign all three OriginPassive assets here (FaithLeader, NepoBaby, Actor).")]
         [SerializeField]
@@ -82,6 +95,10 @@ namespace Crookedile.Gameplay.Battle
 
         // Cached echo-chamber state, so transitions can publish EchoChamberChangedEvent once.
         private bool _echoChamberActive;
+
+        // Guards the Turncoat cascade against re-entrancy (a contagion nudge can't itself turncoat,
+        // but this keeps the reaction atomic if tuning ever changes).
+        private bool _resolvingTurncoat;
 
         // Battle result
         private BattleResult _battleResult;
@@ -146,6 +163,7 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Subscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
             EventBus.Subscribe<CardVFXApplyEffectsEvent>(OnCardVFXApplyEffects);
             EventBus.Subscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
+            EventBus.Subscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
         }
 
         private void UnsubscribeFromEvents()
@@ -154,6 +172,7 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Unsubscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
             EventBus.Unsubscribe<CardVFXApplyEffectsEvent>(OnCardVFXApplyEffects);
             EventBus.Unsubscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
+            EventBus.Unsubscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
         }
 
         private void InitializeStateMachine()
@@ -450,6 +469,89 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<BattleManager>(
                 now ? "Echo chamber formed — opinion gains halved, meter will decay." : "Echo chamber broken."
             );
+        }
+
+        #endregion
+
+        #region Turncoat
+
+        /// <summary>
+        /// Reacts to a receptive enemy flipping hostile: applies the Turncoat status, takes a small
+        /// opinion hit (the crowd noticed), nudges immediate neighbours toward hostility (contagion),
+        /// and forces the betrayer's next intent to be aggressive.
+        /// </summary>
+        private void OnEnemyTurncoat(EnemyTurncoatEvent evt)
+        {
+            if (_resolvingTurncoat)
+                return;
+
+            int idx = evt.EnemyIndex;
+            if (idx < 0 || idx >= _enemies.Count)
+                return;
+            var enemy = _enemies[idx];
+            if (enemy.IsDefeated)
+                return;
+
+            _resolvingTurncoat = true;
+            try
+            {
+                // 1. Turncoat status — hits harder than a natural hostile for a turn or two.
+                if (_turncoatStacks > 0)
+                {
+                    enemy.StatusEffects.ApplyStatusEffect(
+                        StatusEffectType.Turncoat,
+                        _turncoatStacks,
+                        StatusDurationType.DecreasePerTurn
+                    );
+                    EventBus.Publish(
+                        new StatusEffectAppliedEvent
+                        {
+                            StatusType = StatusEffectType.Turncoat,
+                            Stacks = _turncoatStacks,
+                            IsToPlayer = false,
+                        }
+                    );
+                }
+
+                // 2. The crowd noticed the betrayal — small direct opinion hit (bypasses Support).
+                if (_turncoatOpinionHit > 0)
+                    _opinion.DecayOpinion(_turncoatOpinionHit);
+
+                // 3. Betrayal is contagious — nudge immediate neighbours' hostility.
+                if (_turncoatAdjacentNudge > 0)
+                {
+                    NudgeNeighbourHostility(idx - 1);
+                    NudgeNeighbourHostility(idx + 1);
+                }
+
+                // 4. Lash out — force an aggressive next intent and re-declare it for the UI.
+                enemy.FlagForcedAggressiveIntent();
+                var intent = enemy.SelectNextMove(_enemies);
+                if (intent != null)
+                    EventBus.Publish(
+                        new EnemyIntentDeclaredEvent { Move = intent, EnemyIndex = idx }
+                    );
+
+                GameLogger.LogInfo<BattleManager>(
+                    $"Turncoat! [{idx}] {enemy.EnemyData.EnemyName} turned on you."
+                );
+            }
+            finally
+            {
+                _resolvingTurncoat = false;
+            }
+
+            // Contagion may have changed the room's echo-chamber status.
+            RefreshEchoChamberState();
+        }
+
+        private void NudgeNeighbourHostility(int index)
+        {
+            if (index < 0 || index >= _enemies.Count)
+                return;
+            var neighbour = _enemies[index];
+            if (!neighbour.IsDefeated)
+                neighbour.Stats.GainHostility(_turncoatAdjacentNudge);
         }
 
         #endregion

@@ -161,6 +161,7 @@ namespace Crookedile.Gameplay.Battle
         Fanatic, // GainHostility is a no-op — can't be riled up; can be won over
         Momentum, // Deal X damage to a random enemy per card played this turn
         Echo, // Next card is played twice
+        Turncoat, // A freshly-betrayed enemy: deals +X bonus pressure per stack, fades over a turn or two
     }
 
     /// <summary>

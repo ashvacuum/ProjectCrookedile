@@ -38,6 +38,9 @@ namespace Crookedile.Gameplay.Battle
         // Hostile-this-turn tracking — used by BattleManager to award bonus card draws
         private int _hostilityAtTurnStart;
 
+        // Set by the Turncoat cascade — forces the next SelectNextMove to pick an offensive move.
+        private bool _forceAggressiveIntent;
+
         /// <summary>
         /// The move the enemy intends to execute this turn.
         /// Set by SelectNextMove() at the start of the player's turn
@@ -123,6 +126,19 @@ namespace Crookedile.Gameplay.Battle
                 return null;
             }
 
+            // Turncoat: a freshly-betrayed enemy lashes out — force an offensive move this once.
+            if (_forceAggressiveIntent)
+            {
+                _forceAggressiveIntent = false;
+                var offensive = eligible.Where(m => IsOffensiveMove(m.MoveType)).ToList();
+                if (offensive.Count > 0)
+                {
+                    CurrentIntent = offensive[Random.Range(0, offensive.Count)];
+                    return CurrentIntent;
+                }
+                // No offensive move available — fall through to normal selection.
+            }
+
             // When receptive (negative hostility), prefer non-offensive moves.
             if (Stats.IsReceptive)
             {
@@ -171,6 +187,17 @@ namespace Crookedile.Gameplay.Battle
             if (!BecameHostileThisTurn && _hostilityAtTurnStart <= 0 && Stats.CurrentHostility > 0)
                 BecameHostileThisTurn = true;
         }
+
+        /// <summary>
+        /// Flags the next <see cref="SelectNextMove"/> to pick an offensive move if one is available.
+        /// Used by the Turncoat cascade so a betrayer lashes out on its next intent.
+        /// </summary>
+        public void FlagForcedAggressiveIntent() => _forceAggressiveIntent = true;
+
+        private static bool IsOffensiveMove(EnemyMoveType type) =>
+            type == EnemyMoveType.Attack
+            || type == EnemyMoveType.OffensiveBuff
+            || type == EnemyMoveType.DebuffAttack;
 
         #endregion
 
