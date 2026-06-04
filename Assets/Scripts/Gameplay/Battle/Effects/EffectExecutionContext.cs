@@ -245,6 +245,11 @@ namespace Crookedile.Gameplay.Battle
                     AddLivingEnemiesWhere(pairs, e => e.Stats.IsReceptive);
                     break;
 
+                case TargetType.RandomReceptive:
+                    // One random receptive enemy (e.g. an enemy Sway converting a supporter).
+                    AddRandomEnemyWhere(pairs, e => e.Stats.IsReceptive);
+                    break;
+
                 default:
                     GameLogger.LogWarning<EffectExecutionContext>(
                         $"Unhandled TargetType {targetType} — falling back to Opponent"
@@ -277,6 +282,24 @@ namespace Crookedile.Gameplay.Battle
             foreach (var enemy in AllEnemies)
                 if (!enemy.IsDefeated && predicate(enemy))
                     pairs.Add((enemy.Stats, enemy.StatusEffects));
+        }
+
+        /// <summary>Adds one random living enemy matching <paramref name="predicate"/> (none if no match).</summary>
+        private void AddRandomEnemyWhere(
+            List<(BattleStats, StatusEffectManager)> pairs,
+            System.Func<EnemyController, bool> predicate
+        )
+        {
+            if (AllEnemies == null)
+                return;
+            var matches = new List<EnemyController>();
+            foreach (var enemy in AllEnemies)
+                if (!enemy.IsDefeated && predicate(enemy))
+                    matches.Add(enemy);
+            if (matches.Count == 0)
+                return;
+            var chosen = matches[Random.Range(0, matches.Count)];
+            pairs.Add((chosen.Stats, chosen.StatusEffects));
         }
 
         /// <summary>
