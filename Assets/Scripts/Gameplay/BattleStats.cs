@@ -40,6 +40,9 @@ namespace Crookedile.Gameplay
         // roster. -1 for the player (and for an enemy mid-construction, before it's registered).
         private int _ownerEnemyIndex = -1;
 
+        // Devotion resist — hostility gains are reduced by this much (synced from Devotion stacks).
+        private int _devotionResist;
+
         #region Properties
 
         /// <summary>ReduceHostility is a no-op while true (won't listen to reason).</summary>
@@ -103,6 +106,9 @@ namespace Crookedile.Gameplay
         /// <summary>Sets whether this combatant ignores hostility gains (Fanatic status).</summary>
         public void SetFanatic(bool value) => IsFanatic = value;
 
+        /// <summary>Sets how much each hostility gain is reduced (Devotion status — steadfast loyalty).</summary>
+        public void SetDevotionResist(int value) => _devotionResist = Mathf.Max(0, value);
+
         #endregion
 
         #region Hostility Management
@@ -117,10 +123,16 @@ namespace Crookedile.Gameplay
             _maxHostility = max;
         }
 
-        /// <summary>Shifts hostility upward (more hostile). No-op when Fanatic.</summary>
+        /// <summary>
+        /// Shifts hostility upward (more hostile). No-op when Fanatic; reduced by Devotion resist.
+        /// </summary>
         public void GainHostility(int amount)
         {
             if (IsFanatic)
+                return;
+            // Devotion (steadfast) softens incoming riling.
+            amount = Mathf.Max(0, amount - _devotionResist);
+            if (amount <= 0)
                 return;
             int old = _currentHostility;
             _currentHostility = Mathf.Min(_maxHostility, _currentHostility + amount);

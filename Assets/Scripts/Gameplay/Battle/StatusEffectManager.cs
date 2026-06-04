@@ -100,6 +100,7 @@ namespace Crookedile.Gameplay.Battle
                 return;
             _owner.SetHardened(HasEffect(StatusEffectType.Hardened));
             _owner.SetFanatic(HasEffect(StatusEffectType.Fanatic));
+            _owner.SetDevotionResist(GetStacks(StatusEffectType.Devotion));
         }
 
         /// <summary>
@@ -135,6 +136,7 @@ namespace Crookedile.Gameplay.Battle
                         $"{_ownerName}: {type} reduced by {amount} stacks (now {effect.Stacks})"
                     );
                 }
+                SyncHostilityFlags();
             }
         }
 
@@ -261,6 +263,9 @@ namespace Crookedile.Gameplay.Battle
 
                 i++;
             }
+
+            // Statuses may have faded (e.g. Devotion) — resync hostility-flag/resist state.
+            SyncHostilityFlags();
         }
 
         /// <summary>
@@ -301,6 +306,9 @@ namespace Crookedile.Gameplay.Battle
             // Apply Weakened (debuff)
             finalDamage -= GetStacks(StatusEffectType.Weakened);
 
+            // Shame (debuff): a shamed enemy speaks with a muted voice — less pressure.
+            finalDamage -= GetStacks(StatusEffectType.Shame);
+
             // Apply Exposed (double damage, then remove)
             if (HasEffect(StatusEffectType.Exposed))
             {
@@ -332,6 +340,9 @@ namespace Crookedile.Gameplay.Battle
             {
                 finalDamage *= 1.5f;
             }
+
+            // Guilt (debuff): a guilty enemy is persuadable — takes +1 opinion pressure per stack.
+            finalDamage += GetStacks(StatusEffectType.Guilt);
 
             // Apply Rattled — damage shifted by attacker's Hostility per stack.
             // Hostile attacker = hits land harder; receptive attacker = hits land softer.
@@ -372,6 +383,7 @@ namespace Crookedile.Gameplay.Battle
             final += GetStacks(StatusEffectType.Strength);
             final += GetStacks(StatusEffectType.Turncoat);
             final -= GetStacks(StatusEffectType.Weakened);
+            final -= GetStacks(StatusEffectType.Shame);
             if (HasEffect(StatusEffectType.Exposed))
                 final *= 2; // show doubled — Exposed will fire on the actual hit
             return Mathf.Max(0, final);
@@ -390,6 +402,7 @@ namespace Crookedile.Gameplay.Battle
             float final = incomingDamage;
             if (HasEffect(StatusEffectType.Vulnerable))
                 final *= 1.5f;
+            final += GetStacks(StatusEffectType.Guilt);
             int rattled = GetStacks(StatusEffectType.Rattled);
             if (rattled != 0)
                 final += attackerHostility * rattled;
@@ -474,6 +487,8 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Rattled => true,
                 StatusEffectType.Hardened => true,
                 StatusEffectType.Fanatic => true,
+                StatusEffectType.Guilt => true,
+                StatusEffectType.Shame => true,
                 _ => false,
             };
         }
