@@ -350,6 +350,10 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>True = applied to the player; false = applied to an enemy.</summary>
         public bool IsToPlayer;
+
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> the status was applied to,
+        /// or -1 for the player. Lets the UI refresh the correct enemy slot.</summary>
+        public int EnemyIndex;
     }
 
     #endregion
