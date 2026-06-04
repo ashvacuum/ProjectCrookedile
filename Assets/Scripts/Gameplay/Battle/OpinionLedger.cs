@@ -27,11 +27,21 @@ namespace Crookedile.Gameplay.Battle
         // Invoked whenever opinion reaches the maximum, so BattleManager can end the battle.
         private readonly Action _onOpinionMaxed;
 
-        public OpinionLedger(int maxOpinion, int startingOpinion, Action onOpinionMaxed)
+        // True while the room is an echo chamber (all enemies receptive). Supplied by BattleManager,
+        // evaluated live so halving always reflects the current room state.
+        private readonly Func<bool> _isEchoChamber;
+
+        public OpinionLedger(
+            int maxOpinion,
+            int startingOpinion,
+            Action onOpinionMaxed,
+            Func<bool> isEchoChamber = null
+        )
         {
             _maxOpinion = Mathf.Max(1, maxOpinion);
             _opinion = Mathf.Clamp(startingOpinion, 0, _maxOpinion);
             _onOpinionMaxed = onOpinionMaxed;
+            _isEchoChamber = isEchoChamber ?? (() => false);
         }
 
         #region Properties
@@ -86,12 +96,23 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void RaiseDirect(int amount) => Raise(amount);
 
+        /// <summary>
+        /// Echo-chamber decay: bleeds opinion toward 0 while the whole room is receptive.
+        /// Bypasses shields — it is ambient sentiment loss, not an attack.
+        /// </summary>
+        public void DecayOpinion(int amount) => Lower(amount);
+
         #endregion
 
         #region Opinion mutation
 
         private void Raise(int amount)
         {
+            if (amount <= 0)
+                return;
+            // Echo chamber: converting the whole room is inefficient — gains are halved.
+            if (_isEchoChamber())
+                amount /= 2;
             if (amount <= 0)
                 return;
             int old = _opinion;

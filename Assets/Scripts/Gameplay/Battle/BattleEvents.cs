@@ -490,6 +490,17 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
+    /// Published by <c>BattleManager</c> when the room enters or leaves an echo chamber
+    /// (every living enemy is receptive). While active, opinion gains are halved and the meter
+    /// decays each player turn until a non-receptive enemy is present. UI should warn the player.
+    /// </summary>
+    public struct EchoChamberChangedEvent : IGameEvent
+    {
+        /// <summary>True = the room just became an echo chamber; false = it was just broken.</summary>
+        public bool Active;
+    }
+
+    /// <summary>
     /// Published by <c>BattleManager.TurnEndState</c> each time a player turn ends,
     /// so the UI countdown always reflects the latest turn count.
     /// </summary>
