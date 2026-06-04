@@ -295,6 +295,9 @@ namespace Crookedile.Gameplay.Battle
             // Apply Strength (buff)
             finalDamage += GetStacks(StatusEffectType.Strength);
 
+            // Turncoat (buff): a freshly-betrayed enemy hits harder than a natural hostile.
+            finalDamage += GetStacks(StatusEffectType.Turncoat);
+
             // Apply Weakened (debuff)
             finalDamage -= GetStacks(StatusEffectType.Weakened);
 
@@ -367,6 +370,7 @@ namespace Crookedile.Gameplay.Battle
         {
             int final = baseDamage;
             final += GetStacks(StatusEffectType.Strength);
+            final += GetStacks(StatusEffectType.Turncoat);
             final -= GetStacks(StatusEffectType.Weakened);
             if (HasEffect(StatusEffectType.Exposed))
                 final *= 2; // show doubled — Exposed will fire on the actual hit

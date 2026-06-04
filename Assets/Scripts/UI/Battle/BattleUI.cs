@@ -233,6 +233,7 @@ namespace Crookedile.UI.Battle
             EventBus.Subscribe<JudgmentEvent>(OnJudgment);
             EventBus.Subscribe<EnemySkippedTurnEvent>(OnEnemySkippedTurn);
             EventBus.Subscribe<EchoChamberChangedEvent>(OnEchoChamberChanged);
+            EventBus.Subscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
         }
 
         private void UnsubscribeFromEvents()
@@ -262,6 +263,7 @@ namespace Crookedile.UI.Battle
             EventBus.Unsubscribe<JudgmentEvent>(OnJudgment);
             EventBus.Unsubscribe<EnemySkippedTurnEvent>(OnEnemySkippedTurn);
             EventBus.Unsubscribe<EchoChamberChangedEvent>(OnEchoChamberChanged);
+            EventBus.Unsubscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
         }
 
         /// <summary>
@@ -681,6 +683,22 @@ namespace Crookedile.UI.Battle
                     ? "Echo chamber! The room agrees with you — opinion gains are halved and your lead will bleed. Provoke someone."
                     : "Echo chamber broken — the room has a dissenter again."
             );
+        }
+
+        private void OnEnemyTurncoat(EnemyTurncoatEvent evt)
+        {
+            string name =
+                battleManager != null
+                && evt.EnemyIndex >= 0
+                && evt.EnemyIndex < battleManager.Enemies.Count
+                    ? battleManager.Enemies[evt.EnemyIndex].EnemyData.EnemyName
+                    : "An ally";
+            logPanel?.AddEntry($"{name} turned on you! They'll hit harder for a turn.");
+            if (evt.EnemyIndex >= 0 && evt.EnemyIndex < _enemySlots.Count)
+            {
+                _enemySlots[evt.EnemyIndex]?.Refresh();
+                _enemySlots[evt.EnemyIndex]?.PulseHostility();
+            }
         }
 
         private void RefreshOpinionMeter()

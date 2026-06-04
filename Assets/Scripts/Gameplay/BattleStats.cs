@@ -169,6 +169,9 @@ namespace Crookedile.Gameplay
                 EventBus.Publish(new EnemyMaxedReceptiveEvent { EnemyIndex = _ownerEnemyIndex });
             if (oldValue <= 0 && newValue > 0)
                 EventBus.Publish(new EnemyBecameHostileEvent { EnemyIndex = _ownerEnemyIndex });
+            // Turncoat: a receptive enemy (<0) flipping all the way to hostile (>0) is a betrayal.
+            if (oldValue < 0 && newValue > 0)
+                EventBus.Publish(new EnemyTurncoatEvent { EnemyIndex = _ownerEnemyIndex });
             if (oldValue >= 0 && newValue < 0)
                 EventBus.Publish(new EnemyBecameReceptiveEvent { EnemyIndex = _ownerEnemyIndex });
             if (oldValue != 0 && newValue == 0)

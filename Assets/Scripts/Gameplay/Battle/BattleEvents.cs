@@ -450,6 +450,18 @@ namespace Crookedile.Gameplay.Battle
         public int EnemyIndex;
     }
 
+    /// <summary>
+    /// Published when an enemy crosses from receptive (&lt;0) straight to hostile (&gt;0) — a betrayal.
+    /// <c>BattleManager</c> reacts with the Turncoat cascade (status, opinion hit, adjacency nudge,
+    /// forced-aggressive intent). Distinct from <see cref="EnemyBecameHostileEvent"/>, which also fires
+    /// for a neutral enemy turning hostile.
+    /// </summary>
+    public struct EnemyTurncoatEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that turned coat.</summary>
+        public int EnemyIndex;
+    }
+
     #endregion
 
     #region Opinion Meter Events
