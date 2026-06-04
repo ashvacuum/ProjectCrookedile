@@ -96,6 +96,9 @@ namespace Crookedile.Gameplay.Battle
                     "Skips its next action. Removed at start of player turn.",
                 StatusEffectType.Rattled =>
                     "Take bonus damage equal to attacker Hostility per stack (reduced if attacker is Receptive).",
+                StatusEffectType.Guilt =>
+                    "Persuadable: takes +X opinion pressure per stack, and can be converted (e.g. Absolution).",
+                StatusEffectType.Shame => "Muted: deals X less opinion pressure per stack.",
                 // Buffs
                 StatusEffectType.Strength => "Deal X more damage.",
                 StatusEffectType.Dexterity => "Gain X more Support per card played.",
@@ -112,6 +115,10 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Momentum =>
                     "Deal X damage to a random enemy per card played this turn.",
                 StatusEffectType.Echo => "The next card played is resolved twice.",
+                StatusEffectType.Turncoat =>
+                    "Freshly betrayed: deals +X bonus pressure per stack, fading over a turn or two.",
+                StatusEffectType.Devotion =>
+                    "Steadfast: resists hostility gains by X per stack (protects converts from Sway/Rile).",
                 _ => "",
             };
     }
@@ -144,6 +151,8 @@ namespace Crookedile.Gameplay.Battle
         Silenced, // Cannot play Rhetoric cards
         Stunned, // Skips its next action; removed at start of player turn (non-stackable)
         Rattled, // Take bonus/reduced damage equal to attacker's Hostility per stack
+        Guilt, // Persuadable — takes +X opinion pressure per stack; convert marker (Absolution)
+        Shame, // Muted — deals X less opinion pressure per stack
 
         // BUFFS (Positive)
         Strength, // Deal X more damage
@@ -162,6 +171,7 @@ namespace Crookedile.Gameplay.Battle
         Momentum, // Deal X damage to a random enemy per card played this turn
         Echo, // Next card is played twice
         Turncoat, // A freshly-betrayed enemy: deals +X bonus pressure per stack, fades over a turn or two
+        Devotion, // Steadfast loyalty — resists hostility gains by X per stack (protects converts)
     }
 
     /// <summary>
