@@ -150,6 +150,9 @@ namespace Crookedile.Data
         Random, // Random single opponent
         AllOpponents, // Player card → all living enemies | Enemy card → the player
         AllAllies, // Enemy card → all living enemies  | Player card → self
+        Adjacent, // Focused enemy + immediate row neighbours (player); the player (enemy)
+        AllHostile, // Every living enemy with Hostility > 0 (the dissenters)
+        AllReceptive, // Every living enemy with Hostility < 0 (the supporters)
     }
 
     /// <summary>

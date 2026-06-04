@@ -28,6 +28,17 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
 
+        [Tooltip(
+            "Which part of the crowd this pressure addresses (player cards). Opponent = the focused "
+                + "enemy; Adjacent = focused + neighbours; AllHostile / AllReceptive / AllOpponents = "
+                + "the matching group. Amount is applied per target. Enemy cards always pressure the player."
+        )]
+        [SerializeField]
+        private TargetType _target = TargetType.Opponent;
+
+        /// <summary>Exposes the chosen pattern so single-target (Opponent) cards still bump hostility.</summary>
+        public override TargetType Target => _target;
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             int baseDamage =
@@ -38,8 +49,17 @@ namespace Crookedile.Gameplay.Battle
                         : ctx.GetValue(_amountSource)
                 );
 
-            BattleStats pressureTarget = ctx.IsPlayerCard ? ctx.Target : ctx.PlayerStats;
-            ApplyPressure(pressureTarget, ctx.Caster, baseDamage, ctx);
+            if (ctx.IsPlayerCard)
+            {
+                // Address the chosen part of the crowd — pressure applies per target.
+                foreach (var (targetStats, _) in ctx.GetTargets(_target))
+                    ApplyPressure(targetStats, ctx.Caster, baseDamage, ctx);
+            }
+            else
+            {
+                // Enemy cards always pressure the player.
+                ApplyPressure(ctx.PlayerStats, ctx.Caster, baseDamage, ctx);
+            }
         }
 
         public override DamagePreview? GetDamagePreview() =>
@@ -53,7 +73,16 @@ namespace Crookedile.Gameplay.Battle
                 _amountSource == EffectContextValue.FixedAmount
                     ? _amount.ToString()
                     : _amountSource.ToString();
-            return $"Apply {amountStr} pressure to the Opinion Meter";
+            string targetStr = _target switch
+            {
+                TargetType.Opponent => "",
+                TargetType.Adjacent => " to the target and its neighbours",
+                TargetType.AllHostile => " to all hostile enemies",
+                TargetType.AllReceptive => " to all receptive enemies",
+                TargetType.AllOpponents => " to all enemies",
+                _ => $" ({_target})",
+            };
+            return $"Apply {amountStr} pressure to the Opinion Meter{targetStr}";
         }
     }
 }
