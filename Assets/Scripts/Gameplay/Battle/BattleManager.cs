@@ -101,12 +101,8 @@ namespace Crookedile.Gameplay.Battle
         private int _maxTurns; // 0 = no limit
         private int _playerTurnsElapsed;
 
-        // Cached echo-chamber state, so transitions can publish EchoChamberChangedEvent once.
-        private bool _echoChamberActive;
-
-        // Guards the Turncoat cascade against re-entrancy (a contagion nudge can't itself turncoat,
-        // but this keeps the reaction atomic if tuning ever changes).
-        private bool _resolvingTurncoat;
+        // Crowd dynamics — hostility shifts from cards, the Echo Chamber rule, the Turncoat cascade.
+        private CrowdReactions _crowd;
 
         // Battle result
         private BattleResult _battleResult;
@@ -167,6 +163,7 @@ namespace Crookedile.Gameplay.Battle
         {
             UnsubscribeFromEvents();
             _passiveResolver?.Dispose();
+            _crowd?.Dispose();
         }
 
         private void SubscribeToEvents()
@@ -175,7 +172,7 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Subscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
             EventBus.Subscribe<CardVFXApplyEffectsEvent>(OnCardVFXApplyEffects);
             EventBus.Subscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
-            EventBus.Subscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
+            // EnemyTurncoatEvent is owned by CrowdReactions (subscribed in its constructor).
         }
 
         private void UnsubscribeFromEvents()
@@ -184,7 +181,6 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Unsubscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
             EventBus.Unsubscribe<CardVFXApplyEffectsEvent>(OnCardVFXApplyEffects);
             EventBus.Unsubscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
-            EventBus.Unsubscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
         }
 
         private void InitializeStateMachine()
@@ -276,6 +272,17 @@ namespace Crookedile.Gameplay.Battle
             // the first move.
             _isPlayerTurn = false;
 
+            // Crowd dynamics — created before the ledger because the ledger asks it whether the
+            // room is an echo chamber. (Dispose any prior instance if a battle is restarted.)
+            _crowd?.Dispose();
+            _crowd = new CrowdReactions(
+                _enemies,
+                _echoChamberDecayPerTurn,
+                _turncoatStacks,
+                _turncoatOpinionHit,
+                _turncoatAdjacentNudge
+            );
+
             // Opinion Meter + session shields
             int maxOpinion = setup.maxOpinion ?? 100;
             _maxTurns = setup.maxTurns ?? 0;
@@ -283,10 +290,9 @@ namespace Crookedile.Gameplay.Battle
                 maxOpinion,
                 setup.startingOpinion ?? maxOpinion / 2,
                 onOpinionMaxed: () => CheckAndEndBattleIfOver(),
-                isEchoChamber: IsEchoChamber
+                isEchoChamber: _crowd.IsEchoChamber
             );
-            // Start "inactive" so the first state refresh announces an opening chamber, if any.
-            _echoChamberActive = false;
+            _crowd.AttachLedger(_opinion);
 
             EventBus.Publish(new BattleStartedEvent { Setup = setup });
             TransitionToState(BattleState.Initialize);
@@ -449,124 +455,6 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
-        #region Echo Chamber
-
-        /// <summary>
-        /// True when the room is an echo chamber: at least one enemy is present and EVERY living
-        /// enemy is receptive (hostility &lt; 0). A single neutral or hostile enemy breaks it.
-        /// While active, opinion gains are halved and the meter decays each player turn.
-        /// </summary>
-        public bool IsEchoChamber()
-        {
-            bool anyLiving = false;
-            foreach (var enemy in LivingEnemies)
-            {
-                anyLiving = true;
-                if (!enemy.Stats.IsReceptive)
-                    return false;
-            }
-            return anyLiving;
-        }
-
-        /// <summary>Recomputes echo-chamber state and publishes a transition event only when it changes.</summary>
-        private void RefreshEchoChamberState()
-        {
-            bool now = IsEchoChamber();
-            if (now == _echoChamberActive)
-                return;
-            _echoChamberActive = now;
-            EventBus.Publish(new EchoChamberChangedEvent { Active = now });
-            GameLogger.LogInfo<BattleManager>(
-                now ? "Echo chamber formed — opinion gains halved, meter will decay." : "Echo chamber broken."
-            );
-        }
-
-        #endregion
-
-        #region Turncoat
-
-        /// <summary>
-        /// Reacts to a receptive enemy flipping hostile: applies the Turncoat status, takes a small
-        /// opinion hit (the crowd noticed), nudges immediate neighbours toward hostility (contagion),
-        /// and forces the betrayer's next intent to be aggressive.
-        /// </summary>
-        private void OnEnemyTurncoat(EnemyTurncoatEvent evt)
-        {
-            if (_resolvingTurncoat)
-                return;
-
-            int idx = evt.EnemyIndex;
-            if (idx < 0 || idx >= _enemies.Count)
-                return;
-            var enemy = _enemies[idx];
-            if (enemy.IsDefeated)
-                return;
-
-            _resolvingTurncoat = true;
-            try
-            {
-                // 1. Turncoat status — hits harder than a natural hostile for a turn or two.
-                if (_turncoatStacks > 0)
-                {
-                    enemy.StatusEffects.ApplyStatusEffect(
-                        StatusEffectType.Turncoat,
-                        _turncoatStacks,
-                        StatusDurationType.DecreasePerTurn
-                    );
-                    EventBus.Publish(
-                        new StatusEffectAppliedEvent
-                        {
-                            StatusType = StatusEffectType.Turncoat,
-                            Stacks = _turncoatStacks,
-                            IsToPlayer = false,
-                            EnemyIndex = idx,
-                        }
-                    );
-                }
-
-                // 2. The crowd noticed the betrayal — small direct opinion hit (bypasses Support).
-                if (_turncoatOpinionHit > 0)
-                    _opinion.DecayOpinion(_turncoatOpinionHit);
-
-                // 3. Betrayal is contagious — nudge immediate neighbours' hostility.
-                if (_turncoatAdjacentNudge > 0)
-                {
-                    NudgeNeighbourHostility(idx - 1);
-                    NudgeNeighbourHostility(idx + 1);
-                }
-
-                // 4. Lash out — force an aggressive next intent and re-declare it for the UI.
-                enemy.FlagForcedAggressiveIntent();
-                var intent = enemy.SelectNextMove(_enemies);
-                if (intent != null)
-                    EventBus.Publish(
-                        new EnemyIntentDeclaredEvent { Move = intent, EnemyIndex = idx }
-                    );
-
-                GameLogger.LogInfo<BattleManager>(
-                    $"Turncoat! [{idx}] {enemy.EnemyData.EnemyName} turned on you."
-                );
-            }
-            finally
-            {
-                _resolvingTurncoat = false;
-            }
-
-            // Contagion may have changed the room's echo-chamber status.
-            RefreshEchoChamberState();
-        }
-
-        private void NudgeNeighbourHostility(int index)
-        {
-            if (index < 0 || index >= _enemies.Count)
-                return;
-            var neighbour = _enemies[index];
-            if (!neighbour.IsDefeated)
-                neighbour.Stats.GainHostility(_turncoatAdjacentNudge);
-        }
-
-        #endregion
-
         #region Card Playing
 
         /// <summary>Plays a card from the player's hand.</summary>
@@ -637,15 +525,12 @@ namespace Crookedile.Gameplay.Battle
             if (ctx.ShouldExhaust || card.IsPower)
                 _playerDeck.ExhaustFromDiscard(card);
 
-            ApplyPolicyHostilityShifts(card);
-            ApplySingleTargetHostilityRaise(card);
+            // The crowd reacts: policy/single-target hostility shifts + echo-chamber refresh.
+            _crowd.OnCardPlayed(card, FocusedEnemy, FocusedEnemyIndex);
             foreach (var enemy in _enemies)
                 enemy.CheckBecameHostile();
             CheckAndAdvanceFocusAfterCardPlay();
             TriggerMomentum();
-
-            // The card may have shifted the room in or out of an echo chamber — notify the UI live.
-            RefreshEchoChamberState();
 
             // Immediately end the battle if all enemies are dead (or player died e.g. from Thorns).
             if (CheckAndEndBattleIfOver())
@@ -701,95 +586,6 @@ namespace Crookedile.Gameplay.Battle
                     GameLogger.LogInfo<BattleManager>($"Paid {effective} AP for {card.CardName}");
                 }
             }
-        }
-
-        /// <summary>
-        /// If the played card is a Policy card, shifts EVERY living enemy's hostility
-        /// based on how their DemographicValues aligns with the card's PolicyLean.
-        ///
-        /// Alignment table (PolicyLean × DemographicValues):
-        ///   Left   + Progressive  → −1  (agreement — they like it)
-        ///   Left   + Moderate     →  0
-        ///   Left   + Traditional  → +1  (disagreement — they dislike it)
-        ///   Center + Progressive  →  0
-        ///   Center + Moderate     → −1  (agreement)
-        ///   Center + Traditional  →  0
-        ///   Right  + Progressive  → +1  (disagreement)
-        ///   Right  + Moderate     →  0
-        ///   Right  + Traditional  → −1  (agreement)
-        /// </summary>
-        private void ApplyPolicyHostilityShifts(CardData card)
-        {
-            if (card.CardType != CardType.Policy)
-                return;
-
-            foreach (var enemy in LivingEnemies)
-            {
-                int shift = GetPolicyHostilityShift(
-                    card.PolicyLean,
-                    enemy.EnemyData.DemographicValues
-                );
-                if (shift == 0)
-                    continue;
-
-                // BattleStats publishes the indexed HostilityChangedEvent itself.
-                if (shift > 0)
-                    enemy.Stats.GainHostility(shift);
-                else
-                    enemy.Stats.ReduceHostility(-shift);
-            }
-        }
-
-        /// <summary>
-        /// If the played card has any effect targeting a single enemy (<see cref="TargetType.Opponent"/>),
-        /// raises the focused enemy's Hostility by 1. This reflects the personal escalation of
-        /// singling someone out in a public debate.
-        /// Does not apply to AoE or self-targeting cards.
-        /// </summary>
-        private void ApplySingleTargetHostilityRaise(CardData card)
-        {
-            bool isSingleTarget = false;
-
-            if (card.Effects != null)
-            {
-                foreach (var effect in card.Effects)
-                {
-                    if (effect.Target == TargetType.Opponent)
-                    {
-                        isSingleTarget = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!isSingleTarget)
-                return;
-            if (FocusedEnemy == null || FocusedEnemy.IsDefeated)
-                return;
-
-            // BattleStats publishes the indexed HostilityChangedEvent itself.
-            int old = FocusedEnemy.Stats.CurrentHostility;
-            FocusedEnemy.Stats.GainHostility(1);
-            FocusedEnemy.CheckBecameHostile();
-
-            if (FocusedEnemy.Stats.CurrentHostility != old)
-                GameLogger.LogInfo<BattleManager>(
-                    $"Single-target card '{card.CardName}' raised hostility on [{_focusedEnemyIndex}] "
-                        + $"{FocusedEnemy.EnemyData.EnemyName}: {old} → {FocusedEnemy.Stats.CurrentHostility}"
-                );
-        }
-
-        private static int GetPolicyHostilityShift(PolicyLean lean, DemographicValues values)
-        {
-            return (lean, values) switch
-            {
-                (PolicyLean.Left, DemographicValues.Progressive) => -1,
-                (PolicyLean.Left, DemographicValues.Traditional) => +1,
-                (PolicyLean.Right, DemographicValues.Traditional) => -1,
-                (PolicyLean.Right, DemographicValues.Progressive) => +1,
-                (PolicyLean.Center, DemographicValues.Moderate) => -1,
-                _ => 0,
-            };
         }
 
         /// <summary>
@@ -1046,7 +842,7 @@ namespace Crookedile.Gameplay.Battle
 
             // Surface the echo-chamber state at the top of each turn (enemy moves may have
             // changed the room; halving/decay always use the live IsEchoChamber() check).
-            RefreshEchoChamberState();
+            _crowd.RefreshEchoChamberState();
         }
 
         /// <summary>Runs end-of-turn effects for the current combatant(s).</summary>
@@ -1061,13 +857,7 @@ namespace Crookedile.Gameplay.Battle
 
                 // Echo-chamber decay — bleeds sentiment while the whole room is receptive.
                 // Checked after the player's full turn, so breaking the chamber this turn avoids it.
-                if (_echoChamberDecayPerTurn > 0 && IsEchoChamber())
-                {
-                    _opinion.DecayOpinion(_echoChamberDecayPerTurn);
-                    GameLogger.LogInfo<BattleManager>(
-                        $"Echo chamber decay: -{_echoChamberDecayPerTurn} opinion"
-                    );
-                }
+                _crowd.ApplyTurnEndDecay();
 
                 _playerDeck.EndTurn();
             }
