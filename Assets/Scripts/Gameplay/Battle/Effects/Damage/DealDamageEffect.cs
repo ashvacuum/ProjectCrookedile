@@ -41,13 +41,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            int baseDamage =
-                amountOverride
-                ?? (
-                    _amountSource == EffectContextValue.FixedAmount
-                        ? _amount
-                        : ctx.GetValue(_amountSource)
-                );
+            int baseDamage = ResolveAmount(ctx, amountOverride, _amount, _amountSource);
 
             if (ctx.IsPlayerCard)
             {
@@ -69,10 +63,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override string GetDescription()
         {
-            string amountStr =
-                _amountSource == EffectContextValue.FixedAmount
-                    ? _amount.ToString()
-                    : _amountSource.ToString();
+            string amountStr = DescribeAmount(_amount, _amountSource);
             string targetStr = _target switch
             {
                 TargetType.Opponent => "",

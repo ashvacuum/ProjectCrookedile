@@ -91,6 +91,27 @@
         /// </summary>
         public abstract string GetDescription();
 
+        #region Amount resolution
+        /// <summary>
+        /// Resolves an effect's runtime amount: a Confused override wins; otherwise the authored
+        /// fixed value (when <paramref name="source"/> is FixedAmount) or the context-sourced value.
+        /// Shared by amount-based effects so the resolution rule lives in one place.
+        /// </summary>
+        protected static int ResolveAmount(
+            EffectExecutionContext ctx,
+            int? amountOverride,
+            int fixedAmount,
+            EffectContextValue source
+        ) =>
+            amountOverride
+            ?? (source == EffectContextValue.FixedAmount ? fixedAmount : ctx.GetValue(source));
+
+        /// <summary>Human-readable amount for descriptions: the fixed value, or the source name.</summary>
+        protected static string DescribeAmount(int fixedAmount, EffectContextValue source) =>
+            source == EffectContextValue.FixedAmount ? fixedAmount.ToString() : source.ToString();
+
+        #endregion
+
         #region Shared pressure helpers
         /// <summary>
         /// Applies opinion-meter pressure from <paramref name="attacker"/> to <paramref name="target"/>.

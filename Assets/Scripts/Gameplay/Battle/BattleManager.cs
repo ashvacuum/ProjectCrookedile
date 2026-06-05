@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
@@ -125,6 +126,10 @@ namespace Crookedile.Gameplay.Battle
 
         // Multi-enemy
         public IReadOnlyList<EnemyController> Enemies => _enemies;
+
+        /// <summary>Enemies still in the fight. (Currently always all of them — there is no HP/death.)</summary>
+        private IEnumerable<EnemyController> LivingEnemies => _enemies.Where(e => !e.IsDefeated);
+
         public EnemyController FocusedEnemy =>
             _enemies.Count > 0 ? _enemies[_focusedEnemyIndex] : null;
         public BattleStats OpponentStats => FocusedEnemy?.Stats;
@@ -454,10 +459,8 @@ namespace Crookedile.Gameplay.Battle
         public bool IsEchoChamber()
         {
             bool anyLiving = false;
-            foreach (var enemy in _enemies)
+            foreach (var enemy in LivingEnemies)
             {
-                if (enemy.IsDefeated)
-                    continue;
                 anyLiving = true;
                 if (!enemy.Stats.IsReceptive)
                     return false;
@@ -720,11 +723,8 @@ namespace Crookedile.Gameplay.Battle
             if (card.CardType != CardType.Policy)
                 return;
 
-            foreach (var enemy in _enemies)
+            foreach (var enemy in LivingEnemies)
             {
-                if (enemy.IsDefeated)
-                    continue;
-
                 int shift = GetPolicyHostilityShift(
                     card.PolicyLean,
                     enemy.EnemyData.DemographicValues
@@ -894,10 +894,7 @@ namespace Crookedile.Gameplay.Battle
             if (stacks <= 0)
                 return;
 
-            var living = new List<EnemyController>();
-            foreach (var e in _enemies)
-                if (!e.IsDefeated)
-                    living.Add(e);
+            var living = LivingEnemies.ToList();
             if (living.Count == 0)
                 return;
 
@@ -1018,20 +1015,14 @@ namespace Crookedile.Gameplay.Battle
                 // bleeds via the echo chamber, since decay bypasses Support).
                 if (_supportPerReceptiveEnemy > 0)
                 {
-                    int receptive = 0;
-                    foreach (var enemy in _enemies)
-                        if (!enemy.IsDefeated && enemy.Stats.IsReceptive)
-                            receptive++;
+                    int receptive = LivingEnemies.Count(e => e.Stats.IsReceptive);
                     if (receptive > 0)
                         GainSupport(receptive * _supportPerReceptiveEnemy);
                 }
 
                 // Remove player-turn-start duration effects from all living enemies (e.g. Stunned).
-                foreach (var enemy in _enemies)
-                {
-                    if (!enemy.IsDefeated)
-                        enemy.StatusEffects.OnPlayerTurnStart();
-                }
+                foreach (var enemy in LivingEnemies)
+                    enemy.StatusEffects.OnPlayerTurnStart();
 
                 // Confused: randomize card effect amounts for this turn
                 if (_effectResolver.PlayerStatusEffects.HasEffect(StatusEffectType.Confused))
@@ -1041,10 +1032,8 @@ namespace Crookedile.Gameplay.Battle
             }
             else
             {
-                foreach (var enemy in _enemies)
+                foreach (var enemy in LivingEnemies)
                 {
-                    if (enemy.IsDefeated)
-                        continue;
                     enemy.Stats.StartTurn();
                     enemy.StatusEffects.OnTurnStart(enemy.Stats);
 
@@ -1084,10 +1073,8 @@ namespace Crookedile.Gameplay.Battle
             }
             else
             {
-                foreach (var enemy in _enemies)
+                foreach (var enemy in LivingEnemies)
                 {
-                    if (enemy.IsDefeated)
-                        continue;
                     enemy.Stats.EndTurn();
                     ApplyTurnEndOpinionStatuses(enemy.StatusEffects);
                     enemy.StatusEffects.OnTurnEnd(enemy.Stats);
