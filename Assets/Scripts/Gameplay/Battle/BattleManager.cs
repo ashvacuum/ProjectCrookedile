@@ -904,15 +904,19 @@ namespace Crookedile.Gameplay.Battle
 
         #region Battle States
 
-        /// <summary>Initialize State — draws the player's opening hand.</summary>
-        private class InitializeState : State
+        /// <summary>Shared base for the battle's FSM states — holds the owning BattleManager.</summary>
+        private abstract class BattleStateBase : State
         {
-            private BattleManager _manager;
+            protected readonly BattleManager _manager;
 
+            protected BattleStateBase(BattleManager manager) => _manager = manager;
+        }
+
+        /// <summary>Initialize State — draws the player's opening hand.</summary>
+        private class InitializeState : BattleStateBase
+        {
             public InitializeState(BattleManager manager)
-            {
-                _manager = manager;
-            }
+                : base(manager) { }
 
             public override void OnEnter()
             {
@@ -934,14 +938,10 @@ namespace Crookedile.Gameplay.Battle
         /// has the enemy declare their intent (Slay the Spire timing: player sees
         /// the threat BEFORE deciding which cards to play).
         /// </summary>
-        private class TurnStartState : State
+        private class TurnStartState : BattleStateBase
         {
-            private BattleManager _manager;
-
             public TurnStartState(BattleManager manager)
-            {
-                _manager = manager;
-            }
+                : base(manager) { }
 
             public override void OnEnter()
             {
@@ -1015,14 +1015,10 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>Player Turn State — waits for EndTurnRequestedEvent from the UI.</summary>
-        private class PlayerTurnState : State
+        private class PlayerTurnState : BattleStateBase
         {
-            private BattleManager _manager;
-
             public PlayerTurnState(BattleManager manager)
-            {
-                _manager = manager;
-            }
+                : base(manager) { }
 
             public override void OnEnter() =>
                 GameLogger.LogInfo<BattleManager>("Player's turn started");
@@ -1041,14 +1037,10 @@ namespace Crookedile.Gameplay.Battle
         /// living enemies' declared moves and transitions to TurnEnd.
         /// The delay gives the player a visible pause before damage lands.
         /// </summary>
-        private class OpponentTurnState : State
+        private class OpponentTurnState : BattleStateBase
         {
-            private readonly BattleManager _manager;
-
             public OpponentTurnState(BattleManager manager)
-            {
-                _manager = manager;
-            }
+                : base(manager) { }
 
             public override void OnEnter()
             {
@@ -1184,14 +1176,10 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>Turn End State — cleanup effects, check victory, advance.</summary>
-        private class TurnEndState : State
+        private class TurnEndState : BattleStateBase
         {
-            private BattleManager _manager;
-
             public TurnEndState(BattleManager manager)
-            {
-                _manager = manager;
-            }
+                : base(manager) { }
 
             public override void OnEnter()
             {
@@ -1271,14 +1259,10 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>Battle End State — publishes the result event.</summary>
-        private class BattleEndState : State
+        private class BattleEndState : BattleStateBase
         {
-            private BattleManager _manager;
-
             public BattleEndState(BattleManager manager)
-            {
-                _manager = manager;
-            }
+                : base(manager) { }
 
             public override void OnEnter()
             {
