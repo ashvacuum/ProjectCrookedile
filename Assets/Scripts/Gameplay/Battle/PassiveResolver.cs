@@ -217,7 +217,11 @@ namespace Crookedile.Gameplay.Battle
                 {
                     foreach (var card in zone)
                     {
-                        var cardPassives = card?.GetPassives();
+                        // Power cards are excluded: their passives activate only when the card is
+                        // played (see ActivateCardPassives), Slay-the-Spire style — not from battle start.
+                        if (card == null || card.IsPower)
+                            continue;
+                        var cardPassives = card.GetPassives();
                         if (cardPassives == null)
                             continue;
                         foreach (var bp in cardPassives)
@@ -231,24 +235,55 @@ namespace Crookedile.Gameplay.Battle
             // type their trigger listens for so DispatchEvent can skip non-matching passives.
             _passivesByEvent.Clear();
             foreach (var bp in _allPassives)
-            {
-                bp.ResetForBattle();
-
-                var eventType = bp.Trigger?.EventType;
-                if (eventType == null)
-                    continue; // a passive with no trigger can never fire — leave it unbucketed
-
-                if (!_passivesByEvent.TryGetValue(eventType, out var bucket))
-                {
-                    bucket = new List<BattlePassive>();
-                    _passivesByEvent[eventType] = bucket;
-                }
-                bucket.Add(bp);
-            }
+                BucketPassive(bp);
 
             GameLogger.LogInfo<PassiveResolver>(
                 $"Registered {_allPassives.Count} BattlePassive(s) for this battle."
             );
+        }
+
+        /// <summary>Resets a passive for this battle and files it under its trigger's event type.</summary>
+        private void BucketPassive(BattlePassive bp)
+        {
+            bp.ResetForBattle();
+
+            var eventType = bp.Trigger?.EventType;
+            if (eventType == null)
+                return; // a passive with no trigger can never fire — leave it unbucketed
+
+            if (!_passivesByEvent.TryGetValue(eventType, out var bucket))
+            {
+                bucket = new List<BattlePassive>();
+                _passivesByEvent[eventType] = bucket;
+            }
+            bucket.Add(bp);
+        }
+
+        /// <summary>
+        /// Activates a Power card's passives at runtime (when the card is played), making them live
+        /// for the rest of the battle. Call from BattleManager when an <see cref="CardData.IsPower"/>
+        /// card resolves.
+        /// </summary>
+        public void ActivateCardPassives(CardData card)
+        {
+            var passives = card?.GetPassives();
+            if (passives == null)
+                return;
+
+            int added = 0;
+            foreach (var bp in passives)
+            {
+                if (bp == null)
+                    continue;
+                _allPassives.Add(bp);
+                BucketPassive(bp);
+                added++;
+            }
+
+            if (added > 0)
+                GameLogger.LogInfo<PassiveResolver>(
+                    $"Activated {added} Power passive(s) from '{card.CardName}'."
+                );
         }
 
         #endregion

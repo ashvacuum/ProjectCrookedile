@@ -624,9 +624,14 @@ namespace Crookedile.Gameplay.Battle
         {
             var ctx = _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides);
 
-            // If any effect flagged exhaust, move the card from discard → exhaust pile now
-            // (PlayCardAtIndex already moved it hand → discard before effects resolved).
-            if (ctx.ShouldExhaust)
+            // Power card (Slay-the-Spire style): its effects resolved above; now activate its
+            // passives for the rest of the battle. The card is exhausted below so it leaves play.
+            if (card.IsPower)
+                _passiveResolver?.ActivateCardPassives(card);
+
+            // If any effect flagged exhaust — or this is a Power card — move the card from
+            // discard → exhaust pile now (PlayCardAtIndex already moved it hand → discard).
+            if (ctx.ShouldExhaust || card.IsPower)
                 _playerDeck.ExhaustFromDiscard(card);
 
             ApplyPolicyHostilityShifts(card);
