@@ -79,6 +79,14 @@ namespace Crookedile.Data.Cards
         [SerializeField]
         private List<BattlePassive> _passives = new List<BattlePassive>();
 
+        [Tooltip(
+            "Power card (Slay-the-Spire style): the Passives above are NOT active from battle start. "
+                + "Instead, playing this card activates them for the rest of the battle, then the card "
+                + "is exhausted (removed from play). Its normal effects still resolve on play."
+        )]
+        [SerializeField]
+        private bool _isPower = false;
+
         #region Upgrade
         [FoldoutGroup("Upgrade")]
         [Tooltip("Is this card currently in its upgraded state?")]
@@ -248,9 +256,16 @@ namespace Crookedile.Data.Cards
 
         /// <summary>
         /// Battle-scoped passives that fire on broad battle events for the entire battle.
-        /// Registered by PassiveResolver at the start of each battle.
+        /// For non-Power cards these are registered by PassiveResolver at the start of each battle;
+        /// for <see cref="IsPower"/> cards they are activated only when the card is played.
         /// </summary>
         public IReadOnlyList<BattlePassive> Passives => _passives;
+
+        /// <summary>
+        /// True if this is a Power card: its <see cref="Passives"/> activate on play (not at battle
+        /// start) and the card is exhausted afterwards. See PassiveResolver / BattleManager.PlayCard.
+        /// </summary>
+        public bool IsPower => _isPower;
 
         /// <summary>
         /// VFX played when this card is used. Null means effects resolve immediately (no regression).
