@@ -44,29 +44,10 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
-        #region Lambda references for unconditional new-system subscriptions
-        // Stored as fields so that Dispose() can unsubscribe them correctly.
-
-        private readonly Action<TurnStartedEvent> _onTurnStarted;
-        private readonly Action<TurnEndedEvent> _onTurnEnded;
-        private readonly Action<BattleEndedEvent> _onBattleEnded;
-        private readonly Action<CardPlayedEvent> _onCardPlayed;
-        private readonly Action<CardDrawnEvent> _onCardDrawn;
-        private readonly Action<CardDiscardedEvent> _onCardDiscarded;
-        private readonly Action<CardExhaustedEvent> _onCardExhausted;
-        private readonly Action<CardRetainedEvent> _onCardRetained;
-        private readonly Action<CardRecoveredEvent> _onCardRecovered;
-        private readonly Action<CardUpgradedEvent> _onCardUpgraded;
-        private readonly Action<DamageDealtEvent> _onDamageDealt;
-        private readonly Action<HealingAppliedEvent> _onHealingApplied;
-        private readonly Action<StatusEffectAppliedEvent> _onStatusEffectApplied;
-        private readonly Action<SupportChangedEvent> _onSupportChanged;
-        private readonly Action<DenialChangedEvent> _onDenialChanged;
-        private readonly Action<EnemyDefeatedEvent> _onEnemyDefeated;
-        private readonly Action<EnemySummonedEvent> _onEnemySummoned;
-        private readonly Action<EnemyActingEvent> _onEnemyActing;
-
-        #endregion
+        // Records an unsubscribe action per EventBus subscription, so Dispose() can tear them all
+        // down without a parallel set of hand-maintained delegate fields (which were easy to
+        // desync — a subscribe with no matching unsubscribe leaks the listener).
+        private readonly List<Action> _unsubscribers = new List<Action>();
 
         #region Constructor
         /// <summary>
@@ -98,90 +79,58 @@ namespace Crookedile.Gameplay.Battle
             _battleManager = battleManager;
             _allPassives = new List<BattlePassive>();
 
-            // Initialise stored lambdas (required so Dispose can unsubscribe exact same delegate)
-            _onTurnStarted = e => DispatchEvent(e);
-            _onTurnEnded = e => DispatchEvent(e);
-            _onBattleEnded = e => DispatchEvent(e);
-            _onCardPlayed = e => DispatchEvent(e);
-            _onCardDrawn = e => DispatchEvent(e);
-            _onCardDiscarded = e => DispatchEvent(e);
-            _onCardExhausted = e => DispatchEvent(e);
-            _onCardRetained = e => DispatchEvent(e);
-            _onCardRecovered = e => DispatchEvent(e);
-            _onCardUpgraded = e => DispatchEvent(e);
-            _onDamageDealt = e => DispatchEvent(e);
-            _onHealingApplied = e => DispatchEvent(e);
-            _onStatusEffectApplied = e => DispatchEvent(e);
-            _onSupportChanged = e => DispatchEvent(e);
-            _onDenialChanged = e => DispatchEvent(e);
-            _onEnemyDefeated = e => DispatchEvent(e);
-            _onEnemySummoned = e => DispatchEvent(e);
-            _onEnemyActing = e => DispatchEvent(e);
-
             SubscribeToAllEventsForNewSystem();
         }
 
         #endregion
 
         #region EventBus wiring
-        private void SubscribeToAllEventsForNewSystem()
+
+        /// <summary>
+        /// Subscribes a single <c>e =&gt; DispatchEvent(e)</c> handler for event type
+        /// <typeparamref name="T"/> and records the matching unsubscribe so Dispose can undo it.
+        /// </summary>
+        private void Subscribe<T>()
+            where T : struct, IGameEvent
         {
-            // Subscribe unconditionally to every known event type.
-            // Each BattlePassive's PassiveTriggerBase.Matches() handles filtering.
-            // BattleStartedEvent is omitted — timing handled via FireBattleStart() instead.
-
-            EventBus.Subscribe(_onTurnStarted);
-            EventBus.Subscribe(_onTurnEnded);
-            EventBus.Subscribe(_onBattleEnded);
-
-            EventBus.Subscribe(_onCardPlayed);
-            EventBus.Subscribe(_onCardDrawn);
-            EventBus.Subscribe(_onCardDiscarded);
-            EventBus.Subscribe(_onCardExhausted);
-            EventBus.Subscribe(_onCardRetained);
-            EventBus.Subscribe(_onCardRecovered);
-            EventBus.Subscribe(_onCardUpgraded);
-
-            EventBus.Subscribe(_onDamageDealt);
-            EventBus.Subscribe(_onHealingApplied);
-            EventBus.Subscribe(_onStatusEffectApplied);
-            EventBus.Subscribe(_onSupportChanged);
-            EventBus.Subscribe(_onDenialChanged);
-
-            EventBus.Subscribe(_onEnemyDefeated);
-            EventBus.Subscribe(_onEnemySummoned);
-            EventBus.Subscribe(_onEnemyActing);
+            Action<T> handler = e => DispatchEvent(e);
+            EventBus.Subscribe(handler);
+            _unsubscribers.Add(() => EventBus.Unsubscribe(handler));
         }
 
-        private void UnsubscribeFromAllEventsForNewSystem()
+        private void SubscribeToAllEventsForNewSystem()
         {
-            EventBus.Unsubscribe(_onTurnStarted);
-            EventBus.Unsubscribe(_onTurnEnded);
-            EventBus.Unsubscribe(_onBattleEnded);
+            // Subscribe unconditionally to every known event type; each BattlePassive's trigger
+            // does its own filtering. BattleStartedEvent is omitted — handled via FireBattleStart().
+            Subscribe<TurnStartedEvent>();
+            Subscribe<TurnEndedEvent>();
+            Subscribe<BattleEndedEvent>();
 
-            EventBus.Unsubscribe(_onCardPlayed);
-            EventBus.Unsubscribe(_onCardDrawn);
-            EventBus.Unsubscribe(_onCardDiscarded);
-            EventBus.Unsubscribe(_onCardExhausted);
-            EventBus.Unsubscribe(_onCardRetained);
-            EventBus.Unsubscribe(_onCardRecovered);
-            EventBus.Unsubscribe(_onCardUpgraded);
+            Subscribe<CardPlayedEvent>();
+            Subscribe<CardDrawnEvent>();
+            Subscribe<CardDiscardedEvent>();
+            Subscribe<CardExhaustedEvent>();
+            Subscribe<CardRetainedEvent>();
+            Subscribe<CardRecoveredEvent>();
+            Subscribe<CardUpgradedEvent>();
 
-            EventBus.Unsubscribe(_onDamageDealt);
-            EventBus.Unsubscribe(_onHealingApplied);
-            EventBus.Unsubscribe(_onStatusEffectApplied);
-            EventBus.Unsubscribe(_onSupportChanged);
-            EventBus.Unsubscribe(_onDenialChanged);
+            Subscribe<DamageDealtEvent>();
+            Subscribe<HealingAppliedEvent>();
+            Subscribe<StatusEffectAppliedEvent>();
+            Subscribe<SupportChangedEvent>();
+            Subscribe<DenialChangedEvent>();
 
-            EventBus.Unsubscribe(_onEnemyDefeated);
-            EventBus.Unsubscribe(_onEnemySummoned);
-            EventBus.Unsubscribe(_onEnemyActing);
+            Subscribe<EnemyDefeatedEvent>();
+            Subscribe<EnemySummonedEvent>();
+            Subscribe<EnemyActingEvent>();
         }
 
         /// <summary>Unsubscribes all EventBus listeners. Call when the battle ends.</summary>
         public void Dispose()
         {
-            UnsubscribeFromAllEventsForNewSystem();
+            foreach (var unsubscribe in _unsubscribers)
+                unsubscribe();
+            _unsubscribers.Clear();
         }
 
         #region New-system: registration

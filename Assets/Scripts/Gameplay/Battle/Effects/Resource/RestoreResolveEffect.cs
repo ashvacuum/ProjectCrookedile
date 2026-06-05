@@ -31,13 +31,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            int amount =
-                amountOverride
-                ?? (
-                    _amountSource == EffectContextValue.FixedAmount
-                        ? _amount
-                        : ctx.GetValue(_amountSource)
-                );
+            int amount = ResolveAmount(ctx, amountOverride, _amount, _amountSource);
 
             if (amount <= 0)
                 return;
@@ -47,13 +41,7 @@ namespace Crookedile.Gameplay.Battle
             ctx.LastHealAmount += amount;
         }
 
-        public override string GetDescription()
-        {
-            string amountStr =
-                _amountSource == EffectContextValue.FixedAmount
-                    ? _amount.ToString()
-                    : _amountSource.ToString();
-            return $"Raise Opinion by {amountStr}";
-        }
+        public override string GetDescription() =>
+            $"Raise Opinion by {DescribeAmount(_amount, _amountSource)}";
     }
 }

@@ -35,13 +35,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            int amount =
-                amountOverride
-                ?? (
-                    _amountSource == EffectContextValue.FixedAmount
-                        ? _amount
-                        : ctx.GetValue(_amountSource)
-                );
+            int amount = ResolveAmount(ctx, amountOverride, _amount, _amountSource);
 
             if (ctx.IsPlayerCard)
                 ApplyGainSupport(amount, ctx);
@@ -51,11 +45,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override string GetDescription()
         {
-            string amountStr =
-                _amountSource == EffectContextValue.FixedAmount
-                    ? _amount.ToString()
-                    : _amountSource.ToString();
-            return $"Gain {amountStr} Support";
+            return $"Gain {DescribeAmount(_amount, _amountSource)} Support";
         }
     }
 }
