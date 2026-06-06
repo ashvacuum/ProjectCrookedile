@@ -562,7 +562,7 @@ namespace Crookedile.Gameplay.Battle
 
         private bool CanPlayCard(CardData card, BattleStats stats)
         {
-            // Curses and flagged Status cards are never playable
+            // Scandals and flagged Status cards are never playable
             if (card.IsUnplayable)
                 return false;
 
@@ -880,12 +880,12 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         private void ApplyTurnEndOpinionStatuses(StatusEffectManager mgr)
         {
-            int scandal = mgr.GetStacks(StatusEffectType.Scandal);
-            if (scandal > 0)
+            int smear = mgr.GetStacks(StatusEffectType.Smear);
+            if (smear > 0)
                 _opinion.ApplyPressure(
-                    scandal,
+                    smear,
                     toPlayer: true,
-                    attackerName: "Scandal",
+                    attackerName: "Smear",
                     sourceEnemyIndex: -1,
                     targetEnemyIndex: -1
                 );

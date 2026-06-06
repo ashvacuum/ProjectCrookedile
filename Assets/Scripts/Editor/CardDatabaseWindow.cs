@@ -943,7 +943,7 @@ namespace Crookedile.Editor
                 CardType.Rhetoric => new Color(0.9f, 0.3f, 0.3f),
                 CardType.Policy => new Color(0.3f, 0.5f, 0.9f),
                 CardType.Status => new Color(0.6f, 0.3f, 0.85f),
-                CardType.Curse => new Color(0.4f, 0.1f, 0.1f),
+                CardType.Scandal => new Color(0.4f, 0.1f, 0.1f),
                 _ => Color.grey,
             };
         }
@@ -1216,7 +1216,7 @@ namespace Crookedile.Editor
             EditorGUILayout.HelpBox(
                 "Cards listed here have a configuration problem: no behavior at all, a null entry in an "
                     + "effect/passive list, an effect missing a required reference, or a passive with no "
-                    + "trigger/effects. Unplayable cards (Curse / Status) with empty effects are expected.",
+                    + "trigger/effects. Unplayable cards (Scandal / Status) with empty effects are expected.",
                 MessageType.Info
             );
             EditorGUILayout.Space(4);

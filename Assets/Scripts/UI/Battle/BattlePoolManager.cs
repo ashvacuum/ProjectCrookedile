@@ -240,7 +240,7 @@ namespace Crookedile.UI.Battle
                 CardType.Rhetoric => _rhetoricPool,
                 CardType.Policy => _policyPool,
                 CardType.Status => _statusPool,
-                CardType.Curse => _cursePool,
+                CardType.Scandal => _cursePool,
                 _ => _pressurePool, // Pressure fallback
             };
         }

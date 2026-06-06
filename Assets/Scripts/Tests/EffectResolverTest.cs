@@ -150,8 +150,8 @@ namespace Crookedile.Tests
             Debug.Log("\n--- TEST: Turn-Based Status Effects ---");
             SetupTestBattle();
 
-            // Apply Scandal (damage at end of turn)
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Scandal, 3);
+            // Apply Smear (reputation bleed at end of turn)
+            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Smear, 3);
 
             // Apply Regeneration (heal at end of turn)
             effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Regeneration, 2);
@@ -165,7 +165,7 @@ namespace Crookedile.Tests
 
             Debug.Log($"After turn end: {playerStats.GetStatusString()}");
             Debug.Log(
-                "Scandal/Regeneration opinion effects are applied by BattleManager (OpinionLedger), "
+                "Smear/Regeneration opinion effects are applied by BattleManager (OpinionLedger), "
                     + "not by StatusEffectManager — this unit tester only decrements their stacks."
             );
 
