@@ -43,7 +43,9 @@ Hostile enemies are **not purely a problem** — they are a resource. You want t
 Both are **statuses** (can be applied and potentially removed), not fixed enemy types. Each archetype relates differently: Faith Leader is frustrated by Hardened (conversion kit fails), Celebrity loves Hardened (free permanent villain), Nepo Baby may be able to break Hardened ("daddy knows people").
 
 ### Status list (working)
-Guilt · Shame · Silence · Devotion · Hardened · Fanatic · Turncoat
+Guilt · Shame · Doubt · Silence · Devotion · Jaded · Hardened · Fanatic · Turncoat · Scandal (Celebrity)
+
+*Faith Leader's core statuses:* **Guilt** (weakens enemy push), **Shame** (drops enemy shield), **Doubt** (soft reluctance to act) are *pacify statuses* (count toward conversion, consumed on convert). **Jaded** is a *threshold status* (permanent, stacks, raises pacify cost, never consumed). See §7 Faith Leader.
 
 ---
 
@@ -120,49 +122,82 @@ Each asks a different question every turn and lives at a different point in time
 | Archetype | Question | Time | Can uniquely... | Fears... |
 |---|---|---|---|---|
 | **Nepo Baby** | "Who can I bring in?" | **Before** | Change who is even in the room (summon bodies) | Its own imported allies betraying it |
-| **Celebrity** | "What drama do I set up?" | **During** | Fabricate cards & room conditions on demand | Its own credibility collapsing / exposure |
-| **Faith Leader** | "Do I have the right cards in the right order?" | **After** | Chain compounding combos into one explosive turn | Disruption of the sequence |
+| **Celebrity** | "What deck am I building this run?" | **flexible** | Draft into multiple archetypes the locked classes can't (open canvas) | Committing wrong / an incoherent pile; weakest before it commits |
+| **Faith Leader** | "Who can I pacify into a follower?" | **After** | Stack statuses to convert enemies into 1-turn meter-pumping Fanatics | Disruption before reaching 3 stacks; a Hardened room (can't pacify) |
 
 > A distinctiveness test: each archetype must have a **unique capability** AND a **unique fear**. Overlapping fears are what make archetypes feel samey. Watch especially that Celebrity fears *self-overreach* while Faith Leader fears *opponent disruption* — if Celebrity's risk becomes "opponent breaks my setup," they've merged.
 
 ### Nepo Baby — *the schemer*
 Controls room composition; imports allies via daddy's connections (necromancer-like — summons bodies). Can also **Plant** a hostile to break the echo chamber. **Leash:** summoned allies are the *most* corruptible — their own people turning Turncoat is the signature nightmare.
 
-### Celebrity — *the director*
-Doesn't manage the room, **directs** it. Manufactures cards and crowd states (staging) then cashes in with conditional payoff cards. Think teleserye: scripted drama, timed tears, a villain cast on purpose. **Credibility** = an overload-style resource (Hearthstone Overload): manufacture now, pay later. **Leash:** exposure — overreach while low on credibility is catastrophic.
-- Loop: **Stage → Perform → Cash in**
-- Two starter cards scaling off *opposite* room states teaches "curate, don't farm."
+### Celebrity — *the open canvas* (archetype-flexible)
+**Spine: deliberately none — and that absence IS the identity.** The other two are *locked* into one engine (Nepo Baby always Patronage; Faith Leader always stack-to-convert). Celebrity is the class whose final identity is **assembled during the run** — you draft into whichever sub-archetype the reward pool offers, and the class bends to support it. On-fantasy: a celebrity politician has *no fixed substance*, reinventing themselves for the moment (action star one cycle, tearful family man the next). "Empty vessel that becomes whatever the run shapes" is the sharpest expression of the celebrity-politician satire in the cast.
 
-### Faith Leader — *the combo player*
-Incremental gains that compound into massive payoffs; everything interconnects (prayer → blessing → miracle). Status specialist (guilt, shame, devotion). Weakest individual card stats; most vulnerable if caught without setup. Highest skill ceiling. **Leash:** disruption unravels the chain.
-- Loop: **Seed → Tend → Harvest** (Suffer → Build → Deliver)
+Closest StS reference: **Silent's deep philosophy** (draft into poison/shiv/discard) taken to the extreme, with an **Ironclad-style reliable floor** so it never bricks before committing. *Plays like the Silent (card flow, adapt), with Ironclad's floor (sturdy fundamentals).* **High floor early, high ceiling late.**
+
+**NOT the beginner on-ramp.** "Versatile" sounds gentle but the open-canvas class is the *hardest to balance and least beginner-friendly* — maximum freedom = maximum rope. A new player can build an incoherent pile; an expert expresses themselves. **Celebrity is the advanced / expressive class.** (Corrects earlier "accessible starter" framing.) Depth comes from engaging the *core game* (hostility, villain balance, echo chamber) directly + assembling an archetype, rather than a personal engine layered on top.
+
+**Design history:** an earlier "Credibility" resource (Overload → depleting pool w/ exposure cliff → fabricated-tag + collapse) was **cut as over-engineered** — it made Celebrity play a different game (bespoke fake-trackers/collapse rules), hurt accessibility, cost a lot to build for 1/3 of the roster, and kept resembling StS2's **Regent** (Stars). Resolution: no unique resource; identity = breadth of card pool + draftable sub-archetypes below.
+
+**The card pool must contain multiple *coherent* mini-archetypes** (not a pile of random good cards — that's oatmeal). Each is a distinct **risk posture**; the run decides which you assemble. The Scandal line in particular hard-commits (it sacrifices flexibility), so committing to one direction can shut others off — spiky, replayable, expert.
+
+#### Three draftable sub-archetypes
+
+**1. Attention / Aggro — *build-and-spend* (tempo risk).** Court attention / provoke the room to bank a resource, then spend it as a big opinion-meter hit. Fantasy: the celebrity who *wants* the spotlight — all publicity is good publicity — and converts "everyone's talking about me" into political gain. **Risk:** drawing aggro means the room focuses on attacking *you*; you take heat to build the payoff, and holding too long makes you a target. The easiest/cleanest of the three.
+
+**2. Scandal — *anti-Curse snowball* (consistency risk, all-in).** Scandals are manufactured cards (by your own cards *or* inflicted by enemies — a tabloid/paparazzi enemy is a *threat to others but a gift here*: all publicity is good publicity). They **clog the hand** (fewer playable slots = the "fewer outs" downside), **but that clog IS the engine**: your other cards pay off **per Scandal drawn** (e.g. +1 shield each) and/or **per Scandal in play** (e.g. deal X at end of turn each). The more you carry, the harder you hit and the more cramped you play — reward and cost are *the same cards*, so it's **self-limiting** (no cap needed; eventually you can't draw a workable hand). A **"spin"/cash-out** outlet clears Scandals for a burst, letting you detonate at the peak before you choke. This is the one Celebrity line with a real spine-like loop — fine, since the open-canvas class can have one deep draftable direction among simpler ones.
+  - *Inversion of StS Curses:* you WANT Scandals (they power you); they only hurt by occupying hand slots — not by active punishment. Keep the draw-downside **gentle** (clog, not stab) since the scaling reward is already the reason to stop hoarding (don't double-punish).
+  - *Tuning/open:* exact severity when drawn; whether removal beyond the cash-out exists; on-draw triggers (swingy) vs. in-play triggers (steady) — pool can have both.
+
+**3. Drama King — *sympathy + disarm* (low risk, control).** Manufactured victimhood: fetch **sympathy** (shields / opinion defense) and **disarm** enemies (reduce their ability to hurt the meter) while still chipping the meter. The outlast/grind line — survive, neutralize, win on accumulated pressure, never let your standing drop. *"Look what they're doing to me."*
+  - *Watch-flag:* disarm ≈ Faith Leader's weaken/debuffs. Keep framing distinct — Faith Leader debuffs to **convert**; Celebrity disarms to **protect itself while attacking**. Similar tools, different intent.
+
+**Why the set works:** three different *risk postures*, not three flavors of one thing — **Attention** = tempo risk (fast, snowbally), **Scandal** = consistency risk (all-in, sacrifices flexibility), **Drama King** = low risk (grind, control). Drafting Celebrity = choosing "fast and loud / all-in on spectacle / slow and safe." Three genuinely different runs from one class — the open canvas delivering.
+
+### Faith Leader — *the converter* (status specialist)
+**Spine (as concrete as Nepo Baby's Patronage):**
+
+> **Stack statuses (Guilt / Shame / Doubt, any mix) on an enemy to the pacify threshold. This consumes the statuses and converts them. Normal enemy → becomes a Fanatic for 1 turn (a one-turn burst pumping the opinion meter), then reverts to neutral. Hardened enemy → silenced instead (can't be converted, but can be shut up).**
+>
+> **Pacify threshold = 3 + the enemy's Jaded stacks.** Each time an enemy is fanaticized they gain a stack of **Jaded** (permanent for the fight, never consumed), raising their future conversion cost by 1. So a fresh enemy converts at 3; a once-burned backslider at 4; twice at 5; etc. **This is the anti-milking brake** — re-converting the same person hits diminishing returns, pushing you to win *new* converts rather than farm one target. On-fantasy: a believer who's already lapsed is harder to inspire again.
+
+**Two status categories (keep distinct):**
+- **Pacify statuses** (Guilt / Shame / Doubt) — *you* apply them, they count toward the threshold, **consumed on conversion**.
+- **Threshold status** (Jaded) — applied *automatically* on each fanaticization, **modifies** the requirement, **permanent & never consumed**, does **NOT** count toward its own threshold. Stacks. Visible on the enemy so the player reads conversion cost directly off the Jaded count.
+
+**The status kit** — each status blunts one specific enemy behavior *while* counting toward the pacify threshold (so the climb is self-protecting):
+
+| Status | Blunts | Note |
+|---|---|---|
+| **Guilt** (≈Weakened) | Enemy's *push* on the meter (offense) | softens their Condemn |
+| **Shame** | Enemy's *shielding* of the meter (Rebuke/defense) | they can't defend opinion |
+| **Doubt** | Enemy's *willingness to act* (soft, partial reluctance) | distinct from Preach's hard guaranteed silence |
+
+All three count equally toward conversion: **any 3 = pacify.**
+
+**Lifecycle:** stack to threshold (3 + Jaded) → consume pacify statuses → **Fanatic for 1 turn** (meter burst) → **revert to neutral** + gain a **Jaded** stack. No permanent emitters. The class is **relentlessly active** — every turn is spent either stacking toward the next conversion or cashing one in. Kills auto-pilot; you can never coast on a built board, and you can't infinitely milk one target (Jaded escalation).
+
+**Echo-chamber immunity (emergent):** because converts revert to *neutral* (not receptive), Faith Leader's core engine can't accidentally fill the row with permanent receptives — so playing their identity doesn't self-trigger the all-receptive penalty. The other two classes make *lasting* allies and genuinely risk the echo chamber; Faith Leader's allies are momentary, so they're naturally immune. (On non-converting turns they still want a hostile present — the **Hardened-enemy-as-permanent-villain** interaction handles this: can't convert them, so they reliably keep you out of the echo chamber; silence them only if too loud.)
+
+**Hard counter / fear:** a row of **Hardened** enemies starves Faith Leader (can't be pacified). On-fantasy: the preacher is powerless against true non-believers. **Leash:** disruption — losing setup or being rushed before reaching 3 stacks.
+
+**Tuning flags (key balance levers):**
+- Payoff math must be **generous** — 3 status-applications for a *1-turn* burst is a steep trade; the Fanatic burst (or a harvest card scaling off it) must pay well or it feels bad.
+- Needs cards that apply **multiple statuses at once**, so conversion isn't always a full 3 turns of setup.
+- *(Open: can you over-stack past 3 for a bigger burst? Likely reward-pool, not core.)*
+
+- Loop: **Stack → Convert → Burst → (revert) → repeat**
 
 ---
 
-## 8. Starter Decks (first pass — values are placeholder)
+## 8. Starter Decks
 
-> Starter decks teach the **core loop** in its simplest form. Be deliberately humble; excitement comes from rewards/relics. Each starter has exactly **one** card teaching "you want a villain."
+> **Canonical starter decks live in `crookedile-starter-decks.md`** (kept current there). Summary of the teaching goal per class:
+> - **Nepo Baby** — teaches the *Patronage* loop (burn a card → bank Patronage → summon). Two-currency economy; the heaviest to learn.
+> - **Faith Leader** — teaches *stack-to-convert* (3 + Jaded statuses → Fanatic burst → revert neutral). All three pacify statuses present.
+> - **Celebrity** — teaches *fundamentals + a taste of each draftable direction* (Attention / Scandal / Drama King). Deliberately the most vanilla starter, hinting at breadth rather than one loop, with a sturdy floor.
 
-### Faith Leader — teaches *sequencing*
-- **Guilt** (x3) — 1e. Reduce one enemy's hostility, apply Guilt. (seed)
-- **Pray** (x3) — 1e. Small opinion shield, draw a card. (engine)
-- **Preach** (x2) — 1e. Silence one hostile enemy this turn. (defense)
-- **Absolution** (x1) — 2e. Convert an enemy to ally — *only if they have Guilt*. (payoff requiring prior play — teaches the whole archetype)
-- **Sermon** (x1) — 2e. Whole row; scales with total statuses on field. (villain-wanting card)
-
-### Celebrity — teaches *stage-then-cash-in*
-- **Spin** (x3) — 1e. Manufacture: flip one enemy's apparent stance. (staging)
-- **Woe Is Me** (x2) — 1e. Opinion shield + meter gain scaling with **receptive** enemies. (payoff)
-- **Read the Room** (x2) — 1e. Draw 2, costs Credibility. (teaches debt gently)
-- **Crocodile Tears** (x2) — 1e. Meter surge scaling with **hostile** enemies. (villain-wanting card)
-- **Big Reveal** (x1) — 2e. Strong manufactured card, adds Credibility debt. (high-risk taste)
-
-### Nepo Baby — teaches *import-and-protect*
-- **Call a Favor** (x3) — 1e. Summon a receptive ally. (signature verb)
-- **Cover Story** (x2) — 1e. Protect one ally from Turncoat this turn. (teaches fragility immediately)
-- **Connections** (x2) — 1e. Reduce one enemy's hostility, gain small resource. (glue)
-- **Plant** (x2) — 1e. Summon a **hostile** body. (villain-wanting card + echo-chamber breaker)
-- **Daddy Knows People** (x1) — 2e. Summon an ally AND shield the meter. (import + payoff)
+Design rule: starters teach the **core verb** in its simplest form, mostly via repeats, with as few distinct cards as a first-timer can hold. Excitement comes from the reward pool, not the starter. See the starter-decks doc for full lists, the legibility pass, and the per-class "potential" (reward-pool) sketches.
 
 ---
 
@@ -171,7 +206,7 @@ Incremental gains that compound into massive payoffs; everything interconnects (
 Two layers, like StS: **starter passives** = simple innate per-battle ability defining the baseline; **relics** = accumulated persistent passives that warp strategy (the real depth layer — TBD). Starter passives should be humble and reinforce the fantasy via their **trigger timing** (before / during / after).
 
 - **Nepo Baby (before)** — *start of battle:* discard any number of cards and redraw that many. (The mulligan — privilege, starts ahead.)
-- **Celebrity (during)** — *on first card each turn:* its room-scaling effect counts one extra enemy. (Performance — best in the moment.)
+- **Celebrity (start of battle)** — *the first card you play each battle is played upgraded.* "Mastering his craft" — his opening move is always the polished, rehearsed best-take. Uses the existing upgrade system (nothing new to build); adds a small *which card do I open with?* decision. Note: colorless/generic benefit — Celebrity's identity comes from the card pool, not this passive. *(Playtest watch: don't let any single card's upgraded version be a blowout, since this guarantees it turn one.)*
 - **Faith Leader (after)** — *(candidate, unresolved)* leaning toward something that protects the patient setup or engages hostility:
   - Option A: first opinion shield each battle gets a bonus (shelters the setup) — risk: a bit generic.
   - Option B: start of battle, reduce all enemy hostility by 1 (on-theme; does *not* make all receptive, so doesn't auto-trigger echo chamber) — risk: softens a villain you may want.
@@ -207,3 +242,8 @@ The game is a card game wrapped in an overworld metagame (StS map structure, not
 - Finalizing Faith Leader's starter passive trigger
 - What receptive enemies grant (mirror to the hostile-draw reward)
 - Whether the default hostility card is removable
+- Celebrity: flesh out each of the three sub-archetype card pools (Attention / Scandal / Drama King) deeply enough that each is committable; settle Scandal tuning (draw-severity, on-draw vs in-play triggers, removal beyond cash-out)
+
+### Recently resolved
+- ~~Celebrity's resource system~~ → **CUT.** No unique resource; manufacturing fantasy lives in the card pool (see §7). Over-engineered and made Celebrity inaccessible / too close to StS2's Regent.
+- ~~Celebrity's starter passive~~ → **LOCKED.** First card played each battle is upgraded ("mastering his craft").
