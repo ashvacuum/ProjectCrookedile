@@ -210,7 +210,7 @@ namespace Crookedile.Gameplay.Battle
         #region Trigger Effects
 
         /// <summary>
-        /// Called at the start of turn. (Opinion-affecting turn statuses — Ritual, Scandal,
+        /// Called at the start of turn. (Opinion-affecting turn statuses — Ritual, Smear,
         /// Regeneration — are applied by BattleManager, which owns the meter.)
         /// </summary>
         public void OnTurnStart(BattleStats ownerStats)
@@ -480,7 +480,7 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Frail => true,
                 StatusEffectType.Entangled => true,
                 StatusEffectType.Exposed => true,
-                StatusEffectType.Scandal => true,
+                StatusEffectType.Smear => true,
                 StatusEffectType.Confused => true,
                 StatusEffectType.Silenced => true,
                 StatusEffectType.Stunned => true,

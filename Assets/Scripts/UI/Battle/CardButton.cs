@@ -792,7 +792,7 @@ namespace Crookedile.UI.Battle
                 CardType.Rhetoric => rhetoricColor,
                 CardType.Policy => policyColor,
                 CardType.Status => statusColor,
-                CardType.Curse => curseColor,
+                CardType.Scandal => curseColor,
                 _ => Color.white,
             };
         }

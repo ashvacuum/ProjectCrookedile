@@ -131,7 +131,7 @@ namespace Crookedile.Data.Cards
         [ShowIf("_cardType", CardType.Status)]
         [Tooltip(
             "If true, this Status card is shown in the hand but cannot be played. "
-                + "All Curses are always unplayable regardless of this flag."
+                + "All Scandals are always unplayable regardless of this flag."
         )]
         [SerializeField]
         private bool _isUnplayable = false;
@@ -223,7 +223,7 @@ namespace Crookedile.Data.Cards
         /// upgraded field defined (costs, effects, or passives).
         /// </summary>
         public bool CanUpgrade =>
-            _cardType != CardType.Curse
+            _cardType != CardType.Scandal
             && _cardType != CardType.Status
             && !_isUpgraded
             && (
@@ -242,11 +242,11 @@ namespace Crookedile.Data.Cards
         public bool IsUnlockable => _isUnlockable;
 
         /// <summary>
-        /// True if this card can never be played: all Curses, and Status cards flagged as unplayable.
+        /// True if this card can never be played: all Scandals, and Status cards flagged as unplayable.
         /// The hand displays these cards at half alpha; dragging is blocked.
         /// </summary>
         public bool IsUnplayable =>
-            _cardType == CardType.Curse || (_cardType == CardType.Status && _isUnplayable);
+            _cardType == CardType.Scandal || (_cardType == CardType.Status && _isUnplayable);
 
         /// <summary>
         /// Political lean of this card. Only relevant for CardType.Policy.

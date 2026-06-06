@@ -89,7 +89,7 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Frail => "Gain 25% less Support.",
                 StatusEffectType.Entangled => "All cards cost +1 AP.",
                 StatusEffectType.Exposed => "Next attack against this target deals double damage.",
-                StatusEffectType.Scandal => "Take X damage at end of turn (like Poison).",
+                StatusEffectType.Smear => "Take X opinion pressure at end of turn (reputation bleed).",
                 StatusEffectType.Confused => "Effect values are randomised each turn.",
                 StatusEffectType.Silenced => "Cannot play Rhetoric cards.",
                 StatusEffectType.Stunned =>
@@ -146,7 +146,7 @@ namespace Crookedile.Gameplay.Battle
         Frail, // Gain X% less Support (usually 25%)
         Entangled, // Cards cost +1 AP
         Exposed, // Next attack deals double damage
-        Scandal, // Take X damage at end of turn (like Poison)
+        Smear, // Reputation bleed — take X opinion pressure at end of turn (like Poison). Currently unused by player classes; reserved for hostile enemies.
         Confused, // Effect values are randomised each turn
         Silenced, // Cannot play Rhetoric cards
         Stunned, // Skips its next action; removed at start of player turn (non-stackable)

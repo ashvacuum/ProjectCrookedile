@@ -11,7 +11,7 @@ namespace Crookedile.Data
         Rhetoric, // Red    - Aggressive framing, attacks, pressure tactics
         Policy, // Blue   - Policy positions; lean shifts all enemy hostility by demographic
         Status, // Purple - Temporary effect cards; some are unplayable
-        Curse, // Dark   - Always unplayable; negative cards forced into the deck
+        Scandal, // Dark  - Manufactured controversy: unplayable, clogs the hand; the Celebrity exploits these
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ namespace Crookedile.Data
         ApplyFrail, // Gain 25% less Shield
         ApplyEntangled, // Cards cost +1 AP
         ApplyExposed, // Next attack deals double damage
-        ApplyScandal, // Take X damage at end of turn
+        ApplySmear, // Take X opinion pressure at end of turn (reputation bleed)
         ApplyConfused, // Random card costs +1 AP each turn
         ApplySilenced, // Cannot play Policy cards
 
