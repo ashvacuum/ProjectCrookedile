@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Crookedile.Data;
 using Crookedile.Data.Audio;
+using Crookedile.Data.Battle;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 using Crookedile.Gameplay.Battle;
@@ -261,26 +262,26 @@ namespace Crookedile.EditorTools
 
             public IEnumerable<Row> Rows()
             {
-                var db = LoadFirst<StatusEffectDatabase>();
+                var map = LoadFirst<StatusEffectIconMapSO>();
                 foreach (StatusEffectType type in Enum.GetValues(typeof(StatusEffectType)))
                 {
                     var issues = new List<AuditIssue>();
                     if (string.IsNullOrWhiteSpace(new StatusEffect(type, 1).Description))
                         issues.Add(new AuditIssue(Severity.Error, "No description in StatusEffect switch."));
-                    string detail = "no DB";
-                    if (db == null)
-                        issues.Add(new AuditIssue(Severity.Warning, "No StatusEffectDatabase asset (run the generator)."));
-                    else if (!db.TryGet(type, out var e))
-                        issues.Add(new AuditIssue(Severity.Error, "No database entry (re-run generator)."));
+                    string detail = "no icon map";
+                    if (map == null)
+                        issues.Add(new AuditIssue(Severity.Warning, "No StatusEffectIconMap asset (run the seeder)."));
+                    else if (!map.TryGet(type, out var icon, out _, out var name, out _))
+                        issues.Add(new AuditIssue(Severity.Warning, "No icon-map entry (run the seeder)."));
                     else
                     {
-                        detail = e.Category.ToString();
-                        if (e.Icon == null)
+                        detail = string.IsNullOrEmpty(name) ? "(no name)" : name;
+                        if (icon == null)
                             issues.Add(new AuditIssue(Severity.Warning, "No icon."));
-                        if (e.Color.a <= 0f)
-                            issues.Add(new AuditIssue(Severity.Info, "No color set."));
+                        if (string.IsNullOrEmpty(name))
+                            issues.Add(new AuditIssue(Severity.Info, "No display name."));
                     }
-                    yield return new Row(type.ToString(), detail, db, issues);
+                    yield return new Row(type.ToString(), detail, map, issues);
                 }
             }
         }
