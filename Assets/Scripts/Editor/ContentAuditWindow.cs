@@ -70,6 +70,7 @@ namespace Crookedile.EditorTools
                 new EffectsCheck(),
                 new OriginDatabaseCheck(),
                 new RewardConfigCheck(),
+                new RelicCheck(),
             };
 
         private void RunAudit()
@@ -481,6 +482,49 @@ namespace Crookedile.EditorTools
                             cfg
                         );
                 }
+            }
+        }
+
+        /// <summary>
+        /// Validates relic data (future layer): each <see cref="RelicData"/> has a name, icon and at
+        /// least one passive; warns if relics exist but aren't collected in a <see cref="RelicDatabase"/>.
+        /// </summary>
+        private sealed class RelicCheck : IContentCheck
+        {
+            public string Category => "Relics";
+
+            public IEnumerable<AuditIssue> Run()
+            {
+                string[] relicGuids = AssetDatabase.FindAssets("t:RelicData");
+                if (relicGuids.Length == 0)
+                {
+                    yield return new AuditIssue(
+                        Severity.Info,
+                        "No relics authored yet (future layer)."
+                    );
+                    yield break;
+                }
+
+                foreach (string guid in relicGuids)
+                {
+                    var relic = AssetDatabase.LoadAssetAtPath<RelicData>(
+                        AssetDatabase.GUIDToAssetPath(guid)
+                    );
+                    if (relic == null)
+                        continue;
+                    if (string.IsNullOrWhiteSpace(relic.RelicName))
+                        yield return new AuditIssue(Severity.Warning, $"Relic '{relic.name}' has no display name.", relic);
+                    if (relic.Icon == null)
+                        yield return new AuditIssue(Severity.Info, $"Relic '{relic.name}' has no icon.", relic);
+                    if (relic.Passives == null || relic.Passives.Count == 0)
+                        yield return new AuditIssue(Severity.Warning, $"Relic '{relic.name}' has no passives (does nothing).", relic);
+                }
+
+                if (AssetDatabase.FindAssets("t:RelicDatabase").Length == 0)
+                    yield return new AuditIssue(
+                        Severity.Info,
+                        $"{relicGuids.Length} relic(s) exist but there is no RelicDatabase collecting them."
+                    );
             }
         }
     }
