@@ -68,6 +68,7 @@ namespace Crookedile.UI.Battle
         private readonly List<CardButton> _spawnedButtons = new List<CardButton>();
 
         private int _requiredCount;
+        private bool _allowFewer;
         private Action<List<CardData>> _onConfirmed;
 
         #endregion
@@ -90,10 +91,12 @@ namespace Crookedile.UI.Battle
             string title,
             IReadOnlyList<CardData> choices,
             int requiredCount,
-            Action<List<CardData>> onConfirmed
+            Action<List<CardData>> onConfirmed,
+            bool allowFewer = false
         )
         {
             _requiredCount = requiredCount;
+            _allowFewer = allowFewer;
             _onConfirmed = onConfirmed;
 
             if (titleText != null)
@@ -197,7 +200,11 @@ namespace Crookedile.UI.Battle
 
         private void OnConfirmClicked()
         {
-            if (_selected.Count != _requiredCount)
+            // Exact mode requires the full count; up-to mode accepts any count within the max.
+            bool valid = _allowFewer
+                ? _selected.Count <= _requiredCount
+                : _selected.Count == _requiredCount;
+            if (!valid)
                 return; // guard — button should be disabled anyway
 
             var confirmed = new List<CardData>(_selected);
@@ -215,12 +222,17 @@ namespace Crookedile.UI.Battle
 
         private void RefreshConfirmButton()
         {
-            bool ready = _selected.Count == _requiredCount;
+            // Up-to mode (e.g. mulligan): any selection from 0..max can confirm.
+            bool ready = _allowFewer
+                ? _selected.Count <= _requiredCount
+                : _selected.Count == _requiredCount;
             if (confirmButton != null)
                 confirmButton.interactable = ready;
 
             if (confirmButtonText != null)
-                confirmButtonText.text = $"Confirm ({_selected.Count}/{_requiredCount})";
+                confirmButtonText.text = _allowFewer
+                    ? $"Confirm ({_selected.Count})"
+                    : $"Confirm ({_selected.Count}/{_requiredCount})";
         }
 
         private void ClearCards()
