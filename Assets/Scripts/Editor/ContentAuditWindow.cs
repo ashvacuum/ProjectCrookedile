@@ -89,6 +89,7 @@ namespace Crookedile.EditorTools
                 new CardsProvider(),
                 new StatusesProvider(),
                 new StatusParityProvider(),
+                new StatusMigrationProvider(),
                 new EffectsProvider(),
                 new EnemiesProvider(),
                 new EnemyMovesProvider(),
@@ -378,6 +379,77 @@ namespace Crookedile.EditorTools
                                 new AuditIssue(Severity.Info, "New status (no enum) — fine once the enum is dropped."),
                             });
                 }
+            }
+        }
+
+        /// <summary>
+        /// Migration tracker: every card / enemy move whose effects still include the legacy
+        /// (enum-based) ApplyStatusEffect. Re-author these onto ApplyStatusBehaviorEffect; this tab
+        /// going empty is the green light to delete the old effect + the enum.
+        /// </summary>
+        private sealed class StatusMigrationProvider : IContentProvider
+        {
+            public string Category => "Status migration";
+
+            // Match by type name so this code doesn't reference the [Obsolete] type directly.
+            private static int CountLegacy(IEnumerable<BattleEffect> effects)
+            {
+                if (effects == null)
+                    return 0;
+                int n = 0;
+                foreach (var e in effects)
+                    if (e != null && e.GetType().Name == "ApplyStatusEffect")
+                        n++;
+                return n;
+            }
+
+            private static int CountInPassives(IEnumerable<BattlePassive> passives)
+            {
+                if (passives == null)
+                    return 0;
+                int n = 0;
+                foreach (var p in passives)
+                    if (p != null)
+                        n += CountLegacy(p.Effects);
+                return n;
+            }
+
+            public IEnumerable<Row> Rows()
+            {
+                int totalAssets = 0;
+
+                foreach (var card in LoadAll<CardData>().OrderBy(c => c.name))
+                {
+                    int n = CountLegacy(card.Effects)
+                        + CountLegacy(card.UpgradedEffects)
+                        + CountInPassives(card.Passives);
+                    if (n == 0)
+                        continue;
+                    totalAssets++;
+                    yield return new Row(
+                        card.name,
+                        $"card — {n} legacy ApplyStatusEffect",
+                        card,
+                        new List<AuditIssue> { new AuditIssue(Severity.Warning, "Re-author onto ApplyStatusBehaviorEffect.") }
+                    );
+                }
+
+                foreach (var move in LoadAll<EnemyMoveData>().OrderBy(m => m.name))
+                {
+                    int n = CountLegacy(move.Effects);
+                    if (n == 0)
+                        continue;
+                    totalAssets++;
+                    yield return new Row(
+                        move.name,
+                        $"enemy move — {n} legacy ApplyStatusEffect",
+                        move,
+                        new List<AuditIssue> { new AuditIssue(Severity.Warning, "Re-author onto ApplyStatusBehaviorEffect.") }
+                    );
+                }
+
+                if (totalAssets == 0)
+                    yield return new Row("(none)", "all content migrated off the enum status effect", null, new List<AuditIssue>());
             }
         }
 
