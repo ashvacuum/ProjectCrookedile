@@ -66,6 +66,7 @@ namespace Crookedile.EditorTools
                 new AudioVfxCheck(),
                 new IntentThemeCheck(),
                 new EnemyCheck(),
+                new EffectsCheck(),
             };
 
         private void RunAudit()
@@ -369,6 +370,35 @@ namespace Crookedile.EditorTools
 
                     if (move.MoveType == EnemyMoveType.SummonMinion && move.MinionToSummon == null)
                         yield return new AuditIssue(Severity.Error, $"Summon move '{move.name}' has no minion assigned.", move);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates every concrete <see cref="BattleEffect"/> is authorable ([Serializable], so it
+        /// shows in the card/enemy effect picker) and self-describing (non-empty GetDescription, so
+        /// cards auto-generate readable text). Uses <see cref="BattleEffectCatalog"/>.
+        /// </summary>
+        private sealed class EffectsCheck : IContentCheck
+        {
+            public string Category => "Effects";
+
+            public IEnumerable<AuditIssue> Run()
+            {
+                foreach (var info in BattleEffectCatalog.All())
+                {
+                    if (!info.Serializable)
+                        yield return new AuditIssue(
+                            Severity.Warning,
+                            $"Effect '{info.DisplayName}' ({info.Type.Name}) is not [Serializable] — "
+                                + "it won't appear in the effect picker."
+                        );
+                    else if (string.IsNullOrWhiteSpace(info.Description))
+                        yield return new AuditIssue(
+                            Severity.Info,
+                            $"Effect '{info.DisplayName}' ({info.Type.Name}) has an empty GetDescription — "
+                                + "cards using it auto-generate no text."
+                        );
                 }
             }
         }
