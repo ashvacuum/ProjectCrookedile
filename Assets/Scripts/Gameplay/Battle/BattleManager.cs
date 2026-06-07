@@ -75,6 +75,9 @@ namespace Crookedile.Gameplay.Battle
         private BattleStats _playerStats;
         private OriginType _playerOrigin;
 
+        // Celebrity passive: the first card played each battle is played upgraded. Reset at battle start.
+        private bool _firstCardPlayedThisBattle;
+
         // Player deck
         private DeckManager _playerDeck;
 
@@ -640,6 +643,20 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
 
+            // Celebrity passive ("mastering his craft"): the first card played each battle is played
+            // as its upgraded version. Swap to the upgraded instance before paying costs so the
+            // upgraded cost AND effects apply. One-shot — consumed on the first play of the battle.
+            if (!_firstCardPlayedThisBattle)
+            {
+                _firstCardPlayedThisBattle = true;
+                if (_playerOrigin == OriginType.Actor && !card.IsUpgraded && card.CanUpgrade)
+                {
+                    var upgraded = card.CreateUpgradedInstance();
+                    if (_playerDeck.SwapCardInHand(card, upgraded))
+                        card = upgraded;
+                }
+            }
+
             PayCardCosts(card, stats);
 
             // Capture Confused overrides before the card leaves the hand (indices are stable here)
@@ -1121,6 +1138,7 @@ namespace Crookedile.Gameplay.Battle
 
                 // Patronage banks across turns but not across battles — start each battle empty.
                 _manager.SetPatronage(0);
+                _manager._firstCardPlayedThisBattle = false;
 
                 // Draw player's opening hand; enemies have no deck
                 _manager._playerDeck.StartBattle(_manager._startingHandSize);
