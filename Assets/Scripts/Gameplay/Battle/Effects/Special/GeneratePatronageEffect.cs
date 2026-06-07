@@ -1,5 +1,6 @@
 using System;
 using Crookedile.Data;
+using Crookedile.Data.Cards;
 using Crookedile.Utilities;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -15,11 +16,6 @@ namespace Crookedile.Gameplay.Battle
     [Serializable]
     public class GeneratePatronageEffect : BattleEffect
     {
-        [MinValue(1)]
-        [Tooltip("Patronage banked per card sacrificed.")]
-        [SerializeField]
-        private int _patronagePerCard = 2;
-
         [MinValue(1)]
         [Tooltip("How many cards to sacrifice from hand.")]
         [SerializeField]
@@ -59,11 +55,14 @@ namespace Crookedile.Gameplay.Battle
                 chosen =>
                 {
                     int sacrificed = 0;
+                    int gained = 0;
                     foreach (var card in chosen)
                         if (ctx.Deck.ExhaustCard(card))
+                        {
                             sacrificed++;
+                            gained += PatronageValue(card);
+                        }
 
-                    int gained = sacrificed * _patronagePerCard;
                     if (gained > 0)
                     {
                         ctx.BattleManager?.GainPatronage(gained);
@@ -78,7 +77,42 @@ namespace Crookedile.Gameplay.Battle
         public override string GetDescription()
         {
             string what = _cardsToSacrifice == 1 ? "a card" : $"{_cardsToSacrifice} cards";
-            return $"Sacrifice {what} to gain {_patronagePerCard} Patronage each";
+            return $"Sacrifice {what} to gain Patronage equal to its cost (+1 if Rare, +1 if Upgraded; 0-cost and junk cards give 1)";
+        }
+
+        /// <summary>
+        /// Patronage banked when <paramref name="card"/> is sacrificed.
+        /// Base = the card's energy cost, +1 if Rare, +1 if Upgraded. A 0-cost card — and any
+        /// junk card (Status / Scandal) — is always worth a flat 1, regardless of rarity/upgrade.
+        /// </summary>
+        public static int PatronageValue(CardData card)
+        {
+            if (card == null)
+                return 0;
+
+            // Junk / unplayable filler is worth a flat 1.
+            if (card.CardType == CardType.Status || card.CardType == CardType.Scandal)
+                return 1;
+
+            int cost = BaseEnergyCost(card);
+            if (cost <= 0)
+                return 1; // 0-cost cards always give 1 (rarity/upgrade do not apply).
+
+            int value = cost;
+            if (card.Rarity == CardRarity.Rare)
+                value += 1;
+            if (card.IsUpgraded)
+                value += 1;
+            return value;
+        }
+
+        /// <summary>The card's printed energy (ActionPoints) cost, or 0 if it has none.</summary>
+        private static int BaseEnergyCost(CardData card)
+        {
+            foreach (var c in card.GetCosts())
+                if (c.CostType == CostType.ActionPoints)
+                    return c.BaseAmount;
+            return 0;
         }
     }
 }
