@@ -12,11 +12,16 @@ namespace Crookedile.Gameplay.Battle
     /// Directly raises the Opinion Meter by a fixed or context-sourced amount, bypassing Denial.
     /// Use for cards that win the crowd over without going through the damage pipeline —
     /// rallying speeches, concessions, crowd appeals, etc.
-    /// Does not set <c>ctx.LastHealAmount</c>; use <see cref="RestoreResolveEffect"/> if chaining off that value.
+    /// Does not set <c>ctx.LastHealAmount</c>; use <see cref="RaiseOpinionTrackedEffect"/> if chaining off that value.
     /// </summary>
     [Serializable]
-    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class HealResolveEffect : BattleEffect
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(
+        true,
+        "Crookedile.Gameplay.Battle",
+        "Crookedile.Runtime",
+        "HealResolveEffect"
+    )]
+    public class RaiseOpinionEffect : BattleEffect
     {
         [Tooltip("Opinion to raise. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]
@@ -38,7 +43,7 @@ namespace Crookedile.Gameplay.Battle
                 return;
 
             ctx.BattleManager?.RaiseOpinion(amount);
-            GameLogger.LogInfo<HealResolveEffect>($"Raised Opinion by {amount}");
+            GameLogger.LogInfo<RaiseOpinionEffect>($"Raised Opinion by {amount}");
         }
 
         public override string GetDescription() =>
