@@ -696,8 +696,18 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>All cards available to pick from.</summary>
         public System.Collections.Generic.IReadOnlyList<CardData> Choices;
 
-        /// <summary>Exact number of cards the player must select before Confirm activates.</summary>
+        /// <summary>
+        /// Number of cards to select. When <see cref="AllowFewer"/> is false this is an exact
+        /// requirement (Confirm activates only at exactly this many). When true it is a maximum —
+        /// the player may confirm with any number from 0 up to this (e.g. the Nepo Baby mulligan).
+        /// </summary>
         public int RequiredCount;
+
+        /// <summary>
+        /// When true, <see cref="RequiredCount"/> is treated as a maximum and the player may confirm
+        /// with fewer (including zero). When false, an exact count is required. Default false.
+        /// </summary>
+        public bool AllowFewer;
 
         /// <summary>
         /// Invoked with the confirmed selection once the player presses Confirm.

@@ -263,7 +263,8 @@
             CardType filterType,
             string choiceTitle,
             int count,
-            Action<List<CardData>> onResolved
+            Action<List<CardData>> onResolved,
+            bool allowFewer = false
         )
         {
             var candidates = new List<CardData>();
@@ -290,6 +291,7 @@
                         Title = choiceTitle,
                         Choices = candidates,
                         RequiredCount = Mathf.Min(count, candidates.Count),
+                        AllowFewer = allowFewer,
                         OnConfirmed = onResolved,
                     }
                 );

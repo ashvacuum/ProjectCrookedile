@@ -607,7 +607,13 @@ namespace Crookedile.UI.Battle
             _cardChoiceActive = true;
             if (endTurnButton != null)
                 endTurnButton.interactable = false;
-            cardChoicePanel?.Open(evt.Title, evt.Choices, evt.RequiredCount, OnCardChoiceConfirmed);
+            cardChoicePanel?.Open(
+                evt.Title,
+                evt.Choices,
+                evt.RequiredCount,
+                OnCardChoiceConfirmed,
+                evt.AllowFewer
+            );
         }
 
         private void OnCardChoiceConfirmed(List<CardData> selected)
