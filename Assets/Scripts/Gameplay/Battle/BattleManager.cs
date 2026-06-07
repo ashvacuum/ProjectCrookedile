@@ -506,6 +506,46 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
+        #region Celebrity — Attention (banked spotlight)
+
+        // Player's banked Attention — courted/provoked, then spent as a big opinion-meter hit.
+        // Banks across turns; reset to 0 at battle start.
+        private int _attention;
+
+        /// <summary>Current banked Attention (Celebrity's build-and-spend spotlight resource).</summary>
+        public int CurrentAttention => _attention;
+
+        /// <summary>Banks Attention. No-op for non-positive amounts.</summary>
+        public void GainAttention(int amount)
+        {
+            if (amount <= 0)
+                return;
+            SetAttention(_attention + amount);
+        }
+
+        /// <summary>Spends Attention if affordable. Returns false (and spends nothing) if short.</summary>
+        public bool SpendAttention(int amount)
+        {
+            if (amount <= 0)
+                return true;
+            if (_attention < amount)
+                return false;
+            SetAttention(_attention - amount);
+            return true;
+        }
+
+        private void SetAttention(int value)
+        {
+            int old = _attention;
+            _attention = Mathf.Max(0, value);
+            if (_attention != old)
+                EventBus.Publish(
+                    new AttentionChangedEvent { OldValue = old, NewValue = _attention }
+                );
+        }
+
+        #endregion
+
         #region Faith Leader — Pacify Conversion
 
         // Base pacify threshold before Jaded; each Jaded stack on the enemy raises it by 1.
@@ -1138,6 +1178,7 @@ namespace Crookedile.Gameplay.Battle
 
                 // Patronage banks across turns but not across battles — start each battle empty.
                 _manager.SetPatronage(0);
+                _manager.SetAttention(0);
                 _manager._firstCardPlayedThisBattle = false;
 
                 // Draw player's opening hand; enemies have no deck
