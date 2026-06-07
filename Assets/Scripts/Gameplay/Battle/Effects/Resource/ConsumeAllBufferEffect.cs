@@ -6,12 +6,7 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Consumes all session Support, reducing it to zero.</summary>
     [Serializable]
-    [UnityEngine.Scripting.APIUpdating.MovedFrom(
-        true,
-        "Crookedile.Gameplay.Battle",
-        "Assembly-CSharp",
-        "ConsumeAllComposureEffect"
-    )]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class ConsumeAllBufferEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)

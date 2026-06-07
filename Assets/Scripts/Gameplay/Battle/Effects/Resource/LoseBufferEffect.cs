@@ -8,12 +8,7 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Removes Support from the session shield by the given amount.</summary>
     [Serializable]
-    [UnityEngine.Scripting.APIUpdating.MovedFrom(
-        true,
-        "Crookedile.Gameplay.Battle",
-        "Assembly-CSharp",
-        "LoseComposureEffect"
-    )]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class LoseBufferEffect : BattleEffect
     {
         [MinValue(1)]
