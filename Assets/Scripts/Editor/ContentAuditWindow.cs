@@ -88,6 +88,7 @@ namespace Crookedile.EditorTools
                 new ReadinessProvider(),
                 new CardsProvider(),
                 new StatusesProvider(),
+                new StatusParityProvider(),
                 new EffectsProvider(),
                 new EnemiesProvider(),
                 new EnemyMovesProvider(),
@@ -340,6 +341,42 @@ namespace Crookedile.EditorTools
                             issues.Add(new AuditIssue(Severity.Info, "No display name."));
                     }
                     yield return new Row(type.ToString(), detail, map, issues);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Status migration parity: every legacy StatusEffectType enum value maps to a StatusBehavior
+        /// (by id), and flags behaviors with no enum (new statuses). When this tab is all-green the
+        /// new system is a faithful drop-in for the old — the green light to cut over and drop the enum.
+        /// </summary>
+        private sealed class StatusParityProvider : IContentProvider
+        {
+            public string Category => "Status parity";
+
+            public IEnumerable<Row> Rows()
+            {
+                foreach (StatusEffectType type in Enum.GetValues(typeof(StatusEffectType)))
+                {
+                    var b = StatusBridge.ToBehavior(type);
+                    var issues = new List<AuditIssue>();
+                    if (b == null)
+                        issues.Add(new AuditIssue(Severity.Error,
+                            $"No StatusBehavior with Id '{type.ToString().ToLowerInvariant()}'."));
+                    yield return new Row(type.ToString(), b != null ? b.GetType().Name : "— missing —", null, issues);
+                }
+
+                foreach (var behavior in StatusRegistry.All)
+                {
+                    if (!StatusBridge.TryToEnum(behavior, out _))
+                        yield return new Row(
+                            behavior.Id,
+                            behavior.GetType().Name,
+                            null,
+                            new List<AuditIssue>
+                            {
+                                new AuditIssue(Severity.Info, "New status (no enum) — fine once the enum is dropped."),
+                            });
                 }
             }
         }
