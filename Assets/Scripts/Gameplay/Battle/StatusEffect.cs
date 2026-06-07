@@ -89,7 +89,8 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Frail => "Gain 25% less Support.",
                 StatusEffectType.Entangled => "All cards cost +1 AP.",
                 StatusEffectType.Exposed => "Next attack against this target deals double damage.",
-                StatusEffectType.Smear => "Take X opinion pressure at end of turn (reputation bleed).",
+                StatusEffectType.Smear =>
+                    "Take X opinion pressure at end of turn (reputation bleed).",
                 StatusEffectType.Confused => "Effect values are randomised each turn.",
                 StatusEffectType.Silenced => "Cannot play Rhetoric cards.",
                 StatusEffectType.Stunned =>
@@ -100,7 +101,9 @@ namespace Crookedile.Gameplay.Battle
                     "Pacify status: blunts the enemy's push — it deals X less opinion pressure per stack. Counts toward conversion.",
                 StatusEffectType.Shame =>
                     "Pacify status: the enemy can't defend the meter — it gains X less Denial per stack. Counts toward conversion.",
+                StatusEffectType.Doubt =>
                     "Pacify status: the enemy may hold back its action (soft skip chance per stack). Counts toward conversion.",
+                StatusEffectType.Jaded =>
                     "Threshold status: each stack raises this enemy's pacify cost by 1. Permanent; gained on each conversion; never consumed.",
                 // Buffs
                 StatusEffectType.Strength => "Deal X more damage.",
@@ -156,6 +159,8 @@ namespace Crookedile.Gameplay.Battle
         Rattled, // Take bonus/reduced damage equal to attacker's Hostility per stack
         Guilt, // Pacify status — blunts enemy push: deals X less opinion pressure per stack; counts toward conversion
         Shame, // Pacify status — drops enemy shield: gains X less Denial per stack; counts toward conversion
+        Doubt, // Pacify status — soft skip chance per stack; counts toward conversion
+        Jaded, // Threshold status — raises pacify cost by 1 per stack; permanent, gained on conversion, never consumed
 
         // BUFFS (Positive)
         Strength, // Deal X more damage

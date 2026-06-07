@@ -486,6 +486,8 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Fanatic => true,
                 StatusEffectType.Guilt => true,
                 StatusEffectType.Shame => true,
+                StatusEffectType.Doubt => true,
+                // Jaded protects the enemy from re-conversion — an enemy-side buff, not a debuff.
                 _ => false,
             };
         }

@@ -341,6 +341,7 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.ReceptiveEnemyCount => CountLivingEnemies(e =>
                     e.Stats.IsReceptive
                 ),
+                EffectContextValue.ConversionsThisTurn => BattleManager?.ConversionsThisTurn ?? 0,
                 _ => 0, // FixedAmount / None — use authored value
             };
 
