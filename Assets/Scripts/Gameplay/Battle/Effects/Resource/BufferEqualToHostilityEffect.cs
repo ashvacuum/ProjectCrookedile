@@ -9,12 +9,7 @@ namespace Crookedile.Gameplay.Battle
     /// Dexterity/Frail modifiers apply.
     /// </summary>
     [Serializable]
-    [UnityEngine.Scripting.APIUpdating.MovedFrom(
-        true,
-        "Crookedile.Gameplay.Battle",
-        "Assembly-CSharp",
-        "ComposureEqualToHostilityEffect"
-    )]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class BufferEqualToHostilityEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
