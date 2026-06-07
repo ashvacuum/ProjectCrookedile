@@ -391,6 +391,20 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
+    /// Published by <c>BattleManager</c> whenever the player's banked Attention changes (Celebrity).
+    /// Attention is courted/provoked, banks across turns, and is spent as a big opinion-meter hit.
+    /// Subscribers: a future Attention HUD element.
+    /// </summary>
+    public struct AttentionChangedEvent : IGameEvent
+    {
+        /// <summary>Attention value before the change.</summary>
+        public int OldValue;
+
+        /// <summary>Attention value after the change.</summary>
+        public int NewValue;
+    }
+
+    /// <summary>
     /// Published by <c>BattleManager</c> whenever the session's Support buffer changes.
     /// Support absorbs opinion drops before they reach the opinion meter.
     /// </summary>

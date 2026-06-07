@@ -257,5 +257,6 @@ namespace Crookedile.Data
         CurrentPatronage, // 11 — Nepo Baby's current banked Patronage
         ScandalsInHand, // 12 — Scandal cards currently clogging the player's hand (Celebrity Scandal line)
         ScandalsDrawnThisTurn, // 13 — Scandal cards drawn so far this turn (Celebrity on-draw payoffs)
+        CurrentAttention, // 14 — Celebrity's banked Attention (spotlight resource)
     }
 }

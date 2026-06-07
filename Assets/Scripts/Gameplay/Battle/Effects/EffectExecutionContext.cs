@@ -345,6 +345,7 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.CurrentPatronage => BattleManager?.CurrentPatronage ?? 0,
                 EffectContextValue.ScandalsInHand => CountScandalsInHand(),
                 EffectContextValue.ScandalsDrawnThisTurn => Deck?.ScandalsDrawnThisTurn ?? 0,
+                EffectContextValue.CurrentAttention => BattleManager?.CurrentAttention ?? 0,
                 _ => 0, // FixedAmount / None — use authored value
             };
 
