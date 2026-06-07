@@ -252,5 +252,6 @@ namespace Crookedile.Data
         None, // 7 — return 0; hides fixed amount fields (use when amount is irrelevant)
         HostileEnemyCount, // 8 — number of living enemies with Hostility > 0
         ReceptiveEnemyCount, // 9 — number of living enemies with Hostility < 0
+        ConversionsThisTurn, // 10 — Faith Leader pacify conversions made this player turn (Sermon harvest)
     }
 }

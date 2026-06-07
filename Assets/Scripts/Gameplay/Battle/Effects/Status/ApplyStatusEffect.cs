@@ -55,6 +55,18 @@ namespace Crookedile.Gameplay.Battle
                         EnemyIndex = targetStats.OwnerEnemyIndex,
                     }
                 );
+
+                // Faith Leader pacify-conversion: stacking Guilt/Shame/Doubt on an enemy may push it
+                // over the threshold (3 + Jaded), converting it. No-op for non-pacify statuses,
+                // the player target, or sub-threshold totals.
+                if (
+                    stacks > 0
+                    && BattleManager.IsPacifyStatus(_statusType)
+                    && targetStats != ctx.PlayerStats
+                )
+                {
+                    ctx.BattleManager?.TryPacifyConvert(targetStats, statusMgr);
+                }
             }
         }
 

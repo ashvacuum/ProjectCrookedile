@@ -455,6 +455,130 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
+        #region Faith Leader — Pacify Conversion
+
+        // Base pacify threshold before Jaded; each Jaded stack on the enemy raises it by 1.
+        private const int PacifyBaseThreshold = 3;
+
+        // Opinion pumped into the meter per pacify stack consumed on conversion (generous by design;
+        // over-stacking past the threshold yields a proportionally bigger burst).
+        private const int ConvertBurstPerStack = 3;
+
+        // Pacify conversions made during the current player turn — read by Sermon-style harvest cards
+        // via EffectContextValue.ConversionsThisTurn. Reset at the start of each player turn.
+        private int _conversionsThisTurn;
+
+        /// <summary>Faith Leader pacify conversions made this player turn (Sermon harvest scaling).</summary>
+        public int ConversionsThisTurn => _conversionsThisTurn;
+
+        /// <summary>The pacify statuses that count toward (and are consumed by) a conversion.</summary>
+        public static bool IsPacifyStatus(StatusEffectType type) =>
+            type == StatusEffectType.Guilt
+            || type == StatusEffectType.Shame
+            || type == StatusEffectType.Doubt;
+
+        /// <summary>
+        /// Faith Leader conversion engine. Call after a pacify status (Guilt/Shame/Doubt) lands on an
+        /// enemy. When the enemy's total pacify stacks reach <c>3 + its Jaded stacks</c>, the pacify
+        /// statuses are consumed and the enemy converts:
+        /// <list type="bullet">
+        ///   <item>Hardened enemy — can't be converted; silenced instead (no burst, no Jaded).</item>
+        ///   <item>Any other enemy — a one-turn Fanatic burst pumps the meter, then it reverts to
+        ///   neutral and gains a permanent Jaded stack (raising its next conversion cost).</item>
+        /// </list>
+        /// No-op when the threshold isn't met. Player target is ignored.
+        /// </summary>
+        public void TryPacifyConvert(BattleStats enemyStats, StatusEffectManager mgr)
+        {
+            if (enemyStats == null || mgr == null || enemyStats == _playerStats)
+                return;
+
+            int guilt = mgr.GetStacks(StatusEffectType.Guilt);
+            int shame = mgr.GetStacks(StatusEffectType.Shame);
+            int doubt = mgr.GetStacks(StatusEffectType.Doubt);
+            int total = guilt + shame + doubt;
+
+            int threshold = PacifyBaseThreshold + mgr.GetStacks(StatusEffectType.Jaded);
+            if (total < threshold)
+                return;
+
+            int idx = enemyStats.OwnerEnemyIndex;
+
+            // Consume the pacify statuses — spent whether we convert or (Hardened) silence.
+            ConsumePacifyStatus(mgr, StatusEffectType.Guilt, guilt, idx);
+            ConsumePacifyStatus(mgr, StatusEffectType.Shame, shame, idx);
+            ConsumePacifyStatus(mgr, StatusEffectType.Doubt, doubt, idx);
+
+            // A true non-believer can't be converted — shut them up instead.
+            if (enemyStats.IsHardened)
+            {
+                mgr.ApplyStatusEffect(
+                    StatusEffectType.Silenced,
+                    1,
+                    StatusDurationType.DecreasePerTurn
+                );
+                GameLogger.LogInfo<BattleManager>(
+                    $"Enemy [{idx}] is Hardened — pacify failed, silenced instead"
+                );
+                EventBus.Publish(
+                    new EnemyConvertedEvent
+                    {
+                        EnemyIndex = idx,
+                        OpinionBurst = 0,
+                        WasSilenced = true,
+                    }
+                );
+                return;
+            }
+
+            // Convert: one-turn Fanatic burst pumping the meter (generous, scales with stacks eaten).
+            int burst = total * ConvertBurstPerStack;
+            _opinion.RaiseDirect(burst);
+
+            // Revert to neutral and gain a permanent Jaded stack (raises the next conversion cost).
+            enemyStats.SetHostility(0);
+            mgr.ApplyStatusEffect(StatusEffectType.Jaded, 1, StatusDurationType.Permanent);
+
+            _conversionsThisTurn++;
+
+            GameLogger.LogInfo<BattleManager>(
+                $"Enemy [{idx}] converted — {total} pacify stacks → {burst} opinion burst "
+                    + $"(now Jaded {mgr.GetStacks(StatusEffectType.Jaded)})"
+            );
+            EventBus.Publish(
+                new EnemyConvertedEvent
+                {
+                    EnemyIndex = idx,
+                    OpinionBurst = burst,
+                    WasSilenced = false,
+                }
+            );
+        }
+
+        /// <summary>Removes a pacify status and notifies the UI (negative-stack StatusEffectAppliedEvent).</summary>
+        private static void ConsumePacifyStatus(
+            StatusEffectManager mgr,
+            StatusEffectType type,
+            int stacks,
+            int enemyIndex
+        )
+        {
+            if (stacks <= 0)
+                return;
+            mgr.RemoveStatusEffect(type);
+            EventBus.Publish(
+                new StatusEffectAppliedEvent
+                {
+                    StatusType = type,
+                    Stacks = -stacks,
+                    IsToPlayer = false,
+                    EnemyIndex = enemyIndex,
+                }
+            );
+        }
+
+        #endregion
+
         #region Card Playing
 
         /// <summary>Plays a card from the player's hand.</summary>
@@ -798,6 +922,9 @@ namespace Crookedile.Gameplay.Battle
 
             if (_isPlayerTurn)
             {
+                // Fresh tally each player turn for Sermon-style harvest scaling.
+                _conversionsThisTurn = 0;
+
                 _playerStats.StartTurn();
                 _effectResolver.PlayerStatusEffects.OnTurnStart(_playerStats);
 
@@ -1105,13 +1232,39 @@ namespace Crookedile.Gameplay.Battle
                 if (enemy.IsDefeated || enemy.CurrentIntent == null)
                     yield break;
 
-                // Stunned enemies skip their entire action for this turn.
-                if (enemy.StatusEffects.HasEffect(StatusEffectType.Stunned))
+                // Stunned or Silenced enemies skip their entire action for this turn.
+                // (Silence is the Faith Leader's "shut them up" — also how a Hardened enemy is handled
+                // when pacify-conversion can't convert it.)
+                if (
+                    enemy.StatusEffects.HasEffect(StatusEffectType.Stunned)
+                    || enemy.StatusEffects.HasEffect(StatusEffectType.Silenced)
+                )
                 {
                     GameLogger.LogInfo<BattleManager>(
-                        $"Enemy [{i}] {enemy.EnemyData.EnemyName} is Stunned — skipping action"
+                        $"Enemy [{i}] {enemy.EnemyData.EnemyName} is silenced/stunned — skipping action"
                     );
                     yield break;
+                }
+
+                // Doubt (pacify): a doubting enemy may hold back its action (soft skip, 25% per stack).
+                int doubt = enemy.StatusEffects.GetStacks(StatusEffectType.Doubt);
+                if (doubt > 0)
+                {
+                    float doubtSkip = Mathf.Clamp01(doubt * 0.25f);
+                    if (UnityEngine.Random.value < doubtSkip)
+                    {
+                        GameLogger.LogInfo<BattleManager>(
+                            $"Enemy [{i}] {enemy.EnemyData.EnemyName} hesitates (Doubt skip {doubtSkip:P0})"
+                        );
+                        EventBus.Publish(
+                            new EnemySkippedTurnEvent
+                            {
+                                EnemyIndex = i,
+                                EnemyName = enemy.EnemyData.EnemyName,
+                            }
+                        );
+                        yield break;
+                    }
                 }
 
                 // Receptive enemies have a chance to hold back (20% per negative hostility stack).
