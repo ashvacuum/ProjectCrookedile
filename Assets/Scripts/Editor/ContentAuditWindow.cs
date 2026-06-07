@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Crookedile.Data;
 using Crookedile.Data.Audio;
 using Crookedile.Gameplay.Battle;
 using UnityEditor;
@@ -57,7 +58,12 @@ namespace Crookedile.EditorTools
         }
 
         private static List<IContentCheck> BuildChecks() =>
-            new List<IContentCheck> { new StatusCheck(), new AudioVfxCheck() };
+            new List<IContentCheck>
+            {
+                new StatusCheck(),
+                new StatusDatabaseCheck(),
+                new AudioVfxCheck(),
+            };
 
         private void RunAudit()
         {
@@ -164,12 +170,59 @@ namespace Crookedile.EditorTools
                             $"Status '{type}' has no description (add a case in StatusEffect.GetEffectDescription)."
                         );
                 }
+            }
+        }
 
-                yield return new AuditIssue(
-                    Severity.Warning,
-                    "No status visual database exists — statuses have no authored icon/color/SFX/VFX. "
-                        + "Consider a StatusEffectDatabase SO so every status is fully presentable."
+        /// <summary>
+        /// Validates the <see cref="StatusEffectDatabase"/> has a complete entry for every status:
+        /// present, with an icon and a color. Run "Crookedile → Generate → Status Effect Database"
+        /// to seed it, then fill in the visuals.
+        /// </summary>
+        private sealed class StatusDatabaseCheck : IContentCheck
+        {
+            public string Category => "Status database";
+
+            public IEnumerable<AuditIssue> Run()
+            {
+                string[] guids = AssetDatabase.FindAssets("t:StatusEffectDatabase");
+                if (guids.Length == 0)
+                {
+                    yield return new AuditIssue(
+                        Severity.Warning,
+                        "No StatusEffectDatabase asset — statuses have no icon/color/SFX/VFX. "
+                            + "Run Crookedile → Generate → Status Effect Database."
+                    );
+                    yield break;
+                }
+
+                var db = AssetDatabase.LoadAssetAtPath<StatusEffectDatabase>(
+                    AssetDatabase.GUIDToAssetPath(guids[0])
                 );
+
+                foreach (StatusEffectType type in Enum.GetValues(typeof(StatusEffectType)))
+                {
+                    if (!db.TryGet(type, out var entry))
+                    {
+                        yield return new AuditIssue(
+                            Severity.Error,
+                            $"Status '{type}' has no database entry (re-run the generator to sync).",
+                            db
+                        );
+                        continue;
+                    }
+                    if (entry.Icon == null)
+                        yield return new AuditIssue(
+                            Severity.Warning,
+                            $"Status '{type}' has no icon.",
+                            db
+                        );
+                    if (entry.Color.a <= 0f)
+                        yield return new AuditIssue(
+                            Severity.Info,
+                            $"Status '{type}' has no color set.",
+                            db
+                        );
+                }
             }
         }
 
