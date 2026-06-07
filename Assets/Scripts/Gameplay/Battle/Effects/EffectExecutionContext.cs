@@ -342,6 +342,7 @@ namespace Crookedile.Gameplay.Battle
                     e.Stats.IsReceptive
                 ),
                 EffectContextValue.ConversionsThisTurn => BattleManager?.ConversionsThisTurn ?? 0,
+                EffectContextValue.CurrentPatronage => BattleManager?.CurrentPatronage ?? 0,
                 _ => 0, // FixedAmount / None — use authored value
             };
 

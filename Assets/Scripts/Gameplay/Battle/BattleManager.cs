@@ -340,11 +340,15 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Adds up to <paramref name="count"/> copies of <paramref name="data"/> to the enemy list
-        /// (capped so total enemies never exceed 5). Called by OpponentTurnState when a SummonMinion
-        /// move resolves. Each new enemy immediately declares intent for the next turn.
+        /// Adds up to <paramref name="count"/> copies of <paramref name="data"/> to the enemy row
+        /// (capped so total enemies never exceed 5). Used both by enemy SummonMinion moves and by the
+        /// player's summon cards (Nepo Baby). Each new body immediately declares intent for next turn.
         /// </summary>
-        public void SummonMinions(EnemyData data, int count)
+        /// <param name="initialHostility">
+        /// Overrides the body's starting hostility when set — e.g. a Nepo Baby "Call a Favor" ally
+        /// spawns receptive (negative), a "Plant" spawns hostile (positive). Null uses the EnemyData default.
+        /// </param>
+        public void SummonMinions(EnemyData data, int count, int? initialHostility = null)
         {
             if (data == null || count <= 0)
                 return;
@@ -366,6 +370,10 @@ namespace Crookedile.Gameplay.Battle
                 int newIndex = _enemies.Count;
                 _enemies.Add(controller);
                 controller.Stats.SetOwnerEnemyIndex(newIndex);
+
+                // Player summons override the body's mood (receptive ally / hostile Plant).
+                if (initialHostility.HasValue)
+                    controller.Stats.SetHostility(initialHostility.Value);
 
                 EventBus.Publish(
                     new EnemySummonedEvent { EnemyData = data, EnemyIndex = newIndex }
@@ -452,6 +460,46 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>Drains session Support (used by "lose Support" effects). Returns amount removed.</summary>
         public int SpendSupport(int amount) => _opinion?.SpendSupport(amount) ?? 0;
+
+        #endregion
+
+        #region Nepo Baby — Patronage (banked currency)
+
+        // Player's banked Patronage. Unlike AP it persists across turns; spent on summons/installations,
+        // generated only by sacrificing cards (GeneratePatronageEffect). Reset to 0 at battle start.
+        private int _patronage;
+
+        /// <summary>Current banked Patronage (Nepo Baby's spend currency).</summary>
+        public int CurrentPatronage => _patronage;
+
+        /// <summary>Banks Patronage (e.g. from a sacrifice). No-op for non-positive amounts.</summary>
+        public void GainPatronage(int amount)
+        {
+            if (amount <= 0)
+                return;
+            SetPatronage(_patronage + amount);
+        }
+
+        /// <summary>Spends Patronage if affordable. Returns false (and spends nothing) if short.</summary>
+        public bool SpendPatronage(int amount)
+        {
+            if (amount <= 0)
+                return true;
+            if (_patronage < amount)
+                return false;
+            SetPatronage(_patronage - amount);
+            return true;
+        }
+
+        private void SetPatronage(int value)
+        {
+            int old = _patronage;
+            _patronage = Mathf.Max(0, value);
+            if (_patronage != old)
+                EventBus.Publish(
+                    new PatronageChangedEvent { OldValue = old, NewValue = _patronage }
+                );
+        }
 
         #endregion
 
@@ -693,8 +741,15 @@ namespace Crookedile.Gameplay.Battle
             foreach (var cost in card.Costs)
             {
                 if (cost.CostType == CostType.ActionPoints)
+                {
                     if (stats.CurrentActionPoints < GetEffectiveCardCost(card))
                         return false;
+                }
+                else if (cost.CostType == CostType.Patronage)
+                {
+                    if (_patronage < cost.CurrentAmount)
+                        return false;
+                }
             }
             return true;
         }
@@ -708,6 +763,13 @@ namespace Crookedile.Gameplay.Battle
                     int effective = GetEffectiveCardCost(card);
                     stats.SpendActionPoints(effective);
                     GameLogger.LogInfo<BattleManager>($"Paid {effective} AP for {card.CardName}");
+                }
+                else if (cost.CostType == CostType.Patronage)
+                {
+                    SpendPatronage(cost.CurrentAmount);
+                    GameLogger.LogInfo<BattleManager>(
+                        $"Paid {cost.CurrentAmount} Patronage for {card.CardName}"
+                    );
                 }
             }
         }
@@ -763,8 +825,16 @@ namespace Crookedile.Gameplay.Battle
         {
             if (card?.Costs == null || card.Costs.Count == 0)
                 return 0;
-            var cost = card.Costs[0];
-            if (cost.CostType != CostType.ActionPoints)
+            // Find the AP cost wherever it sits in the list — a card may be double-gated
+            // (e.g. Patronage + Energy), so we don't assume the AP cost is Costs[0].
+            CardCost cost = null;
+            foreach (var c in card.Costs)
+                if (c.CostType == CostType.ActionPoints)
+                {
+                    cost = c;
+                    break;
+                }
+            if (cost == null)
                 return 0;
 
             StatusEffectManager statusMgr = _effectResolver?.PlayerStatusEffects;
@@ -1048,6 +1118,9 @@ namespace Crookedile.Gameplay.Battle
             public override void OnEnter()
             {
                 GameLogger.LogInfo<BattleManager>("Initializing battle...");
+
+                // Patronage banks across turns but not across battles — start each battle empty.
+                _manager.SetPatronage(0);
 
                 // Draw player's opening hand; enemies have no deck
                 _manager._playerDeck.StartBattle(_manager._startingHandSize);
