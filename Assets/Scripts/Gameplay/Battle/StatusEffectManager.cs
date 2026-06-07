@@ -200,6 +200,17 @@ namespace Crookedile.Gameplay.Battle
                 ApplyStatusEffect(t, stacks, durationType);
         }
 
+        /// <summary>Removes X stacks of a status by behavior (maps to the enum store via the bridge).</summary>
+        public void RemoveStacks(StatusBehavior behavior, int amount)
+        {
+            if (behavior != null && StatusBridge.TryToEnum(behavior, out var t))
+                RemoveStacks(t, amount);
+        }
+
+        /// <summary>Removes X stacks of a status by behavior type.</summary>
+        public void RemoveStacks<T>(int amount)
+            where T : StatusBehavior => RemoveStacks(StatusRegistry.Get<T>(), amount);
+
         #endregion
 
         #region Query Effects (cont.)
