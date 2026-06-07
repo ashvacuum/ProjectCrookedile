@@ -60,6 +60,18 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Adjusts card AP cost (Focus/Energized/Entangled).</summary>
         public virtual int ModifyCardCost(int cost, int stacks) => cost;
 
+        /// <summary>
+        /// True for statuses consumed after a single incoming hit (Exposed doubles then drops;
+        /// Intangible caps at 1 then drops). The manager removes a stack after applying incoming mods.
+        /// </summary>
+        public virtual bool ConsumedOnIncomingHit => false;
+
+        /// <summary>
+        /// When true the manager applies this status's incoming modifier LAST (after all others) —
+        /// for hard overrides like Intangible (take exactly 1).
+        /// </summary>
+        public virtual bool IncomingOverride => false;
+
         #endregion
 
         #region Hostility flags
