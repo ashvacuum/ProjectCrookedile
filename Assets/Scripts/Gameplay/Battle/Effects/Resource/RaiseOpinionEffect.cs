@@ -25,7 +25,6 @@ namespace Crookedile.Gameplay.Battle
     {
         [Tooltip("Opinion to raise. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]
-        [MinValue(1)]
         [SerializeField]
         private int _amount = 5;
 
@@ -42,7 +41,7 @@ namespace Crookedile.Gameplay.Battle
             if (amount <= 0)
                 return;
 
-            ctx.BattleManager?.RaiseOpinion(amount);
+            ApplyPressure(ctx.Target, ctx.Caster, amount, ctx);
             GameLogger.LogInfo<RaiseOpinionEffect>($"Raised Opinion by {amount}");
         }
 
