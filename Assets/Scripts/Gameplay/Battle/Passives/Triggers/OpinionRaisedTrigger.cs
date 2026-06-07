@@ -2,10 +2,15 @@ using System;
 
 namespace Crookedile.Gameplay.Battle
 {
-    /// <summary>Fires when Opinion is raised directly (via HealResolveEffect / RestoreResolveEffect).</summary>
+    /// <summary>Fires when Opinion is raised directly (via RaiseOpinionEffect / RaiseOpinionTrackedEffect).</summary>
     [Serializable]
-    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class OpinionHealedTrigger : PassiveTriggerBase
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(
+        true,
+        "Crookedile.Gameplay.Battle",
+        "Crookedile.Runtime",
+        "OpinionHealedTrigger"
+    )]
+    public class OpinionRaisedTrigger : PassiveTriggerBase
     {
         public override bool Matches(PassiveEventContext ctx)
         {
