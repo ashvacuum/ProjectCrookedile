@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Crookedile.Data;
 using Crookedile.Data.Audio;
+using Crookedile.Data.Enemy;
 using Crookedile.Gameplay.Battle;
 using UnityEditor;
 using UnityEngine;
@@ -63,6 +64,8 @@ namespace Crookedile.EditorTools
                 new StatusCheck(),
                 new StatusDatabaseCheck(),
                 new AudioVfxCheck(),
+                new IntentThemeCheck(),
+                new EnemyCheck(),
             };
 
         private void RunAudit()
@@ -273,6 +276,99 @@ namespace Crookedile.EditorTools
                             );
                         }
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates every <see cref="EnemyMoveType"/> has an icon in an <see cref="EnemyIntentTheme"/>,
+        /// so the intent badge isn't blank for some move types.
+        /// </summary>
+        private sealed class IntentThemeCheck : IContentCheck
+        {
+            public string Category => "Intent theme";
+
+            public IEnumerable<AuditIssue> Run()
+            {
+                string[] guids = AssetDatabase.FindAssets("t:EnemyIntentTheme");
+                if (guids.Length == 0)
+                {
+                    yield return new AuditIssue(
+                        Severity.Warning,
+                        "No EnemyIntentTheme asset — intent badges have no icons/colors."
+                    );
+                    yield break;
+                }
+
+                foreach (string guid in guids)
+                {
+                    var theme = AssetDatabase.LoadAssetAtPath<EnemyIntentTheme>(
+                        AssetDatabase.GUIDToAssetPath(guid)
+                    );
+                    if (theme == null)
+                        continue;
+                    foreach (EnemyMoveType type in Enum.GetValues(typeof(EnemyMoveType)))
+                    {
+                        var (icon, _) = theme.GetVisual(type);
+                        if (icon == null)
+                            yield return new AuditIssue(
+                                Severity.Warning,
+                                $"[{theme.name}] intent '{type}' has no icon.",
+                                theme
+                            );
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates enemy assets: each <see cref="EnemyData"/> has a name, portrait and at least one
+        /// move; each <see cref="EnemyMoveData"/> has an intent description, effects (where applicable),
+        /// and a minion assigned for SummonMinion moves.
+        /// </summary>
+        private sealed class EnemyCheck : IContentCheck
+        {
+            public string Category => "Enemies";
+
+            public IEnumerable<AuditIssue> Run()
+            {
+                foreach (string guid in AssetDatabase.FindAssets("t:EnemyData"))
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(guid);
+                    var enemy = AssetDatabase.LoadAssetAtPath<EnemyData>(path);
+                    if (enemy == null)
+                        continue;
+
+                    if (string.IsNullOrWhiteSpace(enemy.EnemyName) || enemy.EnemyName == "Unknown Enemy")
+                        yield return new AuditIssue(Severity.Warning, $"Enemy '{enemy.name}' has no display name.", enemy);
+                    if (enemy.Portrait == null)
+                        yield return new AuditIssue(Severity.Warning, $"Enemy '{enemy.name}' has no portrait.", enemy);
+                    if (enemy.Moves == null || enemy.Moves.Count == 0)
+                        yield return new AuditIssue(Severity.Error, $"Enemy '{enemy.name}' has no moves.", enemy);
+                    else
+                        for (int i = 0; i < enemy.Moves.Count; i++)
+                            if (enemy.Moves[i] == null)
+                                yield return new AuditIssue(Severity.Error, $"Enemy '{enemy.name}' move [{i}] is unassigned.", enemy);
+                }
+
+                foreach (string guid in AssetDatabase.FindAssets("t:EnemyMoveData"))
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(guid);
+                    var move = AssetDatabase.LoadAssetAtPath<EnemyMoveData>(path);
+                    if (move == null)
+                        continue;
+
+                    if (string.IsNullOrWhiteSpace(move.IntentDescription))
+                        yield return new AuditIssue(Severity.Warning, $"Move '{move.name}' has no intent description.", move);
+
+                    bool needsEffects =
+                        move.MoveType != EnemyMoveType.Idle
+                        && move.MoveType != EnemyMoveType.SummonMinion;
+                    if (needsEffects && (move.Effects == null || move.Effects.Count == 0))
+                        yield return new AuditIssue(Severity.Warning, $"Move '{move.name}' ({move.MoveType}) has no effects.", move);
+
+                    if (move.MoveType == EnemyMoveType.SummonMinion && move.MinionToSummon == null)
+                        yield return new AuditIssue(Severity.Error, $"Summon move '{move.name}' has no minion assigned.", move);
                 }
             }
         }
