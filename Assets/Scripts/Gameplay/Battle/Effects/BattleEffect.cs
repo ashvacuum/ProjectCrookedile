@@ -236,7 +236,14 @@
 
         protected static void ApplyGainDenial(int amount, EffectExecutionContext ctx)
         {
-            ctx.BattleManager?.GainDenial(amount);
+            if (ctx.BattleManager == null)
+                return;
+            // Shame (pacify status): a shamed enemy can't defend the meter — the Denial it gains
+            // is reduced by its Shame stacks. Counts toward the pacify threshold.
+            int shame = ctx.CasterStatusEffects?.GetStacks(StatusEffectType.Shame) ?? 0;
+            if (shame > 0)
+                amount = Mathf.Max(0, amount - shame);
+            ctx.BattleManager.GainDenial(amount);
         }
 
         #endregion
