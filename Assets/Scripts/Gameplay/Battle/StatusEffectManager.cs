@@ -170,6 +170,40 @@ namespace Crookedile.Gameplay.Battle
             return _byType.ContainsKey(type);
         }
 
+        #endregion
+
+        #region Behavior bridge (transitional — lets new code be behavior-first; storage stays enum)
+
+        /// <summary>Stacks of a status by its behavior (0 if not present or unmapped).</summary>
+        public int GetStacks(StatusBehavior behavior) =>
+            behavior != null && StatusBridge.TryToEnum(behavior, out var t) ? GetStacks(t) : 0;
+
+        /// <summary>Stacks of a status by behavior type.</summary>
+        public int GetStacks<T>()
+            where T : StatusBehavior => GetStacks(StatusRegistry.Get<T>());
+
+        /// <summary>True if a status (by behavior) is present.</summary>
+        public bool HasStatus(StatusBehavior behavior) =>
+            behavior != null && StatusBridge.TryToEnum(behavior, out var t) && HasEffect(t);
+
+        public bool HasStatus<T>()
+            where T : StatusBehavior => HasStatus(StatusRegistry.Get<T>());
+
+        /// <summary>Applies a status by behavior (maps to the enum store via the bridge).</summary>
+        public void ApplyStatus(
+            StatusBehavior behavior,
+            int stacks,
+            StatusDurationType durationType = StatusDurationType.DecreasePerTurn
+        )
+        {
+            if (behavior != null && StatusBridge.TryToEnum(behavior, out var t))
+                ApplyStatusEffect(t, stacks, durationType);
+        }
+
+        #endregion
+
+        #region Query Effects (cont.)
+
         /// <summary>
         /// Gets all active debuffs.
         /// </summary>
