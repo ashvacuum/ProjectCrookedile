@@ -67,6 +67,7 @@ namespace Crookedile.EditorTools
                 new IntentThemeCheck(),
                 new EnemyCheck(),
                 new EffectsCheck(),
+                new OriginDatabaseCheck(),
             };
 
         private void RunAudit()
@@ -399,6 +400,49 @@ namespace Crookedile.EditorTools
                             $"Effect '{info.DisplayName}' ({info.Type.Name}) has an empty GetDescription — "
                                 + "cards using it auto-generate no text."
                         );
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates the <see cref="OriginDatabase"/> has a complete entry per <see cref="OriginType"/>:
+        /// present, with a display name and a linked starter passive.
+        /// </summary>
+        private sealed class OriginDatabaseCheck : IContentCheck
+        {
+            public string Category => "Origin database";
+
+            public IEnumerable<AuditIssue> Run()
+            {
+                string[] guids = AssetDatabase.FindAssets("t:OriginDatabase");
+                if (guids.Length == 0)
+                {
+                    yield return new AuditIssue(
+                        Severity.Warning,
+                        "No OriginDatabase asset — run Crookedile → Generate → Origin Database."
+                    );
+                    yield break;
+                }
+
+                var db = AssetDatabase.LoadAssetAtPath<OriginDatabase>(
+                    AssetDatabase.GUIDToAssetPath(guids[0])
+                );
+
+                foreach (OriginType origin in Enum.GetValues(typeof(OriginType)))
+                {
+                    if (!db.TryGet(origin, out var entry))
+                    {
+                        yield return new AuditIssue(
+                            Severity.Error,
+                            $"Origin '{origin}' has no database entry (re-run the generator).",
+                            db
+                        );
+                        continue;
+                    }
+                    if (string.IsNullOrWhiteSpace(entry.DisplayName))
+                        yield return new AuditIssue(Severity.Warning, $"Origin '{origin}' has no display name.", db);
+                    if (entry.Passive == null)
+                        yield return new AuditIssue(Severity.Warning, $"Origin '{origin}' has no starter passive linked.", db);
                 }
             }
         }
