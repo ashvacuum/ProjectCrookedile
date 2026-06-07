@@ -30,6 +30,9 @@ namespace Crookedile.Gameplay.Battle
         public int Stacks => _stacks;
         public StatusDurationType DurationType => _durationType;
 
+        /// <summary>Human-readable description of this status (mirrors the editor InfoBox text).</summary>
+        public string Description => GetEffectDescription();
+
         public StatusEffect(
             StatusEffectType type,
             int stacks,
