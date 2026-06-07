@@ -255,5 +255,7 @@ namespace Crookedile.Data
         ReceptiveEnemyCount, // 9 — number of living enemies with Hostility < 0
         ConversionsThisTurn, // 10 — Faith Leader pacify conversions made this player turn (Sermon harvest)
         CurrentPatronage, // 11 — Nepo Baby's current banked Patronage
+        ScandalsInHand, // 12 — Scandal cards currently clogging the player's hand (Celebrity Scandal line)
+        ScandalsDrawnThisTurn, // 13 — Scandal cards drawn so far this turn (Celebrity on-draw payoffs)
     }
 }
