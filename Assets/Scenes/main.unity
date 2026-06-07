@@ -390,6 +390,11 @@ MonoBehaviour:
   _cardsPerTurn: 5
   _opponentTurnDelay: 1
   _perEnemyAttackDelay: 0.5
+  _echoChamberDecayPerTurn: 5
+  _supportPerReceptiveEnemy: 1
+  _turncoatStacks: 2
+  _turncoatOpinionHit: 3
+  _turncoatAdjacentNudge: 1
   _originPassives:
   - {fileID: 11400000, guid: 1c444f8d41faab941946d3b7ac62f5f8, type: 2}
   - {fileID: 11400000, guid: 9fe225578fe293c4ba31c366dd76670b, type: 2}
