@@ -118,7 +118,10 @@ namespace Crookedile.Gameplay.Battle
 
             var execCtx = CreateContext(isPlayerCard);
 
-            var effects = card.Effects;
+            // Honour the card's upgrade state — GetNewEffects returns the upgraded effect list when
+            // the card is upgraded (and one is authored), else the base list. Identical to .Effects
+            // for non-upgraded cards, so this is a no-op for them.
+            var effects = card.GetNewEffects();
             if (effects == null)
                 return execCtx;
             for (int j = 0; j < effects.Count; j++)
