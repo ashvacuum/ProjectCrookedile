@@ -742,16 +742,33 @@ namespace Crookedile.UI.Battle
             if (cardData.Costs == null || cardData.Costs.Count == 0)
                 return "0";
 
-            var cost = cardData.Costs[0];
+            // A card may carry an Energy cost, a Patronage cost (Nepo Baby), or both (double-gated).
+            CardCost ap = null;
+            CardCost patronage = null;
+            foreach (var c in cardData.Costs)
+            {
+                if (c.CostType == CostType.ActionPoints)
+                    ap = c;
+                else if (c.CostType == CostType.Patronage)
+                    patronage = c;
+            }
 
-            if (cost.CostType == CostType.None)
-                return "Free";
-            if (cost.IsXCost)
+            if (ap != null && ap.IsXCost)
                 return "X";
 
-            // Use the effective cost (post status-effect modifiers) so Focus/Energized/Entangled
-            // are reflected in the cost display on the card.
-            return _effectiveCost <= 0 ? "0" : _effectiveCost.ToString();
+            // Energy uses the effective cost (post Focus/Energized/Entangled); Patronage is flat.
+            string apPart = ap != null ? (_effectiveCost <= 0 ? "0" : _effectiveCost.ToString()) : null;
+            string patPart = patronage != null ? $"{patronage.CurrentAmount}P" : null;
+
+            if (apPart != null && patPart != null)
+                return $"{apPart} + {patPart}";
+            if (patPart != null)
+                return patPart;
+            if (apPart != null)
+                return apPart;
+
+            // No Energy/Patronage cost — Free (None) or unknown.
+            return cardData.Costs[0].CostType == CostType.None ? "Free" : "0";
         }
 
         /// <summary>
