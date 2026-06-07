@@ -69,6 +69,12 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public int HandCount => _hand.Count;
 
+        // Scandals drawn since the start of the current turn — reset each StartTurn/StartBattle.
+        private int _scandalsDrawnThisTurn;
+
+        /// <summary>Number of Scandal cards drawn so far this turn (Celebrity on-draw payoffs).</summary>
+        public int ScandalsDrawnThisTurn => _scandalsDrawnThisTurn;
+
         /// <summary>
         /// Number of cards in the discard pile.
         /// </summary>
@@ -223,6 +229,10 @@ namespace Crookedile.Gameplay.Battle
             CardData drawnCard = _deck[0];
             _deck.RemoveAt(0);
             _hand.Add(drawnCard);
+
+            // Track Scandals drawn this turn (Celebrity on-draw payoffs read this via the context).
+            if (drawnCard != null && drawnCard.CardType == Crookedile.Data.CardType.Scandal)
+                _scandalsDrawnThisTurn++;
 
             EventBus.Publish(new CardDrawnEvent { Card = drawnCard, IsPlayer = _isPlayer });
             return true;
@@ -651,6 +661,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void StartBattle(int initialHandSize)
         {
+            _scandalsDrawnThisTurn = 0;
             DrawCards(initialHandSize);
             GameLogger.LogInfo<DeckManager>(
                 $"{_ownerName} drew initial hand of {initialHandSize} cards"
@@ -660,7 +671,11 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Called at the start of each turn.
         /// </summary>
-        public void StartTurn(int cardsToDraw) => DrawCards(cardsToDraw);
+        public void StartTurn(int cardsToDraw)
+        {
+            _scandalsDrawnThisTurn = 0;
+            DrawCards(cardsToDraw);
+        }
 
         /// <summary>
         /// Called at the end of each turn - discards hand.

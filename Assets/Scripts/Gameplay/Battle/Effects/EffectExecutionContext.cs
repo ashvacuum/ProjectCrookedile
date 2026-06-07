@@ -343,6 +343,8 @@ namespace Crookedile.Gameplay.Battle
                 ),
                 EffectContextValue.ConversionsThisTurn => BattleManager?.ConversionsThisTurn ?? 0,
                 EffectContextValue.CurrentPatronage => BattleManager?.CurrentPatronage ?? 0,
+                EffectContextValue.ScandalsInHand => CountScandalsInHand(),
+                EffectContextValue.ScandalsDrawnThisTurn => Deck?.ScandalsDrawnThisTurn ?? 0,
                 _ => 0, // FixedAmount / None — use authored value
             };
 
@@ -350,6 +352,18 @@ namespace Crookedile.Gameplay.Battle
         /// Counts living enemies matching <paramref name="predicate"/>.
         /// Returns 0 if <see cref="AllEnemies"/> is null (e.g. enemy move context).
         /// </summary>
+        /// <summary>Counts Scandal cards currently in the player's hand (Celebrity Scandal line).</summary>
+        private int CountScandalsInHand()
+        {
+            if (Deck == null)
+                return 0;
+            int count = 0;
+            foreach (var card in Deck.Hand)
+                if (card != null && card.CardType == CardType.Scandal)
+                    count++;
+            return count;
+        }
+
         private int CountLivingEnemies(System.Func<EnemyController, bool> predicate)
         {
             if (AllEnemies == null)
