@@ -8,10 +8,20 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Applies a status effect (buff or debuff) to one or more targets.
-    /// Stacks and duration are configured per instance.
+    /// DEPRECATED — applies a status by the legacy <see cref="StatusEffectType"/> enum. Use
+    /// <see cref="ApplyStatusBehaviorEffect"/> (polymorphic <see cref="StatusBehavior"/>) instead.
+    /// Kept so existing assets keep working during the status-system migration; re-author onto the
+    /// behavior version and this class will be removed once nothing uses it (see Content Hub →
+    /// "Status migration").
     /// </summary>
     [Serializable]
+    [Obsolete(
+        "Use ApplyStatusBehaviorEffect (polymorphic StatusBehavior). Kept for existing assets during migration."
+    )]
+    [InfoBox(
+        "DEPRECATED — use ApplyStatusBehaviorEffect instead (pick a StatusBehavior).",
+        InfoMessageType.Warning
+    )]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class ApplyStatusEffect : BattleEffect
     {
