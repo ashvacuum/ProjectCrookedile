@@ -85,6 +85,7 @@ namespace Crookedile.EditorTools
         private static List<IContentProvider> BuildProviders() =>
             new List<IContentProvider>
             {
+                new ReadinessProvider(),
                 new CardsProvider(),
                 new StatusesProvider(),
                 new EffectsProvider(),
@@ -232,6 +233,63 @@ namespace Crookedile.EditorTools
         // -----------------------------------------------------------------
         // Providers
         // -----------------------------------------------------------------
+
+        /// <summary>
+        /// Asset-level readiness for a playable battle: each origin has a starter deck and a wired
+        /// passive, and the project has enemies and at least one encounter. (Scene wiring — the
+        /// BattleManager's passive array / intent theme / overlay text slots / BattleTestStarter
+        /// session — can't be asset-scanned; verify those in the scene.)
+        /// </summary>
+        private sealed class ReadinessProvider : IContentProvider
+        {
+            public string Category => "Readiness";
+
+            public IEnumerable<Row> Rows()
+            {
+                var cards = LoadAll<CardData>();
+                var passives = LoadAll<OriginPassive>();
+
+                foreach (OriginType origin in Enum.GetValues(typeof(OriginType)))
+                {
+                    string tag = origin.ToString().ToLowerInvariant();
+                    int deck = cards.Count(c =>
+                        c.IsStarterCard
+                        && (c.Tags == null || c.Tags.Count == 0 || c.HasTag(tag) || c.HasTag("universal"))
+                    );
+                    var deckIssues = new List<AuditIssue>();
+                    if (deck == 0)
+                        deckIssues.Add(new AuditIssue(Severity.Error, "No starter cards (run the deck generator / tag cards)."));
+                    else if (deck < 5)
+                        deckIssues.Add(new AuditIssue(Severity.Warning, "Fewer than 5 starter cards — thin deck."));
+                    yield return new Row($"{origin} starter deck", $"{deck} card(s)", null, deckIssues);
+
+                    var p = passives.FirstOrDefault(x => x.Origin == origin);
+                    var passIssues = new List<AuditIssue>();
+                    if (p == null)
+                        passIssues.Add(new AuditIssue(Severity.Warning, "No OriginPassive asset for this origin."));
+                    else if (p.Passives == null || p.Passives.Count == 0)
+                        passIssues.Add(new AuditIssue(Severity.Warning, "OriginPassive has no passives wired."));
+                    yield return new Row($"{origin} passive", p != null ? p.name : "(none)", p, passIssues);
+                }
+
+                int enemies = LoadAll<EnemyData>().Count(e => e.Moves != null && e.Moves.Count > 0);
+                var enemyIssues = new List<AuditIssue>();
+                if (enemies == 0)
+                    enemyIssues.Add(new AuditIssue(Severity.Error, "No enemies with moves — nothing to fight."));
+                yield return new Row("Enemies with moves", $"{enemies}", null, enemyIssues);
+
+                var sessions = LoadAll<BattleSession>();
+                int playable = sessions.Count(s =>
+                    s.rounds != null && s.rounds.Any(r => r != null && r.enemies != null && r.enemies.Count > 0)
+                );
+                var sessionIssues = new List<AuditIssue>();
+                if (sessions.Count == 0)
+                    sessionIssues.Add(new AuditIssue(Severity.Info, "No BattleSession — BattleTestStarter must use its own enemies list."));
+                else if (playable == 0)
+                    sessionIssues.Add(new AuditIssue(Severity.Warning, "BattleSession(s) exist but no round has enemies."));
+                yield return new Row("Encounters (BattleSession)", $"{playable}/{sessions.Count} playable", null, sessionIssues);
+            }
+        }
 
         private sealed class CardsProvider : IContentProvider
         {
