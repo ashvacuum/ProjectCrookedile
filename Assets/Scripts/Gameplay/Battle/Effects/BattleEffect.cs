@@ -213,14 +213,6 @@
             }
         }
 
-        // Keep the old name as a redirect so any call sites not yet updated still compile.
-        protected static int ApplyResolveDamage(
-            BattleStats target,
-            BattleStats attacker,
-            int baseDamage,
-            EffectExecutionContext ctx
-        ) => ApplyPressure(target, attacker, baseDamage, ctx);
-
         #endregion
 
         #region Session shield helpers
