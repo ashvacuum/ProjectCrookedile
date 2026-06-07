@@ -39,7 +39,7 @@
     [Serializable]
     // Live description shown above each effect's fields in the inspector (card/enemy authoring),
     // so designers see what an effect does without reading code. Inherited by every concrete effect.
-    [InfoBox("@GetDescription()", InfoMessageType.None)]
+    [InfoBox("@$value.GetDescription()", InfoMessageType.None)]
     public abstract class BattleEffect
     {
         [SerializeField]
