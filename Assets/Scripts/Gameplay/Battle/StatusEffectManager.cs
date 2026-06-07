@@ -306,8 +306,9 @@ namespace Crookedile.Gameplay.Battle
             // Apply Weakened (debuff)
             finalDamage -= GetStacks(StatusEffectType.Weakened);
 
-            // Shame (debuff): a shamed enemy speaks with a muted voice — less pressure.
-            finalDamage -= GetStacks(StatusEffectType.Shame);
+            // Guilt (pacify status): a guilty enemy's push on the meter is blunted — less pressure
+            // dealt per stack (≈Weakened on their offense). Counts toward the pacify threshold.
+            finalDamage -= GetStacks(StatusEffectType.Guilt);
 
             // Apply Exposed (double damage, then remove)
             if (HasEffect(StatusEffectType.Exposed))
@@ -340,9 +341,6 @@ namespace Crookedile.Gameplay.Battle
             {
                 finalDamage *= 1.5f;
             }
-
-            // Guilt (debuff): a guilty enemy is persuadable — takes +1 opinion pressure per stack.
-            finalDamage += GetStacks(StatusEffectType.Guilt);
 
             // Apply Rattled — damage shifted by attacker's Hostility per stack.
             // Hostile attacker = hits land harder; receptive attacker = hits land softer.
@@ -383,7 +381,7 @@ namespace Crookedile.Gameplay.Battle
             final += GetStacks(StatusEffectType.Strength);
             final += GetStacks(StatusEffectType.Turncoat);
             final -= GetStacks(StatusEffectType.Weakened);
-            final -= GetStacks(StatusEffectType.Shame);
+            final -= GetStacks(StatusEffectType.Guilt);
             if (HasEffect(StatusEffectType.Exposed))
                 final *= 2; // show doubled — Exposed will fire on the actual hit
             return Mathf.Max(0, final);
@@ -402,7 +400,6 @@ namespace Crookedile.Gameplay.Battle
             float final = incomingDamage;
             if (HasEffect(StatusEffectType.Vulnerable))
                 final *= 1.5f;
-            final += GetStacks(StatusEffectType.Guilt);
             int rattled = GetStacks(StatusEffectType.Rattled);
             if (rattled != 0)
                 final += attackerHostility * rattled;

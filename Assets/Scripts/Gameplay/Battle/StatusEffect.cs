@@ -97,8 +97,11 @@ namespace Crookedile.Gameplay.Battle
                 StatusEffectType.Rattled =>
                     "Take bonus damage equal to attacker Hostility per stack (reduced if attacker is Receptive).",
                 StatusEffectType.Guilt =>
-                    "Persuadable: takes +X opinion pressure per stack, and can be converted (e.g. Absolution).",
-                StatusEffectType.Shame => "Muted: deals X less opinion pressure per stack.",
+                    "Pacify status: blunts the enemy's push — it deals X less opinion pressure per stack. Counts toward conversion.",
+                StatusEffectType.Shame =>
+                    "Pacify status: the enemy can't defend the meter — it gains X less Denial per stack. Counts toward conversion.",
+                    "Pacify status: the enemy may hold back its action (soft skip chance per stack). Counts toward conversion.",
+                    "Threshold status: each stack raises this enemy's pacify cost by 1. Permanent; gained on each conversion; never consumed.",
                 // Buffs
                 StatusEffectType.Strength => "Deal X more damage.",
                 StatusEffectType.Dexterity => "Gain X more Support per card played.",
@@ -151,8 +154,8 @@ namespace Crookedile.Gameplay.Battle
         Silenced, // Cannot play Rhetoric cards
         Stunned, // Skips its next action; removed at start of player turn (non-stackable)
         Rattled, // Take bonus/reduced damage equal to attacker's Hostility per stack
-        Guilt, // Persuadable — takes +X opinion pressure per stack; convert marker (Absolution)
-        Shame, // Muted — deals X less opinion pressure per stack
+        Guilt, // Pacify status — blunts enemy push: deals X less opinion pressure per stack; counts toward conversion
+        Shame, // Pacify status — drops enemy shield: gains X less Denial per stack; counts toward conversion
 
         // BUFFS (Positive)
         Strength, // Deal X more damage
