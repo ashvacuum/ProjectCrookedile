@@ -12,519 +12,461 @@ using UnityEngine;
 namespace Crookedile.EditorTools
 {
     /// <summary>
-    /// Content-completeness dashboard. Runs a registry of read-only checks that verify every
-    /// enum-driven piece of content is actually authored (statuses described, audio/VFX triggers
-    /// mapped, etc.) and surfaces what's missing. Mutates nothing.
+    /// Content Hub — one window that browses ALL game content (cards, statuses, effects, enemies,
+    /// intents, origins, audio/VFX, relics, reward config) and audits completeness. A Summary tab
+    /// shows per-category health; each content tab lists every entry with a status badge and
+    /// click-to-select. Read-only. Add an <see cref="IContentProvider"/> to <see cref="BuildProviders"/>
+    /// and it shows up as a new tab automatically.
     ///
-    /// Menu: Crookedile → Content Audit. Designed to grow — add an <see cref="IContentCheck"/> to
-    /// <see cref="BuildChecks"/> and it shows up automatically.
+    /// Menu: Crookedile → Content Hub.
     /// </summary>
     public class ContentAuditWindow : EditorWindow
     {
         public enum Severity
         {
-            Error,
-            Warning,
+            Ok,
             Info,
+            Warning,
+            Error,
         }
 
         public readonly struct AuditIssue
         {
             public readonly Severity Severity;
             public readonly string Message;
-            public readonly UnityEngine.Object Context;
 
-            public AuditIssue(Severity severity, string message, UnityEngine.Object context = null)
+            public AuditIssue(Severity severity, string message)
             {
                 Severity = severity;
                 Message = message;
-                Context = context;
             }
         }
 
-        public interface IContentCheck
+        /// <summary>One entry in a category — a content item plus any problems found with it.</summary>
+        public readonly struct Row
         {
-            string Category { get; }
-            IEnumerable<AuditIssue> Run();
+            public readonly string Label;
+            public readonly string Detail;
+            public readonly UnityEngine.Object Context;
+            public readonly List<AuditIssue> Issues;
+
+            public Row(string label, string detail, UnityEngine.Object context, List<AuditIssue> issues)
+            {
+                Label = label;
+                Detail = detail;
+                Context = context;
+                Issues = issues ?? new List<AuditIssue>();
+            }
+
+            public Severity Worst =>
+                Issues.Count == 0 ? Severity.Ok : Issues.Max(i => i.Severity);
         }
 
-        private List<(string category, List<AuditIssue> issues)> _results;
-        private Vector2 _scroll;
+        public interface IContentProvider
+        {
+            string Category { get; }
+            IEnumerable<Row> Rows();
+        }
 
-        [MenuItem("Crookedile/Content Audit")]
+        private List<(string category, List<Row> rows)> _data;
+        private int _tab;
+        private Vector2 _scroll;
+        private bool _problemsOnly;
+
+        [MenuItem("Crookedile/Content Hub")]
         public static void ShowWindow()
         {
-            var win = GetWindow<ContentAuditWindow>("Content Audit");
-            win.minSize = new Vector2(480, 320);
+            var win = GetWindow<ContentAuditWindow>("Content Hub");
+            win.minSize = new Vector2(560, 400);
             win.Show();
         }
 
-        private static List<IContentCheck> BuildChecks() =>
-            new List<IContentCheck>
+        private static List<IContentProvider> BuildProviders() =>
+            new List<IContentProvider>
             {
-                new StatusCheck(),
-                new StatusDatabaseCheck(),
-                new AudioVfxCheck(),
-                new IntentThemeCheck(),
-                new EnemyCheck(),
-                new EffectsCheck(),
-                new OriginDatabaseCheck(),
-                new RewardConfigCheck(),
-                new RelicCheck(),
+                new CardsProvider(),
+                new StatusesProvider(),
+                new EffectsProvider(),
+                new EnemiesProvider(),
+                new EnemyMovesProvider(),
+                new IntentsProvider(),
+                new OriginsProvider(),
+                new AudioVfxProvider(),
+                new RelicsProvider(),
+                new RewardProvider(),
             };
 
-        private void RunAudit()
+        private void Refresh()
         {
-            _results = new List<(string, List<AuditIssue>)>();
-            foreach (var check in BuildChecks())
+            _data = new List<(string, List<Row>)>();
+            foreach (var p in BuildProviders())
             {
-                List<AuditIssue> issues;
+                List<Row> rows;
                 try
                 {
-                    issues = check.Run().ToList();
+                    rows = p.Rows().ToList();
                 }
                 catch (Exception e)
                 {
-                    issues = new List<AuditIssue>
+                    rows = new List<Row>
                     {
-                        new AuditIssue(Severity.Error, $"Check threw: {e.Message}"),
+                        new Row("(provider error)", e.Message, null,
+                            new List<AuditIssue> { new AuditIssue(Severity.Error, e.Message) }),
                     };
                 }
-                _results.Add((check.Category, issues));
+                _data.Add((p.Category, rows));
             }
         }
 
         private void OnGUI()
         {
-            EditorGUILayout.Space(4);
-            if (GUILayout.Button("Run Audit", GUILayout.Height(28)))
-                RunAudit();
-
-            if (_results == null)
+            using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
             {
-                EditorGUILayout.HelpBox("Press Run Audit to scan content.", MessageType.Info);
+                if (GUILayout.Button("Refresh", EditorStyles.toolbarButton, GUILayout.Width(70)))
+                    Refresh();
+                GUILayout.FlexibleSpace();
+                _problemsOnly = GUILayout.Toggle(_problemsOnly, "Problems only", EditorStyles.toolbarButton);
+            }
+
+            if (_data == null)
+            {
+                EditorGUILayout.HelpBox("Press Refresh to scan all content.", MessageType.Info);
                 return;
             }
 
-            int totalErrors = _results.Sum(r => r.issues.Count(i => i.Severity == Severity.Error));
-            int totalWarnings = _results.Sum(r =>
-                r.issues.Count(i => i.Severity == Severity.Warning)
-            );
-            EditorGUILayout.LabelField(
-                $"{totalErrors} error(s), {totalWarnings} warning(s) across {_results.Count} categories.",
-                EditorStyles.boldLabel
-            );
+            // Tab bar: Summary + one per category.
+            var tabs = new List<string> { "Summary" };
+            tabs.AddRange(_data.Select(d => d.category));
+            _tab = GUILayout.Toolbar(Mathf.Clamp(_tab, 0, tabs.Count - 1), tabs.ToArray());
 
             _scroll = EditorGUILayout.BeginScrollView(_scroll);
-            foreach (var (category, issues) in _results)
-            {
-                int errs = issues.Count(i => i.Severity == Severity.Error);
-                int warns = issues.Count(i => i.Severity == Severity.Warning);
-                string suffix = issues.Count == 0 ? "OK" : $"{errs} err, {warns} warn";
-                EditorGUILayout.Space(6);
-                EditorGUILayout.LabelField($"{category}  —  {suffix}", EditorStyles.boldLabel);
-
-                foreach (var issue in issues)
-                {
-                    var prev = GUI.color;
-                    GUI.color = issue.Severity switch
-                    {
-                        Severity.Error => new Color(1f, 0.6f, 0.6f),
-                        Severity.Warning => new Color(1f, 0.85f, 0.5f),
-                        _ => Color.white,
-                    };
-                    using (new EditorGUILayout.HorizontalScope())
-                    {
-                        EditorGUILayout.LabelField(
-                            $"[{issue.Severity}] {issue.Message}",
-                            EditorStyles.wordWrappedLabel
-                        );
-                        if (
-                            issue.Context != null
-                            && GUILayout.Button("Select", GUILayout.Width(60))
-                        )
-                        {
-                            Selection.activeObject = issue.Context;
-                            EditorGUIUtility.PingObject(issue.Context);
-                        }
-                    }
-                    GUI.color = prev;
-                }
-            }
+            if (_tab == 0)
+                DrawSummary();
+            else
+                DrawCategory(_data[_tab - 1]);
             EditorGUILayout.EndScrollView();
         }
 
-        // ---------------------------------------------------------------------
-        // Checks
-        // ---------------------------------------------------------------------
+        private void DrawSummary()
+        {
+            foreach (var (category, rows) in _data)
+            {
+                int errors = rows.Count(r => r.Worst == Severity.Error);
+                int warns = rows.Count(r => r.Worst == Severity.Warning);
+                string status = errors == 0 && warns == 0 ? "OK" : $"{errors} err, {warns} warn";
+                var prev = GUI.color;
+                GUI.color = errors > 0 ? Red : warns > 0 ? Amber : Color.white;
+                EditorGUILayout.LabelField($"{category}", $"{rows.Count} entries  —  {status}");
+                GUI.color = prev;
+            }
+        }
 
-        /// <summary>
-        /// Validates every <see cref="StatusEffectType"/> has a non-empty description, and flags the
-        /// absence of any central status visual data (icons/colors/sfx/vfx) — there is no status
-        /// database yet, so a status added to the enum can be wholly invisible to the player.
-        /// </summary>
-        private sealed class StatusCheck : IContentCheck
+        private void DrawCategory((string category, List<Row> rows) data)
+        {
+            EditorGUILayout.LabelField($"{data.category}  ({data.rows.Count} entries)", EditorStyles.boldLabel);
+            foreach (var row in data.rows)
+            {
+                if (_problemsOnly && row.Worst == Severity.Ok)
+                    continue;
+
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    var prev = GUI.color;
+                    GUI.color = ColorFor(row.Worst);
+                    EditorGUILayout.LabelField($"{Glyph(row.Worst)} {row.Label}", GUILayout.Width(240));
+                    GUI.color = prev;
+                    EditorGUILayout.LabelField(row.Detail, EditorStyles.miniLabel);
+                    if (row.Context != null && GUILayout.Button("Select", GUILayout.Width(56)))
+                    {
+                        Selection.activeObject = row.Context;
+                        EditorGUIUtility.PingObject(row.Context);
+                    }
+                }
+
+                foreach (var issue in row.Issues)
+                {
+                    var prev = GUI.color;
+                    GUI.color = ColorFor(issue.Severity);
+                    EditorGUILayout.LabelField($"      • {issue.Message}", EditorStyles.wordWrappedMiniLabel);
+                    GUI.color = prev;
+                }
+            }
+        }
+
+        private static readonly Color Red = new Color(1f, 0.6f, 0.6f);
+        private static readonly Color Amber = new Color(1f, 0.85f, 0.5f);
+
+        private static Color ColorFor(Severity s) =>
+            s switch
+            {
+                Severity.Error => Red,
+                Severity.Warning => Amber,
+                _ => Color.white,
+            };
+
+        private static string Glyph(Severity s) =>
+            s switch
+            {
+                Severity.Error => "x",
+                Severity.Warning => "!",
+                Severity.Info => "i",
+                _ => "+",
+            };
+
+        // -----------------------------------------------------------------
+        // Helpers
+        // -----------------------------------------------------------------
+
+        private static List<T> LoadAll<T>() where T : UnityEngine.Object
+        {
+            return AssetDatabase
+                .FindAssets("t:" + typeof(T).Name)
+                .Select(g => AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(g)))
+                .Where(o => o != null)
+                .ToList();
+        }
+
+        private static T LoadFirst<T>() where T : UnityEngine.Object => LoadAll<T>().FirstOrDefault();
+
+        // -----------------------------------------------------------------
+        // Providers
+        // -----------------------------------------------------------------
+
+        private sealed class CardsProvider : IContentProvider
+        {
+            public string Category => "Cards";
+
+            public IEnumerable<Row> Rows()
+            {
+                foreach (var card in LoadAll<CardData>().OrderBy(c => c.name))
+                {
+                    var issues = new List<AuditIssue>();
+                    bool junk = card.CardType == CardType.Status || card.CardType == CardType.Scandal;
+                    if (!junk && (card.Effects == null || card.Effects.Count == 0))
+                        issues.Add(new AuditIssue(Severity.Error, "No effects."));
+                    if (card.IsInDevelopment)
+                        issues.Add(new AuditIssue(Severity.Warning, "No artwork (in development)."));
+                    if (card.NeedsConfiguration)
+                        issues.Add(new AuditIssue(Severity.Warning, "Has leftover configuration notes."));
+                    if (card.Costs == null || card.Costs.Count == 0)
+                        issues.Add(new AuditIssue(Severity.Info, "No cost entry."));
+                    yield return new Row(card.name, $"{card.CardType} / {card.Rarity}", card, issues);
+                }
+            }
+        }
+
+        private sealed class StatusesProvider : IContentProvider
         {
             public string Category => "Statuses";
 
-            public IEnumerable<AuditIssue> Run()
+            public IEnumerable<Row> Rows()
             {
+                var db = LoadFirst<StatusEffectDatabase>();
                 foreach (StatusEffectType type in Enum.GetValues(typeof(StatusEffectType)))
                 {
-                    string desc = new StatusEffect(type, 1).Description;
-                    if (string.IsNullOrWhiteSpace(desc))
-                        yield return new AuditIssue(
-                            Severity.Error,
-                            $"Status '{type}' has no description (add a case in StatusEffect.GetEffectDescription)."
-                        );
-                }
-            }
-        }
-
-        /// <summary>
-        /// Validates the <see cref="StatusEffectDatabase"/> has a complete entry for every status:
-        /// present, with an icon and a color. Run "Crookedile → Generate → Status Effect Database"
-        /// to seed it, then fill in the visuals.
-        /// </summary>
-        private sealed class StatusDatabaseCheck : IContentCheck
-        {
-            public string Category => "Status database";
-
-            public IEnumerable<AuditIssue> Run()
-            {
-                string[] guids = AssetDatabase.FindAssets("t:StatusEffectDatabase");
-                if (guids.Length == 0)
-                {
-                    yield return new AuditIssue(
-                        Severity.Warning,
-                        "No StatusEffectDatabase asset — statuses have no icon/color/SFX/VFX. "
-                            + "Run Crookedile → Generate → Status Effect Database."
-                    );
-                    yield break;
-                }
-
-                var db = AssetDatabase.LoadAssetAtPath<StatusEffectDatabase>(
-                    AssetDatabase.GUIDToAssetPath(guids[0])
-                );
-
-                foreach (StatusEffectType type in Enum.GetValues(typeof(StatusEffectType)))
-                {
-                    if (!db.TryGet(type, out var entry))
-                    {
-                        yield return new AuditIssue(
-                            Severity.Error,
-                            $"Status '{type}' has no database entry (re-run the generator to sync).",
-                            db
-                        );
-                        continue;
-                    }
-                    if (entry.Icon == null)
-                        yield return new AuditIssue(
-                            Severity.Warning,
-                            $"Status '{type}' has no icon.",
-                            db
-                        );
-                    if (entry.Color.a <= 0f)
-                        yield return new AuditIssue(
-                            Severity.Info,
-                            $"Status '{type}' has no color set.",
-                            db
-                        );
-                }
-            }
-        }
-
-        /// <summary>
-        /// Validates every <see cref="BattleAudioTrigger"/> is mapped in a <see cref="BattleSoundMap"/>
-        /// and that the entry has at least an audio event or a visual. Unmapped triggers play no
-        /// feedback at all.
-        /// </summary>
-        private sealed class AudioVfxCheck : IContentCheck
-        {
-            public string Category => "Audio / VFX triggers";
-
-            public IEnumerable<AuditIssue> Run()
-            {
-                string[] guids = AssetDatabase.FindAssets("t:BattleSoundMap");
-                if (guids.Length == 0)
-                {
-                    yield return new AuditIssue(
-                        Severity.Error,
-                        "No BattleSoundMap asset found — no battle audio/VFX is wired."
-                    );
-                    yield break;
-                }
-
-                foreach (string guid in guids)
-                {
-                    string path = AssetDatabase.GUIDToAssetPath(guid);
-                    var map = AssetDatabase.LoadAssetAtPath<BattleSoundMap>(path);
-                    if (map == null)
-                        continue;
-
-                    foreach (BattleAudioTrigger trigger in Enum.GetValues(typeof(BattleAudioTrigger)))
-                    {
-                        if (!map.TryGet(trigger, out var entry))
-                        {
-                            yield return new AuditIssue(
-                                Severity.Warning,
-                                $"[{map.name}] trigger '{trigger}' is unmapped — no sound or VFX.",
-                                map
-                            );
-                        }
-                        else if (entry.Sound == null && entry.Visual == null)
-                        {
-                            yield return new AuditIssue(
-                                Severity.Info,
-                                $"[{map.name}] trigger '{trigger}' is mapped but has neither sound nor VFX.",
-                                map
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Validates every <see cref="EnemyMoveType"/> has an icon in an <see cref="EnemyIntentTheme"/>,
-        /// so the intent badge isn't blank for some move types.
-        /// </summary>
-        private sealed class IntentThemeCheck : IContentCheck
-        {
-            public string Category => "Intent theme";
-
-            public IEnumerable<AuditIssue> Run()
-            {
-                string[] guids = AssetDatabase.FindAssets("t:EnemyIntentTheme");
-                if (guids.Length == 0)
-                {
-                    yield return new AuditIssue(
-                        Severity.Warning,
-                        "No EnemyIntentTheme asset — intent badges have no icons/colors."
-                    );
-                    yield break;
-                }
-
-                foreach (string guid in guids)
-                {
-                    var theme = AssetDatabase.LoadAssetAtPath<EnemyIntentTheme>(
-                        AssetDatabase.GUIDToAssetPath(guid)
-                    );
-                    if (theme == null)
-                        continue;
-                    foreach (EnemyMoveType type in Enum.GetValues(typeof(EnemyMoveType)))
-                    {
-                        var (icon, _) = theme.GetVisual(type);
-                        if (icon == null)
-                            yield return new AuditIssue(
-                                Severity.Warning,
-                                $"[{theme.name}] intent '{type}' has no icon.",
-                                theme
-                            );
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Validates enemy assets: each <see cref="EnemyData"/> has a name, portrait and at least one
-        /// move; each <see cref="EnemyMoveData"/> has an intent description, effects (where applicable),
-        /// and a minion assigned for SummonMinion moves.
-        /// </summary>
-        private sealed class EnemyCheck : IContentCheck
-        {
-            public string Category => "Enemies";
-
-            public IEnumerable<AuditIssue> Run()
-            {
-                foreach (string guid in AssetDatabase.FindAssets("t:EnemyData"))
-                {
-                    string path = AssetDatabase.GUIDToAssetPath(guid);
-                    var enemy = AssetDatabase.LoadAssetAtPath<EnemyData>(path);
-                    if (enemy == null)
-                        continue;
-
-                    if (string.IsNullOrWhiteSpace(enemy.EnemyName) || enemy.EnemyName == "Unknown Enemy")
-                        yield return new AuditIssue(Severity.Warning, $"Enemy '{enemy.name}' has no display name.", enemy);
-                    if (enemy.Portrait == null)
-                        yield return new AuditIssue(Severity.Warning, $"Enemy '{enemy.name}' has no portrait.", enemy);
-                    if (enemy.Moves == null || enemy.Moves.Count == 0)
-                        yield return new AuditIssue(Severity.Error, $"Enemy '{enemy.name}' has no moves.", enemy);
+                    var issues = new List<AuditIssue>();
+                    if (string.IsNullOrWhiteSpace(new StatusEffect(type, 1).Description))
+                        issues.Add(new AuditIssue(Severity.Error, "No description in StatusEffect switch."));
+                    string detail = "no DB";
+                    if (db == null)
+                        issues.Add(new AuditIssue(Severity.Warning, "No StatusEffectDatabase asset (run the generator)."));
+                    else if (!db.TryGet(type, out var e))
+                        issues.Add(new AuditIssue(Severity.Error, "No database entry (re-run generator)."));
                     else
-                        for (int i = 0; i < enemy.Moves.Count; i++)
-                            if (enemy.Moves[i] == null)
-                                yield return new AuditIssue(Severity.Error, $"Enemy '{enemy.name}' move [{i}] is unassigned.", enemy);
-                }
-
-                foreach (string guid in AssetDatabase.FindAssets("t:EnemyMoveData"))
-                {
-                    string path = AssetDatabase.GUIDToAssetPath(guid);
-                    var move = AssetDatabase.LoadAssetAtPath<EnemyMoveData>(path);
-                    if (move == null)
-                        continue;
-
-                    if (string.IsNullOrWhiteSpace(move.IntentDescription))
-                        yield return new AuditIssue(Severity.Warning, $"Move '{move.name}' has no intent description.", move);
-
-                    bool needsEffects =
-                        move.MoveType != EnemyMoveType.Idle
-                        && move.MoveType != EnemyMoveType.SummonMinion;
-                    if (needsEffects && (move.Effects == null || move.Effects.Count == 0))
-                        yield return new AuditIssue(Severity.Warning, $"Move '{move.name}' ({move.MoveType}) has no effects.", move);
-
-                    if (move.MoveType == EnemyMoveType.SummonMinion && move.MinionToSummon == null)
-                        yield return new AuditIssue(Severity.Error, $"Summon move '{move.name}' has no minion assigned.", move);
+                    {
+                        detail = e.Category.ToString();
+                        if (e.Icon == null)
+                            issues.Add(new AuditIssue(Severity.Warning, "No icon."));
+                        if (e.Color.a <= 0f)
+                            issues.Add(new AuditIssue(Severity.Info, "No color set."));
+                    }
+                    yield return new Row(type.ToString(), detail, db, issues);
                 }
             }
         }
 
-        /// <summary>
-        /// Validates every concrete <see cref="BattleEffect"/> is authorable ([Serializable], so it
-        /// shows in the card/enemy effect picker) and self-describing (non-empty GetDescription, so
-        /// cards auto-generate readable text). Uses <see cref="BattleEffectCatalog"/>.
-        /// </summary>
-        private sealed class EffectsCheck : IContentCheck
+        private sealed class EffectsProvider : IContentProvider
         {
             public string Category => "Effects";
 
-            public IEnumerable<AuditIssue> Run()
+            public IEnumerable<Row> Rows()
             {
                 foreach (var info in BattleEffectCatalog.All())
                 {
+                    var issues = new List<AuditIssue>();
                     if (!info.Serializable)
-                        yield return new AuditIssue(
-                            Severity.Warning,
-                            $"Effect '{info.DisplayName}' ({info.Type.Name}) is not [Serializable] — "
-                                + "it won't appear in the effect picker."
-                        );
+                        issues.Add(new AuditIssue(Severity.Warning, "Not [Serializable] — hidden from the picker."));
                     else if (string.IsNullOrWhiteSpace(info.Description))
-                        yield return new AuditIssue(
-                            Severity.Info,
-                            $"Effect '{info.DisplayName}' ({info.Type.Name}) has an empty GetDescription — "
-                                + "cards using it auto-generate no text."
-                        );
+                        issues.Add(new AuditIssue(Severity.Info, "Empty GetDescription."));
+                    yield return new Row(info.DisplayName, info.Type.Name, null, issues);
                 }
             }
         }
 
-        /// <summary>
-        /// Validates the <see cref="OriginDatabase"/> has a complete entry per <see cref="OriginType"/>:
-        /// present, with a display name and a linked starter passive.
-        /// </summary>
-        private sealed class OriginDatabaseCheck : IContentCheck
+        private sealed class EnemiesProvider : IContentProvider
         {
-            public string Category => "Origin database";
+            public string Category => "Enemies";
 
-            public IEnumerable<AuditIssue> Run()
+            public IEnumerable<Row> Rows()
             {
-                string[] guids = AssetDatabase.FindAssets("t:OriginDatabase");
-                if (guids.Length == 0)
+                foreach (var enemy in LoadAll<EnemyData>().OrderBy(e => e.name))
                 {
-                    yield return new AuditIssue(
-                        Severity.Warning,
-                        "No OriginDatabase asset — run Crookedile → Generate → Origin Database."
-                    );
-                    yield break;
+                    var issues = new List<AuditIssue>();
+                    if (string.IsNullOrWhiteSpace(enemy.EnemyName) || enemy.EnemyName == "Unknown Enemy")
+                        issues.Add(new AuditIssue(Severity.Warning, "No display name."));
+                    if (enemy.Portrait == null)
+                        issues.Add(new AuditIssue(Severity.Warning, "No portrait."));
+                    int moves = enemy.Moves?.Count ?? 0;
+                    if (moves == 0)
+                        issues.Add(new AuditIssue(Severity.Error, "No moves."));
+                    yield return new Row(enemy.EnemyName ?? enemy.name, $"{moves} move(s)", enemy, issues);
                 }
+            }
+        }
 
-                var db = AssetDatabase.LoadAssetAtPath<OriginDatabase>(
-                    AssetDatabase.GUIDToAssetPath(guids[0])
-                );
+        private sealed class EnemyMovesProvider : IContentProvider
+        {
+            public string Category => "Enemy moves";
 
+            public IEnumerable<Row> Rows()
+            {
+                foreach (var move in LoadAll<EnemyMoveData>().OrderBy(m => m.name))
+                {
+                    var issues = new List<AuditIssue>();
+                    if (string.IsNullOrWhiteSpace(move.IntentDescription))
+                        issues.Add(new AuditIssue(Severity.Warning, "No intent description."));
+                    bool needsEffects =
+                        move.MoveType != EnemyMoveType.Idle && move.MoveType != EnemyMoveType.SummonMinion;
+                    if (needsEffects && (move.Effects == null || move.Effects.Count == 0))
+                        issues.Add(new AuditIssue(Severity.Warning, "No effects."));
+                    if (move.MoveType == EnemyMoveType.SummonMinion && move.MinionToSummon == null)
+                        issues.Add(new AuditIssue(Severity.Error, "Summon move has no minion."));
+                    yield return new Row(move.name, move.MoveType.ToString(), move, issues);
+                }
+            }
+        }
+
+        private sealed class IntentsProvider : IContentProvider
+        {
+            public string Category => "Intents";
+
+            public IEnumerable<Row> Rows()
+            {
+                var theme = LoadFirst<EnemyIntentTheme>();
+                foreach (EnemyMoveType type in Enum.GetValues(typeof(EnemyMoveType)))
+                {
+                    var issues = new List<AuditIssue>();
+                    if (theme == null)
+                        issues.Add(new AuditIssue(Severity.Warning, "No EnemyIntentTheme asset."));
+                    else if (theme.GetVisual(type).icon == null)
+                        issues.Add(new AuditIssue(Severity.Warning, "No icon in theme."));
+                    yield return new Row(type.ToString(), "", theme, issues);
+                }
+            }
+        }
+
+        private sealed class OriginsProvider : IContentProvider
+        {
+            public string Category => "Origins";
+
+            public IEnumerable<Row> Rows()
+            {
+                var db = LoadFirst<OriginDatabase>();
                 foreach (OriginType origin in Enum.GetValues(typeof(OriginType)))
                 {
-                    if (!db.TryGet(origin, out var entry))
+                    var issues = new List<AuditIssue>();
+                    string detail = "no DB";
+                    if (db == null)
+                        issues.Add(new AuditIssue(Severity.Warning, "No OriginDatabase asset (run the generator)."));
+                    else if (!db.TryGet(origin, out var e))
+                        issues.Add(new AuditIssue(Severity.Error, "No database entry."));
+                    else
                     {
-                        yield return new AuditIssue(
-                            Severity.Error,
-                            $"Origin '{origin}' has no database entry (re-run the generator).",
-                            db
-                        );
-                        continue;
+                        detail = $"{e.DisplayName} / {e.Resource}";
+                        if (string.IsNullOrWhiteSpace(e.DisplayName))
+                            issues.Add(new AuditIssue(Severity.Warning, "No display name."));
+                        if (e.Passive == null)
+                            issues.Add(new AuditIssue(Severity.Warning, "No starter passive linked."));
                     }
-                    if (string.IsNullOrWhiteSpace(entry.DisplayName))
-                        yield return new AuditIssue(Severity.Warning, $"Origin '{origin}' has no display name.", db);
-                    if (entry.Passive == null)
-                        yield return new AuditIssue(Severity.Warning, $"Origin '{origin}' has no starter passive linked.", db);
+                    yield return new Row(origin.ToString(), detail, db, issues);
                 }
             }
         }
 
-        /// <summary>
-        /// Validates the optional <see cref="RewardConfig"/> (rarity weights + offer count) is usable.
-        /// </summary>
-        private sealed class RewardConfigCheck : IContentCheck
+        private sealed class AudioVfxProvider : IContentProvider
         {
-            public string Category => "Reward config";
+            public string Category => "Audio / VFX";
 
-            public IEnumerable<AuditIssue> Run()
+            public IEnumerable<Row> Rows()
             {
-                string[] guids = AssetDatabase.FindAssets("t:RewardConfig");
-                if (guids.Length == 0)
+                var map = LoadFirst<BattleSoundMap>();
+                foreach (BattleAudioTrigger trigger in Enum.GetValues(typeof(BattleAudioTrigger)))
                 {
-                    yield return new AuditIssue(
-                        Severity.Info,
-                        "No RewardConfig asset — rewards use the hardcoded weights in CardDatabase."
-                    );
-                    yield break;
-                }
-                foreach (string guid in guids)
-                {
-                    var cfg = AssetDatabase.LoadAssetAtPath<RewardConfig>(
-                        AssetDatabase.GUIDToAssetPath(guid)
-                    );
-                    if (cfg == null)
-                        continue;
-                    if (!cfg.IsValid)
-                        yield return new AuditIssue(
-                            Severity.Error,
-                            $"RewardConfig '{cfg.name}' is invalid (weights sum to 0 or offer count < 1).",
-                            cfg
-                        );
+                    var issues = new List<AuditIssue>();
+                    string detail = "unmapped";
+                    if (map == null)
+                        issues.Add(new AuditIssue(Severity.Error, "No BattleSoundMap asset."));
+                    else if (!map.TryGet(trigger, out var entry))
+                        issues.Add(new AuditIssue(Severity.Warning, "Unmapped — no sound or VFX."));
+                    else
+                    {
+                        detail = $"{(entry.Sound != null ? "sfx" : "—")} / {(entry.Visual != null ? "vfx" : "—")}";
+                        if (entry.Sound == null && entry.Visual == null)
+                            issues.Add(new AuditIssue(Severity.Info, "Mapped but empty."));
+                    }
+                    yield return new Row(trigger.ToString(), detail, map, issues);
                 }
             }
         }
 
-        /// <summary>
-        /// Validates relic data (future layer): each <see cref="RelicData"/> has a name, icon and at
-        /// least one passive; warns if relics exist but aren't collected in a <see cref="RelicDatabase"/>.
-        /// </summary>
-        private sealed class RelicCheck : IContentCheck
+        private sealed class RelicsProvider : IContentProvider
         {
             public string Category => "Relics";
 
-            public IEnumerable<AuditIssue> Run()
+            public IEnumerable<Row> Rows()
             {
-                string[] relicGuids = AssetDatabase.FindAssets("t:RelicData");
-                if (relicGuids.Length == 0)
+                var relics = LoadAll<RelicData>();
+                if (relics.Count == 0)
                 {
-                    yield return new AuditIssue(
-                        Severity.Info,
-                        "No relics authored yet (future layer)."
-                    );
+                    yield return new Row("(none)", "no relics authored yet (future layer)", null, new List<AuditIssue>());
                     yield break;
                 }
-
-                foreach (string guid in relicGuids)
+                foreach (var relic in relics.OrderBy(r => r.name))
                 {
-                    var relic = AssetDatabase.LoadAssetAtPath<RelicData>(
-                        AssetDatabase.GUIDToAssetPath(guid)
-                    );
-                    if (relic == null)
-                        continue;
+                    var issues = new List<AuditIssue>();
                     if (string.IsNullOrWhiteSpace(relic.RelicName))
-                        yield return new AuditIssue(Severity.Warning, $"Relic '{relic.name}' has no display name.", relic);
+                        issues.Add(new AuditIssue(Severity.Warning, "No display name."));
                     if (relic.Icon == null)
-                        yield return new AuditIssue(Severity.Info, $"Relic '{relic.name}' has no icon.", relic);
+                        issues.Add(new AuditIssue(Severity.Info, "No icon."));
                     if (relic.Passives == null || relic.Passives.Count == 0)
-                        yield return new AuditIssue(Severity.Warning, $"Relic '{relic.name}' has no passives (does nothing).", relic);
+                        issues.Add(new AuditIssue(Severity.Warning, "No passives (does nothing)."));
+                    yield return new Row(relic.RelicName ?? relic.name, relic.Rarity.ToString(), relic, issues);
                 }
+            }
+        }
 
-                if (AssetDatabase.FindAssets("t:RelicDatabase").Length == 0)
-                    yield return new AuditIssue(
-                        Severity.Info,
-                        $"{relicGuids.Length} relic(s) exist but there is no RelicDatabase collecting them."
-                    );
+        private sealed class RewardProvider : IContentProvider
+        {
+            public string Category => "Reward config";
+
+            public IEnumerable<Row> Rows()
+            {
+                var configs = LoadAll<RewardConfig>();
+                if (configs.Count == 0)
+                {
+                    yield return new Row("(none)", "rewards use hardcoded weights in CardDatabase", null,
+                        new List<AuditIssue> { new AuditIssue(Severity.Info, "No RewardConfig asset.") });
+                    yield break;
+                }
+                foreach (var cfg in configs)
+                {
+                    var issues = new List<AuditIssue>();
+                    if (!cfg.IsValid)
+                        issues.Add(new AuditIssue(Severity.Error, "Weights sum to 0 or offer count < 1."));
+                    yield return new Row(cfg.name,
+                        $"B{cfg.BasicWeight}/E{cfg.EnhancedWeight}/R{cfg.RareWeight}  x{cfg.DefaultOfferCount}",
+                        cfg, issues);
+                }
             }
         }
     }
