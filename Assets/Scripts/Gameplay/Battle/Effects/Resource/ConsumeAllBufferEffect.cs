@@ -12,7 +12,7 @@ namespace Crookedile.Gameplay.Battle
         "Assembly-CSharp",
         "ConsumeAllComposureEffect"
     )]
-    public class ConsumeAllShieldEffect : BattleEffect
+    public class ConsumeAllBufferEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
@@ -20,7 +20,7 @@ namespace Crookedile.Gameplay.Battle
                 return;
             int support = ctx.BattleManager.SpendSupport(ctx.BattleManager.CurrentSupport);
             ctx.LastSupportLost += support;
-            GameLogger.LogInfo<ConsumeAllShieldEffect>($"Consumed {support} Support");
+            GameLogger.LogInfo<ConsumeAllBufferEffect>($"Consumed {support} Support");
         }
 
         public override string GetDescription() => "Consume all Support";

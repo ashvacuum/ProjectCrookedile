@@ -14,7 +14,7 @@ namespace Crookedile.Gameplay.Battle
         "Assembly-CSharp",
         "LoseComposureEffect"
     )]
-    public class LoseShieldEffect : BattleEffect
+    public class LoseBufferEffect : BattleEffect
     {
         [MinValue(1)]
         [SerializeField]
@@ -26,7 +26,7 @@ namespace Crookedile.Gameplay.Battle
             if (ctx.BattleManager == null)
                 return;
             int actual = ctx.BattleManager.SpendSupport(amount);
-            GameLogger.LogInfo<LoseShieldEffect>($"Lost {actual} Support");
+            GameLogger.LogInfo<LoseBufferEffect>($"Lost {actual} Support");
         }
 
         public override string GetDescription() => $"Lose {_amount} Support";

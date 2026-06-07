@@ -12,7 +12,7 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class DealDamageEffect : BattleEffect
+    public class ApplyPressureEffect : BattleEffect
     {
         [Tooltip("Base pressure amount. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]

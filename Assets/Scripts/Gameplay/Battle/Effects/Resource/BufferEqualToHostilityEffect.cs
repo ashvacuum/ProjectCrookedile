@@ -15,7 +15,7 @@ namespace Crookedile.Gameplay.Battle
         "Assembly-CSharp",
         "ComposureEqualToHostilityEffect"
     )]
-    public class ShieldEqualToHostilityEffect : BattleEffect
+    public class BufferEqualToHostilityEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
@@ -26,7 +26,7 @@ namespace Crookedile.Gameplay.Battle
                         hostileCount++;
 
             ApplyGainSupport(hostileCount, ctx);
-            GameLogger.LogInfo<ShieldEqualToHostilityEffect>(
+            GameLogger.LogInfo<BufferEqualToHostilityEffect>(
                 $"Gained Support equal to hostile enemy count ({hostileCount})"
             );
         }

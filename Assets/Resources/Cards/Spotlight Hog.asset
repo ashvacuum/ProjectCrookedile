@@ -109,14 +109,14 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608336531357815
-      type: {class: DealDamageEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: 
         _target: 1
         _amount: 6
         _amountSource: 0
     - rid: 4738608336531357816
-      type: {class: GainShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: GainBufferEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 3

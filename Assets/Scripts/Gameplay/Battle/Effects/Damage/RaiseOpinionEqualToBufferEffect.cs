@@ -15,7 +15,7 @@ namespace Crookedile.Gameplay.Battle
         "Assembly-CSharp",
         "DealDamageEqualToComposureEffect"
     )]
-    public class RaiseOpinionEqualToShieldEffect : BattleEffect
+    public class RaiseOpinionEqualToBufferEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
