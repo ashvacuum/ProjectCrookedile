@@ -27,7 +27,8 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
-  _effects: []
+  _effects:
+  - rid: 4823698419005784179
   _passives: []
   _isPower: 0
   _isUpgraded: 0
@@ -44,4 +45,8 @@ MonoBehaviour:
   _configurationNotes: 
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 4823698419005784179
+      type: {class: ConsumeStatusAndRaiseOpinion, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
