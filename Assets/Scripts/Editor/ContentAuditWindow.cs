@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Crookedile.Data;
 using Crookedile.Data.Audio;
+using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 using Crookedile.Gameplay.Battle;
 using UnityEditor;
@@ -68,6 +69,7 @@ namespace Crookedile.EditorTools
                 new EnemyCheck(),
                 new EffectsCheck(),
                 new OriginDatabaseCheck(),
+                new RewardConfigCheck(),
             };
 
         private void RunAudit()
@@ -443,6 +445,41 @@ namespace Crookedile.EditorTools
                         yield return new AuditIssue(Severity.Warning, $"Origin '{origin}' has no display name.", db);
                     if (entry.Passive == null)
                         yield return new AuditIssue(Severity.Warning, $"Origin '{origin}' has no starter passive linked.", db);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates the optional <see cref="RewardConfig"/> (rarity weights + offer count) is usable.
+        /// </summary>
+        private sealed class RewardConfigCheck : IContentCheck
+        {
+            public string Category => "Reward config";
+
+            public IEnumerable<AuditIssue> Run()
+            {
+                string[] guids = AssetDatabase.FindAssets("t:RewardConfig");
+                if (guids.Length == 0)
+                {
+                    yield return new AuditIssue(
+                        Severity.Info,
+                        "No RewardConfig asset — rewards use the hardcoded weights in CardDatabase."
+                    );
+                    yield break;
+                }
+                foreach (string guid in guids)
+                {
+                    var cfg = AssetDatabase.LoadAssetAtPath<RewardConfig>(
+                        AssetDatabase.GUIDToAssetPath(guid)
+                    );
+                    if (cfg == null)
+                        continue;
+                    if (!cfg.IsValid)
+                        yield return new AuditIssue(
+                            Severity.Error,
+                            $"RewardConfig '{cfg.name}' is invalid (weights sum to 0 or offer count < 1).",
+                            cfg
+                        );
                 }
             }
         }
