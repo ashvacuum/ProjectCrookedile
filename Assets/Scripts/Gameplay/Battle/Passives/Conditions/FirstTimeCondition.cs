@@ -7,7 +7,7 @@ namespace Crookedile.Gameplay.Battle
     /// The complement to <see cref="NthEventCondition"/> (which only supports N ≥ 2).
     ///
     /// Used by the Faith Leader starter passive ("first opinion shield each battle gets a bonus"):
-    /// pair with <c>ShieldGainedTrigger</c> + a <c>GainShieldEffect</c> bonus. Per-passive fire
+    /// pair with <c>ShieldGainedTrigger</c> + a <c>GainBufferEffect</c> bonus. Per-passive fire
     /// counts reset each battle, so this is genuinely once-per-battle.
     /// </summary>
     [Serializable]

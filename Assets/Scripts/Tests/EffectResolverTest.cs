@@ -185,8 +185,8 @@ namespace Crookedile.Tests
 
         private BattleEffect CreateDamageEffect(int amount)
         {
-            var effect = new DealDamageEffect();
-            var amountField = typeof(DealDamageEffect).GetField(
+            var effect = new ApplyPressureEffect();
+            var amountField = typeof(ApplyPressureEffect).GetField(
                 "_amount",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
             );
@@ -196,8 +196,8 @@ namespace Crookedile.Tests
 
         private BattleEffect CreateShieldEffect(int amount)
         {
-            var effect = new GainShieldEffect();
-            var amountField = typeof(GainShieldEffect).GetField(
+            var effect = new GainBufferEffect();
+            var amountField = typeof(GainBufferEffect).GetField(
                 "_amount",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
             );

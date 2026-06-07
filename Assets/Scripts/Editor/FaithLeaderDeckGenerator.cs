@@ -83,7 +83,7 @@ namespace Crookedile.EditorTools
 
         private static BattleEffect DealDamage(int amount, TargetType target)
         {
-            var e = new DealDamageEffect();
+            var e = new ApplyPressureEffect();
             SetField(e, "_amount", amount);
             SetField(e, "_amountSource", EffectContextValue.FixedAmount);
             SetField(e, "_target", target);
@@ -92,7 +92,7 @@ namespace Crookedile.EditorTools
 
         private static BattleEffect DealDamageSourced(EffectContextValue source, TargetType target)
         {
-            var e = new DealDamageEffect();
+            var e = new ApplyPressureEffect();
             SetField(e, "_amountSource", source);
             SetField(e, "_target", target);
             return e;
@@ -100,7 +100,7 @@ namespace Crookedile.EditorTools
 
         private static BattleEffect GainShield(int amount)
         {
-            var e = new GainShieldEffect();
+            var e = new GainBufferEffect();
             SetField(e, "_amount", amount);
             SetField(e, "_amountSource", EffectContextValue.FixedAmount);
             return e;

@@ -17,7 +17,7 @@ namespace Crookedile.Gameplay.Battle
         "Assembly-CSharp",
         "GainComposureEffect"
     )]
-    public class GainShieldEffect : BattleEffect
+    public class GainBufferEffect : BattleEffect
     {
         [Tooltip("Base amount to gain. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]

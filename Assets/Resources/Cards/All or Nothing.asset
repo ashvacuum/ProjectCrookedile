@@ -78,14 +78,14 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608336531357788
-      type: {class: DealRandomDamageEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: ApplyRandomPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: 
         _target: 1
         _minDamage: 1
         _maxDamage: 9
     - rid: 4738608357276909568
-      type: {class: DealRandomDamageEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: ApplyRandomPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: 
         _target: 1

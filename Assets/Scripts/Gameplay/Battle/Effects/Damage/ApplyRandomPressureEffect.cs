@@ -14,7 +14,7 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class DealRandomDamageEffect : BattleEffect
+    public class ApplyRandomPressureEffect : BattleEffect
     {
         [MinValue(1)]
         [Tooltip("Minimum pressure (inclusive).")]

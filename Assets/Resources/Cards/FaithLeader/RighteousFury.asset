@@ -90,14 +90,14 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608375284105342
-      type: {class: DealDamageEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: 
         _target: 1
         _amount: 4
         _amountSource: 0
     - rid: 4738608375284105343
-      type: {class: LoseShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: LoseBufferEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 3
