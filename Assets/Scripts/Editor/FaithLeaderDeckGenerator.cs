@@ -128,9 +128,11 @@ namespace Crookedile.EditorTools
             StatusDurationType duration
         )
         {
-            var e = new ApplyStatusEffect();
+            // Behavior-first: resolve the enum to a fresh StatusBehavior instance via the bridge.
+            var behavior = Activator.CreateInstance(StatusBridge.ToBehavior(status).GetType());
+            var e = new ApplyStatusBehaviorEffect();
             SetField(e, "_target", target);
-            SetField(e, "_statusType", status);
+            SetField(e, "_behavior", behavior);
             SetField(e, "_stacks", stacks);
             SetField(e, "_duration", duration);
             return e;

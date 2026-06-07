@@ -16,7 +16,9 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     [Serializable]
     [Obsolete(
-        "Use ApplyStatusBehaviorEffect (polymorphic StatusBehavior). Kept for existing assets during migration."
+        "Use ApplyStatusBehaviorEffect (polymorphic StatusBehavior). Kept only so existing assets "
+            + "deserialize during migration — do not reference this type in code.",
+        error: true
     )]
     [InfoBox(
         "DEPRECATED — use ApplyStatusBehaviorEffect instead (pick a StatusBehavior).",
@@ -52,7 +54,8 @@ namespace Crookedile.Gameplay.Battle
             foreach (var (targetStats, statusMgr) in ctx.GetTargets(_target))
             {
                 statusMgr?.ApplyStatusEffect(_statusType, stacks, _duration);
-                GameLogger.LogInfo<ApplyStatusEffect>(
+                GameLogger.LogInfo(
+                    "ApplyStatusEffect",
                     $"Applied {stacks} {_statusType} ({_duration}) to {(targetStats == ctx.PlayerStats ? "Player" : "Enemy")}"
                 );
 
