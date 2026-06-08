@@ -14,8 +14,8 @@
 - **[`docs/crookedile-starter-decks.md`](docs/crookedile-starter-decks.md)** — per-class starter decks and the reward-pool "potential" layer.
 
 ## What the game is (current)
-- **Roguelite deck-builder**, political satire. The battle is the game; an StS-style overworld is connective tissue (mostly deferred).
-- **No HP.** The battleground is a shared **Opinion Meter** (win at 100, lose at 0, Judgment at the turn limit). Directional session shields — **Support** (guards against drops) and **Denial** (guards against rises) — protect it.
+- **Roguelite deck-builder**, political satire. The card **battles are the core** and the current focus — but they're wrapped in an **overworld campaign**: you navigate a town map and accumulate **Support** toward winning the election by a deadline. That campaign layer is still part of the vision, just **deferred and unsettled** (its exact shape — an abstract StS-style node map vs. a Potionomics-style navigable town — is an open design question; see `docs/core-design.md` §10 and the campaign-era docs below).
+- **No HP.** The per-battle battleground is a shared **Opinion Meter** (win at 100, lose at 0, Judgment at the turn limit). Directional session shields — **Support** (guards against drops) and **Denial** (guards against rises) — protect it. *(Note: per-battle "Support" the shield is distinct from campaign "Support points" the win condition — a naming overlap to resolve.)*
 - **Hostility** is a signed per-enemy stance you manage (hostile ↔ receptive). The central tension is the **Echo Chamber**: convert the *whole* room and your gains halve and your lead decays — so you always want a villain present.
 - **Three archetypes:** **Nepo Baby** (summon bodies; a hand-gated *Patronage* economy), **Celebrity** (an "open canvas" that drafts into Attention / Scandal / Drama King), **Faith Leader** (stack statuses to convert enemies into one-turn meter-pumping followers).
 
@@ -37,4 +37,4 @@ These were the original campaign-era design + setup notes. Kept for reference; *
 Satire of political violence, corruption, religious manipulation, class inequality, and nepotism. No real politicians are depicted; all content is fictional parody.
 
 ---
-*Status: active development — combat single-encounter loop is the focus; metagame is deferred.*
+*Status: active development — the single-encounter battle loop is the current focus. The overworld campaign (town map, Support-to-win) remains part of the design but is deferred and not yet locked.*
