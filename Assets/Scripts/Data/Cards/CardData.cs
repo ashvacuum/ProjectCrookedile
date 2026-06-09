@@ -79,14 +79,6 @@ namespace Crookedile.Data.Cards
         [SerializeField]
         private List<BattlePassive> _passives = new List<BattlePassive>();
 
-        [Tooltip(
-            "Power card (Slay-the-Spire style): the Passives above are NOT active from battle start. "
-                + "Instead, playing this card activates them for the rest of the battle, then the card "
-                + "is exhausted (removed from play). Its normal effects still resolve on play."
-        )]
-        [SerializeField]
-        private bool _isPower = false;
-
         #region Upgrade
         [FoldoutGroup("Upgrade")]
         [Tooltip("Is this card currently in its upgraded state?")]
@@ -128,7 +120,7 @@ namespace Crookedile.Data.Cards
         [SerializeField]
         private bool _isUnlockable = false;
 
-        [ShowIf("_cardType", CardType.Status)]
+        [ShowIf("_cardType", CardType.Heckle)]
         [Tooltip(
             "If true, this Status card is shown in the hand but cannot be played. "
                 + "All Scandals are always unplayable regardless of this flag."
@@ -224,7 +216,7 @@ namespace Crookedile.Data.Cards
         /// </summary>
         public bool CanUpgrade =>
             _cardType != CardType.Scandal
-            && _cardType != CardType.Status
+            && _cardType != CardType.Heckle
             && !_isUpgraded
             && (
                 _upgradedCosts.Count > 0
@@ -246,7 +238,7 @@ namespace Crookedile.Data.Cards
         /// The hand displays these cards at half alpha; dragging is blocked.
         /// </summary>
         public bool IsUnplayable =>
-            _cardType == CardType.Scandal || (_cardType == CardType.Status && _isUnplayable);
+            _cardType == CardType.Scandal || (_cardType == CardType.Heckle && _isUnplayable);
 
         /// <summary>
         /// Political lean of this card. Only relevant for CardType.Policy.
@@ -264,8 +256,10 @@ namespace Crookedile.Data.Cards
         /// <summary>
         /// True if this is a Power card: its <see cref="Passives"/> activate on play (not at battle
         /// start) and the card is exhausted afterwards. See PassiveResolver / BattleManager.PlayCard.
+        /// Now derived — every <see cref="CardType.Policy"/> card is a Power (the old per-card
+        /// <c>_isPower</c> toggle was redundant and was removed).
         /// </summary>
-        public bool IsPower => _isPower;
+        public bool IsPower => _cardType == CardType.Policy;
 
         /// <summary>
         /// VFX played when this card is used. Null means effects resolve immediately (no regression).

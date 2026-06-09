@@ -942,7 +942,7 @@ namespace Crookedile.Editor
                 CardType.Pressure => new Color(0.3f, 0.8f, 0.3f),
                 CardType.Rhetoric => new Color(0.9f, 0.3f, 0.3f),
                 CardType.Policy => new Color(0.3f, 0.5f, 0.9f),
-                CardType.Status => new Color(0.6f, 0.3f, 0.85f),
+                CardType.Heckle => new Color(0.6f, 0.3f, 0.85f),
                 CardType.Scandal => new Color(0.4f, 0.1f, 0.1f),
                 _ => Color.grey,
             };
@@ -1183,10 +1183,7 @@ namespace Crookedile.Editor
             {
                 var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
                 labelStyle.normal.textColor = new Color(1f, 0.65f, 0f);
-                GUILayout.Label(
-                    $"⚠  {cardsWithIssues.Count} card(s) need attention",
-                    labelStyle
-                );
+                GUILayout.Label($"⚠  {cardsWithIssues.Count} card(s) need attention", labelStyle);
             }
             else
             {

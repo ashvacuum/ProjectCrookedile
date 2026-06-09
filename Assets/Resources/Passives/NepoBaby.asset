@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4cafe87c1348d646a71da0cf440dbd3, type: 3}
-  m_Name: ActorPassive
+  m_Name: NepoBaby
   m_EditorClassIdentifier: 
-  _passiveName: Improvise
-  _origin: 2
+  _passiveName: Daddy's Gifts
+  _origin: 1
   _description: Once every battle, at the start of your turn you can discard any
     number of cards and draw the same number back.
   _icon: {fileID: 0}
@@ -23,7 +23,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608336531357838
-      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: New Passive
         _trigger:
@@ -32,14 +32,14 @@ MonoBehaviour:
         - rid: 4738608336531357840
         _oneShot: 1
         _effects:
-        - rid: 4738608336531357841
+        - rid: 4823698462508580958
     - rid: 4738608336531357840
-      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 4738608336531357841
-      type: {class: DiscardHandAndRedrawEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+    - rid: 4738608336531357845
+      type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 4823698462508580958
+      type: {class: MulliganEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-    - rid: 4738608336531357845
-      type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
-      data: 

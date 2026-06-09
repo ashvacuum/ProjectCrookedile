@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Student
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Enemy.EnemyData
   _enemyName: Curious Student
-  _portrait: {fileID: 21300000, guid: 3fe3544bc87158f4f9fe376780ba1205, type: 3}
-  _maxResolve: 35
+  _portrait: {fileID: 21300000, guid: edaf660ecaa3bf34dbf9aa3f97320181, type: 3}
   _startingHostility: 0
   _maxHostility: 2
   _minHostility: -4

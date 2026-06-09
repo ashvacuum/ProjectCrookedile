@@ -10,7 +10,7 @@ namespace Crookedile.Data
         Pressure, // Green  - Persuasion, de-escalation, relationship building
         Rhetoric, // Red    - Aggressive framing, attacks, pressure tactics
         Policy, // Blue   - Policy positions; lean shifts all enemy hostility by demographic
-        Status, // Purple - Temporary effect cards; some are unplayable
+        Heckle, // Purple - Temporary effect cards; some are unplayable
         Scandal, // Dark  - Manufactured controversy: unplayable, clogs the hand; the Celebrity exploits these
     }
 

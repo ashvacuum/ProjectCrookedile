@@ -46,7 +46,9 @@ namespace Crookedile.Data.Cards
         [SerializeField]
         private Sprite _statusFrame;
 
-        [Tooltip("Frame for Scandal cards (Dark crimson - manufactured controversy, unplayable, clogs the hand)")]
+        [Tooltip(
+            "Frame for Scandal cards (Dark crimson - manufactured controversy, unplayable, clogs the hand)"
+        )]
         [SerializeField]
         private Sprite _curseFrame;
 
@@ -157,7 +159,7 @@ namespace Crookedile.Data.Cards
                 CardType.Pressure => _pressureFrame,
                 CardType.Rhetoric => _rhetoricFrame,
                 CardType.Policy => _policyFrame,
-                CardType.Status => _statusFrame,
+                CardType.Heckle => _statusFrame,
                 CardType.Scandal => _curseFrame,
                 _ => null,
             };
