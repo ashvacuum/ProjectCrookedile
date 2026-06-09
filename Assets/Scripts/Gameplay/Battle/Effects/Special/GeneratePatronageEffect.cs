@@ -91,7 +91,7 @@ namespace Crookedile.Gameplay.Battle
                 return 0;
 
             // Junk / unplayable filler is worth a flat 1.
-            if (card.CardType == CardType.Status || card.CardType == CardType.Scandal)
+            if (card.CardType == CardType.Heckle || card.CardType == CardType.Scandal)
                 return 1;
 
             int cost = BaseEnergyCost(card);

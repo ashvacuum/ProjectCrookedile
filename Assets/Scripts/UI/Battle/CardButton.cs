@@ -757,7 +757,8 @@ namespace Crookedile.UI.Battle
                 return "X";
 
             // Energy uses the effective cost (post Focus/Energized/Entangled); Patronage is flat.
-            string apPart = ap != null ? (_effectiveCost <= 0 ? "0" : _effectiveCost.ToString()) : null;
+            string apPart =
+                ap != null ? (_effectiveCost <= 0 ? "0" : _effectiveCost.ToString()) : null;
             string patPart = patronage != null ? $"{patronage.CurrentAmount}P" : null;
 
             if (apPart != null && patPart != null)
@@ -808,7 +809,7 @@ namespace Crookedile.UI.Battle
                 CardType.Pressure => pressureColor,
                 CardType.Rhetoric => rhetoricColor,
                 CardType.Policy => policyColor,
-                CardType.Status => statusColor,
+                CardType.Heckle => statusColor,
                 CardType.Scandal => curseColor,
                 _ => Color.white,
             };

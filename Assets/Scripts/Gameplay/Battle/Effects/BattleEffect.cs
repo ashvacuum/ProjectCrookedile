@@ -39,7 +39,10 @@
     [Serializable]
     // Live description shown above each effect's fields in the inspector (card/enemy authoring),
     // so designers see what an effect does without reading code. Inherited by every concrete effect.
-    [InfoBox("@$value.GetDescription()", InfoMessageType.None)]
+    [InfoBox(
+        "@$value == null ? \"(no effect chosen)\" : $value.EditorSafeDescription()",
+        InfoMessageType.None
+    )]
     public abstract class BattleEffect
     {
         [SerializeField]
@@ -94,6 +97,24 @@
         /// Used for card tooltips, enemy move descriptions, and the card-design editor.
         /// </summary>
         public abstract string GetDescription();
+
+        /// <summary>
+        /// Guarded wrapper around <see cref="GetDescription"/> used by the inspector InfoBox. A single
+        /// effect with a latent null-deref in its description must not throw and break the entire
+        /// CardData / EnemyMoveData inspector — it shows an error marker on that one row instead.
+        /// Referenced by reflection from the <c>[InfoBox]</c> attribute, so it must stay public.
+        /// </summary>
+        public string EditorSafeDescription()
+        {
+            try
+            {
+                return GetDescription();
+            }
+            catch (Exception e)
+            {
+                return $"(description error: {e.GetType().Name})";
+            }
+        }
 
         #region Amount resolution
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 using System.Collections.Generic;
+using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
 using Crookedile.Data;
@@ -156,29 +157,35 @@ namespace Crookedile.Editor
 
         private void OnGUI()
         {
-            GUILayout.Label("Starter Card Data Fixer", EditorStyles.boldLabel);
-            EditorGUILayout.Space();
+            _scroll = EditorGUILayout.BeginScrollView(_scroll);
 
-            EditorGUILayout.HelpBox(
-                "This tool stamps all 19 starter card assets with:\n"
+            SirenixEditorGUI.Title(
+                "Starter Card Data Fixer",
+                $"{CardMetadata.Count} starter cards",
+                TextAlignment.Left,
+                true
+            );
+
+            SirenixEditorGUI.MessageBox(
+                "Stamps all starter card assets with:\n"
                     + "  • IsStarterCard = true\n"
                     + "  • Origin tag (faithleader / nepobaby / actor)\n"
                     + "  • Flavor text\n\n"
-                    + "Note: Mechanical descriptions are now auto-generated from card effects at runtime.\n\n"
-                    + "Cards are loaded from Assets/Resources/Cards/.\n"
-                    + "Safe to run multiple times — idempotent.",
+                    + "Mechanical descriptions are auto-generated from card effects at runtime.\n"
+                    + "Cards load from Assets/Resources/Cards/. Idempotent — safe to re-run.",
                 MessageType.Info
             );
 
-            EditorGUILayout.Space();
-
+            GUILayout.Space(6);
+            SirenixEditorGUI.BeginBox();
             if (GUILayout.Button("Fix All Starter Cards", GUILayout.Height(40)))
                 FixAllCards();
-
-            EditorGUILayout.Space();
-
+            GUILayout.Space(4);
             if (GUILayout.Button("Log Card Status (dry run)", GUILayout.Height(30)))
                 LogCardStatus();
+            SirenixEditorGUI.EndBox();
+
+            EditorGUILayout.EndScrollView();
         }
 
         #endregion
