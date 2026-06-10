@@ -1,48 +1,62 @@
-﻿using System;
-using Sirenix.OdinInspector;
+using System;
 using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Represents a status effect (buff/debuff) applied to a combatant.
-    /// Stacks decrease by 1 each turn by default (Slay the Spire style).
-    /// Can be marked as permanent (doesn't decrease) or removed at end of turn.
+    /// A status effect (buff/debuff) applied to a combatant: a canonical <see cref="StatusBehavior"/>
+    /// plus per-application stacks and duration. Stacks decrease by 1 each turn by default
+    /// (Slay the Spire style). Can be marked as permanent (doesn't decrease) or removed at end of turn.
     /// </summary>
     [Serializable]
     public class StatusEffect
     {
-        [InfoBox("@GetEffectDescription()")]
-        [SerializeField]
-        private StatusEffectType _type;
+        private readonly StatusBehavior _behavior;
 
-        [Tooltip("Number of stacks. Most effects scale linearly with stacks.")]
         [SerializeField]
         private int _stacks;
 
-        [Tooltip(
-            "DecreasePerTurn: loses 1 stack each turn.\nRemoveEndOfTurn: gone entirely at end of turn.\nPermanent: never expires.\nRemoveAtPlayerTurnStart: removed when the player's next turn begins (e.g. Stunned)."
-        )]
         [SerializeField]
         private StatusDurationType _durationType;
 
-        public StatusEffectType Type => _type;
+        /// <summary>The canonical behavior defining this status's rules.</summary>
+        public StatusBehavior Behavior => _behavior;
+
+        /// <summary>Stable id of the underlying behavior (storage / visuals / events key).</summary>
+        public string Id => _behavior.Id;
+
+        public string DisplayName => _behavior.DisplayName;
+
+        /// <summary>
+        /// Transitional: the legacy enum value for this status. Goes away with the enum.
+        /// </summary>
+        public StatusEffectType Type =>
+            StatusBridge.TryToEnum(_behavior, out StatusEffectType t) ? t : default;
+
         public int Stacks => _stacks;
         public StatusDurationType DurationType => _durationType;
 
-        /// <summary>Human-readable description of this status (mirrors the editor InfoBox text).</summary>
-        public string Description => GetEffectDescription();
+        /// <summary>Human-readable description of this status at its current stack count.</summary>
+        public string Description => _behavior.Describe(_stacks);
 
+        public StatusEffect(
+            StatusBehavior behavior,
+            int stacks,
+            StatusDurationType durationType = StatusDurationType.DecreasePerTurn
+        )
+        {
+            _behavior = behavior ?? throw new ArgumentNullException(nameof(behavior));
+            _stacks = stacks;
+            _durationType = durationType;
+        }
+
+        /// <summary>Transitional: construct from the legacy enum (maps via the bridge).</summary>
         public StatusEffect(
             StatusEffectType type,
             int stacks,
             StatusDurationType durationType = StatusDurationType.DecreasePerTurn
         )
-        {
-            _type = type;
-            _stacks = stacks;
-            _durationType = durationType;
-        }
+            : this(StatusBridge.ToBehavior(type), stacks, durationType) { }
 
         /// <summary>
         /// Add stacks to this status effect.
@@ -81,55 +95,6 @@ namespace Crookedile.Gameplay.Battle
             _stacks -= amount;
             return _stacks <= 0;
         }
-
-        #region Editor Helpers
-        private string GetEffectDescription() =>
-            _type switch
-            {
-                // Debuffs
-                StatusEffectType.Weakened => "Deal X less damage.",
-                StatusEffectType.Vulnerable => "Take 50% more damage.",
-                StatusEffectType.Frail => "Gain 25% less Support.",
-                StatusEffectType.Entangled => "All cards cost +1 AP.",
-                StatusEffectType.Exposed => "Next attack against this target deals double damage.",
-                StatusEffectType.Smear =>
-                    "Take X opinion pressure at end of turn (reputation bleed).",
-                StatusEffectType.Confused => "Effect values are randomised each turn.",
-                StatusEffectType.Silenced => "Cannot play Rhetoric cards.",
-                StatusEffectType.Stunned =>
-                    "Skips its next action. Removed at start of player turn.",
-                StatusEffectType.Rattled =>
-                    "Take bonus damage equal to attacker Hostility per stack (reduced if attacker is Receptive).",
-                StatusEffectType.Guilt =>
-                    "Pacify status: blunts the enemy's push — it deals X less opinion pressure per stack. Counts toward conversion.",
-                StatusEffectType.Shame =>
-                    "Pacify status: the enemy can't defend the meter — it gains X less Denial per stack. Counts toward conversion.",
-                StatusEffectType.Doubt =>
-                    "Pacify status: the enemy may hold back its action (soft skip chance per stack). Counts toward conversion.",
-                StatusEffectType.Jaded =>
-                    "Threshold status: each stack raises this enemy's pacify cost by 1. Permanent; gained on each conversion; never consumed.",
-                // Buffs
-                StatusEffectType.Strength => "Deal X more damage.",
-                StatusEffectType.Dexterity => "Gain X more Support per card played.",
-                StatusEffectType.Focus => "Cards cost X less AP (this turn only).",
-                StatusEffectType.Energized => "Cards cost X less AP this turn.",
-                StatusEffectType.Plated => "Reduce incoming damage by X.",
-                StatusEffectType.Regeneration => "Raise Opinion by X at the end of each turn.",
-                StatusEffectType.Intangible => "Take only 1 damage from all attacks.",
-                StatusEffectType.Thorns => "Reflect X to the Opinion Meter when hit.",
-                // Special
-                StatusEffectType.Ritual => "Gain X Support at the start of each turn.",
-                StatusEffectType.Hardened => "De-escalation cards have no effect.",
-                StatusEffectType.Fanatic => "Cannot be riled up; can still be won over.",
-                StatusEffectType.Momentum =>
-                    "Deal X damage to a random enemy per card played this turn.",
-                StatusEffectType.Echo => "The next card played is resolved twice.",
-                StatusEffectType.Turncoat =>
-                    "Freshly betrayed: deals +X bonus pressure per stack, fading over a turn or two.",
-                StatusEffectType.Devotion =>
-                    "Steadfast: resists hostility gains by X per stack (protects converts from Sway/Rile).",
-                _ => "",
-            };
     }
 
     /// <summary>
@@ -144,8 +109,9 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// All possible status effects in the game.
-    /// Each has specific behavior defined in StatusEffectManager.
+    /// LEGACY — being replaced by the polymorphic <see cref="StatusBehavior"/> registry.
+    /// Still referenced by transitional bridge wrappers and a few serialized fields;
+    /// deleted in the final migration step.
     /// </summary>
     public enum StatusEffectType
     {
@@ -184,39 +150,4 @@ namespace Crookedile.Gameplay.Battle
         Turncoat, // A freshly-betrayed enemy: deals +X bonus pressure per stack, fades over a turn or two
         Devotion, // Steadfast loyalty — resists hostility gains by X per stack (protects converts)
     }
-
-    /// <summary>
-    /// Defines when a status effect triggers.
-    /// </summary>
-    public enum StatusTriggerTiming
-    {
-        OnTurnStart, // Start of combatant's turn
-        OnTurnEnd, // End of combatant's turn
-        OnDamageDealt, // When dealing damage
-        OnDamageTaken, // When taking damage
-        OnCardPlayed, // When playing a card
-        OnShieldGain, // When gaining Shield
-        Passive, // Always active (modifier to stats)
-    }
-
-    /// <summary>
-    /// Metadata for each status effect type.
-    /// Defines behavior, trigger timing, and description.
-    /// </summary>
-    [Serializable]
-    public class StatusEffectData
-    {
-        public StatusEffectType type;
-        public string displayName;
-        public string description;
-        public StatusTriggerTiming triggerTiming;
-        public bool isDebuff;
-        public bool stacksReducePerTurn; // If true, reduces by 1 stack per turn
-        public bool durationReducesPerTurn; // If true, duration reduces by 1 per turn
-
-        // Icons/visuals
-        public Sprite icon;
-        public Color color;
-    }
 }
-        #endregion

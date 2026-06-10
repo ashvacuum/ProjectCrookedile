@@ -6,18 +6,19 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Manages all status effects for a single combatant.
-    /// Tracks buffs/debuffs, applies their effects, and handles duration/stacks.
+    /// Manages all status effects for a single combatant. Statuses are stored per
+    /// <see cref="StatusBehavior"/> (keyed by its stable Id); each status owns its own rules via
+    /// the behavior hooks, so the modify-pipeline methods here just fold the active effects.
     /// </summary>
     public class StatusEffectManager
     {
         private List<StatusEffect> _activeEffects = new List<StatusEffect>();
 
-        // Type-indexed mirror of _activeEffects for O(1) lookups (GetStacks/HasEffect/etc.).
+        // Id-indexed mirror of _activeEffects for O(1) lookups (GetStacks/HasStatus/etc.).
         // Always kept in sync via AddEffectInternal/RemoveEffectInternal — never mutate
         // _activeEffects directly.
-        private readonly Dictionary<StatusEffectType, StatusEffect> _byType =
-            new Dictionary<StatusEffectType, StatusEffect>();
+        private readonly Dictionary<string, StatusEffect> _byId =
+            new Dictionary<string, StatusEffect>();
 
         private string _ownerName; // For logging
         private BattleStats _owner; // Optional — used to sync Hardened/Fanatic flags
@@ -36,23 +37,31 @@ namespace Crookedile.Gameplay.Battle
         #region Apply/Remove Effects
 
         /// <summary>
-        /// Applies a status effect. Stacks if already present, otherwise adds new.
+        /// Applies a status. Stacks if already present, otherwise adds new.
         /// </summary>
-        public void ApplyStatusEffect(
-            StatusEffectType type,
+        public void ApplyStatus(
+            StatusBehavior behavior,
             int stacks,
             StatusDurationType durationType = StatusDurationType.DecreasePerTurn
         )
         {
-            _byType.TryGetValue(type, out StatusEffect existing);
+            if (behavior == null)
+            {
+                GameLogger.LogWarning<StatusEffectManager>(
+                    $"{_ownerName}: ApplyStatus called with a null behavior — ignored"
+                );
+                return;
+            }
+
+            _byId.TryGetValue(behavior.Id, out StatusEffect existing);
 
             if (existing != null)
             {
                 // Stunned is non-stackable: a second application is ignored entirely.
-                if (type == StatusEffectType.Stunned)
+                if (behavior is StunnedStatus)
                 {
                     GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: {type} already active — re-application ignored"
+                        $"{_ownerName}: {behavior.DisplayName} already active — re-application ignored"
                     );
                     return;
                 }
@@ -66,19 +75,19 @@ namespace Crookedile.Gameplay.Battle
                 {
                     RemoveEffectInternal(existing);
                     GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: {type} neutralised — removed"
+                        $"{_ownerName}: {behavior.DisplayName} neutralised — removed"
                     );
                     return;
                 }
 
                 GameLogger.LogInfo<StatusEffectManager>(
-                    $"{_ownerName}: {type} stacked {stacks:+0;-0} (now {existing.Stacks} stacks)"
+                    $"{_ownerName}: {behavior.DisplayName} stacked {stacks:+0;-0} (now {existing.Stacks} stacks)"
                 );
             }
             else
             {
                 // New effect
-                StatusEffect newEffect = new StatusEffect(type, stacks, durationType);
+                StatusEffect newEffect = new StatusEffect(behavior, stacks, durationType);
                 AddEffectInternal(newEffect);
                 string durationText = durationType switch
                 {
@@ -87,7 +96,7 @@ namespace Crookedile.Gameplay.Battle
                     _ => $"{stacks} stacks",
                 };
                 GameLogger.LogInfo<StatusEffectManager>(
-                    $"{_ownerName}: Applied {type} ({durationText})"
+                    $"{_ownerName}: Applied {behavior.DisplayName} ({durationText})"
                 );
             }
 
@@ -98,47 +107,67 @@ namespace Crookedile.Gameplay.Battle
         {
             if (_owner == null)
                 return;
-            _owner.SetHardened(HasEffect(StatusEffectType.Hardened));
-            _owner.SetFanatic(HasEffect(StatusEffectType.Fanatic));
-            _owner.SetDevotionResist(GetStacks(StatusEffectType.Devotion));
+
+            bool hardened = false;
+            bool fanatic = false;
+            int devotionResist = 0;
+            foreach (StatusEffect e in _activeEffects)
+            {
+                hardened |= e.Behavior.BlocksHostilityReduction;
+                fanatic |= e.Behavior.BlocksHostilityGain;
+                devotionResist += e.Behavior.HostilityResistPerStack * e.Stacks;
+            }
+
+            _owner.SetHardened(hardened);
+            _owner.SetFanatic(fanatic);
+            _owner.SetDevotionResist(devotionResist);
         }
 
         /// <summary>
-        /// Removes all stacks of a status effect.
+        /// Removes all stacks of a status.
         /// </summary>
-        public void RemoveStatusEffect(StatusEffectType type)
+        public void RemoveStatus(StatusBehavior behavior)
         {
-            if (_byType.TryGetValue(type, out StatusEffect effect))
+            if (behavior != null && _byId.TryGetValue(behavior.Id, out StatusEffect effect))
             {
                 RemoveEffectInternal(effect);
-                GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Removed {type}");
+                GameLogger.LogInfo<StatusEffectManager>(
+                    $"{_ownerName}: Removed {behavior.DisplayName}"
+                );
                 SyncHostilityFlags();
             }
         }
 
+        public void RemoveStatus<T>()
+            where T : StatusBehavior => RemoveStatus(StatusRegistry.Get<T>());
+
         /// <summary>
-        /// Removes X stacks of a status effect.
+        /// Removes X stacks of a status.
         /// </summary>
-        public void RemoveStacks(StatusEffectType type, int amount)
+        public void RemoveStacks(StatusBehavior behavior, int amount)
         {
-            if (_byType.TryGetValue(type, out StatusEffect effect))
+            if (behavior != null && _byId.TryGetValue(behavior.Id, out StatusEffect effect))
             {
                 if (effect.ReduceStacks(amount))
                 {
                     RemoveEffectInternal(effect);
                     GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: {type} depleted and removed"
+                        $"{_ownerName}: {behavior.DisplayName} depleted and removed"
                     );
                 }
                 else
                 {
                     GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: {type} reduced by {amount} stacks (now {effect.Stacks})"
+                        $"{_ownerName}: {behavior.DisplayName} reduced by {amount} stacks (now {effect.Stacks})"
                     );
                 }
                 SyncHostilityFlags();
             }
         }
+
+        /// <summary>Removes X stacks of a status by behavior type.</summary>
+        public void RemoveStacks<T>(int amount)
+            where T : StatusBehavior => RemoveStacks(StatusRegistry.Get<T>(), amount);
 
         /// <summary>
         /// Clears all status effects.
@@ -146,70 +175,54 @@ namespace Crookedile.Gameplay.Battle
         public void ClearAll()
         {
             _activeEffects.Clear();
-            _byType.Clear();
+            _byId.Clear();
             GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: All status effects cleared");
+            SyncHostilityFlags();
         }
 
         #endregion
 
         #region Query Effects
 
-        /// <summary>
-        /// Gets the total stacks of a specific status effect.
-        /// </summary>
-        public int GetStacks(StatusEffectType type)
-        {
-            return _byType.TryGetValue(type, out StatusEffect effect) ? effect.Stacks : 0;
-        }
-
-        /// <summary>
-        /// Checks if combatant has a specific status effect.
-        /// </summary>
-        public bool HasEffect(StatusEffectType type)
-        {
-            return _byType.ContainsKey(type);
-        }
-
-        #endregion
-
-        #region Behavior bridge (transitional — lets new code be behavior-first; storage stays enum)
-
-        /// <summary>Stacks of a status by its behavior (0 if not present or unmapped).</summary>
+        /// <summary>Stacks of a status (0 if not present).</summary>
         public int GetStacks(StatusBehavior behavior) =>
-            behavior != null && StatusBridge.TryToEnum(behavior, out var t) ? GetStacks(t) : 0;
+            behavior != null && _byId.TryGetValue(behavior.Id, out StatusEffect e) ? e.Stacks : 0;
 
         /// <summary>Stacks of a status by behavior type.</summary>
         public int GetStacks<T>()
             where T : StatusBehavior => GetStacks(StatusRegistry.Get<T>());
 
-        /// <summary>True if a status (by behavior) is present.</summary>
+        /// <summary>True if a status is present.</summary>
         public bool HasStatus(StatusBehavior behavior) =>
-            behavior != null && StatusBridge.TryToEnum(behavior, out var t) && HasEffect(t);
+            behavior != null && _byId.ContainsKey(behavior.Id);
 
         public bool HasStatus<T>()
             where T : StatusBehavior => HasStatus(StatusRegistry.Get<T>());
 
-        /// <summary>Applies a status by behavior (maps to the enum store via the bridge).</summary>
-        public void ApplyStatus(
-            StatusBehavior behavior,
+        #endregion
+
+        #region Legacy enum bridge (transitional — deleted with the enum)
+
+        /// <summary>Transitional: applies a status by legacy enum value.</summary>
+        public void ApplyStatusEffect(
+            StatusEffectType type,
             int stacks,
             StatusDurationType durationType = StatusDurationType.DecreasePerTurn
-        )
-        {
-            if (behavior != null && StatusBridge.TryToEnum(behavior, out var t))
-                ApplyStatusEffect(t, stacks, durationType);
-        }
+        ) => ApplyStatus(StatusBridge.ToBehavior(type), stacks, durationType);
 
-        /// <summary>Removes X stacks of a status by behavior (maps to the enum store via the bridge).</summary>
-        public void RemoveStacks(StatusBehavior behavior, int amount)
-        {
-            if (behavior != null && StatusBridge.TryToEnum(behavior, out var t))
-                RemoveStacks(t, amount);
-        }
+        /// <summary>Transitional: stacks by legacy enum value.</summary>
+        public int GetStacks(StatusEffectType type) => GetStacks(StatusBridge.ToBehavior(type));
 
-        /// <summary>Removes X stacks of a status by behavior type.</summary>
-        public void RemoveStacks<T>(int amount)
-            where T : StatusBehavior => RemoveStacks(StatusRegistry.Get<T>(), amount);
+        /// <summary>Transitional: presence by legacy enum value.</summary>
+        public bool HasEffect(StatusEffectType type) => HasStatus(StatusBridge.ToBehavior(type));
+
+        /// <summary>Transitional: removes a status by legacy enum value.</summary>
+        public void RemoveStatusEffect(StatusEffectType type) =>
+            RemoveStatus(StatusBridge.ToBehavior(type));
+
+        /// <summary>Transitional: removes stacks by legacy enum value.</summary>
+        public void RemoveStacks(StatusEffectType type, int amount) =>
+            RemoveStacks(StatusBridge.ToBehavior(type), amount);
 
         #endregion
 
@@ -220,8 +233,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public IEnumerable<StatusEffect> GetDebuffs()
         {
-            // Debuffs are negative effects
-            return _activeEffects.Where(e => IsDebuff(e.Type));
+            return _activeEffects.Where(e => e.Behavior.IsDebuff);
         }
 
         /// <summary>
@@ -229,7 +241,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public IEnumerable<StatusEffect> GetBuffs()
         {
-            return _activeEffects.Where(e => !IsDebuff(e.Type));
+            return _activeEffects.Where(e => !e.Behavior.IsDebuff);
         }
 
         /// <summary>
@@ -238,7 +250,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public bool HasAnyDebuff()
         {
-            return _activeEffects.Any(e => IsDebuff(e.Type));
+            return _activeEffects.Any(e => e.Behavior.IsDebuff);
         }
 
         /// <summary>
@@ -247,7 +259,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public bool HasAnyBuff()
         {
-            return _activeEffects.Any(e => !IsDebuff(e.Type));
+            return _activeEffects.Any(e => !e.Behavior.IsDebuff);
         }
 
         #endregion
@@ -284,7 +296,7 @@ namespace Crookedile.Gameplay.Battle
                 {
                     RemoveEffectAt(i);
                     GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: {effect.Type} removed (end of turn)"
+                        $"{_ownerName}: {effect.DisplayName} removed (end of turn)"
                     );
                     continue; // index now points at the next (shifted) element
                 }
@@ -296,13 +308,13 @@ namespace Crookedile.Gameplay.Battle
                     {
                         RemoveEffectAt(i);
                         GameLogger.LogInfo<StatusEffectManager>(
-                            $"{_ownerName}: {effect.Type} depleted and removed"
+                            $"{_ownerName}: {effect.DisplayName} depleted and removed"
                         );
                         continue;
                     }
 
                     GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: {effect.Type} reduced to {effect.Stacks} stacks"
+                        $"{_ownerName}: {effect.DisplayName} reduced to {effect.Stacks} stacks"
                     );
                 }
 
@@ -327,7 +339,7 @@ namespace Crookedile.Gameplay.Battle
                 {
                     RemoveEffectAt(i);
                     GameLogger.LogInfo<StatusEffectManager>(
-                        $"{_ownerName}: {e.Type} removed (player turn start)"
+                        $"{_ownerName}: {e.DisplayName} removed (player turn start)"
                     );
                     continue;
                 }
@@ -336,37 +348,21 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Modifies damage dealt based on active effects.
+        /// Modifies pressure this combatant deals, folding every active status's outgoing hook
+        /// (Strength/Turncoat add, Weakened/Guilt subtract).
         /// </summary>
         public int ModifyDamageDealt(int baseDamage)
         {
-            int finalDamage = baseDamage;
-
-            // Apply Strength (buff)
-            finalDamage += GetStacks(StatusEffectType.Strength);
-
-            // Turncoat (buff): a freshly-betrayed enemy hits harder than a natural hostile.
-            finalDamage += GetStacks(StatusEffectType.Turncoat);
-
-            // Apply Weakened (debuff)
-            finalDamage -= GetStacks(StatusEffectType.Weakened);
-
-            // Guilt (pacify status): a guilty enemy's push on the meter is blunted — less pressure
-            // dealt per stack (≈Weakened on their offense). Counts toward the pacify threshold.
-            finalDamage -= GetStacks(StatusEffectType.Guilt);
-
-            // Apply Exposed (double damage, then remove)
-            if (HasEffect(StatusEffectType.Exposed))
-            {
-                finalDamage *= 2;
-                RemoveStatusEffect(StatusEffectType.Exposed);
-            }
-
-            return Mathf.Max(0, finalDamage);
+            float final = baseDamage;
+            foreach (StatusEffect e in _activeEffects)
+                final = e.Behavior.ModifyOutgoingPressure(final, e.Stacks);
+            return Mathf.Max(0, Mathf.RoundToInt(final));
         }
 
         /// <summary>
-        /// Modifies damage taken based on active effects. Pure with respect to the Opinion Meter —
+        /// Modifies pressure this combatant takes, folding every active status's incoming hook in
+        /// application order; hard overrides (Intangible) apply last, and consume-on-hit statuses
+        /// (Exposed, Intangible) lose a stack afterwards. Pure with respect to the Opinion Meter —
         /// the Thorns reflection is returned via <paramref name="thornsReflected"/> for the caller
         /// to route through the ledger, rather than published from here.
         /// </summary>
@@ -379,78 +375,67 @@ namespace Crookedile.Gameplay.Battle
             out int thornsReflected
         )
         {
-            float finalDamage = baseDamage;
+            int attackerHostility = attackerStats != null ? attackerStats.CurrentHostility : 0;
+            float final = baseDamage;
+            List<StatusEffect> consumed = null;
 
-            // Apply Vulnerable (+50% damage to opinion meter impact)
-            if (HasEffect(StatusEffectType.Vulnerable))
+            foreach (StatusEffect e in _activeEffects)
             {
-                finalDamage *= 1.5f;
+                if (!e.Behavior.IncomingOverride)
+                    final = e.Behavior.ModifyIncomingPressure(final, e.Stacks, attackerHostility);
+                if (e.Behavior.ConsumedOnIncomingHit)
+                    (consumed ??= new List<StatusEffect>()).Add(e);
+            }
+            foreach (StatusEffect e in _activeEffects)
+            {
+                if (e.Behavior.IncomingOverride)
+                    final = e.Behavior.ModifyIncomingPressure(final, e.Stacks, attackerHostility);
             }
 
-            // Apply Rattled — damage shifted by attacker's Hostility per stack.
-            // Hostile attacker = hits land harder; receptive attacker = hits land softer.
-            // Naturally caps at 0 via the Mathf.Max at the end.
-            int rattledStacks = GetStacks(StatusEffectType.Rattled);
-            if (rattledStacks != 0 && attackerStats != null)
-            {
-                finalDamage += attackerStats.CurrentHostility * rattledStacks;
-            }
-
-            // Apply Plated (reduce damage)
-            finalDamage -= GetStacks(StatusEffectType.Plated);
-
-            // Apply Intangible (only take 1 damage, then remove)
-            if (HasEffect(StatusEffectType.Intangible))
-            {
-                finalDamage = 1;
-                RemoveStacks(StatusEffectType.Intangible, 1);
-            }
+            if (consumed != null)
+                foreach (StatusEffect e in consumed)
+                    RemoveStacks(e.Behavior, 1);
 
             // Thorns reflects incoming pressure back; the caller applies it via the ledger.
-            thornsReflected = GetStacks(StatusEffectType.Thorns);
+            thornsReflected = GetStacks<ThornsStatus>();
             if (thornsReflected > 0)
                 GameLogger.LogInfo<StatusEffectManager>(
                     $"{_ownerName}: Thorns reflecting {thornsReflected} to Opinion Meter"
                 );
 
-            return Mathf.Max(0, Mathf.RoundToInt(finalDamage));
+            return Mathf.Max(0, Mathf.RoundToInt(final));
         }
 
         /// <summary>
-        /// Preview version of ModifyDamageDealt — applies Strength/Weakened/Exposed math
-        /// WITHOUT consuming Exposed. Safe to call repeatedly for UI display.
+        /// Preview version of ModifyDamageDealt — same fold, no side effects.
+        /// Safe to call repeatedly for UI display.
         /// </summary>
         public int PreviewDamageDealt(int baseDamage)
         {
-            int final = baseDamage;
-            final += GetStacks(StatusEffectType.Strength);
-            final += GetStacks(StatusEffectType.Turncoat);
-            final -= GetStacks(StatusEffectType.Weakened);
-            final -= GetStacks(StatusEffectType.Guilt);
-            if (HasEffect(StatusEffectType.Exposed))
-                final *= 2; // show doubled — Exposed will fire on the actual hit
-            return Mathf.Max(0, final);
+            return ModifyDamageDealt(baseDamage);
         }
 
         /// <summary>
-        /// Preview version of ModifyDamageTaken — applies Vulnerable/Plated/Intangible math
-        /// WITHOUT consuming Intangible stacks or triggering Thorns. Safe to call for UI display.
+        /// Preview version of ModifyDamageTaken — folds the incoming hooks WITHOUT consuming
+        /// Exposed/Intangible stacks or triggering Thorns. Safe to call for UI display.
         /// </summary>
         /// <param name="attackerHostility">
         /// Pass the attacker's current Hostility when known (e.g. from intent preview) so
-        /// <see cref="StatusEffectType.Rattled"/> can be factored in. Defaults to 0 (no adjustment).
+        /// Rattled can be factored in. Defaults to 0 (no adjustment).
         /// </param>
         public int PreviewDamageTaken(int incomingDamage, int attackerHostility = 0)
         {
             float final = incomingDamage;
-            if (HasEffect(StatusEffectType.Vulnerable))
-                final *= 1.5f;
-            int rattled = GetStacks(StatusEffectType.Rattled);
-            if (rattled != 0)
-                final += attackerHostility * rattled;
-            final -= GetStacks(StatusEffectType.Plated);
-            if (HasEffect(StatusEffectType.Intangible))
-                final = 1; // show 1 — Intangible stack consumed on actual hit
+            foreach (StatusEffect e in _activeEffects)
+            {
+                if (!e.Behavior.IncomingOverride)
+                    final = e.Behavior.ModifyIncomingPressure(final, e.Stacks, attackerHostility);
+            }
+            foreach (StatusEffect e in _activeEffects)
+            {
+                if (e.Behavior.IncomingOverride)
+                    final = e.Behavior.ModifyIncomingPressure(final, e.Stacks, attackerHostility);
+            }
             return Mathf.Max(0, Mathf.RoundToInt(final));
         }
 
@@ -459,82 +444,57 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public int ModifySupportGained(int baseSupport)
         {
-            float final = baseSupport;
-            final += GetStacks(StatusEffectType.Dexterity);
-            if (HasEffect(StatusEffectType.Frail))
-                final *= 0.75f;
-            return Mathf.Max(0, Mathf.RoundToInt(final));
+            int final = baseSupport;
+            foreach (StatusEffect e in _activeEffects)
+                final = e.Behavior.ModifySupportGained(final, e.Stacks);
+            return Mathf.Max(0, final);
         }
 
         /// <summary>
-        /// Modifies card AP cost based on active effects.
+        /// Modifies Denial an enemy gains (Shame drops the enemy's shield).
+        /// </summary>
+        public int ModifyDenialGained(int baseDenial)
+        {
+            int final = baseDenial;
+            foreach (StatusEffect e in _activeEffects)
+                final = e.Behavior.ModifyDenialGained(final, e.Stacks);
+            return Mathf.Max(0, final);
+        }
+
+        /// <summary>
+        /// Modifies card AP cost based on active effects (Focus/Energized/Entangled).
         /// </summary>
         public int ModifyCardCost(int baseCost)
         {
-            int finalCost = baseCost;
-
-            // Apply Focus (buff, reduce cost by stack count)
-            finalCost -= GetStacks(StatusEffectType.Focus);
-
-            // Apply Energized (buff, reduce cost by stack count each turn)
-            finalCost -= GetStacks(StatusEffectType.Energized);
-
-            // Apply Entangled (debuff, +1 cost)
-            if (HasEffect(StatusEffectType.Entangled))
-            {
-                finalCost += 1;
-            }
-
-            return Mathf.Max(0, finalCost);
+            int final = baseCost;
+            foreach (StatusEffect e in _activeEffects)
+                final = e.Behavior.ModifyCardCost(final, e.Stacks);
+            return Mathf.Max(0, final);
         }
 
         #endregion
 
         #region Private Helpers
 
-        // --- Collection mutation: keep _activeEffects and _byType in lockstep ---
+        // --- Collection mutation: keep _activeEffects and _byId in lockstep ---
 
         private void AddEffectInternal(StatusEffect effect)
         {
             _activeEffects.Add(effect);
-            _byType[effect.Type] = effect;
+            _byId[effect.Id] = effect;
         }
 
         private void RemoveEffectInternal(StatusEffect effect)
         {
             _activeEffects.Remove(effect);
-            _byType.Remove(effect.Type);
+            _byId.Remove(effect.Id);
         }
 
         private void RemoveEffectAt(int index)
         {
             StatusEffect effect = _activeEffects[index];
             _activeEffects.RemoveAt(index);
-            _byType.Remove(effect.Type);
-        }
-
-        private bool IsDebuff(StatusEffectType type)
-        {
-            return type switch
-            {
-                StatusEffectType.Weakened => true,
-                StatusEffectType.Vulnerable => true,
-                StatusEffectType.Frail => true,
-                StatusEffectType.Entangled => true,
-                StatusEffectType.Exposed => true,
-                StatusEffectType.Smear => true,
-                StatusEffectType.Confused => true,
-                StatusEffectType.Silenced => true,
-                StatusEffectType.Stunned => true,
-                StatusEffectType.Rattled => true,
-                StatusEffectType.Hardened => true,
-                StatusEffectType.Fanatic => true,
-                StatusEffectType.Guilt => true,
-                StatusEffectType.Shame => true,
-                StatusEffectType.Doubt => true,
-                // Jaded protects the enemy from re-conversion — an enemy-side buff, not a debuff.
-                _ => false,
-            };
+            _byId.Remove(effect.Id);
         }
 
         #endregion
