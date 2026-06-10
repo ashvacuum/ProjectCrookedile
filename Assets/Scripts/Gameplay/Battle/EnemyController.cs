@@ -90,7 +90,7 @@ namespace Crookedile.Gameplay.Battle
             StatusEffects = new StatusEffectManager(enemyData.EnemyName, Stats);
 
             foreach (var effect in enemyData.StartingEffects)
-                StatusEffects.ApplyStatusEffect(effect.Type, effect.Stacks, effect.DurationType);
+                StatusEffects.ApplyStatus(effect.Behavior, effect.Stacks, effect.Duration);
         }
 
         #endregion

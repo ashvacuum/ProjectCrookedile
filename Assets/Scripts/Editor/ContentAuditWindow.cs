@@ -101,8 +101,6 @@ namespace Crookedile.EditorTools
                 new ReadinessProvider(),
                 new CardsProvider(),
                 new StatusesProvider(),
-                new StatusParityProvider(),
-                new StatusMigrationProvider(),
                 new EffectsProvider(),
                 new EnemiesProvider(),
                 new EnemyMovesProvider(),
@@ -536,13 +534,11 @@ namespace Crookedile.EditorTools
             public IEnumerable<Row> Rows()
             {
                 var map = LoadFirst<StatusEffectIconMapSO>();
-                foreach (StatusEffectType type in Enum.GetValues(typeof(StatusEffectType)))
+                foreach (StatusBehavior behavior in StatusRegistry.All.OrderBy(b => b.Id))
                 {
                     var issues = new List<AuditIssue>();
-                    if (string.IsNullOrWhiteSpace(new StatusEffect(type, 1).Description))
-                        issues.Add(
-                            new AuditIssue(Severity.Error, "No description in StatusEffect switch.")
-                        );
+                    if (string.IsNullOrWhiteSpace(behavior.Describe(1)))
+                        issues.Add(new AuditIssue(Severity.Error, "Empty Describe()."));
                     string detail = "no icon map";
                     if (map == null)
                         issues.Add(
@@ -551,7 +547,7 @@ namespace Crookedile.EditorTools
                                 "No StatusEffectIconMap asset (run the seeder)."
                             )
                         );
-                    else if (!map.TryGet(type, out var icon, out _, out var name, out _))
+                    else if (!map.TryGet(behavior.Id, out var icon, out _, out var name, out _))
                         issues.Add(
                             new AuditIssue(Severity.Warning, "No icon-map entry (run the seeder).")
                         );
@@ -563,146 +559,8 @@ namespace Crookedile.EditorTools
                         if (string.IsNullOrEmpty(name))
                             issues.Add(new AuditIssue(Severity.Info, "No display name."));
                     }
-                    yield return new Row(type.ToString(), detail, map, issues);
+                    yield return new Row(behavior.DisplayName, detail, map, issues);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Status migration parity: every legacy StatusEffectType enum value maps to a StatusBehavior
-        /// (by id), and flags behaviors with no enum (new statuses). When this tab is all-green the
-        /// new system is a faithful drop-in for the old — the green light to cut over and drop the enum.
-        /// </summary>
-        private sealed class StatusParityProvider : IContentProvider
-        {
-            public string Category => "Status parity";
-
-            public IEnumerable<Row> Rows()
-            {
-                foreach (StatusEffectType type in Enum.GetValues(typeof(StatusEffectType)))
-                {
-                    var b = StatusBridge.ToBehavior(type);
-                    var issues = new List<AuditIssue>();
-                    if (b == null)
-                        issues.Add(
-                            new AuditIssue(
-                                Severity.Error,
-                                $"No StatusBehavior with Id '{type.ToString().ToLowerInvariant()}'."
-                            )
-                        );
-                    yield return new Row(
-                        type.ToString(),
-                        b != null ? b.GetType().Name : "— missing —",
-                        null,
-                        issues
-                    );
-                }
-
-                foreach (var behavior in StatusRegistry.All)
-                {
-                    if (!StatusBridge.TryToEnum(behavior, out _))
-                        yield return new Row(
-                            behavior.Id,
-                            behavior.GetType().Name,
-                            null,
-                            new List<AuditIssue>
-                            {
-                                new AuditIssue(
-                                    Severity.Info,
-                                    "New status (no enum) — fine once the enum is dropped."
-                                ),
-                            }
-                        );
-                }
-            }
-        }
-
-        /// <summary>
-        /// Migration tracker: every card / enemy move whose effects still include the legacy
-        /// (enum-based) ApplyStatusEffect. Re-author these onto ApplyStatusBehaviorEffect; this tab
-        /// going empty is the green light to delete the old effect + the enum.
-        /// </summary>
-        private sealed class StatusMigrationProvider : IContentProvider
-        {
-            public string Category => "Status migration";
-
-            // Match by type name so this code doesn't reference the [Obsolete] type directly.
-            private static int CountLegacy(IEnumerable<BattleEffect> effects)
-            {
-                if (effects == null)
-                    return 0;
-                int n = 0;
-                foreach (var e in effects)
-                    if (e != null && e.GetType().Name == "ApplyStatusEffect")
-                        n++;
-                return n;
-            }
-
-            private static int CountInPassives(IEnumerable<BattlePassive> passives)
-            {
-                if (passives == null)
-                    return 0;
-                int n = 0;
-                foreach (var p in passives)
-                    if (p != null)
-                        n += CountLegacy(p.Effects);
-                return n;
-            }
-
-            public IEnumerable<Row> Rows()
-            {
-                int totalAssets = 0;
-
-                foreach (var card in LoadAll<CardData>().OrderBy(c => c.name))
-                {
-                    int n =
-                        CountLegacy(card.Effects)
-                        + CountLegacy(card.UpgradedEffects)
-                        + CountInPassives(card.Passives);
-                    if (n == 0)
-                        continue;
-                    totalAssets++;
-                    yield return new Row(
-                        card.name,
-                        $"card — {n} legacy ApplyStatusEffect",
-                        card,
-                        new List<AuditIssue>
-                        {
-                            new AuditIssue(
-                                Severity.Warning,
-                                "Re-author onto ApplyStatusBehaviorEffect."
-                            ),
-                        }
-                    );
-                }
-
-                foreach (var move in LoadAll<EnemyMoveData>().OrderBy(m => m.name))
-                {
-                    int n = CountLegacy(move.Effects);
-                    if (n == 0)
-                        continue;
-                    totalAssets++;
-                    yield return new Row(
-                        move.name,
-                        $"enemy move — {n} legacy ApplyStatusEffect",
-                        move,
-                        new List<AuditIssue>
-                        {
-                            new AuditIssue(
-                                Severity.Warning,
-                                "Re-author onto ApplyStatusBehaviorEffect."
-                            ),
-                        }
-                    );
-                }
-
-                if (totalAssets == 0)
-                    yield return new Row(
-                        "(none)",
-                        "all content migrated off the enum status effect",
-                        null,
-                        new List<AuditIssue>()
-                    );
             }
         }
 
@@ -832,9 +690,13 @@ namespace Crookedile.EditorTools
 
                 var iconMap = LoadFirst<StatusEffectIconMapSO>();
                 if (iconMap != null)
-                    foreach (StatusEffectType type in Enum.GetValues(typeof(StatusEffectType)))
-                        if (iconMap.TryGet(type, out var icon, out _) && icon != null)
-                            yield return new ArtRef(icon, $"Status: {type}", iconMap);
+                    foreach (StatusBehavior behavior in StatusRegistry.All)
+                        if (iconMap.TryGet(behavior.Id, out var icon, out _) && icon != null)
+                            yield return new ArtRef(
+                                icon,
+                                $"Status: {behavior.DisplayName}",
+                                iconMap
+                            );
 
                 var theme = LoadFirst<EnemyIntentTheme>();
                 if (theme != null)

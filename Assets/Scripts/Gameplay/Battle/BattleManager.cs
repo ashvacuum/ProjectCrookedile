@@ -563,10 +563,8 @@ namespace Crookedile.Gameplay.Battle
         public int ConversionsThisTurn => _conversionsThisTurn;
 
         /// <summary>The pacify statuses that count toward (and are consumed by) a conversion.</summary>
-        public static bool IsPacifyStatus(StatusEffectType type) =>
-            type == StatusEffectType.Guilt
-            || type == StatusEffectType.Shame
-            || type == StatusEffectType.Doubt;
+        public static bool IsPacifyStatus(StatusBehavior behavior) =>
+            behavior != null && behavior.CountsTowardPacify;
 
         /// <summary>
         /// Faith Leader conversion engine. Call after a pacify status (Guilt/Shame/Doubt) lands on an
@@ -584,27 +582,27 @@ namespace Crookedile.Gameplay.Battle
             if (enemyStats == null || mgr == null || enemyStats == _playerStats)
                 return;
 
-            int guilt = mgr.GetStacks(StatusEffectType.Guilt);
-            int shame = mgr.GetStacks(StatusEffectType.Shame);
-            int doubt = mgr.GetStacks(StatusEffectType.Doubt);
+            int guilt = mgr.GetStacks<GuiltStatus>();
+            int shame = mgr.GetStacks<ShameStatus>();
+            int doubt = mgr.GetStacks<DoubtStatus>();
             int total = guilt + shame + doubt;
 
-            int threshold = PacifyBaseThreshold + mgr.GetStacks(StatusEffectType.Jaded);
+            int threshold = PacifyBaseThreshold + mgr.GetStacks<JadedStatus>();
             if (total < threshold)
                 return;
 
             int idx = enemyStats.OwnerEnemyIndex;
 
             // Consume the pacify statuses — spent whether we convert or (Hardened) silence.
-            ConsumePacifyStatus(mgr, StatusEffectType.Guilt, guilt, idx);
-            ConsumePacifyStatus(mgr, StatusEffectType.Shame, shame, idx);
-            ConsumePacifyStatus(mgr, StatusEffectType.Doubt, doubt, idx);
+            ConsumePacifyStatus(mgr, StatusRegistry.Get<GuiltStatus>(), guilt, idx);
+            ConsumePacifyStatus(mgr, StatusRegistry.Get<ShameStatus>(), shame, idx);
+            ConsumePacifyStatus(mgr, StatusRegistry.Get<DoubtStatus>(), doubt, idx);
 
             // A true non-believer can't be converted — shut them up instead.
             if (enemyStats.IsHardened)
             {
-                mgr.ApplyStatusEffect(
-                    StatusEffectType.Silenced,
+                mgr.ApplyStatus(
+                    StatusRegistry.Get<SilencedStatus>(),
                     1,
                     StatusDurationType.DecreasePerTurn
                 );
@@ -628,13 +626,13 @@ namespace Crookedile.Gameplay.Battle
 
             // Revert to neutral and gain a permanent Jaded stack (raises the next conversion cost).
             enemyStats.SetHostility(0);
-            mgr.ApplyStatusEffect(StatusEffectType.Jaded, 1, StatusDurationType.Permanent);
+            mgr.ApplyStatus(StatusRegistry.Get<JadedStatus>(), 1, StatusDurationType.Permanent);
 
             _conversionsThisTurn++;
 
             GameLogger.LogInfo<BattleManager>(
                 $"Enemy [{idx}] converted — {total} pacify stacks → {burst} opinion burst "
-                    + $"(now Jaded {mgr.GetStacks(StatusEffectType.Jaded)})"
+                    + $"(now Jaded {mgr.GetStacks<JadedStatus>()})"
             );
             EventBus.Publish(
                 new EnemyConvertedEvent
@@ -649,18 +647,18 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Removes a pacify status and notifies the UI (negative-stack StatusEffectAppliedEvent).</summary>
         private static void ConsumePacifyStatus(
             StatusEffectManager mgr,
-            StatusEffectType type,
+            StatusBehavior behavior,
             int stacks,
             int enemyIndex
         )
         {
             if (stacks <= 0)
                 return;
-            mgr.RemoveStatusEffect(type);
+            mgr.RemoveStatus(behavior);
             EventBus.Publish(
                 new StatusEffectAppliedEvent
                 {
-                    StatusType = type,
+                    Behavior = behavior,
                     Stacks = -stacks,
                     IsToPlayer = false,
                     EnemyIndex = enemyIndex,
@@ -767,16 +765,16 @@ namespace Crookedile.Gameplay.Battle
 
             // Echo — replay the card a second time; consume the stack BEFORE the replay to
             // prevent a second Echo stack (if any) from triggering an infinite chain.
-            int echoStacks = _effectResolver.PlayerStatusEffects.GetStacks(StatusEffectType.Echo);
+            int echoStacks = _effectResolver.PlayerStatusEffects.GetStacks<EchoStatus>();
             if (echoStacks > 0)
             {
-                _effectResolver.PlayerStatusEffects.RemoveStacks(StatusEffectType.Echo, 1);
+                _effectResolver.PlayerStatusEffects.RemoveStacks<EchoStatus>(1);
                 // Notify the UI and any passive listening for status changes that
                 // one Echo stack was consumed (negative Stacks = removed).
                 EventBus.Publish(
                     new StatusEffectAppliedEvent
                     {
-                        StatusType = StatusEffectType.Echo,
+                        Behavior = StatusRegistry.Get<EchoStatus>(),
                         Stacks = -1,
                         IsToPlayer = true,
                         EnemyIndex = -1,
@@ -937,7 +935,7 @@ namespace Crookedile.Gameplay.Battle
         private void TriggerMomentum()
         {
             int stacks =
-                _effectResolver?.PlayerStatusEffects?.GetStacks(StatusEffectType.Momentum) ?? 0;
+                _effectResolver?.PlayerStatusEffects?.GetStacks<MomentumStatus>() ?? 0;
             if (stacks <= 0)
                 return;
 
@@ -1056,7 +1054,7 @@ namespace Crookedile.Gameplay.Battle
                 _effectResolver.PlayerStatusEffects.OnTurnStart(_playerStats);
 
                 // Ritual grants Support each turn.
-                int ritual = _effectResolver.PlayerStatusEffects.GetStacks(StatusEffectType.Ritual);
+                int ritual = _effectResolver.PlayerStatusEffects.GetStacks<RitualStatus>();
                 if (ritual > 0)
                     GainSupport(ritual);
 
@@ -1075,7 +1073,7 @@ namespace Crookedile.Gameplay.Battle
                     enemy.StatusEffects.OnPlayerTurnStart();
 
                 // Confused: randomize card effect amounts for this turn
-                if (_effectResolver.PlayerStatusEffects.HasEffect(StatusEffectType.Confused))
+                if (_effectResolver.PlayerStatusEffects.HasStatus<ConfusedStatus>())
                     ApplyConfusedOverrides();
                 else
                     _confusedOverrides.Clear();
@@ -1088,7 +1086,7 @@ namespace Crookedile.Gameplay.Battle
                     enemy.StatusEffects.OnTurnStart(enemy.Stats);
 
                     // Enemy Ritual grants Denial.
-                    int ritual = enemy.StatusEffects.GetStacks(StatusEffectType.Ritual);
+                    int ritual = enemy.StatusEffects.GetStacks<RitualStatus>();
                     if (ritual > 0)
                         GainDenial(ritual);
                 }
@@ -1134,7 +1132,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         private void ApplyTurnEndOpinionStatuses(StatusEffectManager mgr)
         {
-            int smear = mgr.GetStacks(StatusEffectType.Smear);
+            int smear = mgr.GetStacks<SmearStatus>();
             if (smear > 0)
                 _opinion.ApplyPressure(
                     smear,
@@ -1144,7 +1142,7 @@ namespace Crookedile.Gameplay.Battle
                     targetEnemyIndex: -1
                 );
 
-            int regen = mgr.GetStacks(StatusEffectType.Regeneration);
+            int regen = mgr.GetStacks<RegenerationStatus>();
             if (regen > 0)
                 _opinion.RaiseDirect(regen);
         }
@@ -1368,8 +1366,8 @@ namespace Crookedile.Gameplay.Battle
                 // (Silence is the Faith Leader's "shut them up" — also how a Hardened enemy is handled
                 // when pacify-conversion can't convert it.)
                 if (
-                    enemy.StatusEffects.HasEffect(StatusEffectType.Stunned)
-                    || enemy.StatusEffects.HasEffect(StatusEffectType.Silenced)
+                    enemy.StatusEffects.HasStatus<StunnedStatus>()
+                    || enemy.StatusEffects.HasStatus<SilencedStatus>()
                 )
                 {
                     GameLogger.LogInfo<BattleManager>(
@@ -1379,7 +1377,7 @@ namespace Crookedile.Gameplay.Battle
                 }
 
                 // Doubt (pacify): a doubting enemy may hold back its action (soft skip, 25% per stack).
-                int doubt = enemy.StatusEffects.GetStacks(StatusEffectType.Doubt);
+                int doubt = enemy.StatusEffects.GetStacks<DoubtStatus>();
                 if (doubt > 0)
                 {
                     float doubtSkip = Mathf.Clamp01(doubt * 0.25f);

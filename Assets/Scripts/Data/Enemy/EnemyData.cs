@@ -86,7 +86,7 @@ namespace Crookedile.Data.Enemy
             "Status effects (buffs or debuffs) applied to this enemy at the start of every battle."
         )]
         [SerializeField]
-        private List<StatusEffect> _startingEffects = new List<StatusEffect>();
+        private List<StartingStatusEntry> _startingEffects = new List<StartingStatusEntry>();
 
         #endregion
 
@@ -115,7 +115,31 @@ namespace Crookedile.Data.Enemy
         public DemographicValues DemographicValues => _demographicValues;
         public EnemyMovePattern MovePattern => _movePattern;
         public IReadOnlyList<EnemyMoveData> Moves => _moves;
-        public IReadOnlyList<StatusEffect> StartingEffects => _startingEffects;
+        public IReadOnlyList<StartingStatusEntry> StartingEffects => _startingEffects;
+    }
+
+    /// <summary>
+    /// Authoring entry for a status applied at battle start: a polymorphic
+    /// <see cref="StatusBehavior"/> (inspector type dropdown) plus stacks and duration.
+    /// </summary>
+    [System.Serializable]
+    public class StartingStatusEntry
+    {
+        [Tooltip("The status to apply — pick a StatusBehavior subclass from the type dropdown.")]
+        [SerializeReference]
+        private StatusBehavior _behavior;
+
+        [Tooltip("Number of stacks applied at battle start.")]
+        [SerializeField]
+        private int _stacks = 1;
+
+        [Tooltip("How the status duration is tracked.")]
+        [SerializeField]
+        private StatusDurationType _duration = StatusDurationType.Permanent;
+
+        public StatusBehavior Behavior => _behavior;
+        public int Stacks => _stacks;
+        public StatusDurationType Duration => _duration;
     }
 }
         #endregion

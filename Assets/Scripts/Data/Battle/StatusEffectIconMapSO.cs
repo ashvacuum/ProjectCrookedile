@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Crookedile.Gameplay.Battle;
 using UnityEngine;
 
 namespace Crookedile.Data.Battle
 {
     /// <summary>
-    /// ScriptableObject that maps each <see cref="StatusEffectType"/> to a display icon and tint color.
+    /// ScriptableObject that maps each status id (<see cref="Crookedile.Gameplay.Battle.StatusBehavior.Id"/>,
+    /// e.g. "guilt") to a display icon and tint color.
     /// One asset is shared by all <see cref="Crookedile.UI.Battle.StatusEffectPanelUI"/> instances.
     ///
     /// Create via: Right-click → Crookedile / Battle / Status Effect Icon Map
@@ -20,7 +20,8 @@ namespace Crookedile.Data.Battle
         [Serializable]
         public struct Entry
         {
-            public StatusEffectType type;
+            [Tooltip("Stable status id — must match a StatusBehavior.Id (lowercase, e.g. \"guilt\").")]
+            public string id;
 
             [Tooltip("Icon sprite shown in the buff/debuff pill.")]
             public Sprite icon;
@@ -28,7 +29,7 @@ namespace Crookedile.Data.Battle
             [Tooltip("Tint color applied to the icon image.")]
             public Color color;
 
-            [Tooltip("Short display name shown in the tooltip header (e.g. \"Poison\").")]
+            [Tooltip("Short display name shown in the tooltip header (e.g. \"Guilt\").")]
             public string effectName;
 
             [TextArea(1, 3)]
@@ -39,21 +40,25 @@ namespace Crookedile.Data.Battle
         [SerializeField]
         private List<Entry> _entries = new List<Entry>();
 
-        private Dictionary<StatusEffectType, Entry> _lookup;
+        private Dictionary<string, Entry> _lookup;
 
         private void BuildLookup()
         {
-            _lookup = new Dictionary<StatusEffectType, Entry>(_entries.Count);
+            _lookup = new Dictionary<string, Entry>(
+                _entries.Count,
+                StringComparer.OrdinalIgnoreCase
+            );
             foreach (var entry in _entries)
-                _lookup[entry.type] = entry;
+                if (!string.IsNullOrEmpty(entry.id))
+                    _lookup[entry.id] = entry;
         }
 
         /// <summary>
-        /// Attempts to retrieve the icon, color, name, and description for a given status effect type.
+        /// Attempts to retrieve the icon, color, name, and description for a given status id.
         /// Returns false (with null icon, white color, and empty strings) when no entry is configured.
         /// </summary>
         public bool TryGet(
-            StatusEffectType type,
+            string id,
             out Sprite icon,
             out Color color,
             out string effectName,
@@ -63,7 +68,7 @@ namespace Crookedile.Data.Battle
             if (_lookup == null)
                 BuildLookup();
 
-            if (_lookup.TryGetValue(type, out Entry entry))
+            if (id != null && _lookup.TryGetValue(id, out Entry entry))
             {
                 icon = entry.icon;
                 color = entry.color;
@@ -80,10 +85,10 @@ namespace Crookedile.Data.Battle
         }
 
         /// <summary>
-        /// Backwards-compatible 2-out-param overload. Existing callers (StatusEffectPanelUI) are unaffected.
+        /// 2-out-param overload for callers that only need the visual pair.
         /// </summary>
-        public bool TryGet(StatusEffectType type, out Sprite icon, out Color color) =>
-            TryGet(type, out icon, out color, out _, out _);
+        public bool TryGet(string id, out Sprite icon, out Color color) =>
+            TryGet(id, out icon, out color, out _, out _);
 
         private void OnValidate() => _lookup = null; // invalidate cache when edited in Inspector
     }

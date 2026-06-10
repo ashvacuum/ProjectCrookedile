@@ -12,9 +12,9 @@ namespace Crookedile.Gameplay.Battle
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class PlayerHasStatusCondition : PassiveConditionBase
     {
-        [Tooltip("The status type to check for on the player.")]
-        [SerializeField]
-        private StatusEffectType _statusType = StatusEffectType.Confused;
+        [Tooltip("The status to check for on the player.")]
+        [SerializeReference]
+        private StatusBehavior _status;
 
         [Tooltip("Minimum stack count required.")]
         [MinValue(1)]
@@ -23,12 +23,14 @@ namespace Crookedile.Gameplay.Battle
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
-            if (ctx.PlayerStatusEffects == null)
+            if (ctx.PlayerStatusEffects == null || _status == null)
                 return false;
-            return ctx.PlayerStatusEffects.GetStacks(_statusType) >= _minStacks;
+            return ctx.PlayerStatusEffects.GetStacks(_status) >= _minStacks;
         }
 
         public override string ConditionLabel =>
-            _minStacks <= 1 ? $"you have {_statusType}" : $"you have {_minStacks}+ {_statusType}";
+            _minStacks <= 1
+                ? $"you have {_status?.DisplayName ?? "(none)"}"
+                : $"you have {_minStacks}+ {_status?.DisplayName ?? "(none)"}";
     }
 }

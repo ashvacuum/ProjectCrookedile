@@ -19,7 +19,7 @@ namespace Crookedile.UI.Battle
     /// </summary>
     public class StatusEffectPanelUI : MonoBehaviour
     {
-        [Tooltip("ScriptableObject mapping StatusEffectType → icon sprite and tint color.")]
+        [Tooltip("ScriptableObject mapping status id → icon sprite and tint color.")]
         [SerializeField]
         private StatusEffectIconMapSO _iconMap;
 
@@ -31,8 +31,8 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private Transform _container;
 
-        private readonly Dictionary<StatusEffectType, StatusEffectIconUI> _active =
-            new Dictionary<StatusEffectType, StatusEffectIconUI>();
+        private readonly Dictionary<string, StatusEffectIconUI> _active =
+            new Dictionary<string, StatusEffectIconUI>();
 
         /// <summary>
         /// Synchronises the displayed icons with the current state of <paramref name="effects"/>.
@@ -54,18 +54,18 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
-            // Track which types are still active so we can remove expired ones afterwards.
-            var seen = new HashSet<StatusEffectType>();
+            // Track which ids are still active so we can remove expired ones afterwards.
+            var seen = new HashSet<string>();
 
-            foreach (StatusEffectType type in System.Enum.GetValues(typeof(StatusEffectType)))
+            foreach (StatusEffect effect in effects.ActiveEffects)
             {
-                int stacks = effects.GetStacks(type);
+                int stacks = effect.Stacks;
                 if (stacks <= 0)
                     continue;
 
-                seen.Add(type);
+                seen.Add(effect.Id);
 
-                if (_active.TryGetValue(type, out StatusEffectIconUI existing))
+                if (_active.TryGetValue(effect.Id, out StatusEffectIconUI existing))
                 {
                     existing.Refresh(stacks);
                 }
@@ -74,7 +74,7 @@ namespace Crookedile.UI.Battle
                     // New effect — create icon if we have a prefab and a map entry.
                     if (_iconPrefab == null || _container == null)
                         continue;
-                    if (!_iconMap.TryGet(type, out var icon, out var color))
+                    if (!_iconMap.TryGet(effect.Id, out var icon, out var color))
                         continue;
 
                     var go = Instantiate(_iconPrefab, _container);
@@ -82,22 +82,22 @@ namespace Crookedile.UI.Battle
                     if (ui == null)
                         continue;
 
-                    ui.Setup(type, icon, color, stacks);
-                    _active[type] = ui;
+                    ui.Setup(effect.Behavior, icon, color, stacks);
+                    _active[effect.Id] = ui;
                 }
             }
 
             // Remove icons for effects that are no longer active.
-            var toRemove = new List<StatusEffectType>();
+            var toRemove = new List<string>();
             foreach (var kvp in _active)
                 if (!seen.Contains(kvp.Key))
                     toRemove.Add(kvp.Key);
 
-            foreach (var type in toRemove)
+            foreach (var id in toRemove)
             {
-                if (_active[type] != null)
-                    Destroy(_active[type].gameObject);
-                _active.Remove(type);
+                if (_active[id] != null)
+                    Destroy(_active[id].gameObject);
+                _active.Remove(id);
             }
         }
 

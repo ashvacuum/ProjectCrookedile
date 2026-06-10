@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Gameplay;
@@ -53,7 +53,7 @@ namespace Crookedile.Tests
         {
             Debug.Log("--- Setting up test battle ---");
 
-            // Initialize stats — resolve removed; use opinion-meter model
+            // Initialize stats â€” resolve removed; use opinion-meter model
             playerStats = new BattleStats(maxActionPoints: 3, isPlayer: true);
             opponentStats = new BattleStats(maxActionPoints: 3, isPlayer: false);
 
@@ -69,7 +69,7 @@ namespace Crookedile.Tests
         }
 
         // TODO: Rewrite damage tests for the opinion-meter model.
-        // Cards apply pressure to the opinion meter via DamageDealtEvent → BattleManager.
+        // Cards apply pressure to the opinion meter via DamageDealtEvent â†’ BattleManager.
         // Tests need a BattleManager mock or an EventBus listener to assert opinion changes.
 
         [ContextMenu("Test: Basic Damage")]
@@ -82,9 +82,9 @@ namespace Crookedile.Tests
         public void TestShieldAbsorption()
         {
             // Support/Denial are now session-level on BattleManager, not per-BattleStats.
-            // This test requires a full BattleManager instance — stub for now.
+            // This test requires a full BattleManager instance â€” stub for now.
             Debug.Log(
-                "\n--- TEST: Support/Denial absorption — requires BattleManager, skipped in unit tester ---"
+                "\n--- TEST: Support/Denial absorption â€” requires BattleManager, skipped in unit tester ---"
             );
         }
 
@@ -95,9 +95,9 @@ namespace Crookedile.Tests
             SetupTestBattle();
             opponentStats.GainHostility(2);
             float mult = opponentStats.HostilityDamageMultiplier;
-            Debug.Log($"Hostility 2 → multiplier: {mult:F2}x (expected 2.0x)");
+            Debug.Log($"Hostility 2 â†’ multiplier: {mult:F2}x (expected 2.0x)");
             Debug.Assert(Mathf.Approximately(mult, 2.0f), "Hostility multiplier wrong!");
-            Debug.Log("✓ PASSED");
+            Debug.Log("âœ“ PASSED");
         }
 
         [ContextMenu("Test: Status Effect Damage Modifiers")]
@@ -109,9 +109,9 @@ namespace Crookedile.Tests
         [ContextMenu("Test: Shield Gain With Modifiers")]
         public void TestShieldGainWithModifiers()
         {
-            // Support is now session-level on BattleManager — requires BattleManager instance to test.
+            // Support is now session-level on BattleManager â€” requires BattleManager instance to test.
             Debug.Log(
-                "\n--- TEST: Support gain with modifiers — requires BattleManager, skipped in unit tester ---"
+                "\n--- TEST: Support gain with modifiers â€” requires BattleManager, skipped in unit tester ---"
             );
         }
 
@@ -125,7 +125,7 @@ namespace Crookedile.Tests
             CardCost cost = new CardCost(CostType.ActionPoints, 2);
 
             // Apply Focus -1 (reduces cost by 1)
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Focus, 1);
+            effectResolver.PlayerStatusEffects.ApplyStatus(new FocusStatus(), 1);
 
             int baseCost = cost.CurrentAmount;
             int modifiedCost = effectResolver.PlayerStatusEffects.ModifyCardCost(baseCost);
@@ -135,13 +135,13 @@ namespace Crookedile.Tests
 
             // Now test Entangled (+1 cost)
             SetupTestBattle();
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Entangled, 1);
+            effectResolver.PlayerStatusEffects.ApplyStatus(new EntangledStatus(), 1);
 
             modifiedCost = effectResolver.PlayerStatusEffects.ModifyCardCost(baseCost);
             Debug.Log($"Expected: 3 AP (2 base + 1 Entangled) | Actual: {modifiedCost} AP");
             Debug.Assert(modifiedCost == 3, "Entangled cost test failed!");
 
-            Debug.Log("✓ PASSED");
+            Debug.Log("âœ“ PASSED");
         }
 
         [ContextMenu("Test: Turn-Based Status Effects")]
@@ -151,12 +151,12 @@ namespace Crookedile.Tests
             SetupTestBattle();
 
             // Apply Smear (reputation bleed at end of turn)
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Smear, 3);
+            effectResolver.PlayerStatusEffects.ApplyStatus(new SmearStatus(), 3);
 
             // Apply Regeneration (heal at end of turn)
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Regeneration, 2);
+            effectResolver.PlayerStatusEffects.ApplyStatus(new RegenerationStatus(), 2);
 
-            // Support/Denial are session-level — no per-stat shield to set up.
+            // Support/Denial are session-level â€” no per-stat shield to set up.
 
             Debug.Log($"Before turn end: {playerStats.GetStatusString()}");
 
@@ -166,19 +166,19 @@ namespace Crookedile.Tests
             Debug.Log($"After turn end: {playerStats.GetStatusString()}");
             Debug.Log(
                 "Smear/Regeneration opinion effects are applied by BattleManager (OpinionLedger), "
-                    + "not by StatusEffectManager — this unit tester only decrements their stacks."
+                    + "not by StatusEffectManager â€” this unit tester only decrements their stacks."
             );
 
             // Test Ritual (gain Shield at start of turn)
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Ritual, 2);
+            effectResolver.PlayerStatusEffects.ApplyStatus(new RitualStatus(), 2);
             effectResolver.PlayerStatusEffects.OnTurnStart(playerStats);
 
             Debug.Log($"After turn start: {playerStats.GetStatusString()}");
             Debug.Log(
-                "Ritual now grants Support (session-level) — verify via BattleManager.CurrentSupport"
+                "Ritual now grants Support (session-level) â€” verify via BattleManager.CurrentSupport"
             );
 
-            Debug.Log("✓ PASSED");
+            Debug.Log("âœ“ PASSED");
         }
 
         #region Helper Methods

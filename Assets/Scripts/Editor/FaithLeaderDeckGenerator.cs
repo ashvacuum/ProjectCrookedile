@@ -39,11 +39,11 @@ namespace Crookedile.EditorTools
 
             // Identity — pacify stackers (Permanent so they persist toward the 3-stack threshold)
             MakeCard("Guilt Trip", CardType.Pressure, 1, CardRarity.Basic,
-                ApplyStatus(TargetType.Opponent, StatusEffectType.Guilt, 1, StatusDurationType.Permanent));
+                ApplyStatus(TargetType.Opponent, new GuiltStatus(), 1, StatusDurationType.Permanent));
             MakeCard("Name and Shame", CardType.Pressure, 1, CardRarity.Basic,
-                ApplyStatus(TargetType.Opponent, StatusEffectType.Shame, 1, StatusDurationType.Permanent));
+                ApplyStatus(TargetType.Opponent, new ShameStatus(), 1, StatusDurationType.Permanent));
             MakeCard("Sow Doubt", CardType.Pressure, 1, CardRarity.Basic,
-                ApplyStatus(TargetType.Opponent, StatusEffectType.Doubt, 1, StatusDurationType.Permanent));
+                ApplyStatus(TargetType.Opponent, new DoubtStatus(), 1, StatusDurationType.Permanent));
 
             // Identity — harvest (scales with conversions this turn; 1:1 for now, tune/multiplier later)
             MakeCard("Sermon", CardType.Pressure, 2, CardRarity.Basic,
@@ -123,13 +123,11 @@ namespace Crookedile.EditorTools
 
         private static BattleEffect ApplyStatus(
             TargetType target,
-            StatusEffectType status,
+            StatusBehavior behavior,
             int stacks,
             StatusDurationType duration
         )
         {
-            // Behavior-first: resolve the enum to a fresh StatusBehavior instance via the bridge.
-            var behavior = Activator.CreateInstance(StatusBridge.ToBehavior(status).GetType());
             var e = new ApplyStatusBehaviorEffect();
             SetField(e, "_target", target);
             SetField(e, "_behavior", behavior);

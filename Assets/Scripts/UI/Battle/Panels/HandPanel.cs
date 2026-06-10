@@ -53,7 +53,7 @@ namespace Crookedile.UI.Battle
                 return; // safety — Idle state should call ClearHand instead
 
             int currentAP = bm.PlayerStats.CurrentActionPoints;
-            bool isSilenced = bm.PlayerStatusEffects?.HasEffect(StatusEffectType.Silenced) ?? false;
+            bool isSilenced = bm.PlayerStatusEffects?.HasStatus<SilencedStatus>() ?? false;
             var hand = bm.PlayerDeck.Hand;
 
             for (int i = 0; i < hand.Count; i++)
@@ -98,7 +98,7 @@ namespace Crookedile.UI.Battle
                 return;
 
             int currentAP = bm.PlayerStats.CurrentActionPoints;
-            bool isSilenced = bm.PlayerStatusEffects?.HasEffect(StatusEffectType.Silenced) ?? false;
+            bool isSilenced = bm.PlayerStatusEffects?.HasStatus<SilencedStatus>() ?? false;
 
             for (int i = 0; i < _activeButtons.Count; i++)
             {
@@ -157,7 +157,7 @@ namespace Crookedile.UI.Battle
                 return;
 
             int currentAP = bm.PlayerStats.CurrentActionPoints;
-            bool isSilenced = bm.PlayerStatusEffects?.HasEffect(StatusEffectType.Silenced) ?? false;
+            bool isSilenced = bm.PlayerStatusEffects?.HasStatus<SilencedStatus>() ?? false;
             var hand = bm.PlayerDeck.Hand;
 
             // List-based pool so duplicate CardData references are each matched once.
