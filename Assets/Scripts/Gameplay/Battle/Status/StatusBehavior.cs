@@ -14,7 +14,7 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Polymorphic status effect — replaces the StatusEffectType enum + the parallel behavior switches.
+    /// Polymorphic status effect.
     /// Each concrete status is one [Serializable] subclass that owns its own rules (description,
     /// debuff/buff, the pressure/support/cost modify hooks, hostility flags, pacify flag). Statuses are
     /// stacked/looked-up by concrete <see cref="System.Type"/> at runtime; <see cref="Id"/> is the

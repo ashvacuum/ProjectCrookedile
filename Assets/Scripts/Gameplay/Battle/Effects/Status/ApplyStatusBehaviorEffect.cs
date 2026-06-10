@@ -8,10 +8,8 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Behavior-first version of <see cref="ApplyStatusEffect"/> — applies a polymorphic
-    /// <see cref="StatusBehavior"/> (picked via the inspector's [SerializeReference] type dropdown)
-    /// instead of the legacy StatusEffectType enum. Routes through the transitional bridge
-    /// (<c>StatusEffectManager.ApplyStatus</c>) so it works alongside the old system during migration.
+    /// Applies a polymorphic <see cref="StatusBehavior"/> (picked via the inspector's
+    /// [SerializeReference] type dropdown) to the chosen targets.
     ///
     /// To author: add this effect, then in the "Behavior" field pick a status class (GuiltStatus,
     /// WeakenedStatus, …). The Faith Leader pacify check reads <see cref="StatusBehavior.CountsTowardPacify"/>.

@@ -201,31 +201,6 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
-        #region Legacy enum bridge (transitional — deleted with the enum)
-
-        /// <summary>Transitional: applies a status by legacy enum value.</summary>
-        public void ApplyStatusEffect(
-            StatusEffectType type,
-            int stacks,
-            StatusDurationType durationType = StatusDurationType.DecreasePerTurn
-        ) => ApplyStatus(StatusBridge.ToBehavior(type), stacks, durationType);
-
-        /// <summary>Transitional: stacks by legacy enum value.</summary>
-        public int GetStacks(StatusEffectType type) => GetStacks(StatusBridge.ToBehavior(type));
-
-        /// <summary>Transitional: presence by legacy enum value.</summary>
-        public bool HasEffect(StatusEffectType type) => HasStatus(StatusBridge.ToBehavior(type));
-
-        /// <summary>Transitional: removes a status by legacy enum value.</summary>
-        public void RemoveStatusEffect(StatusEffectType type) =>
-            RemoveStatus(StatusBridge.ToBehavior(type));
-
-        /// <summary>Transitional: removes stacks by legacy enum value.</summary>
-        public void RemoveStacks(StatusEffectType type, int amount) =>
-            RemoveStacks(StatusBridge.ToBehavior(type), amount);
-
-        #endregion
-
         #region Query Effects (cont.)
 
         /// <summary>
