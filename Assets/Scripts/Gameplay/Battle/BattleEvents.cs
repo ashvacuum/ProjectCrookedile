@@ -342,8 +342,11 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public struct StatusEffectAppliedEvent : IGameEvent
     {
-        /// <summary>The type of status effect applied (e.g. Burning, Shielded, Stunned).</summary>
-        public StatusEffectType StatusType;
+        /// <summary>The status applied (canonical behavior instance from the registry).</summary>
+        public StatusBehavior Behavior;
+
+        /// <summary>Stable id of the applied status (e.g. "guilt"), or null.</summary>
+        public string StatusId => Behavior?.Id;
 
         /// <summary>Number of stacks applied (positive = added; negative = removed).</summary>
         public int Stacks;

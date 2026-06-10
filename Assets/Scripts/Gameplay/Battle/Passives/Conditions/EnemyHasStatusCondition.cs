@@ -14,9 +14,9 @@ namespace Crookedile.Gameplay.Battle
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class EnemyHasStatusCondition : PassiveConditionBase
     {
-        [Tooltip("The status type to check for on any enemy.")]
-        [SerializeField]
-        private StatusEffectType _statusType = StatusEffectType.Weakened;
+        [Tooltip("The status to check for on any enemy.")]
+        [SerializeReference]
+        private StatusBehavior _status;
 
         [Tooltip("Minimum stack count required.")]
         [MinValue(1)]
@@ -25,18 +25,18 @@ namespace Crookedile.Gameplay.Battle
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
-            if (ctx.Enemies == null)
+            if (ctx.Enemies == null || _status == null)
                 return false;
             return ctx.Enemies.Any(e =>
                 e != null
                 && e.StatusEffects != null
-                && e.StatusEffects.GetStacks(_statusType) >= _minStacks
+                && e.StatusEffects.GetStacks(_status) >= _minStacks
             );
         }
 
         public override string ConditionLabel =>
             _minStacks <= 1
-                ? $"an enemy has {_statusType}"
-                : $"an enemy has {_minStacks}+ {_statusType}";
+                ? $"an enemy has {_status?.DisplayName ?? "(none)"}"
+                : $"an enemy has {_minStacks}+ {_status?.DisplayName ?? "(none)"}";
     }
 }

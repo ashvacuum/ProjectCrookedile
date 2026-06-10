@@ -16,17 +16,20 @@ namespace Crookedile.Gameplay.Battle
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class IfStatusTypeCondition : PassiveConditionBase
     {
-        [Tooltip("The passive fires only if the triggering event applied this status type.")]
-        [SerializeField]
-        private StatusEffectType _requiredStatus = StatusEffectType.Weakened;
+        [Tooltip("The passive fires only if the triggering event applied this status.")]
+        [SerializeReference]
+        private StatusBehavior _requiredStatus;
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
             if (!ctx.EventCtx.Is<StatusEffectAppliedEvent>())
                 return true; // not a status event — don't block
-            return ctx.EventCtx.As<StatusEffectAppliedEvent>().StatusType == _requiredStatus;
+            if (_requiredStatus == null)
+                return true; // unconfigured — don't block
+            return ctx.EventCtx.As<StatusEffectAppliedEvent>().StatusId == _requiredStatus.Id;
         }
 
-        public override string ConditionLabel => $"the status is {_requiredStatus}";
+        public override string ConditionLabel =>
+            $"the status is {_requiredStatus?.DisplayName ?? "(none)"}";
     }
 }

@@ -212,13 +212,13 @@ namespace Crookedile.Editor
                 if (_playerStatusEffects.Count > 0)
                 {
                     Debug.Log(
-                        $"Player Status Effects: {string.Join(", ", _playerStatusEffects.ConvertAll(s => $"{s.Type} x{s.Stacks}"))}"
+                        $"Player Status Effects: {string.Join(", ", _playerStatusEffects.ConvertAll(s => $"{s.Behavior?.DisplayName ?? "(none)"} x{s.Stacks}"))}"
                     );
                 }
                 if (_opponentStatusEffects.Count > 0)
                 {
                     Debug.Log(
-                        $"Opponent Status Effects: {string.Join(", ", _opponentStatusEffects.ConvertAll(s => $"{s.Type} x{s.Stacks}"))}"
+                        $"Opponent Status Effects: {string.Join(", ", _opponentStatusEffects.ConvertAll(s => $"{s.Behavior?.DisplayName ?? "(none)"} x{s.Stacks}"))}"
                     );
                 }
                 Debug.Log("");
@@ -301,7 +301,7 @@ namespace Crookedile.Editor
         {
             foreach (var effect in effects)
             {
-                manager.ApplyStatusEffect(effect.Type, effect.Stacks, effect.Duration);
+                manager.ApplyStatus(effect.Behavior, effect.Stacks, effect.Duration);
             }
         }
 
@@ -336,7 +336,7 @@ namespace Crookedile.Editor
             _playerStatusEffects.Add(
                 new StatusEffectSetup
                 {
-                    Type = StatusEffectType.Strength,
+                    Behavior = new StrengthStatus(),
                     Stacks = 3,
                     Duration = StatusDurationType.DecreasePerTurn,
                 }
@@ -344,7 +344,7 @@ namespace Crookedile.Editor
             _playerStatusEffects.Add(
                 new StatusEffectSetup
                 {
-                    Type = StatusEffectType.Vulnerable,
+                    Behavior = new VulnerableStatus(),
                     Stacks = 2,
                     Duration = StatusDurationType.DecreasePerTurn,
                 }
@@ -354,7 +354,7 @@ namespace Crookedile.Editor
             _opponentStatusEffects.Add(
                 new StatusEffectSetup
                 {
-                    Type = StatusEffectType.Weakened,
+                    Behavior = new WeakenedStatus(),
                     Stacks = 2,
                     Duration = StatusDurationType.DecreasePerTurn,
                 }
@@ -378,7 +378,8 @@ namespace Crookedile.Editor
         [HideLabel]
         [HorizontalGroup]
         [LabelWidth(50)]
-        public StatusEffectType Type;
+        [SerializeReference]
+        public StatusBehavior Behavior;
 
         [HorizontalGroup]
         [LabelText("Stacks")]

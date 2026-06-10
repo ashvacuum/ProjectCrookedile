@@ -255,11 +255,10 @@
         {
             if (ctx.BattleManager == null)
                 return;
-            // Shame (pacify status): a shamed enemy can't defend the meter — the Denial it gains
-            // is reduced by its Shame stacks. Counts toward the pacify threshold.
-            int shame = ctx.CasterStatusEffects?.GetStacks(StatusEffectType.Shame) ?? 0;
-            if (shame > 0)
-                amount = Mathf.Max(0, amount - shame);
+            // Shame (pacify status): a shamed enemy can't defend the meter — its own statuses fold
+            // the Denial it gains (ModifyDenialGained). Counts toward the pacify threshold.
+            if (ctx.CasterStatusEffects != null)
+                amount = ctx.CasterStatusEffects.ModifyDenialGained(amount);
             ctx.BattleManager.GainDenial(amount);
         }
 

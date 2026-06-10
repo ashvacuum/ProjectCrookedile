@@ -641,7 +641,7 @@ namespace Crookedile.UI.Battle
 
                 // Silencing an enemy (Stunned) neutralises its turn — clear the intent immediately
                 // so the player sees the threat is handled rather than a move that will never fire.
-                if (evt.StatusType == StatusEffectType.Stunned && evt.Stacks > 0)
+                if (evt.Behavior is StunnedStatus && evt.Stacks > 0)
                     _enemySlots[evt.EnemyIndex]?.ClearIntent();
             }
         }

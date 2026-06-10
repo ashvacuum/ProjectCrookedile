@@ -34,7 +34,8 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private StatusEffectIconMapSO _iconMap;
 
-        private StatusEffectType _type;
+        private string _id;
+        private string _fallbackName;
         private int _currentStacks;
 
         #region Initialisation
@@ -42,9 +43,10 @@ namespace Crookedile.UI.Battle
         /// Full initialisation — sets the icon sprite, tint color, and initial stack count.
         /// Call once when the icon is first created for an effect.
         /// </summary>
-        public void Setup(StatusEffectType type, Sprite icon, Color color, int stacks)
+        public void Setup(StatusBehavior behavior, Sprite icon, Color color, int stacks)
         {
-            _type = type;
+            _id = behavior?.Id;
+            _fallbackName = behavior?.DisplayName ?? string.Empty;
 
             if (_icon != null)
             {
@@ -78,11 +80,11 @@ namespace Crookedile.UI.Battle
             if (_iconMap == null || BattleTooltipUI.Instance == null)
                 return;
 
-            _iconMap.TryGet(_type, out var icon, out var color, out var name, out var desc);
+            _iconMap.TryGet(_id, out var icon, out var color, out var name, out var desc);
 
-            // Default: fall back to the enum name when effectName is not authored in the SO
+            // Default: fall back to the behavior's display name when effectName is not authored in the SO
             if (string.IsNullOrEmpty(name))
-                name = _type.ToString();
+                name = _fallbackName;
 
             // Template substitution: replace {a} with the current stack count
             if (!string.IsNullOrEmpty(desc))

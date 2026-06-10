@@ -11,9 +11,10 @@ namespace Crookedile.EditorTools
 {
     /// <summary>
     /// Seeds the existing <see cref="StatusEffectIconMapSO"/> (the status visual DB already wired to
-    /// the battle status badges) with an entry for every <see cref="StatusEffectType"/> that doesn't
-    /// have one yet — pre-filling the display name and description from StatusEffect.GetEffectDescription.
-    /// Existing entries (icons/colors you've set) are preserved; only missing statuses are added.
+    /// the battle status badges) with an entry for every <see cref="StatusBehavior"/> in the
+    /// <see cref="StatusRegistry"/> that doesn't have one yet — pre-filling the display name and
+    /// description from the behavior. Existing entries (icons/colors you've set) are preserved;
+    /// only missing statuses are added.
     ///
     /// Menu: Crookedile → Generate → Seed Status Icon Map. Then fill in icons/colors.
     /// </summary>
@@ -37,19 +38,22 @@ namespace Crookedile.EditorTools
             );
 
             var entries = GetEntries(map);
-            var present = new HashSet<StatusEffectType>(entries.Select(e => e.type));
+            var present = new HashSet<string>(
+                entries.Select(e => e.id),
+                StringComparer.OrdinalIgnoreCase
+            );
 
             int added = 0;
-            foreach (StatusEffectType type in Enum.GetValues(typeof(StatusEffectType)))
+            foreach (StatusBehavior behavior in StatusRegistry.All.OrderBy(b => b.Id))
             {
-                if (present.Contains(type))
+                if (present.Contains(behavior.Id))
                     continue;
                 entries.Add(
                     new StatusEffectIconMapSO.Entry
                     {
-                        type = type,
-                        effectName = type.ToString(),
-                        description = new StatusEffect(type, 1).Description,
+                        id = behavior.Id,
+                        effectName = behavior.DisplayName,
+                        description = behavior.Describe(1),
                         color = Color.white,
                     }
                 );

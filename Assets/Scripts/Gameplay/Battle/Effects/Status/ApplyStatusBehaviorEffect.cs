@@ -58,17 +58,16 @@ namespace Crookedile.Gameplay.Battle
                         + $"{(targetStats == ctx.PlayerStats ? "Player" : "Enemy")}"
                 );
 
-                // Notify the UI/passives (event still carries the legacy enum during the bridge period).
-                if (StatusBridge.TryToEnum(_behavior, out var legacyType))
-                    EventBus.Publish(
-                        new StatusEffectAppliedEvent
-                        {
-                            StatusType = legacyType,
-                            Stacks = stacks,
-                            IsToPlayer = targetStats == ctx.PlayerStats,
-                            EnemyIndex = targetStats.OwnerEnemyIndex,
-                        }
-                    );
+                // Notify the UI/passives.
+                EventBus.Publish(
+                    new StatusEffectAppliedEvent
+                    {
+                        Behavior = _behavior,
+                        Stacks = stacks,
+                        IsToPlayer = targetStats == ctx.PlayerStats,
+                        EnemyIndex = targetStats.OwnerEnemyIndex,
+                    }
+                );
 
                 // Faith Leader pacify-conversion: a pacify status on an enemy may cross the threshold.
                 if (stacks > 0 && _behavior.CountsTowardPacify && targetStats != ctx.PlayerStats)

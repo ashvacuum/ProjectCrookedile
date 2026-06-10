@@ -225,15 +225,15 @@ namespace Crookedile.Gameplay.Battle
                 // 1. Turncoat status — hits harder than a natural hostile for a turn or two.
                 if (_turncoatStacks > 0)
                 {
-                    enemy.StatusEffects.ApplyStatusEffect(
-                        StatusEffectType.Turncoat,
+                    enemy.StatusEffects.ApplyStatus(
+                        StatusRegistry.Get<TurncoatStatus>(),
                         _turncoatStacks,
                         StatusDurationType.DecreasePerTurn
                     );
                     EventBus.Publish(
                         new StatusEffectAppliedEvent
                         {
-                            StatusType = StatusEffectType.Turncoat,
+                            Behavior = StatusRegistry.Get<TurncoatStatus>(),
                             Stacks = _turncoatStacks,
                             IsToPlayer = false,
                             EnemyIndex = idx,

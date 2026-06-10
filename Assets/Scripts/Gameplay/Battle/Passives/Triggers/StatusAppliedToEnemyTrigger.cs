@@ -7,7 +7,7 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
     /// Fires when the player applies a status effect to an enemy.
-    /// Optionally filters to a specific <see cref="StatusEffectType"/>.
+    /// Optionally filters to a specific <see cref="StatusBehavior"/>.
     /// </summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
@@ -19,8 +19,8 @@ namespace Crookedile.Gameplay.Battle
 
         [ShowIf("_filterByStatus")]
         [Tooltip("Only fire when this specific status is applied.")]
-        [SerializeField]
-        private StatusEffectType _filterStatus = StatusEffectType.Weakened;
+        [SerializeReference]
+        private StatusBehavior _filterStatus;
 
         public override bool Matches(PassiveEventContext ctx)
         {
@@ -29,7 +29,7 @@ namespace Crookedile.Gameplay.Battle
             var e = ctx.As<StatusEffectAppliedEvent>();
             if (e.IsToPlayer)
                 return false; // must be applied to an enemy
-            if (_filterByStatus && e.StatusType != _filterStatus)
+            if (_filterByStatus && _filterStatus != null && e.StatusId != _filterStatus.Id)
                 return false;
             return true;
         }
@@ -38,7 +38,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override string TriggerLabel =>
             _filterByStatus
-                ? $"When you apply {_filterStatus} to an enemy"
+                ? $"When you apply {_filterStatus?.DisplayName ?? "(none)"} to an enemy"
                 : "When you apply a status to an enemy";
     }
 }
