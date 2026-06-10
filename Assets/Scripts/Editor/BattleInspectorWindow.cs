@@ -123,7 +123,7 @@ namespace Crookedile.EditorTools
                 if (all.Count == 0)
                     EditorGUILayout.LabelField("(none)", EditorStyles.miniLabel);
                 foreach (var s in all)
-                    Field(s.Type.ToString(), $"x{s.Stacks}");
+                    Field(s.DisplayName, $"x{s.Stacks}");
             }
             SirenixEditorGUI.EndBox();
         }
@@ -200,7 +200,7 @@ namespace Crookedile.EditorTools
                     if (statuses.Count > 0)
                         Field(
                             "Statuses",
-                            string.Join("  ", statuses.Select(s => $"{s.Type} x{s.Stacks}"))
+                            string.Join("  ", statuses.Select(s => $"{s.DisplayName} x{s.Stacks}"))
                         );
                 }
 

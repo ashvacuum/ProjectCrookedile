@@ -10,7 +10,7 @@ namespace Crookedile.Gameplay.Battle
     /// stateless (per-application stacks/duration live on the status instance), so one canonical
     /// instance per type is shared. Looked up by <see cref="StatusBehavior.Id"/> or by concrete type.
     ///
-    /// Replaces the StatusEffectType enum as the source of truth for "what statuses exist".
+    /// The source of truth for "what statuses exist".
     /// </summary>
     public static class StatusRegistry
     {
