@@ -6,14 +6,17 @@ Ordered roughly by dependency, not difficulty.
 
 ---
 
-## 1. Finish the status cutover (enum → StatusBehavior)
+## 1. Status cutover (enum → StatusBehavior) — DONE (2026-06-10)
 
-The behavior system (`Status/StatusBehavior.cs`, `StatusRegistry`, all 29 behaviors) is the keeper. The enum path is ready to fall. Remaining, in order:
+Completed in three commits on `test-new-gameplay` (verified by compiling all four assemblies outside Unity):
 
-1. **Re-key the status DB.** `StatusEffectIconMapSO` is the last structural hook on the enum: entries, lookup dictionary, and `TryGet` are all `StatusEffectType`-keyed, and `StatusEffectIconUI`/`StatusEffectPanelUI` consume it that way. Re-key entries by string `Id` (behavior Ids == lowercase enum names, so a one-time migration of the asset is mechanical — `StatusIconMapSeeder` can be adapted to do it). Keep icon/color/name/description fields as-is.
-2. **Migrate consumers off the enum** file by file using the behavior API already on `StatusEffectManager` (`GetStacks<T>()`, `HasStatus(behavior)`, `ApplyStatus(behavior, ...)`). Biggest holders: `StatusEffectManager` (~54 refs), `StatusEffect` (~34), `BattleManager` (~27). The damage-pipeline switches (ModifyOutgoing/Incoming/SupportGained/DenialGained/CardCost) are the one real cutover — replace switch bodies with "iterate behaviors via hooks" in a single parity-checked commit.
-3. **Re-author the 5 legacy assets** still on enum `ApplyStatusEffect` if any remain (Content Hub → "Status migration" tab is the live checklist; last grep of `.asset` files found zero — verify the tab agrees).
-4. **Delete the legacy layer:** `ApplyStatusEffect` (already `[Obsolete(error)]`), the `StatusEffectType` enum, `StatusBridge`, and the enum payload on `StatusEffectAppliedEvent` (→ string Id). Gate on the Content Hub "Status parity" tab being green AND the new tests (see `test-plan.md`) passing.
+1. Store cutover: `StatusEffect` wraps a `StatusBehavior`; manager keyed by Id; pipeline methods fold the behavior hooks.
+2. Consumer migration: event payload carries the behavior (`StatusEffectAppliedEvent.Behavior`/`StatusId`); BattleManager/CrowdReactions/UI/passives/editor/tests on the behavior API; `EnemyData.StartingEffects` re-authored as `StartingStatusEntry`; icon map re-keyed by id (asset YAML migrated); legacy `ApplyStatusEffect` deleted (zero asset refs confirmed).
+3. Deletion: `StatusEffectType`, `StatusBridge`, transitional wrappers all gone. `StatusRegistry` is the sole source of truth.
+
+**Behavior change to verify in play:** Exposed now doubles INCOMING pressure on its holder (per its description), not the holder's outgoing hit — the old enum code had it on the wrong side.
+
+**Unity follow-ups (user):** let Unity recompile and regenerate csproj; commit any new/changed `.meta`; re-run Crookedile → Generate → Seed Status Icon Map (adds Doubt/Jaded/etc. entries by id); spot-check status badges and tooltips in a battle.
 
 ## 2. Rebuild the tests
 
