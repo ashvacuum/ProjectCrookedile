@@ -368,7 +368,7 @@ GameObject:
   - component: {fileID: 507472322}
   - component: {fileID: 507472321}
   m_Layer: 0
-  m_Name: Tester
+  m_Name: Game Tester
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -439,8 +439,6 @@ MonoBehaviour:
   _battleInfoHoldTime: 1.5
   _battleInfoFadeTime: 0.5
   endTurnButton: {fileID: 1806335340}
-  improviseButton: {fileID: 0}
-  cardSelectionPanel: {fileID: 862259585}
   cardChoicePanel: {fileID: 2137863400}
   discardZoneButton: {fileID: 1745643991}
   exhaustZoneButton: {fileID: 32501985}
@@ -466,17 +464,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Gameplay.Battle.BattleTestStarter
   playerOrigin: 0
-  originStats: {fileID: 0}
-  enemies:
-  - {fileID: 11400000, guid: 479384f45f5279841992f7941bf13790, type: 2}
-  - {fileID: 11400000, guid: 2fa6b2b1bc5267e4f8052005db94e5a9, type: 2}
-  - {fileID: 11400000, guid: 2789037277794d042a5ec22391908f4c, type: 2}
+  originDatabase: {fileID: 0}
   battleManager: {fileID: 507472318}
   battleUI: {fileID: 507472321}
   battleSession: {fileID: 11400000, guid: a0e0214204e47474da56aa150321e5c7, type: 2}
   startOnAwake: 1
-  fallbackMaxTurns: 10
-  fallbackStartingOpinion: 50
 --- !u!224 &689597276 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7804831873926943668, guid: 1e0254102a1b98f4c8513c3a0ac2795e, type: 3}
@@ -498,17 +490,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3488465112812336583, guid: 9f78428ff802a86429623ccce460a48c, type: 3}
   m_PrefabInstance: {fileID: 8942082148147502908}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &862259585 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2021298812971758943, guid: 9f78428ff802a86429623ccce460a48c, type: 3}
-  m_PrefabInstance: {fileID: 8942082148147502908}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 123b7492a2ca2dc45a9565fd4aac25da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.CardSelectionPanel
 --- !u!1 &878670390
 GameObject:
   m_ObjectHideFlags: 0
@@ -769,8 +750,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.BattleFeedbackController
   _soundMap: {fileID: 11400000, guid: b71bc93247856d94093e57e7cc2dd2b0, type: 2}
   _battleUI: {fileID: 507472321}
+  _battleManager: {fileID: 0}
   _damageColor: {r: 0.9, g: 0.2, b: 0.2, a: 1}
   _healColor: {r: 0.2, g: 0.9, b: 0.2, a: 1}
+  _blockedColor: {r: 0.7, g: 0.7, b: 0.75, a: 1}
 --- !u!114 &1351107091
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -819,8 +802,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.BattleFeedbackController
   _soundMap: {fileID: 11400000, guid: b71bc93247856d94093e57e7cc2dd2b0, type: 2}
   _battleUI: {fileID: 507472321}
+  _battleManager: {fileID: 0}
   _damageColor: {r: 0.9, g: 0.2, b: 0.2, a: 1}
   _healColor: {r: 0.2, g: 0.9, b: 0.2, a: 1}
+  _blockedColor: {r: 0.7, g: 0.7, b: 0.75, a: 1}
 --- !u!114 &1351107094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -849,7 +834,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.CardFlyAnimator
   _rootCanvas: {fileID: 1961816019}
-  _cardHandParent: {fileID: 1436815757}
+  _discardTransform: {fileID: 0}
   _drawStaggerDelay: 0.3
   _discardDuration: 0.28
   _grantScaleInDuration: 0.15

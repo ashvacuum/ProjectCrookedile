@@ -12,7 +12,7 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class GainBufferEffect : BattleEffect
+    public class GainBufferShieldEffect : BattleEffect
     {
         [Tooltip("Base amount to gain. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]

@@ -225,10 +225,13 @@
             }
             else
             {
+                // Test-harness fallback (no ledger): nothing absorbs, so the full amount applies.
                 EventBus.Publish(
                     new DamageDealtEvent
                     {
                         Amount = amount,
+                        Absorbed = 0,
+                        Applied = amount,
                         IsToPlayer = toPlayer,
                         AttackerName = attackerName,
                         SourceEnemyIndex = sourceEnemyIndex,

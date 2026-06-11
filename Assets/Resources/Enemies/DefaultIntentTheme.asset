@@ -14,17 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Enemy.EnemyIntentTheme
   _entries:
   - Type: 0
-    Icon: {fileID: 21300000, guid: 267b9b5bd68e9c0499113ae1e25dabf4, type: 3}
-    Color: {r: 1, g: 0, b: 0, a: 1}
+    Icon: {fileID: 21300000, guid: 22ac3ad0898a5154c8f0c3ffcf6cc55b, type: 3}
+    Color: {r: 1, g: 1, b: 1, a: 1}
   - Type: 1
     Icon: {fileID: 21300000, guid: e688872e727b3f149abc6457ffc9186b, type: 3}
-    Color: {r: 0, g: 0.4500003, b: 1, a: 1}
+    Color: {r: 1, g: 1, b: 1, a: 1}
   - Type: 3
     Icon: {fileID: 21300000, guid: 8cf95a8cf259ef94fb3ac4416fa3f77f, type: 3}
     Color: {r: 1, g: 1, b: 1, a: 1}
   - Type: 4
     Icon: {fileID: 21300000, guid: d982edd833a7acc4ea645145b9b22346, type: 3}
-    Color: {r: 1, g: 0, b: 0, a: 1}
+    Color: {r: 1, g: 1, b: 1, a: 1}
   - Type: 5
     Icon: {fileID: 21300000, guid: 5562a2d2d337c09409e01049555f9bf9, type: 3}
     Color: {r: 1, g: 1, b: 1, a: 1}

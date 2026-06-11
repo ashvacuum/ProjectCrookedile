@@ -913,7 +913,7 @@ namespace Crookedile.Editor
             int total = 0;
             foreach (var effect in card.Effects)
             {
-                if (effect is GainBufferEffect shield)
+                if (effect is GainBufferShieldEffect shield)
                     total += shield.PreviewSupportAmount;
             }
             return total;

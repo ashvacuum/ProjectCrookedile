@@ -18,7 +18,8 @@ namespace Crookedile.Data
     /// Central registry of per-archetype (<see cref="OriginType"/>) configuration that is otherwise
     /// scattered across passive assets, tag conventions and code: display name, description, color,
     /// icon, unique resource, starter-deck tag, and the origin's <see cref="OriginPassive"/>.
-    /// Additive — does not replace OriginStats (AP/portrait) yet; the Content Audit validates it.
+    /// The single source of truth for per-origin battle data (AP, portrait, passive, resource);
+    /// replaced the old OriginStats asset. The Content Audit validates it.
     ///
     /// Create via: Assets → Create → Crookedile → Origin Database
     /// (or generate a seeded one: Crookedile → Generate → Origin Database).
@@ -36,7 +37,13 @@ namespace Crookedile.Data
             public string Description;
 
             public Color Color;
+
+            [Tooltip("Small UI icon (menus, labels).")]
             public Sprite Icon;
+
+            [Tooltip("Character portrait shown in the player slot during battle.")]
+            public Sprite Portrait;
+
             public ArchetypeResource Resource;
 
             [Tooltip("The origin's starter passive asset.")]
@@ -45,7 +52,7 @@ namespace Crookedile.Data
             [Tooltip("Tag used to collect this origin's starter cards (CardDatabase.GetStarterDeck).")]
             public string StarterTag;
 
-            [Tooltip("Max Action Points per turn (mirrors OriginStats).")]
+            [Tooltip("Max Action Points per turn.")]
             public int MaxActionPoints;
         }
 

@@ -49,7 +49,7 @@ namespace Crookedile.EditorTools
                 return;
             }
 
-            var bm = Object.FindObjectOfType<BattleManager>();
+            var bm = FindFirstObjectByType<BattleManager>();
             if (bm == null)
             {
                 SirenixEditorGUI.MessageBox(
@@ -93,7 +93,11 @@ namespace Crookedile.EditorTools
                 Field(
                     "Action Points",
                     $"{stats.CurrentActionPoints} / {stats.MaxActionPoints}"
-                        + (stats.ActionPointsNextTurn > 0 ? $"  (+{stats.ActionPointsNextTurn} next)" : "")
+                        + (
+                            stats.ActionPointsNextTurn > 0
+                                ? $"  (+{stats.ActionPointsNextTurn} next)"
+                                : ""
+                        )
                 );
             Field("Conversions this turn", bm.ConversionsThisTurn.ToString());
             Field("Turns elapsed", $"{bm.PlayerTurnsElapsed} / {bm.MaxTurns}");
