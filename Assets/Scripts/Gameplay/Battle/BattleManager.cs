@@ -8,6 +8,7 @@ using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 using Crookedile.Data.VFX;
 using Crookedile.Utilities;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
@@ -159,32 +160,24 @@ namespace Crookedile.Gameplay.Battle
         private void Awake()
         {
             InitializeStateMachine();
-            SubscribeToEvents();
+            // Player input (end turn, play card) arrives as direct method calls
+            // (RequestEndTurn / RequestPlayCard); VFX sequencing is a direct callback
+            // handshake (ICardPlayFeedback). The bus is notification-only here.
+            // EnemyTurncoatEvent is owned by CrowdReactions (subscribed in its constructor).
         }
 
         private void OnDestroy()
         {
-            UnsubscribeFromEvents();
             _passiveResolver?.Dispose();
             _crowd?.Dispose();
         }
 
-        private void SubscribeToEvents()
-        {
-            EventBus.Subscribe<EndTurnRequestedEvent>(OnEndTurnRequested);
-            EventBus.Subscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
-            EventBus.Subscribe<CardVFXApplyEffectsEvent>(OnCardVFXApplyEffects);
-            EventBus.Subscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
-            // EnemyTurncoatEvent is owned by CrowdReactions (subscribed in its constructor).
-        }
-
-        private void UnsubscribeFromEvents()
-        {
-            EventBus.Unsubscribe<EndTurnRequestedEvent>(OnEndTurnRequested);
-            EventBus.Unsubscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
-            EventBus.Unsubscribe<CardVFXApplyEffectsEvent>(OnCardVFXApplyEffects);
-            EventBus.Unsubscribe<CardVFXCompleteEvent>(OnCardVFXComplete);
-        }
+        /// <summary>
+        /// UI-layer VFX implementation for card plays. Registered by
+        /// <c>BattleFeedbackController.OnEnable</c>. Null = effects resolve instantly
+        /// with no animation (headless / tests / unwired scene).
+        /// </summary>
+        public ICardPlayFeedback CardPlayFeedback { get; set; }
 
         private void InitializeStateMachine()
         {
@@ -395,9 +388,13 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
-        #region Event Handlers
+        #region Player Input (direct calls from BattleUI)
 
-        private void OnEndTurnRequested(EndTurnRequestedEvent evt)
+        /// <summary>
+        /// Ends the player's turn. Called directly by the UI's End Turn button.
+        /// Ignored while a card play is still resolving or outside the player turn.
+        /// </summary>
+        public void RequestEndTurn()
         {
             if (_vfxInFlight)
                 return;
@@ -409,10 +406,14 @@ namespace Crookedile.Gameplay.Battle
             TransitionToState(BattleState.TurnEnd);
         }
 
-        private void OnPlayCardRequested(PlayCardRequestedEvent evt)
+        /// <summary>
+        /// Plays a card from the player's hand. Called directly by the UI when a card is
+        /// played. Validates turn state and rejects input while a previous play resolves.
+        /// </summary>
+        public void RequestPlayCard(CardData card, int handIndex)
         {
             GameLogger.LogInfo<BattleManager>(
-                $"PlayCardRequested received: '{evt.Card?.CardName}'  _vfxInFlight={_vfxInFlight}  IsPlayerTurn={_isPlayerTurn}  State={CurrentState}"
+                $"RequestPlayCard: '{card?.CardName}'  _vfxInFlight={_vfxInFlight}  IsPlayerTurn={_isPlayerTurn}  State={CurrentState}"
             );
             if (_vfxInFlight)
             {
@@ -428,24 +429,7 @@ namespace Crookedile.Gameplay.Battle
                 );
                 return;
             }
-            PlayCard(evt.Card, evt.HandIndex);
-        }
-
-        private void OnCardVFXApplyEffects(CardVFXApplyEffectsEvent evt)
-        {
-            GameLogger.LogInfo<BattleManager>($"VFX ApplyEffects fired for '{evt.Card?.CardName}'");
-            ApplyCardEffects(evt.Card, evt.AmountOverrides);
-        }
-
-        private void OnCardVFXComplete(CardVFXCompleteEvent evt)
-        {
-            if (_vfxInFlight)
-            {
-                GameLogger.LogInfo<BattleManager>(
-                    $"VFX complete for '{evt.Card?.CardName}' — unblocking input"
-                );
-                _vfxInFlight = false;
-            }
+            PlayCard(card, handIndex);
         }
 
         #endregion
@@ -716,22 +700,48 @@ namespace Crookedile.Gameplay.Battle
                 $"Player played: {card.CardName}  hasVFX={(card.CardVFX != null)}"
             );
 
-            if (card.CardVFX != null)
+            if (card.CardVFX != null && CardPlayFeedback != null)
             {
-                // VFX path: ask the UI layer to play the animation.
-                // It will publish CardVFXApplyEffectsEvent at the hit frame and
-                // CardVFXCompleteEvent when done; we handle both via subscriptions.
-                _vfxInFlight = true;
-                EventBus.Publish(
-                    new CardPlayVFXRequestedEvent { Card = card, AmountOverrides = amountOverrides }
-                );
+                // VFX path: await the UI layer's animation. The implementation guarantees
+                // the hit-frame callback fires and the task completes exactly once, including
+                // on failure paths, so the battle can never be left blocked.
+                ResolveCardPlayWithVFX(card, amountOverrides).Forget();
             }
             else
             {
-                // No VFX — resolve effects immediately then signal discard is ready.
+                // No VFX (or no feedback layer registered) — resolve effects immediately.
                 ApplyCardEffects(card, amountOverrides);
-                EventBus.Publish(new CardVFXCompleteEvent { Card = card });
+                CompleteCardPlay(card);
             }
+        }
+
+        private async UniTaskVoid ResolveCardPlayWithVFX(CardData card, int[] amountOverrides)
+        {
+            _vfxInFlight = true;
+            try
+            {
+                await CardPlayFeedback.PlayCardVFX(
+                    card,
+                    onApplyEffects: () => ApplyCardEffects(card, amountOverrides)
+                );
+            }
+            finally
+            {
+                // Always unblock input and publish the resolved notification, even if the
+                // feedback implementation faulted mid-animation.
+                CompleteCardPlay(card);
+            }
+        }
+
+        /// <summary>
+        /// Finalises a card play: unblocks input and publishes the
+        /// <see cref="CardPlayResolvedEvent"/> notification (BattleUI starts the discard
+        /// animation on it). Sole publisher of that event.
+        /// </summary>
+        private void CompleteCardPlay(CardData card)
+        {
+            _vfxInFlight = false;
+            EventBus.Publish(new CardPlayResolvedEvent { Card = card });
         }
 
         /// <summary>
@@ -1271,7 +1281,7 @@ namespace Crookedile.Gameplay.Battle
             }
         }
 
-        /// <summary>Player Turn State — waits for EndTurnRequestedEvent from the UI.</summary>
+        /// <summary>Player Turn State — waits for the UI to call <see cref="RequestEndTurn"/>.</summary>
         private class PlayerTurnState : BattleStateBase
         {
             public PlayerTurnState(BattleManager manager)
@@ -1285,7 +1295,7 @@ namespace Crookedile.Gameplay.Battle
 
             public override void OnUpdate()
             {
-                // Waits for player to publish EndTurnRequestedEvent via the UI
+                // Waits for the UI to call RequestEndTurn()
             }
         }
 
@@ -1301,12 +1311,12 @@ namespace Crookedile.Gameplay.Battle
 
             public override void OnEnter()
             {
-                _manager.StartCoroutine(ExecuteAfterDelay());
+                ExecuteAfterDelay(_manager.GetCancellationTokenOnDestroy()).Forget();
             }
 
-            private IEnumerator ExecuteAfterDelay()
+            private async UniTaskVoid ExecuteAfterDelay(System.Threading.CancellationToken ct)
             {
-                yield return new WaitForSeconds(_manager._opponentTurnDelay);
+                await UniTask.WaitForSeconds(_manager._opponentTurnDelay, cancellationToken: ct);
 
                 GameLogger.LogInfo<BattleManager>("Enemy turn started — all living enemies act");
 
@@ -1321,9 +1331,9 @@ namespace Crookedile.Gameplay.Battle
                     var intent = _manager._enemies[i].CurrentIntent;
                     if (intent != null && IsModifierIntent(intent.MoveType))
                     {
-                        yield return _manager.StartCoroutine(ResolveSingleEnemyAction(i));
+                        await ResolveSingleEnemyAction(i, ct);
                         if (_manager.CurrentState == BattleState.BattleEnd)
-                            yield break;
+                            return;
                     }
                 }
 
@@ -1332,9 +1342,9 @@ namespace Crookedile.Gameplay.Battle
                     var intent = _manager._enemies[i].CurrentIntent;
                     if (intent != null && !IsModifierIntent(intent.MoveType))
                     {
-                        yield return _manager.StartCoroutine(ResolveSingleEnemyAction(i));
+                        await ResolveSingleEnemyAction(i, ct);
                         if (_manager.CurrentState == BattleState.BattleEnd)
-                            yield break;
+                            return;
                     }
                 }
 
@@ -1356,11 +1366,14 @@ namespace Crookedile.Gameplay.Battle
             /// (transitioning to BattleEnd) if the player is defeated mid-action — callers should
             /// stop once <see cref="CurrentState"/> is BattleEnd.
             /// </summary>
-            private IEnumerator ResolveSingleEnemyAction(int i)
+            private async UniTask ResolveSingleEnemyAction(
+                int i,
+                System.Threading.CancellationToken ct
+            )
             {
                 var enemy = _manager._enemies[i];
                 if (enemy.IsDefeated || enemy.CurrentIntent == null)
-                    yield break;
+                    return;
 
                 // Stunned or Silenced enemies skip their entire action for this turn.
                 // (Silence is the Faith Leader's "shut them up" — also how a Hardened enemy is handled
@@ -1373,7 +1386,7 @@ namespace Crookedile.Gameplay.Battle
                     GameLogger.LogInfo<BattleManager>(
                         $"Enemy [{i}] {enemy.EnemyData.EnemyName} is silenced/stunned — skipping action"
                     );
-                    yield break;
+                    return;
                 }
 
                 // Doubt (pacify): a doubting enemy may hold back its action (soft skip, 25% per stack).
@@ -1393,7 +1406,7 @@ namespace Crookedile.Gameplay.Battle
                                 EnemyName = enemy.EnemyData.EnemyName,
                             }
                         );
-                        yield break;
+                        return;
                     }
                 }
 
@@ -1414,7 +1427,7 @@ namespace Crookedile.Gameplay.Battle
                                 EnemyName = enemy.EnemyData.EnemyName,
                             }
                         );
-                        yield break;
+                        return;
                     }
                 }
 
@@ -1422,7 +1435,7 @@ namespace Crookedile.Gameplay.Battle
                 EventBus.Publish(new EnemyActingEvent { EnemyIndex = i, Move = enemy.CurrentIntent });
 
                 // Brief pause so the player sees the signal before damage lands
-                yield return new WaitForSeconds(_manager._perEnemyAttackDelay);
+                await UniTask.WaitForSeconds(_manager._perEnemyAttackDelay, cancellationToken: ct);
 
                 GameLogger.LogInfo<BattleManager>(
                     $"Enemy [{i}] {enemy.EnemyData.EnemyName} executes: {enemy.CurrentIntent.MoveName}"
@@ -1436,13 +1449,11 @@ namespace Crookedile.Gameplay.Battle
                     enemy.EnemyData.EnemyName
                 );
                 var move = enemy.CurrentIntent;
-                yield return _manager.StartCoroutine(
-                    _manager._effectResolver.ResolveEnemyMoveEffects(move)
-                );
+                await _manager._effectResolver.ResolveEnemyMoveEffects(move, ct);
 
                 // If the player was defeated by this move, end the battle before any further actions.
                 if (_manager.CheckAndEndBattleIfOver())
-                    yield break;
+                    return;
 
                 // Handle SummonMinion moves after normal effects resolve.
                 if (move.MoveType == EnemyMoveType.SummonMinion && move.MinionToSummon != null)

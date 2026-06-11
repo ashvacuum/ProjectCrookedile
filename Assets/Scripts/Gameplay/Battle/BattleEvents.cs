@@ -109,11 +109,9 @@ using Crookedile.Data.Enemy;
 //
 #endregion
 
-//   EndTurnRequestedEvent    Publisher: BattleUI end-turn button
-//                            Subscribers: BattleManager
-//
-//   PlayCardRequestedEvent   Publisher: BattleUI card button click
-//                            Subscribers: BattleManager
+//   (Player input — end turn, play card — is a DIRECT METHOD CALL on BattleManager
+//    (RequestEndTurn / RequestPlayCard), not an event. The bus carries notifications
+//    only; commands go through references.)
 //
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -216,37 +214,17 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by <c>BattleManager</c> once a played card's VFX animation fully completes,
-    /// or immediately after effects resolve when the card has no VFX.
-    /// <c>BattleUI</c> subscribes to this to begin the card discard animation, ensuring the
-    /// sequence is always: VFX resolves → card flies to discard → new draws appear.
+    /// Notification published ONLY by <c>BattleManager</c> once a played card has fully
+    /// resolved — VFX finished (or none) and effects applied. <c>BattleUI</c> subscribes
+    /// to begin the card discard animation, ensuring the sequence is always:
+    /// VFX resolves → card flies to discard → new draws appear.
+    /// The VFX sequencing itself is a direct callback handshake via
+    /// <see cref="ICardPlayFeedback"/>, not bus events.
     /// </summary>
-    public struct CardVFXCompleteEvent : IGameEvent
+    public struct CardPlayResolvedEvent : IGameEvent
     {
-        /// <summary>The card whose VFX (or immediate resolution) just finished.</summary>
+        /// <summary>The card whose play sequence just finished.</summary>
         public CardData Card;
-    }
-
-    /// <summary>
-    /// Published by <c>BattleManager</c> when a card with a VFX asset is played.
-    /// The UI layer subscribes, spawns the VFX animation, and fires
-    /// <see cref="CardVFXApplyEffectsEvent"/> at the hit frame and
-    /// <see cref="CardVFXCompleteEvent"/> when the animation finishes.
-    /// </summary>
-    public struct CardPlayVFXRequestedEvent : IGameEvent
-    {
-        public CardData Card;
-        public int[] AmountOverrides;
-    }
-
-    /// <summary>
-    /// Published by the UI VFX layer at the animation's hit frame.
-    /// <c>BattleManager</c> subscribes and calls <c>ApplyCardEffects</c> on receipt.
-    /// </summary>
-    public struct CardVFXApplyEffectsEvent : IGameEvent
-    {
-        public CardData Card;
-        public int[] AmountOverrides;
     }
 
     /// <summary>
@@ -652,29 +630,6 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>The move this enemy is about to execute. Used by <c>BattleFeedbackController</c>
         /// to play <see cref="EnemyMoveData.MoveVFX"/> on the player slot.</summary>
         public EnemyMoveData Move;
-    }
-
-    #endregion
-
-    #region Player Input Events
-
-    /// <summary>
-    /// Published by <c>BattleUI</c> when the player clicks the End Turn button.
-    /// <c>BattleManager</c> validates and processes the turn transition on receipt.
-    /// </summary>
-    public struct EndTurnRequestedEvent : IGameEvent { }
-
-    /// <summary>
-    /// Published by <c>BattleUI</c> when the player clicks a card in their hand.
-    /// <c>BattleManager</c> validates affordability and triggers card resolution on receipt.
-    /// </summary>
-    public struct PlayCardRequestedEvent : IGameEvent
-    {
-        /// <summary>The card data the player wants to play.</summary>
-        public CardData Card;
-
-        /// <summary>Zero-based index of this card in the player's current hand (used to remove the correct copy if duplicates exist).</summary>
-        public int HandIndex;
     }
 
     #endregion

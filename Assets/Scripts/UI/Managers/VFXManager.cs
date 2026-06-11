@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using Crookedile.Core;
 using Crookedile.Data.VFX;
 using Crookedile.UI;
 using Crookedile.Utilities;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Crookedile.Managers
@@ -13,9 +13,9 @@ namespace Crookedile.Managers
     /// Centralised VFX service for UI-space visual effects. Spawns pooled instances of a
     /// single shared VFX prefab onto <see cref="_vfxCanvas"/> at the target element's canvas
     /// position, then plays the Animator state specified by <see cref="VFXEvent.AnimationStateName"/>.
-    ///      Each instance carries a <see cref="VFXAnimatedImage"/> that self-deactivates (via
-    ///      an <c>OnAnimationComplete</c> AnimationEvent on the clip's last frame), returning
-    ///      it to pool automatically.
+    ///      Each instance carries a <see cref="VFXAnimatedImage"/> whose playback-driver
+    ///      coroutine self-deactivates it at the clip's end (code-timed — no AnimationEvents
+    ///      in clips), returning it to pool automatically.
     ///
     /// Entry points:
     ///   <see cref="Play(VFXEvent, RectTransform)"/>  — UI element target (most common).
@@ -95,7 +95,7 @@ namespace Crookedile.Managers
             if (evt == null)
                 return;
             if (!string.IsNullOrEmpty(evt.AnimationStateName))
-                SpawnAnimatedImageAt(evt.AnimationStateName, target, evt.Offset);
+                SpawnAnimatedImageAt(evt.AnimationStateName, target, evt.Offset, evt.HitTimeNormalized);
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Crookedile.Managers
                 return;
             }
             if (!string.IsNullOrEmpty(evt.AnimationStateName))
-                SpawnAnimatedImageAt(evt.AnimationStateName, null, evt.Offset);
+                SpawnAnimatedImageAt(evt.AnimationStateName, null, evt.Offset, evt.HitTimeNormalized);
         }
 
         /// <summary>Plays a VFX event at an explicit world-space position.</summary>
@@ -121,7 +121,12 @@ namespace Crookedile.Managers
             if (evt == null)
                 return;
             if (!string.IsNullOrEmpty(evt.AnimationStateName))
-                SpawnAnimatedImageAtWorld(evt.AnimationStateName, worldPos, evt.Offset);
+                SpawnAnimatedImageAtWorld(
+                    evt.AnimationStateName,
+                    worldPos,
+                    evt.Offset,
+                    evt.HitTimeNormalized
+                );
         }
 
         /// <summary>
@@ -135,7 +140,12 @@ namespace Crookedile.Managers
                 return null;
             if (string.IsNullOrEmpty(evt.AnimationStateName))
                 return null;
-            return SpawnAnimatedImageAt(evt.AnimationStateName, target, evt.Offset);
+            return SpawnAnimatedImageAt(
+                evt.AnimationStateName,
+                target,
+                evt.Offset,
+                evt.HitTimeNormalized
+            );
         }
 
         public VFXAnimatedImage PlayAndSetInstance(
@@ -148,7 +158,13 @@ namespace Crookedile.Managers
                 return null;
             if (string.IsNullOrEmpty(evt.AnimationStateName))
                 return null;
-            return SpawnAnimatedImageAt(evt.AnimationStateName, target, evt.Offset, context);
+            return SpawnAnimatedImageAt(
+                evt.AnimationStateName,
+                target,
+                evt.Offset,
+                evt.HitTimeNormalized,
+                context
+            );
         }
 
         #region Internal — Animated Image Spawn
@@ -162,6 +178,7 @@ namespace Crookedile.Managers
             string stateName,
             RectTransform uiTarget,
             Vector2 pixelOffset,
+            float hitTimeNormalized,
             BattleVFXContext context = null
         )
         {
@@ -183,7 +200,7 @@ namespace Crookedile.Managers
             instance.transform.SetAsLastSibling();
             instance.transform.localPosition = Vector3.zero;
 
-            return ActivateInstance(instance, stateName, ctx: context);
+            return ActivateInstance(instance, stateName, hitTimeNormalized, ctx: context);
         }
 
         /// <summary>
@@ -193,7 +210,8 @@ namespace Crookedile.Managers
         private VFXAnimatedImage SpawnAnimatedImageAtWorld(
             string stateName,
             Vector3 worldPos,
-            Vector2 pixelOffset
+            Vector2 pixelOffset,
+            float hitTimeNormalized
         )
         {
             if (_vfxCanvas == null)
@@ -239,7 +257,7 @@ namespace Crookedile.Managers
                 rt.anchoredPosition = Vector2.zero;
             }
 
-            return ActivateInstance(instance, stateName, pivot);
+            return ActivateInstance(instance, stateName, hitTimeNormalized, pivot);
         }
 
         /// <summary>
@@ -251,6 +269,7 @@ namespace Crookedile.Managers
         private VFXAnimatedImage ActivateInstance(
             GameObject instance,
             string stateName,
+            float hitTimeNormalized,
             GameObject pivot = null,
             BattleVFXContext ctx = null
         )
@@ -286,13 +305,13 @@ namespace Crookedile.Managers
             instance.SetActive(true);
 
             // Play the specific animation state from time 0 (after SetActive so the Animator is awake).
-            controller?.PlayAnimation(stateName);
+            controller?.PlayAnimation(stateName, hitTimeNormalized);
 
-            // Fallback pool-return: if no VFXAnimatedImage, use a timed coroutine to return the instance.
+            // Fallback pool-return: if no VFXAnimatedImage, use a timed task to return the instance.
             if (controller == null)
             {
                 float duration = GetStateDuration(instance.GetComponent<Animator>(), stateName);
-                StartCoroutine(ReturnAfterDelay(instance, duration, pivot));
+                ReturnAfterDelay(instance, duration, pivot).Forget();
             }
 
             return controller;
@@ -324,12 +343,12 @@ namespace Crookedile.Managers
         {
             if (callback == null)
                 return;
-            StartCoroutine(DeferOneFrame(callback));
+            DeferOneFrame(callback).Forget();
         }
 
-        private IEnumerator DeferOneFrame(System.Action callback)
+        private async UniTaskVoid DeferOneFrame(System.Action callback)
         {
-            yield return null;
+            await UniTask.NextFrame(this.GetCancellationTokenOnDestroy());
             callback?.Invoke();
         }
 
@@ -345,14 +364,17 @@ namespace Crookedile.Managers
             _pool.Enqueue(instance);
         }
 
-        private IEnumerator ReturnAfterDelay(
+        private async UniTaskVoid ReturnAfterDelay(
             GameObject instance,
             float delay,
             GameObject pivot = null
         )
         {
             if (delay > 0f)
-                yield return new WaitForSeconds(delay);
+                await UniTask.WaitForSeconds(
+                    delay,
+                    cancellationToken: this.GetCancellationTokenOnDestroy()
+                );
             if (pivot != null)
                 Destroy(pivot);
             ReturnToPool(instance);
@@ -379,7 +401,8 @@ namespace Crookedile.Managers
             }
             return Instantiate(_vfxPrefab);
         }
+
+        #endregion
+        #endregion
     }
 }
-        #endregion
-        #endregion

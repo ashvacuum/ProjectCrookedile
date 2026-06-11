@@ -2,6 +2,7 @@
     "name": "Crookedile.Utilities",
     "rootNamespace": "Crookedile.Utilities",
     "references": [
+        "UniTask",
         "Crookedile.Core"
     ],
     "includePlatforms": [],

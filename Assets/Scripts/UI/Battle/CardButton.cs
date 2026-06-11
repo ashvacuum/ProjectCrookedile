@@ -231,12 +231,44 @@ namespace Crookedile.UI.Battle
 
         #endregion
 
+        // Cached parent lookups — hover enter/exit is the hottest input path, so avoid
+        // walking the hierarchy on every pointer event. Invalidated on re-parenting
+        // (pool rent/return moves cards between containers).
+        private Canvas _parentCanvasCache;
+        private CardHandLayout _handLayoutCache;
+
+        private Canvas ParentCanvas
+        {
+            get
+            {
+                if (_parentCanvasCache == null)
+                    _parentCanvasCache = GetComponentInParent<Canvas>();
+                return _parentCanvasCache;
+            }
+        }
+
+        private CardHandLayout HandLayout
+        {
+            get
+            {
+                if (_handLayoutCache == null)
+                    _handLayoutCache = GetComponentInParent<CardHandLayout>();
+                return _handLayoutCache;
+            }
+        }
+
         #region Unity Lifecycle
         private void Awake()
         {
             baseScale = Vector3.one;
             basePosition = transform.localPosition;
             baseRotation = transform.localRotation;
+        }
+
+        private void OnTransformParentChanged()
+        {
+            _parentCanvasCache = null;
+            _handLayoutCache = null;
         }
 
         #endregion
@@ -381,7 +413,7 @@ namespace Crookedile.UI.Battle
             transform.SetAsLastSibling();
 
             hoverEnterFeedback?.PlayFeedbacks();
-            GetComponentInParent<CardHandLayout>()?.SetHoverSpread(true, this);
+            HandLayout?.SetHoverSpread(true, this);
         }
 
         public void OnPointerExit(PointerEventData eventData)
@@ -399,7 +431,7 @@ namespace Crookedile.UI.Battle
             transform.SetSiblingIndex(baseSiblingIndex);
 
             hoverExitFeedback?.PlayFeedbacks();
-            GetComponentInParent<CardHandLayout>()?.SetHoverSpread(false);
+            HandLayout?.SetHoverSpread(false);
         }
 
         /// <summary>
@@ -410,7 +442,7 @@ namespace Crookedile.UI.Battle
         /// </summary>
         private float ComputeHoverY()
         {
-            Canvas canvas = GetComponentInParent<Canvas>();
+            Canvas canvas = ParentCanvas;
             if (canvas == null)
                 return basePosition.y;
 
@@ -437,7 +469,15 @@ namespace Crookedile.UI.Battle
         public void OnBeginDrag(PointerEventData eventData)
         {
             if (!isPlayable)
+            {
+                // Visible "nope" so a rejected drag reads as unplayable, not unresponsive.
+                transform.DOKill();
+                transform.localRotation = baseRotation;
+                transform
+                    .DOPunchRotation(new Vector3(0f, 0f, 6f), 0.3f, vibrato: 8, elasticity: 1f)
+                    .SetLink(gameObject);
                 return;
+            }
 
             _isDragging = true;
             _isTargeting = false;
@@ -831,6 +871,7 @@ namespace Crookedile.UI.Battle
 
             onClickCallback = null;
         }
+
+        #endregion
     }
 }
-        #endregion
