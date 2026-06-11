@@ -2,6 +2,7 @@
     "name": "Crookedile.Runtime",
     "rootNamespace": "Crookedile.Gameplay",
     "references": [
+        "UniTask",
         "Crookedile.Core",
         "Crookedile.Utilities"
     ],
