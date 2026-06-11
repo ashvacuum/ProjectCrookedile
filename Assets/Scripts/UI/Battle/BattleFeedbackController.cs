@@ -18,7 +18,7 @@ namespace Crookedile.UI.Battle
     /// All entries in the sound map are optional — a missing entry or null AudioEvent/VFXEvent
     /// is silently ignored, so the game runs without sound until assets are assigned.
     /// </summary>
-    public class BattleFeedbackController : MonoBehaviour
+    public class BattleFeedbackController : MonoBehaviour, ICardPlayFeedback
     {
         [Header("Data")]
         [Tooltip(
@@ -32,6 +32,13 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private BattleUI _battleUI;
 
+        [Tooltip(
+            "BattleManager to register card-play VFX callbacks with. "
+                + "Found automatically if left unassigned."
+        )]
+        [SerializeField]
+        private BattleManager _battleManager;
+
         [Header("Floating Numbers")]
         [Tooltip("Color of damage number text spawned by FloatingTextManager.")]
         [SerializeField]
@@ -42,50 +49,57 @@ namespace Crookedile.UI.Battle
         private Color _healColor = new Color(0.2f, 0.9f, 0.2f);
 
         #region Lifecycle
+        /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
+        private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
+
+        /// <summary>
+        /// Subscribes <paramref name="handler"/> and records the matching unsubscribe so
+        /// <see cref="OnDisable"/> can't drift out of sync with the subscribe list.
+        /// </summary>
+        private void Sub<T>(System.Action<T> handler)
+            where T : IGameEvent
+        {
+            EventBus.Subscribe(handler);
+            _eventUnsubscribers.Add(() => EventBus.Unsubscribe(handler));
+        }
+
         private void OnEnable()
         {
-            EventBus.Subscribe<BattleStartedEvent>(OnBattleStarted);
-            EventBus.Subscribe<BattleEndedEvent>(OnBattleEnded);
-            EventBus.Subscribe<TurnStartedEvent>(OnTurnStarted);
-            EventBus.Subscribe<TurnEndedEvent>(OnTurnEnded);
-            EventBus.Subscribe<CardPlayedEvent>(OnCardPlayed);
-            EventBus.Subscribe<CardDrawnEvent>(OnCardDrawn);
-            EventBus.Subscribe<CardDiscardedEvent>(OnCardDiscarded);
-            EventBus.Subscribe<CardExhaustedEvent>(OnCardExhausted);
-            EventBus.Subscribe<DamageDealtEvent>(OnDamageDealt);
-            EventBus.Subscribe<HealingAppliedEvent>(OnHealApplied);
-            EventBus.Subscribe<StatusEffectAppliedEvent>(OnStatusApplied);
-            EventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
-            EventBus.Subscribe<EnemyActingEvent>(OnEnemyActing);
-            EventBus.Subscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
-            EventBus.Subscribe<SupportChangedEvent>(OnSupportChanged);
-            EventBus.Subscribe<DenialChangedEvent>(OnDenialChanged);
-            EventBus.Subscribe<HostilityChangedEvent>(OnHostilityChanged);
-            EventBus.Subscribe<ActionPointsChangedEvent>(OnAPChanged);
-            EventBus.Subscribe<CardPlayVFXRequestedEvent>(OnCardPlayVFXRequested);
+            // Register as the card-play VFX implementation — a direct callback handshake,
+            // not bus events (game flow must never block on a missed message).
+            if (_battleManager == null)
+                _battleManager = FindObjectOfType<BattleManager>();
+            if (_battleManager != null)
+                _battleManager.CardPlayFeedback = this;
+
+            Sub<BattleStartedEvent>(OnBattleStarted);
+            Sub<BattleEndedEvent>(OnBattleEnded);
+            Sub<TurnStartedEvent>(OnTurnStarted);
+            Sub<TurnEndedEvent>(OnTurnEnded);
+            Sub<CardPlayedEvent>(OnCardPlayed);
+            Sub<CardDrawnEvent>(OnCardDrawn);
+            Sub<CardDiscardedEvent>(OnCardDiscarded);
+            Sub<CardExhaustedEvent>(OnCardExhausted);
+            Sub<DamageDealtEvent>(OnDamageDealt);
+            Sub<HealingAppliedEvent>(OnHealApplied);
+            Sub<StatusEffectAppliedEvent>(OnStatusApplied);
+            Sub<EnemyDefeatedEvent>(OnEnemyDefeated);
+            Sub<EnemyActingEvent>(OnEnemyActing);
+            Sub<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
+            Sub<SupportChangedEvent>(OnSupportChanged);
+            Sub<DenialChangedEvent>(OnDenialChanged);
+            Sub<HostilityChangedEvent>(OnHostilityChanged);
+            Sub<ActionPointsChangedEvent>(OnAPChanged);
         }
 
         private void OnDisable()
         {
-            EventBus.Unsubscribe<BattleStartedEvent>(OnBattleStarted);
-            EventBus.Unsubscribe<BattleEndedEvent>(OnBattleEnded);
-            EventBus.Unsubscribe<TurnStartedEvent>(OnTurnStarted);
-            EventBus.Unsubscribe<TurnEndedEvent>(OnTurnEnded);
-            EventBus.Unsubscribe<CardPlayedEvent>(OnCardPlayed);
-            EventBus.Unsubscribe<CardDrawnEvent>(OnCardDrawn);
-            EventBus.Unsubscribe<CardDiscardedEvent>(OnCardDiscarded);
-            EventBus.Unsubscribe<CardExhaustedEvent>(OnCardExhausted);
-            EventBus.Unsubscribe<DamageDealtEvent>(OnDamageDealt);
-            EventBus.Unsubscribe<HealingAppliedEvent>(OnHealApplied);
-            EventBus.Unsubscribe<StatusEffectAppliedEvent>(OnStatusApplied);
-            EventBus.Unsubscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
-            EventBus.Unsubscribe<EnemyActingEvent>(OnEnemyActing);
-            EventBus.Unsubscribe<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
-            EventBus.Unsubscribe<SupportChangedEvent>(OnSupportChanged);
-            EventBus.Unsubscribe<DenialChangedEvent>(OnDenialChanged);
-            EventBus.Unsubscribe<HostilityChangedEvent>(OnHostilityChanged);
-            EventBus.Unsubscribe<ActionPointsChangedEvent>(OnAPChanged);
-            EventBus.Unsubscribe<CardPlayVFXRequestedEvent>(OnCardPlayVFXRequested);
+            if (_battleManager != null && ReferenceEquals(_battleManager.CardPlayFeedback, this))
+                _battleManager.CardPlayFeedback = null;
+
+            foreach (var unsub in _eventUnsubscribers)
+                unsub();
+            _eventUnsubscribers.Clear();
         }
 
         #endregion
@@ -173,41 +187,39 @@ namespace Crookedile.UI.Battle
                 VFXManager.Instance?.Play(evt.Move.MoveVFX, _battleUI?.PlayerSlotTransform);
         }
 
-        private void OnCardPlayVFXRequested(CardPlayVFXRequestedEvent evt)
+        /// <summary>
+        /// <see cref="ICardPlayFeedback"/> implementation — called directly by
+        /// <c>BattleManager.PlayCard</c>. Spawns the card's VFX, fires the hit-frame
+        /// callback through the animation, and completes the returned task when the
+        /// animation ends. If the VFX fails to spawn, the callback fires and the task
+        /// completes immediately so the battle is never left blocked.
+        /// </summary>
+        public Cysharp.Threading.Tasks.UniTask PlayCardVFX(
+            Crookedile.Data.Cards.CardData card,
+            System.Action onApplyEffects
+        )
         {
             // Resolve VFX spawn target: prefer the last-targeted enemy slot, fall back to the card's origin rect.
             var vfxTarget = EnemySlotUI.LastTargetedRect ?? CardButton.LastPlayedRect;
 
+            var completion = new Cysharp.Threading.Tasks.UniTaskCompletionSource();
             var vfx = VFXManager.Instance?.PlayAndSetInstance(
-                evt.Card.CardVFX,
+                card.CardVFX,
                 vfxTarget,
                 new BattleVFXContext
                 {
-                    OnApplyEffects = () =>
-                        EventBus.Publish(
-                            new CardVFXApplyEffectsEvent
-                            {
-                                Card = evt.Card,
-                                AmountOverrides = evt.AmountOverrides,
-                            }
-                        ),
-                    OnComplete = () =>
-                        EventBus.Publish(new CardVFXCompleteEvent { Card = evt.Card }),
+                    OnApplyEffects = onApplyEffects,
+                    OnComplete = () => completion.TrySetResult(),
                 }
             );
 
             if (vfx == null)
             {
-                // VFX failed to spawn — fire both events immediately so BattleManager isn't left blocked.
-                EventBus.Publish(
-                    new CardVFXApplyEffectsEvent
-                    {
-                        Card = evt.Card,
-                        AmountOverrides = evt.AmountOverrides,
-                    }
-                );
-                EventBus.Publish(new CardVFXCompleteEvent { Card = evt.Card });
+                onApplyEffects?.Invoke();
+                completion.TrySetResult();
             }
+
+            return completion.Task;
         }
 
         private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt) =>
@@ -277,6 +289,7 @@ namespace Crookedile.UI.Battle
                     VFXManager.Instance?.Play(entry.Visual, (RectTransform)null);
             }
         }
+
+        #endregion
     }
 }
-        #endregion

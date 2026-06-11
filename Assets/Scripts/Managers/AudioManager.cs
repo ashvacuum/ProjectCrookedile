@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Threading;
 using Crookedile.Core;
 using Crookedile.Data.Audio;
 using Crookedile.Utilities;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Crookedile.Managers
@@ -79,18 +81,7 @@ namespace Crookedile.Managers
 
             if (fadeDuration > 0f)
             {
-                StartCoroutine(
-                    FadeMusicOut(
-                        fadeDuration / 2f,
-                        () =>
-                        {
-                            _musicSource.clip = clip;
-                            _musicSource.loop = loop;
-                            _musicSource.Play();
-                            StartCoroutine(FadeMusicIn(fadeDuration / 2f));
-                        }
-                    )
-                );
+                CrossfadeTo(clip, loop, fadeDuration).Forget();
             }
             else
             {
@@ -102,50 +93,66 @@ namespace Crookedile.Managers
             GameLogger.LogInfo("Audio", $"Playing music: {clip.name}");
         }
 
-        private System.Collections.IEnumerator FadeMusicIn(float duration)
+        /// <summary>
+        /// Cancellation source for the active music fade. Each new fade cancels the previous
+        /// one so overlapping PlayMusic/StopMusic calls can't fight over the volume.
+        /// </summary>
+        private CancellationTokenSource _musicFadeCts;
+
+        private CancellationToken NextMusicFadeToken()
         {
-            float elapsed = 0f;
-            float targetVolume = _musicVolume * _masterVolume;
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.deltaTime;
-                _musicSource.volume = Mathf.Lerp(0f, targetVolume, elapsed / duration);
-                yield return null;
-            }
-
-            _musicSource.volume = targetVolume;
+            _musicFadeCts?.Cancel();
+            _musicFadeCts?.Dispose();
+            _musicFadeCts = CancellationTokenSource.CreateLinkedTokenSource(
+                this.GetCancellationTokenOnDestroy()
+            );
+            return _musicFadeCts.Token;
         }
 
-        private System.Collections.IEnumerator FadeMusicOut(
+        private async UniTaskVoid CrossfadeTo(AudioClip clip, bool loop, float fadeDuration)
+        {
+            var ct = NextMusicFadeToken();
+            await FadeMusicVolume(_musicSource.volume, 0f, fadeDuration / 2f, ct);
+            _musicSource.clip = clip;
+            _musicSource.loop = loop;
+            _musicSource.Play();
+            await FadeMusicVolume(0f, _musicVolume * _masterVolume, fadeDuration / 2f, ct);
+        }
+
+        private async UniTask FadeMusicVolume(
+            float from,
+            float to,
             float duration,
-            System.Action onComplete = null
+            CancellationToken ct
         )
         {
             float elapsed = 0f;
-            float startVolume = _musicSource.volume;
-
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
-                _musicSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
-                yield return null;
+                _musicSource.volume = Mathf.Lerp(from, to, elapsed / duration);
+                await UniTask.Yield(ct);
             }
-
-            _musicSource.volume = 0f;
-            onComplete?.Invoke();
+            _musicSource.volume = to;
         }
 
         public void StopMusic(float fadeDuration = 0f)
         {
             if (fadeDuration > 0f)
             {
-                StartCoroutine(FadeMusicOut(fadeDuration, () => _musicSource.Stop()));
+                FadeOutAndStop(fadeDuration).Forget();
             }
             else
             {
                 _musicSource.Stop();
             }
+        }
+
+        private async UniTaskVoid FadeOutAndStop(float fadeDuration)
+        {
+            var ct = NextMusicFadeToken();
+            await FadeMusicVolume(_musicSource.volume, 0f, fadeDuration, ct);
+            _musicSource.Stop();
         }
 
         public void PlaySfx(AudioClip clip, float volumeScale = 1f)

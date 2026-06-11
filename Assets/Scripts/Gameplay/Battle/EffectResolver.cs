@@ -1,9 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Crookedile.Core;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 using Crookedile.Utilities;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
@@ -141,10 +142,10 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Resolves an enemy move's <see cref="BattleEffect"/> list with a delay between effects.
         /// </summary>
-        public IEnumerator ResolveEnemyMoveEffects(EnemyMoveData move)
+        public async UniTask ResolveEnemyMoveEffects(EnemyMoveData move, CancellationToken ct)
         {
             if (move == null)
-                yield break;
+                return;
 
             GameLogger.LogInfo<EffectResolver>($"Resolving enemy move: {move.MoveName}");
 
@@ -154,7 +155,7 @@ namespace Crookedile.Gameplay.Battle
             {
                 effects[i]?.Execute(execCtx);
                 if (i < effects.Count - 1)
-                    yield return new WaitForSeconds(EffectStepDelay);
+                    await UniTask.WaitForSeconds(EffectStepDelay, cancellationToken: ct);
             }
         }
     }

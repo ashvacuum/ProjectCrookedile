@@ -1,6 +1,6 @@
 using System;
-using System.Collections;
 using Crookedile.Core;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -25,7 +25,7 @@ namespace Crookedile.Utilities
 
             if (async)
             {
-                StartCoroutine(LoadSceneAsync(sceneName));
+                LoadSceneTask(SceneManager.LoadSceneAsync(sceneName), sceneName).Forget();
             }
             else
             {
@@ -43,7 +43,8 @@ namespace Crookedile.Utilities
 
             if (async)
             {
-                StartCoroutine(LoadSceneAsync(sceneIndex));
+                string sceneName = SceneManager.GetSceneByBuildIndex(sceneIndex).name;
+                LoadSceneTask(SceneManager.LoadSceneAsync(sceneIndex), sceneName).Forget();
             }
             else
             {
@@ -57,12 +58,15 @@ namespace Crookedile.Utilities
             LoadScene(currentScene.name);
         }
 
-        private IEnumerator LoadSceneAsync(string sceneName)
+        /// <summary>
+        /// Drives an in-flight scene load: reports progress, releases activation at 90%,
+        /// and fires the completion event. Shared by the name- and index-based overloads.
+        /// </summary>
+        private async UniTaskVoid LoadSceneTask(AsyncOperation operation, string sceneName)
         {
             _isLoading = true;
             OnSceneLoadStarted?.Invoke(sceneName);
 
-            AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
             operation.allowSceneActivation = false;
 
             while (!operation.isDone)
@@ -75,34 +79,7 @@ namespace Crookedile.Utilities
                     operation.allowSceneActivation = true;
                 }
 
-                yield return null;
-            }
-
-            _isLoading = false;
-            OnSceneLoadCompleted?.Invoke(sceneName);
-            GameLogger.LogInfo("Core", $"Scene loaded: {sceneName}");
-        }
-
-        private IEnumerator LoadSceneAsync(int sceneIndex)
-        {
-            _isLoading = true;
-            string sceneName = SceneManager.GetSceneByBuildIndex(sceneIndex).name;
-            OnSceneLoadStarted?.Invoke(sceneName);
-
-            AsyncOperation operation = SceneManager.LoadSceneAsync(sceneIndex);
-            operation.allowSceneActivation = false;
-
-            while (!operation.isDone)
-            {
-                float progress = Mathf.Clamp01(operation.progress / 0.9f);
-                OnSceneLoadProgress?.Invoke(sceneName, progress);
-
-                if (operation.progress >= 0.9f)
-                {
-                    operation.allowSceneActivation = true;
-                }
-
-                yield return null;
+                await UniTask.Yield();
             }
 
             _isLoading = false;

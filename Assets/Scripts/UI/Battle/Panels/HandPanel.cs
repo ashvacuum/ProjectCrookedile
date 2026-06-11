@@ -241,6 +241,39 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
+        /// Flies every card in hand to the discard pile, returning each button to the pool
+        /// as it lands. The active list is cleared immediately so a subsequent hand rebuild
+        /// can't double-manage the departing buttons. Falls back to an instant
+        /// <see cref="ClearHand"/> when no <see cref="CardFlyAnimator"/> is present.
+        /// </summary>
+        public void DiscardHandAnimated()
+        {
+            if (CardFlyAnimator.Instance == null)
+            {
+                ClearHand();
+                return;
+            }
+
+            foreach (var btn in _activeButtons)
+            {
+                if (btn == null)
+                    continue;
+                var captured = btn;
+                CardFlyAnimator.Instance.AnimateDiscardOut(
+                    captured,
+                    () =>
+                    {
+                        if (BattlePoolManager.Instance != null)
+                            BattlePoolManager.Instance.ReturnCard(captured);
+                        else
+                            Destroy(captured.gameObject);
+                    }
+                );
+            }
+            _activeButtons.Clear();
+        }
+
+        /// <summary>
         /// Returns all active card buttons to the shared pool and clears the list.
         /// </summary>
         public void ClearHand()
@@ -297,6 +330,7 @@ namespace Crookedile.UI.Battle
                 return;
             CardFlyAnimator.Instance?.AnimateDrawIn(buttons, cardButtonContainer);
         }
+
+        #endregion
     }
 }
-        #endregion

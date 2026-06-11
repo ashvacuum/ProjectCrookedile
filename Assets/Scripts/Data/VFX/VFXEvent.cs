@@ -27,6 +27,15 @@ namespace Crookedile.Data.VFX
         [SerializeField]
         private Vector2 _offset = Vector2.zero;
 
+        [Tooltip(
+            "When card effects land, as a fraction of the clip length (0 = first frame, "
+                + "1 = last frame). Drives the code-timed hit moment — no AnimationEvent "
+                + "needs to be keyed in the clip."
+        )]
+        [Range(0f, 1f)]
+        [SerializeField]
+        private float _hitTimeNormalized = 0.5f;
+
         #region Properties
         /// <summary>
         /// The exact Animator state name string derived from <see cref="_animationState"/>.
@@ -36,6 +45,9 @@ namespace Crookedile.Data.VFX
 
         /// <summary>Canvas-space pixel offset applied when positioning the animated image at the target.</summary>
         public Vector2 Offset => _offset;
+
+        /// <summary>Normalized (0–1) point in the clip at which effect callbacks fire.</summary>
+        public float HitTimeNormalized => _hitTimeNormalized;
 
         #endregion
     }
