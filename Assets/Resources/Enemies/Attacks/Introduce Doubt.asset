@@ -22,7 +22,7 @@ MonoBehaviour:
   _minionCount: 1
   _condition: 0
   _conditionTurn: 1
-  _stanceRequirement: 7
+  _stanceRequirement: 3
   references:
     version: 2
     RefIds:

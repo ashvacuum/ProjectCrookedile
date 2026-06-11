@@ -135,6 +135,49 @@
         protected static string DescribeAmount(int fixedAmount, EffectContextValue source) =>
             source == EffectContextValue.FixedAmount ? fixedAmount.ToString() : source.ToString();
 
+        /// <summary>
+        /// Resolves a scaled effect amount:
+        ///   base (fixed or context-sourced; Confused override wins)
+        ///   × per-X context value (e.g. HostileEnemyCount = "per hostile enemy")
+        ///   × flat multiplier.
+        /// Sentinels for backward compatibility with assets authored before scaling existed:
+        /// a per-X of None or FixedAmount means "no scaling" (missing enum fields deserialize
+        /// to FixedAmount), and a multiplier ≤ 0 is treated as 1 (missing floats deserialize to 0).
+        /// </summary>
+        protected static int ResolveScaledAmount(
+            EffectExecutionContext ctx,
+            int? amountOverride,
+            int fixedAmount,
+            EffectContextValue source,
+            EffectContextValue perXSource,
+            float multiplier
+        )
+        {
+            int baseAmount = ResolveAmount(ctx, amountOverride, fixedAmount, source);
+            int scale = IsScaling(perXSource) ? ctx.GetValue(perXSource) : 1;
+            float mult = multiplier <= 0f ? 1f : multiplier;
+            return Mathf.RoundToInt(baseAmount * scale * mult);
+        }
+
+        /// <summary>Human-readable scaled amount, e.g. "5 per HostileEnemyCount ×2".</summary>
+        protected static string DescribeScaledAmount(
+            int fixedAmount,
+            EffectContextValue source,
+            EffectContextValue perXSource,
+            float multiplier
+        )
+        {
+            string text = DescribeAmount(fixedAmount, source);
+            if (IsScaling(perXSource))
+                text = $"{text} per {perXSource}";
+            if (multiplier > 0f && !Mathf.Approximately(multiplier, 1f))
+                text = $"{text} ×{multiplier:0.##}";
+            return text;
+        }
+
+        private static bool IsScaling(EffectContextValue perXSource) =>
+            perXSource != EffectContextValue.None && perXSource != EffectContextValue.FixedAmount;
+
         #endregion
 
         #region Shared pressure helpers

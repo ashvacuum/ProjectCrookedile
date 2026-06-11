@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
   _id: 7dbe79d6-764d-4119-9fdb-ce6f7a20d356
   _cardName: Absolution
-  _cardType: 2
+  _cardType: 0
   _rarity: 2
   _artwork: {fileID: 21300000, guid: 7e284d257664b0b4db17d0d913a398e2, type: 3}
   _description: Sacrifice everything. Shed your hand for an explosion of conviction.
@@ -30,7 +30,6 @@ MonoBehaviour:
   _effects:
   - rid: 4823698419005784179
   _passives: []
-  _isPower: 0
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []

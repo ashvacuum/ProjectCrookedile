@@ -30,6 +30,6 @@ MonoBehaviour:
       type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 1
+        _amount: 3
         _amountSource: 0
         _target: 1

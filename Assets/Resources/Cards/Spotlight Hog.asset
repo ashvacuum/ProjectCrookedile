@@ -116,7 +116,7 @@ MonoBehaviour:
         _amount: 6
         _amountSource: 0
     - rid: 4738608336531357816
-      type: {class: GainBufferEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 3

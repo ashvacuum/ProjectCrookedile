@@ -38,7 +38,16 @@ namespace Crookedile.Gameplay.Battle
         private bool _isPlayer; // True for the player's deck; false for enemies
 
         // Cards retained at end of turn (not discarded; cleared after each EndTurn).
-        private readonly HashSet<CardData> _retainedCards = new HashSet<CardData>();
+        // Retain marks are COUNTED per CardData, not set-membership: duplicate copies of one
+        // card asset share the same CardData reference, so a set would retain every copy when
+        // one was marked. A count of N protects exactly N copies at end-of-turn discard.
+        private readonly Dictionary<CardData, int> _retainedCards = new Dictionary<CardData, int>();
+
+        /// <summary>Retain counts for the REST OF THE BATTLE — not cleared at end of turn,
+        /// only on deck re-initialization. A copy consumes its mark when played or force-discarded.
+        /// Granted via RetainCard(untilEndOfBattle: true).</summary>
+        private readonly Dictionary<CardData, int> _battleRetainedCards =
+            new Dictionary<CardData, int>();
 
         // Per-card AP cost reductions applied this battle (individual card effects).
         // int.MaxValue signals "free" (0 AP regardless of base cost).
@@ -159,6 +168,8 @@ namespace Crookedile.Gameplay.Battle
             _hand.Clear();
             _discard.Clear();
             _exhaust.Clear();
+            _retainedCards.Clear();
+            _battleRetainedCards.Clear();
 
             _deck.AddRange(cards);
             Shuffle();
@@ -277,6 +288,7 @@ namespace Crookedile.Gameplay.Battle
             CardData card = _hand[index];
             _hand.RemoveAt(index);
             _discard.Add(card);
+            ConsumeRetainMark(card); // a retained copy leaving the hand uses up its mark
 
             GameLogger.LogInfo<DeckManager>($"{_ownerName} played card: {card.CardName}");
             return true;
@@ -302,6 +314,7 @@ namespace Crookedile.Gameplay.Battle
 
             _hand.RemoveAt(idx);
             _discard.Add(card);
+            ConsumeRetainMark(card); // forced discard consumes the copy's retain mark too
 
             EventBus.Publish(new CardDiscardedEvent { Card = card, IsPlayer = _isPlayer });
             GameLogger.LogInfo<DeckManager>($"{_ownerName} discarded card: {card.CardName}");
@@ -316,17 +329,23 @@ namespace Crookedile.Gameplay.Battle
         public List<CardData> DiscardHand()
         {
             var discarded = new List<CardData>();
+
+            // Local allowance copies so each retain mark protects exactly one copy this pass.
+            // Battle-long marks are consumed locally only — the master counts persist.
+            var turnLeft = new Dictionary<CardData, int>(_retainedCards);
+            var battleLeft = new Dictionary<CardData, int>(_battleRetainedCards);
+
             for (int i = _hand.Count - 1; i >= 0; i--)
             {
                 CardData card = _hand[i];
-                if (_retainedCards.Contains(card))
+                if (card.InnateRetain || TryConsume(turnLeft, card) || TryConsume(battleLeft, card))
                     continue; // skip — stays in hand
                 _hand.RemoveAt(i);
                 _discard.Add(card);
                 discarded.Add(card);
                 EventBus.Publish(new CardDiscardedEvent { Card = card, IsPlayer = _isPlayer });
             }
-            _retainedCards.Clear(); // retain only lasts one turn
+            _retainedCards.Clear(); // one-turn retains expire; battle-long retains persist
 
             GameLogger.LogInfo<DeckManager>(
                 $"{_ownerName} discarded {discarded.Count} card(s). "
@@ -483,10 +502,12 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Marks a card currently in hand as retained.
-        /// Retained cards are not discarded at end of turn; the flag clears after EndTurn.
+        /// Marks a card currently in hand as retained — it is not discarded at end of turn.
+        /// Default duration is one turn (flag clears after EndTurn); pass
+        /// <paramref name="untilEndOfBattle"/> = true for a retain that persists every turn
+        /// until the card is played or the battle ends.
         /// </summary>
-        public bool RetainCard(CardData card)
+        public bool RetainCard(CardData card, bool untilEndOfBattle = false)
         {
             if (!_hand.Contains(card))
             {
@@ -495,10 +516,55 @@ namespace Crookedile.Gameplay.Battle
                 );
                 return false;
             }
-            _retainedCards.Add(card);
-            GameLogger.LogInfo<DeckManager>($"{_ownerName}: {card.CardName} marked as retained");
+            var marks = untilEndOfBattle ? _battleRetainedCards : _retainedCards;
+            marks.TryGetValue(card, out int current);
+
+            // Cap marks at the number of copies actually in hand — retaining the same copy
+            // twice shouldn't bank a phantom mark for a copy drawn later.
+            int copiesInHand = 0;
+            foreach (var c in _hand)
+                if (c == card)
+                    copiesInHand++;
+            if (current >= copiesInHand)
+            {
+                GameLogger.LogInfo<DeckManager>(
+                    $"{_ownerName}: all copies of {card.CardName} already retained"
+                );
+                return false;
+            }
+
+            marks[card] = current + 1;
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: {card.CardName} marked as retained"
+                    + (untilEndOfBattle ? " (until end of battle)" : " (this turn)")
+            );
             EventBus.Publish(new CardRetainedEvent { Card = card, IsPlayer = _isPlayer });
             return true;
+        }
+
+        /// <summary>
+        /// Consumes one retain mark for <paramref name="card"/> from <paramref name="marks"/>.
+        /// Returns true when a mark was available (and is now spent).
+        /// </summary>
+        private static bool TryConsume(Dictionary<CardData, int> marks, CardData card)
+        {
+            if (!marks.TryGetValue(card, out int count) || count <= 0)
+                return false;
+            if (count == 1)
+                marks.Remove(card);
+            else
+                marks[card] = count - 1;
+            return true;
+        }
+
+        /// <summary>
+        /// Spends a retain mark when a copy leaves the hand by being played or force-discarded,
+        /// so the mark can't transfer to another copy of the same card. Turn marks spend first.
+        /// </summary>
+        private void ConsumeRetainMark(CardData card)
+        {
+            if (!TryConsume(_retainedCards, card))
+                TryConsume(_battleRetainedCards, card);
         }
 
         #endregion

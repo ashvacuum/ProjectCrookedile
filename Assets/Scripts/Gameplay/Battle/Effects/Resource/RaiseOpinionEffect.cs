@@ -34,9 +34,20 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
 
+        [Tooltip(
+            "Optional scaling: multiply the amount by this context value "
+                + "(e.g. HostileEnemyCount = 'per hostile enemy'). None = no scaling."
+        )]
+        [SerializeField]
+        private EffectContextValue _perXSource = EffectContextValue.None;
+
+        [Tooltip("Optional flat multiplier applied last. Values <= 0 are treated as 1.")]
+        [SerializeField]
+        private float _multiplier = 1f;
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            int amount = ResolveAmount(ctx, amountOverride, _amount, _amountSource);
+            int amount = ResolveScaledAmount(ctx, amountOverride, _amount, _amountSource, _perXSource, _multiplier);
 
             if (amount <= 0)
                 return;
@@ -46,6 +57,6 @@ namespace Crookedile.Gameplay.Battle
         }
 
         public override string GetDescription() =>
-            $"Raise Opinion by {DescribeAmount(_amount, _amountSource)}";
+            $"Raise Opinion by {DescribeScaledAmount(_amount, _amountSource, _perXSource, _multiplier)}";
     }
 }

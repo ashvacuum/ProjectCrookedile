@@ -38,6 +38,7 @@ namespace Crookedile.Data.Cards
         [Header("Visuals")]
         [Tooltip("Main artwork displayed on the front of the card")]
         [SerializeField]
+        [PreviewField]
         private Sprite _artwork;
 
         [FoldoutGroup("Description Override")]
@@ -127,6 +128,13 @@ namespace Crookedile.Data.Cards
         )]
         [SerializeField]
         private bool _isUnplayable = false;
+
+        [Tooltip(
+            "If true, this card is never discarded at end of turn — it stays in hand until "
+                + "played. A card property (like Unplayable), not an effect."
+        )]
+        [SerializeField]
+        private bool _innateRetain = false;
 
         [Header("Policy")]
         [ShowIf("_cardType", CardType.Policy)]
@@ -232,6 +240,12 @@ namespace Crookedile.Data.Cards
 
         /// <summary>Whether this card must be unlocked.</summary>
         public bool IsUnlockable => _isUnlockable;
+
+        /// <summary>
+        /// True if this card always stays in hand at end of turn (never discarded until played).
+        /// Checked by <c>DeckManager.DiscardHand</c> alongside per-turn granted retains.
+        /// </summary>
+        public bool InnateRetain => _innateRetain;
 
         /// <summary>
         /// True if this card can never be played: all Scandals, and Status cards flagged as unplayable.

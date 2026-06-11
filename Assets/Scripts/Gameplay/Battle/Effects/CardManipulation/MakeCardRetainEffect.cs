@@ -25,6 +25,13 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private CardType _filterType = CardType.Pressure;
 
+        [Tooltip(
+            "If true the retain persists every turn until the card is played or the battle "
+                + "ends. If false (default) it lasts this turn only."
+        )]
+        [SerializeField]
+        private bool _untilEndOfBattle = false;
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             if (ctx.Deck == null || ctx.Deck.HandCount == 0)
@@ -41,7 +48,7 @@ namespace Crookedile.Gameplay.Battle
                 chosen =>
                 {
                     if (chosen.Count > 0)
-                        ctx.Deck.RetainCard(chosen[0]);
+                        ctx.Deck.RetainCard(chosen[0], _untilEndOfBattle);
                 }
             );
         }
@@ -54,7 +61,9 @@ namespace Crookedile.Gameplay.Battle
                 CardSelectionMode.RandomByType => $"a random {_filterType} card",
                 _ => "a card",
             };
-            return $"Retain {suffix} until the battle ends";
+            return _untilEndOfBattle
+                ? $"Retain {suffix} for the rest of the battle"
+                : $"Retain {suffix} this turn (it stays in hand at end of turn)";
         }
     }
 }

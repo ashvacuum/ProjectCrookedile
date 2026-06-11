@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Self Pity
+  m_Name: Disappointed
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: 3abec8ff-b814-4dbd-b72b-84599119c174
-  _cardName: Self Pity
+  _id: fcb4bd23-223b-461b-b2be-1052609027db
+  _cardName: Disappointed
   _cardType: 3
   _rarity: 0
-  _artwork: {fileID: 21300000, guid: ff02454949b7f2444a5b22ea27e39080, type: 3}
-  _description: You're pathetic. Lose 1 Resolve at turn end while held. Exhaust.
+  _artwork: {fileID: 21300000, guid: 4b5d931a2d2419649a005db7bf4d8a28, type: 3}
+  _description: A missing sense of purpose. Unplayable. Ethereal.
   _flavorText: 
   _costs:
   - _costType: 1
@@ -26,9 +26,10 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
-  _effects: []
+  _effects:
+  - rid: 4823698507066769523
   _passives:
-  - rid: 4738608375284105304
+  - rid: 4738608375284105317
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
@@ -37,35 +38,32 @@ MonoBehaviour:
   - faithleader
   _isStarterCard: 0
   _isUnlockable: 0
-  _isUnplayable: 0
+  _isUnplayable: 1
   _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
   references:
     version: 2
     RefIds:
-    - rid: 4738608375284105304
+    - rid: 4738608375284105317
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: New Passive
         _trigger:
-          rid: 4738608375284105307
+          rid: 4738608375284105318
         _conditions: []
         _oneShot: 0
         _effects:
-        - rid: 4738608375284105308
-        - rid: 4823698507066769524
-    - rid: 4738608375284105307
+        - rid: 4738608375284105319
+    - rid: 4738608375284105318
       type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 4738608375284105308
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _amount: 1
-        _amountSource: 0
-        _target: 0
-    - rid: 4823698507066769524
+    - rid: 4738608375284105319
       type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
+    - rid: 4823698507066769523
+      type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 1
