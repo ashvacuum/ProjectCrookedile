@@ -1,10 +1,7 @@
 {
-    "name": "Crookedile.Runtime",
-    "rootNamespace": "Crookedile.Gameplay",
+    "name": "UniTask.Linq",
     "references": [
-        "UniTask",
-        "Crookedile.Core",
-        "Crookedile.Utilities"
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

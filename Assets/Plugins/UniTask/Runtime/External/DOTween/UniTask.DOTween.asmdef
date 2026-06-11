@@ -1,10 +1,8 @@
 {
-    "name": "Crookedile.Runtime",
-    "rootNamespace": "Crookedile.Gameplay",
+    "name": "UniTask.DOTween",
     "references": [
         "UniTask",
-        "Crookedile.Core",
-        "Crookedile.Utilities"
+        "DOTween.Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -13,6 +11,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.demigiant.dotween",
+            "expression": "",
+            "define": "UNITASK_DOTWEEN_SUPPORT"
+        }
+    ],
     "noEngineReferences": false
 }
