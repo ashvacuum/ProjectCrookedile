@@ -36,6 +36,23 @@ namespace Crookedile.Data.Enemy
     {
         None, // Default — move is always eligible
         OnlyIfNoMinionsAlive, // Skip if any living enemy already matches MinionToSummon
+        OnTurnOrAfter, // Eligible from turn ConditionTurn onward (Escalator clocks)
+        BeforeTurn, // Eligible only before turn ConditionTurn (opening behavior)
+        EveryNTurns, // Eligible only on turns divisible by ConditionTurn (periodic moves)
+    }
+
+    /// <summary>
+    /// Which stances a move is usable in. Combinable flags — a move can serve two stances
+    /// (e.g. Neutral | Receptive). Stored value 0 on assets authored before this field
+    /// existed is treated as Any by the selection filter, so old data keeps working.
+    /// </summary>
+    [System.Flags]
+    public enum MoveStanceMask
+    {
+        Hostile = 1 << 0, // Usable while hostility > 0
+        Neutral = 1 << 1, // Usable while hostility == 0
+        Receptive = 1 << 2, // Usable while hostility < 0
+        Any = Hostile | Neutral | Receptive,
     }
 
     /// <summary>
@@ -113,10 +130,34 @@ namespace Crookedile.Data.Enemy
             "When this move is included in the selection pool.\n\n"
                 + "None: always eligible.\n"
                 + "OnlyIfNoMinionsAlive: only selected when no living enemy matches MinionToSummon "
-                + "(boss re-summons minions only after they have all been killed)."
+                + "(boss re-summons minions only after they have all been killed).\n"
+                + "OnTurnOrAfter / BeforeTurn / EveryNTurns: turn-gated — see Condition Turn below."
         )]
         [SerializeField]
         private EnemyMoveCondition _condition = EnemyMoveCondition.None;
+
+        [ShowIf(
+            "@_condition == EnemyMoveCondition.OnTurnOrAfter || "
+                + "_condition == EnemyMoveCondition.BeforeTurn || "
+                + "_condition == EnemyMoveCondition.EveryNTurns"
+        )]
+        [MinValue(1)]
+        [Tooltip(
+            "Turn parameter for the selected condition.\n"
+                + "OnTurnOrAfter: first turn the move becomes eligible.\n"
+                + "BeforeTurn: last eligible turn is this turn minus one.\n"
+                + "EveryNTurns: eligible on turns divisible by this value."
+        )]
+        [SerializeField]
+        private int _conditionTurn = 1;
+
+        [Tooltip(
+            "Which stances this move is usable in. The enemy only picks moves matching its "
+                + "current stance; if none match, all condition-eligible moves are used as a "
+                + "fallback so the enemy is never stuck."
+        )]
+        [SerializeField]
+        private MoveStanceMask _stanceRequirement = MoveStanceMask.Any;
 
         #endregion
 
@@ -148,6 +189,14 @@ namespace Crookedile.Data.Enemy
         public EnemyData MinionToSummon => _minionToSummon;
         public int MinionCount => _minionCount;
         public EnemyMoveCondition Condition => _condition;
+        public int ConditionTurn => _conditionTurn;
+
+        /// <summary>
+        /// Stance gate, with the value 0 (assets serialized before this field existed)
+        /// normalized to <see cref="MoveStanceMask.Any"/>.
+        /// </summary>
+        public MoveStanceMask StanceRequirement =>
+            _stanceRequirement == 0 ? MoveStanceMask.Any : _stanceRequirement;
     }
 }
         #endregion

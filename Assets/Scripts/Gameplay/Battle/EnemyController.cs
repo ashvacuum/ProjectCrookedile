@@ -27,6 +27,9 @@ namespace Crookedile.Gameplay.Battle
         {
             [EnemyMoveCondition.None] = new NoConditionEvaluator(),
             [EnemyMoveCondition.OnlyIfNoMinionsAlive] = new NoMinionsAliveEvaluator(),
+            [EnemyMoveCondition.OnTurnOrAfter] = new OnTurnOrAfterEvaluator(),
+            [EnemyMoveCondition.BeforeTurn] = new BeforeTurnEvaluator(),
+            [EnemyMoveCondition.EveryNTurns] = new EveryNTurnsEvaluator(),
         };
 
         #endregion
@@ -34,6 +37,7 @@ namespace Crookedile.Gameplay.Battle
         #region State
         private readonly EnemyData _enemyData;
         private readonly IMovePatternSelector _moveSelector;
+        private readonly System.Func<int> _turnProvider;
 
         // Hostile-this-turn tracking — used by BattleManager to award bonus card draws
         private int _hostilityAtTurnStart;
@@ -69,10 +73,18 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
+        /// <summary>
+        /// Current battle turn number, read from the provider passed at construction.
+        /// 0 when no provider was wired (e.g. test harnesses) — turn-gated move
+        /// conditions treat that as "always eligible".
+        /// </summary>
+        public int CurrentBattleTurn => _turnProvider?.Invoke() ?? 0;
+
         #region Constructor
-        public EnemyController(EnemyData enemyData)
+        public EnemyController(EnemyData enemyData, System.Func<int> turnProvider = null)
         {
             _enemyData = enemyData;
+            _turnProvider = turnProvider;
 
             // Factory switch — acceptable here: construction happens once per enemy instance.
             // To add a new pattern, add an enum value + a new IMovePatternSelector class.
@@ -125,6 +137,13 @@ namespace Crookedile.Gameplay.Battle
                 CurrentIntent = null;
                 return null;
             }
+
+            // Stance gate: prefer moves authored for the current stance (hostile/neutral/receptive).
+            // If nothing matches, fall back to the full condition-eligible pool — an enemy is
+            // never left without a move just because its stance changed.
+            var stanceEligible = eligible.Where(m => MatchesCurrentStance(m)).ToList();
+            if (stanceEligible.Count > 0)
+                eligible = stanceEligible;
 
             // Turncoat: a freshly-betrayed enemy lashes out — force an offensive move this once.
             if (_forceAggressiveIntent)
@@ -213,6 +232,18 @@ namespace Crookedile.Gameplay.Battle
                 return true; // Unknown condition — default to eligible.
 
             return evaluator.IsMet(move, allEnemies, this);
+        }
+
+        /// <summary>
+        /// True if the move's <see cref="EnemyMoveData.StanceRequirement"/> includes this
+        /// enemy's current stance (hostile &gt; 0, neutral == 0, receptive &lt; 0).
+        /// </summary>
+        private bool MatchesCurrentStance(EnemyMoveData move)
+        {
+            MoveStanceMask current = Stats.IsHostile ? MoveStanceMask.Hostile
+                : Stats.IsReceptive ? MoveStanceMask.Receptive
+                : MoveStanceMask.Neutral;
+            return (move.StanceRequirement & current) != 0;
         }
         #endregion
     }
