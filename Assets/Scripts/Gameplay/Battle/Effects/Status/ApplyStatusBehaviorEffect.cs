@@ -39,7 +39,9 @@ namespace Crookedile.Gameplay.Battle
         {
             if (_behavior == null)
             {
-                GameLogger.LogWarning<ApplyStatusBehaviorEffect>("No status behavior assigned — no-op");
+                GameLogger.LogWarning<ApplyStatusBehaviorEffect>(
+                    "No status behavior assigned — no-op"
+                );
                 return;
             }
 

@@ -16,24 +16,26 @@ MonoBehaviour:
   _moveType: 4
   _intentDescription: 
   _effects:
-  - rid: 4823698419005784186
+  - rid: 4823698507066769522
   - rid: 4823698419005784187
   _moveVFX: {fileID: 11400000, guid: c30a0880977bcf848bcee8173deef6e8, type: 2}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
   _condition: 0
+  _conditionTurn: 1
+  _stanceRequirement: 1
   references:
     version: 2
     RefIds:
-    - rid: 4823698419005784186
-      type: {class: RaiseAlliesHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _amount: 1
-        _includeSelf: 1
     - rid: 4823698419005784187
       type: {class: RaiseOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: -5
+        _amount: -2
         _amountSource: 0
+    - rid: 4823698507066769522
+      type: {class: RaiseTargetHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 2
+        _target: 0

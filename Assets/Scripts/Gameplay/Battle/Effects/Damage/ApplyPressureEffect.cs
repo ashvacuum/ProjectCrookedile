@@ -29,6 +29,17 @@ namespace Crookedile.Gameplay.Battle
         private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
 
         [Tooltip(
+            "Optional scaling: multiply the amount by this context value "
+                + "(e.g. HostileEnemyCount = 'per hostile enemy'). None = no scaling."
+        )]
+        [SerializeField]
+        private EffectContextValue _perXSource = EffectContextValue.None;
+
+        [Tooltip("Optional flat multiplier applied last. Values <= 0 are treated as 1.")]
+        [SerializeField]
+        private float _multiplier = 1f;
+
+        [Tooltip(
             "Which part of the crowd this pressure addresses (player cards). Opponent = the focused "
                 + "enemy; Adjacent = focused + neighbours; AllHostile / AllReceptive / AllOpponents = "
                 + "the matching group. Amount is applied per target. Enemy cards always pressure the player."
@@ -41,7 +52,14 @@ namespace Crookedile.Gameplay.Battle
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            int baseDamage = ResolveAmount(ctx, amountOverride, _amount, _amountSource);
+            int baseDamage = ResolveScaledAmount(
+                ctx,
+                amountOverride,
+                _amount,
+                _amountSource,
+                _perXSource,
+                _multiplier
+            );
 
             if (ctx.IsPlayerCard)
             {
@@ -63,7 +81,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override string GetDescription()
         {
-            string amountStr = DescribeAmount(_amount, _amountSource);
+            string amountStr = DescribeScaledAmount(_amount, _amountSource, _perXSource, _multiplier);
             string targetStr = _target switch
             {
                 TargetType.Opponent => "",

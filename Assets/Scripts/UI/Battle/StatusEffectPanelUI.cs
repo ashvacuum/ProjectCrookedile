@@ -34,6 +34,9 @@ namespace Crookedile.UI.Battle
         private readonly Dictionary<string, StatusEffectIconUI> _active =
             new Dictionary<string, StatusEffectIconUI>();
 
+        // Status ids we've already warned about — one log per id, not one per refresh.
+        private static readonly HashSet<string> _warnedIds = new HashSet<string>();
+
         /// <summary>
         /// Synchronises the displayed icons with the current state of <paramref name="effects"/>.
         /// — Adds icons for newly applied effects.
@@ -75,7 +78,24 @@ namespace Crookedile.UI.Battle
                     if (_iconPrefab == null || _container == null)
                         continue;
                     if (!_iconMap.TryGet(effect.Id, out var icon, out var color))
+                    {
+                        // Missing wiring must be LOUD: an active status with no map entry
+                        // would otherwise be silently invisible to the player.
+                        if (_warnedIds.Add(effect.Id))
+                            Debug.LogWarning(
+                                $"[StatusEffectPanelUI] Active status '{effect.Id}' has no entry in "
+                                    + $"'{_iconMap.name}' — its icon will not be shown. "
+                                    + "Run Crookedile → Generate → Seed Status Icon Map, then assign a sprite.",
+                                _iconMap
+                            );
                         continue;
+                    }
+                    if (icon == null && _warnedIds.Add(effect.Id + ":icon"))
+                        Debug.LogWarning(
+                            $"[StatusEffectPanelUI] Icon-map entry '{effect.Id}' has no sprite assigned "
+                                + $"in '{_iconMap.name}' — the pill will render blank.",
+                            _iconMap
+                        );
 
                     var go = Instantiate(_iconPrefab, _container);
                     var ui = go.GetComponent<StatusEffectIconUI>();
