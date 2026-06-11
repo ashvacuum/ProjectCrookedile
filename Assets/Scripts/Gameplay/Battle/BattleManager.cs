@@ -220,7 +220,7 @@ namespace Crookedile.Gameplay.Battle
             foreach (var enemyData in setup.enemies)
             {
                 if (enemyData != null)
-                    _enemies.Add(new EnemyController(enemyData));
+                    _enemies.Add(new EnemyController(enemyData, () => CurrentTurn));
             }
             // Register each enemy's roster index so its BattleStats can stamp hostility events.
             for (int i = 0; i < _enemies.Count; i++)
@@ -369,7 +369,7 @@ namespace Crookedile.Gameplay.Battle
 
             for (int i = 0; i < count; i++)
             {
-                var controller = new EnemyController(data);
+                var controller = new EnemyController(data, () => CurrentTurn);
                 int newIndex = _enemies.Count;
                 _enemies.Add(controller);
                 controller.Stats.SetOwnerEnemyIndex(newIndex);

@@ -229,6 +229,14 @@ namespace Crookedile.Gameplay.Battle
                         AddEnemyAt(pairs, idx);
                         AddEnemyAt(pairs, idx + 1);
                     }
+                    else if (!IsPlayerCard && AllEnemies != null && AttackerEnemyIndex >= 0)
+                    {
+                        // Enemy move: the caster and its immediate living neighbours in the row
+                        // (e.g. an Amplifier spreading a status to whoever stands beside it).
+                        AddEnemyAt(pairs, AttackerEnemyIndex - 1);
+                        AddEnemyAt(pairs, AttackerEnemyIndex);
+                        AddEnemyAt(pairs, AttackerEnemyIndex + 1);
+                    }
                     else
                     {
                         pairs.Add((Target, TargetStatusEffects));
