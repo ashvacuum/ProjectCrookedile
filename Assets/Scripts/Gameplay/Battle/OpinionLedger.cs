@@ -27,6 +27,9 @@ namespace Crookedile.Gameplay.Battle
         // Invoked whenever opinion reaches the maximum, so BattleManager can end the battle.
         private readonly Action _onOpinionMaxed;
 
+        // Invoked whenever opinion hits 0 (the loss condition) — symmetric with _onOpinionMaxed.
+        private readonly Action _onOpinionZeroed;
+
         // True while the room is an echo chamber (all enemies receptive). Supplied by BattleManager,
         // evaluated live so halving always reflects the current room state.
         private readonly Func<bool> _isEchoChamber;
@@ -35,12 +38,14 @@ namespace Crookedile.Gameplay.Battle
             int maxOpinion,
             int startingOpinion,
             Action onOpinionMaxed,
-            Func<bool> isEchoChamber = null
+            Func<bool> isEchoChamber = null,
+            Action onOpinionZeroed = null
         )
         {
             _maxOpinion = Mathf.Max(1, maxOpinion);
             _opinion = Mathf.Clamp(startingOpinion, 0, _maxOpinion);
             _onOpinionMaxed = onOpinionMaxed;
+            _onOpinionZeroed = onOpinionZeroed;
             _isEchoChamber = isEchoChamber ?? (() => false);
         }
 
@@ -59,8 +64,9 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Applies incoming opinion pressure. Enemy attacks (<paramref name="toPlayer"/> = true)
         /// pass through Support before lowering opinion; player pressure passes through Denial
-        /// before raising it. Publishes <see cref="DamageDealtEvent"/> as a notification first
-        /// (so passives/UI observe the hit at the pre-mutation state), then mutates state.
+        /// before raising it. Publishes <see cref="DamageDealtEvent"/> AFTER resolution so the
+        /// notification can carry the honest outcome: raw amount, shield-absorbed portion, and
+        /// the delta the meter actually moved (post echo-halving and 0/max clamping).
         /// </summary>
         public void ApplyPressure(
             int pressure,
@@ -73,26 +79,30 @@ namespace Crookedile.Gameplay.Battle
             if (pressure <= 0)
                 return;
 
+            int remaining = toPlayer
+                ? AbsorbThroughSupport(pressure)
+                : AbsorbThroughDenial(pressure);
+            int applied = toPlayer ? Lower(remaining) : Raise(remaining);
+
             EventBus.Publish(
                 new DamageDealtEvent
                 {
                     Amount = pressure,
+                    Absorbed = pressure - remaining,
+                    Applied = applied,
                     IsToPlayer = toPlayer,
                     AttackerName = attackerName,
                     SourceEnemyIndex = sourceEnemyIndex,
                     TargetEnemyIndex = targetEnemyIndex,
                 }
             );
-
-            if (toPlayer)
-                Lower(AbsorbThroughSupport(pressure));
-            else
-                Raise(AbsorbThroughDenial(pressure));
         }
 
         /// <summary>
         /// Raises the Opinion Meter directly, bypassing the Denial buffer.
-        /// Used by rallying/heal effects and Regeneration.
+        /// Used by rallying/heal effects, Regeneration, and the pacify conversion burst.
+        /// NOTE (deliberate): echo-chamber halving STILL applies — "direct" bypasses the
+        /// Denial shield only, not the room-state penalty.
         /// </summary>
         public void RaiseDirect(int amount) => Raise(amount);
 
@@ -106,19 +116,20 @@ namespace Crookedile.Gameplay.Battle
 
         #region Opinion mutation
 
-        private void Raise(int amount)
+        /// <summary>Raises opinion; returns the delta actually applied (post halving/clamp).</summary>
+        private int Raise(int amount)
         {
             if (amount <= 0)
-                return;
+                return 0;
             // Echo chamber: converting the whole room is inefficient — gains are halved.
             if (_isEchoChamber())
                 amount /= 2;
             if (amount <= 0)
-                return;
+                return 0;
             int old = _opinion;
             _opinion = Mathf.Min(_opinion + amount, _maxOpinion);
             if (_opinion == old)
-                return;
+                return 0;
             EventBus.Publish(
                 new OpinionChangedEvent
                 {
@@ -130,16 +141,18 @@ namespace Crookedile.Gameplay.Battle
             );
             if (_opinion >= _maxOpinion)
                 _onOpinionMaxed?.Invoke();
+            return _opinion - old;
         }
 
-        private void Lower(int amount)
+        /// <summary>Lowers opinion; returns the delta actually applied (post clamp at 0).</summary>
+        private int Lower(int amount)
         {
             if (amount <= 0)
-                return;
+                return 0;
             int old = _opinion;
             _opinion = Mathf.Max(_opinion - amount, 0);
             if (_opinion == old)
-                return;
+                return 0;
             EventBus.Publish(
                 new OpinionChangedEvent
                 {
@@ -149,6 +162,9 @@ namespace Crookedile.Gameplay.Battle
                     WasRaisedByPlayer = false,
                 }
             );
+            if (_opinion <= 0)
+                _onOpinionZeroed?.Invoke();
+            return old - _opinion;
         }
 
         #endregion
@@ -223,7 +239,16 @@ namespace Crookedile.Gameplay.Battle
                 return;
             int old = _support;
             _support = 0;
-            EventBus.Publish(new SupportChangedEvent { OldValue = old, NewValue = 0 });
+            // IsDecay: ambient turn-start expiry, not an attack — feedback layers skip the
+            // "shield lost" sting for it.
+            EventBus.Publish(
+                new SupportChangedEvent
+                {
+                    OldValue = old,
+                    NewValue = 0,
+                    IsDecay = true,
+                }
+            );
         }
 
         private void ConsumeAllDenial()
@@ -232,7 +257,14 @@ namespace Crookedile.Gameplay.Battle
                 return;
             int old = _denial;
             _denial = 0;
-            EventBus.Publish(new DenialChangedEvent { OldValue = old, NewValue = 0 });
+            EventBus.Publish(
+                new DenialChangedEvent
+                {
+                    OldValue = old,
+                    NewValue = 0,
+                    IsDecay = true,
+                }
+            );
         }
 
         #endregion

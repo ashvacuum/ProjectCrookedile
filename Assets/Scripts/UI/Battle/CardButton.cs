@@ -163,10 +163,10 @@ namespace Crookedile.UI.Battle
 
         #endregion
 
-        #region Selection (CardSelectionPanel)
+        #region Selection (CardChoicePanel)
         [Header("Selection")]
         [Tooltip(
-            "Overlay Image shown when this card is selected in a CardSelectionPanel. Assign a colored border child."
+            "Overlay Image shown when this card is selected in a CardChoicePanel. Assign a colored border child."
         )]
         [SerializeField]
         private Image _selectionOutline;
@@ -320,7 +320,7 @@ namespace Crookedile.UI.Battle
 
         /// <summary>
         /// Shows or hides the selection outline overlay.
-        /// Called by CardSelectionPanel to indicate whether this card is currently selected.
+        /// Called by CardChoicePanel to indicate whether this card is currently selected.
         /// </summary>
         public void SetSelected(bool selected)
         {

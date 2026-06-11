@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Data.Battle
@@ -20,10 +21,13 @@ namespace Crookedile.Data.Battle
         [Serializable]
         public struct Entry
         {
-            [Tooltip("Stable status id — must match a StatusBehavior.Id (lowercase, e.g. \"guilt\").")]
+            [Tooltip(
+                "Stable status id — must match a StatusBehavior.Id (lowercase, e.g. \"guilt\")."
+            )]
             public string id;
 
             [Tooltip("Icon sprite shown in the buff/debuff pill.")]
+            [PreviewField(ObjectFieldAlignment.Right)]
             public Sprite icon;
 
             [Tooltip("Tint color applied to the icon image.")]

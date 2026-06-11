@@ -48,6 +48,10 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private Color _healColor = new Color(0.2f, 0.9f, 0.2f);
 
+        [Tooltip("Color of the 'Blocked' text when a shield fully absorbs a hit.")]
+        [SerializeField]
+        private Color _blockedColor = new Color(0.7f, 0.7f, 0.75f);
+
         #region Lifecycle
         /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
         private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
@@ -68,7 +72,7 @@ namespace Crookedile.UI.Battle
             // Register as the card-play VFX implementation — a direct callback handshake,
             // not bus events (game flow must never block on a missed message).
             if (_battleManager == null)
-                _battleManager = FindObjectOfType<BattleManager>();
+                _battleManager = FindFirstObjectByType<BattleManager>();
             if (_battleManager != null)
                 _battleManager.CardPlayFeedback = this;
 
@@ -156,7 +160,14 @@ namespace Crookedile.UI.Battle
             var dmgTarget = evt.IsToPlayer
                 ? _battleUI?.PlayerSlotTransform
                 : _battleUI?.GetEnemySlotTransform(evt.TargetEnemyIndex);
-            FloatingTextManager.Instance?.Show(evt.Amount.ToString(), dmgTarget, _damageColor);
+
+            // Show what actually happened, not the raw pressure: the applied delta when the
+            // meter moved, "Blocked" when a shield ate the whole hit, nothing when the hit
+            // evaporated without a shield (echo-halved to 0 / meter already clamped).
+            if (evt.Applied > 0)
+                FloatingTextManager.Instance?.Show(evt.Applied.ToString(), dmgTarget, _damageColor);
+            else if (evt.Absorbed > 0)
+                FloatingTextManager.Instance?.Show("Blocked", dmgTarget, _blockedColor);
         }
 
         private void OnHealApplied(HealingAppliedEvent evt)
@@ -228,19 +239,28 @@ namespace Crookedile.UI.Battle
                 _battleUI?.GetEnemySlotTransform(evt.EnemyIndex)
             );
 
-        private void OnSupportChanged(SupportChangedEvent evt) =>
+        private void OnSupportChanged(SupportChangedEvent evt)
+        {
+            // Ambient turn-start expiry is not an attack — no "shield lost" sting.
+            if (evt.IsDecay)
+                return;
             Play(
                 evt.NewValue > evt.OldValue
                     ? BattleAudioTrigger.ShieldGained
                     : BattleAudioTrigger.ShieldLost
             );
+        }
 
-        private void OnDenialChanged(DenialChangedEvent evt) =>
+        private void OnDenialChanged(DenialChangedEvent evt)
+        {
+            if (evt.IsDecay)
+                return;
             Play(
                 evt.NewValue > evt.OldValue
                     ? BattleAudioTrigger.ShieldGained
                     : BattleAudioTrigger.ShieldLost
             );
+        }
 
         private void OnHostilityChanged(HostilityChangedEvent evt)
         {

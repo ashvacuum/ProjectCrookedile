@@ -1,3 +1,4 @@
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,9 +7,12 @@ namespace Crookedile.UI.Battle
 {
     /// <summary>
     /// Displays the shared Opinion Meter as three side-by-side elements inside a HorizontalLayoutGroup:
-    ///   [PlayerShield] [BarFill] [EnemyShield]
-    /// Widths are proportional to the bar container's total width. The background track (a sibling Image)
-    /// shows through the unfilled portion on the right.
+    ///   [BarFill] [PlayerShield] [EnemyShield]
+    /// BarFill spans the FULL current opinion (so the fill never under-reports the label).
+    /// PlayerShield (Support) sits at the fill's right edge — incoming drops bite there first.
+    /// EnemyShield (Denial) sits beyond it — player gains must chew through it before the
+    /// fill grows. Both shields render in the unfilled region; the background track shows
+    /// through whatever remains. Widths tween smoothly on change.
     ///
     /// HorizontalLayoutGroup on _barContainer must have childControlWidth and childForceExpandWidth disabled.
     /// </summary>
@@ -20,17 +24,22 @@ namespace Crookedile.UI.Battle
         private RectTransform _barContainer;
 
         [Header("Bar Elements")]
-        [Tooltip("Left Image — Player Support. Width = support / maxOpinion * totalWidth, clamped to opinionWidth.")]
+        [Tooltip("Support segment — rendered at the fill's right edge (drops bite there first). Width clamped to the unfilled region.")]
         [SerializeField]
         private RectTransform _playerShield;
 
-        [Tooltip("Middle Image — plain Image (not fill-method). Width = opinionWidth − playerShieldWidth.")]
+        [Tooltip("Opinion fill — plain Image (not fill-method). Width = full current opinion.")]
         [SerializeField]
         private Image _barFill;
 
-        [Tooltip("Right Image — Enemy Denial. Width = denial / maxOpinion * totalWidth, clamped to unfilled width.")]
+        [Tooltip("Denial segment — rendered after Support (gains chew through it). Width clamped to the remaining unfilled region.")]
         [SerializeField]
         private RectTransform _enemyShield;
+
+        [Header("Animation")]
+        [Tooltip("Seconds for segment widths to tween to their new size. 0 = snap.")]
+        [SerializeField]
+        private float _tweenDuration = 0.25f;
 
         [Header("Overlays")]
         [Tooltip("RectTransform pinned at 50% of bar width — marks the Judgment win threshold.")]
@@ -58,10 +67,27 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private Color _urgentColor = new Color(0.9f, 0.2f, 0.2f);
 
+        #region Runtime
+
+        // True after the first successful Refresh — the first paint snaps instead of
+        // tweening from whatever stale widths the scene serialized.
+        private bool _hasPainted;
+
+        private void Awake()
+        {
+            // Enforce the [BarFill][PlayerShield][EnemyShield] sibling order regardless of
+            // how the scene hierarchy happens to be arranged.
+            _barFill?.rectTransform.SetSiblingIndex(0);
+            _playerShield?.SetSiblingIndex(1);
+            _enemyShield?.SetSiblingIndex(2);
+        }
+
+        #endregion
+
         #region Public API
 
         /// <summary>
-        /// Recalculates all three element widths and updates text labels.
+        /// Recalculates all three element widths (tweened) and updates text labels.
         /// Call from BattleUI in response to opinion / shield / turn events.
         /// </summary>
         public void Refresh(
@@ -77,25 +103,34 @@ namespace Crookedile.UI.Battle
                 return;
 
             float total = _barContainer.rect.width;
+            if (total <= 0f)
+            {
+                // First-frame call before the canvas layout pass — force a layout so the
+                // container has a real width instead of painting an empty bar.
+                LayoutRebuilder.ForceRebuildLayoutImmediate(_barContainer);
+                total = _barContainer.rect.width;
+                if (total <= 0f)
+                    return;
+            }
+
             float pct = maxOpinion > 0 ? Mathf.Clamp01((float)currentOpinion / maxOpinion) : 0f;
 
-            float opinionWidth = pct * total;
-            float unfilledWidth = total - opinionWidth;
+            // Fill = full current opinion; shields live in the unfilled region to its right.
+            float barFillWidth = pct * total;
+            float unfilled = total - barFillWidth;
 
             float playerShieldWidth = maxOpinion > 0
-                ? Mathf.Min((float)playerSupport / maxOpinion * total, opinionWidth)
+                ? Mathf.Min((float)playerSupport / maxOpinion * total, unfilled)
                 : 0f;
-            float barFillWidth = opinionWidth - playerShieldWidth;
             float enemyShieldWidth = maxOpinion > 0
-                ? Mathf.Min((float)enemyDenial / maxOpinion * total, unfilledWidth)
+                ? Mathf.Min((float)enemyDenial / maxOpinion * total, unfilled - playerShieldWidth)
                 : 0f;
 
-            SetWidth(_playerShield, playerShieldWidth);
             if (_barFill != null)
-                SetWidth(_barFill.rectTransform, barFillWidth);
-            SetWidth(_enemyShield, enemyShieldWidth);
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(_barContainer);
+                AnimateWidth(_barFill.rectTransform, barFillWidth);
+            AnimateWidth(_playerShield, playerShieldWidth);
+            AnimateWidth(_enemyShield, enemyShieldWidth);
+            _hasPainted = true;
 
             if (_barFill != null)
                 _barFill.color = pct < 0.30f ? _dangerBarColor : _normalBarColor;
@@ -110,11 +145,39 @@ namespace Crookedile.UI.Battle
 
         #region Private
 
-        private static void SetWidth(RectTransform rt, float width)
+        /// <summary>
+        /// Tweens a segment to <paramref name="width"/>, re-flowing the layout group each
+        /// frame so siblings slide along. Snaps on the first paint and when tweening is off.
+        /// </summary>
+        private void AnimateWidth(RectTransform rt, float width)
         {
             if (rt == null)
                 return;
-            rt.sizeDelta = new Vector2(Mathf.Max(0f, width), rt.sizeDelta.y);
+            width = Mathf.Max(0f, width);
+
+            DOTween.Kill(rt);
+
+            if (!_hasPainted || _tweenDuration <= 0f)
+            {
+                rt.sizeDelta = new Vector2(width, rt.sizeDelta.y);
+                LayoutRebuilder.MarkLayoutForRebuild(_barContainer);
+                return;
+            }
+
+            DOTween
+                .To(
+                    () => rt.sizeDelta.x,
+                    x =>
+                    {
+                        rt.sizeDelta = new Vector2(x, rt.sizeDelta.y);
+                        LayoutRebuilder.MarkLayoutForRebuild(_barContainer);
+                    },
+                    width,
+                    _tweenDuration
+                )
+                .SetEase(Ease.OutQuad)
+                .SetTarget(rt)
+                .SetLink(gameObject);
         }
 
         private void RefreshTurnCountdown(int turnsElapsed, int maxTurns)

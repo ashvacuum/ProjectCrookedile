@@ -196,8 +196,8 @@ namespace Crookedile.Tests
 
         private BattleEffect CreateShieldEffect(int amount)
         {
-            var effect = new GainBufferEffect();
-            var amountField = typeof(GainBufferEffect).GetField(
+            var effect = new GainBufferShieldEffect();
+            var amountField = typeof(GainBufferShieldEffect).GetField(
                 "_amount",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
             );

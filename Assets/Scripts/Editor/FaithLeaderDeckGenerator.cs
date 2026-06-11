@@ -32,22 +32,53 @@ namespace Crookedile.EditorTools
             AssetDatabase.Refresh(); // register the folder before creating assets in it
 
             // Basics
-            MakeCard("Rebuke", CardType.Rhetoric, 1, CardRarity.Basic, DealDamage(6, TargetType.Opponent));
+            MakeCard(
+                "Rebuke",
+                CardType.Rhetoric,
+                1,
+                CardRarity.Basic,
+                DealDamage(6, TargetType.Opponent)
+            );
             MakeCard("Pray", CardType.Pressure, 1, CardRarity.Basic, GainShield(5), Draw(1));
-            MakeCard("Call Out Sin", CardType.Rhetoric, 1, CardRarity.Basic,
-                RaiseHostility(3, TargetType.RandomReceptive));
+            MakeCard(
+                "Call Out Sin",
+                CardType.Rhetoric,
+                1,
+                CardRarity.Basic,
+                RaiseHostility(3, TargetType.RandomReceptive)
+            );
 
             // Identity — pacify stackers (Permanent so they persist toward the 3-stack threshold)
-            MakeCard("Guilt Trip", CardType.Pressure, 1, CardRarity.Basic,
-                ApplyStatus(TargetType.Opponent, new GuiltStatus(), 1, StatusDurationType.Permanent));
-            MakeCard("Name and Shame", CardType.Pressure, 1, CardRarity.Basic,
-                ApplyStatus(TargetType.Opponent, new ShameStatus(), 1, StatusDurationType.Permanent));
-            MakeCard("Sow Doubt", CardType.Pressure, 1, CardRarity.Basic,
-                ApplyStatus(TargetType.Opponent, new DoubtStatus(), 1, StatusDurationType.Permanent));
+            MakeCard(
+                "Guilt Trip",
+                CardType.Pressure,
+                1,
+                CardRarity.Basic,
+                ApplyStatus(TargetType.Opponent, new GuiltStatus(), 1, StatusDurationType.Permanent)
+            );
+            MakeCard(
+                "Name and Shame",
+                CardType.Pressure,
+                1,
+                CardRarity.Basic,
+                ApplyStatus(TargetType.Opponent, new ShameStatus(), 1, StatusDurationType.Permanent)
+            );
+            MakeCard(
+                "Sow Doubt",
+                CardType.Pressure,
+                1,
+                CardRarity.Basic,
+                ApplyStatus(TargetType.Opponent, new DoubtStatus(), 1, StatusDurationType.Permanent)
+            );
 
             // Identity — harvest (scales with conversions this turn; 1:1 for now, tune/multiplier later)
-            MakeCard("Sermon", CardType.Pressure, 2, CardRarity.Basic,
-                DealDamageSourced(EffectContextValue.ConversionsThisTurn, TargetType.Opponent));
+            MakeCard(
+                "Sermon",
+                CardType.Pressure,
+                2,
+                CardRarity.Basic,
+                DealDamageSourced(EffectContextValue.ConversionsThisTurn, TargetType.Opponent)
+            );
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -69,7 +100,11 @@ namespace Crookedile.EditorTools
             SetField(card, "_cardName", name);
             SetField(card, "_cardType", type);
             SetField(card, "_rarity", rarity);
-            SetField(card, "_costs", new List<CardCost> { new CardCost(CostType.ActionPoints, energyCost) });
+            SetField(
+                card,
+                "_costs",
+                new List<CardCost> { new CardCost(CostType.ActionPoints, energyCost) }
+            );
             SetField(card, "_effects", new List<BattleEffect>(effects));
             SetField(card, "_isStarterCard", true);
             SetField(card, "_tags", new List<string> { "faithleader" });
@@ -100,7 +135,7 @@ namespace Crookedile.EditorTools
 
         private static BattleEffect GainShield(int amount)
         {
-            var e = new GainBufferEffect();
+            var e = new GainBufferShieldEffect();
             SetField(e, "_amount", amount);
             SetField(e, "_amountSource", EffectContextValue.FixedAmount);
             return e;

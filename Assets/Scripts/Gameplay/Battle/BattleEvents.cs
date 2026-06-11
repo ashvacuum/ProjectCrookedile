@@ -279,13 +279,21 @@ namespace Crookedile.Gameplay.Battle
 
 
     /// <summary>
-    /// Published by <c>OpinionLedger.ApplyPressure</c> whenever opinion-meter pressure is applied
-    /// (after all modifiers, as a notification before the meter mutates). Only fires when <c>Amount &gt; 0</c>.
+    /// Published by <c>OpinionLedger.ApplyPressure</c> whenever opinion-meter pressure resolves
+    /// (after shields and meter mutation, so the payload carries the honest outcome).
+    /// Only fires when <c>Amount &gt; 0</c>.
     /// </summary>
     public struct DamageDealtEvent : IGameEvent
     {
         /// <summary>Opinion pressure applied after modifiers/hostility, before session-shield absorption.</summary>
         public int Amount;
+
+        /// <summary>Portion of <see cref="Amount"/> eaten by the session shield (Support/Denial).</summary>
+        public int Absorbed;
+
+        /// <summary>Delta the opinion meter actually moved (post echo-halving and 0/max clamping).
+        /// Show THIS to the player — <see cref="Amount"/> overstates the hit when shields absorb.</summary>
+        public int Applied;
 
         /// <summary>True = player is the damage target; false = an enemy is the target.</summary>
         public bool IsToPlayer;
@@ -393,6 +401,10 @@ namespace Crookedile.Gameplay.Battle
     {
         public int OldValue;
         public int NewValue;
+
+        /// <summary>True when the change is ambient turn-start expiry (DecayShields), not an
+        /// attack or spend — feedback layers skip the "shield lost" sting for decay.</summary>
+        public bool IsDecay;
     }
 
     /// <summary>
@@ -403,6 +415,10 @@ namespace Crookedile.Gameplay.Battle
     {
         public int OldValue;
         public int NewValue;
+
+        /// <summary>True when the change is ambient turn-start expiry (DecayShields), not an
+        /// attack or spend — feedback layers skip the "shield lost" sting for decay.</summary>
+        public bool IsDecay;
     }
 
     /// <summary>

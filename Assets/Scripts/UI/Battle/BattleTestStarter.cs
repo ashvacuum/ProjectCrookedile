@@ -26,19 +26,11 @@ namespace Crookedile.Gameplay.Battle
         private OriginType playerOrigin = OriginType.FaithLeader;
 
         [Tooltip(
-            "OriginStats ScriptableObject — controls player AP and portrait per origin. "
-                + "If null, defaults to 3 AP."
+            "Central OriginDatabase asset — source of the player's max AP and portrait. "
+                + "If null, defaults to 3 AP and no portrait."
         )]
         [SerializeField]
-        private OriginStats originStats;
-
-        [Header("Enemies")]
-        [Tooltip(
-            "The enemies present in this room (1–5). "
-                + "Create via: Right-click → Crookedile / Enemy / Enemy Data"
-        )]
-        [SerializeField]
-        private List<EnemyData> enemies = new List<EnemyData>();
+        private OriginDatabase originDatabase;
 
         [Header("Scene References")]
         [SerializeField]
@@ -49,8 +41,8 @@ namespace Crookedile.Gameplay.Battle
 
         [Header("Session")]
         [Tooltip(
-            "Optional multi-round session asset. If assigned, enemies for each battle are "
-                + "taken from here instead of the Enemies list. Leave null for single-round testing."
+            "Battle session asset defining the rounds (enemies, turn limits, starting opinion). "
+                + "REQUIRED — for a quick single-fight test, make a one-round session."
         )]
         [SerializeField]
         private BattleSession battleSession;
@@ -59,21 +51,6 @@ namespace Crookedile.Gameplay.Battle
         [Tooltip("Automatically start the battle when the scene loads")]
         [SerializeField]
         private bool startOnAwake = true;
-
-        [Tooltip(
-            "Maximum player turns before Judgment. Used when no BattleSession is assigned. "
-                + "0 = no turn limit. (Sessions define this per-round.)"
-        )]
-        [SerializeField]
-        private int fallbackMaxTurns = 5;
-
-        [Tooltip(
-            "Starting Opinion Meter value (0–100). Used when no BattleSession is assigned. "
-                + "(Sessions define this per-round.)"
-        )]
-        [Range(0, 100)]
-        [SerializeField]
-        private int fallbackStartingOpinion = 50;
 
         #region Deck Definitions
         // Each entry is (assetName, count). Name must match the .asset filename in Resources/Cards/.
@@ -127,15 +104,11 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void StartTestBattle()
         {
-            // Require at least one enemy source: a session asset OR the fallback enemies list.
-            bool hasSession = battleSession != null && battleSession.RoundCount > 0;
-            bool hasEnemies = enemies != null && enemies.Count > 0 && enemies.Any(e => e != null);
-            if (!hasSession && !hasEnemies)
+            if (battleSession == null || battleSession.RoundCount == 0)
             {
                 Debug.LogError(
-                    "[BattleTestStarter] No enemies assigned. "
-                        + "Either assign a BattleSession asset or assign enemies to the Enemies list. "
-                        + "Create enemies via Right-click → Crookedile / Enemy / Enemy Data."
+                    "[BattleTestStarter] No BattleSession assigned (or it has no rounds). "
+                        + "Create one via Right-click → Crookedile / Battle Session and assign it."
                 );
                 return;
             }
@@ -174,25 +147,11 @@ namespace Crookedile.Gameplay.Battle
                     return;
                 }
 
-                // Build the battle queue from the session asset (if assigned) or wrap the
-                // single enemies list as a one-round queue.
-                List<List<EnemyData>> battleQueue;
-                if (battleSession != null && battleSession.RoundCount > 0)
-                {
-                    battleQueue = battleSession.BuildBattleQueue();
-                    Debug.Log(
-                        $"[BattleTestStarter] Session '{battleSession.name}' — "
-                            + $"{battleQueue.Count} rounds."
-                    );
-                }
-                else
-                {
-                    battleQueue = new List<List<EnemyData>>
-                    {
-                        enemies.Where(e => e != null).ToList(),
-                    };
-                    Debug.Log("[BattleTestStarter] No session assigned — single-round fallback.");
-                }
+                List<List<EnemyData>> battleQueue = battleSession.BuildBattleQueue();
+                Debug.Log(
+                    $"[BattleTestStarter] Session '{battleSession.name}' — "
+                        + $"{battleQueue.Count} rounds."
+                );
 
                 RunState.Create(playerOrigin, playerDeck, battleQueue);
                 Debug.Log($"[BattleTestStarter] RunState created for origin: {playerOrigin}");
@@ -212,22 +171,15 @@ namespace Crookedile.Gameplay.Battle
             }
 
             // Resolve this battle's enemy list from RunState's queue.
-            var queueEnemies = RunState.Current?.CurrentBattleEnemies;
-            if (queueEnemies != null && queueEnemies.Count > 0)
-            {
-                battleEnemies = queueEnemies.Where(e => e != null).ToList();
-            }
-            else
-            {
-                // Fallback: use the Inspector enemies list directly (no session assigned).
-                battleEnemies = enemies.Where(e => e != null).ToList();
-            }
+            battleEnemies =
+                RunState.Current?.CurrentBattleEnemies?.Where(e => e != null).ToList()
+                ?? new List<EnemyData>();
 
             if (battleEnemies.Count == 0)
             {
                 Debug.LogError(
-                    "[BattleTestStarter] No valid enemies for this battle. "
-                        + "Check the session asset or the Enemies list."
+                    "[BattleTestStarter] No valid enemies for this battle — "
+                        + "check the session asset's rounds."
                 );
                 return;
             }
@@ -237,19 +189,18 @@ namespace Crookedile.Gameplay.Battle
                     + $"Enemies: {string.Join(", ", battleEnemies.Select(e => e.EnemyName))}"
             );
 
-            // Resolve per-round Opinion Meter settings from the session, or fall back to inspector values.
+            // Resolve per-round Opinion Meter settings from the session.
             int battleIndex = RunState.Current?.CurrentBattleIndex ?? 0;
-            BattleSession.BattleRound currentRound = battleSession?.GetRound(battleIndex);
+            BattleSession.BattleRound currentRound = battleSession.GetRound(battleIndex);
 
-            int roundMaxTurns = currentRound != null ? currentRound.maxTurns : fallbackMaxTurns;
-            int roundStartOpinion =
-                currentRound != null ? currentRound.startingOpinion : fallbackStartingOpinion;
+            int roundMaxTurns = currentRound != null ? currentRound.maxTurns : 5;
+            int roundStartOpinion = currentRound != null ? currentRound.startingOpinion : 50;
 
             // Assemble BattleSetup
             var setup = new BattleSetup
             {
                 playerOrigin = playerOrigin,
-                originStats = originStats,
+                originDatabase = originDatabase,
                 playerDeck = playerDeck,
                 enemies = battleEnemies,
                 maxTurns = roundMaxTurns > 0 ? roundMaxTurns : (int?)null,
@@ -259,7 +210,7 @@ namespace Crookedile.Gameplay.Battle
             Debug.Log(
                 $"[BattleTestStarter] Opinion Meter: start={roundStartOpinion}, "
                     + $"maxTurns={(roundMaxTurns > 0 ? roundMaxTurns.ToString() : "none")} "
-                    + $"(source: {(currentRound != null ? $"session round '{currentRound.label}'" : "fallback inspector values")})"
+                    + $"(source: {(currentRound != null ? $"session round '{currentRound.label}'" : "defaults — round index out of range")})"
             );
 
             // Wire BattleUI before starting (BattleUI needs BattleManager reference)

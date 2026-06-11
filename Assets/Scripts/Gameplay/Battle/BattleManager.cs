@@ -204,8 +204,7 @@ namespace Crookedile.Gameplay.Battle
                 $"Starting battle: {setup.playerOrigin} vs {setup.enemies.Count} enemies"
             );
 
-            OriginBattleStats playerOriginStats = setup.GetPlayerStats();
-            _playerStats = new BattleStats(playerOriginStats.maxActionPoints, isPlayer: true);
+            _playerStats = new BattleStats(setup.GetPlayerMaxActionPoints(), isPlayer: true);
             _playerOrigin = setup.playerOrigin;
 
             // Build enemy controllers — each owns its own BattleStats + StatusEffectManager
@@ -286,7 +285,8 @@ namespace Crookedile.Gameplay.Battle
                 maxOpinion,
                 setup.startingOpinion ?? maxOpinion / 2,
                 onOpinionMaxed: () => CheckAndEndBattleIfOver(),
-                isEchoChamber: _crowd.IsEchoChamber
+                isEchoChamber: _crowd.IsEchoChamber,
+                onOpinionZeroed: () => CheckAndEndBattleIfOver()
             );
             _crowd.AttachLedger(_opinion);
 
@@ -1579,7 +1579,10 @@ namespace Crookedile.Gameplay.Battle
     public class BattleSetup
     {
         public OriginType playerOrigin;
-        public OriginStats originStats;
+
+        [Tooltip("Central origin database — source of the player's max AP and portrait.")]
+        public OriginDatabase originDatabase;
+
         public List<CardData> playerDeck = new List<CardData>();
 
         /// <summary>All enemies present in this room (1–5). Order = display order.</summary>
@@ -1594,13 +1597,23 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Maximum Opinion Meter value. Defaults to 100.</summary>
         public int? maxOpinion;
 
-        /// <summary>Gets the player's battle stats based on their origin.</summary>
-        public OriginBattleStats GetPlayerStats()
+        /// <summary>Max AP per turn for the player's origin. Defaults to 3 when unconfigured.</summary>
+        public int GetPlayerMaxActionPoints()
         {
-            return originStats != null
-                ? originStats.GetStatsForOrigin(playerOrigin)
-                : new OriginBattleStats { maxActionPoints = 3 };
+            if (
+                originDatabase != null
+                && originDatabase.TryGet(playerOrigin, out var entry)
+                && entry.MaxActionPoints > 0
+            )
+                return entry.MaxActionPoints;
+            return 3;
         }
+
+        /// <summary>Portrait sprite for the player's origin, or null when unconfigured.</summary>
+        public Sprite GetPlayerPortrait() =>
+            originDatabase != null && originDatabase.TryGet(playerOrigin, out var entry)
+                ? entry.Portrait
+                : null;
     }
 
     /// <summary>Result data from a completed battle.</summary>

@@ -118,14 +118,6 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private Button endTurnButton;
 
-        [Tooltip("Actor passive — shown on the Actor's first player turn only.")]
-        [SerializeField]
-        private Button improviseButton;
-
-        [Tooltip("Card selection modal shared by Improvise and ChooseFromDiscard effects.")]
-        [SerializeField]
-        private CardSelectionPanel cardSelectionPanel;
-
         [Tooltip(
             "General-purpose interactive card picker for card-choice effects (ChooseFromDiscard, Upgrade, Retain, etc.)."
         )]
@@ -297,7 +289,6 @@ namespace Crookedile.UI.Battle
             {
                 case BattleState.Initialize:
                     RequestStatsRefresh();
-                    RefreshOpinionMeter();
                     break;
 
                 case BattleState.TurnStart:
@@ -319,8 +310,6 @@ namespace Crookedile.UI.Battle
                     handPanel?.DiscardHandAnimated();
                     if (endTurnButton != null)
                         endTurnButton.interactable = false;
-                    if (improviseButton != null)
-                        improviseButton.gameObject.SetActive(false);
                     UpdateBattleInfo();
                     break;
 
@@ -334,8 +323,6 @@ namespace Crookedile.UI.Battle
                     handPanel?.ClearHand();
                     if (endTurnButton != null)
                         endTurnButton.interactable = false;
-                    if (improviseButton != null)
-                        improviseButton.gameObject.SetActive(false);
                     resultPanel?.Show(_lastBattleResult.isVictory);
                     RequestStatsRefresh();
                     break;
@@ -345,10 +332,9 @@ namespace Crookedile.UI.Battle
         private void OnBattleStarted(BattleStartedEvent evt)
         {
             logPanel?.AddEntry("=== Battle Started ===");
-            _playerSlotUI?.Initialize(battleManager, evt.Setup.GetPlayerStats().portrait);
+            _playerSlotUI?.Initialize(battleManager, evt.Setup.GetPlayerPortrait());
             BuildEnemySlots();
             RequestStatsRefresh();
-            RefreshOpinionMeter();
         }
 
         private void OnTurnStarted(TurnStartedEvent evt)
@@ -643,9 +629,9 @@ namespace Crookedile.UI.Battle
                 endTurnButton.interactable = true;
         }
 
-        private void OnSupportChanged(SupportChangedEvent evt) => RefreshOpinionMeter();
+        private void OnSupportChanged(SupportChangedEvent evt) => RequestStatsRefresh();
 
-        private void OnDenialChanged(DenialChangedEvent evt) => RefreshOpinionMeter();
+        private void OnDenialChanged(DenialChangedEvent evt) => RequestStatsRefresh();
 
         private void OnStatusEffectApplied(StatusEffectAppliedEvent evt)
         {
@@ -667,18 +653,13 @@ namespace Crookedile.UI.Battle
         {
             if (!evt.IsToPlayer)
                 return;
-            logPanel?.AddEntry($"{evt.AttackerName} dealt {evt.Amount} damage");
+            string suffix = evt.Absorbed > 0 ? $" ({evt.Absorbed} absorbed by Support)" : "";
+            logPanel?.AddEntry($"{evt.AttackerName} dealt {evt.Applied} damage{suffix}");
         }
 
-        private void OnOpinionChanged(OpinionChangedEvent evt)
-        {
-            RefreshOpinionMeter();
-        }
+        private void OnOpinionChanged(OpinionChangedEvent evt) => RequestStatsRefresh();
 
-        private void OnTurnLimitUpdated(TurnLimitUpdatedEvent evt)
-        {
-            RefreshOpinionMeter();
-        }
+        private void OnTurnLimitUpdated(TurnLimitUpdatedEvent evt) => RequestStatsRefresh();
 
         private void OnJudgment(JudgmentEvent evt)
         {

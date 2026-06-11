@@ -386,7 +386,7 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>
         /// Moves a specific card from the discard pile directly into the hand.
-        /// Used by ChooseFromDiscardToHand effects and CardSelectionPanel confirm callbacks.
+        /// Used by ChooseFromDiscardToHand effects and card-choice confirm callbacks.
         /// Returns false if the card is not in discard or the hand is full.
         /// </summary>
         public bool MoveFromDiscardToHand(CardData card)

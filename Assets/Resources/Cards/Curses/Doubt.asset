@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 4
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: 'Uncertainty strikes the moment this enters your hand. Lose 4 Support
-    on draw. (Configure OnDraw passive: LoseShield 4 via Inspector.)'
+  _description: Uncertainty strikes the moment this enters your hand. Lose 2 Support
+    on at end of turn.
   _flavorText: 
   _costs:
   - _costType: 0
@@ -27,9 +27,9 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
-  _newEffects: []
   _effects: []
-  _passives: []
+  _passives:
+  - rid: 4823698507066769512
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
@@ -41,6 +41,31 @@ MonoBehaviour:
   _isUnplayable: 1
   _policyLean: 3
   _cardVFX: {fileID: 0}
+  _configurationNotes: 
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 4823698507066769512
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: New Passive
+        _trigger:
+          rid: 4823698507066769513
+        _conditions:
+        - rid: 4823698507066769514
+        _oneShot: 0
+        _effects:
+        - rid: 4823698507066769515
+    - rid: 4823698507066769513
+      type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 4823698507066769514
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 4823698507066769515
+      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: -2
+        _amountSource: 0
+        _target: 1
