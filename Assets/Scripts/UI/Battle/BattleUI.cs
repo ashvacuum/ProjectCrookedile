@@ -48,13 +48,9 @@ namespace Crookedile.UI.Battle
 
         #region Enemy Slots
         [Header("Enemy Slots")]
-        [Tooltip("Parent transform that enemy slot panels are spawned into.")]
+        [Tooltip("Self-subscribing enemy row — owns slot spawning and per-slot event reactions.")]
         [SerializeField]
-        private Transform enemySlotContainer;
-
-        [Tooltip("Prefab with an EnemySlotUI component — instantiated once per enemy.")]
-        [SerializeField]
-        private GameObject enemySlotPrefab;
+        private EnemyRowPanel enemyRow;
 
         #endregion
 
@@ -176,7 +172,6 @@ namespace Crookedile.UI.Battle
         private BattleManager battleManager;
         private BattleResult _lastBattleResult;
         private bool _cardChoiceActive;
-        private List<EnemySlotUI> _enemySlots = new List<EnemySlotUI>();
         private CardChoiceRequestedEvent _pendingCardChoice;
         private Sequence _battleInfoFadeSeq;
 
@@ -217,20 +212,15 @@ namespace Crookedile.UI.Battle
             Sub<BattleStartedEvent>(OnBattleStarted);
             Sub<CardPlayedEvent>(OnCardPlayed);
             Sub<BattleEndedEvent>(OnBattleEnded);
-            Sub<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
-            Sub<HostilityChangedEvent>(OnHostilityChanged);
-            Sub<EnemyDefeatedEvent>(OnEnemyDefeated);
             Sub<EnemySummonedEvent>(OnEnemySummoned);
             Sub<CardChoiceRequestedEvent>(OnCardChoiceRequested);
             Sub<SupportChangedEvent>(OnSupportChanged);
             Sub<DenialChangedEvent>(OnDenialChanged);
-            Sub<EnemyActingEvent>(OnEnemyActing);
             Sub<StatusEffectAppliedEvent>(OnStatusEffectApplied);
             Sub<CardGrantedEvent>(OnCardGranted);
             Sub<CardExhaustedEvent>(OnCardExhausted);
             Sub<OpinionChangedEvent>(OnOpinionChanged);
             Sub<TurnLimitUpdatedEvent>(OnTurnLimitUpdated);
-            Sub<EnemyTurncoatEvent>(OnEnemyTurncoat);
         }
 
         private void UnsubscribeFromEvents()
@@ -252,6 +242,7 @@ namespace Crookedile.UI.Battle
             // Self-subscribing panels get their battle context here.
             logPanel?.Bind(manager);
             handPanel?.Bind(manager, OnCardButtonClicked);
+            enemyRow?.Bind(manager);
 
             discardZoneButton?.onClick.AddListener(ShowDiscardZone);
             exhaustZoneButton?.onClick.AddListener(ShowExhaustZone);
@@ -321,7 +312,7 @@ namespace Crookedile.UI.Battle
         private void OnBattleStarted(BattleStartedEvent evt)
         {
             _playerSlotUI?.Initialize(battleManager, evt.Setup.GetPlayerPortrait());
-            BuildEnemySlots();
+            // Enemy slots build themselves — EnemyRowPanel subscribes to BattleStartedEvent.
             RequestStatsRefresh();
         }
 
@@ -412,41 +403,9 @@ namespace Crookedile.UI.Battle
                 .SetLink(gameObject);
         }
 
-        private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
-        {
-            if (evt.EnemyIndex < _enemySlots.Count)
-                _enemySlots[evt.EnemyIndex]?.UpdateIntent(evt.Move);
-        }
-
-        private void OnHostilityChanged(HostilityChangedEvent evt)
-        {
-            // Player hostility (index -1) has no slot; only refresh real enemy slots.
-            if (evt.EnemyIndex < 0 || evt.EnemyIndex >= _enemySlots.Count)
-                return;
-            _enemySlots[evt.EnemyIndex]?.Refresh();
-            _enemySlots[evt.EnemyIndex]?.PulseHostility();
-        }
-
-        private void OnEnemyDefeated(EnemyDefeatedEvent evt)
-        {
-            if (evt.EnemyIndex >= _enemySlots.Count)
-                return;
-
-            var slot = _enemySlots[evt.EnemyIndex];
-            if (slot == null)
-                return;
-
-            if (BattlePoolManager.Instance != null)
-                BattlePoolManager.Instance.ReturnSlot(slot);
-            else
-                Destroy(slot.gameObject);
-
-            _enemySlots[evt.EnemyIndex] = null;
-        }
-
         private void OnEnemySummoned(EnemySummonedEvent evt)
         {
-            AddEnemySlot(evt.EnemyIndex);
+            // Slot spawn handled by EnemyRowPanel; this just repaints stats/focus.
             RequestStatsRefresh();
         }
 
@@ -489,34 +448,11 @@ namespace Crookedile.UI.Battle
 
         private void OnDenialChanged(DenialChangedEvent evt) => RequestStatsRefresh();
 
-        private void OnStatusEffectApplied(StatusEffectAppliedEvent evt)
-        {
-            RequestStatsRefresh();
-
-            // Refresh the specific enemy slot so its status display reflects the change.
-            if (!evt.IsToPlayer && evt.EnemyIndex >= 0 && evt.EnemyIndex < _enemySlots.Count)
-            {
-                _enemySlots[evt.EnemyIndex]?.Refresh();
-
-                // Silencing an enemy (Stunned) neutralises its turn — clear the intent immediately
-                // so the player sees the threat is handled rather than a move that will never fire.
-                if (evt.Behavior is StunnedStatus && evt.Stacks > 0)
-                    _enemySlots[evt.EnemyIndex]?.ClearIntent();
-            }
-        }
+        private void OnStatusEffectApplied(StatusEffectAppliedEvent evt) => RequestStatsRefresh();
 
         private void OnOpinionChanged(OpinionChangedEvent evt) => RequestStatsRefresh();
 
         private void OnTurnLimitUpdated(TurnLimitUpdatedEvent evt) => RequestStatsRefresh();
-
-        private void OnEnemyTurncoat(EnemyTurncoatEvent evt)
-        {
-            if (evt.EnemyIndex >= 0 && evt.EnemyIndex < _enemySlots.Count)
-            {
-                _enemySlots[evt.EnemyIndex]?.Refresh();
-                _enemySlots[evt.EnemyIndex]?.PulseHostility();
-            }
-        }
 
         private void RefreshOpinionMeter()
         {
@@ -530,14 +466,6 @@ namespace Crookedile.UI.Battle
                 battleManager.CurrentSupport,
                 battleManager.CurrentDenial
             );
-        }
-
-        private void OnEnemyActing(EnemyActingEvent evt)
-        {
-            if (evt.EnemyIndex >= _enemySlots.Count)
-                return;
-            _enemySlots[evt.EnemyIndex]?.PulseIntent();
-            _enemySlots[evt.EnemyIndex]?.ClearIntent();
         }
 
         #endregion
@@ -566,12 +494,8 @@ namespace Crookedile.UI.Battle
 
             _playerSlotUI?.Refresh();
 
-            // Enemy slots — refresh + focus highlight
-            for (int i = 0; i < _enemySlots.Count; i++)
-            {
-                _enemySlots[i]?.Refresh();
-                _enemySlots[i]?.SetSelected(i == battleManager.FocusedEnemyIndex);
-            }
+            // Enemy slots — refresh + focus highlight (owned by EnemyRowPanel)
+            enemyRow?.RefreshAll(battleManager.FocusedEnemyIndex);
 
             // Card zone counts
             DeckManager deck = battleManager.PlayerDeck;
@@ -640,88 +564,13 @@ namespace Crookedile.UI.Battle
 
         #region Enemy Slots
 
-        private void BuildEnemySlots()
-        {
-            // Return all current slots to the pool (or destroy if no pool).
-            foreach (var slot in _enemySlots)
-            {
-                if (slot == null)
-                    continue;
-                if (BattlePoolManager.Instance != null)
-                    BattlePoolManager.Instance.ReturnSlot(slot);
-                else
-                    Destroy(slot.gameObject);
-            }
-
-            _enemySlots.Clear();
-
-            if (enemySlotContainer == null || battleManager == null)
-                return;
-            if (BattlePoolManager.Instance == null && enemySlotPrefab == null)
-                return;
-
-            for (int i = 0; i < battleManager.Enemies.Count; i++)
-            {
-                EnemySlotUI slot =
-                    BattlePoolManager.Instance != null
-                        ? BattlePoolManager.Instance.RentSlot(enemySlotContainer)
-                        : Instantiate(enemySlotPrefab, enemySlotContainer)
-                            .GetComponent<EnemySlotUI>();
-
-                if (slot != null)
-                {
-                    slot.Initialize(
-                        i,
-                        battleManager,
-                        battleManager.PlayerOrigin,
-                        battleManager.Enemies[i].EnemyData
-                    );
-                    _enemySlots.Add(slot);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Spawns a new enemy slot for the enemy at <paramref name="index"/> in
-        /// <c>BattleManager.Enemies</c>. Called when a <c>SummonMinion</c> move fires.
-        /// </summary>
-        private void AddEnemySlot(int index)
-        {
-            if (enemySlotContainer == null || battleManager == null)
-                return;
-            if (BattlePoolManager.Instance == null && enemySlotPrefab == null)
-                return;
-            if (index >= battleManager.Enemies.Count)
-                return;
-
-            EnemySlotUI slot =
-                BattlePoolManager.Instance != null
-                    ? BattlePoolManager.Instance.RentSlot(enemySlotContainer)
-                    : Instantiate(enemySlotPrefab, enemySlotContainer).GetComponent<EnemySlotUI>();
-
-            if (slot != null)
-            {
-                slot.Initialize(
-                    index,
-                    battleManager,
-                    battleManager.PlayerOrigin,
-                    battleManager.Enemies[index].EnemyData
-                );
-                _enemySlots.Add(slot);
-            }
-        }
-
         /// <summary>
         /// Returns the <see cref="RectTransform"/> of the enemy slot at the given index,
         /// or null if the index is out of range or the slot has been destroyed.
         /// Used by <see cref="BattleFeedbackController"/> to aim VFX at specific enemy panels.
         /// </summary>
-        public RectTransform GetEnemySlotTransform(int index)
-        {
-            if (index < 0 || index >= _enemySlots.Count || _enemySlots[index] == null)
-                return null;
-            return _enemySlots[index].GetComponent<RectTransform>();
-        }
+        public RectTransform GetEnemySlotTransform(int index) =>
+            enemyRow?.GetSlotTransform(index);
 
         #endregion
 
