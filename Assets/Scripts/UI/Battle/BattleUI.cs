@@ -122,29 +122,11 @@ namespace Crookedile.UI.Battle
 
         #endregion
 
-        #region Card Zone Buttons
-        [Header("Card Zone Buttons")]
+        #region Card Zone Bar
+        [Header("Card Zone Bar")]
+        [Tooltip("Self-subscribing zone bar — owns deck/discard/exhaust buttons, counts, and grant animations.")]
         [SerializeField]
-        private Button discardZoneButton;
-
-        [SerializeField]
-        private Button exhaustZoneButton;
-
-        [SerializeField]
-        private Button deckZoneButton;
-
-        [SerializeField]
-        private TMP_Text discardCountText;
-
-        [SerializeField]
-        private TMP_Text exhaustCountText;
-
-        [SerializeField]
-        private TMP_Text deckCountText;
-
-        [Header("Card Zone Panel")]
-        [SerializeField]
-        private CardZonePanel cardZonePanel;
+        private CardZoneBar cardZoneBar;
 
         [Header("Reward")]
         [Tooltip("CardDatabase ScriptableObject used to generate post-battle card offers.")]
@@ -156,15 +138,6 @@ namespace Crookedile.UI.Battle
         )]
         [SerializeField]
         private RewardScreen _rewardScreen;
-
-        [Header("Card Grant Animation")]
-        [Tooltip("Seconds for the zone count text to scale up on card grant arrival.")]
-        [SerializeField]
-        private float _countPunchDuration = 0.25f;
-
-        [Tooltip("Scale multiplier applied to the count text at the peak of the punch.")]
-        [SerializeField]
-        private float _countPunchScale = 1.4f;
 
         #endregion
 
@@ -217,8 +190,6 @@ namespace Crookedile.UI.Battle
             Sub<SupportChangedEvent>(OnSupportChanged);
             Sub<DenialChangedEvent>(OnDenialChanged);
             Sub<StatusEffectAppliedEvent>(OnStatusEffectApplied);
-            Sub<CardGrantedEvent>(OnCardGranted);
-            Sub<CardExhaustedEvent>(OnCardExhausted);
             Sub<OpinionChangedEvent>(OnOpinionChanged);
             Sub<TurnLimitUpdatedEvent>(OnTurnLimitUpdated);
         }
@@ -243,10 +214,7 @@ namespace Crookedile.UI.Battle
             logPanel?.Bind(manager);
             handPanel?.Bind(manager, OnCardButtonClicked);
             enemyRow?.Bind(manager);
-
-            discardZoneButton?.onClick.AddListener(ShowDiscardZone);
-            exhaustZoneButton?.onClick.AddListener(ShowExhaustZone);
-            deckZoneButton?.onClick.AddListener(ShowDeckZone);
+            cardZoneBar?.Bind(manager);
 
             if (resultPanel != null)
                 resultPanel.OnContinueClicked += OnResultContinueClicked;
@@ -322,86 +290,6 @@ namespace Crookedile.UI.Battle
             RequestStatsRefresh();
         }
 
-        private void OnCardGranted(CardGrantedEvent evt)
-        {
-            if (!evt.IsPlayer)
-                return;
-            Transform target = evt.ToDiscard
-                ? discardZoneButton.transform
-                : deckZoneButton.transform;
-            TMP_Text counter = evt.ToDiscard ? discardCountText : deckCountText;
-            CardGrantedAnimationSequence(evt.Card, target, counter).Forget();
-        }
-
-        private void OnCardExhausted(CardExhaustedEvent evt)
-        {
-            // Ensure exhaust count is always up-to-date regardless of trigger source
-            // (ExhaustFromDiscard does not go through CardPlayedEvent → UpdateStatsDisplay).
-            if (!evt.IsPlayer)
-                return;
-            RequestStatsRefresh();
-        }
-
-        /// <summary>
-        /// Rents a card button, initialises it display-only, then asks CardFlyAnimator to
-        /// show it at screen centre and fly it to the target zone.  On arrival the count
-        /// text receives a scale-punch and the button is returned to the pool.
-        /// </summary>
-        private async UniTaskVoid CardGrantedAnimationSequence(
-            CardData card,
-            Transform targetZone,
-            TMP_Text countText
-        )
-        {
-            var btn = BattlePoolManager.Instance?.RentCard(card.CardType, transform);
-            if (btn == null)
-            {
-                RequestStatsRefresh();
-                return;
-            }
-
-            int ap = battleManager?.PlayerStats.CurrentActionPoints ?? 0;
-            int cost = battleManager?.GetEffectiveCardCost(card) ?? 1;
-            btn.Initialize(card, 0, ap, cost, forceUnplayable: true);
-
-            if (CardFlyAnimator.Instance == null)
-            {
-                // No animator — skip the flight, count the card and return the button.
-                RequestStatsRefresh();
-                BattlePoolManager.Instance?.ReturnCard(btn);
-                return;
-            }
-
-            var arrived = new UniTaskCompletionSource();
-            CardFlyAnimator.Instance.AnimateCardGranted(
-                btn,
-                targetZone,
-                () =>
-                {
-                    RequestStatsRefresh();
-                    PunchCountText(countText);
-                    BattlePoolManager.Instance?.ReturnCard(btn);
-                    arrived.TrySetResult();
-                }
-            );
-
-            await arrived.Task.AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-        }
-
-        private void PunchCountText(TMP_Text text)
-        {
-            if (text == null)
-                return;
-            text.transform.DOKill();
-            text.transform.DOScale(Vector3.one * _countPunchScale, _countPunchDuration * 0.5f)
-                .SetEase(Ease.OutQuad)
-                .OnComplete(() =>
-                    text
-                        .transform.DOScale(Vector3.one, _countPunchDuration * 0.5f)
-                        .SetEase(Ease.InQuad)
-                )
-                .SetLink(gameObject);
-        }
 
         private void OnEnemySummoned(EnemySummonedEvent evt)
         {
@@ -497,17 +385,8 @@ namespace Crookedile.UI.Battle
             // Enemy slots — refresh + focus highlight (owned by EnemyRowPanel)
             enemyRow?.RefreshAll(battleManager.FocusedEnemyIndex);
 
-            // Card zone counts
-            DeckManager deck = battleManager.PlayerDeck;
-            if (deck != null)
-            {
-                if (discardCountText != null)
-                    discardCountText.text = deck.DiscardCount.ToString();
-                if (exhaustCountText != null)
-                    exhaustCountText.text = deck.ExhaustCount.ToString();
-                if (deckCountText != null)
-                    deckCountText.text = deck.DeckCount.ToString();
-            }
+            // Card zone counts (owned by CardZoneBar)
+            cardZoneBar?.RefreshCounts();
 
             // Refresh opinion meter so Support/Denial shields stay in sync.
             RefreshOpinionMeter();
@@ -649,40 +528,6 @@ namespace Crookedile.UI.Battle
                 RunState.Clear();
                 SceneLoader.Instance?.ReloadCurrentScene();
             }
-        }
-
-        #endregion
-
-        #region Card Zone Viewers
-
-        private void ShowDiscardZone()
-        {
-            if (cardZonePanel == null || battleManager?.PlayerDeck == null)
-                return;
-            cardZonePanel.Open("Discard Pile", battleManager.PlayerDeck.DiscardPile);
-        }
-
-        private void ShowExhaustZone()
-        {
-            if (cardZonePanel == null || battleManager?.PlayerDeck == null)
-                return;
-            cardZonePanel.Open("Exhaust Pile", battleManager.PlayerDeck.ExhaustPile);
-        }
-
-        private void ShowDeckZone()
-        {
-            if (cardZonePanel == null || battleManager?.PlayerDeck == null)
-                return;
-
-            // Shuffle display copy — don't reveal the real draw order.
-            var display = new List<CardData>(battleManager.PlayerDeck.DrawPile);
-            for (int i = display.Count - 1; i > 0; i--)
-            {
-                int j = Random.Range(0, i + 1);
-                (display[i], display[j]) = (display[j], display[i]);
-            }
-
-            cardZonePanel.Open("Draw Pile", display);
         }
 
         #endregion
