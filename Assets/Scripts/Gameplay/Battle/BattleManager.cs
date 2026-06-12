@@ -744,409 +744,44 @@ namespace Crookedile.Gameplay.Battle
             _stateMachine?.Update();
         }
 
-        #region Battle States
+        #region Internal state-machine surface
 
-        /// <summary>Shared base for the battle's FSM states — holds the owning BattleManager.</summary>
-        private abstract class BattleStateBase : State
+        // The FSM states live in Battle/States/ as internal classes. They drive the battle
+        // through the public API plus this narrow internal surface — keep it minimal; states
+        // should not reach arbitrary private fields.
+
+        /// <summary>Opening hand size (InitializeState).</summary>
+        internal int StartingHandSize => _startingHandSize;
+
+        /// <summary>Base card draw per player turn, before hostile-crowd bonus draws (TurnStartState).</summary>
+        internal int CardsPerTurn => _cardsPerTurn;
+
+        /// <summary>Pause before the enemy side acts (OpponentTurnState).</summary>
+        internal float OpponentTurnDelay => _opponentTurnDelay;
+
+        /// <summary>Pause between individual enemy actions (OpponentTurnState).</summary>
+        internal float PerEnemyAttackDelay => _perEnemyAttackDelay;
+
+        /// <summary>Resets per-battle session state: banked pools and the card-play pipeline (InitializeState).</summary>
+        internal void ResetBattleSessionState()
         {
-            protected readonly BattleManager _manager;
-
-            protected BattleStateBase(BattleManager manager) => _manager = manager;
+            _patronage.Reset();
+            _attention.Reset();
+            _cards.ResetForBattle();
         }
 
-        /// <summary>Initialize State — draws the player's opening hand.</summary>
-        private class InitializeState : BattleStateBase
+        /// <summary>Advances the player-turn counter and fires per-player-turn passives (TurnStartState).</summary>
+        internal void FirePlayerTurnStartPassives()
         {
-            public InitializeState(BattleManager manager)
-                : base(manager) { }
-
-            public override void OnEnter()
-            {
-                GameLogger.LogInfo<BattleManager>("Initializing battle...");
-
-                // Banked pools and the card-play pipeline reset per battle, not per turn.
-                _manager._patronage.Reset();
-                _manager._attention.Reset();
-                _manager._cards.ResetForBattle();
-
-                // Draw player's opening hand; enemies have no deck
-                _manager._playerDeck.StartBattle(_manager._startingHandSize);
-
-                // Fire battle-start passive AFTER the opening hand is dealt
-                // (e.g. Faith Leader's Opening Prayer draws 1 extra card on top of the base hand)
-                _manager._passiveResolver?.FireBattleStart(_manager._playerDeck);
-
-                _manager.TransitionToState(BattleState.TurnStart);
-            }
+            _playerTurnNumber++;
+            _passiveResolver?.FireTurnStart(_playerTurnNumber);
         }
 
-        /// <summary>
-        /// Turn Start State — draws cards for the player and, on player turns,
-        /// has the enemy declare their intent (Slay the Spire timing: player sees
-        /// the threat BEFORE deciding which cards to play).
-        /// </summary>
-        private class TurnStartState : BattleStateBase
-        {
-            public TurnStartState(BattleManager manager)
-                : base(manager) { }
+        /// <summary>Bumps the Judgment turn-limit counter (TurnEndState).</summary>
+        internal void IncrementPlayerTurnsElapsed() => _playerTurnsElapsed++;
 
-            public override void OnEnter()
-            {
-                _manager.NextTurn();
-                _manager.StartTurn();
-
-                GameLogger.LogInfo<BattleManager>($"Starting turn {_manager.CurrentTurn}");
-
-                if (_manager.IsPlayerTurn)
-                {
-                    // Track the player's personal turn count and fire per-player-turn passives
-                    _manager._playerTurnNumber++;
-                    _manager._passiveResolver?.FireTurnStart(_manager._playerTurnNumber);
-
-                    // Count bonus draws BEFORE snapshotting (BecameHostileThisTurn reflects last turn's escalations)
-                    int bonusDraws = 0;
-                    foreach (var enemy in _manager._enemies)
-                    {
-                        if (
-                            !enemy.IsDefeated
-                            && (enemy.Stats.IsHostile || enemy.BecameHostileThisTurn)
-                        )
-                            bonusDraws++;
-                    }
-
-                    // Snapshot hostility for the new turn (resets BecameHostileThisTurn on all enemies)
-                    foreach (var enemy in _manager._enemies)
-                        enemy.SnapshotHostilityForTurn();
-
-                    // Draw cards — base draw plus one per hostile/newly-hostile enemy
-                    int totalDraw = _manager._cardsPerTurn + bonusDraws;
-                    _manager._playerDeck.StartTurn(totalDraw);
-
-                    if (bonusDraws > 0)
-                        GameLogger.LogInfo<BattleManager>(
-                            $"Hostile crowd: drawing +{bonusDraws} extra card(s) ({totalDraw} total)"
-                        );
-
-                    // Every living enemy declares their intent (Slay the Spire timing)
-                    for (int i = 0; i < _manager._enemies.Count; i++)
-                    {
-                        var enemy = _manager._enemies[i];
-                        if (enemy.IsDefeated)
-                            continue;
-                        EnemyMoveData intent = enemy.SelectNextMove(_manager._enemies);
-                        if (intent != null)
-                        {
-                            EventBus.Publish(
-                                new EnemyIntentDeclaredEvent { Move = intent, EnemyIndex = i }
-                            );
-                            GameLogger.LogInfo<BattleManager>(
-                                $"Enemy [{i}] {enemy.EnemyData.EnemyName} declares: {intent.MoveName}"
-                            );
-                        }
-                    }
-                }
-                // Enemy turn: no card draw; intent was already declared during the previous player turn
-
-                EventBus.Publish(
-                    new TurnStartedEvent
-                    {
-                        TurnNumber = _manager.CurrentTurn,
-                        IsPlayerTurn = _manager.IsPlayerTurn,
-                    }
-                );
-
-                _manager.TransitionToState(
-                    _manager.IsPlayerTurn ? BattleState.PlayerTurn : BattleState.OpponentTurn
-                );
-            }
-        }
-
-        /// <summary>Player Turn State — waits for the UI to call <see cref="RequestEndTurn"/>.</summary>
-        private class PlayerTurnState : BattleStateBase
-        {
-            public PlayerTurnState(BattleManager manager)
-                : base(manager) { }
-
-            public override void OnEnter() =>
-                GameLogger.LogInfo<BattleManager>("Player's turn started");
-
-            public override void OnExit() =>
-                GameLogger.LogInfo<BattleManager>("Player's turn ended");
-
-            public override void OnUpdate()
-            {
-                // Waits for the UI to call RequestEndTurn()
-            }
-        }
-
-        /// <summary>
-        /// Opponent Turn State — waits <c>_opponentTurnDelay</c> seconds, then resolves all
-        /// living enemies' declared moves and transitions to TurnEnd.
-        /// The delay gives the player a visible pause before damage lands.
-        /// </summary>
-        private class OpponentTurnState : BattleStateBase
-        {
-            public OpponentTurnState(BattleManager manager)
-                : base(manager) { }
-
-            public override void OnEnter()
-            {
-                ExecuteAfterDelay(_manager.GetCancellationTokenOnDestroy()).Forget();
-            }
-
-            private async UniTaskVoid ExecuteAfterDelay(System.Threading.CancellationToken ct)
-            {
-                await UniTask.WaitForSeconds(_manager._opponentTurnDelay, cancellationToken: ct);
-
-                GameLogger.LogInfo<BattleManager>("Enemy turn started — all living enemies act");
-
-                // Capture count before the loop so summoned enemies act next turn, not this one.
-                int enemyCount = _manager._enemies.Count;
-
-                // Two-pass resolution. Pass 1: modifier intents (e.g. RileOthers) resolve first so
-                // their board changes — amplifying allies' hostility, summoning bodies — land before
-                // the direct hits. Pass 2: direct intents (attacks, shields) resolve left to right.
-                for (int i = 0; i < enemyCount; i++)
-                {
-                    var intent = _manager._enemies[i].CurrentIntent;
-                    if (intent != null && IsModifierIntent(intent.MoveType))
-                    {
-                        await ResolveSingleEnemyAction(i, ct);
-                        if (_manager.CurrentState == BattleState.BattleEnd)
-                            return;
-                    }
-                }
-
-                for (int i = 0; i < enemyCount; i++)
-                {
-                    var intent = _manager._enemies[i].CurrentIntent;
-                    if (intent != null && !IsModifierIntent(intent.MoveType))
-                    {
-                        await ResolveSingleEnemyAction(i, ct);
-                        if (_manager.CurrentState == BattleState.BattleEnd)
-                            return;
-                    }
-                }
-
-                // Restore resolver to the player's current focused target
-                if (_manager.FocusedEnemy != null)
-                    _manager._effectResolver.SetFocusedOpponent(
-                        _manager.FocusedEnemy.Stats,
-                        _manager.FocusedEnemy.StatusEffects,
-                        _manager.FocusedEnemyIndex,
-                        _manager.FocusedEnemy.EnemyData.EnemyName
-                    );
-
-                _manager.TransitionToState(BattleState.TurnEnd);
-            }
-
-            /// <summary>
-            /// Resolves one enemy's declared action: stun / receptive-skip checks, the acting
-            /// signal + pause, effect resolution, and SummonMinion handling. Ends the battle early
-            /// (transitioning to BattleEnd) if the player is defeated mid-action — callers should
-            /// stop once <see cref="CurrentState"/> is BattleEnd.
-            /// </summary>
-            private async UniTask ResolveSingleEnemyAction(
-                int i,
-                System.Threading.CancellationToken ct
-            )
-            {
-                var enemy = _manager._enemies[i];
-                if (enemy.IsDefeated || enemy.CurrentIntent == null)
-                    return;
-
-                // Stunned or Silenced enemies skip their entire action for this turn.
-                // (Silence is the Faith Leader's "shut them up" — also how a Hardened enemy is handled
-                // when pacify-conversion can't convert it.)
-                if (
-                    enemy.StatusEffects.HasStatus<StunnedStatus>()
-                    || enemy.StatusEffects.HasStatus<SilencedStatus>()
-                )
-                {
-                    GameLogger.LogInfo<BattleManager>(
-                        $"Enemy [{i}] {enemy.EnemyData.EnemyName} is silenced/stunned — skipping action"
-                    );
-                    return;
-                }
-
-                // Doubt (pacify): a doubting enemy may hold back its action (soft skip, 25% per stack).
-                int doubt = enemy.StatusEffects.GetStacks<DoubtStatus>();
-                if (doubt > 0)
-                {
-                    float doubtSkip = Mathf.Clamp01(doubt * 0.25f);
-                    if (UnityEngine.Random.value < doubtSkip)
-                    {
-                        GameLogger.LogInfo<BattleManager>(
-                            $"Enemy [{i}] {enemy.EnemyData.EnemyName} hesitates (Doubt skip {doubtSkip:P0})"
-                        );
-                        EventBus.Publish(
-                            new EnemySkippedTurnEvent
-                            {
-                                EnemyIndex = i,
-                                EnemyName = enemy.EnemyData.EnemyName,
-                            }
-                        );
-                        return;
-                    }
-                }
-
-                // Receptive enemies have a chance to hold back (20% per negative hostility stack).
-                if (enemy.Stats.IsReceptive)
-                {
-                    float skipChance = Mathf.Clamp01(Mathf.Abs(enemy.Stats.CurrentHostility) * 0.20f);
-                    if (UnityEngine.Random.value < skipChance)
-                    {
-                        GameLogger.LogInfo<BattleManager>(
-                            $"Enemy [{i}] {enemy.EnemyData.EnemyName} is Receptive — held back "
-                                + $"(skip chance {skipChance:P0})"
-                        );
-                        EventBus.Publish(
-                            new EnemySkippedTurnEvent
-                            {
-                                EnemyIndex = i,
-                                EnemyName = enemy.EnemyData.EnemyName,
-                            }
-                        );
-                        return;
-                    }
-                }
-
-                // Signal the UI: this enemy is about to act (shake + highlight intent panel)
-                EventBus.Publish(new EnemyActingEvent { EnemyIndex = i, Move = enemy.CurrentIntent });
-
-                // Brief pause so the player sees the signal before damage lands
-                await UniTask.WaitForSeconds(_manager._perEnemyAttackDelay, cancellationToken: ct);
-
-                GameLogger.LogInfo<BattleManager>(
-                    $"Enemy [{i}] {enemy.EnemyData.EnemyName} executes: {enemy.CurrentIntent.MoveName}"
-                );
-
-                // Temporarily point EffectResolver at this enemy as the caster
-                _manager._effectResolver.SetFocusedOpponent(
-                    enemy.Stats,
-                    enemy.StatusEffects,
-                    i,
-                    enemy.EnemyData.EnemyName
-                );
-                var move = enemy.CurrentIntent;
-                await _manager._effectResolver.ResolveEnemyMoveEffects(move, ct);
-
-                // If the player was defeated by this move, end the battle before any further actions.
-                if (_manager.CheckAndEndBattleIfOver())
-                    return;
-
-                // Handle SummonMinion moves after normal effects resolve.
-                if (move.MoveType == EnemyMoveType.SummonMinion && move.MinionToSummon != null)
-                    _manager.SummonMinions(move.MinionToSummon, move.MinionCount);
-            }
-
-            /// <summary>
-            /// Modifier intents reshape the board (other enemies / new bodies) and resolve before
-            /// direct intents so their effects apply this turn. Add future board-modifiers (e.g. Sway)
-            /// here.
-            /// </summary>
-            private static bool IsModifierIntent(EnemyMoveType type) =>
-                type == EnemyMoveType.RileOthers || type == EnemyMoveType.SummonMinion;
-        }
-
-        /// <summary>Turn End State — cleanup effects, check victory, advance.</summary>
-        private class TurnEndState : BattleStateBase
-        {
-            public TurnEndState(BattleManager manager)
-                : base(manager) { }
-
-            public override void OnEnter()
-            {
-                _manager.EndTurn();
-                GameLogger.LogInfo<BattleManager>("Ending turn");
-
-                EventBus.Publish(
-                    new TurnEndedEvent
-                    {
-                        TurnNumber = _manager.CurrentTurn,
-                        WasPlayerTurn = _manager.IsPlayerTurn,
-                    }
-                );
-
-                // Track player turns and check the Judgment turn limit.
-                if (_manager.IsPlayerTurn)
-                {
-                    _manager._playerTurnsElapsed++;
-
-                    int remaining =
-                        _manager._maxTurns > 0
-                            ? Mathf.Max(0, _manager._maxTurns - _manager._playerTurnsElapsed)
-                            : 0;
-
-                    EventBus.Publish(
-                        new TurnLimitUpdatedEvent
-                        {
-                            PlayerTurnsElapsed = _manager._playerTurnsElapsed,
-                            MaxTurns = _manager._maxTurns,
-                            TurnsRemaining = remaining,
-                        }
-                    );
-
-                    if (
-                        _manager._maxTurns > 0
-                        && _manager._playerTurnsElapsed >= _manager._maxTurns
-                    )
-                    {
-                        // Judgment — outcome decided by majority opinion
-                        var ledger = _manager._opinion;
-                        int threshold = ledger.MaxOpinion / 2;
-                        bool isVictory = ledger.CurrentOpinion >= threshold;
-
-                        _manager._battleResult = new BattleResult
-                        {
-                            isVictory = isVictory,
-                            turnsToWin = _manager._currentTurn,
-                            finalPlayerSupport = ledger.CurrentSupport,
-                            finalPlayerHostility = _manager._playerStats.CurrentHostility,
-                            finalOpinion = ledger.CurrentOpinion,
-                            wasJudgmentVictory = isVictory,
-                        };
-
-                        EventBus.Publish(
-                            new JudgmentEvent
-                            {
-                                FinalOpinion = ledger.CurrentOpinion,
-                                Threshold = threshold,
-                                IsVictory = isVictory,
-                            }
-                        );
-
-                        GameLogger.LogInfo<BattleManager>(
-                            $"Judgment! Opinion {ledger.CurrentOpinion}/{ledger.MaxOpinion} — {(isVictory ? "VICTORY" : "DEFEAT")}"
-                        );
-
-                        _manager.TransitionToState(BattleState.BattleEnd);
-                        return;
-                    }
-                }
-
-                if (_manager.CheckVictoryConditions())
-                    _manager.TransitionToState(BattleState.BattleEnd);
-                else
-                    _manager.TransitionToState(BattleState.TurnStart);
-            }
-        }
-
-        /// <summary>Battle End State — publishes the result event.</summary>
-        private class BattleEndState : BattleStateBase
-        {
-            public BattleEndState(BattleManager manager)
-                : base(manager) { }
-
-            public override void OnEnter()
-            {
-                BattleResult result = _manager.GetBattleResult();
-                GameLogger.LogInfo<BattleManager>(
-                    $"Battle ended — {(result.isVictory ? "VICTORY" : "DEFEAT")}"
-                );
-                EventBus.Publish(new BattleEndedEvent { Result = result });
-            }
-        }
+        /// <summary>Caches the battle result (TurnEndState's Judgment path).</summary>
+        internal void SetBattleResult(BattleResult result) => _battleResult = result;
 
         #endregion
     }
