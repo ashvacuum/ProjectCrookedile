@@ -178,12 +178,6 @@ namespace Crookedile.UI.Battle
         private bool _cardChoiceActive;
         private List<EnemySlotUI> _enemySlots = new List<EnemySlotUI>();
         private CardChoiceRequestedEvent _pendingCardChoice;
-        private bool _handRefreshPending;
-
-        /// <summary>Card button extracted from hand on CardPlayedEvent, waiting for VFX to finish before animating to discard.</summary>
-        private CardButton _pendingDiscardButton;
-
-        private HashSet<CardData> _pendingDrawnCards = new HashSet<CardData>();
         private Sequence _battleInfoFadeSeq;
 
         /// <summary>One-frame coalescing flag — see <see cref="RequestStatsRefresh"/>.</summary>
@@ -221,8 +215,6 @@ namespace Crookedile.UI.Battle
         {
             Sub<BattleStateChangedEvent>(OnBattleStateChanged);
             Sub<BattleStartedEvent>(OnBattleStarted);
-            Sub<TurnStartedEvent>(OnTurnStarted);
-            Sub<TurnEndedEvent>(OnTurnEnded);
             Sub<CardPlayedEvent>(OnCardPlayed);
             Sub<BattleEndedEvent>(OnBattleEnded);
             Sub<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
@@ -232,20 +224,13 @@ namespace Crookedile.UI.Battle
             Sub<CardChoiceRequestedEvent>(OnCardChoiceRequested);
             Sub<SupportChangedEvent>(OnSupportChanged);
             Sub<DenialChangedEvent>(OnDenialChanged);
-            Sub<DamageDealtEvent>(OnDamageDealt);
             Sub<EnemyActingEvent>(OnEnemyActing);
-            Sub<CardDrawnEvent>(OnCardDrawn);
             Sub<StatusEffectAppliedEvent>(OnStatusEffectApplied);
-            Sub<CardPlayResolvedEvent>(OnCardPlayResolved);
             Sub<CardGrantedEvent>(OnCardGranted);
             Sub<CardExhaustedEvent>(OnCardExhausted);
             Sub<OpinionChangedEvent>(OnOpinionChanged);
             Sub<TurnLimitUpdatedEvent>(OnTurnLimitUpdated);
-            Sub<JudgmentEvent>(OnJudgment);
-            Sub<EnemySkippedTurnEvent>(OnEnemySkippedTurn);
-            Sub<EchoChamberChangedEvent>(OnEchoChamberChanged);
             Sub<EnemyTurncoatEvent>(OnEnemyTurncoat);
-            Sub<ActionPointsChangedEvent>(OnActionPointsChanged);
         }
 
         private void UnsubscribeFromEvents()
@@ -263,6 +248,10 @@ namespace Crookedile.UI.Battle
         public void Initialize(BattleManager manager)
         {
             battleManager = manager;
+
+            // Self-subscribing panels get their battle context here.
+            logPanel?.Bind(manager);
+            handPanel?.Bind(manager, OnCardButtonClicked);
 
             discardZoneButton?.onClick.AddListener(ShowDiscardZone);
             exhaustZoneButton?.onClick.AddListener(ShowExhaustZone);
@@ -331,112 +320,15 @@ namespace Crookedile.UI.Battle
 
         private void OnBattleStarted(BattleStartedEvent evt)
         {
-            logPanel?.AddEntry("=== Battle Started ===");
             _playerSlotUI?.Initialize(battleManager, evt.Setup.GetPlayerPortrait());
             BuildEnemySlots();
             RequestStatsRefresh();
         }
 
-        private void OnTurnStarted(TurnStartedEvent evt)
-        {
-            string owner = evt.IsPlayerTurn ? "Player" : "Opponent";
-            logPanel?.AddEntry($"--- Turn {evt.TurnNumber}: {owner} ---");
-        }
-
-        private void OnTurnEnded(TurnEndedEvent evt)
-        {
-            // Data-only — structural changes handled by BattleStateChangedEvent.
-        }
-
         private void OnCardPlayed(CardPlayedEvent evt)
         {
-            logPanel?.AddEntry(
-                $"{(evt.IsPlayer ? "Player" : "Opponent")} played: {evt.Card.CardName}"
-            );
+            // Narration → BattleLogPanel; hand choreography → HandPanel (both self-subscribe).
             RequestStatsRefresh();
-
-            if (evt.IsPlayer)
-            {
-                // Extract the card from hand immediately so the layout closes the gap,
-                // but hold it — the discard animation fires in OnCardPlayResolved so the
-                // sequence is: VFX resolves → card flies to discard → new draws appear.
-                GameLogger.LogInfo(
-                    "Card",
-                    $"Extracted '{evt.Card.CardName}' from hand — awaiting VFX complete before discard"
-                );
-                _pendingDiscardButton = handPanel?.ExtractCard(evt.Card);
-            }
-            else
-            {
-                // Enemy card — no VFX sequencing needed; refresh hand immediately.
-                if (!_handRefreshPending)
-                {
-                    _handRefreshPending = true;
-                    RefreshHandNextFrame().Forget();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Fires after a played card fully resolves (VFX done or none, effects applied).
-        /// Begins the discard animation; once the card lands in the discard pile the hand
-        /// refreshes — so newly drawn cards appear AFTER the discard, not during VFX.
-        /// </summary>
-        private void OnCardPlayResolved(CardPlayResolvedEvent evt)
-        {
-            GameLogger.LogInfo(
-                "Card",
-                $"CardPlayResolved for '{evt.Card?.CardName}' — starting discard animation"
-            );
-
-            if (_pendingDiscardButton != null)
-            {
-                var btn = _pendingDiscardButton;
-                _pendingDiscardButton = null;
-
-                CardFlyAnimator.Instance?.AnimateDiscardOut(
-                    btn,
-                    () =>
-                    {
-                        GameLogger.LogInfo(
-                            "Card",
-                            $"Discard animation done for '{btn.CardData?.CardName}' — returning to pool and refreshing hand"
-                        );
-                        BattlePoolManager.Instance?.ReturnCard(btn);
-
-                        // Refresh hand AFTER discard so any drawn cards appear once the discard lands.
-                        if (!_handRefreshPending)
-                        {
-                            _handRefreshPending = true;
-                            RefreshHandNextFrame().Forget();
-                        }
-                    }
-                );
-            }
-            else
-            {
-                // No card to discard (no-VFX card that was already handled, or edge case).
-                GameLogger.LogWarning(
-                    "Card",
-                    $"CardPlayResolved for '{evt.Card?.CardName}' but no pending discard button found"
-                );
-                if (!_handRefreshPending)
-                {
-                    _handRefreshPending = true;
-                    RefreshHandNextFrame().Forget();
-                }
-            }
-        }
-
-        private void OnCardDrawn(CardDrawnEvent evt)
-        {
-            if (!evt.IsPlayer)
-                return; // enemy draws don't affect the player's hand panel
-            _pendingDrawnCards.Add(evt.Card); // track which cards are new this batch
-            if (_handRefreshPending)
-                return; // coroutine already running — just add to batch
-            _handRefreshPending = true;
-            RefreshHandNextFrame().Forget();
         }
 
         private void OnCardGranted(CardGrantedEvent evt)
@@ -457,34 +349,6 @@ namespace Crookedile.UI.Battle
             if (!evt.IsPlayer)
                 return;
             RequestStatsRefresh();
-        }
-
-        /// <summary>
-        /// Keeps card affordability dimming in sync the moment AP changes, instead of
-        /// waiting for the post-VFX hand refresh.
-        /// </summary>
-        private void OnActionPointsChanged(ActionPointsChangedEvent evt)
-        {
-            if (!evt.IsPlayer)
-                return;
-            handPanel?.RefreshAffordability(evt.NewValue);
-        }
-
-        private async UniTaskVoid RefreshHandNextFrame()
-        {
-            // Wait one frame so all draw events from one effect batch together.
-            await UniTask.NextFrame(this.GetCancellationTokenOnDestroy());
-            _handRefreshPending = false;
-            var drawn =
-                _pendingDrawnCards.Count > 0 ? new HashSet<CardData>(_pendingDrawnCards) : null;
-            _pendingDrawnCards.Clear();
-
-            // If cards were drawn, merge them in and animate only the new ones;
-            // otherwise just reposition and re-init the existing buttons.
-            if (drawn != null)
-                handPanel?.AddDrawnCards(drawn, battleManager, OnCardButtonClicked);
-            else
-                handPanel?.RearrangeCurrentHand(battleManager, OnCardButtonClicked);
         }
 
         /// <summary>
@@ -550,10 +414,6 @@ namespace Crookedile.UI.Battle
 
         private void OnEnemyIntentDeclared(EnemyIntentDeclaredEvent evt)
         {
-            if (evt.Move != null)
-                logPanel?.AddEntry(
-                    $"Enemy [{evt.EnemyIndex}] intends: {evt.Move.IntentDescription}"
-                );
             if (evt.EnemyIndex < _enemySlots.Count)
                 _enemySlots[evt.EnemyIndex]?.UpdateIntent(evt.Move);
         }
@@ -569,7 +429,6 @@ namespace Crookedile.UI.Battle
 
         private void OnEnemyDefeated(EnemyDefeatedEvent evt)
         {
-            logPanel?.AddEntry($"{evt.EnemyName} defeated!");
             if (evt.EnemyIndex >= _enemySlots.Count)
                 return;
 
@@ -587,15 +446,12 @@ namespace Crookedile.UI.Battle
 
         private void OnEnemySummoned(EnemySummonedEvent evt)
         {
-            logPanel?.AddEntry($"{evt.EnemyData.EnemyName} was summoned!");
             AddEnemySlot(evt.EnemyIndex);
             RequestStatsRefresh();
         }
 
         private void OnBattleEnded(BattleEndedEvent evt)
         {
-            string outcome = evt.Result.isVictory ? "=== VICTORY ===" : "=== DEFEAT ===";
-            logPanel?.AddEntry(outcome);
             _lastBattleResult = evt.Result;
 
             // Victory: update RunState so the next battle knows this one was won.
@@ -649,49 +505,12 @@ namespace Crookedile.UI.Battle
             }
         }
 
-        private void OnDamageDealt(DamageDealtEvent evt)
-        {
-            if (!evt.IsToPlayer)
-                return;
-            string suffix = evt.Absorbed > 0 ? $" ({evt.Absorbed} absorbed by Support)" : "";
-            logPanel?.AddEntry($"{evt.AttackerName} dealt {evt.Applied} damage{suffix}");
-        }
-
         private void OnOpinionChanged(OpinionChangedEvent evt) => RequestStatsRefresh();
 
         private void OnTurnLimitUpdated(TurnLimitUpdatedEvent evt) => RequestStatsRefresh();
 
-        private void OnJudgment(JudgmentEvent evt)
-        {
-            string outcome = evt.IsVictory ? "VICTORY" : "DEFEAT";
-            logPanel?.AddEntry(
-                $"=== JUDGMENT: Opinion {evt.FinalOpinion} / {evt.Threshold * 2} — {outcome} ==="
-            );
-        }
-
-        private void OnEnemySkippedTurn(EnemySkippedTurnEvent evt)
-        {
-            logPanel?.AddEntry($"{evt.EnemyName} held back this turn.");
-        }
-
-        private void OnEchoChamberChanged(EchoChamberChangedEvent evt)
-        {
-            logPanel?.AddEntry(
-                evt.Active
-                    ? "Echo chamber! The room agrees with you — opinion gains are halved and your lead will bleed. Provoke someone."
-                    : "Echo chamber broken — the room has a dissenter again."
-            );
-        }
-
         private void OnEnemyTurncoat(EnemyTurncoatEvent evt)
         {
-            string name =
-                battleManager != null
-                && evt.EnemyIndex >= 0
-                && evt.EnemyIndex < battleManager.Enemies.Count
-                    ? battleManager.Enemies[evt.EnemyIndex].EnemyData.EnemyName
-                    : "An ally";
-            logPanel?.AddEntry($"{name} turned on you! They'll hit harder for a turn.");
             if (evt.EnemyIndex >= 0 && evt.EnemyIndex < _enemySlots.Count)
             {
                 _enemySlots[evt.EnemyIndex]?.Refresh();

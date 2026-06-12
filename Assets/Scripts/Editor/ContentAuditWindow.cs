@@ -115,6 +115,7 @@ namespace Crookedile.EditorTools
                 new LocalizationProvider(),
                 new RelicsProvider(),
                 new RewardProvider(),
+                new UIRefsAuditProvider(),
             };
 
         /// <summary>Re-scans every provider into <see cref="_data"/>. Cheap; safe to call on demand.</summary>

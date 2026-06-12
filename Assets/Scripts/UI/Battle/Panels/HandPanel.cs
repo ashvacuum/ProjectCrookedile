@@ -4,17 +4,20 @@ using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Gameplay.Battle;
+using Crookedile.Utilities;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Owns all card-hand display logic: card button pooling, normal play callbacks,
-    /// affordability dimming, and arc-fan layout.
+    /// Owns all card-hand display logic AND flow choreography: card button pooling,
+    /// play callbacks, affordability dimming, arc-fan layout, and the event-driven
+    /// play → VFX → discard-animation → refresh sequencing (moved from BattleUI).
     ///
-    /// Extracted from <c>BattleUI</c> so the FSM state classes can call focused, single-
-    /// responsibility methods (<c>RefreshNormalHand</c>, <c>ClearHand</c>) without BattleUI
-    /// managing hand state internally.
+    /// Self-subscribes to the card events it cares about; BattleUI only drives the
+    /// structural state changes (RefreshNormalHand / DiscardHandAnimated / ClearHand)
+    /// and supplies the battle context via <see cref="Bind"/>.
     /// </summary>
     public class HandPanel : MonoBehaviour
     {
@@ -35,6 +38,175 @@ namespace Crookedile.UI.Battle
 
         #region Runtime
         private List<CardButton> _activeButtons = new List<CardButton>();
+
+        // Battle context for event-driven refreshes — set via Bind (BattleUI.Initialize).
+        private BattleManager _bm;
+        private System.Action<CardData, int> _onCardClicked;
+
+        /// <summary>Card button extracted from hand on CardPlayedEvent, waiting for VFX to finish before animating to discard.</summary>
+        private CardButton _pendingDiscardButton;
+
+        private readonly HashSet<CardData> _pendingDrawnCards = new HashSet<CardData>();
+        private bool _handRefreshPending;
+
+        /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
+        private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
+
+        #endregion
+
+        #region Event-driven flow (play → VFX → discard → refresh)
+
+        /// <summary>
+        /// Supplies the battle context the event-driven flows need. Called by
+        /// <c>BattleUI.Initialize</c>; until then the event handlers no-op.
+        /// </summary>
+        public void Bind(BattleManager bm, System.Action<CardData, int> onCardClicked)
+        {
+            _bm = bm;
+            _onCardClicked = onCardClicked;
+        }
+
+        private void OnEnable()
+        {
+            Sub<CardPlayedEvent>(OnCardPlayed);
+            Sub<CardPlayResolvedEvent>(OnCardPlayResolved);
+            Sub<CardDrawnEvent>(OnCardDrawn);
+            Sub<ActionPointsChangedEvent>(OnActionPointsChanged);
+        }
+
+        private void OnDisable()
+        {
+            foreach (var unsub in _eventUnsubscribers)
+                unsub();
+            _eventUnsubscribers.Clear();
+        }
+
+        private void Sub<T>(System.Action<T> handler)
+            where T : IGameEvent
+        {
+            EventBus.Subscribe(handler);
+            _eventUnsubscribers.Add(() => EventBus.Unsubscribe(handler));
+        }
+
+        private void OnCardPlayed(CardPlayedEvent evt)
+        {
+            if (_bm == null)
+                return;
+
+            if (evt.IsPlayer)
+            {
+                // Extract the card from hand immediately so the layout closes the gap,
+                // but hold it — the discard animation fires in OnCardPlayResolved so the
+                // sequence is: VFX resolves → card flies to discard → new draws appear.
+                GameLogger.LogInfo(
+                    "Card",
+                    $"Extracted '{evt.Card.CardName}' from hand — awaiting VFX complete before discard"
+                );
+                _pendingDiscardButton = ExtractCard(evt.Card);
+            }
+            else
+            {
+                // Enemy card — no VFX sequencing needed; refresh hand immediately.
+                QueueHandRefresh();
+            }
+        }
+
+        /// <summary>
+        /// Fires after a played card fully resolves (VFX done or none, effects applied).
+        /// Begins the discard animation; once the card lands in the discard pile the hand
+        /// refreshes — so newly drawn cards appear AFTER the discard, not during VFX.
+        /// </summary>
+        private void OnCardPlayResolved(CardPlayResolvedEvent evt)
+        {
+            if (_bm == null)
+                return;
+
+            GameLogger.LogInfo(
+                "Card",
+                $"CardPlayResolved for '{evt.Card?.CardName}' — starting discard animation"
+            );
+
+            if (_pendingDiscardButton != null)
+            {
+                var btn = _pendingDiscardButton;
+                _pendingDiscardButton = null;
+
+                CardFlyAnimator.Instance?.AnimateDiscardOut(
+                    btn,
+                    () =>
+                    {
+                        GameLogger.LogInfo(
+                            "Card",
+                            $"Discard animation done for '{btn.CardData?.CardName}' — returning to pool and refreshing hand"
+                        );
+                        BattlePoolManager.Instance?.ReturnCard(btn);
+
+                        // Refresh hand AFTER discard so any drawn cards appear once the discard lands.
+                        QueueHandRefresh();
+                    }
+                );
+            }
+            else
+            {
+                // No card to discard (no-VFX card that was already handled, or edge case).
+                GameLogger.LogWarning(
+                    "Card",
+                    $"CardPlayResolved for '{evt.Card?.CardName}' but no pending discard button found"
+                );
+                QueueHandRefresh();
+            }
+        }
+
+        private void OnCardDrawn(CardDrawnEvent evt)
+        {
+            if (_bm == null || !evt.IsPlayer)
+                return; // enemy draws don't affect the player's hand panel
+            _pendingDrawnCards.Add(evt.Card); // track which cards are new this batch
+            QueueHandRefresh();
+        }
+
+        /// <summary>
+        /// Keeps card affordability dimming in sync the moment AP changes, instead of
+        /// waiting for the post-VFX hand refresh.
+        /// </summary>
+        private void OnActionPointsChanged(ActionPointsChangedEvent evt)
+        {
+            if (!evt.IsPlayer)
+                return;
+            RefreshAffordability(evt.NewValue);
+        }
+
+        private void QueueHandRefresh()
+        {
+            if (_handRefreshPending)
+                return; // refresh already scheduled — events batch into it
+            _handRefreshPending = true;
+            RefreshHandNextFrame().Forget();
+        }
+
+        private async UniTaskVoid RefreshHandNextFrame()
+        {
+            // Wait one frame so all draw events from one effect batch together.
+            await UniTask.NextFrame(this.GetCancellationTokenOnDestroy());
+            _handRefreshPending = false;
+            var drawn =
+                _pendingDrawnCards.Count > 0 ? new HashSet<CardData>(_pendingDrawnCards) : null;
+            _pendingDrawnCards.Clear();
+
+            if (_bm == null || _onCardClicked == null)
+                return;
+
+            // If cards were drawn, merge them in and animate only the new ones;
+            // otherwise just reposition and re-init the existing buttons.
+            if (drawn != null)
+                AddDrawnCards(drawn, _bm, _onCardClicked);
+            else
+                RearrangeCurrentHand(_bm, _onCardClicked);
+        }
+
+        #endregion
+
+        #region Display API
 
         /// <summary>
         /// Rebuilds the hand using normal play-card callbacks.
