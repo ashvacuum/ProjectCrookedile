@@ -37,26 +37,11 @@ namespace Crookedile.Gameplay.Battle
         private string _ownerName; // For logging purposes
         private bool _isPlayer; // True for the player's deck; false for enemies
 
-        // Cards retained at end of turn (not discarded; cleared after each EndTurn).
-        // Retain marks are COUNTED per CardData, not set-membership: duplicate copies of one
-        // card asset share the same CardData reference, so a set would retain every copy when
-        // one was marked. A count of N protects exactly N copies at end-of-turn discard.
-        private readonly Dictionary<CardData, int> _retainedCards = new Dictionary<CardData, int>();
+        // Retain-mark bookkeeping (turn + battle scopes) — see RetainTracker for the rules.
+        private readonly RetainTracker _retain = new RetainTracker();
 
-        /// <summary>Retain counts for the REST OF THE BATTLE — not cleared at end of turn,
-        /// only on deck re-initialization. A copy consumes its mark when played or force-discarded.
-        /// Granted via RetainCard(untilEndOfBattle: true).</summary>
-        private readonly Dictionary<CardData, int> _battleRetainedCards =
-            new Dictionary<CardData, int>();
-
-        // Per-card AP cost reductions applied this battle (individual card effects).
-        // int.MaxValue signals "free" (0 AP regardless of base cost).
-        private readonly Dictionary<CardData, int> _cardCostReductions =
-            new Dictionary<CardData, int>();
-
-        // Snapshot of _cardCostReductions taken before a "next-play-only" free-all pass.
-        // Non-null only while a MakeAllCardsFreeNextPlay is active; restored after the next card play.
-        private Dictionary<CardData, int> _costReductionSnapshot;
+        // Per-card AP cost reductions this battle (+ snapshot/restore for transient passes).
+        private readonly CardCostOverrides _costOverrides = new CardCostOverrides();
 
         // Cached ReadOnlyCollection wrappers — live views of the underlying lists.
         // AsReadOnly() returns a wrapper that reflects the list directly, so we only
@@ -168,8 +153,7 @@ namespace Crookedile.Gameplay.Battle
             _hand.Clear();
             _discard.Clear();
             _exhaust.Clear();
-            _retainedCards.Clear();
-            _battleRetainedCards.Clear();
+            _retain.Reset();
 
             _deck.AddRange(cards);
             Shuffle();
@@ -254,28 +238,7 @@ namespace Crookedile.Gameplay.Battle
         #region Playing Cards
 
         /// <summary>
-        /// Plays a card from hand (moves it to discard pile).
-        /// </summary>
-        /// <param name="card">The card to play</param>
-        /// <returns>True if card was successfully played</returns>
-        public bool PlayCard(CardData card)
-        {
-            int idx = _hand.IndexOf(card);
-            if (idx < 0)
-            {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot play card - not in hand");
-                return false;
-            }
-
-            _hand.RemoveAt(idx);
-            _discard.Add(card);
-
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} played card: {card.CardName}");
-            return true;
-        }
-
-        /// <summary>
-        /// Plays a card by index in hand.
+        /// Plays a card by index in hand (moves it to the discard pile).
         /// </summary>
         public bool PlayCardAtIndex(int index)
         {
@@ -288,7 +251,7 @@ namespace Crookedile.Gameplay.Battle
             CardData card = _hand[index];
             _hand.RemoveAt(index);
             _discard.Add(card);
-            ConsumeRetainMark(card); // a retained copy leaving the hand uses up its mark
+            _retain.ConsumeMark(card); //a retained copy leaving the hand uses up its mark
 
             GameLogger.LogInfo<DeckManager>($"{_ownerName} played card: {card.CardName}");
             return true;
@@ -314,7 +277,7 @@ namespace Crookedile.Gameplay.Battle
 
             _hand.RemoveAt(idx);
             _discard.Add(card);
-            ConsumeRetainMark(card); // forced discard consumes the copy's retain mark too
+            _retain.ConsumeMark(card); //forced discard consumes the copy's retain mark too
 
             EventBus.Publish(new CardDiscardedEvent { Card = card, IsPlayer = _isPlayer });
             GameLogger.LogInfo<DeckManager>($"{_ownerName} discarded card: {card.CardName}");
@@ -330,22 +293,20 @@ namespace Crookedile.Gameplay.Battle
         {
             var discarded = new List<CardData>();
 
-            // Local allowance copies so each retain mark protects exactly one copy this pass.
-            // Battle-long marks are consumed locally only — the master counts persist.
-            var turnLeft = new Dictionary<CardData, int>(_retainedCards);
-            var battleLeft = new Dictionary<CardData, int>(_battleRetainedCards);
+            // Per-pass allowances so each retain mark protects exactly one copy this sweep.
+            var pass = _retain.BeginDiscardPass();
 
             for (int i = _hand.Count - 1; i >= 0; i--)
             {
                 CardData card = _hand[i];
-                if (card.InnateRetain || TryConsume(turnLeft, card) || TryConsume(battleLeft, card))
+                if (card.InnateRetain || pass.TryRetain(card))
                     continue; // skip — stays in hand
                 _hand.RemoveAt(i);
                 _discard.Add(card);
                 discarded.Add(card);
                 EventBus.Publish(new CardDiscardedEvent { Card = card, IsPlayer = _isPlayer });
             }
-            _retainedCards.Clear(); // one-turn retains expire; battle-long retains persist
+            _retain.ClearTurnMarks(); // one-turn retains expire; battle-long retains persist
 
             GameLogger.LogInfo<DeckManager>(
                 $"{_ownerName} discarded {discarded.Count} card(s). "
@@ -516,16 +477,13 @@ namespace Crookedile.Gameplay.Battle
                 );
                 return false;
             }
-            var marks = untilEndOfBattle ? _battleRetainedCards : _retainedCards;
-            marks.TryGetValue(card, out int current);
 
-            // Cap marks at the number of copies actually in hand — retaining the same copy
-            // twice shouldn't bank a phantom mark for a copy drawn later.
             int copiesInHand = 0;
             foreach (var c in _hand)
                 if (c == card)
                     copiesInHand++;
-            if (current >= copiesInHand)
+
+            if (!_retain.TryMark(card, copiesInHand, untilEndOfBattle))
             {
                 GameLogger.LogInfo<DeckManager>(
                     $"{_ownerName}: all copies of {card.CardName} already retained"
@@ -533,38 +491,12 @@ namespace Crookedile.Gameplay.Battle
                 return false;
             }
 
-            marks[card] = current + 1;
             GameLogger.LogInfo<DeckManager>(
                 $"{_ownerName}: {card.CardName} marked as retained"
                     + (untilEndOfBattle ? " (until end of battle)" : " (this turn)")
             );
             EventBus.Publish(new CardRetainedEvent { Card = card, IsPlayer = _isPlayer });
             return true;
-        }
-
-        /// <summary>
-        /// Consumes one retain mark for <paramref name="card"/> from <paramref name="marks"/>.
-        /// Returns true when a mark was available (and is now spent).
-        /// </summary>
-        private static bool TryConsume(Dictionary<CardData, int> marks, CardData card)
-        {
-            if (!marks.TryGetValue(card, out int count) || count <= 0)
-                return false;
-            if (count == 1)
-                marks.Remove(card);
-            else
-                marks[card] = count - 1;
-            return true;
-        }
-
-        /// <summary>
-        /// Spends a retain mark when a copy leaves the hand by being played or force-discarded,
-        /// so the mark can't transfer to another copy of the same card. Turn marks spend first.
-        /// </summary>
-        private void ConsumeRetainMark(CardData card)
-        {
-            if (!TryConsume(_retainedCards, card))
-                TryConsume(_battleRetainedCards, card);
         }
 
         #endregion
@@ -579,10 +511,9 @@ namespace Crookedile.Gameplay.Battle
         {
             if (card == null)
                 return;
-            _cardCostReductions.TryGetValue(card, out int current);
-            _cardCostReductions[card] = current + reduction;
+            int total = _costOverrides.ApplyReduction(card, reduction);
             GameLogger.LogInfo<DeckManager>(
-                $"{_ownerName}: {card.CardName} cost −{reduction} (total reduction: {_cardCostReductions[card]})"
+                $"{_ownerName}: {card.CardName} cost −{reduction} (total reduction: {total})"
             );
         }
 
@@ -594,7 +525,7 @@ namespace Crookedile.Gameplay.Battle
         {
             if (card == null)
                 return;
-            _cardCostReductions[card] = int.MaxValue;
+            _costOverrides.MakeFree(card);
             GameLogger.LogInfo<DeckManager>(
                 $"{_ownerName}: {card.CardName} is now free (0 AP) this battle"
             );
@@ -604,12 +535,8 @@ namespace Crookedile.Gameplay.Battle
         /// Returns the AP cost reduction that has been applied to this specific card this battle.
         /// Returns 0 if none was applied. Returns <see cref="int.MaxValue"/> if the card was made free.
         /// </summary>
-        public int GetCardCostReduction(CardData card)
-        {
-            if (card == null)
-                return 0;
-            return _cardCostReductions.TryGetValue(card, out int r) ? r : 0;
-        }
+        public int GetCardCostReduction(CardData card) =>
+            card == null ? 0 : _costOverrides.GetReduction(card);
 
         /// <summary>
         /// Captures a snapshot of all current cost reductions so they can be restored later.
@@ -619,9 +546,9 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void SnapshotCostReductions()
         {
-            _costReductionSnapshot = new Dictionary<CardData, int>(_cardCostReductions);
+            int entries = _costOverrides.Snapshot();
             GameLogger.LogInfo<DeckManager>(
-                $"{_ownerName}: Cost-reduction snapshot captured ({_costReductionSnapshot.Count} entries)"
+                $"{_ownerName}: Cost-reduction snapshot captured ({entries} entries)"
             );
         }
 
@@ -633,15 +560,10 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void RestoreCostReductionSnapshot()
         {
-            if (_costReductionSnapshot == null)
-                return;
-            _cardCostReductions.Clear();
-            foreach (var kvp in _costReductionSnapshot)
-                _cardCostReductions[kvp.Key] = kvp.Value;
-            _costReductionSnapshot = null;
-            GameLogger.LogInfo<DeckManager>(
-                $"{_ownerName}: Cost reductions restored from snapshot"
-            );
+            if (_costOverrides.RestoreSnapshot())
+                GameLogger.LogInfo<DeckManager>(
+                    $"{_ownerName}: Cost reductions restored from snapshot"
+                );
         }
 
         #endregion
@@ -762,30 +684,8 @@ namespace Crookedile.Gameplay.Battle
 
         #region Card Generation
 
-        /// <summary>
-        /// Adds a card to the draw pile and shuffles.
-        /// </summary>
-        public void AddCardToDeck(CardData card)
-        {
-            if (card == null)
-            {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to deck");
-                return;
-            }
-
-            _deck.Add(card);
-            Shuffle();
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {card.CardName} to deck");
-            EventBus.Publish(
-                new CardGrantedEvent
-                {
-                    Card = card,
-                    IsPlayer = _isPlayer,
-                    Count = 1,
-                    ToDiscard = false,
-                }
-            );
-        }
+        /// <summary>Adds a card to the draw pile and shuffles.</summary>
+        public void AddCardToDeck(CardData card) => AddCardsToDeck(card, 1);
 
         /// <summary>
         /// Adds multiple copies of a card to the draw pile and shuffles.
@@ -814,32 +714,12 @@ namespace Crookedile.Gameplay.Battle
             );
         }
 
-        /// <summary>
-        /// Adds a card directly to hand (if space available).
-        /// </summary>
-        public bool AddCardToHand(CardData card)
-        {
-            if (card == null)
-            {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to hand");
-                return false;
-            }
-
-            if (IsHandFull)
-            {
-                GameLogger.LogWarning<DeckManager>(
-                    $"{_ownerName} cannot add card to hand - hand is full"
-                );
-                return false;
-            }
-
-            _hand.Add(card);
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {card.CardName} to hand");
-            return true;
-        }
+        /// <summary>Adds a card directly to hand (if space available).</summary>
+        public bool AddCardToHand(CardData card) => AddCardsToHand(card, 1) == 1;
 
         /// <summary>
         /// Adds multiple copies of a card directly to hand (up to hand limit).
+        /// Returns the number of copies actually added.
         /// </summary>
         public int AddCardsToHand(CardData card, int count)
         {
@@ -856,6 +736,10 @@ namespace Crookedile.Gameplay.Battle
                 cardsAdded++;
             }
 
+            if (cardsAdded < count)
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName} hand full — only {cardsAdded}/{count} copies added"
+                );
             GameLogger.LogInfo<DeckManager>(
                 $"{_ownerName} added {cardsAdded}x {card.CardName} to hand"
             );
@@ -865,26 +749,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Adds a card directly to the discard pile (e.g. a status or curse card granted by an enemy effect).
         /// </summary>
-        public void AddCardToDiscard(CardData card)
-        {
-            if (card == null)
-            {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to discard");
-                return;
-            }
-
-            _discard.Add(card);
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {card.CardName} to discard");
-            EventBus.Publish(
-                new CardGrantedEvent
-                {
-                    Card = card,
-                    IsPlayer = _isPlayer,
-                    Count = 1,
-                    ToDiscard = true,
-                }
-            );
-        }
+        public void AddCardToDiscard(CardData card) => AddCardsToDiscard(card, 1);
 
         /// <summary>
         /// Adds multiple copies of a card directly to the discard pile.
