@@ -128,16 +128,10 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private CardZoneBar cardZoneBar;
 
-        [Header("Reward")]
-        [Tooltip("CardDatabase ScriptableObject used to generate post-battle card offers.")]
+        [Header("Post-battle")]
+        [Tooltip("Owns reward offers and RunState progression after the result panel's Continue.")]
         [SerializeField]
-        private CardDatabase _cardDatabase;
-
-        [Tooltip(
-            "Reward screen overlay panel (starts inactive). Shown after a victory Continue click."
-        )]
-        [SerializeField]
-        private RewardScreen _rewardScreen;
+        private PostBattleFlow postBattleFlow;
 
         #endregion
 
@@ -215,9 +209,7 @@ namespace Crookedile.UI.Battle
             handPanel?.Bind(manager, OnCardButtonClicked);
             enemyRow?.Bind(manager);
             cardZoneBar?.Bind(manager);
-
-            if (resultPanel != null)
-                resultPanel.OnContinueClicked += OnResultContinueClicked;
+            postBattleFlow?.Bind(manager);
 
             RequestStatsRefresh();
         }
@@ -299,12 +291,9 @@ namespace Crookedile.UI.Battle
 
         private void OnBattleEnded(BattleEndedEvent evt)
         {
+            // Kept only for resultPanel.Show on BattleState.BattleEnd; run progression
+            // (RunState victory record, rewards, reload) lives in PostBattleFlow.
             _lastBattleResult = evt.Result;
-
-            // Victory: update RunState so the next battle knows this one was won.
-            if (evt.Result.isVictory)
-                RunState.Current?.RecordBattleVictory();
-            // Structural UI change (result panel, hand clear) handled by BattleStateChangedEvent → BattleState.BattleEnd.
         }
 
         private void OnCardChoiceRequested(CardChoiceRequestedEvent evt)
@@ -481,52 +470,6 @@ namespace Crookedile.UI.Battle
                     "Card",
                     $"Card play blocked in BattleUI — battleManager={(battleManager != null ? "set" : "null")}  IsPlayerTurn={battleManager?.IsPlayerTurn}"
                 );
-            }
-        }
-
-        /// <summary>
-        /// Fired by <see cref="BattleResultPanel.OnContinueClicked"/> after a victory.
-        /// Generates a reward offer and opens the reward screen.
-        /// On defeat (or if reward infrastructure isn't set up yet) clears the run and reloads.
-        /// </summary>
-        private void OnResultContinueClicked()
-        {
-            if (!_lastBattleResult.isVictory || _cardDatabase == null || _rewardScreen == null)
-            {
-                // Defeat — wipe RunState so the next scene load starts a fresh run.
-                RunState.Clear();
-                SceneLoader.Instance?.ReloadCurrentScene();
-                return;
-            }
-
-            var offers = _cardDatabase.GenerateRewardOffer(battleManager.PlayerOrigin, count: 3);
-            _rewardScreen.Open(offers, OnRewardChosen);
-        }
-
-        /// <summary>
-        /// Callback from <see cref="RewardScreen"/> once the player picks a card (or skips).
-        /// Adds the card to <see cref="RunState.Current"/>, advances the session battle index,
-        /// and reloads the scene. Clears RunState when the session is fully complete.
-        /// </summary>
-        private void OnRewardChosen(CardData picked)
-        {
-            if (picked != null)
-                RunState.Current?.AddCardToDeck(picked);
-
-            if (RunState.Current?.HasNextBattle == true)
-            {
-                // More battles remain — advance the index and reload into the next fight.
-                RunState.Current.AdvanceToNextBattle();
-                SceneLoader.Instance?.ReloadCurrentScene();
-            }
-            else
-            {
-                // Session complete (or no session). Clear RunState and restart for playtesting.
-                Debug.Log(
-                    "[BattleUI] Run complete! Clearing RunState — next scene load starts fresh."
-                );
-                RunState.Clear();
-                SceneLoader.Instance?.ReloadCurrentScene();
             }
         }
 
