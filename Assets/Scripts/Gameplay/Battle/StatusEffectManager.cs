@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Crookedile.Core;
 using Crookedile.Utilities;
 using UnityEngine;
 
@@ -168,6 +169,56 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Removes X stacks of a status by behavior type.</summary>
         public void RemoveStacks<T>(int amount)
             where T : StatusBehavior => RemoveStacks(StatusRegistry.Get<T>(), amount);
+
+        /// <summary>
+        /// Removes all stacks of a status AND publishes the removal as a negative-stack
+        /// <see cref="StatusEffectAppliedEvent"/> so badges and passives react.
+        /// Single home for the publish-on-removal pattern — use this instead of
+        /// hand-rolling the event at call sites. No-op if the status isn't active.
+        /// </summary>
+        public void RemoveStatusNotify(StatusBehavior behavior)
+        {
+            if (behavior == null || !_byId.TryGetValue(behavior.Id, out StatusEffect effect))
+                return;
+            int stacks = effect.Stacks;
+            RemoveStatus(behavior);
+            PublishStackChange(behavior, -stacks);
+        }
+
+        /// <summary>
+        /// Removes <paramref name="amount"/> stacks of a status AND publishes the change as a
+        /// negative-stack <see cref="StatusEffectAppliedEvent"/>. No-op if the status isn't active.
+        /// </summary>
+        public void RemoveStacksNotify(StatusBehavior behavior, int amount)
+        {
+            if (
+                behavior == null
+                || amount <= 0
+                || !_byId.TryGetValue(behavior.Id, out StatusEffect effect)
+            )
+                return;
+            int removed = Mathf.Min(amount, effect.Stacks);
+            RemoveStacks(behavior, amount);
+            PublishStackChange(behavior, -removed);
+        }
+
+        public void RemoveStacksNotify<T>(int amount)
+            where T : StatusBehavior => RemoveStacksNotify(StatusRegistry.Get<T>(), amount);
+
+        private void PublishStackChange(StatusBehavior behavior, int stacksDelta)
+        {
+            // The player's manager has no owner BattleStats; enemies carry their roster index.
+            int enemyIndex = _owner?.OwnerEnemyIndex ?? -1;
+            EventBus.Publish(
+                new StatusEffectAppliedEvent
+                {
+                    Behavior = behavior,
+                    Stacks = stacksDelta,
+                    IsToPlayer = enemyIndex < 0,
+                    EnemyIndex = enemyIndex,
+                }
+            );
+        }
 
         /// <summary>
         /// Clears all status effects.

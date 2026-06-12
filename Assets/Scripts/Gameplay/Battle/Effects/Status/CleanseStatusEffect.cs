@@ -71,22 +71,7 @@ namespace Crookedile.Gameplay.Battle
                 }
 
                 foreach (var effect in toRemove)
-                {
-                    int removedStacks = effect.Stacks;
-                    statusMgr.RemoveStatus(effect.Behavior);
-
-                    // Negative stacks = removal, per the StatusEffectAppliedEvent contract —
-                    // lets badges and passives react without a separate event type.
-                    EventBus.Publish(
-                        new StatusEffectAppliedEvent
-                        {
-                            Behavior = effect.Behavior,
-                            Stacks = -removedStacks,
-                            IsToPlayer = targetStats == ctx.PlayerStats,
-                            EnemyIndex = targetStats.OwnerEnemyIndex,
-                        }
-                    );
-                }
+                    statusMgr.RemoveStatusNotify(effect.Behavior);
 
                 if (toRemove.Count > 0)
                     GameLogger.LogInfo<CleanseStatusEffect>(
