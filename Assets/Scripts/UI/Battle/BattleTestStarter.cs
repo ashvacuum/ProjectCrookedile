@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
@@ -9,17 +9,27 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Quick-start script for testing battles in the editor.
-    /// Loads CardData assets from Resources/Cards/, assembles the player's starter deck,
-    /// and fires BattleManager.StartBattle() — no manual deck setup needed.
+    /// Run bootstrap + quick-start for battle scenes. On first load it creates the
+    /// RunState (starter deck + session battle queue); on reloads after a reward pick
+    /// it continues the existing run. The back half of this loop lives in
+    /// <c>PostBattleFlow</c> (advance index, reload scene) — when the real metagame
+    /// lands, this class is promoted to a RunDirector, not deleted.
     ///
-    /// Drop this on a GameObject in your battle test scene alongside BattleManager and BattleUI.
-    /// Assign an EnemyData ScriptableObject to enemyData to choose who to fight.
-    ///
-    /// Create enemy assets via: Right-click → Crookedile / Enemy / Enemy Data
+    /// Drop on a GameObject alongside BattleManager and BattleUI; assign a
+    /// BattleSession and (preferably) the per-origin starter deck lists below.
     /// </summary>
     public class BattleTestStarter : MonoBehaviour
     {
+        /// <summary>One starter-deck entry: a direct card asset reference plus copy count.</summary>
+        [System.Serializable]
+        public class StarterCardEntry
+        {
+            public CardData card;
+
+            [Min(1)]
+            public int count = 1;
+        }
+
         [Header("Player")]
         [Tooltip("Origin the player will use in this test")]
         [SerializeField]
@@ -47,15 +57,30 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private BattleSession battleSession;
 
+        [Header("Starter Decks (direct asset references)")]
+        [Tooltip(
+            "Preferred deck source — rename-proof direct references. When an origin's list is "
+                + "empty, falls back to the legacy name-string templates against Resources/Cards/."
+        )]
+        [SerializeField]
+        private List<StarterCardEntry> faithLeaderDeck = new List<StarterCardEntry>();
+
+        [SerializeField]
+        private List<StarterCardEntry> nepoBabyDeck = new List<StarterCardEntry>();
+
+        [SerializeField]
+        private List<StarterCardEntry> actorDeck = new List<StarterCardEntry>();
+
         [Header("Settings")]
         [Tooltip("Automatically start the battle when the scene loads")]
         [SerializeField]
         private bool startOnAwake = true;
 
-        #region Deck Definitions
+        #region Legacy name templates (fallback while the serialized lists are unpopulated)
         // Each entry is (assetName, count). Name must match the .asset filename in Resources/Cards/.
+        // Fragile by nature (renames break silently) — populate the serialized lists instead.
 
-        private static readonly (string name, int count)[] FaithLeaderDeck =
+        private static readonly (string name, int count)[] FaithLeaderTemplate =
         {
             ("Find Common Ground", 4),
             ("Blessing", 2),
@@ -64,7 +89,7 @@ namespace Crookedile.Gameplay.Battle
             ("Gather Thoughts", 1),
         };
 
-        private static readonly (string name, int count)[] NepoBabyDeck =
+        private static readonly (string name, int count)[] NepoBabyTemplate =
         {
             ("Family Name", 2),
             ("Inherited Privelege", 1), // Note: typo matches the asset filename
@@ -75,7 +100,7 @@ namespace Crookedile.Gameplay.Battle
             ("Trust Fund", 1),
         };
 
-        private static readonly (string name, int count)[] ActorDeck =
+        private static readonly (string name, int count)[] ActorTemplate =
         {
             ("Charming Gambit", 2),
             ("All or Nothing", 1),
@@ -89,6 +114,7 @@ namespace Crookedile.Gameplay.Battle
         #endregion
 
         #region Unity Lifecycle
+
         private void Start()
         {
             if (startOnAwake)
@@ -98,8 +124,10 @@ namespace Crookedile.Gameplay.Battle
         #endregion
 
         #region Public API
+
         /// <summary>
-        /// Builds the player deck from Resources and starts the battle against the assigned enemy.
+        /// Ensures a RunState exists (creating it with a starter deck on first load),
+        /// assembles this round's BattleSetup, and starts the battle.
         /// Can also be called from a UI button or other test harness.
         /// </summary>
         public void StartTestBattle()
@@ -113,65 +141,67 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
 
-            List<CardData> playerDeck;
-            List<EnemyData> battleEnemies;
+            if (!EnsureRunState(out List<CardData> playerDeck))
+                return;
 
-            if (RunState.Current == null)
-            {
+            BattleSetup setup = BuildSetup(playerDeck);
+            if (setup == null)
+                return;
+
+            // Wire BattleUI before starting (BattleUI needs the BattleManager reference).
+            if (battleUI != null)
+                battleUI.Initialize(battleManager);
+
+            battleManager.StartBattle(setup);
+        }
+
         #endregion
 
-                #region First battle of the run
-                // Build the starter deck from the hardcoded template and initialise RunState.
+        #region Run bootstrap
 
-                CardData[] allCards = Resources.LoadAll<CardData>("Cards");
-
-                if (allCards == null || allCards.Length == 0)
-                {
-                    Debug.LogError(
-                        "[BattleTestStarter] No CardData assets found in Resources/Cards/. "
-                            + "Make sure all card .asset files are in Assets/Resources/Cards/."
-                    );
-                    return;
-                }
-
-                Debug.Log($"[BattleTestStarter] Loaded {allCards.Length} card assets.");
-
-                playerDeck = BuildDeck(playerOrigin, allCards);
-
-                if (playerDeck.Count == 0)
-                {
-                    Debug.LogError(
-                        "[BattleTestStarter] Player deck could not be built. "
-                            + "Check the warnings above for missing card names."
-                    );
-                    return;
-                }
-
-                List<List<EnemyData>> battleQueue = battleSession.BuildBattleQueue();
-                Debug.Log(
-                    $"[BattleTestStarter] Session '{battleSession.name}' — "
-                        + $"{battleQueue.Count} rounds."
-                );
-
-                RunState.Create(playerOrigin, playerDeck, battleQueue);
-                Debug.Log($"[BattleTestStarter] RunState created for origin: {playerOrigin}");
-            }
-            else
+        /// <summary>
+        /// First load: builds the starter deck and creates RunState with the session's
+        /// battle queue. Reloads (returning from a reward screen): continues the run —
+        /// RunState already holds the updated deck and battle index.
+        /// </summary>
+        private bool EnsureRunState(out List<CardData> playerDeck)
+        {
+            if (RunState.Current != null)
             {
-                #endregion
-
-                #region Returning from a reward screen
-                // RunState already holds the updated deck, HP, and battle index.
                 playerOrigin = RunState.Current.Origin;
                 playerDeck = RunState.Current.Deck;
                 Debug.Log(
                     $"[BattleTestStarter] Continuing run — deck has {playerDeck.Count} cards, "
                         + $"battle index {RunState.Current.CurrentBattleIndex}."
                 );
+                return true;
             }
 
-            // Resolve this battle's enemy list from RunState's queue.
-            battleEnemies =
+            playerDeck = BuildDeck(playerOrigin);
+            if (playerDeck.Count == 0)
+            {
+                Debug.LogError(
+                    "[BattleTestStarter] Player deck could not be built. "
+                        + "Populate the starter deck list for this origin (or check the "
+                        + "name-template warnings above)."
+                );
+                return false;
+            }
+
+            List<List<EnemyData>> battleQueue = battleSession.BuildBattleQueue();
+            Debug.Log(
+                $"[BattleTestStarter] Session '{battleSession.name}' — {battleQueue.Count} rounds."
+            );
+
+            RunState.Create(playerOrigin, playerDeck, battleQueue);
+            Debug.Log($"[BattleTestStarter] RunState created for origin: {playerOrigin}");
+            return true;
+        }
+
+        /// <summary>Resolves this round's enemies + opinion settings into a BattleSetup.</summary>
+        private BattleSetup BuildSetup(List<CardData> playerDeck)
+        {
+            List<EnemyData> battleEnemies =
                 RunState.Current?.CurrentBattleEnemies?.Where(e => e != null).ToList()
                 ?? new List<EnemyData>();
 
@@ -181,7 +211,7 @@ namespace Crookedile.Gameplay.Battle
                     "[BattleTestStarter] No valid enemies for this battle — "
                         + "check the session asset's rounds."
                 );
-                return;
+                return null;
             }
 
             Debug.Log(
@@ -189,15 +219,19 @@ namespace Crookedile.Gameplay.Battle
                     + $"Enemies: {string.Join(", ", battleEnemies.Select(e => e.EnemyName))}"
             );
 
-            // Resolve per-round Opinion Meter settings from the session.
             int battleIndex = RunState.Current?.CurrentBattleIndex ?? 0;
             BattleSession.BattleRound currentRound = battleSession.GetRound(battleIndex);
 
             int roundMaxTurns = currentRound != null ? currentRound.maxTurns : 5;
             int roundStartOpinion = currentRound != null ? currentRound.startingOpinion : 50;
 
-            // Assemble BattleSetup
-            var setup = new BattleSetup
+            Debug.Log(
+                $"[BattleTestStarter] Opinion Meter: start={roundStartOpinion}, "
+                    + $"maxTurns={(roundMaxTurns > 0 ? roundMaxTurns.ToString() : "none")} "
+                    + $"(source: {(currentRound != null ? $"session round '{currentRound.label}'" : "defaults — round index out of range")})"
+            );
+
+            return new BattleSetup
             {
                 playerOrigin = playerOrigin,
                 originDatabase = originDatabase,
@@ -206,31 +240,58 @@ namespace Crookedile.Gameplay.Battle
                 maxTurns = roundMaxTurns > 0 ? roundMaxTurns : (int?)null,
                 startingOpinion = roundStartOpinion,
             };
-
-            Debug.Log(
-                $"[BattleTestStarter] Opinion Meter: start={roundStartOpinion}, "
-                    + $"maxTurns={(roundMaxTurns > 0 ? roundMaxTurns.ToString() : "none")} "
-                    + $"(source: {(currentRound != null ? $"session round '{currentRound.label}'" : "defaults — round index out of range")})"
-            );
-
-            // Wire BattleUI before starting (BattleUI needs BattleManager reference)
-            if (battleUI != null)
-                battleUI.Initialize(battleManager);
-
-            // Fire!
-            battleManager.StartBattle(setup);
         }
 
-                #endregion
+        #endregion
 
         #region Deck Builder
-        private List<CardData> BuildDeck(OriginType origin, CardData[] allCards)
+
+        /// <summary>
+        /// Builds the starter deck for <paramref name="origin"/>. Prefers the serialized
+        /// asset-reference list; falls back to the legacy name templates when it's empty.
+        /// </summary>
+        private List<CardData> BuildDeck(OriginType origin)
+        {
+            List<StarterCardEntry> entries = origin switch
+            {
+                OriginType.FaithLeader => faithLeaderDeck,
+                OriginType.NepoBaby => nepoBabyDeck,
+                OriginType.Actor => actorDeck,
+                _ => null,
+            };
+
+            if (entries != null && entries.Count > 0)
+            {
+                var deck = new List<CardData>();
+                foreach (var entry in entries)
+                {
+                    if (entry?.card == null)
+                    {
+                        Debug.LogWarning(
+                            $"[BattleTestStarter] Empty starter-deck entry for {origin} — skipping."
+                        );
+                        continue;
+                    }
+                    for (int i = 0; i < entry.count; i++)
+                        deck.Add(entry.card);
+                }
+                return deck;
+            }
+
+            Debug.LogWarning(
+                $"[BattleTestStarter] No serialized starter deck for {origin} — "
+                    + "falling back to legacy name templates (populate the list to fix)."
+            );
+            return BuildDeckFromNameTemplate(origin);
+        }
+
+        private List<CardData> BuildDeckFromNameTemplate(OriginType origin)
         {
             (string name, int count)[] template = origin switch
             {
-                OriginType.FaithLeader => FaithLeaderDeck,
-                OriginType.NepoBaby => NepoBabyDeck,
-                OriginType.Actor => ActorDeck,
+                OriginType.FaithLeader => FaithLeaderTemplate,
+                OriginType.NepoBaby => NepoBabyTemplate,
+                OriginType.Actor => ActorTemplate,
                 _ => System.Array.Empty<(string, int)>(),
             };
 
@@ -242,11 +303,20 @@ namespace Crookedile.Gameplay.Battle
                 return new List<CardData>();
             }
 
-            var deck = new List<CardData>();
+            CardData[] allCards = Resources.LoadAll<CardData>("Cards");
+            if (allCards == null || allCards.Length == 0)
+            {
+                Debug.LogError(
+                    "[BattleTestStarter] No CardData assets found in Resources/Cards/. "
+                        + "Make sure all card .asset files are in Assets/Resources/Cards/."
+                );
+                return new List<CardData>();
+            }
 
+            var deck = new List<CardData>();
             foreach (var (cardName, count) in template)
             {
-                // Match by asset filename (c.name) first, then by CardData.CardName field
+                // Match by asset filename (c.name) first, then by CardData.CardName field.
                 CardData found = System.Array.Find(
                     allCards,
                     c => c.name == cardName || c.CardName == cardName
@@ -267,6 +337,7 @@ namespace Crookedile.Gameplay.Battle
 
             return deck;
         }
+
+        #endregion
     }
 }
-        #endregion
