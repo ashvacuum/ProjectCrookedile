@@ -263,6 +263,12 @@ namespace Crookedile.UI.Battle
                 if (i > 0 && _drawStaggerDelay > 0f)
                     await UniTask.WaitForSeconds(_drawStaggerDelay, cancellationToken: ct);
 
+                // A refresh/ClearHand during the stagger can return this button to the pool
+                // (reparented away from the hand container). Skipping here prevents the classic
+                // "active card parented under the pool" — we must not re-activate a recycled card.
+                if (btn == null || btn.transform.parent != container)
+                    continue;
+
                 GameLogger.LogVerbose(
                     "Card",
                     $"Draw animation started for '{btn.CardData?.CardName}'",

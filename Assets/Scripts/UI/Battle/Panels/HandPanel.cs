@@ -539,14 +539,14 @@ namespace Crookedile.UI.Battle
                 CardType.Policy => _policyPrefab,
                 _ => _pressurePrefab,
             };
-            if (prefab == null)
-            {
-                GameLogger.LogWarning<HandPanel>(
-                    $"GetOrCreate: no fallback prefab assigned for {cardType} — card not shown."
-                );
-                return null;
-            }
-            return Instantiate(prefab, cardButtonContainer);
+
+            if (prefab != null)
+                return Instantiate(prefab, cardButtonContainer);
+
+            GameLogger.LogWarning<HandPanel>(
+                $"GetOrCreate: no fallback prefab assigned for {cardType} — card not shown."
+            );
+            return null;
         }
 
         private void ArrangeCards(bool animated = false)
