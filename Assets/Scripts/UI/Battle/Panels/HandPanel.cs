@@ -556,9 +556,11 @@ namespace Crookedile.UI.Battle
                 ?.ArrangeCards(_activeButtons, animated);
         }
 
-        // One-time sanity check on the hand container: cards are positioned by CardHandLayout
-        // (an arc fan). Without it cards stack at the container origin; a UI LayoutGroup on the
-        // same object overrides the arc every frame. Both fail silently otherwise.
+        // One-time setup of the hand container: cards are positioned by CardHandLayout (an arc
+        // fan). The container MUST have it — without it cards stack at the origin. Rather than
+        // depend on manual scene wiring, ensure it exists (add with sane defaults if missing).
+        // A UI LayoutGroup on the same object would override the arc every frame, so it is
+        // disabled here too. Both used to fail silently.
         private bool _layoutChecked;
 
         private void ValidateLayoutContainerOnce()
@@ -568,16 +570,34 @@ namespace Crookedile.UI.Battle
             _layoutChecked = true;
 
             if (cardButtonContainer.GetComponent<CardHandLayout>() == null)
+            {
+                cardButtonContainer.gameObject.AddComponent<CardHandLayout>();
                 GameLogger.LogWarning<HandPanel>(
-                    $"'{cardButtonContainer.name}' has no CardHandLayout component — cards will "
-                        + "stack at its origin instead of fanning. Add CardHandLayout to it."
+                    $"'{cardButtonContainer.name}' had no CardHandLayout — added one with default "
+                        + "arc settings. Add it in the Inspector to tune the fan (radius/angle/width)."
                 );
+            }
 
-            if (cardButtonContainer.GetComponent<UnityEngine.UI.LayoutGroup>() != null)
+            // A Unity layout group repositions children every frame, fighting the arc fan.
+            var layoutGroup = cardButtonContainer.GetComponent<UnityEngine.UI.LayoutGroup>();
+            if (layoutGroup != null)
+            {
+                layoutGroup.enabled = false;
                 GameLogger.LogWarning<HandPanel>(
-                    $"'{cardButtonContainer.name}' has a UI LayoutGroup that fights CardHandLayout "
-                        + "(it overrides card positions every frame). Remove it from the hand container."
+                    $"'{cardButtonContainer.name}' had a UI {layoutGroup.GetType().Name} that fights "
+                        + "CardHandLayout — disabled it. Remove it from the hand container."
                 );
+            }
+
+            var fitter = cardButtonContainer.GetComponent<UnityEngine.UI.ContentSizeFitter>();
+            if (fitter != null)
+            {
+                fitter.enabled = false;
+                GameLogger.LogWarning<HandPanel>(
+                    $"'{cardButtonContainer.name}' had a ContentSizeFitter — disabled it "
+                        + "(it can resize the container and throw off the arc)."
+                );
+            }
         }
 
         private void PlayCardDrawAnimation(List<CardButton> buttons)
