@@ -267,7 +267,16 @@ namespace Crookedile.UI.Battle
                 // (reparented away from the hand container). Skipping here prevents the classic
                 // "active card parented under the pool" — we must not re-activate a recycled card.
                 if (btn == null || btn.transform.parent != container)
+                {
+                    GameLogger.LogInfo(
+                        "Card",
+                        $"StaggeredDraw skip: '{(btn != null ? btn.CardData?.CardName : "null")}' "
+                            + $"was recycled mid-stagger (parent='{(btn != null ? btn.transform.parent?.name : "-")}', "
+                            + $"expected '{container.name}').",
+                        this
+                    );
                     continue;
+                }
 
                 GameLogger.LogVerbose(
                     "Card",
