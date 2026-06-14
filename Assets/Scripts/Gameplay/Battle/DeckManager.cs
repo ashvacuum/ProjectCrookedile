@@ -650,10 +650,16 @@ namespace Crookedile.Gameplay.Battle
         public void StartBattle(int initialHandSize)
         {
             _scandalsDrawnThisTurn = 0;
-            DrawCards(initialHandSize);
+            int drawn = DrawCards(initialHandSize);
             GameLogger.LogInfo<DeckManager>(
-                $"{_ownerName} drew initial hand of {initialHandSize} cards"
+                $"{_ownerName} drew initial hand of {drawn} cards (requested {initialHandSize}, "
+                    + $"deck {_deck.Count}, hand cap {_maxHandSize})"
             );
+            if (initialHandSize <= 0)
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName}: initial hand size is {initialHandSize} — check "
+                        + "BattleManager > Starting Hand Size in the Inspector (should be > 0)."
+                );
         }
 
         /// <summary>

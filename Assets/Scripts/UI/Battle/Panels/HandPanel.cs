@@ -229,12 +229,36 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void RefreshNormalHand(BattleManager bm, System.Action<CardData, int> onCardClicked)
         {
-            if (cardButtonContainer == null || bm?.PlayerStats == null)
+            if (cardButtonContainer == null)
+            {
+                GameLogger.LogWarning<HandPanel>(
+                    "RefreshNormalHand: cardButtonContainer is not assigned on HandPanel — "
+                        + "no cards can be shown. Assign it in the Inspector."
+                );
                 return;
+            }
+            if (bm?.PlayerStats == null)
+            {
+                GameLogger.LogWarning<HandPanel>(
+                    "RefreshNormalHand: BattleManager/PlayerStats null (was Bind() called?) — skipping."
+                );
+                return;
+            }
             if (!HasPrefabSource())
+            {
+                GameLogger.LogWarning<HandPanel>(
+                    "RefreshNormalHand: no card-button source — BattlePoolManager.Instance is null "
+                        + "AND no fallback prefabs (pressure/rhetoric/policy) are assigned on HandPanel. "
+                        + "Add a BattlePoolManager to the scene or assign the fallback prefabs."
+                );
                 return;
+            }
 
             ClearHand();
+            GameLogger.LogInfo<HandPanel>(
+                $"RefreshNormalHand: building {bm.PlayerDeck.Hand.Count} card button(s) "
+                    + $"(pool={(BattlePoolManager.Instance != null)})"
+            );
 
             // This is an authoritative full rebuild with its own staggered draw animation.
             // If a draw-driven incremental refresh is queued for this frame's draw batch,
@@ -278,6 +302,10 @@ namespace Crookedile.UI.Battle
                 _activeButtons.Add(btn);
             }
 
+            GameLogger.LogInfo<HandPanel>(
+                $"RefreshNormalHand: created {_activeButtons.Count} button(s) under "
+                    + $"'{cardButtonContainer.name}'."
+            );
             PlayCardDrawAnimation(_activeButtons);
         }
 
@@ -510,7 +538,12 @@ namespace Crookedile.UI.Battle
                 _ => _pressurePrefab,
             };
             if (prefab == null)
+            {
+                GameLogger.LogWarning<HandPanel>(
+                    $"GetOrCreate: no fallback prefab assigned for {cardType} — card not shown."
+                );
                 return null;
+            }
             return Instantiate(prefab, cardButtonContainer);
         }
 

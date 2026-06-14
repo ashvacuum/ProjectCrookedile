@@ -166,7 +166,10 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         private bool EnsureRunState(out List<CardData> playerDeck)
         {
-            if (RunState.Current != null)
+            // Continue an existing run — but only if it actually carries a deck. A stale or
+            // empty RunState (e.g. left over in the editor, or a prior half-built run) would
+            // otherwise launch a cardless battle; fall through to a fresh build instead.
+            if (RunState.Current != null && RunState.Current.Deck != null && RunState.Current.Deck.Count > 0)
             {
                 playerOrigin = RunState.Current.Origin;
                 playerDeck = RunState.Current.Deck;
@@ -177,13 +180,23 @@ namespace Crookedile.Gameplay.Battle
                 return true;
             }
 
+            if (RunState.Current != null)
+            {
+                Debug.LogWarning(
+                    "[BattleTestStarter] RunState exists but its deck is empty — "
+                        + "rebuilding a fresh starter deck."
+                );
+                RunState.Clear();
+            }
+
             playerDeck = BuildDeck(playerOrigin);
             if (playerDeck.Count == 0)
             {
                 Debug.LogError(
-                    "[BattleTestStarter] Player deck could not be built. "
-                        + "Populate the starter deck list for this origin (or check the "
-                        + "name-template warnings above)."
+                    $"[BattleTestStarter] Player deck for {playerOrigin} is empty. "
+                        + "Assign card asset references (with count >= 1) to the "
+                        + $"{playerOrigin} starter-deck list on BattleTestStarter, "
+                        + "and make sure the origin matches the list you filled."
                 );
                 return false;
             }

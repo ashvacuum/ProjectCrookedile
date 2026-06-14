@@ -211,6 +211,17 @@ namespace Crookedile.UI.Battle
             cardZoneBar?.Bind(manager);
             postBattleFlow?.Bind(manager);
 
+            // One-shot wiring report — flags any panel ref left unassigned on this BattleUI.
+            GameLogger.LogInfo(
+                "BattleUI",
+                "Panel wiring — "
+                    + $"hand:{(handPanel != null ? "ok" : "MISSING")} "
+                    + $"log:{(logPanel != null ? "ok" : "MISSING")} "
+                    + $"enemyRow:{(enemyRow != null ? "ok" : "MISSING")} "
+                    + $"zoneBar:{(cardZoneBar != null ? "ok" : "MISSING")} "
+                    + $"postBattle:{(postBattleFlow != null ? "ok" : "MISSING")}"
+            );
+
             RequestStatsRefresh();
         }
 
