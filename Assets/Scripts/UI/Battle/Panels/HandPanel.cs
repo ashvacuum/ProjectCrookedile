@@ -6,6 +6,7 @@ using Crookedile.Data.Cards;
 using Crookedile.Gameplay.Battle;
 using Crookedile.Utilities;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
 
 namespace Crookedile.UI.Battle
@@ -25,6 +26,14 @@ namespace Crookedile.UI.Battle
         [Tooltip("Parent Transform that card buttons are placed inside.")]
         [SerializeField]
         private Transform cardButtonContainer;
+
+        [Header("Debug")]
+        [Tooltip(
+            "OFF = no CardFlyAnimator. Cards just appear/arrange/return instantly — use this to "
+                + "verify the rent → parent → activate → layout path without the animation system."
+        )]
+        [SerializeField]
+        private bool _animateCards = false;
 
         [Header("Fallback Prefabs (used only when BattlePoolManager singleton is absent)")]
         [SerializeField]
@@ -136,20 +145,27 @@ namespace Crookedile.UI.Battle
                 var btn = _pendingDiscardButton;
                 _pendingDiscardButton = null;
 
-                CardFlyAnimator.Instance?.AnimateDiscardOut(
-                    btn,
-                    () =>
-                    {
-                        GameLogger.LogInfo(
-                            "Card",
-                            $"Discard animation done for '{btn.CardData?.CardName}' — returning to pool and refreshing hand"
-                        );
-                        BattlePoolManager.Instance?.ReturnCard(btn);
-
-                        // Refresh hand AFTER discard so any drawn cards appear once the discard lands.
-                        QueueHandRefresh();
-                    }
-                );
+                if (!_animateCards || CardFlyAnimator.Instance == null)
+                {
+                    // No-anim baseline: return the played card immediately, then refresh.
+                    BattlePoolManager.Instance?.ReturnCard(btn);
+                    QueueHandRefresh();
+                }
+                else
+                {
+                    CardFlyAnimator.Instance.AnimateDiscardOut(
+                        btn,
+                        () =>
+                        {
+                            GameLogger.LogInfo(
+                                "Card",
+                                $"Discard animation done for '{btn.CardData?.CardName}' — returning to pool and refreshing hand"
+                            );
+                            BattlePoolManager.Instance?.ReturnCard(btn);
+                            QueueHandRefresh();
+                        }
+                    );
+                }
             }
             else
             {
@@ -300,7 +316,10 @@ namespace Crookedile.UI.Battle
                     isCostDiscounted,
                     () => onCardClicked(captured, idx)
                 );
-                btn.PlayDrawAnimation();
+                if (_animateCards)
+                    btn.PlayDrawAnimation();
+                else
+                    EnsureVisible(btn);
                 _activeButtons.Add(btn);
             }
 
@@ -435,7 +454,8 @@ namespace Crookedile.UI.Battle
                         () => onCardClicked(captured, capturedIdx)
                     );
                     btn.gameObject.SetActive(true); // always activate; StaggeredDraw hides+reveals on top
-                    btn.PlayDrawAnimation();
+                    if (_animateCards)
+                        btn.PlayDrawAnimation();
                     toAnimate.Add(btn);
                 }
 
@@ -475,9 +495,9 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void DiscardHandAnimated()
         {
-            if (CardFlyAnimator.Instance == null)
+            if (!_animateCards || CardFlyAnimator.Instance == null)
             {
-                ClearHand();
+                ClearHand(); // no-anim baseline: instantly return the whole hand to the pool
                 return;
             }
 
@@ -604,7 +624,32 @@ namespace Crookedile.UI.Battle
         {
             if (buttons == null || buttons.Count == 0)
                 return;
+
+            if (!_animateCards)
+            {
+                // No-anim baseline: make every card visible and lay them out instantly.
+                foreach (var btn in buttons)
+                    EnsureVisible(btn);
+                cardButtonContainer
+                    .GetComponent<CardHandLayout>()
+                    ?.ArrangeCards(buttons, animated: false);
+                GameLogger.LogInfo<HandPanel>(
+                    $"PlayCardDrawAnimation (no-anim): activated + arranged {buttons.Count} card(s)."
+                );
+                return;
+            }
+
             CardFlyAnimator.Instance?.AnimateDrawIn(buttons, cardButtonContainer);
+        }
+
+        /// <summary>Force a card to its normal visible state (active, full scale). No-anim path.</summary>
+        private static void EnsureVisible(CardButton btn)
+        {
+            if (btn == null)
+                return;
+            btn.transform.DOKill();
+            btn.gameObject.SetActive(true);
+            btn.transform.localScale = Vector3.one;
         }
 
         #endregion
