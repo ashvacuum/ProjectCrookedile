@@ -254,6 +254,8 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
+            ValidateLayoutContainerOnce();
+
             ClearHand();
             GameLogger.LogInfo<HandPanel>(
                 $"RefreshNormalHand: building {bm.PlayerDeck.Hand.Count} card button(s) "
@@ -552,6 +554,30 @@ namespace Crookedile.UI.Battle
             cardButtonContainer
                 .GetComponent<CardHandLayout>()
                 ?.ArrangeCards(_activeButtons, animated);
+        }
+
+        // One-time sanity check on the hand container: cards are positioned by CardHandLayout
+        // (an arc fan). Without it cards stack at the container origin; a UI LayoutGroup on the
+        // same object overrides the arc every frame. Both fail silently otherwise.
+        private bool _layoutChecked;
+
+        private void ValidateLayoutContainerOnce()
+        {
+            if (_layoutChecked)
+                return;
+            _layoutChecked = true;
+
+            if (cardButtonContainer.GetComponent<CardHandLayout>() == null)
+                GameLogger.LogWarning<HandPanel>(
+                    $"'{cardButtonContainer.name}' has no CardHandLayout component — cards will "
+                        + "stack at its origin instead of fanning. Add CardHandLayout to it."
+                );
+
+            if (cardButtonContainer.GetComponent<UnityEngine.UI.LayoutGroup>() != null)
+                GameLogger.LogWarning<HandPanel>(
+                    $"'{cardButtonContainer.name}' has a UI LayoutGroup that fights CardHandLayout "
+                        + "(it overrides card positions every frame). Remove it from the hand container."
+                );
         }
 
         private void PlayCardDrawAnimation(List<CardButton> buttons)
