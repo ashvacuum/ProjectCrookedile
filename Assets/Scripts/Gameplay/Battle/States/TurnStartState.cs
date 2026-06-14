@@ -41,11 +41,14 @@ namespace Crookedile.Gameplay.Battle
                 foreach (var enemy in _manager.Enemies)
                     enemy.SnapshotHostilityForTurn();
 
-                // Draw cards — base draw plus one per hostile/newly-hostile enemy
-                int totalDraw = _manager.CardsPerTurn + bonusDraws;
+                // Draw cards — base draw plus one per hostile/newly-hostile enemy.
+                // The first player turn draws nothing: the opening hand dealt in InitializeState
+                // IS this turn's hand, so a turn-1 draw would stack on top (5 + 5 = 10).
+                int totalDraw =
+                    _manager.PlayerTurnNumber > 1 ? _manager.CardsPerTurn + bonusDraws : 0;
                 _manager.PlayerDeck.StartTurn(totalDraw);
 
-                if (bonusDraws > 0)
+                if (_manager.PlayerTurnNumber > 1 && bonusDraws > 0)
                     GameLogger.LogInfo<BattleManager>(
                         $"Hostile crowd: drawing +{bonusDraws} extra card(s) ({totalDraw} total)"
                     );

@@ -756,6 +756,11 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Base card draw per player turn, before hostile-crowd bonus draws (TurnStartState).</summary>
         internal int CardsPerTurn => _cardsPerTurn;
 
+        /// <summary>The player's personal turn count (1 on the first player turn). Set by
+        /// <see cref="FirePlayerTurnStartPassives"/>; read by TurnStartState to skip the
+        /// turn-1 draw so the opening hand isn't doubled.</summary>
+        internal int PlayerTurnNumber => _playerTurnNumber;
+
         /// <summary>Pause before the enemy side acts (OpponentTurnState).</summary>
         internal float OpponentTurnDelay => _opponentTurnDelay;
 
