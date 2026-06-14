@@ -49,6 +49,11 @@ namespace Crookedile.UI.Battle
         private readonly HashSet<CardData> _pendingDrawnCards = new HashSet<CardData>();
         private bool _handRefreshPending;
 
+        // Set by RefreshNormalHand when it pre-empts a queued draw refresh; consumed (and
+        // cleared) by the queued RefreshHandNextFrame so it no-ops instead of fighting the
+        // full rebuild's draw animation.
+        private bool _fullRebuildSuppressedRefresh;
+
         /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
         private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
 
@@ -193,6 +198,16 @@ namespace Crookedile.UI.Battle
                 _pendingDrawnCards.Count > 0 ? new HashSet<CardData>(_pendingDrawnCards) : null;
             _pendingDrawnCards.Clear();
 
+            // A full rebuild (RefreshNormalHand) ran this frame AFTER these draws were queued —
+            // it already built and animated the whole hand. Running an incremental refresh now
+            // would re-Initialize the buttons, and Initialize() calls DOKill(), killing the
+            // in-flight staggered draw-in and stranding not-yet-revealed cards at scale 0.
+            if (_fullRebuildSuppressedRefresh)
+            {
+                _fullRebuildSuppressedRefresh = false;
+                return;
+            }
+
             if (_bm == null || _onCardClicked == null)
                 return;
 
@@ -220,6 +235,16 @@ namespace Crookedile.UI.Battle
                 return;
 
             ClearHand();
+
+            // This is an authoritative full rebuild with its own staggered draw animation.
+            // If a draw-driven incremental refresh is queued for this frame's draw batch,
+            // suppress it — otherwise it re-Initializes these buttons next frame and DOKills
+            // the reveal tween, leaving cards invisible at scale 0.
+            if (_handRefreshPending)
+            {
+                _pendingDrawnCards.Clear();
+                _fullRebuildSuppressedRefresh = true;
+            }
 
             if (!bm.IsPlayerTurn)
                 return; // safety — Idle state should call ClearHand instead
