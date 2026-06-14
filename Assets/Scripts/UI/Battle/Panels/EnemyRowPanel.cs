@@ -203,7 +203,7 @@ namespace Crookedile.UI.Battle
             if (slot == null)
                 return;
 
-            slot.Initialize(index, _bm, _bm.PlayerOrigin, _bm.Enemies[index].EnemyData);
+            slot.Initialize(index, _bm, _bm.Enemies[index].EnemyData);
             _slots.Add(slot);
         }
 

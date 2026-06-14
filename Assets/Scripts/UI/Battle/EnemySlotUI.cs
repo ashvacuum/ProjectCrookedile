@@ -68,7 +68,6 @@ namespace Crookedile.UI.Battle
 
         private int _enemyIndex;
         private BattleManager _battleManager;
-        private OriginType _playerOrigin;
 
         /// <summary>The enemy slot currently targeted by the card targeting arrow, or null.</summary>
         public static EnemySlotUI TargetedSlot { get; private set; }
@@ -95,16 +94,10 @@ namespace Crookedile.UI.Battle
         /// <summary>
         /// Called by BattleUI when spawning this slot. Must be called before the first frame.
         /// </summary>
-        public void Initialize(
-            int index,
-            BattleManager manager,
-            OriginType playerOrigin,
-            EnemyData enemyData
-        )
+        public void Initialize(int index, BattleManager manager, EnemyData enemyData)
         {
             _enemyIndex = index;
             _battleManager = manager;
-            _playerOrigin = playerOrigin;
 
             if (defeatedOverlay != null)
                 defeatedOverlay.SetActive(false);
@@ -157,13 +150,13 @@ namespace Crookedile.UI.Battle
             TweenFill(_hostileFill, posT);
             TweenFill(_receptiveFill, negT);
 
-            // Optional exact-value label — shown only for Actor origin
+            // Exact signed hostility — always shown. The number line is the core read of
+            // the game (pacify thresholds, the pressure multiplier, the ±conversion edges),
+            // so every origin sees the actual value, not just the bar.
             if (hostilityText != null)
             {
-                bool showExact = _playerOrigin == OriginType.Actor;
-                hostilityText.gameObject.SetActive(showExact);
-                if (showExact)
-                    hostilityText.text = $"{h:+0;-0;0}";
+                hostilityText.gameObject.SetActive(true);
+                hostilityText.text = $"{h:+0;-0;0}";
             }
 
             // Buff/debuff icons
