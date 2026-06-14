@@ -65,6 +65,11 @@ namespace Crookedile.Utilities
             bool
         >(StringComparer.Ordinal);
 
+        // Focus mode: when non-null, ONLY this category logs (all levels), bypassing the global
+        // level and per-category filters. Lets you isolate one category without disabling the
+        // others one by one. Toggle via SoloCategory / ClearSolo (or the "logsolo" console cmd).
+        private static string _soloCategory;
+
         #endregion
 
         #region Log Buffer
@@ -105,6 +110,38 @@ namespace Crookedile.Utilities
         public static void SetGlobalLevel(LogLevel level) => _globalLevel = level;
 
         public static void SetGlobalEnabled(bool enabled) => _globalEnabled = enabled;
+
+        /// <summary>
+        /// Focus the console on a single category: only <paramref name="category"/> logs
+        /// (all its levels), everything else is muted, until <see cref="ClearSolo"/>.
+        /// Pass null/empty to clear.
+        /// </summary>
+        public static void SoloCategory(string category) =>
+            _soloCategory = string.IsNullOrEmpty(category) ? null : category;
+
+        /// <summary>Clears focus mode — all categories log per their normal levels again.</summary>
+        public static void ClearSolo() => _soloCategory = null;
+
+        /// <summary>The category currently soloed, or null when focus mode is off.</summary>
+        public static string CurrentSolo => _soloCategory;
+
+        #endregion
+
+        #region Console commands
+
+        [CheatCommand("logsolo", "Mute all logs except one category (e.g. logsolo Card)")]
+        private static string CmdLogSolo(string category)
+        {
+            SoloCategory(category);
+            return $"Log focus → '{category}'. Everything else muted. Use 'logall' to restore.";
+        }
+
+        [CheatCommand("logall", "Clear log focus — all categories log again")]
+        private static string CmdLogAll()
+        {
+            ClearSolo();
+            return "Log focus cleared — all categories log per their levels.";
+        }
 
         #region Logging API — generic (type name as category)
         public static void LogError<T>(string message, UnityEngine.Object context = null) =>
@@ -158,14 +195,22 @@ namespace Crookedile.Utilities
         {
             if (!_globalEnabled)
                 return;
-            if (level > _globalLevel)
-                return;
 
-            if (_categoryEnabled.TryGetValue(category, out bool catEnabled) && !catEnabled)
-                return;
-
-            if (_categoryLevels.TryGetValue(category, out LogLevel catLevel) && level > catLevel)
-                return;
+            // Focus mode wins over everything: only the soloed category logs (all levels).
+            if (_soloCategory != null)
+            {
+                if (!string.Equals(category, _soloCategory, StringComparison.Ordinal))
+                    return;
+            }
+            else
+            {
+                if (level > _globalLevel)
+                    return;
+                if (_categoryEnabled.TryGetValue(category, out bool catEnabled) && !catEnabled)
+                    return;
+                if (_categoryLevels.TryGetValue(category, out LogLevel catLevel) && level > catLevel)
+                    return;
+            }
 
             var entry = new LogEntry(Time.time, category, message, level);
 
