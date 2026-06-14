@@ -164,6 +164,12 @@ namespace Crookedile.UI.Battle
                 return null;
             CardButton btn = pool.Get();
             btn.transform.SetParent(parent, false);
+            GameLogger.LogVerbose(
+                "Card",
+                $"RentCard {cardType} → parented under '{(parent != null ? parent.name : "null")}' "
+                    + $"(active={btn.gameObject.activeSelf})",
+                btn
+            );
             return btn;
         }
 
@@ -194,6 +200,11 @@ namespace Crookedile.UI.Battle
             btn.transform.localScale = Vector3.one;
             btn.transform.SetParent(transform, false);
             pool.Return(btn);
+            GameLogger.LogVerbose(
+                "Card",
+                $"ReturnCard '{btn.CardData?.CardName}' → back to pool '{name}' (deactivated)",
+                btn
+            );
         }
 
         #endregion
