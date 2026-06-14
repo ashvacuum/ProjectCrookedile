@@ -272,9 +272,17 @@ namespace Crookedile.Gameplay.Battle
                         );
                         continue;
                     }
-                    for (int i = 0; i < entry.count; i++)
+                    // Inspector-added list elements can land with count 0 (Unity skips the C#
+                    // field initializer), which would silently add zero copies — treat any
+                    // non-positive count as a single copy.
+                    int copies = Mathf.Max(1, entry.count);
+                    for (int i = 0; i < copies; i++)
                         deck.Add(entry.card);
                 }
+                Debug.Log(
+                    $"[BattleTestStarter] Built {origin} deck from serialized list: "
+                        + $"{deck.Count} cards ({entries.Count} entries)."
+                );
                 return deck;
             }
 
