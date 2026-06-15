@@ -457,6 +457,7 @@ MonoBehaviour:
   _playerShield: {fileID: 1471582496989247320}
   _barFill: {fileID: 32329655388704423}
   _enemyShield: {fileID: 9137516265271607830}
+  _tweenDuration: 0.25
   _thresholdMarker: {fileID: 3973458710541158314}
   _valueText: {fileID: 3084105616310411813}
   _turnsText: {fileID: 2371662875373801271}
@@ -687,6 +688,7 @@ GameObject:
   - component: {fileID: 655297845343853781}
   - component: {fileID: 3704260919478329346}
   - component: {fileID: 7863529311896325498}
+  - component: {fileID: 7408190706416409326}
   m_Layer: 5
   m_Name: Enemy Panel
   m_TagString: Untagged
@@ -753,6 +755,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &7408190706416409326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7298479544866366203}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2e905d04c26e2142bb1ea5babad7c90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Crookedile.UI::Crookedile.UI.Battle.EnemyRowPanel
+  enemySlotContainer: {fileID: 6356149785948822252}
+  enemySlotPrefab: {fileID: 5129716837229297804, guid: 27b4f0d6ccdeff948896ca6804495b83, type: 3}
 --- !u!1 &7387195345980057061
 GameObject:
   m_ObjectHideFlags: 0
