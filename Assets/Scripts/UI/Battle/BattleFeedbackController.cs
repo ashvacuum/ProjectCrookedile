@@ -4,6 +4,7 @@ using Crookedile.Data.Audio;
 using Crookedile.Data.VFX;
 using Crookedile.Gameplay.Battle;
 using Crookedile.Managers;
+using DG.Tweening;
 using UnityEngine;
 
 namespace Crookedile.UI.Battle
@@ -51,6 +52,10 @@ namespace Crookedile.UI.Battle
         [Tooltip("Color of the 'Blocked' text when a shield fully absorbs a hit.")]
         [SerializeField]
         private Color _blockedColor = new Color(0.7f, 0.7f, 0.75f);
+
+        [Tooltip("Color of shield gain/loss numbers (Support / Denial) shown on the meter.")]
+        [SerializeField]
+        private Color _shieldColor = new Color(0.4f, 0.6f, 0.9f);
 
         #region Lifecycle
         /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
@@ -154,12 +159,15 @@ namespace Crookedile.UI.Battle
                 : _battleUI?.PlayerSlotTransform;
             Play(trigger, vfxSource);
 
-            // Floating damage number: appears at the target that took the hit.
-            // Player took damage: number appears at the player slot.
-            // Enemy took damage: number appears at the targeted enemy slot.
+            // The Opinion Meter is the only resource pressure actually moves — enemies are who
+            // you're addressing, not damage sponges. So the number lands on the meter (what
+            // changed), and a player-targeted enemy just gets a light reaction tell, not a hit.
             var dmgTarget = evt.IsToPlayer
                 ? _battleUI?.PlayerSlotTransform
-                : _battleUI?.GetEnemySlotTransform(evt.TargetEnemyIndex);
+                : _battleUI?.MeterTransform;
+
+            if (!evt.IsToPlayer)
+                ReactOnEnemy(evt.TargetEnemyIndex);
 
             // Show what actually happened, not the raw pressure: the applied delta when the
             // meter moved, "Blocked" when a shield ate the whole hit, nothing when the hit
@@ -168,6 +176,20 @@ namespace Crookedile.UI.Battle
                 FloatingTextManager.Instance?.Show(evt.Applied.ToString(), dmgTarget, _damageColor);
             else if (evt.Absorbed > 0)
                 FloatingTextManager.Instance?.Show("Blocked", dmgTarget, _blockedColor);
+        }
+
+        /// <summary>
+        /// Light "you addressed me" tell on a player-targeted enemy — a small scale punch. The
+        /// enemy isn't being depleted (the meter is), so this stays subtle, not a damage hit.
+        /// </summary>
+        private void ReactOnEnemy(int enemyIndex)
+        {
+            var slot = _battleUI?.GetEnemySlotTransform(enemyIndex);
+            if (slot == null)
+                return;
+            slot.DOComplete();
+            slot.DOPunchScale(Vector3.one * 0.08f, 0.2f, vibrato: 6, elasticity: 0.5f)
+                .SetLink(slot.gameObject);
         }
 
         private void OnHealApplied(HealingAppliedEvent evt)
@@ -239,27 +261,34 @@ namespace Crookedile.UI.Battle
                 _battleUI?.GetEnemySlotTransform(evt.EnemyIndex)
             );
 
-        private void OnSupportChanged(SupportChangedEvent evt)
-        {
-            // Ambient turn-start expiry is not an attack — no "shield lost" sting.
-            if (evt.IsDecay)
-                return;
-            Play(
-                evt.NewValue > evt.OldValue
-                    ? BattleAudioTrigger.ShieldGained
-                    : BattleAudioTrigger.ShieldLost
-            );
-        }
+        // Support and Denial both live on the meter (rendered as bar segments), so their
+        // gain/loss feedback anchors to the meter — not a player/enemy slot — just like the
+        // pressure numbers that move it.
+        private void OnSupportChanged(SupportChangedEvent evt) =>
+            ShieldFeedback(evt.OldValue, evt.NewValue, evt.IsDecay);
 
-        private void OnDenialChanged(DenialChangedEvent evt)
+        private void OnDenialChanged(DenialChangedEvent evt) =>
+            ShieldFeedback(evt.OldValue, evt.NewValue, evt.IsDecay);
+
+        private void ShieldFeedback(int oldValue, int newValue, bool isDecay)
         {
-            if (evt.IsDecay)
+            // Ambient turn-start expiry is not an attack — no sting, no number.
+            if (isDecay)
                 return;
+            var meter = _battleUI?.MeterTransform;
             Play(
-                evt.NewValue > evt.OldValue
+                newValue > oldValue
                     ? BattleAudioTrigger.ShieldGained
-                    : BattleAudioTrigger.ShieldLost
+                    : BattleAudioTrigger.ShieldLost,
+                meter
             );
+            int delta = newValue - oldValue;
+            if (delta != 0)
+                FloatingTextManager.Instance?.Show(
+                    (delta > 0 ? "+" : "") + delta,
+                    meter,
+                    _shieldColor
+                );
         }
 
         private void OnHostilityChanged(HostilityChangedEvent evt)
