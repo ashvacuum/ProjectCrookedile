@@ -89,6 +89,10 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private OpinionMeterUI _opinionMeterUI;
 
+        /// <summary>Anchor for feedback that targets the Opinion Meter (the real damage sink).</summary>
+        public RectTransform MeterTransform =>
+            _opinionMeterUI != null ? _opinionMeterUI.AnchorTransform : null;
+
         #endregion
 
         #region Battle Info
@@ -124,7 +128,9 @@ namespace Crookedile.UI.Battle
 
         #region Card Zone Bar
         [Header("Card Zone Bar")]
-        [Tooltip("Self-subscribing zone bar — owns deck/discard/exhaust buttons, counts, and grant animations.")]
+        [Tooltip(
+            "Self-subscribing zone bar — owns deck/discard/exhaust buttons, counts, and grant animations."
+        )]
         [SerializeField]
         private CardZoneBar cardZoneBar;
 
@@ -250,7 +256,7 @@ namespace Crookedile.UI.Battle
                     break;
 
                 case BattleState.PlayerTurn:
-                    handPanel?.RefreshNormalHand(battleManager, OnCardButtonClicked);
+                    handPanel?.RequestHandRefresh();
                     if (endTurnButton != null)
                         endTurnButton.interactable = !_cardChoiceActive;
                     RequestStatsRefresh();
@@ -292,7 +298,6 @@ namespace Crookedile.UI.Battle
             // Narration → BattleLogPanel; hand choreography → HandPanel (both self-subscribe).
             RequestStatsRefresh();
         }
-
 
         private void OnEnemySummoned(EnemySummonedEvent evt)
         {
@@ -448,8 +453,7 @@ namespace Crookedile.UI.Battle
         /// or null if the index is out of range or the slot has been destroyed.
         /// Used by <see cref="BattleFeedbackController"/> to aim VFX at specific enemy panels.
         /// </summary>
-        public RectTransform GetEnemySlotTransform(int index) =>
-            enemyRow?.GetSlotTransform(index);
+        public RectTransform GetEnemySlotTransform(int index) => enemyRow?.GetSlotTransform(index);
 
         #endregion
 
