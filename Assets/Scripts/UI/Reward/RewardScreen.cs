@@ -146,6 +146,7 @@ namespace Crookedile.UI.Reward
                     baseCost,
                     onClick: () => SelectCard(captured, capturedBtn)
                 );
+                btn.SetPickerMode(true); // plain click-to-select; no hand hover-lift / drag-to-play
 
                 // Force layout so SetBasePosition gets the real slot position, not (0,0)
                 Canvas.ForceUpdateCanvases();

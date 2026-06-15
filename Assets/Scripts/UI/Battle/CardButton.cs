@@ -21,6 +21,7 @@ namespace Crookedile.UI.Battle
         : MonoBehaviour,
             IPointerEnterHandler,
             IPointerExitHandler,
+            IPointerClickHandler,
             IBeginDragHandler,
             IDragHandler,
             IEndDragHandler
@@ -201,6 +202,11 @@ namespace Crookedile.UI.Battle
         // lerping cards toward (0,0) before a layout group has had a chance to position them.
         private bool _basePositionSet;
 
+        // Picker mode: card is a plain selectable button (reward / choose-a-card grids), not a
+        // hand card. Suppresses hover-lift-to-canvas-bottom and drag-to-play; a plain click
+        // fires onClickCallback instead. Set by RewardScreen / CardChoicePanel after Initialize.
+        private bool _pickerMode;
+
         // Drag / targeting state
         private bool _isDragging;
         private bool _isTargeting;
@@ -302,9 +308,17 @@ namespace Crookedile.UI.Battle
             basePosition = transform.localPosition;
             baseRotation = transform.localRotation;
             _basePositionSet = false;
+            _pickerMode = false; // default to hand behavior; pickers re-enable after Initialize
 
             UpdateDisplay();
         }
+
+        /// <summary>
+        /// Switches this button to picker mode (reward / choose-a-card grids): hover just pops
+        /// the scale, drag-to-play is disabled, and a plain click fires the onClick callback.
+        /// Call AFTER <see cref="Initialize"/> (which resets it to hand behavior).
+        /// </summary>
+        public void SetPickerMode(bool on) => _pickerMode = on;
 
         /// <summary>
         /// Refreshes all visuals — call when AP changes mid-turn so affordability updates.
@@ -397,6 +411,16 @@ namespace Crookedile.UI.Battle
                 return;
             isHovered = true;
 
+            if (_pickerMode)
+            {
+                // Plain selectable: pop the scale only — no lift to the canvas bottom, no spread.
+                transform.DOKill();
+                transform.DOScale(baseScale * hoverScale, hoverTweenDuration).SetEase(Ease.OutQuad);
+                transform.SetAsLastSibling();
+                hoverEnterFeedback?.PlayFeedbacks();
+                return;
+            }
+
             transform.DOKill();
             transform.DOScale(baseScale * hoverScale, hoverTweenDuration).SetEase(Ease.OutQuad);
             transform
@@ -421,6 +445,14 @@ namespace Crookedile.UI.Battle
             if (!isHovered)
                 return;
             isHovered = false;
+
+            if (_pickerMode)
+            {
+                transform.DOKill();
+                transform.DOScale(baseScale, hoverTweenDuration).SetEase(Ease.OutQuad);
+                hoverExitFeedback?.PlayFeedbacks();
+                return;
+            }
 
             transform.DOKill();
             transform.DOScale(baseScale, hoverTweenDuration).SetEase(Ease.OutQuad);
@@ -463,11 +495,21 @@ namespace Crookedile.UI.Battle
                 + hoverEdgePadding;
         }
 
+        /// <summary>Picker-mode selection. Hand cards are played by dragging, so they ignore plain clicks.</summary>
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (_pickerMode)
+                onClickCallback?.Invoke();
+        }
+
         #endregion
 
         #region Drag Handlers
         public void OnBeginDrag(PointerEventData eventData)
         {
+            if (_pickerMode)
+                return; // pickers select by click, never drag-to-play
+
             if (!isPlayable)
             {
                 // Visible "nope" so a rejected drag reads as unplayable, not unresponsive.
