@@ -263,9 +263,12 @@ MonoBehaviour:
   pressureColor: {r: 0.2, g: 0.8, b: 0.2, a: 1}
   rhetoricColor: {r: 0.8, g: 0.2, b: 0.2, a: 1}
   policyColor: {r: 0.2, g: 0.5, b: 0.9, a: 1}
+  statusColor: {r: 0.6, g: 0.3, b: 0.85, a: 1}
+  curseColor: {r: 0.25, g: 0.05, b: 0.05, a: 1}
   unaffordableColor: {r: 0.4, g: 0.4, b: 0.4, a: 0.6}
+  _defaultCostColor: {r: 1, g: 1, b: 1, a: 1}
   hoverScale: 1.2
-  hoverLerpSpeed: 16
+  hoverTweenDuration: 0.15
   hoverEdgePadding: 6
   dragUpThreshold: 100
   drawFeedback: {fileID: 0}
@@ -829,7 +832,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5348849135926080914}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
