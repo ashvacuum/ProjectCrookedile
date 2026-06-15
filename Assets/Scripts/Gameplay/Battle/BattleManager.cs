@@ -189,6 +189,10 @@ namespace Crookedile.Gameplay.Battle
         private void InitializeStateMachine()
         {
             _stateMachine = new StateMachine<BattleState>();
+            _stateMachine.StateEntered += (previous, current) =>
+                EventBus.Publish(
+                    new BattleStateChangedEvent { Previous = previous, Current = current }
+                );
 
             _stateMachine.RegisterState(BattleState.Initialize, new InitializeState(this));
             _stateMachine.RegisterState(BattleState.TurnStart, new TurnStartState(this));
@@ -341,11 +345,11 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Transitions to the next state in the battle flow and notifies all listeners.</summary>
         public void TransitionToState(BattleState newState)
         {
-            var previous = CurrentState;
+            // The BattleStateChangedEvent is published by the state machine's StateEntered hook
+            // (wired in setup) the moment the state becomes current — see ChangeState. Publishing
+            // here instead would fire AFTER any nested transition inside the new state's OnEnter,
+            // delivering a transient state (e.g. TurnStart) last and clobbering PlayerTurn.
             _stateMachine.ChangeState(newState);
-            EventBus.Publish(
-                new BattleStateChangedEvent { Previous = previous, Current = newState }
-            );
         }
 
         /// <summary>
