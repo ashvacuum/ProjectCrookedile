@@ -25,5 +25,5 @@ MonoBehaviour:
   _enhancedFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
   _rareFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
   _upgradedNameSuffix: +
-  _upgradedNameColor: {r: 1, g: 1, b: 1, a: 1}
-  _discountedCostColor: {r: 0.3, g: 1, b: 0.3, a: 1}
+  _upgradedNameColor: {r: 0.115417674, g: 0.5924529, b: 0, a: 1}
+  _discountedCostColor: {r: 0.7344565, g: 0.87169814, b: 0.08388037, a: 1}

@@ -34,11 +34,11 @@ MonoBehaviour:
   _upgradedCosts: []
   _upgradedEffects: []
   _upgradedPassives: []
-  _tags:
-  - faithleader
+  _tags: []
   _isStarterCard: 0
   _isUnlockable: 0
   _isUnplayable: 1
+  _innateRetain: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
@@ -67,3 +67,6 @@ MonoBehaviour:
       data:
         _name: 
         _amount: 1
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
