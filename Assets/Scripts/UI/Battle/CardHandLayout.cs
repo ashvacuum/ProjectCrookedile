@@ -128,9 +128,15 @@ namespace Crookedile.UI.Battle
             // Cancel any in-progress animation before starting a new arrangement.
             _lerpSequence?.Kill();
             _lerpSequence = null;
+
             foreach (var card in cards)
-                if (card != null)
-                    card.transform.DOKill();
+            {
+                if (card == null)
+                    continue;
+                card.transform.DOKill();
+                card.transform.SetParent(transform);
+                card.gameObject.SetActive(true);
+            }
 
             // Compute target transforms for every card.
             var targets = new List<(CardButton btn, Vector3 pos, float angle)>(count);
