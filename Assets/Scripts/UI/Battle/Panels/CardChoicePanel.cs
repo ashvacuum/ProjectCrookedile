@@ -157,6 +157,7 @@ namespace Crookedile.UI.Battle
                     effectiveCost: baseCost,
                     onClick: () => OnCardClicked(card, capturedBtn)
                 );
+                btn.SetPickerMode(true); // plain click-to-select; no hand hover-lift / drag-to-play
 
                 // Force layout so SetBasePosition receives the real slot position.
                 Canvas.ForceUpdateCanvases();
