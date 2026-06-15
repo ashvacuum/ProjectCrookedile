@@ -80,16 +80,19 @@ namespace Crookedile.UI.Battle
 
         #region Draw API
         /// <summary>
-        /// Reveals each button in <paramref name="buttons"/> with a staggered scale-in pop,
-        /// re-running the arc layout after each reveal.
-        /// Call this immediately after <c>CardHandLayout.ArrangeCards()</c> so the arc targets
-        /// are already established.
+        /// Reveals each button in <paramref name="newCards"/> with a staggered scale-in pop,
+        /// re-running the arc layout over the full <paramref name="allCards"/> hand after each
+        /// reveal so existing cards make room as new ones deal in.
         /// </summary>
-        public void AnimateDrawIn(List<CardButton> buttons, Transform handContainer)
+        public void AnimateDrawIn(
+            List<CardButton> allCards,
+            List<CardButton> newCards,
+            Transform handContainer
+        )
         {
             if (handContainer == null)
                 return;
-            StaggeredDraw(buttons, handContainer).Forget();
+            StaggeredDraw(allCards, newCards, handContainer).Forget();
         }
 
         #endregion
@@ -163,11 +166,15 @@ namespace Crookedile.UI.Battle
                         continue;
 
                     var completion = new UniTaskCompletionSource();
-                    PlayGrantAnimation(btn, zone, () =>
-                    {
-                        onArrival?.Invoke();
-                        completion.TrySetResult();
-                    });
+                    PlayGrantAnimation(
+                        btn,
+                        zone,
+                        () =>
+                        {
+                            onArrival?.Invoke();
+                            completion.TrySetResult();
+                        }
+                    );
                     await completion.Task.AttachExternalCancellation(
                         this.GetCancellationTokenOnDestroy()
                     );
@@ -236,61 +243,46 @@ namespace Crookedile.UI.Battle
         #endregion
 
         #region Internal — Draw
-        private async UniTaskVoid StaggeredDraw(List<CardButton> buttons, Transform container)
+        private async UniTaskVoid StaggeredDraw(
+            List<CardButton> allCards,
+            List<CardButton> newCards,
+            Transform container
+        )
         {
             var ct = this.GetCancellationTokenOnDestroy();
-            // Snapshot the list immediately — the live _activeButtons list may be mutated
-            // by ClearHand() or ExtractCard() while the coroutine is yielding.
-            var snapshot = new CardButton[buttons.Count];
-            buttons.CopyTo(snapshot);
+            var layout = container.GetComponent<CardHandLayout>();
+            // Snapshot — the live lists may be mutated by a rebuild while this yields.
+            var newSnap = newCards.ToArray();
+            var allSnap = new List<CardButton>(allCards);
 
-            // Immediately hide all cards before the first yield so there is no frame where
-            // cards are visible at their final arc positions before the stagger launches them.
-            foreach (var btn in snapshot)
-            {
+            // Hide the new cards, then arrange the whole hand once so existing cards settle.
+            foreach (var btn in newSnap)
                 if (btn != null)
                     btn.transform.localScale = Vector3.zero;
-            }
+            layout?.ArrangeCards(allSnap);
 
-            for (int i = 0; i < snapshot.Length; i++)
+            for (int i = 0; i < newSnap.Length; i++)
             {
-                var btn = snapshot[i];
+                var btn = newSnap[i];
                 if (btn == null)
                     continue;
 
-                // Stagger between cards only — the first card launches immediately so the
-                // hand starts responding the same frame the draw begins.
                 if (i > 0 && _drawStaggerDelay > 0f)
                     await UniTask.WaitForSeconds(_drawStaggerDelay, cancellationToken: ct);
 
-                // A refresh/ClearHand during the stagger can return this button to the pool
-                // (reparented away from the hand container). Skipping here prevents the classic
-                // "active card parented under the pool" — we must not re-activate a recycled card.
-                if (btn == null || btn.transform.parent != container)
-                {
-                    GameLogger.LogInfo(
-                        "Card",
-                        $"StaggeredDraw skip: '{(btn != null ? btn.CardData?.CardName : "null")}' "
-                            + $"was recycled mid-stagger (parent='{(btn != null ? btn.transform.parent?.name : "-")}', "
-                            + $"expected '{container.name}').",
-                        this
-                    );
+                // A rebuild mid-stagger can return this button to the pool (reparented away).
+                // Skipping prevents re-activating a recycled card under the wrong parent.
+                if (btn.transform.parent != container)
                     continue;
-                }
 
-                GameLogger.LogVerbose(
-                    "Card",
-                    $"Draw animation started for '{btn.CardData?.CardName}'",
-                    this
-                );
                 btn.gameObject.SetActive(true);
                 btn.transform.localScale = Vector3.zero;
                 btn.transform.DOScale(Vector3.one, 0.18f).SetEase(Ease.OutBack);
-                btn.transform.SetSiblingIndex(0); // enter behind all existing cards; ArrangeCards restores proper z-order
-                container.GetComponent<CardHandLayout>()?.ArrangeCards(buttons);
+                btn.transform.SetSiblingIndex(0); // enter behind; ArrangeCards restores z-order
+                layout?.ArrangeCards(allSnap);
             }
 
-            container.GetComponent<CardHandLayout>()?.ArrangeCards(buttons);
+            layout?.ArrangeCards(allSnap);
         }
 
         #endregion

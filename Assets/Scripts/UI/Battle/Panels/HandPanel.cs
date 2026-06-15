@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Generic;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
@@ -12,13 +11,13 @@ using UnityEngine;
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Owns all card-hand display logic AND flow choreography: card button pooling,
-    /// play callbacks, affordability dimming, arc-fan layout, and the event-driven
-    /// play → VFX → discard-animation → refresh sequencing (moved from BattleUI).
+    /// Owns card-hand display and the play → VFX → discard → refresh sequencing.
     ///
-    /// Self-subscribes to the card events it cares about; BattleUI only drives the
-    /// structural state changes (RefreshNormalHand / DiscardHandAnimated / ClearHand)
-    /// and supplies the battle context via <see cref="Bind"/>.
+    /// One rebuild path: every card event (and the PlayerTurn state change) funnels through
+    /// <see cref="RequestHandRefresh"/>, which coalesces all changes from one frame into a
+    /// single rebuild on the next. The hand is rebuilt as a pure function of
+    /// <c>bm.PlayerDeck.Hand</c>; cards that weren't already on screen fly in, the rest just
+    /// re-arrange. No incremental-merge bookkeeping, no full-vs-partial refresh race.
     /// </summary>
     public class HandPanel : MonoBehaviour
     {
@@ -26,14 +25,6 @@ namespace Crookedile.UI.Battle
         [Tooltip("Parent Transform that card buttons are placed inside.")]
         [SerializeField]
         private Transform cardButtonContainer;
-
-        [Header("Debug")]
-        [Tooltip(
-            "OFF = no CardFlyAnimator. Cards just appear/arrange/return instantly — use this to "
-                + "verify the rent → parent → activate → layout path without the animation system."
-        )]
-        [SerializeField]
-        private bool _animateCards = false;
 
         [Header("Fallback Prefabs (used only when BattlePoolManager singleton is absent)")]
         [SerializeField]
@@ -45,35 +36,21 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private CardButton _policyPrefab;
 
-        #region Runtime
-        private List<CardButton> _activeButtons = new List<CardButton>();
+        private readonly List<CardButton> _activeButtons = new List<CardButton>();
 
-        // Battle context for event-driven refreshes — set via Bind (BattleUI.Initialize).
         private BattleManager _bm;
         private System.Action<CardData, int> _onCardClicked;
 
-        /// <summary>Card button extracted from hand on CardPlayedEvent, waiting for VFX to finish before animating to discard.</summary>
+        /// <summary>Card pulled from hand on CardPlayedEvent, held until VFX resolves before flying to discard.</summary>
         private CardButton _pendingDiscardButton;
 
-        private readonly HashSet<CardData> _pendingDrawnCards = new HashSet<CardData>();
         private bool _handRefreshPending;
 
-        // Set by RefreshNormalHand when it pre-empts a queued draw refresh; consumed (and
-        // cleared) by the queued RefreshHandNextFrame so it no-ops instead of fighting the
-        // full rebuild's draw animation.
-        private bool _fullRebuildSuppressedRefresh;
-
-        /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
         private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
 
-        #endregion
+        #region Setup / events
 
-        #region Event-driven flow (play → VFX → discard → refresh)
-
-        /// <summary>
-        /// Supplies the battle context the event-driven flows need. Called by
-        /// <c>BattleUI.Initialize</c>; until then the event handlers no-op.
-        /// </summary>
+        /// <summary>Supplies the battle context the refresh needs. Called by <c>BattleUI.Initialize</c>.</summary>
         public void Bind(BattleManager bm, System.Action<CardData, int> onCardClicked)
         {
             _bm = bm;
@@ -104,400 +81,163 @@ namespace Crookedile.UI.Battle
 
         private void OnCardPlayed(CardPlayedEvent evt)
         {
-            if (_bm == null)
-                return;
+            if (_bm == null || !evt.IsPlayer)
+                return; // enemy plays don't touch the player hand (it's hidden on the enemy turn)
 
-            if (evt.IsPlayer)
-            {
-                // Extract the card from hand immediately so the layout closes the gap,
-                // but hold it — the discard animation fires in OnCardPlayResolved so the
-                // sequence is: VFX resolves → card flies to discard → new draws appear.
-                GameLogger.LogInfo(
-                    "Card",
-                    $"Extracted '{evt.Card.CardName}' from hand — awaiting VFX complete before discard"
-                );
-                _pendingDiscardButton = ExtractCard(evt.Card);
-            }
-            else
-            {
-                // Enemy card — no VFX sequencing needed; refresh hand immediately.
-                QueueHandRefresh();
-            }
+            // Pull the played card from hand and hold it; the gap closes now, the card flies
+            // to discard in OnCardPlayResolved so order is: VFX → discard → new draws appear.
+            _pendingDiscardButton = ExtractCard(evt.Card);
+            ArrangeCards(animated: true);
         }
 
-        /// <summary>
-        /// Fires after a played card fully resolves (VFX done or none, effects applied).
-        /// Begins the discard animation; once the card lands in the discard pile the hand
-        /// refreshes — so newly drawn cards appear AFTER the discard, not during VFX.
-        /// </summary>
+        /// <summary>Played card fully resolved (VFX done): fly the held card to discard, then refresh.</summary>
         private void OnCardPlayResolved(CardPlayResolvedEvent evt)
         {
             if (_bm == null)
                 return;
 
-            GameLogger.LogInfo(
-                "Card",
-                $"CardPlayResolved for '{evt.Card?.CardName}' — starting discard animation"
-            );
-
-            if (_pendingDiscardButton != null)
+            var btn = _pendingDiscardButton;
+            _pendingDiscardButton = null;
+            if (btn == null)
             {
-                var btn = _pendingDiscardButton;
-                _pendingDiscardButton = null;
+                RequestHandRefresh();
+                return;
+            }
 
-                if (!_animateCards || CardFlyAnimator.Instance == null)
-                {
-                    // No-anim baseline: return the played card immediately, then refresh.
-                    BattlePoolManager.Instance?.ReturnCard(btn);
-                    QueueHandRefresh();
-                }
-                else
-                {
-                    CardFlyAnimator.Instance.AnimateDiscardOut(
-                        btn,
-                        () =>
-                        {
-                            GameLogger.LogInfo(
-                                "Card",
-                                $"Discard animation done for '{btn.CardData?.CardName}' — returning to pool and refreshing hand"
-                            );
-                            BattlePoolManager.Instance?.ReturnCard(btn);
-                            QueueHandRefresh();
-                        }
-                    );
-                }
+            if (CardFlyAnimator.Instance == null)
+            {
+                BattlePoolManager.Instance?.ReturnCard(btn);
+                RequestHandRefresh();
             }
             else
             {
-                // No card to discard (no-VFX card that was already handled, or edge case).
-                GameLogger.LogWarning(
-                    "Card",
-                    $"CardPlayResolved for '{evt.Card?.CardName}' but no pending discard button found"
+                CardFlyAnimator.Instance.AnimateDiscardOut(
+                    btn,
+                    () =>
+                    {
+                        BattlePoolManager.Instance?.ReturnCard(btn);
+                        RequestHandRefresh();
+                    }
                 );
-                QueueHandRefresh();
             }
         }
 
         private void OnCardDrawn(CardDrawnEvent evt)
         {
             if (_bm == null || !evt.IsPlayer)
-                return; // enemy draws don't affect the player's hand panel
-            _pendingDrawnCards.Add(evt.Card); // track which cards are new this batch
-            QueueHandRefresh();
+                return;
+            RequestHandRefresh();
         }
 
-        /// <summary>
-        /// Keeps card affordability dimming in sync the moment AP changes, instead of
-        /// waiting for the post-VFX hand refresh.
-        /// </summary>
         private void OnActionPointsChanged(ActionPointsChangedEvent evt)
         {
             if (!evt.IsPlayer)
                 return;
-            RefreshAffordability(evt.NewValue);
-        }
-
-        private void QueueHandRefresh()
-        {
-            if (_handRefreshPending)
-                return; // refresh already scheduled — events batch into it
-            _handRefreshPending = true;
-            RefreshHandNextFrame().Forget();
-        }
-
-        private async UniTaskVoid RefreshHandNextFrame()
-        {
-            // Wait one frame so all draw events from one effect batch together.
-            await UniTask.NextFrame(this.GetCancellationTokenOnDestroy());
-            _handRefreshPending = false;
-            var drawn =
-                _pendingDrawnCards.Count > 0 ? new HashSet<CardData>(_pendingDrawnCards) : null;
-            _pendingDrawnCards.Clear();
-
-            // A full rebuild (RefreshNormalHand) ran this frame AFTER these draws were queued —
-            // it already built and animated the whole hand. Running an incremental refresh now
-            // would re-Initialize the buttons, and Initialize() calls DOKill(), killing the
-            // in-flight staggered draw-in and stranding not-yet-revealed cards at scale 0.
-            if (_fullRebuildSuppressedRefresh)
-            {
-                _fullRebuildSuppressedRefresh = false;
-                return;
-            }
-
-            if (_bm == null || _onCardClicked == null)
-                return;
-
-            // If cards were drawn, merge them in and animate only the new ones;
-            // otherwise just reposition and re-init the existing buttons.
-            if (drawn != null)
-                AddDrawnCards(drawn, _bm, _onCardClicked);
-            else
-                RearrangeCurrentHand(_bm, _onCardClicked);
+            foreach (var btn in _activeButtons)
+                if (btn != null)
+                    btn.RefreshVisuals(evt.NewValue);
         }
 
         #endregion
 
-        #region Display API
+        #region Refresh
 
         /// <summary>
-        /// Rebuilds the hand using normal play-card callbacks.
-        /// Called by <c>BattleUI.ConfigureForBattleState</c> on <see cref="BattleState.PlayerTurn"/>.
+        /// Schedules a hand rebuild for next frame. Coalesces every change from this frame
+        /// (PlayerTurn start, a batch of draws, a resolved discard) into one rebuild.
         /// </summary>
-        public void RefreshNormalHand(BattleManager bm, System.Action<CardData, int> onCardClicked)
+        public void RequestHandRefresh()
         {
-            if (cardButtonContainer == null)
-            {
-                GameLogger.LogWarning<HandPanel>(
-                    "RefreshNormalHand: cardButtonContainer is not assigned on HandPanel — "
-                        + "no cards can be shown. Assign it in the Inspector."
-                );
+            if (_handRefreshPending)
                 return;
-            }
-            if (bm?.PlayerStats == null)
-            {
-                GameLogger.LogWarning<HandPanel>(
-                    "RefreshNormalHand: BattleManager/PlayerStats null (was Bind() called?) — skipping."
-                );
+            _handRefreshPending = true;
+            RefreshNextFrame().Forget();
+        }
+
+        private async UniTaskVoid RefreshNextFrame()
+        {
+            await UniTask.NextFrame(this.GetCancellationTokenOnDestroy());
+            _handRefreshPending = false;
+            RebuildHand();
+        }
+
+        /// <summary>
+        /// Rebuilds the hand from <c>bm.PlayerDeck.Hand</c>. Cards not already on screen fly in;
+        /// the rest re-arrange in place. Buttons are pooled, so a full clear+recreate is cheap.
+        /// </summary>
+        private void RebuildHand()
+        {
+            if (cardButtonContainer == null || _bm?.PlayerStats == null || _onCardClicked == null)
                 return;
-            }
-            if (!HasPrefabSource())
-            {
-                GameLogger.LogWarning<HandPanel>(
-                    "RefreshNormalHand: no card-button source — BattlePoolManager.Instance is null "
-                        + "AND no fallback prefabs (pressure/rhetoric/policy) are assigned on HandPanel. "
-                        + "Add a BattlePoolManager to the scene or assign the fallback prefabs."
-                );
-                return;
-            }
+            if (!HasPrefabSource() || !_bm.IsPlayerTurn)
+                return; // not our turn → BattleUI drives ClearHand / DiscardHandAnimated instead
 
             ValidateLayoutContainerOnce();
 
+            // Remember which cards were already shown so only genuinely new ones animate in.
+            var previous = new HashSet<CardData>();
+            foreach (var b in _activeButtons)
+                if (b?.CardData != null)
+                    previous.Add(b.CardData);
+
             ClearHand();
-            GameLogger.LogInfo<HandPanel>(
-                $"RefreshNormalHand: building {bm.PlayerDeck.Hand.Count} card button(s) "
-                    + $"(pool={(BattlePoolManager.Instance != null)})"
-            );
 
-            // This is an authoritative full rebuild with its own staggered draw animation.
-            // If a draw-driven incremental refresh is queued for this frame's draw batch,
-            // suppress it — otherwise it re-Initializes these buttons next frame and DOKills
-            // the reveal tween, leaving cards invisible at scale 0.
-            if (_handRefreshPending)
-            {
-                _pendingDrawnCards.Clear();
-                _fullRebuildSuppressedRefresh = true;
-            }
-
-            if (!bm.IsPlayerTurn)
-                return; // safety — Idle state should call ClearHand instead
-
-            int currentAP = bm.PlayerStats.CurrentActionPoints;
-            bool isSilenced = bm.PlayerStatusEffects?.HasStatus<SilencedStatus>() ?? false;
-            var hand = bm.PlayerDeck.Hand;
-
-            for (int i = 0; i < hand.Count; i++)
-            {
-                CardData captured = hand[i];
-                CardButton btn = GetOrCreate(captured.CardType);
-                if (btn == null)
-                    continue;
-
-                int idx = i;
-                int effectiveCost = bm.GetEffectiveCardCost(captured);
-                bool forceUnplayable =
-                    captured.IsUnplayable || (isSilenced && captured.CardType == CardType.Rhetoric);
-                bool isCostDiscounted = bm.PlayerDeck.GetCardCostReduction(captured) != 0;
-                btn.Initialize(
-                    captured,
-                    idx,
-                    currentAP,
-                    effectiveCost,
-                    forceUnplayable,
-                    isCostDiscounted,
-                    () => onCardClicked(captured, idx)
-                );
-                if (_animateCards)
-                    btn.PlayDrawAnimation();
-                else
-                    EnsureVisible(btn);
-                _activeButtons.Add(btn);
-            }
-
-            GameLogger.LogInfo<HandPanel>(
-                $"RefreshNormalHand: created {_activeButtons.Count} button(s) under "
-                    + $"'{cardButtonContainer.name}'."
-            );
-            PlayCardDrawAnimation(_activeButtons);
-        }
-
-        /// <summary>
-        /// Re-initialises all currently displayed buttons (updated indices, AP, costs) and
-        /// repositions them in the arc. Does NOT clear, re-pool, or re-create anything.
-        /// Call after <see cref="ExtractCard"/> has already removed the played card's button.
-        /// </summary>
-        public void RearrangeCurrentHand(
-            BattleManager bm,
-            System.Action<CardData, int> onCardClicked
-        )
-        {
-            if (cardButtonContainer == null || bm?.PlayerStats == null)
-                return;
-
-            int currentAP = bm.PlayerStats.CurrentActionPoints;
-            bool isSilenced = bm.PlayerStatusEffects?.HasStatus<SilencedStatus>() ?? false;
-
-            for (int i = 0; i < _activeButtons.Count; i++)
-            {
-                var btn = _activeButtons[i];
-                if (btn == null)
-                    continue;
-                var captured = btn.CardData;
-                int capturedIdx = i;
-                int effectiveCost = bm.GetEffectiveCardCost(captured);
-                bool forceUnplayable =
-                    captured.IsUnplayable || (isSilenced && captured.CardType == CardType.Rhetoric);
-                bool isCostDiscounted = bm.PlayerDeck.GetCardCostReduction(captured) != 0;
-                btn.Initialize(
-                    captured,
-                    i,
-                    currentAP,
-                    effectiveCost,
-                    forceUnplayable,
-                    isCostDiscounted,
-                    () => onCardClicked(captured, capturedIdx)
-                );
-            }
-
-            ArrangeCards(animated: true);
-        }
-
-        /// <summary>
-        /// Removes and returns the <see cref="CardButton"/> for <paramref name="card"/> from the
-        /// active list WITHOUT returning it to the pool. Use before a discard-fly animation.
-        /// Returns <c>null</c> if no matching button is found.
-        /// </summary>
-        public CardButton ExtractCard(CardData card)
-        {
-            int idx = _activeButtons.FindIndex(b => b != null && b.CardData == card);
-            if (idx < 0)
-                return null;
-            var btn = _activeButtons[idx];
-            _activeButtons.RemoveAt(idx);
-            return btn;
-        }
-
-        /// <summary>
-        /// Merges newly drawn cards into the live hand without clearing existing buttons.
-        /// Existing buttons are re-used and re-initialised; new buttons fly in from the deck.
-        /// Uses list-based matching so duplicate <see cref="CardData"/> references are each consumed once.
-        /// </summary>
-        public void AddDrawnCards(
-            IEnumerable<CardData> newCards,
-            BattleManager bm,
-            System.Action<CardData, int> onCardClicked
-        )
-        {
-            if (cardButtonContainer == null || bm?.PlayerStats == null)
-                return;
-            if (!HasPrefabSource())
-                return;
-
-            int currentAP = bm.PlayerStats.CurrentActionPoints;
-            bool isSilenced = bm.PlayerStatusEffects?.HasStatus<SilencedStatus>() ?? false;
-            var hand = bm.PlayerDeck.Hand;
-
-            // List-based pool so duplicate CardData references are each matched once.
-            var available = new List<CardButton>(_activeButtons);
-            _activeButtons.Clear();
-            var toAnimate = new List<CardButton>();
+            int currentAP = _bm.PlayerStats.CurrentActionPoints;
+            bool isSilenced = _bm.PlayerStatusEffects?.HasStatus<SilencedStatus>() ?? false;
+            var hand = _bm.PlayerDeck.Hand;
+            var newButtons = new List<CardButton>();
 
             for (int i = 0; i < hand.Count; i++)
             {
                 CardData card = hand[i];
-                int effectiveCost = bm.GetEffectiveCardCost(card);
-                bool forceUnplayable =
-                    card.IsUnplayable || (isSilenced && card.CardType == CardType.Rhetoric);
-                int capturedIdx = i;
+                CardButton btn = GetOrCreate(card.CardType);
+                if (btn == null)
+                    continue;
+
+                int idx = i;
                 var captured = card;
-
-                bool isCostDiscounted = bm.PlayerDeck.GetCardCostReduction(card) != 0;
-                int existingIdx = available.FindIndex(b => b?.CardData == card);
-                CardButton btn;
-                if (existingIdx >= 0)
-                {
-                    btn = available[existingIdx];
-                    available.RemoveAt(existingIdx);
-                    // Existing button — refresh index, cost, callback; no animation.
-                    btn.Initialize(
-                        card,
-                        i,
-                        currentAP,
-                        effectiveCost,
-                        forceUnplayable,
-                        isCostDiscounted,
-                        () => onCardClicked(captured, capturedIdx)
-                    );
-                }
-                else
-                {
-                    // Newly drawn — create a button and queue it for the fly-in.
-                    btn = GetOrCreate(card.CardType);
-                    if (btn == null)
-                        continue;
-                    btn.Initialize(
-                        card,
-                        i,
-                        currentAP,
-                        effectiveCost,
-                        forceUnplayable,
-                        isCostDiscounted,
-                        () => onCardClicked(captured, capturedIdx)
-                    );
-                    btn.gameObject.SetActive(true); // always activate; StaggeredDraw hides+reveals on top
-                    if (_animateCards)
-                        btn.PlayDrawAnimation();
-                    toAnimate.Add(btn);
-                }
-
+                btn.Initialize(
+                    card,
+                    i,
+                    currentAP,
+                    _bm.GetEffectiveCardCost(card),
+                    card.IsUnplayable || (isSilenced && card.CardType == CardType.Rhetoric),
+                    _bm.PlayerDeck.GetCardCostReduction(card) != 0,
+                    () => _onCardClicked(captured, idx)
+                );
                 _activeButtons.Add(btn);
+                if (!previous.Contains(card)) // set-diff; duplicate CardData refs collapse, acceptable
+                    newButtons.Add(btn);
             }
 
-            // Return any buttons whose cards are no longer in hand.
-            foreach (var orphan in available)
+            if (CardFlyAnimator.Instance != null && newButtons.Count > 0)
             {
-                if (BattlePoolManager.Instance != null)
-                    BattlePoolManager.Instance.ReturnCard(orphan);
-                else
-                    Destroy(orphan.gameObject);
+                foreach (var btn in newButtons)
+                    btn.PlayDrawAnimation();
+                CardFlyAnimator.Instance.AnimateDrawIn(
+                    _activeButtons,
+                    newButtons,
+                    cardButtonContainer
+                );
             }
-
-            PlayCardDrawAnimation(toAnimate);
-        }
-
-        /// <summary>
-        /// Updates affordability dimming on all visible card buttons without a full rebuild.
-        /// Call this after AP changes mid-turn (e.g. a card was played).
-        /// </summary>
-        public void RefreshAffordability(int currentAP)
-        {
-            foreach (var btn in _activeButtons)
+            else
             {
-                if (btn != null)
-                    btn.RefreshVisuals(currentAP);
+                foreach (var btn in newButtons)
+                    EnsureVisible(btn);
+                ArrangeCards(animated: false);
             }
         }
 
-        /// <summary>
-        /// Flies every card in hand to the discard pile, returning each button to the pool
-        /// as it lands. The active list is cleared immediately so a subsequent hand rebuild
-        /// can't double-manage the departing buttons. Falls back to an instant
-        /// <see cref="ClearHand"/> when no <see cref="CardFlyAnimator"/> is present.
-        /// </summary>
+        #endregion
+
+        #region Display API (BattleUI)
+
+        /// <summary>Flies every card in hand to the discard pile, returning each button to the pool as it lands.</summary>
         public void DiscardHandAnimated()
         {
-            if (!_animateCards || CardFlyAnimator.Instance == null)
+            if (CardFlyAnimator.Instance == null)
             {
-                ClearHand(); // no-anim baseline: instantly return the whole hand to the pool
+                ClearHand();
                 return;
             }
 
@@ -508,38 +248,45 @@ namespace Crookedile.UI.Battle
                 var captured = btn;
                 CardFlyAnimator.Instance.AnimateDiscardOut(
                     captured,
-                    () =>
-                    {
-                        if (BattlePoolManager.Instance != null)
-                            BattlePoolManager.Instance.ReturnCard(captured);
-                        else
-                            Destroy(captured.gameObject);
-                    }
+                    () => ReturnOrDestroy(captured)
                 );
             }
             _activeButtons.Clear();
         }
 
-        /// <summary>
-        /// Returns all active card buttons to the shared pool and clears the list.
-        /// </summary>
+        /// <summary>Returns all active card buttons to the pool and clears the list.</summary>
         public void ClearHand()
         {
             foreach (var btn in _activeButtons)
-            {
-                if (btn == null)
-                    continue;
-                if (BattlePoolManager.Instance != null)
-                    BattlePoolManager.Instance.ReturnCard(btn);
-                else
-                    Destroy(btn.gameObject);
-            }
+                ReturnOrDestroy(btn);
             _activeButtons.Clear();
         }
 
         #endregion
 
-        #region Private helpers
+        #region Helpers
+
+        /// <summary>Removes and returns the button for <paramref name="card"/> WITHOUT pooling it (used before a discard-fly).</summary>
+        private CardButton ExtractCard(CardData card)
+        {
+            int idx = _activeButtons.FindIndex(b => b != null && b.CardData == card);
+            if (idx < 0)
+                return null;
+            var btn = _activeButtons[idx];
+            _activeButtons.RemoveAt(idx);
+            return btn;
+        }
+
+        private static void ReturnOrDestroy(CardButton btn)
+        {
+            if (btn == null)
+                return;
+            if (BattlePoolManager.Instance != null)
+                BattlePoolManager.Instance.ReturnCard(btn);
+            else
+                Destroy(btn.gameObject);
+        }
+
         private bool HasPrefabSource()
         {
             if (BattlePoolManager.Instance != null)
@@ -552,14 +299,12 @@ namespace Crookedile.UI.Battle
             if (BattlePoolManager.Instance != null)
                 return BattlePoolManager.Instance.RentCard(cardType, cardButtonContainer);
 
-            // Fallback: direct instantiate (standalone testing without a pool manager)
             CardButton prefab = cardType switch
             {
                 CardType.Rhetoric => _rhetoricPrefab,
                 CardType.Policy => _policyPrefab,
                 _ => _pressurePrefab,
             };
-
             if (prefab != null)
                 return Instantiate(prefab, cardButtonContainer);
 
@@ -569,18 +314,24 @@ namespace Crookedile.UI.Battle
             return null;
         }
 
-        private void ArrangeCards(bool animated = false)
+        private void ArrangeCards(bool animated)
         {
             cardButtonContainer
                 .GetComponent<CardHandLayout>()
                 ?.ArrangeCards(_activeButtons, animated);
         }
 
-        // One-time setup of the hand container: cards are positioned by CardHandLayout (an arc
-        // fan). The container MUST have it — without it cards stack at the origin. Rather than
-        // depend on manual scene wiring, ensure it exists (add with sane defaults if missing).
-        // A UI LayoutGroup on the same object would override the arc every frame, so it is
-        // disabled here too. Both used to fail silently.
+        private static void EnsureVisible(CardButton btn)
+        {
+            if (btn == null)
+                return;
+            btn.transform.DOKill();
+            btn.gameObject.SetActive(true);
+            btn.transform.localScale = Vector3.one;
+        }
+
+        // Cards are positioned by CardHandLayout (arc fan). The container must have it, and any UI
+        // LayoutGroup/ContentSizeFitter would fight the arc every frame — ensure + disable, once.
         private bool _layoutChecked;
 
         private void ValidateLayoutContainerOnce()
@@ -593,63 +344,17 @@ namespace Crookedile.UI.Battle
             {
                 cardButtonContainer.gameObject.AddComponent<CardHandLayout>();
                 GameLogger.LogWarning<HandPanel>(
-                    $"'{cardButtonContainer.name}' had no CardHandLayout — added one with default "
-                        + "arc settings. Add it in the Inspector to tune the fan (radius/angle/width)."
+                    $"'{cardButtonContainer.name}' had no CardHandLayout — added one with default arc settings."
                 );
             }
 
-            // A Unity layout group repositions children every frame, fighting the arc fan.
             var layoutGroup = cardButtonContainer.GetComponent<UnityEngine.UI.LayoutGroup>();
             if (layoutGroup != null)
-            {
                 layoutGroup.enabled = false;
-                GameLogger.LogWarning<HandPanel>(
-                    $"'{cardButtonContainer.name}' had a UI {layoutGroup.GetType().Name} that fights "
-                        + "CardHandLayout — disabled it. Remove it from the hand container."
-                );
-            }
 
             var fitter = cardButtonContainer.GetComponent<UnityEngine.UI.ContentSizeFitter>();
             if (fitter != null)
-            {
                 fitter.enabled = false;
-                GameLogger.LogWarning<HandPanel>(
-                    $"'{cardButtonContainer.name}' had a ContentSizeFitter — disabled it "
-                        + "(it can resize the container and throw off the arc)."
-                );
-            }
-        }
-
-        private void PlayCardDrawAnimation(List<CardButton> buttons)
-        {
-            if (buttons == null || buttons.Count == 0)
-                return;
-
-            if (!_animateCards)
-            {
-                // No-anim baseline: make every card visible and lay them out instantly.
-                foreach (var btn in buttons)
-                    EnsureVisible(btn);
-                cardButtonContainer
-                    .GetComponent<CardHandLayout>()
-                    ?.ArrangeCards(buttons, animated: false);
-                GameLogger.LogInfo<HandPanel>(
-                    $"PlayCardDrawAnimation (no-anim): activated + arranged {buttons.Count} card(s)."
-                );
-                return;
-            }
-
-            CardFlyAnimator.Instance?.AnimateDrawIn(buttons, cardButtonContainer);
-        }
-
-        /// <summary>Force a card to its normal visible state (active, full scale). No-anim path.</summary>
-        private static void EnsureVisible(CardButton btn)
-        {
-            if (btn == null)
-                return;
-            btn.transform.DOKill();
-            btn.gameObject.SetActive(true);
-            btn.transform.localScale = Vector3.one;
         }
 
         #endregion
