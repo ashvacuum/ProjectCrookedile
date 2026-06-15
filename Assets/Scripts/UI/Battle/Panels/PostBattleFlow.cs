@@ -2,7 +2,6 @@ using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Gameplay.Battle;
-using Crookedile.UI.Reward;
 using Crookedile.Utilities;
 using UnityEngine;
 
@@ -29,7 +28,7 @@ namespace Crookedile.UI.Battle
             "Reward screen overlay panel (starts inactive). Shown after a victory Continue click."
         )]
         [SerializeField]
-        private RewardScreen _rewardScreen;
+        private CardPickerPanel _rewardScreen;
 
         private BattleManager _bm;
         private BattleResult _lastResult;
@@ -87,11 +86,11 @@ namespace Crookedile.UI.Battle
                 _bm != null ? _bm.PlayerOrigin : default,
                 count: 3
             );
-            _rewardScreen.Open(offers, OnRewardChosen);
+            _rewardScreen.OpenSingle("Choose a Card", offers, "Take Card", OnRewardChosen);
         }
 
         /// <summary>
-        /// Callback from <see cref="RewardScreen"/> once the player picks a card (or skips).
+        /// Callback from <see cref="CardPickerPanel"/> once the player picks a card (or skips).
         /// Adds the card to <see cref="RunState.Current"/>, advances the session battle index,
         /// and reloads the scene. Clears RunState when the session is fully complete.
         /// </summary>

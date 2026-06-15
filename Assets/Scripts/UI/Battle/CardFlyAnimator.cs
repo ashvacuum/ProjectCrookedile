@@ -51,6 +51,10 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private float _drawStaggerDelay = 0.1f;
 
+        [Tooltip("Seconds for a single card's scale-in pop.")]
+        [SerializeField]
+        private float _drawPopDuration = 0.18f;
+
         [Header("Discard Settings")]
         [Tooltip("Total duration (seconds) of the fly-to-discard animation.")]
         [SerializeField]
@@ -76,23 +80,57 @@ namespace Crookedile.UI.Battle
             new Queue<(CardButton, Transform, Action)>();
         private bool _grantRunning;
 
+        private Sequence _drawSeq;
+
         #endregion
 
         #region Draw API
         /// <summary>
-        /// Reveals each button in <paramref name="newCards"/> with a staggered scale-in pop,
-        /// re-running the arc layout over the full <paramref name="allCards"/> hand after each
-        /// reveal so existing cards make room as new ones deal in.
+        /// Lays the whole hand out at its final arc positions, then pops the <paramref name="newCards"/>
+        /// in with a staggered scale-in. <paramref name="onComplete"/> fires when the pop finishes.
+        ///
+        /// Overlapping draws are safe by construction: a draw already running is killed
+        /// <i>complete</i>, which snaps its cards to full scale — so an interrupted draw can never
+        /// strand a card mid-pop. No generation tokens, no coroutine guards.
         /// </summary>
         public void AnimateDrawIn(
             List<CardButton> allCards,
             List<CardButton> newCards,
-            Transform handContainer
+            Transform handContainer,
+            Action onComplete = null
         )
         {
             if (handContainer == null)
+            {
+                onComplete?.Invoke();
                 return;
-            StaggeredDraw(allCards, newCards, handContainer).Forget();
+            }
+
+            // Finish any in-flight draw (snaps its cards to scale 1) before starting a new one.
+            _drawSeq?.Kill(complete: true);
+
+            handContainer.GetComponent<CardHandLayout>()?.ArrangeCards(allCards);
+            foreach (var btn in newCards)
+                if (btn != null)
+                    btn.transform.localScale = Vector3.zero;
+
+            _drawSeq = DOTween.Sequence().SetLink(gameObject);
+            float at = 0f;
+            foreach (var btn in newCards)
+            {
+                if (btn == null)
+                    continue;
+                _drawSeq.Insert(
+                    at,
+                    btn.transform.DOScale(Vector3.one, _drawPopDuration).SetEase(Ease.OutBack)
+                );
+                at += _drawStaggerDelay;
+            }
+            _drawSeq.OnComplete(() =>
+            {
+                _drawSeq = null;
+                onComplete?.Invoke();
+            });
         }
 
         #endregion
@@ -238,51 +276,6 @@ namespace Crookedile.UI.Battle
                     );
                     onArrival?.Invoke();
                 });
-        }
-
-        #endregion
-
-        #region Internal — Draw
-        private async UniTaskVoid StaggeredDraw(
-            List<CardButton> allCards,
-            List<CardButton> newCards,
-            Transform container
-        )
-        {
-            var ct = this.GetCancellationTokenOnDestroy();
-            var layout = container.GetComponent<CardHandLayout>();
-            // Snapshot — the live lists may be mutated by a rebuild while this yields.
-            var newSnap = newCards.ToArray();
-            var allSnap = new List<CardButton>(allCards);
-
-            // Hide the new cards, then arrange the whole hand once so existing cards settle.
-            foreach (var btn in newSnap)
-                if (btn != null)
-                    btn.transform.localScale = Vector3.zero;
-            layout?.ArrangeCards(allSnap);
-
-            for (int i = 0; i < newSnap.Length; i++)
-            {
-                var btn = newSnap[i];
-                if (btn == null)
-                    continue;
-
-                if (i > 0 && _drawStaggerDelay > 0f)
-                    await UniTask.WaitForSeconds(_drawStaggerDelay, cancellationToken: ct);
-
-                // A rebuild mid-stagger can return this button to the pool (reparented away).
-                // Skipping prevents re-activating a recycled card under the wrong parent.
-                if (btn.transform.parent != container)
-                    continue;
-
-                btn.gameObject.SetActive(true);
-                btn.transform.localScale = Vector3.zero;
-                btn.transform.DOScale(Vector3.one, 0.18f).SetEase(Ease.OutBack);
-                btn.transform.SetSiblingIndex(0); // enter behind; ArrangeCards restores z-order
-                layout?.ArrangeCards(allSnap);
-            }
-
-            layout?.ArrangeCards(allSnap);
         }
 
         #endregion

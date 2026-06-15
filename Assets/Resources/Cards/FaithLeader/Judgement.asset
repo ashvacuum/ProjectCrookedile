@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Judgement
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 4acad8d59be6b734b8cfe9fab9e96ace, type: 3}
   _description: 
   _flavorText: 
   _costs: []

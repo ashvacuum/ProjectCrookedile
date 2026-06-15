@@ -1,17 +1,12 @@
 ﻿using System.Collections.Generic;
 using Crookedile.Core;
-using Crookedile.Data;
 using Crookedile.Data.Cards;
-using Crookedile.Data.Enemy;
 using Crookedile.Gameplay.Battle;
-using Crookedile.UI.Reward;
 using Crookedile.Utilities;
-using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 namespace Crookedile.UI.Battle
 {
@@ -122,7 +117,7 @@ namespace Crookedile.UI.Battle
             "General-purpose interactive card picker for card-choice effects (ChooseFromDiscard, Upgrade, Retain, etc.)."
         )]
         [SerializeField]
-        private CardChoicePanel cardChoicePanel;
+        private CardPickerPanel cardChoicePanel;
 
         #endregion
 
@@ -321,9 +316,10 @@ namespace Crookedile.UI.Battle
             cardChoicePanel?.Open(
                 evt.Title,
                 evt.Choices,
-                evt.RequiredCount,
-                OnCardChoiceConfirmed,
-                evt.AllowFewer
+                minCount: evt.AllowFewer ? 0 : evt.RequiredCount,
+                maxCount: evt.RequiredCount,
+                confirmLabel: "Confirm",
+                OnCardChoiceConfirmed
             );
         }
 

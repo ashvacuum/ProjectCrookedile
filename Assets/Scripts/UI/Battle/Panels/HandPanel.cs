@@ -4,7 +4,6 @@ using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Gameplay.Battle;
 using Crookedile.Utilities;
-using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
@@ -26,16 +25,6 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private Transform cardButtonContainer;
 
-        [Header("Fallback Prefabs (used only when BattlePoolManager singleton is absent)")]
-        [SerializeField]
-        private CardButton _pressurePrefab;
-
-        [SerializeField]
-        private CardButton _rhetoricPrefab;
-
-        [SerializeField]
-        private CardButton _policyPrefab;
-
         private readonly List<CardButton> _activeButtons = new List<CardButton>();
 
         private BattleManager _bm;
@@ -44,7 +33,7 @@ namespace Crookedile.UI.Battle
         /// <summary>Card pulled from hand on CardPlayedEvent, held until VFX resolves before flying to discard.</summary>
         private CardButton _pendingDiscardButton;
 
-        private bool _handRefreshPending;
+        private bool _rebuildQueued;
 
         private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
 
@@ -143,21 +132,17 @@ namespace Crookedile.UI.Battle
         #region Refresh
 
         /// <summary>
-        /// Schedules a hand rebuild for next frame. Coalesces every change from this frame
-        /// (PlayerTurn start, a batch of draws, a resolved discard) into one rebuild.
+        /// Marks the hand dirty. Every change in a frame (PlayerTurn start, a batch of draws,
+        /// a resolved discard) coalesces into one rebuild in <see cref="LateUpdate"/>. Plain
+        /// dirty flag — no async, so it can't get stuck if a continuation is cancelled.
         /// </summary>
-        public void RequestHandRefresh()
-        {
-            if (_handRefreshPending)
-                return;
-            _handRefreshPending = true;
-            RefreshNextFrame().Forget();
-        }
+        public void RequestHandRefresh() => _rebuildQueued = true;
 
-        private async UniTaskVoid RefreshNextFrame()
+        private void LateUpdate()
         {
-            await UniTask.NextFrame(this.GetCancellationTokenOnDestroy());
-            _handRefreshPending = false;
+            if (!_rebuildQueued)
+                return;
+            _rebuildQueued = false;
             RebuildHand();
         }
 
@@ -168,8 +153,16 @@ namespace Crookedile.UI.Battle
         private void RebuildHand()
         {
             if (cardButtonContainer == null || _bm?.PlayerStats == null || _onCardClicked == null)
+            {
+                GameLogger.LogWarning<HandPanel>(
+                    "RebuildHand skipped: setup incomplete — "
+                        + $"container={(cardButtonContainer != null)} bm={(_bm != null)} "
+                        + $"stats={(_bm?.PlayerStats != null)} clickCb={(_onCardClicked != null)}. "
+                        + "Hand will not appear. Check HandPanel wiring / Bind() ordering."
+                );
                 return;
-            if (!HasPrefabSource() || !_bm.IsPlayerTurn)
+            }
+            if (BattlePoolManager.Instance == null || !_bm.IsPlayerTurn)
                 return; // not our turn → BattleUI drives ClearHand / DiscardHandAnimated instead
 
             ValidateLayoutContainerOnce();
@@ -190,7 +183,7 @@ namespace Crookedile.UI.Battle
             for (int i = 0; i < hand.Count; i++)
             {
                 CardData card = hand[i];
-                CardButton btn = GetOrCreate(card.CardType);
+                CardButton btn = BattlePoolManager.Instance.RentCard(card.CardType, cardButtonContainer);
                 if (btn == null)
                     continue;
 
@@ -210,15 +203,17 @@ namespace Crookedile.UI.Battle
                     newButtons.Add(btn);
             }
 
+            // Existing (already-shown) cards are visible at scale 1 right away; only the
+            // genuinely new cards get the staggered pop-in.
+            foreach (var btn in _activeButtons)
+                if (!newButtons.Contains(btn))
+                    EnsureVisible(btn);
+
             if (CardFlyAnimator.Instance != null && newButtons.Count > 0)
             {
                 foreach (var btn in newButtons)
                     btn.PlayDrawAnimation();
-                CardFlyAnimator.Instance.AnimateDrawIn(
-                    _activeButtons,
-                    newButtons,
-                    cardButtonContainer
-                );
+                CardFlyAnimator.Instance.AnimateDrawIn(_activeButtons, newButtons, cardButtonContainer);
             }
             else
             {
@@ -246,10 +241,7 @@ namespace Crookedile.UI.Battle
                 if (btn == null)
                     continue;
                 var captured = btn;
-                CardFlyAnimator.Instance.AnimateDiscardOut(
-                    captured,
-                    () => ReturnOrDestroy(captured)
-                );
+                CardFlyAnimator.Instance.AnimateDiscardOut(captured, () => ReturnCard(captured));
             }
             _activeButtons.Clear();
         }
@@ -258,7 +250,7 @@ namespace Crookedile.UI.Battle
         public void ClearHand()
         {
             foreach (var btn in _activeButtons)
-                ReturnOrDestroy(btn);
+                ReturnCard(btn);
             _activeButtons.Clear();
         }
 
@@ -277,41 +269,10 @@ namespace Crookedile.UI.Battle
             return btn;
         }
 
-        private static void ReturnOrDestroy(CardButton btn)
+        private static void ReturnCard(CardButton btn)
         {
-            if (btn == null)
-                return;
-            if (BattlePoolManager.Instance != null)
-                BattlePoolManager.Instance.ReturnCard(btn);
-            else
-                Destroy(btn.gameObject);
-        }
-
-        private bool HasPrefabSource()
-        {
-            if (BattlePoolManager.Instance != null)
-                return true;
-            return _pressurePrefab != null || _rhetoricPrefab != null || _policyPrefab != null;
-        }
-
-        private CardButton GetOrCreate(CardType cardType)
-        {
-            if (BattlePoolManager.Instance != null)
-                return BattlePoolManager.Instance.RentCard(cardType, cardButtonContainer);
-
-            CardButton prefab = cardType switch
-            {
-                CardType.Rhetoric => _rhetoricPrefab,
-                CardType.Policy => _policyPrefab,
-                _ => _pressurePrefab,
-            };
-            if (prefab != null)
-                return Instantiate(prefab, cardButtonContainer);
-
-            GameLogger.LogWarning<HandPanel>(
-                $"GetOrCreate: no fallback prefab assigned for {cardType} — card not shown."
-            );
-            return null;
+            if (btn != null)
+                BattlePoolManager.Instance?.ReturnCard(btn);
         }
 
         private void ArrangeCards(bool animated)
