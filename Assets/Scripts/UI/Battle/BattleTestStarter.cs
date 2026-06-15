@@ -237,9 +237,12 @@ namespace Crookedile.Gameplay.Battle
 
             int roundMaxTurns = currentRound != null ? currentRound.maxTurns : 5;
             int roundStartOpinion = currentRound != null ? currentRound.startingOpinion : 50;
+            // > 0 guard: pre-existing session assets serialized this new field as 0 — fall back to 100.
+            int roundMaxOpinion =
+                currentRound != null && currentRound.maxOpinion > 0 ? currentRound.maxOpinion : 100;
 
             Debug.Log(
-                $"[BattleTestStarter] Opinion Meter: start={roundStartOpinion}, "
+                $"[BattleTestStarter] Opinion Meter: start={roundStartOpinion}, max={roundMaxOpinion}, "
                     + $"maxTurns={(roundMaxTurns > 0 ? roundMaxTurns.ToString() : "none")} "
                     + $"(source: {(currentRound != null ? $"session round '{currentRound.label}'" : "defaults — round index out of range")})"
             );
@@ -252,6 +255,7 @@ namespace Crookedile.Gameplay.Battle
                 enemies = battleEnemies,
                 maxTurns = roundMaxTurns > 0 ? roundMaxTurns : (int?)null,
                 startingOpinion = roundStartOpinion,
+                maxOpinion = roundMaxOpinion,
             };
         }
 

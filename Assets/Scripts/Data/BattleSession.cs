@@ -31,8 +31,12 @@ namespace Crookedile.Data
             [Tooltip("Maximum player turns before Judgment is called. 0 = no turn limit.")]
             public int maxTurns = 10;
 
-            [Tooltip("Starting Opinion Meter value (0–100). 50 = neutral start.")]
-            [Range(0, 100)]
+            [Tooltip("Opinion Meter maximum (the win threshold). The meter runs 0..maxOpinion.")]
+            [Min(1)]
+            public int maxOpinion = 100;
+
+            [Tooltip("Starting Opinion Meter value. Clamped to 0..maxOpinion at battle start.")]
+            [Min(0)]
             public int startingOpinion = 50;
         }
 
