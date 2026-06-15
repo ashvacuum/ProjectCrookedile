@@ -39,6 +39,7 @@ MonoBehaviour:
   _isStarterCard: 0
   _isUnlockable: 0
   _isUnplayable: 0
+  _innateRetain: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
@@ -55,4 +56,7 @@ MonoBehaviour:
       data:
         _name: 
         _amount: 4
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
         _target: 4

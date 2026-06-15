@@ -39,6 +39,7 @@ MonoBehaviour:
   _isStarterCard: 0
   _isUnlockable: 0
   _isUnplayable: 0
+  _innateRetain: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
@@ -51,7 +52,8 @@ MonoBehaviour:
         _name: New Passive
         _trigger:
           rid: 4823698507066769578
-        _conditions: []
+        _conditions:
+        - rid: 4823698577809473639
         _oneShot: 0
         _effects:
         - rid: 4823698507066769580
@@ -64,9 +66,15 @@ MonoBehaviour:
         _name: 
         _selectionMode: 0
         _filterType: 0
+        _untilEndOfBattle: 0
     - rid: 4823698507066769581
       type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 5
         _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+    - rid: 4823698577809473639
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

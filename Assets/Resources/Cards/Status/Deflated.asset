@@ -20,7 +20,6 @@ MonoBehaviour:
   _description: A missing sense of purpose. Unplayable. Ethereal.
   _flavorText: 
   _costs: []
-  _newEffects: []
   _effects: []
   _passives:
   - rid: 4738608375284105317
@@ -28,11 +27,11 @@ MonoBehaviour:
   _upgradedCosts: []
   _upgradedEffects: []
   _upgradedPassives: []
-  _tags:
-  - faithleader
+  _tags: []
   _isStarterCard: 0
   _isUnlockable: 0
   _isUnplayable: 1
+  _innateRetain: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
@@ -40,7 +39,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608375284105317
-      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: New Passive
         _trigger:
@@ -50,9 +49,9 @@ MonoBehaviour:
         _effects:
         - rid: 4738608375284105319
     - rid: 4738608375284105318
-      type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
     - rid: 4738608375284105319
-      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 

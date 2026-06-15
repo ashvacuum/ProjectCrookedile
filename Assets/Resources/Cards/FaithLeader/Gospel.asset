@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Congregation
-  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: 7d93bcbe-e9f9-40c2-b376-cc7ea2e9985e
-  _cardName: Congregation
+  m_Name: Gospel
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
+  _id: 22bdbd1b-1e3c-4f6a-8d81-e344268fb029
+  _cardName: Gospel
   _cardType: 2
   _rarity: 1
   _artwork: {fileID: 0}
-  _description: Rally your followers. Draw strength every turn.
+  _description: 
   _flavorText: 
   _costs:
   - _costType: 1
@@ -28,7 +28,7 @@ MonoBehaviour:
     _maximumCost: 99
   _effects: []
   _passives:
-  - rid: 4823698577809473623
+  - rid: 4823698577809473633
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
@@ -45,32 +45,34 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4823698577809473623
+    - rid: 4823698577809473633
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: New Passive
         _trigger:
-          rid: 4823698577809473624
+          rid: 4823698577809473634
         _conditions:
-        - rid: 4823698577809473625
+        - rid: 4823698577809473636
         _oneShot: 0
         _effects:
-        - rid: 4823698577809473626
-    - rid: 4823698577809473624
-      type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+        - rid: 4823698577809473637
+    - rid: 4823698577809473634
+      type: {class: StatusAppliedToEnemyTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _filterByStatus: 1
+        _filterStatus:
+          rid: 4823698577809473635
+    - rid: 4823698577809473635
+      type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 4823698577809473625
+    - rid: 4823698577809473636
       type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 4823698577809473626
-      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 4823698577809473637
+      type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _target: 0
-        _behavior:
-          rid: 4823698577809473627
-        _stacks: 1
-        _duration: 2
-    - rid: 4823698577809473627
-      type: {class: StrengthStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
+        _amount: 2
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1

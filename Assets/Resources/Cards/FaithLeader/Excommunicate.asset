@@ -17,8 +17,7 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 1
   _artwork: {fileID: 0}
-  _description: Cast them out. Weakens their position significantly. (Add ApplyStatus
-    Weakened 2 + Vulnerable 1 via Inspector.)
+  _description: 'Cast them out. Weakens their position significantly. '
   _flavorText: 
   _costs:
   - _costType: 1
@@ -29,6 +28,7 @@ MonoBehaviour:
     _maximumCost: 99
   _effects:
   - rid: 4823698507066769556
+  - rid: 4823698577809473629
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
@@ -39,6 +39,7 @@ MonoBehaviour:
   _isStarterCard: 0
   _isUnlockable: 0
   _isUnplayable: 0
+  _innateRetain: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
@@ -51,9 +52,21 @@ MonoBehaviour:
         _name: 
         _target: 1
         _behavior:
-          rid: 4823698507066769558
+          rid: 4823698577809473628
         _stacks: 2
         _duration: 0
-    - rid: 4823698507066769558
-      type: {class: SilencedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 4823698577809473628
+      type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 4823698577809473629
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _target: 1
+        _behavior:
+          rid: 4823698577809473632
+        _stacks: 1
+        _duration: 0
+    - rid: 4823698577809473632
+      type: {class: ShameStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 

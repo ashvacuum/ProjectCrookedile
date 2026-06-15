@@ -10,24 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Sermon
-  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: f1994416-4430-4eb6-8fa1-e55d2b1c816e
-  _cardName: Sermon
-  _cardType: 0
+  m_Name: Judgement
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
+  _id: 69a4fbd4-21bd-495f-82a4-d3620cb1ae5f
+  _cardName: Judgement
+  _cardType: 1
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: Share your conviction. Build inner strength and keep the ideas flowing.
+  _description: 
   _flavorText: 
-  _costs:
-  - _costType: 1
-    _baseAmount: 1
-    _isXCost: 0
-    _costChangePerTurn: 0
-    _minimumCost: 0
-    _maximumCost: 99
+  _costs: []
   _effects:
-  - rid: -2
+  - rid: 4823698577809473641
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
@@ -35,7 +29,7 @@ MonoBehaviour:
   _upgradedPassives: []
   _tags:
   - faithleader
-  _isStarterCard: 0
+  _isStarterCard: 1
   _isUnlockable: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -45,5 +39,15 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 4823698577809473641
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _target: 1
+        _behavior:
+          rid: 4823698577809473642
+        _stacks: 2
+        _duration: 0
+    - rid: 4823698577809473642
+      type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

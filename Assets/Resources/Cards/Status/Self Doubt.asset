@@ -30,16 +30,15 @@ MonoBehaviour:
   _effects: []
   _passives:
   - rid: 4738608375284105304
-  _isPower: 0
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
   _upgradedPassives: []
-  _tags:
-  - faithleader
+  _tags: []
   _isStarterCard: 0
   _isUnlockable: 0
   _isUnplayable: 1
+  _innateRetain: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
