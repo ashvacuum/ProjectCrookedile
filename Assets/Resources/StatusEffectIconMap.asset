@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -108,3 +108,53 @@ MonoBehaviour:
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
+  - id: devotion
+    icon: {fileID: 21300000, guid: 41e9fd312b776bf4fa73001a8968921c, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: echo
+    icon: {fileID: 21300000, guid: d709162c7886d9048be8c0f5e41e2d1f, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: fanatic
+    icon: {fileID: 21300000, guid: 604ecca3cb10ed843bb67a5618b08522, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: hardened
+    icon: {fileID: 21300000, guid: a7eef88d7c0c15641acccf4ac77de595, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: intangible
+    icon: {fileID: 21300000, guid: 8ce92f4a49f47734685c68cd95e150aa, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: ritual
+    icon: {fileID: 21300000, guid: 41e5b1b6717dbcb429b61440d9adf787, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: regeneration
+    icon: {fileID: 21300000, guid: e42ef51eeb26a334a8b2e8a38f6da38e, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: momentum
+    icon: {fileID: 21300000, guid: b1dbbedc69a1b8c42825ba955aff7634, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: thorns
+    icon: {fileID: 21300000, guid: d2f229c5c676097459dffff65c646453, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: Thorns
+    description: Reflect 1 pressure when hit.
+  - id: turncoat
+    icon: {fileID: 21300000, guid: ee165b1d7ddab5c4ea7346c34da99516, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: Turncoat
+    description: 'Freshly betrayed: deals +1 pressure.'

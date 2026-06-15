@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Deflated
   _cardType: 3
   _rarity: 0
-  _artwork: {fileID: 21300000, guid: 4b5d931a2d2419649a005db7bf4d8a28, type: 3}
+  _artwork: {fileID: 21300000, guid: 9d0cb3c9aea568642b8febed29b8787a, type: 3}
   _description: A missing sense of purpose. Unplayable. Ethereal.
   _flavorText: 
   _costs: []
