@@ -1,9 +1,9 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using TMPro;
-using Crookedile.Data.Battle;
+﻿using Crookedile.Data.Battle;
 using Crookedile.Gameplay.Battle;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Crookedile.UI.Battle
 {
@@ -20,32 +20,38 @@ namespace Crookedile.UI.Battle
     /// Setup: Assign <see cref="_icon"/>, <see cref="_stackText"/> (can be null), and
     /// <see cref="_iconMap"/> in the Inspector (same asset as <see cref="StatusEffectPanelUI"/>).
     /// </summary>
-    public class StatusEffectIconUI : MonoBehaviour,
-                                       IPointerEnterHandler,
-                                       IPointerExitHandler
+    public class StatusEffectIconUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
-        [SerializeField] private Image                  _icon;
-        [SerializeField] private TMP_Text               _stackText;
-        [Tooltip("Same StatusEffectIconMapSO asset assigned to StatusEffectPanelUI — provides tooltip text.")]
-        [SerializeField] private StatusEffectIconMapSO  _iconMap;
+        [SerializeField]
+        private Image _icon;
 
-        private StatusEffectType _type;
-        private int              _currentStacks;
+        [SerializeField]
+        private TMP_Text _stackText;
 
-        // ─── Initialisation ───────────────────────────────────────────────────────
+        [Tooltip(
+            "Same StatusEffectIconMapSO asset assigned to StatusEffectPanelUI — provides tooltip text."
+        )]
+        [SerializeField]
+        private StatusEffectIconMapSO _iconMap;
 
+        private string _id;
+        private string _fallbackName;
+        private int _currentStacks;
+
+        #region Initialisation
         /// <summary>
         /// Full initialisation — sets the icon sprite, tint color, and initial stack count.
         /// Call once when the icon is first created for an effect.
         /// </summary>
-        public void Setup(StatusEffectType type, Sprite icon, Color color, int stacks)
+        public void Setup(StatusBehavior behavior, Sprite icon, Color color, int stacks)
         {
-            _type = type;
+            _id = behavior?.Id;
+            _fallbackName = behavior?.DisplayName ?? string.Empty;
 
             if (_icon != null)
             {
                 _icon.sprite = icon;
-                _icon.color  = color;
+                _icon.color = color;
             }
 
             Refresh(stacks);
@@ -66,16 +72,19 @@ namespace Crookedile.UI.Battle
             }
         }
 
-        // ─── Pointer Events ───────────────────────────────────────────────────────
+        #endregion
 
+        #region Pointer Events
         public void OnPointerEnter(PointerEventData _)
         {
-            if (_iconMap == null || BattleTooltipUI.Instance == null) return;
+            if (_iconMap == null || BattleTooltipUI.Instance == null)
+                return;
 
-            _iconMap.TryGet(_type, out var icon, out var color, out var name, out var desc);
+            _iconMap.TryGet(_id, out var icon, out var color, out var name, out var desc);
 
-            // Default: fall back to the enum name when effectName is not authored in the SO
-            if (string.IsNullOrEmpty(name)) name = _type.ToString();
+            // Default: fall back to the behavior's display name when effectName is not authored in the SO
+            if (string.IsNullOrEmpty(name))
+                name = _fallbackName;
 
             // Template substitution: replace {a} with the current stack count
             if (!string.IsNullOrEmpty(desc))
@@ -91,3 +100,4 @@ namespace Crookedile.UI.Battle
         }
     }
 }
+        #endregion

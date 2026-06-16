@@ -92,7 +92,7 @@ MonoBehaviour:
         _name: 
         _amount: 3
     - rid: 4738608336531357802
-      type: {class: DealDamageEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: 
         _target: 1

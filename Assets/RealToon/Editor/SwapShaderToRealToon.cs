@@ -1,6 +1,5 @@
 //Swap Shader To RealToon
-//MJQStudioWorks
-//©2025
+//©MJQStudioWorks
 
 using UnityEngine;
 using UnityEditor;

@@ -1,9 +1,9 @@
-using UnityEngine;
-using Crookedile.Gameplay.Battle;
+﻿using System.Collections.Generic;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
-using System.Collections.Generic;
 using Crookedile.Gameplay;
+using Crookedile.Gameplay.Battle;
+using UnityEngine;
 
 namespace Crookedile.Tests
 {
@@ -14,7 +14,8 @@ namespace Crookedile.Tests
     public class EffectResolverTest : MonoBehaviour
     {
         [Header("Test Settings")]
-        [SerializeField] private bool runTestsOnStart = false;
+        [SerializeField]
+        private bool runTestsOnStart = false;
 
         private BattleStats playerStats;
         private BattleStats opponentStats;
@@ -38,10 +39,10 @@ namespace Crookedile.Tests
             SetupTestBattle();
 
             TestBasicDamage();
-            TestComposureDamageBonus();
+            TestShieldAbsorption();
             TestHostilityDamageMultiplier();
             TestStatusEffectDamageModifiers();
-            TestComposureGainWithModifiers();
+            TestShieldGainWithModifiers();
             TestCardCostModifiers();
             TestTurnBasedStatusEffects();
 
@@ -52,9 +53,9 @@ namespace Crookedile.Tests
         {
             Debug.Log("--- Setting up test battle ---");
 
-            // Initialize stats
-            playerStats = new BattleStats(maxResolve: 20, maxActionPoints: 3);
-            opponentStats = new BattleStats(maxResolve: 20, maxActionPoints: 3);
+            // Initialize stats â€” resolve removed; use opinion-meter model
+            playerStats = new BattleStats(maxActionPoints: 3, isPlayer: true);
+            opponentStats = new BattleStats(maxActionPoints: 3, isPlayer: false);
 
             // Initialize deck managers with empty decks
             List<CardData> emptyDeck = new List<CardData>();
@@ -67,110 +68,51 @@ namespace Crookedile.Tests
             Debug.Log($"Opponent: {opponentStats.GetStatusString()}");
         }
 
+        // TODO: Rewrite damage tests for the opinion-meter model.
+        // Cards apply pressure to the opinion meter via DamageDealtEvent â†’ BattleManager.
+        // Tests need a BattleManager mock or an EventBus listener to assert opinion changes.
+
         [ContextMenu("Test: Basic Damage")]
         public void TestBasicDamage()
         {
-            Debug.Log("\n--- TEST: Basic Damage ---");
-            SetupTestBattle();
-
-            // Create a simple damage effect
-            CardEffect damageEffect = CreateDamageEffect(5);
-            CardData testCard = CreateTestCard("Test Attack", damageEffect);
-
-            int initialResolve = opponentStats.CurrentResolve;
-            effectResolver.ResolveCardEffects(testCard, isPlayerCard: true);
-
-            int damageTaken = initialResolve - opponentStats.CurrentResolve;
-            Debug.Log($"Expected: 5 damage | Actual: {damageTaken} damage");
-            Debug.Assert(damageTaken == 5, "Basic damage test failed!");
-            Debug.Log("✓ PASSED");
+            Debug.Log("\n--- TEST: Basic Damage (TODO: update for opinion model) ---");
         }
 
-        [ContextMenu("Test: Composure Damage Bonus")]
-        public void TestComposureDamageBonus()
+        [ContextMenu("Test: Shield Absorption")]
+        public void TestShieldAbsorption()
         {
-            Debug.Log("\n--- TEST: Composure Damage Bonus ---");
-            SetupTestBattle();
-
-            // Give player 3 Composure
-            playerStats.GainComposure(3);
-
-            // Deal 5 base damage (should be 5 + 3 = 8 total)
-            CardEffect damageEffect = CreateDamageEffect(5);
-            CardData testCard = CreateTestCard("Test Attack", damageEffect);
-
-            int initialResolve = opponentStats.CurrentResolve;
-            effectResolver.ResolveCardEffects(testCard, isPlayerCard: true);
-
-            int damageTaken = initialResolve - opponentStats.CurrentResolve;
-            Debug.Log($"Expected: 8 damage (5 base + 3 Composure) | Actual: {damageTaken} damage");
-            Debug.Assert(damageTaken == 8, "Composure bonus test failed!");
-            Debug.Log("✓ PASSED");
+            // Support/Denial are now session-level on BattleManager, not per-BattleStats.
+            // This test requires a full BattleManager instance â€” stub for now.
+            Debug.Log(
+                "\n--- TEST: Support/Denial absorption â€” requires BattleManager, skipped in unit tester ---"
+            );
         }
 
         [ContextMenu("Test: Hostility Damage Multiplier")]
         public void TestHostilityDamageMultiplier()
         {
-            Debug.Log("\n--- TEST: Hostility Damage Multiplier ---");
+            Debug.Log("\n--- TEST: Hostility Multiplier ---");
             SetupTestBattle();
-
-            // Give player 2 Hostility (1 + 2 * 0.5 = 2.0x multiplier)
-            playerStats.GainHostility(2);
-
-            Debug.Log($"Player Hostility: {playerStats.CurrentHostility} (Multiplier: {playerStats.HostilityDamageMultiplier:F2}x)");
-
-            // Opponent deals 5 damage to player (should be 5 * 2.0 = 10)
-            int damage = playerStats.DamageResolveWithHostility(5);
-
-            Debug.Log($"Expected: 10 damage (5 base * 2.0x) | Actual: {damage} damage");
-            Debug.Assert(damage == 10, "Hostility multiplier test failed!");
-            Debug.Log("✓ PASSED");
+            opponentStats.GainHostility(2);
+            float mult = opponentStats.HostilityDamageMultiplier;
+            Debug.Log($"Hostility 2 â†’ multiplier: {mult:F2}x (expected 2.0x)");
+            Debug.Assert(Mathf.Approximately(mult, 2.0f), "Hostility multiplier wrong!");
+            Debug.Log("âœ“ PASSED");
         }
 
         [ContextMenu("Test: Status Effect Damage Modifiers")]
         public void TestStatusEffectDamageModifiers()
         {
-            Debug.Log("\n--- TEST: Status Effect Damage Modifiers ---");
-            SetupTestBattle();
-
-            // Apply Strength +2 to player
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Strength, 2);
-
-            // Apply Vulnerable to opponent
-            effectResolver.OpponentStatusEffects.ApplyStatusEffect(StatusEffectType.Vulnerable, 1);
-
-            // Deal 10 base damage
-            // Should be: 10 + 2 (Strength) = 12, then 12 * 1.5 (Vulnerable) = 18
-            CardEffect damageEffect = CreateDamageEffect(10);
-            CardData testCard = CreateTestCard("Test Attack", damageEffect);
-
-            int initialResolve = opponentStats.CurrentResolve;
-            effectResolver.ResolveCardEffects(testCard, isPlayerCard: true);
-
-            int damageTaken = initialResolve - opponentStats.CurrentResolve;
-            Debug.Log($"Expected: 18 damage (10 base + 2 Strength, then * 1.5 Vulnerable) | Actual: {damageTaken} damage");
-            Debug.Assert(damageTaken == 18, "Status effect damage modifier test failed!");
-            Debug.Log("✓ PASSED");
+            Debug.Log("\n--- TEST: Status Effect Damage Modifiers (TODO: opinion model) ---");
         }
 
-        [ContextMenu("Test: Composure Gain With Modifiers")]
-        public void TestComposureGainWithModifiers()
+        [ContextMenu("Test: Shield Gain With Modifiers")]
+        public void TestShieldGainWithModifiers()
         {
-            Debug.Log("\n--- TEST: Composure Gain With Modifiers ---");
-            SetupTestBattle();
-
-            // Apply Dexterity +2 to player
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Dexterity, 2);
-
-            // Gain 5 Composure (should be 5 + 2 = 7)
-            CardEffect composureEffect = CreateComposureEffect(5);
-            CardData testCard = CreateTestCard("Test Composure Gain", composureEffect);
-
-            effectResolver.ResolveCardEffects(testCard, isPlayerCard: true);
-
-            Debug.Log($"Expected: 7 Composure (5 base + 2 Dexterity) | Actual: {playerStats.CurrentComposure} Composure");
-            Debug.Assert(playerStats.CurrentComposure == 7, "Composure gain modifier test failed!");
-            Debug.Log("✓ PASSED");
+            // Support is now session-level on BattleManager â€” requires BattleManager instance to test.
+            Debug.Log(
+                "\n--- TEST: Support gain with modifiers â€” requires BattleManager, skipped in unit tester ---"
+            );
         }
 
         [ContextMenu("Test: Card Cost Modifiers")]
@@ -183,7 +125,7 @@ namespace Crookedile.Tests
             CardCost cost = new CardCost(CostType.ActionPoints, 2);
 
             // Apply Focus -1 (reduces cost by 1)
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Focus, 1);
+            effectResolver.PlayerStatusEffects.ApplyStatus(new FocusStatus(), 1);
 
             int baseCost = cost.CurrentAmount;
             int modifiedCost = effectResolver.PlayerStatusEffects.ModifyCardCost(baseCost);
@@ -193,13 +135,13 @@ namespace Crookedile.Tests
 
             // Now test Entangled (+1 cost)
             SetupTestBattle();
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Entangled, 1);
+            effectResolver.PlayerStatusEffects.ApplyStatus(new EntangledStatus(), 1);
 
             modifiedCost = effectResolver.PlayerStatusEffects.ModifyCardCost(baseCost);
             Debug.Log($"Expected: 3 AP (2 base + 1 Entangled) | Actual: {modifiedCost} AP");
             Debug.Assert(modifiedCost == 3, "Entangled cost test failed!");
 
-            Debug.Log("✓ PASSED");
+            Debug.Log("âœ“ PASSED");
         }
 
         [ContextMenu("Test: Turn-Based Status Effects")]
@@ -208,14 +150,13 @@ namespace Crookedile.Tests
             Debug.Log("\n--- TEST: Turn-Based Status Effects ---");
             SetupTestBattle();
 
-            // Apply Scandal (damage at end of turn)
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Scandal, 3);
+            // Apply Smear (reputation bleed at end of turn)
+            effectResolver.PlayerStatusEffects.ApplyStatus(new SmearStatus(), 3);
 
             // Apply Regeneration (heal at end of turn)
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Regeneration, 2);
+            effectResolver.PlayerStatusEffects.ApplyStatus(new RegenerationStatus(), 2);
 
-            // Damage player first to see regeneration
-            playerStats.DamageResolve(5);
+            // Support/Denial are session-level â€” no per-stat shield to set up.
 
             Debug.Log($"Before turn end: {playerStats.GetStatusString()}");
 
@@ -223,64 +164,66 @@ namespace Crookedile.Tests
             effectResolver.PlayerStatusEffects.OnTurnEnd(playerStats);
 
             Debug.Log($"After turn end: {playerStats.GetStatusString()}");
-            Debug.Log("Expected: -3 Resolve from Scandal, +2 from Regeneration = -1 net");
+            Debug.Log(
+                "Smear/Regeneration opinion effects are applied by BattleManager (OpinionLedger), "
+                    + "not by StatusEffectManager â€” this unit tester only decrements their stacks."
+            );
 
-            // Test Ritual (gain Composure at start of turn)
-            effectResolver.PlayerStatusEffects.ApplyStatusEffect(StatusEffectType.Ritual, 2);
+            // Test Ritual (gain Shield at start of turn)
+            effectResolver.PlayerStatusEffects.ApplyStatus(new RitualStatus(), 2);
             effectResolver.PlayerStatusEffects.OnTurnStart(playerStats);
 
             Debug.Log($"After turn start: {playerStats.GetStatusString()}");
-            Debug.Log($"Expected: +2 Composure from Ritual | Actual: {playerStats.CurrentComposure} Composure");
+            Debug.Log(
+                "Ritual now grants Support (session-level) â€” verify via BattleManager.CurrentSupport"
+            );
 
-            Debug.Log("✓ PASSED");
+            Debug.Log("âœ“ PASSED");
         }
 
         #region Helper Methods
 
-        private CardEffect CreateDamageEffect(int amount)
+        private BattleEffect CreateDamageEffect(int amount)
         {
-            // Using reflection to create CardEffect since it has complex setup
-            // In real usage, CardEffects would be created through Unity Editor
-            var effect = new CardEffect();
-            var categoryField = typeof(CardEffect).GetField("_category", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var targetField = typeof(CardEffect).GetField("_target", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var damageTypeField = typeof(CardEffect).GetField("_damageType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var damageAmountField = typeof(CardEffect).GetField("_damageAmount", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            categoryField?.SetValue(effect, EffectCategory.Damage);
-            targetField?.SetValue(effect, TargetType.Opponent);
-            damageTypeField?.SetValue(effect, DamageType.FixedDamage);
-            damageAmountField?.SetValue(effect, amount);
-
+            var effect = new ApplyPressureEffect();
+            var amountField = typeof(ApplyPressureEffect).GetField(
+                "_amount",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
+            amountField?.SetValue(effect, amount);
             return effect;
         }
 
-        private CardEffect CreateComposureEffect(int amount)
+        private BattleEffect CreateShieldEffect(int amount)
         {
-            var effect = new CardEffect();
-            var categoryField = typeof(CardEffect).GetField("_category", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var resourceTypeField = typeof(CardEffect).GetField("_resourceType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var resourceAmountField = typeof(CardEffect).GetField("_resourceAmount", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            categoryField?.SetValue(effect, EffectCategory.Resource);
-            resourceTypeField?.SetValue(effect, ResourceEffectType.GainComposure);
-            resourceAmountField?.SetValue(effect, amount);
-
+            var effect = new GainBufferShieldEffect();
+            var amountField = typeof(GainBufferShieldEffect).GetField(
+                "_amount",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
+            amountField?.SetValue(effect, amount);
             return effect;
         }
 
-        private CardData CreateTestCard(string name, params CardEffect[] effects)
+        private CardData CreateTestCard(string name, params BattleEffect[] effects)
         {
-            // Create a ScriptableObject instance for testing
             CardData card = ScriptableObject.CreateInstance<CardData>();
 
-            // Set fields using reflection
-            var nameField = typeof(CardData).GetField("_cardName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var effectsField = typeof(CardData).GetField("_effects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var costsField = typeof(CardData).GetField("_costs", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var nameField = typeof(CardData).GetField(
+                "_cardName",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
+            var effectsField = typeof(CardData).GetField(
+                "_effects",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
+            var costsField = typeof(CardData).GetField(
+                "_costs",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
 
             nameField?.SetValue(card, name);
-            effectsField?.SetValue(card, new List<CardEffect>(effects));
+            effectsField?.SetValue(card, new List<BattleEffect>(effects));
             costsField?.SetValue(card, new List<CardCost>());
 
             return card;

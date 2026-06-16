@@ -12,6 +12,10 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Returns true if the given move satisfies its condition given the current battle state.
         /// </summary>
-        bool IsMet(EnemyMoveData move, IReadOnlyList<EnemyController> allEnemies, EnemyController self);
+        bool IsMet(
+            EnemyMoveData move,
+            IReadOnlyList<EnemyController> allEnemies,
+            EnemyController self
+        );
     }
 }

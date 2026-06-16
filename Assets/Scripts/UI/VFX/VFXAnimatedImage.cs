@@ -1,8 +1,9 @@
-using UnityEngine;
-using System.Collections;
+﻿using System.Threading;
 using Crookedile.Data.VFX;
 using Crookedile.Managers;
 using Crookedile.Utilities;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Crookedile.UI
 {
@@ -11,27 +12,23 @@ namespace Crookedile.UI
     /// Signals <see cref="VFXManager"/> when the animation is done so the instance
     /// can be returned to the object pool cleanly.
     ///
-    /// Optionally accepts a <see cref="BattleVFXContext"/> via <see cref="SetBattleContext"/>
-    /// to gate card-effect resolution on animation events rather than firing immediately:
-    ///   • Add an <b>ApplyEffects</b> AnimationEvent at the hit frame → damage lands in sync.
-    ///   • Add a <b>PlaySound(string)</b> AnimationEvent on any frame → SFX plays there.
-    ///   • If no <b>ApplyEffects</b> event is present, effects resolve automatically in
-    ///     <see cref="OnAnimationComplete"/> as a safety net so no card ever hangs.
+    /// Timing is FULLY CODE-DRIVEN: <see cref="PlayAnimation"/> starts a playback coroutine
+    /// that fires <see cref="ApplyEffects"/> at the hit time (a normalized fraction of the
+    /// clip, authored on <see cref="Crookedile.Data.VFX.VFXEvent"/>) and
+    /// <see cref="OnAnimationComplete"/> at the clip's end. No AnimationEvents need to be
+    /// keyed in any clip. Clips that still contain legacy ApplyEffects/OnAnimationComplete
+    /// events are tolerated — both methods are idempotent, so an early event simply preempts
+    /// the coroutine harmlessly. Do not key events in new clips.
     ///
-    /// Safety guarantees (two layers):
-    ///   1. Timeout coroutine — if <see cref="OnAnimationComplete"/> never fires within
-    ///      clip duration + buffer (missing Animation Event in the clip), it is called
-    ///      automatically so <c>_vfxInFlight</c> is never permanently stuck.
-    ///   2. OnDisable force-complete — if the GameObject is disabled before the animation
-    ///      finishes (parent deactivated, scene change, etc.) battle callbacks fire immediately
-    ///      and the pool-return is deferred one frame via <see cref="VFXManager.DeferredCallback"/>
-    ///      to avoid the "cannot SetParent while activating/deactivating parent" Unity error.
+    /// Safety guarantee: OnDisable force-complete — if the GameObject is disabled before the
+    /// animation finishes (parent deactivated, scene change, etc.) battle callbacks fire
+    /// immediately and the pool-return is deferred one frame via
+    /// <see cref="VFXManager.DeferredCallback"/> to avoid the "cannot SetParent while
+    /// activating/deactivating parent" Unity error.
     ///
     /// Setup:
     ///   1. Add this component to your VFX prefab alongside Image and Animator.
-    ///   2. In the animation clip, add an <b>AnimationEvent</b> on the very last frame
-    ///      targeting this component's <see cref="OnAnimationComplete"/> method.
-    ///   3. VFXManager will wire <see cref="OnComplete"/> at runtime — no manual setup needed.
+    ///   2. VFXManager wires <see cref="OnComplete"/> and drives playback — no clip events needed.
     /// </summary>
     [Debuggable("VFX", LogLevel.Info)]
     public class VFXAnimatedImage : MonoBehaviour
@@ -43,9 +40,9 @@ namespace Crookedile.UI
         internal System.Action OnComplete;
 
         private BattleVFXContext _context;
-        private bool             _effectsApplied;
-        private Coroutine        _completionTimeout;
-        private string           _currentStateName;
+        private bool _effectsApplied;
+        private CancellationTokenSource _playbackCts;
+        private string _currentStateName;
 
         /// <summary>
         /// The bare pool-return action wired by VFXManager, stored separately so
@@ -54,11 +51,10 @@ namespace Crookedile.UI
         /// </summary>
         private System.Action _poolReturnCallback;
 
-        // Extra buffer added to the clip length before the timeout fires.
-        private const float TimeoutBuffer = 0.5f;
+        // Playback duration used when the named clip cannot be found on the Animator.
+        private const float FallbackClipLength = 1f;
 
-        // ─── Battle Context ───────────────────────────────────────────────────────
-
+        #region Battle Context
         /// <summary>
         /// Injects a <see cref="BattleVFXContext"/> so animation events can drive card-effect timing.
         /// Chains the context's <see cref="BattleVFXContext.OnComplete"/> with the pool-return callback
@@ -66,36 +62,44 @@ namespace Crookedile.UI
         /// </summary>
         public void SetBattleContext(BattleVFXContext context)
         {
-            _context            = context;
-            _effectsApplied     = false;
+            _context = context;
+            _effectsApplied = false;
 
             // Capture the current pool-return callback as a LOCAL variable for the lambda closure.
             // If we captured _poolReturnCallback (a field) instead, OnAnimationComplete would null
             // that field before invoking the chain, making the lambda see null and skip pool-return.
-            var poolReturn      = OnComplete;
+            var poolReturn = OnComplete;
             _poolReturnCallback = OnComplete; // also stored in field so OnDisable can detect + defer it
 
-            GameLogger.LogInfo("VFX", $"SetBattleContext on '{gameObject.name}' — parent='{transform.parent?.name ?? "none"}'", this);
+            GameLogger.LogInfo(
+                "VFX",
+                $"SetBattleContext on '{gameObject.name}' — parent='{transform.parent?.name ?? "none"}'",
+                this
+            );
 
             // Chain: pool-return fires first (local capture, immune to field clearing), then battle callback.
             OnComplete = () =>
             {
                 GameLogger.LogInfo("VFX", $"OnComplete chain firing on '{gameObject.name}'", this);
-                poolReturn?.Invoke();           // local capture — always has the value
+                poolReturn?.Invoke(); // local capture — always has the value
                 context.OnComplete?.Invoke();
             };
         }
 
-        // ─── Activation ───────────────────────────────────────────────────────────
+        #endregion
 
+        #region Activation
         /// <summary>
-        /// Plays a specific animation state on this instance's Animator and starts a timeout
-        /// coroutine that force-fires <see cref="OnAnimationComplete"/> if the clip's own
-        /// Animation Event never does so (e.g. the event is missing from the clip).
+        /// Plays a specific animation state on this instance's Animator and starts the
+        /// playback-driver coroutine that fires <see cref="ApplyEffects"/> at
+        /// <paramref name="hitTimeNormalized"/> of the clip length and
+        /// <see cref="OnAnimationComplete"/> at the clip's end. The coroutine IS the
+        /// lifecycle — no AnimationEvents are required in the clip.
         /// </summary>
-        public void PlayAnimation(string stateName)
+        public void PlayAnimation(string stateName, float hitTimeNormalized = 0.5f)
         {
-            if (string.IsNullOrEmpty(stateName)) return;
+            if (string.IsNullOrEmpty(stateName))
+                return;
 
             _currentStateName = stateName;
             var anim = GetComponent<Animator>();
@@ -103,75 +107,120 @@ namespace Crookedile.UI
 
             float clipLength = anim != null ? GetClipLength(anim, stateName) : -1f;
             if (clipLength < 0f)
-                GameLogger.LogWarning("VFX", $"Clip '{stateName}' not found on '{gameObject.name}' — using 3s fallback timeout.", this);
+            {
+                GameLogger.LogWarning(
+                    "VFX",
+                    $"Clip '{stateName}' not found on '{gameObject.name}' — using {FallbackClipLength}s fallback duration.",
+                    this
+                );
+                clipLength = FallbackClipLength;
+            }
             else
-                GameLogger.LogInfo("VFX", $"Playing '{stateName}' on '{gameObject.name}' (clipLength={clipLength:F2}s)  parent='{transform.parent?.name ?? "none"}'", this);
+            {
+                GameLogger.LogInfo(
+                    "VFX",
+                    $"Playing '{stateName}' on '{gameObject.name}' (clipLength={clipLength:F2}s, hit@{hitTimeNormalized:P0})  parent='{transform.parent?.name ?? "none"}'",
+                    this
+                );
+            }
 
-            // Always start a completion timer — code drives VFX lifecycle, not Animation Events.
-            // Animation Events (OnAnimationComplete, ApplyEffects) are optional enhancements that
-            // can fire early, but the coroutine is the guaranteed fallback so _vfxInFlight can
-            // never be permanently stuck by a missing or misconfigured clip/event.
-            if (_completionTimeout != null) StopCoroutine(_completionTimeout);
-            float safeDuration = clipLength > 0f ? clipLength + TimeoutBuffer : 3f;
-            _completionTimeout = StartCoroutine(CompletionTimeout(safeDuration));
+            CancelPlaybackDriver();
+            _playbackCts = CancellationTokenSource.CreateLinkedTokenSource(
+                this.GetCancellationTokenOnDestroy()
+            );
+            DrivePlayback(clipLength, Mathf.Clamp01(hitTimeNormalized), _playbackCts.Token)
+                .Forget();
         }
 
-        private IEnumerator CompletionTimeout(float delay)
+        /// <summary>
+        /// Code-driven playback timeline: hit moment → effects, clip end → completion.
+        /// Both targets are idempotent, so legacy AnimationEvents still keyed in old clips
+        /// can fire first without causing double-application. Cancelled by
+        /// <see cref="OnAnimationComplete"/>, <see cref="OnDisable"/>, or destruction.
+        /// </summary>
+        private async UniTaskVoid DrivePlayback(
+            float clipLength,
+            float hitTimeNormalized,
+            CancellationToken ct
+        )
         {
-            yield return new WaitForSeconds(delay);
-            _completionTimeout = null;
+            float hitDelay = clipLength * hitTimeNormalized;
+            if (hitDelay > 0f)
+                await UniTask.WaitForSeconds(hitDelay, cancellationToken: ct);
+            ApplyEffects();
 
-            if (OnComplete == null && _context == null) yield break; // already completed normally
-
-            GameLogger.LogWarning("VFX",
-                $"Timeout ({delay:F2}s) hit for state '{_currentStateName}' on '{gameObject.name}' — " +
-                $"OnAnimationComplete Animation Event was never fired. Force-completing now.", this);
+            float remaining = clipLength - hitDelay;
+            if (remaining > 0f)
+                await UniTask.WaitForSeconds(remaining, cancellationToken: ct);
             OnAnimationComplete();
+        }
+
+        /// <summary>Cancels and disposes the playback-driver task, if one is running.</summary>
+        private void CancelPlaybackDriver()
+        {
+            if (_playbackCts == null)
+                return;
+            _playbackCts.Cancel();
+            _playbackCts.Dispose();
+            _playbackCts = null;
         }
 
         private static float GetClipLength(Animator anim, string stateName)
         {
-            if (anim.runtimeAnimatorController == null) return -1f;
+            if (anim.runtimeAnimatorController == null)
+                return -1f;
             foreach (var clip in anim.runtimeAnimatorController.animationClips)
-                if (clip.name == stateName) return clip.length;
+                if (clip.name == stateName)
+                    return clip.length;
             return -1f;
         }
 
-        // ─── Animation Events ─────────────────────────────────────────────────────
+        #endregion
 
+        #region Playback Callbacks
         /// <summary>
-        /// Called by an <b>ApplyEffects</b> AnimationEvent at the hit frame of the VFX clip.
+        /// Fires the battle context's hit-frame callback. Called by the playback-driver
+        /// coroutine at the authored hit time (or by a legacy AnimationEvent in old clips).
         /// Idempotent — repeated calls are ignored.
         /// </summary>
         public void ApplyEffects()
         {
-            if (_effectsApplied) return;
+            if (_effectsApplied)
+                return;
             _effectsApplied = true;
-            GameLogger.LogInfo("VFX", $"ApplyEffects fired on '{gameObject.name}'  context={(_context != null ? "set" : "null")}", this);
+            GameLogger.LogInfo(
+                "VFX",
+                $"ApplyEffects fired on '{gameObject.name}'  context={(_context != null ? "set" : "null")}",
+                this
+            );
             _context?.OnApplyEffects?.Invoke();
         }
 
         /// <summary>
-        /// Called by an AnimationEvent on the last frame of the VFX clip, OR by the timeout
-        /// coroutine if that event is missing. Idempotent — safe to call multiple times.
+        /// Finalises playback: pool-return + battle completion callback. Called by the
+        /// playback-driver coroutine at the clip's end (or by a legacy AnimationEvent in
+        /// old clips). Idempotent — safe to call multiple times.
         /// </summary>
         public void OnAnimationComplete()
         {
-            // Cancel timeout — we completed before it fired (normal path).
-            if (_completionTimeout != null)
-            {
-                StopCoroutine(_completionTimeout);
-                _completionTimeout = null;
-            }
+            // Stop the driver if something else (legacy clip event) completed us first.
+            CancelPlaybackDriver();
 
-            GameLogger.LogInfo("VFX",
-                $"OnAnimationComplete on '{gameObject.name}'  hasContext={_context != null}  effectsApplied={_effectsApplied}  hasCallback={OnComplete != null}", this);
+            GameLogger.LogInfo(
+                "VFX",
+                $"OnAnimationComplete on '{gameObject.name}'  hasContext={_context != null}  effectsApplied={_effectsApplied}  hasCallback={OnComplete != null}",
+                this
+            );
 
-            // Safety net: apply effects if the hit-frame event was not keyed in the clip.
+            // Safety net: apply effects if the hit moment somehow never fired.
             if (_context != null && !_effectsApplied)
             {
                 _effectsApplied = true;
-                GameLogger.LogWarning("VFX", $"No ApplyEffects event fired — resolving in OnAnimationComplete safety net on '{gameObject.name}'", this);
+                GameLogger.LogWarning(
+                    "VFX",
+                    $"Hit moment never fired — resolving in OnAnimationComplete safety net on '{gameObject.name}'",
+                    this
+                );
                 _context.OnApplyEffects?.Invoke();
             }
             _context = null;
@@ -187,19 +236,21 @@ namespace Crookedile.UI
         }
 
         /// <summary>
-        /// Called by an AnimationEvent (string parameter = sound name).
+        /// Legacy entry point for old clips with a PlaySound(string) AnimationEvent keyed.
+        /// New VFX should route audio through BattleSoundMap instead of clip events.
         /// </summary>
         public void PlaySound(string soundName)
         {
             AudioManager.Instance?.PlaySound(soundName);
         }
 
-        // ─── Lifecycle ────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Lifecycle
         private void OnDisable()
         {
-            // Coroutine is stopped by Unity automatically when disabled; clear the reference.
-            _completionTimeout = null;
+            // Unlike coroutines, UniTasks do NOT stop on disable — cancel explicitly.
+            CancelPlaybackDriver();
 
             // Normal completion path: OnAnimationComplete already cleared all three before SetActive(false).
             if (OnComplete == null && _context == null && _poolReturnCallback == null)
@@ -208,40 +259,55 @@ namespace Crookedile.UI
                 return;
             }
 
-            // ── Abnormal disable: VFX killed before completing ─────────────────────
-            GameLogger.LogWarning("VFX",
-                $"OnDisable on '{gameObject.name}' with live callbacks " +
-                $"(parent='{transform.parent?.name ?? "none"}', hasContext={_context != null}, " +
-                $"hasPoolReturn={_poolReturnCallback != null}) — force-completing to unblock game state.", this);
+            #region Abnormal disable: VFX killed before completing
+            GameLogger.LogWarning(
+                "VFX",
+                $"OnDisable on '{gameObject.name}' with live callbacks "
+                    + $"(parent='{transform.parent?.name ?? "none"}', hasContext={_context != null}, "
+                    + $"hasPoolReturn={_poolReturnCallback != null}) — force-completing to unblock game state.",
+                this
+            );
 
-            var ctx             = _context;
-            var poolReturn      = _poolReturnCallback;
+            var ctx = _context;
+            var poolReturn = _poolReturnCallback;
             bool alreadyApplied = _effectsApplied;
 
             // Clear all fields before invoking to prevent any re-entry.
-            OnComplete          = null;
-            _context            = null;
+            OnComplete = null;
+            _context = null;
             _poolReturnCallback = null;
-            _effectsApplied     = false;
+            _effectsApplied = false;
 
             // Apply card effects if the hit-frame event never fired.
             if (ctx != null && !alreadyApplied)
             {
-                GameLogger.LogWarning("VFX", $"Force-applying card effects for '{gameObject.name}' in OnDisable safety path", this);
+                GameLogger.LogWarning(
+                    "VFX",
+                    $"Force-applying card effects for '{gameObject.name}' in OnDisable safety path",
+                    this
+                );
                 ctx.OnApplyEffects?.Invoke();
             }
 
             // Fire battle-state callback immediately — this only sets _vfxInFlight = false and
-            // publishes CardVFXCompleteEvent. No SetParent involved, safe to call from OnDisable.
+            // publishes CardPlayResolvedEvent. No SetParent involved, safe to call from OnDisable.
             ctx?.OnComplete?.Invoke();
 
             // Defer the pool-return (SetParent calls) to the next frame via VFXManager.
             // Calling SetParent during a parent's activation/deactivation throws a Unity error.
             if (poolReturn != null)
             {
-                GameLogger.LogInfo("VFX", $"Deferring pool-return for '{gameObject.name}' to next frame", this);
+                GameLogger.LogInfo(
+                    "VFX",
+                    $"Deferring pool-return for '{gameObject.name}' to next frame",
+                    this
+                );
                 VFXManager.Instance?.DeferredCallback(poolReturn);
             }
+
+            #endregion
         }
+
+        #endregion
     }
 }

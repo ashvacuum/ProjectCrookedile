@@ -1,6 +1,7 @@
+using Crookedile.Utilities;
+using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
-using Crookedile.Utilities;
 
 namespace Crookedile.Editor
 {
@@ -11,7 +12,8 @@ namespace Crookedile.Editor
         {
             DebugSettings settings = (DebugSettings)target;
 
-            EditorGUILayout.Space(10);
+            SirenixEditorGUI.BeginBox();
+            SirenixEditorGUI.Title("Debug Settings", "", TextAlignment.Left, true);
 
             if (GUILayout.Button("Refresh Categories", GUILayout.Height(30)))
             {
@@ -34,7 +36,8 @@ namespace Crookedile.Editor
                 }
             }
 
-            EditorGUILayout.Space(10);
+            SirenixEditorGUI.EndBox();
+            EditorGUILayout.Space(6);
 
             DrawDefaultInspector();
         }
@@ -78,7 +81,10 @@ namespace Crookedile.Editor
         {
             if (_settings == null)
             {
-                EditorGUILayout.HelpBox("No DebugSettings found. Creating new one...", MessageType.Info);
+                SirenixEditorGUI.MessageBox(
+                    "No DebugSettings found. Creating new one...",
+                    MessageType.Info
+                );
                 if (GUILayout.Button("Create Debug Settings"))
                 {
                     LoadOrCreateSettings();
@@ -86,9 +92,10 @@ namespace Crookedile.Editor
                 return;
             }
 
-            EditorGUILayout.Space(10);
+            SirenixEditorGUI.Title("Debug Manager", "", TextAlignment.Left, true);
 
             // Action Buttons
+            SirenixEditorGUI.BeginBox();
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("Refresh Categories", GUILayout.Height(30)))
             {
@@ -109,45 +116,56 @@ namespace Crookedile.Editor
                 }
             }
             EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.Space(10);
+            SirenixEditorGUI.EndBox();
 
             // Global Settings
-            _showGlobalSettings = EditorGUILayout.BeginFoldoutHeaderGroup(_showGlobalSettings, "Global Settings");
-            if (_showGlobalSettings)
+            SirenixEditorGUI.BeginBox();
+            _showGlobalSettings = SirenixEditorGUI.Foldout(_showGlobalSettings, "Global Settings");
+            if (SirenixEditorGUI.BeginFadeGroup("globals", _showGlobalSettings))
             {
                 EditorGUI.indentLevel++;
-                _settings.globalLoggingEnabled = EditorGUILayout.Toggle("Global Logging Enabled", _settings.globalLoggingEnabled);
-                _settings.globalLogLevel = (LogLevel)EditorGUILayout.EnumPopup("Global Log Level", _settings.globalLogLevel);
-                _settings.showTimestamp = EditorGUILayout.Toggle("Show Timestamp", _settings.showTimestamp);
-                _settings.showStackTrace = EditorGUILayout.Toggle("Show Stack Trace", _settings.showStackTrace);
+                _settings.globalLoggingEnabled = EditorGUILayout.Toggle(
+                    "Global Logging Enabled",
+                    _settings.globalLoggingEnabled
+                );
+                _settings.globalLogLevel = (LogLevel)
+                    EditorGUILayout.EnumPopup("Global Log Level", _settings.globalLogLevel);
+                _settings.showTimestamp = EditorGUILayout.Toggle(
+                    "Show Timestamp",
+                    _settings.showTimestamp
+                );
                 EditorGUI.indentLevel--;
             }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-
-            EditorGUILayout.Space(10);
+            SirenixEditorGUI.EndFadeGroup();
+            SirenixEditorGUI.EndBox();
 
             // Categories
-            EditorGUILayout.LabelField("Categories", EditorStyles.boldLabel);
+            GUILayout.Space(6);
+            SirenixEditorGUI.Title("Categories", "", TextAlignment.Left, false);
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
 
             for (int i = 0; i < _settings.categories.Count; i++)
             {
                 var category = _settings.categories[i];
 
-                EditorGUILayout.BeginVertical("box");
-
+                SirenixEditorGUI.BeginBox();
+                SirenixEditorGUI.BeginBoxHeader();
                 EditorGUILayout.BeginHorizontal();
                 category.enabled = EditorGUILayout.Toggle(category.enabled, GUILayout.Width(20));
                 EditorGUILayout.LabelField(category.categoryName, EditorStyles.boldLabel);
                 EditorGUILayout.EndHorizontal();
+                SirenixEditorGUI.EndBoxHeader();
 
                 EditorGUI.indentLevel++;
-                category.logLevel = (LogLevel)EditorGUILayout.EnumPopup("Log Level", category.logLevel);
+                category.logLevel = (LogLevel)
+                    EditorGUILayout.EnumPopup("Log Level", category.logLevel);
 
                 if (category.scripts.Count > 0)
                 {
-                    EditorGUILayout.LabelField($"Scripts ({category.scripts.Count}):", EditorStyles.miniLabel);
+                    EditorGUILayout.LabelField(
+                        $"Scripts ({category.scripts.Count}):",
+                        EditorStyles.miniLabel
+                    );
                     EditorGUI.indentLevel++;
                     foreach (string script in category.scripts)
                     {
@@ -157,8 +175,8 @@ namespace Crookedile.Editor
                 }
                 EditorGUI.indentLevel--;
 
-                EditorGUILayout.EndVertical();
-                EditorGUILayout.Space(5);
+                SirenixEditorGUI.EndBox();
+                EditorGUILayout.Space(4);
             }
 
             EditorGUILayout.EndScrollView();

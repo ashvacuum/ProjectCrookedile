@@ -36,20 +36,31 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>The event that caused this dispatch.</summary>
         public PassiveEventContext EventCtx { get; }
 
+        /// <summary>Current opinion meter as a 0–1 fraction. Used by opinion-threshold conditions.</summary>
+        public float OpinionPercentage { get; }
+
+        /// <summary>Active BattleManager — provides session-level stats (Support, Denial).</summary>
+        public BattleManager BattleManager { get; }
+
         public PassiveEvaluationContext(
-            BattleStats            playerStats,
-            DeckManager            deck,
+            BattleStats playerStats,
+            DeckManager deck,
             IReadOnlyList<EnemyController> enemies,
-            StatusEffectManager    playerStatusEffects,
-            int                    playerTurnNumber,
-            PassiveEventContext    eventCtx)
+            StatusEffectManager playerStatusEffects,
+            int playerTurnNumber,
+            PassiveEventContext eventCtx,
+            float opinionPercentage = 0f,
+            BattleManager battleManager = null
+        )
         {
-            PlayerStats         = playerStats;
-            Deck                = deck;
-            Enemies             = enemies;
+            PlayerStats = playerStats;
+            Deck = deck;
+            Enemies = enemies;
             PlayerStatusEffects = playerStatusEffects;
-            PlayerTurnNumber    = playerTurnNumber;
-            EventCtx            = eventCtx;
+            PlayerTurnNumber = playerTurnNumber;
+            EventCtx = eventCtx;
+            OpinionPercentage = opinionPercentage;
+            BattleManager = battleManager;
         }
     }
 }

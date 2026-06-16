@@ -1,16 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Linq;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 using Crookedile.Data.VFX;
-using Crookedile.Managers;
-using Crookedile.UI;
-using Crookedile.UI.Battle;
 using Crookedile.Utilities;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -24,23 +23,58 @@ namespace Crookedile.Gameplay.Battle
     public class BattleManager : MonoBehaviour
     {
         [Header("Battle Settings")]
-        [SerializeField] private int   _startingHandSize    = 5;
-        [SerializeField] private int   _cardsPerTurn        = 1;
+        [SerializeField]
+        private int _startingHandSize = 5;
+
+        [SerializeField]
+        private int _cardsPerTurn = 1;
+
         [Tooltip("Seconds to wait after the opponent turn starts before enemies attack.")]
-        [SerializeField] private float _opponentTurnDelay      = 1.0f;
+        [SerializeField]
+        private float _opponentTurnDelay = 1.0f;
+
         [Tooltip("Seconds to wait between each individual enemy's attack.")]
-        [SerializeField] private float _perEnemyAttackDelay    = 0.5f;
+        [SerializeField]
+        private float _perEnemyAttackDelay = 0.5f;
+
+        [Tooltip(
+            "Opinion lost at the end of each player turn while the room is an echo chamber "
+                + "(every enemy receptive). 0 disables decay."
+        )]
+        [SerializeField]
+        private int _echoChamberDecayPerTurn = 5;
+
+        [Tooltip(
+            "Support gained at the start of the player turn per receptive enemy (reading a friendly "
+                + "room — the mirror to hostile enemies granting bonus draws). 0 disables."
+        )]
+        [SerializeField]
+        private int _supportPerReceptiveEnemy = 1;
+
+        [Header("Turncoat (receptive → hostile betrayal)")]
+        [Tooltip("Turncoat stacks applied to a betrayer. Each stack adds bonus pressure and fades 1/turn.")]
+        [SerializeField]
+        private int _turncoatStacks = 2;
+
+        [Tooltip("Opinion lost when an enemy turns coat (the crowd notices the betrayal). 0 disables.")]
+        [SerializeField]
+        private int _turncoatOpinionHit = 3;
+
+        [Tooltip("Hostility added to each immediate neighbour when an enemy turns coat. 0 disables contagion.")]
+        [SerializeField]
+        private int _turncoatAdjacentNudge = 1;
 
         [Header("Origin Passives")]
         [Tooltip("Assign all three OriginPassive assets here (FaithLeader, NepoBaby, Actor).")]
-        [SerializeField] private OriginPassive[] _originPassives;
+        [SerializeField]
+        private OriginPassive[] _originPassives;
 
         // State Machine
         private StateMachine<BattleState> _stateMachine;
 
         // Combatants
         private BattleStats _playerStats;
-        private OriginType  _playerOrigin;
+        private OriginType _playerOrigin;
 
         // Player deck
         private DeckManager _playerDeck;
@@ -52,44 +86,79 @@ namespace Crookedile.Gameplay.Battle
         // Effect Resolver
         private EffectResolver _effectResolver;
 
-        // Confused status — maps hand index → randomized effect amounts (one per effect on the card)
-        private readonly Dictionary<int, int[]> _confusedOverrides = new Dictionary<int, int[]>();
+        // Card-play pipeline — costs, VFX handshake, Confused/Momentum/Echo side-effects.
+        private CardPlayController _cards;
+
+        // Faith Leader conversion engine — pacify-threshold checks and the convert burst.
+        private PacifyConversionEngine _pacify;
 
         // Passive ability resolver — one per battle, origin-specific
         private PassiveResolver _passiveResolver;
 
         // Turn tracking
         private int _currentTurn = 0;
-        private int _playerTurnNumber = 0;   // counts only the player's turns (for Actor Improvise)
+        private int _playerTurnNumber = 0; // counts only the player's turns (for Actor Improvise)
         private bool _isPlayerTurn = true;
+
+        // Opinion Meter + session shields — single owner of the shared battle resources.
+        private OpinionLedger _opinion;
+        private int _maxTurns; // 0 = no limit
+        private int _playerTurnsElapsed;
+
+        // Crowd dynamics — hostility shifts from cards, the Echo Chamber rule, the Turncoat cascade.
+        private CrowdReactions _crowd;
 
         // Battle result
         private BattleResult _battleResult;
 
-        // VFX — true while a card's VFX animation is in flight; blocks card plays and End Turn
-        private bool _vfxInFlight;
-
         #region Properties
 
-        public BattleState CurrentState  => _stateMachine?.CurrentStateType ?? BattleState.Initialize;
-        public BattleStats PlayerStats   => _playerStats;
-        public DeckManager PlayerDeck    => _playerDeck;
-        public OriginType  PlayerOrigin  => _playerOrigin;
-        public int         CurrentTurn   => _currentTurn;
-        public bool        IsPlayerTurn  => _isPlayerTurn;
+        public BattleState CurrentState =>
+            _stateMachine?.CurrentStateType ?? BattleState.Initialize;
+        public BattleStats PlayerStats => _playerStats;
+        public DeckManager PlayerDeck => _playerDeck;
+        public OriginType PlayerOrigin => _playerOrigin;
+        public int CurrentTurn => _currentTurn;
+        public bool IsPlayerTurn => _isPlayerTurn;
 
         // Multi-enemy
-        public IReadOnlyList<EnemyController> Enemies    => _enemies;
-        public EnemyController FocusedEnemy              => _enemies.Count > 0 ? _enemies[_focusedEnemyIndex] : null;
-        public BattleStats     OpponentStats             => FocusedEnemy?.Stats;
-        public EnemyController EnemyController           => FocusedEnemy;   // backward compat
-        public int             FocusedEnemyIndex         => _focusedEnemyIndex;
+        public IReadOnlyList<EnemyController> Enemies => _enemies;
+
+        /// <summary>Enemies still in the fight. (Currently always all of them — there is no HP/death.)</summary>
+        private IEnumerable<EnemyController> LivingEnemies => _enemies.Where(e => !e.IsDefeated);
+
+        public EnemyController FocusedEnemy =>
+            _enemies.Count > 0 ? _enemies[_focusedEnemyIndex] : null;
+        public BattleStats OpponentStats => FocusedEnemy?.Stats;
+        public EnemyController EnemyController => FocusedEnemy; // backward compat
+        public int FocusedEnemyIndex => _focusedEnemyIndex;
 
         /// <summary>The player's status effect manager. Used by HandPanel to compute effective card costs.</summary>
         public StatusEffectManager PlayerStatusEffects => _effectResolver?.PlayerStatusEffects;
 
         /// <summary>Maps hand index to randomized effect amounts while the player has Confused. Empty when not confused.</summary>
-        public IReadOnlyDictionary<int, int[]> ConfusedOverrides => _confusedOverrides;
+        public IReadOnlyDictionary<int, int[]> ConfusedOverrides =>
+            _cards?.ConfusedOverrides ?? _emptyConfusedOverrides;
+
+        private static readonly Dictionary<int, int[]> _emptyConfusedOverrides =
+            new Dictionary<int, int[]>();
+
+        // Internal collaborator accessors — for the owned battle subsystems (CardPlayController
+        // et al.), not for the UI layer. UI goes through the public facade methods.
+        internal EffectResolver Resolver => _effectResolver;
+        internal CrowdReactions Crowd => _crowd;
+        internal PassiveResolver Passives => _passiveResolver;
+
+        // Opinion Meter + session shields — owned by OpinionLedger; these expose it read-only.
+        /// <summary>The shared opinion/Support/Denial ledger. Effects call this directly for opinion pressure.</summary>
+        public OpinionLedger Opinion => _opinion;
+        public int CurrentOpinion => _opinion?.CurrentOpinion ?? 0;
+        public int MaxOpinion => _opinion?.MaxOpinion ?? 0;
+        public int MaxTurns => _maxTurns;
+        public int PlayerTurnsElapsed => _playerTurnsElapsed;
+        public float OpinionPercentage => _opinion?.OpinionPercentage ?? 0f;
+        public int CurrentSupport => _opinion?.CurrentSupport ?? 0;
+        public int CurrentDenial => _opinion?.CurrentDenial ?? 0;
 
         #endregion
 
@@ -98,37 +167,39 @@ namespace Crookedile.Gameplay.Battle
         private void Awake()
         {
             InitializeStateMachine();
-            SubscribeToEvents();
+            // Player input (end turn, play card) arrives as direct method calls
+            // (RequestEndTurn / RequestPlayCard); VFX sequencing is a direct callback
+            // handshake (ICardPlayFeedback). The bus is notification-only here.
+            // EnemyTurncoatEvent is owned by CrowdReactions (subscribed in its constructor).
         }
 
         private void OnDestroy()
         {
-            UnsubscribeFromEvents();
             _passiveResolver?.Dispose();
+            _crowd?.Dispose();
         }
 
-        private void SubscribeToEvents()
-        {
-            EventBus.Subscribe<EndTurnRequestedEvent>(OnEndTurnRequested);
-            EventBus.Subscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
-        }
-
-        private void UnsubscribeFromEvents()
-        {
-            EventBus.Unsubscribe<EndTurnRequestedEvent>(OnEndTurnRequested);
-            EventBus.Unsubscribe<PlayCardRequestedEvent>(OnPlayCardRequested);
-        }
+        /// <summary>
+        /// UI-layer VFX implementation for card plays. Registered by
+        /// <c>BattleFeedbackController.OnEnable</c>. Null = effects resolve instantly
+        /// with no animation (headless / tests / unwired scene).
+        /// </summary>
+        public ICardPlayFeedback CardPlayFeedback { get; set; }
 
         private void InitializeStateMachine()
         {
             _stateMachine = new StateMachine<BattleState>();
+            _stateMachine.StateEntered += (previous, current) =>
+                EventBus.Publish(
+                    new BattleStateChangedEvent { Previous = previous, Current = current }
+                );
 
-            _stateMachine.RegisterState(BattleState.Initialize,   new InitializeState(this));
-            _stateMachine.RegisterState(BattleState.TurnStart,     new TurnStartState(this));
-            _stateMachine.RegisterState(BattleState.PlayerTurn,    new PlayerTurnState(this));
-            _stateMachine.RegisterState(BattleState.OpponentTurn,  new OpponentTurnState(this));
-            _stateMachine.RegisterState(BattleState.TurnEnd,       new TurnEndState(this));
-            _stateMachine.RegisterState(BattleState.BattleEnd,     new BattleEndState(this));
+            _stateMachine.RegisterState(BattleState.Initialize, new InitializeState(this));
+            _stateMachine.RegisterState(BattleState.TurnStart, new TurnStartState(this));
+            _stateMachine.RegisterState(BattleState.PlayerTurn, new PlayerTurnState(this));
+            _stateMachine.RegisterState(BattleState.OpponentTurn, new OpponentTurnState(this));
+            _stateMachine.RegisterState(BattleState.TurnEnd, new TurnEndState(this));
+            _stateMachine.RegisterState(BattleState.BattleEnd, new BattleEndState(this));
         }
 
         #endregion
@@ -140,15 +211,11 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void StartBattle(BattleSetup setup)
         {
-            GameLogger.LogInfo<BattleManager>($"Starting battle: {setup.playerOrigin} vs {setup.enemies.Count} enemies");
+            GameLogger.LogInfo<BattleManager>(
+                $"Starting battle: {setup.playerOrigin} vs {setup.enemies.Count} enemies"
+            );
 
-            // Player stats from origin — use carried HP if provided, otherwise start at full
-            OriginBattleStats playerOriginStats = setup.GetPlayerStats();
-            int startingResolve = setup.initialPlayerResolve ?? playerOriginStats.maxResolve;
-            _playerStats = startingResolve == playerOriginStats.maxResolve
-                ? new BattleStats(playerOriginStats.maxResolve, playerOriginStats.maxActionPoints)
-                : new BattleStats(playerOriginStats.maxResolve, startingResolve,
-                                  playerOriginStats.maxActionPoints);
+            _playerStats = new BattleStats(setup.GetPlayerMaxActionPoints(), isPlayer: true);
             _playerOrigin = setup.playerOrigin;
 
             // Build enemy controllers — each owns its own BattleStats + StatusEffectManager
@@ -156,13 +223,18 @@ namespace Crookedile.Gameplay.Battle
             foreach (var enemyData in setup.enemies)
             {
                 if (enemyData != null)
-                    _enemies.Add(new EnemyController(enemyData));
+                    _enemies.Add(new EnemyController(enemyData, () => CurrentTurn));
             }
+            // Register each enemy's roster index so its BattleStats can stamp hostility events.
+            for (int i = 0; i < _enemies.Count; i++)
+                _enemies[i].Stats.SetOwnerEnemyIndex(i);
             _focusedEnemyIndex = 0;
 
             if (_enemies.Count == 0)
             {
-                GameLogger.LogError<BattleManager>("StartBattle: setup contains no valid enemies — battle cannot proceed.");
+                GameLogger.LogError<BattleManager>(
+                    "StartBattle: setup contains no valid enemies — battle cannot proceed."
+                );
                 return;
             }
 
@@ -170,25 +242,73 @@ namespace Crookedile.Gameplay.Battle
             _playerDeck = new DeckManager(setup.playerDeck, "Player", 10);
 
             // Effect resolver — initially targets the first enemy; receives full enemy list for multi-target effects
-            _effectResolver = new EffectResolver(_playerStats, FocusedEnemy.Stats, _playerDeck, _enemies);
+            _effectResolver = new EffectResolver(
+                _playerStats,
+                FocusedEnemy.Stats,
+                _playerDeck,
+                _enemies,
+                this
+            );
+
+            // Card-play pipeline — owns cost payment, VFX handshake, Confused/Momentum/Echo.
+            _cards = new CardPlayController(this);
 
             // Passive resolver — find the asset matching this run's origin (null-safe: no passive if asset missing)
-            var passive = _originPassives != null
-                ? System.Array.Find(_originPassives, p => p != null && p.Origin == _playerOrigin)
-                : null;
-            _passiveResolver = new PassiveResolver(passive, _playerStats, _effectResolver, _enemies, _effectResolver.PlayerStatusEffects);
+            var passive =
+                _originPassives != null
+                    ? System.Array.Find(
+                        _originPassives,
+                        p => p != null && p.Origin == _playerOrigin
+                    )
+                    : null;
+            _passiveResolver = new PassiveResolver(
+                passive,
+                _playerStats,
+                _effectResolver,
+                _enemies,
+                _effectResolver.PlayerStatusEffects,
+                () => OpinionPercentage,
+                this
+            );
             // Event subscriptions are managed internally by PassiveResolver via EventBus
 
             // Reset counters
             _currentTurn = 0;
             _playerTurnNumber = 0;
+            _playerTurnsElapsed = 0;
             // Start as false so the first NextTurn() call (in TurnStartState) flips it to
             // true, making turn 1 the player's turn. Starting as true would give the opponent
             // the first move.
             _isPlayerTurn = false;
 
+            // Crowd dynamics — created before the ledger because the ledger asks it whether the
+            // room is an echo chamber. (Dispose any prior instance if a battle is restarted.)
+            _crowd?.Dispose();
+            _crowd = new CrowdReactions(
+                _enemies,
+                _echoChamberDecayPerTurn,
+                _turncoatStacks,
+                _turncoatOpinionHit,
+                _turncoatAdjacentNudge
+            );
+
+            // Opinion Meter + session shields
+            int maxOpinion = setup.maxOpinion ?? 100;
+            _maxTurns = setup.maxTurns ?? 0;
+            _opinion = new OpinionLedger(
+                maxOpinion,
+                setup.startingOpinion ?? maxOpinion / 2,
+                onOpinionMaxed: () => CheckAndEndBattleIfOver(),
+                isEchoChamber: _crowd.IsEchoChamber,
+                onOpinionZeroed: () => CheckAndEndBattleIfOver()
+            );
+            _crowd.AttachLedger(_opinion);
+
+            // Faith Leader conversion engine — needs the ledger for the convert burst.
+            _pacify = new PacifyConversionEngine(_opinion, _playerStats);
+
             EventBus.Publish(new BattleStartedEvent { Setup = setup });
-            _stateMachine.ChangeState(BattleState.Initialize);
+            TransitionToState(BattleState.Initialize);
         }
 
         /// <summary>
@@ -200,37 +320,58 @@ namespace Crookedile.Gameplay.Battle
         {
             if (index < 0 || index >= _enemies.Count)
             {
-                GameLogger.LogWarning<BattleManager>($"SetFocusedEnemy: index {index} out of range (count: {_enemies.Count})");
+                GameLogger.LogWarning<BattleManager>(
+                    $"SetFocusedEnemy: index {index} out of range (count: {_enemies.Count})"
+                );
                 return;
             }
-            GameLogger.LogInfo<BattleManager>($"SetFocusedEnemy: [{index}] of {_enemies.Count}, defeated={_enemies[index].IsDefeated}");
-            if (_enemies[index].IsDefeated) return;
+            GameLogger.LogInfo<BattleManager>(
+                $"SetFocusedEnemy: [{index}] of {_enemies.Count}, defeated={_enemies[index].IsDefeated}"
+            );
+            if (_enemies[index].IsDefeated)
+                return;
             _focusedEnemyIndex = index;
             _effectResolver.SetFocusedOpponent(
-                FocusedEnemy.Stats, FocusedEnemy.StatusEffects,
-                index, FocusedEnemy.EnemyData.EnemyName);
-            GameLogger.LogInfo<BattleManager>($"Focused enemy: [{index}] {FocusedEnemy.EnemyData.EnemyName}");
+                FocusedEnemy.Stats,
+                FocusedEnemy.StatusEffects,
+                index,
+                FocusedEnemy.EnemyData.EnemyName
+            );
+            GameLogger.LogInfo<BattleManager>(
+                $"Focused enemy: [{index}] {FocusedEnemy.EnemyData.EnemyName}"
+            );
         }
 
-        /// <summary>Transitions to the next state in the battle flow.</summary>
+        /// <summary>Transitions to the next state in the battle flow and notifies all listeners.</summary>
         public void TransitionToState(BattleState newState)
         {
+            // The BattleStateChangedEvent is published by the state machine's StateEntered hook
+            // (wired in setup) the moment the state becomes current — see ChangeState. Publishing
+            // here instead would fire AFTER any nested transition inside the new state's OnEnter,
+            // delivering a transient state (e.g. TurnStart) last and clobbering PlayerTurn.
             _stateMachine.ChangeState(newState);
         }
 
         /// <summary>
-        /// Adds up to <paramref name="count"/> copies of <paramref name="data"/> to the enemy list
-        /// (capped so total enemies never exceed 5). Called by OpponentTurnState when a SummonMinion
-        /// move resolves. Each new enemy immediately declares intent for the next turn.
+        /// Adds up to <paramref name="count"/> copies of <paramref name="data"/> to the enemy row
+        /// (capped so total enemies never exceed 5). Used both by enemy SummonMinion moves and by the
+        /// player's summon cards (Nepo Baby). Each new body immediately declares intent for next turn.
         /// </summary>
-        public void SummonMinions(EnemyData data, int count)
+        /// <param name="initialHostility">
+        /// Overrides the body's starting hostility when set — e.g. a Nepo Baby "Call a Favor" ally
+        /// spawns receptive (negative), a "Plant" spawns hostile (positive). Null uses the EnemyData default.
+        /// </param>
+        public void SummonMinions(EnemyData data, int count, int? initialHostility = null)
         {
-            if (data == null || count <= 0) return;
+            if (data == null || count <= 0)
+                return;
 
             int available = Mathf.Max(0, 5 - _enemies.Count);
             if (available == 0)
             {
-                GameLogger.LogWarning<BattleManager>("SummonMinion: enemy cap (5) already reached.");
+                GameLogger.LogWarning<BattleManager>(
+                    "SummonMinion: enemy cap (5) already reached."
+                );
                 return;
             }
 
@@ -238,16 +379,25 @@ namespace Crookedile.Gameplay.Battle
 
             for (int i = 0; i < count; i++)
             {
-                var controller = new EnemyController(data);
-                int newIndex   = _enemies.Count;
+                var controller = new EnemyController(data, () => CurrentTurn);
+                int newIndex = _enemies.Count;
                 _enemies.Add(controller);
+                controller.Stats.SetOwnerEnemyIndex(newIndex);
 
-                EventBus.Publish(new EnemySummonedEvent { EnemyData = data, EnemyIndex = newIndex });
+                // Player summons override the body's mood (receptive ally / hostile Plant).
+                if (initialHostility.HasValue)
+                    controller.Stats.SetHostility(initialHostility.Value);
+
+                EventBus.Publish(
+                    new EnemySummonedEvent { EnemyData = data, EnemyIndex = newIndex }
+                );
 
                 // Pre-declare intent so the player sees the threat on the next player turn
                 var intent = controller.SelectNextMove(_enemies);
                 if (intent != null)
-                    EventBus.Publish(new EnemyIntentDeclaredEvent { Move = intent, EnemyIndex = newIndex });
+                    EventBus.Publish(
+                        new EnemyIntentDeclaredEvent { Move = intent, EnemyIndex = newIndex }
+                    );
 
                 GameLogger.LogInfo<BattleManager>($"Summoned enemy [{newIndex}]: {data.EnemyName}");
             }
@@ -255,280 +405,157 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
-        #region Event Handlers
+        #region Player Input (direct calls from BattleUI)
 
-        private void OnEndTurnRequested(EndTurnRequestedEvent evt)
+        /// <summary>
+        /// Ends the player's turn. Called directly by the UI's End Turn button.
+        /// Ignored while a card play is still resolving or outside the player turn.
+        /// </summary>
+        public void RequestEndTurn()
         {
-            if (_vfxInFlight) return;
+            if (_cards == null || _cards.IsResolving)
+                return;
             if (!_isPlayerTurn || CurrentState != BattleState.PlayerTurn)
             {
                 GameLogger.LogWarning<BattleManager>("Cannot end player turn — not player's turn!");
                 return;
             }
-            _stateMachine.ChangeState(BattleState.TurnEnd);
+            TransitionToState(BattleState.TurnEnd);
         }
 
-        private void OnPlayCardRequested(PlayCardRequestedEvent evt)
+        /// <summary>
+        /// Plays a card from the player's hand. Called directly by the UI when a card is
+        /// played. Validates turn state and rejects input while a previous play resolves.
+        /// </summary>
+        public void RequestPlayCard(CardData card, int handIndex)
         {
-            GameLogger.LogInfo<BattleManager>($"PlayCardRequested received: '{evt.Card?.CardName}'  _vfxInFlight={_vfxInFlight}  IsPlayerTurn={_isPlayerTurn}  State={CurrentState}");
-            if (_vfxInFlight)
+            GameLogger.LogInfo<BattleManager>(
+                $"RequestPlayCard: '{card?.CardName}'  resolving={_cards?.IsResolving}  IsPlayerTurn={_isPlayerTurn}  State={CurrentState}"
+            );
+            if (_cards == null || _cards.IsResolving)
             {
-                GameLogger.LogWarning<BattleManager>($"Card play blocked: VFX animation still in flight");
+                GameLogger.LogWarning<BattleManager>(
+                    $"Card play blocked: no active battle or VFX still in flight"
+                );
                 return;
             }
             if (!_isPlayerTurn || CurrentState != BattleState.PlayerTurn)
             {
-                GameLogger.LogWarning<BattleManager>($"Card play blocked: IsPlayerTurn={_isPlayerTurn}  State={CurrentState}");
+                GameLogger.LogWarning<BattleManager>(
+                    $"Card play blocked: IsPlayerTurn={_isPlayerTurn}  State={CurrentState}"
+                );
                 return;
             }
-            PlayCard(evt.Card, evt.HandIndex, CardButton.LastPlayedRect);
+            _cards.PlayCard(card, handIndex);
         }
 
         #endregion
 
-        #region Card Playing
+        #region Opinion Meter / Session Shields (delegates to OpinionLedger)
 
-        /// <summary>Plays a card from the player's hand.</summary>
-        /// <param name="sourceRect">The card button's RectTransform — used as the VFX spawn origin.</param>
-        private void PlayCard(CardData card, int handIndex, RectTransform sourceRect)
-        {
-            BattleStats stats = _playerStats;
+        /// <summary>Raises the Opinion Meter directly (bypassing Denial). Used by heal/rally effects.</summary>
+        public void RaiseOpinion(int amount) => _opinion?.RaiseDirect(amount);
 
-            if (!CanPlayCard(card, stats))
-            {
-                GameLogger.LogWarning<BattleManager>($"Cannot play card: {card.CardName}");
-                return;
-            }
+        /// <summary>Grants session Support (absorbs future opinion drops).</summary>
+        public void GainSupport(int amount) => _opinion?.GainSupport(amount);
 
-            PayCardCosts(card, stats);
+        /// <summary>Grants session Denial (absorbs future opinion rises).</summary>
+        public void GainDenial(int amount) => _opinion?.GainDenial(amount);
 
-            // Capture Confused overrides before the card leaves the hand (indices are stable here)
-            _confusedOverrides.TryGetValue(handIndex, out int[] amountOverrides);
+        /// <summary>Drains session Support (used by "lose Support" effects). Returns amount removed.</summary>
+        public int SpendSupport(int amount) => _opinion?.SpendSupport(amount) ?? 0;
 
-            if (!_playerDeck.PlayCardAtIndex(handIndex))
-            {
-                GameLogger.LogError<BattleManager>("Failed to play card from hand");
-                return;
-            }
+        #endregion
 
-            // Shift Confused override indices — the played card is gone, so subsequent indices move down
-            ShiftConfusedOverridesAfterPlay(handIndex);
+        #region Archetype Resources (banked pools — Patronage, Attention)
 
-            EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
-            // PassiveResolver listens to CardPlayedEvent via EventBus — no direct call needed
+        // Banked battle pools — persist across turns, reset at battle start (InitializeState).
+        // Patronage (Nepo Baby): spent on summons/installations, generated only by sacrificing
+        // cards (GeneratePatronageEffect). Attention (Celebrity): courted/provoked, then spent
+        // as a big opinion-meter hit. Shared mechanics live in BankedResource.
+        private readonly BankedResource _patronage = new BankedResource(
+            (oldValue, newValue) =>
+                EventBus.Publish(
+                    new PatronageChangedEvent { OldValue = oldValue, NewValue = newValue }
+                )
+        );
 
-            // Target VFX at the enemy slot rather than the card — the card will be discarded
-            // shortly after play, and parenting VFX to it would kill the animation early.
-            var vfxTarget = EnemySlotUI.LastTargetedRect ?? sourceRect;
-            GameLogger.LogInfo<BattleManager>($"Player played: {card.CardName}  vfxTarget={(vfxTarget != null ? vfxTarget.name : "none")}");
+        private readonly BankedResource _attention = new BankedResource(
+            (oldValue, newValue) =>
+                EventBus.Publish(
+                    new AttentionChangedEvent { OldValue = oldValue, NewValue = newValue }
+                )
+        );
 
-            if (card.CardVFX != null)
-            {
-                // VFX path: spawn the animation and defer effect resolution to the hit-frame event.
-                _vfxInFlight = true;
-                var vfx = VFXManager.Instance?.PlayAndSetInstance(card.CardVFX,
-                    vfxTarget,
-                    new BattleVFXContext
-                    {
-                        OnApplyEffects = () =>
-                        {
-                            GameLogger.LogInfo<BattleManager>($"VFX ApplyEffects fired for '{card.CardName}'");
-                            ApplyCardEffects(card, amountOverrides);
-                        },
-                        OnComplete = () =>
-                        {
-                            GameLogger.LogInfo<BattleManager>($"VFX complete for '{card.CardName}' — unblocking input, signalling discard");
-                            _vfxInFlight = false;
-                            EventBus.Publish(new CardVFXCompleteEvent { Card = card });
-                        }
-                    });
+        /// <summary>Current banked Patronage (Nepo Baby's spend currency).</summary>
+        public int CurrentPatronage => _patronage.Current;
 
-                if (vfx == null)
-                {
-                    GameLogger.LogWarning<BattleManager>($"VFX failed to spawn for '{card.CardName}' — resolving immediately");
-                    _vfxInFlight = false;
-                    ApplyCardEffects(card, amountOverrides);
-                    EventBus.Publish(new CardVFXCompleteEvent { Card = card });
-                }
-            }
-            else
-            {
-                // No VFX — resolve effects immediately then signal discard is ready.
-                ApplyCardEffects(card, amountOverrides);
-                EventBus.Publish(new CardVFXCompleteEvent { Card = card });
-            }
-        }
+        /// <summary>Banks Patronage (e.g. from a sacrifice). No-op for non-positive amounts.</summary>
+        public void GainPatronage(int amount) => _patronage.Gain(amount);
+
+        /// <summary>Spends Patronage if affordable. Returns false (and spends nothing) if short.</summary>
+        public bool SpendPatronage(int amount) => _patronage.Spend(amount);
+
+        /// <summary>Current banked Attention (Celebrity's build-and-spend spotlight resource).</summary>
+        public int CurrentAttention => _attention.Current;
+
+        /// <summary>Banks Attention. No-op for non-positive amounts.</summary>
+        public void GainAttention(int amount) => _attention.Gain(amount);
+
+        /// <summary>Spends Attention if affordable. Returns false (and spends nothing) if short.</summary>
+        public bool SpendAttention(int amount) => _attention.Spend(amount);
+
+        #endregion
+
+        #region Faith Leader — Pacify Conversion (delegates to PacifyConversionEngine)
+
+        /// <summary>Faith Leader pacify conversions made this player turn (Sermon harvest scaling).</summary>
+        public int ConversionsThisTurn => _pacify?.ConversionsThisTurn ?? 0;
+
+        /// <summary>The pacify statuses that count toward (and are consumed by) a conversion.</summary>
+        public static bool IsPacifyStatus(StatusBehavior behavior) =>
+            PacifyConversionEngine.IsPacifyStatus(behavior);
 
         /// <summary>
-        /// Resolves all gameplay effects for a played card — damage, policy shifts, Momentum, Echo.
-        /// Called either immediately (no VFX) or from the VFX animation's ApplyEffects event (with VFX).
+        /// Faith Leader conversion check — see <see cref="PacifyConversionEngine.TryConvert"/>.
+        /// Kept as a facade because effects reach it via <c>ctx.BattleManager</c>.
         /// </summary>
-        private void ApplyCardEffects(CardData card, int[] amountOverrides)
-        {
-            var ctx = ResolveCardEffectsDispatch(card, amountOverrides);
+        public void TryPacifyConvert(BattleStats enemyStats, StatusEffectManager mgr) =>
+            _pacify?.TryConvert(enemyStats, mgr);
 
-            // If any effect flagged exhaust, move the card from discard → exhaust pile now
-            // (PlayCardAtIndex already moved it hand → discard before effects resolved).
-            if (ctx.ShouldExhaust)
-                _playerDeck.ExhaustFromDiscard(card);
+        #endregion
 
-            ApplyPolicyHostilityShifts(card);
-            CheckAndAdvanceFocusAfterCardPlay();
-            TriggerMomentum();
-
-            // Immediately end the battle if all enemies are dead (or player died e.g. from Thorns).
-            if (CheckAndEndBattleIfOver()) return;
-
-            // Echo — replay the card a second time; consume the stack BEFORE the replay to
-            // prevent a second Echo stack (if any) from triggering an infinite chain.
-            int echoStacks = _effectResolver.PlayerStatusEffects.GetStacks(StatusEffectType.Echo);
-            if (echoStacks > 0)
-            {
-                _effectResolver.PlayerStatusEffects.RemoveStacks(StatusEffectType.Echo, 1);
-                // Notify the UI and any passive listening for status changes that
-                // one Echo stack was consumed (negative Stacks = removed).
-                EventBus.Publish(new StatusEffectAppliedEvent
-                {
-                    StatusType = StatusEffectType.Echo,
-                    Stacks     = -1,
-                    IsToPlayer = true,
-                });
-                GameLogger.LogInfo<BattleManager>($"Echo triggered — replaying {card.CardName}");
-                ResolveCardEffectsDispatch(card, null);
-                CheckAndAdvanceFocusAfterCardPlay();
-                CheckAndEndBattleIfOver();
-            }
-        }
-
-        /// <summary>
-        /// Routes card effect resolution to the new polymorphic path when the card has
-        /// <see cref="CardData.NewEffects"/>, otherwise falls back to the legacy path.
-        /// Returns a unified <see cref="EffectContext"/> so callers stay path-agnostic.
-        /// </summary>
-        private EffectContext ResolveCardEffectsDispatch(CardData card, int[] amountOverrides)
-        {
-            if (card.NewEffects != null && card.NewEffects.Count > 0)
-            {
-                var execCtx = _effectResolver.ResolveCardEffectsNew(card, isPlayerCard: true, amountOverrides);
-                return new EffectContext
-                {
-                    Caster              = execCtx.Caster,
-                    Target              = execCtx.Target,
-                    LastDamageDealt     = execCtx.LastDamageDealt,
-                    LastHealAmount      = execCtx.LastHealAmount,
-                    LastComposureGained = execCtx.LastComposureGained,
-                    LastTargetDied      = execCtx.LastTargetDied,
-                    ShouldExhaust       = execCtx.ShouldExhaust,
-                };
-            }
-            return _effectResolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides: amountOverrides);
-        }
-
-        private bool CanPlayCard(CardData card, BattleStats stats)
-        {
-            // Curses and flagged Status cards are never playable
-            if (card.IsUnplayable) return false;
-
-            foreach (var cost in card.Costs)
-            {
-                if (cost.CostType == CostType.ActionPoints)
-                    if (stats.CurrentActionPoints < GetEffectiveCardCost(card))
-                        return false;
-            }
-            return true;
-        }
-
-        private void PayCardCosts(CardData card, BattleStats stats)
-        {
-            foreach (var cost in card.Costs)
-            {
-                if (cost.CostType == CostType.ActionPoints)
-                {
-                    int effective = GetEffectiveCardCost(card);
-                    stats.SpendActionPoints(effective);
-                    GameLogger.LogInfo<BattleManager>($"Paid {effective} AP for {card.CardName}");
-                }
-            }
-        }
-
-        /// <summary>
-        /// If the played card is a Policy card, shifts EVERY living enemy's hostility
-        /// based on how their DemographicValues aligns with the card's PolicyLean.
-        ///
-        /// Alignment table (PolicyLean × DemographicValues):
-        ///   Left   + Progressive  → −1  (agreement — they like it)
-        ///   Left   + Moderate     →  0
-        ///   Left   + Traditional  → +1  (disagreement — they dislike it)
-        ///   Center + Progressive  →  0
-        ///   Center + Moderate     → −1  (agreement)
-        ///   Center + Traditional  →  0
-        ///   Right  + Progressive  → +1  (disagreement)
-        ///   Right  + Moderate     →  0
-        ///   Right  + Traditional  → −1  (agreement)
-        /// </summary>
-        private void ApplyPolicyHostilityShifts(CardData card)
-        {
-            if (card.CardType != CardType.Policy) return;
-
-            for (int i = 0; i < _enemies.Count; i++)
-            {
-                var enemy = _enemies[i];
-                if (enemy.IsDefeated) continue;
-
-                int shift = GetPolicyHostilityShift(card.PolicyLean, enemy.EnemyData.DemographicValues);
-                if (shift == 0) continue;
-
-                int old = enemy.Stats.CurrentHostility;
-                if (shift > 0) enemy.Stats.GainHostility(shift);
-                else           enemy.Stats.ReduceHostility(-shift);
-
-                if (enemy.Stats.CurrentHostility != old)
-                    EventBus.Publish(new EnemyHostilityChangedEvent
-                    {
-                        OldValue   = old,
-                        NewValue   = enemy.Stats.CurrentHostility,
-                        EnemyIndex = i
-                    });
-            }
-        }
-
-        private static int GetPolicyHostilityShift(PolicyLean lean, DemographicValues values)
-        {
-            return (lean, values) switch
-            {
-                (PolicyLean.Left,   DemographicValues.Progressive)  => -1,
-                (PolicyLean.Left,   DemographicValues.Traditional)  => +1,
-                (PolicyLean.Right,  DemographicValues.Traditional)  => -1,
-                (PolicyLean.Right,  DemographicValues.Progressive)  => +1,
-                (PolicyLean.Center, DemographicValues.Moderate)     => -1,
-                _                                                    =>  0
-            };
-        }
+        #region Card Playing (pipeline owned by CardPlayController)
 
         /// <summary>
         /// Called after each card resolves. If the focused enemy just died, publishes
         /// EnemyDefeatedEvent and auto-advances focus to the next living enemy.
         /// </summary>
-        private void CheckAndAdvanceFocusAfterCardPlay()
+        internal void CheckAndAdvanceFocusAfterCardPlay()
         {
-            if (FocusedEnemy == null || !FocusedEnemy.IsDefeated) return;
+            if (FocusedEnemy == null || !FocusedEnemy.IsDefeated)
+                return;
 
             // Snapshot before publishing — a passive triggered by the defeat event
             // could change _focusedEnemyIndex, so we capture the reference first.
             var defeatedEnemy = FocusedEnemy;
 
-            EventBus.Publish(new EnemyDefeatedEvent
-            {
-                EnemyIndex = _focusedEnemyIndex,
-                EnemyName  = defeatedEnemy.EnemyData.EnemyName
-            });
+            EventBus.Publish(
+                new EnemyDefeatedEvent
+                {
+                    EnemyIndex = _focusedEnemyIndex,
+                    EnemyName = defeatedEnemy.EnemyData.EnemyName,
+                }
+            );
 
             // Purge status effects now that all defeat-event passives have had a
             // chance to read them. Prevents stale buffs/debuffs living in memory
             // on a dead enemy and affecting any future queries.
             defeatedEnemy.StatusEffects.ClearAll();
 
-            GameLogger.LogInfo<BattleManager>($"Enemy [{_focusedEnemyIndex}] {defeatedEnemy.EnemyData.EnemyName} defeated — seeking next target");
+            GameLogger.LogInfo<BattleManager>(
+                $"Enemy [{_focusedEnemyIndex}] {defeatedEnemy.EnemyData.EnemyName} defeated — seeking next target"
+            );
 
             for (int i = 0; i < _enemies.Count; i++)
             {
@@ -542,96 +569,11 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Single source of truth for the effective AP cost of a card this battle.
-        /// Applies (in order): status effect modifiers (Focus, Energized, Entangled),
-        /// then per-card battle overrides (ReduceCardCost / MakeCardFree effects).
-        /// Result is floored at 0.
+        /// Effective AP cost of a card this battle — facade over
+        /// <see cref="CardPlayController.GetEffectiveCardCost"/> for the UI layer
+        /// (CardButton / HandPanel read it through the manager).
         /// </summary>
-        public int GetEffectiveCardCost(CardData card)
-        {
-            if (card?.Costs == null || card.Costs.Count == 0) return 0;
-            var cost = card.Costs[0];
-            if (cost.CostType != CostType.ActionPoints) return 0;
-
-            StatusEffectManager statusMgr = _effectResolver?.PlayerStatusEffects;
-            int baseCost = statusMgr != null
-                ? statusMgr.ModifyCardCost(cost.CurrentAmount)
-                : cost.CurrentAmount;
-
-            // Per-card battle override (ReduceCardCost / MakeCardFree)
-            int reduction = _playerDeck?.GetCardCostReduction(card) ?? 0;
-            if (reduction == int.MaxValue) return 0;   // MakeCardFree sentinel
-            return Mathf.Max(0, baseCost - reduction);
-        }
-
-        /// <summary>
-        /// Randomizes the displayed/resolved amounts for each card currently in the player's hand.
-        /// Called at turn start while the player has the Confused status. Values are [0, 3] inclusive.
-        /// </summary>
-        private void ApplyConfusedOverrides()
-        {
-            _confusedOverrides.Clear();
-            var hand = _playerDeck.Hand;
-            for (int i = 0; i < hand.Count; i++)
-            {
-                var effects = hand[i].Effects;
-                if (effects == null || effects.Count == 0) continue;
-                var overrides = new int[effects.Count];
-                for (int j = 0; j < effects.Count; j++)
-                    overrides[j] = UnityEngine.Random.Range(0, 4);  // [0, 3] inclusive
-                _confusedOverrides[i] = overrides;
-            }
-            GameLogger.LogInfo<BattleManager>($"Confused: randomized amounts for {_confusedOverrides.Count} cards in hand");
-        }
-
-        /// <summary>
-        /// If the player has Momentum stacks, deals stacks damage to a random living enemy.
-        /// Called once per card play (before Echo replay).
-        /// </summary>
-        private void TriggerMomentum()
-        {
-            int stacks = _effectResolver?.PlayerStatusEffects?.GetStacks(StatusEffectType.Momentum) ?? 0;
-            if (stacks <= 0) return;
-
-            var living = new List<EnemyController>();
-            foreach (var e in _enemies)
-                if (!e.IsDefeated) living.Add(e);
-            if (living.Count == 0) return;
-
-            var target         = living[UnityEngine.Random.Range(0, living.Count)];
-            int momentumActual = target.Stats.DamageResolve(stacks);
-            GameLogger.LogInfo<BattleManager>($"Momentum dealt {momentumActual} damage to {target.EnemyData.EnemyName}");
-            if (momentumActual > 0)
-            {
-                EventBus.Publish(new DamageDealtEvent
-                {
-                    Amount           = momentumActual,
-                    IsToPlayer       = false,
-                    AttackerName     = "Player",
-                    SourceEnemyIndex = -1,
-                    TargetEnemyIndex = _enemies.IndexOf(target),
-                });
-            }
-        }
-
-        /// <summary>
-        /// After a card is removed from the hand, all hand indices above the played index shift
-        /// down by 1. This keeps _confusedOverrides aligned with the updated hand layout.
-        /// </summary>
-        private void ShiftConfusedOverridesAfterPlay(int playedIndex)
-        {
-            if (_confusedOverrides.Count == 0) return;
-            var shifted = new Dictionary<int, int[]>(_confusedOverrides.Count);
-            foreach (var kvp in _confusedOverrides)
-            {
-                if (kvp.Key == playedIndex) continue;   // this entry is now gone
-                int newKey = kvp.Key > playedIndex ? kvp.Key - 1 : kvp.Key;
-                shifted[newKey] = kvp.Value;
-            }
-            _confusedOverrides.Clear();
-            foreach (var kvp in shifted)
-                _confusedOverrides[kvp.Key] = kvp.Value;
-        }
+        public int GetEffectiveCardCost(CardData card) => _cards?.GetEffectiveCardCost(card) ?? 0;
 
         #endregion
 
@@ -640,24 +582,28 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Checks if the battle has ended and caches the result.</summary>
         public bool CheckVictoryConditions()
         {
-            bool playerDefeated    = _playerStats.IsDefeated;
-            bool allEnemiesDefeated = _enemies.Count > 0 && _enemies.TrueForAll(e => e.IsDefeated);
+            bool opinionCollapsed = _opinion.CurrentOpinion <= 0;
+            bool opinionMaxed = _opinion.CurrentOpinion >= _opinion.MaxOpinion;
 
-            if (playerDefeated || allEnemiesDefeated)
+            if (!opinionCollapsed && !opinionMaxed)
+                return false;
+
+            _battleResult = new BattleResult
             {
-                _battleResult = new BattleResult
-                {
-                    isVictory             = allEnemiesDefeated,
-                    turnsToWin            = _currentTurn,
-                    finalPlayerResolve    = _playerStats.CurrentResolve,
-                    finalPlayerComposure  = _playerStats.CurrentComposure,
-                    finalPlayerHostility  = _playerStats.CurrentHostility
-                };
+                isVictory = opinionMaxed,
+                turnsToWin = _currentTurn,
+                finalPlayerSupport = _opinion.CurrentSupport,
+                finalPlayerHostility = _playerStats.CurrentHostility,
+                finalOpinion = _opinion.CurrentOpinion,
+                wasJudgmentVictory = false,
+            };
 
-                GameLogger.LogInfo("BattleManager", $"Battle ended: {(_battleResult.isVictory ? "Victory" : "Defeat")} in {_currentTurn} turns");
-                return true;
-            }
-            return false;
+            GameLogger.LogInfo(
+                "BattleManager",
+                $"Battle ended: {(_battleResult.isVictory ? "Victory" : "Defeat")} "
+                    + $"(opinion={_opinion.CurrentOpinion}) in {_currentTurn} turns"
+            );
+            return true;
         }
 
         /// <summary>
@@ -665,9 +611,10 @@ namespace Crookedile.Gameplay.Battle
         /// immediately transitions to BattleEnd — bypassing TurnEnd cleanup.
         /// Returns true if the battle ended so callers can exit early.
         /// </summary>
-        private bool CheckAndEndBattleIfOver()
+        internal bool CheckAndEndBattleIfOver()
         {
-            if (!CheckVictoryConditions()) return false;
+            if (!CheckVictoryConditions())
+                return false;
             TransitionToState(BattleState.BattleEnd);
             return true;
         }
@@ -684,46 +631,64 @@ namespace Crookedile.Gameplay.Battle
         {
             _currentTurn++;
             _isPlayerTurn = !_isPlayerTurn;
-            GameLogger.LogInfo<BattleManager>($"Turn {_currentTurn} — {(_isPlayerTurn ? "Player" : "Enemy")}");
+            GameLogger.LogInfo<BattleManager>(
+                $"Turn {_currentTurn} — {(_isPlayerTurn ? "Player" : "Enemy")}"
+            );
         }
 
         /// <summary>Runs start-of-turn effects for the current combatant(s).</summary>
         public void StartTurn()
         {
+            // Session shields decay at the start of every turn, then Ritual refills them.
+            _opinion.DecayShields();
+
             if (_isPlayerTurn)
             {
-                // Composure decays at the start of each turn before anything else fires.
-                // Ritual (OnTurnStart: gain Composure) then grants fresh Composure on top of the cleared slate.
-                // A future relic could check a flag here and skip ConsumeAllComposure().
-                _playerStats.ConsumeAllComposure();
+                // Fresh tally each player turn for Sermon-style harvest scaling.
+                _pacify?.ResetTurnTally();
+
                 _playerStats.StartTurn();
                 _effectResolver.PlayerStatusEffects.OnTurnStart(_playerStats);
 
-                // Remove player-turn-start duration effects from all living enemies (e.g. Stunned).
-                // This must run after enemy actions have resolved, ensuring a stunned enemy
-                // skips its turn and is only un-stunned once the player regains control.
-                foreach (var enemy in _enemies)
+                // Ritual grants Support each turn.
+                int ritual = _effectResolver.PlayerStatusEffects.GetStacks<RitualStatus>();
+                if (ritual > 0)
+                    GainSupport(ritual);
+
+                // Receptive crowd grants Support — the mirror to hostile enemies granting bonus
+                // draws. A friendly room cushions your standing (but a fully-receptive room still
+                // bleeds via the echo chamber, since decay bypasses Support).
+                if (_supportPerReceptiveEnemy > 0)
                 {
-                    if (!enemy.IsDefeated)
-                        enemy.StatusEffects.OnPlayerTurnStart();
+                    int receptive = LivingEnemies.Count(e => e.Stats.IsReceptive);
+                    if (receptive > 0)
+                        GainSupport(receptive * _supportPerReceptiveEnemy);
                 }
 
-                // Confused: randomize card effect amounts for this turn
-                if (_effectResolver.PlayerStatusEffects.HasEffect(StatusEffectType.Confused))
-                    ApplyConfusedOverrides();
-                else
-                    _confusedOverrides.Clear();
+                // Remove player-turn-start duration effects from all living enemies (e.g. Stunned).
+                foreach (var enemy in LivingEnemies)
+                    enemy.StatusEffects.OnPlayerTurnStart();
+
+                // Confused: randomize card effect amounts for this turn (owned by CardPlayController)
+                _cards.OnPlayerTurnStart();
             }
             else
             {
-                foreach (var enemy in _enemies)
+                foreach (var enemy in LivingEnemies)
                 {
-                    if (enemy.IsDefeated) continue;
-                    enemy.Stats.ConsumeAllComposure();
                     enemy.Stats.StartTurn();
                     enemy.StatusEffects.OnTurnStart(enemy.Stats);
+
+                    // Enemy Ritual grants Denial.
+                    int ritual = enemy.StatusEffects.GetStacks<RitualStatus>();
+                    if (ritual > 0)
+                        GainDenial(ritual);
                 }
             }
+
+            // Surface the echo-chamber state at the top of each turn (enemy moves may have
+            // changed the room; halving/decay always use the live IsEchoChamber() check).
+            _crowd.RefreshEchoChamberState();
         }
 
         /// <summary>Runs end-of-turn effects for the current combatant(s).</summary>
@@ -732,18 +697,48 @@ namespace Crookedile.Gameplay.Battle
             if (_isPlayerTurn)
             {
                 _playerStats.EndTurn();
+                // Apply opinion-affecting statuses (read at current stacks) before OnTurnEnd decrements.
+                ApplyTurnEndOpinionStatuses(_effectResolver.PlayerStatusEffects);
                 _effectResolver.PlayerStatusEffects.OnTurnEnd(_playerStats);
+
+                // Echo-chamber decay — bleeds sentiment while the whole room is receptive.
+                // Checked after the player's full turn, so breaking the chamber this turn avoids it.
+                _crowd.ApplyTurnEndDecay();
+
                 _playerDeck.EndTurn();
             }
             else
             {
-                foreach (var enemy in _enemies)
+                foreach (var enemy in LivingEnemies)
                 {
-                    if (enemy.IsDefeated) continue;
                     enemy.Stats.EndTurn();
+                    ApplyTurnEndOpinionStatuses(enemy.StatusEffects);
                     enemy.StatusEffects.OnTurnEnd(enemy.Stats);
                 }
             }
+        }
+
+        /// <summary>
+        /// Applies turn-end statuses that move the Opinion Meter, routed through the ledger directly
+        /// (no EventBus round-trip). Mirrors the Ritual pattern in <see cref="StartTurn"/>:
+        /// BattleManager owns opinion, so it reads the stacks and applies the change itself.
+        /// Called before the manager's OnTurnEnd decrements the stacks.
+        /// </summary>
+        private void ApplyTurnEndOpinionStatuses(StatusEffectManager mgr)
+        {
+            int smear = mgr.GetStacks<SmearStatus>();
+            if (smear > 0)
+                _opinion.ApplyPressure(
+                    smear,
+                    toPlayer: true,
+                    attackerName: "Smear",
+                    sourceEnemyIndex: -1,
+                    targetEnemyIndex: -1
+                );
+
+            int regen = mgr.GetStacks<RegenerationStatus>();
+            if (regen > 0)
+                _opinion.RaiseDirect(regen);
         }
 
         #endregion
@@ -753,256 +748,50 @@ namespace Crookedile.Gameplay.Battle
             _stateMachine?.Update();
         }
 
-        #region Battle States
+        #region Internal state-machine surface
 
-        /// <summary>Initialize State — draws the player's opening hand.</summary>
-        private class InitializeState : State
+        // The FSM states live in Battle/States/ as internal classes. They drive the battle
+        // through the public API plus this narrow internal surface — keep it minimal; states
+        // should not reach arbitrary private fields.
+
+        /// <summary>Opening hand size (InitializeState).</summary>
+        internal int StartingHandSize => _startingHandSize;
+
+        /// <summary>Base card draw per player turn, before hostile-crowd bonus draws (TurnStartState).</summary>
+        internal int CardsPerTurn => _cardsPerTurn;
+
+        /// <summary>The player's personal turn count (1 on the first player turn). Set by
+        /// <see cref="FirePlayerTurnStartPassives"/>; read by TurnStartState to skip the
+        /// turn-1 draw so the opening hand isn't doubled.</summary>
+        internal int PlayerTurnNumber => _playerTurnNumber;
+
+        /// <summary>Pause before the enemy side acts (OpponentTurnState).</summary>
+        internal float OpponentTurnDelay => _opponentTurnDelay;
+
+        /// <summary>Pause between individual enemy actions (OpponentTurnState).</summary>
+        internal float PerEnemyAttackDelay => _perEnemyAttackDelay;
+
+        /// <summary>Resets per-battle session state: banked pools and the card-play pipeline (InitializeState).</summary>
+        internal void ResetBattleSessionState()
         {
-            private BattleManager _manager;
-            public InitializeState(BattleManager manager) { _manager = manager; }
-
-            public override void OnEnter()
-            {
-                GameLogger.LogInfo<BattleManager>("Initializing battle...");
-
-                // Draw player's opening hand; enemies have no deck
-                _manager._playerDeck.StartBattle(_manager._startingHandSize);
-
-                // Fire battle-start passive AFTER the opening hand is dealt
-                // (e.g. Faith Leader's Opening Prayer draws 1 extra card on top of the base hand)
-                _manager._passiveResolver?.FireBattleStart(_manager._playerDeck);
-
-                _manager.TransitionToState(BattleState.TurnStart);
-            }
+            _patronage.Reset();
+            _attention.Reset();
+            _cards.ResetForBattle();
         }
 
-        /// <summary>
-        /// Turn Start State — draws cards for the player and, on player turns,
-        /// has the enemy declare their intent (Slay the Spire timing: player sees
-        /// the threat BEFORE deciding which cards to play).
-        /// </summary>
-        private class TurnStartState : State
+        /// <summary>Advances the player-turn counter and fires per-player-turn passives (TurnStartState).</summary>
+        internal void FirePlayerTurnStartPassives()
         {
-            private BattleManager _manager;
-            public TurnStartState(BattleManager manager) { _manager = manager; }
-
-            public override void OnEnter()
-            {
-                _manager.NextTurn();
-                _manager.StartTurn();
-
-                GameLogger.LogInfo<BattleManager>($"Starting turn {_manager.CurrentTurn}");
-
-                if (_manager.IsPlayerTurn)
-                {
-                    // Track the player's personal turn count and fire per-player-turn passives
-                    _manager._playerTurnNumber++;
-                    _manager._passiveResolver?.FireTurnStart(_manager._playerTurnNumber);
-
-                    // Draw cards for the player
-                    _manager._playerDeck.StartTurn(_manager._cardsPerTurn);
-
-                    // Every living enemy declares their intent (Slay the Spire timing)
-                    for (int i = 0; i < _manager._enemies.Count; i++)
-                    {
-                        var enemy = _manager._enemies[i];
-                        if (enemy.IsDefeated) continue;
-                        EnemyMoveData intent = enemy.SelectNextMove(_manager._enemies);
-                        if (intent != null)
-                        {
-                            EventBus.Publish(new EnemyIntentDeclaredEvent { Move = intent, EnemyIndex = i });
-                            GameLogger.LogInfo<BattleManager>($"Enemy [{i}] {enemy.EnemyData.EnemyName} declares: {intent.MoveName}");
-                        }
-                    }
-                }
-                // Enemy turn: no card draw; intent was already declared during the previous player turn
-
-                EventBus.Publish(new TurnStartedEvent
-                {
-                    TurnNumber   = _manager.CurrentTurn,
-                    IsPlayerTurn = _manager.IsPlayerTurn
-                });
-
-                _manager.TransitionToState(_manager.IsPlayerTurn
-                    ? BattleState.PlayerTurn
-                    : BattleState.OpponentTurn);
-            }
+            _playerTurnNumber++;
+            _passiveResolver?.FireTurnStart(_playerTurnNumber);
         }
 
-        /// <summary>Player Turn State — waits for EndTurnRequestedEvent from the UI.</summary>
-        private class PlayerTurnState : State
-        {
-            private BattleManager _manager;
-            public PlayerTurnState(BattleManager manager) { _manager = manager; }
+        /// <summary>Bumps the Judgment turn-limit counter (TurnEndState).</summary>
+        internal void IncrementPlayerTurnsElapsed() => _playerTurnsElapsed++;
 
-            public override void OnEnter() => GameLogger.LogInfo<BattleManager>("Player's turn started");
-            public override void OnExit()  => GameLogger.LogInfo<BattleManager>("Player's turn ended");
-
-            public override void OnUpdate()
-            {
-                // Waits for player to publish EndTurnRequestedEvent via the UI
-            }
-        }
-
-        /// <summary>
-        /// Opponent Turn State — waits <c>_opponentTurnDelay</c> seconds, then resolves all
-        /// living enemies' declared moves and transitions to TurnEnd.
-        /// The delay gives the player a visible pause before damage lands.
-        /// </summary>
-        private class OpponentTurnState : State
-        {
-            private readonly BattleManager _manager;
-            public OpponentTurnState(BattleManager manager) { _manager = manager; }
-
-            public override void OnEnter()
-            {
-                _manager.StartCoroutine(ExecuteAfterDelay());
-            }
-
-            private IEnumerator ExecuteAfterDelay()
-            {
-                yield return new WaitForSeconds(_manager._opponentTurnDelay);
-
-                GameLogger.LogInfo<BattleManager>("Enemy turn started — all living enemies act");
-
-                // Capture count before the loop so summoned enemies act next turn, not this one.
-                int enemyCount = _manager._enemies.Count;
-
-                for (int i = 0; i < enemyCount; i++)
-                {
-                    var enemy = _manager._enemies[i];
-                    if (enemy.IsDefeated || enemy.CurrentIntent == null) continue;
-
-                    // Stunned enemies skip their entire action for this turn.
-                    if (enemy.StatusEffects.HasEffect(StatusEffectType.Stunned))
-                    {
-                        GameLogger.LogInfo<BattleManager>(
-                            $"Enemy [{i}] {enemy.EnemyData.EnemyName} is Stunned — skipping action");
-                        continue;
-                    }
-
-                    // Signal the UI: this enemy is about to act (shake + highlight intent panel)
-                    EventBus.Publish(new EnemyActingEvent { EnemyIndex = i, Move = enemy.CurrentIntent });
-
-                    // Brief pause so the player sees the signal before damage lands
-                    yield return new WaitForSeconds(_manager._perEnemyAttackDelay);
-
-                    GameLogger.LogInfo<BattleManager>(
-                        $"Enemy [{i}] {enemy.EnemyData.EnemyName} executes: {enemy.CurrentIntent.MoveName}");
-
-                    // Temporarily point EffectResolver at this enemy as the caster
-                    _manager._effectResolver.SetFocusedOpponent(
-                        enemy.Stats, enemy.StatusEffects, i, enemy.EnemyData.EnemyName);
-                    var move = enemy.CurrentIntent;
-                    yield return _manager.StartCoroutine(
-                        (move?.NewEffects != null && move.NewEffects.Count > 0)
-                            ? _manager._effectResolver.ResolveEnemyMoveEffectsNew(move)
-                            : _manager._effectResolver.ResolveEnemyMoveEffects(move));
-
-                    // If the player was killed by this move, end the battle immediately
-                    // so remaining enemies don't continue acting.
-                    if (_manager.CheckAndEndBattleIfOver()) yield break;
-
-                    // Handle SummonMinion moves after normal effects resolve
-                    if (enemy.CurrentIntent.MoveType == EnemyMoveType.SummonMinion &&
-                        enemy.CurrentIntent.MinionToSummon != null)
-                    {
-                        _manager.SummonMinions(enemy.CurrentIntent.MinionToSummon,
-                                               enemy.CurrentIntent.MinionCount);
-                    }
-                }
-
-                // Restore resolver to the player's current focused target
-                if (_manager.FocusedEnemy != null)
-                    _manager._effectResolver.SetFocusedOpponent(
-                        _manager.FocusedEnemy.Stats, _manager.FocusedEnemy.StatusEffects,
-                        _manager.FocusedEnemyIndex, _manager.FocusedEnemy.EnemyData.EnemyName);
-
-                _manager.TransitionToState(BattleState.TurnEnd);
-            }
-        }
-
-        /// <summary>Turn End State — cleanup effects, check victory, advance.</summary>
-        private class TurnEndState : State
-        {
-            private BattleManager _manager;
-            public TurnEndState(BattleManager manager) { _manager = manager; }
-
-            public override void OnEnter()
-            {
-                _manager.EndTurn();
-                GameLogger.LogInfo<BattleManager>("Ending turn");
-
-                EventBus.Publish(new TurnEndedEvent
-                {
-                    TurnNumber     = _manager.CurrentTurn,
-                    WasPlayerTurn  = _manager.IsPlayerTurn
-                });
-
-                if (_manager.CheckVictoryConditions())
-                    _manager.TransitionToState(BattleState.BattleEnd);
-                else
-                    _manager.TransitionToState(BattleState.TurnStart);
-            }
-        }
-
-        /// <summary>Battle End State — publishes the result event.</summary>
-        private class BattleEndState : State
-        {
-            private BattleManager _manager;
-            public BattleEndState(BattleManager manager) { _manager = manager; }
-
-            public override void OnEnter()
-            {
-                BattleResult result = _manager.GetBattleResult();
-                GameLogger.LogInfo<BattleManager>($"Battle ended — {(result.isVictory ? "VICTORY" : "DEFEAT")}");
-                EventBus.Publish(new BattleEndedEvent { Result = result });
-            }
-        }
+        /// <summary>Caches the battle result (TurnEndState's Judgment path).</summary>
+        internal void SetBattleResult(BattleResult result) => _battleResult = result;
 
         #endregion
-    }
-
-    /// <summary>
-    /// Setup data for initializing a battle.
-    /// Player brings a card deck and origin; opponents are one or more scripted enemies.
-    /// </summary>
-    [Serializable]
-    public class BattleSetup
-    {
-        public OriginType     playerOrigin;
-        public OriginStats    originStats;
-        public List<CardData> playerDeck = new List<CardData>();
-
-        /// <summary>All enemies present in this room (1–5). Order = display order.</summary>
-        public List<EnemyData> enemies = new List<EnemyData>();
-
-        /// <summary>
-        /// Optional starting Resolve (HP) for the player this battle.
-        /// When <c>null</c> the player starts at full HP from <see cref="GetPlayerStats"/>.
-        /// Set this to carry HP damage over from a previous battle in the same run.
-        /// </summary>
-        public int? initialPlayerResolve;
-
-        /// <summary>Gets the player's battle stats based on their origin.</summary>
-        public OriginBattleStats GetPlayerStats()
-        {
-            return originStats != null
-                ? originStats.GetStatsForOrigin(playerOrigin)
-                : new OriginBattleStats { maxResolve = 20, maxActionPoints = 3 };
-        }
-    }
-
-    /// <summary>Result data from a completed battle.</summary>
-    [Serializable]
-    public class BattleResult
-    {
-        public bool isVictory;
-        public int  turnsToWin;
-        public int  finalPlayerResolve;
-        public int  finalPlayerComposure;
-        public int  finalPlayerHostility;
-
-        // TODO: Add rewards when reward system exists
     }
 }

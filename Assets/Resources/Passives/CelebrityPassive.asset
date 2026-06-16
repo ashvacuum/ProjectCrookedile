@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4cafe87c1348d646a71da0cf440dbd3, type: 3}
+  m_Name: CelebrityPassive
+  m_EditorClassIdentifier: 
+  _passiveName: Nepotism
+  _origin: 2
+  _description: 
+  _icon: {fileID: 0}
+  _passives:
+  - rid: 4738608336531357833
+  references:
+    version: 2
+    RefIds:
+    - rid: 4738608336531357833
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: New Passive
+        _trigger:
+          rid: 4738608336531357834
+        _conditions:
+        - rid: 4823698462508580960
+        _oneShot: 0
+        _effects:
+        - rid: 4738608336531357837
+    - rid: 4738608336531357834
+      type: {class: CardPlayedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _filterByType: 0
+        _filterType: 0
+    - rid: 4738608336531357837
+      type: {class: ReduceCardCostEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _costReduction: 1
+        _selectionMode: 1
+        _filterType: 0
+    - rid: 4823698462508580960
+      type: {class: FirstTimeCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

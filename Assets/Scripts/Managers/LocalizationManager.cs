@@ -1,15 +1,18 @@
-using UnityEngine;
 using Crookedile.Core;
 using Crookedile.Data.Localization;
 using Crookedile.Utilities;
+using UnityEngine;
 
 namespace Crookedile.Managers
 {
     [Debuggable("Localization", LogLevel.Info)]
     public class LocalizationManager : Singleton<LocalizationManager>
     {
-        [SerializeField] private LocalizationData _localizationData;
-        [SerializeField] private SystemLanguage _currentLanguage = SystemLanguage.English;
+        [SerializeField]
+        private LocalizationData _localizationData;
+
+        [SerializeField]
+        private SystemLanguage _currentLanguage = SystemLanguage.English;
 
         public SystemLanguage CurrentLanguage => _currentLanguage;
 
@@ -21,7 +24,10 @@ namespace Crookedile.Managers
             }
 
             // Load saved language preference
-            string savedLanguage = PlayerPrefs.GetString("Language", SystemLanguage.English.ToString());
+            string savedLanguage = PlayerPrefs.GetString(
+                "Language",
+                SystemLanguage.English.ToString()
+            );
             if (System.Enum.TryParse(savedLanguage, out SystemLanguage language))
             {
                 _currentLanguage = language;
@@ -50,7 +56,10 @@ namespace Crookedile.Managers
             }
             catch (System.Exception e)
             {
-                GameLogger.LogError("Localization", $"Failed to format string '{key}': {e.Message}");
+                GameLogger.LogError(
+                    "Localization",
+                    $"Failed to format string '{key}': {e.Message}"
+                );
                 return baseString;
             }
         }
@@ -69,7 +78,8 @@ namespace Crookedile.Managers
 
         public bool HasKey(string key)
         {
-            if (_localizationData == null) return false;
+            if (_localizationData == null)
+                return false;
             return _localizationData.HasKey(key);
         }
     }

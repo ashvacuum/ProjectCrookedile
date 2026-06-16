@@ -27,7 +27,9 @@
       "Bash(do if:*)",
       "Bash(! grep:*)",
       "Bash(then basename:*)",
-      "Bash(grep -E \"\\\\.\\(cs\\)$\")"
+      "Bash(grep -E \"\\\\.\\(cs\\)$\")",
+      "Bash(bash -c 'csharpier format \"Assets/Scripts\" && git add -u \"Assets/Scripts\"; exit 0')",
+      "PowerShell(\\(Get-Content \".claude/settings.json\" | ConvertFrom-Json\\).hooks.PreToolUse[0].hooks[0].command)"
     ],
     "deny": [],
     "ask": []

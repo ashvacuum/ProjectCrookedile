@@ -15,40 +15,20 @@ MonoBehaviour:
   _moveName: Introduce Doubt
   _moveType: 3
   _intentDescription: 
-  _newEffects:
-  - rid: 4738608375284105306
   _effects:
-  - _name: 
-    _category: 0
-    _target: 4
-    _damageType: 0
-    _damageAmount: 3
-    _randomDamageRange: {x: 3, y: 9}
-    _resourceType: 0
-    _resourceAmount: 3
-    _cardManipulationType: 0
-    _cardAmount: 2
-    _cardToAdd: {fileID: 0}
-    _cardSelectionMode: 0
-    _filterCardType: 0
-    _discardDrawAmount: 0
-    _costReduction: 1
-    _chancePercent: 50
-    _chanceEffects: []
-    _statusEffectType: 0
-    _statusStacks: 2
-    _statusDuration: 0
-    _amountSource: 0
+  - rid: 4823698507066769511
   _moveVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
   _condition: 0
+  _conditionTurn: 1
+  _stanceRequirement: 3
   references:
     version: 2
     RefIds:
-    - rid: 4738608375284105306
-      type: {class: AddCardToDiscardEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+    - rid: 4823698507066769511
+      type: {class: AddCardToDeckEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: Scandal
-        _card: {fileID: 11400000, guid: 7a198186b7b4ae549aa0d48002f25ad1, type: 2}
+        _name: 
+        _card: {fileID: 11400000, guid: fc1e66e09e152964eaede3a47608280b, type: 2}
         _amount: 1

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Crookedile.Data;
-using UnityEngine;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
+using UnityEngine;
 using EventBus = Crookedile.Core.EventBus;
 
 namespace Crookedile.Gameplay.Battle
@@ -18,27 +18,30 @@ namespace Crookedile.Gameplay.Battle
     public class DeckManager
     {
         [Header("Card Zones")]
-        [SerializeField] private List<CardData> _deck    = new List<CardData>();
-        [SerializeField] private List<CardData> _hand    = new List<CardData>();
-        [SerializeField] private List<CardData> _discard = new List<CardData>();
-        [SerializeField] private List<CardData> _exhaust = new List<CardData>();
+        [SerializeField]
+        private List<CardData> _deck = new List<CardData>();
+
+        [SerializeField]
+        private List<CardData> _hand = new List<CardData>();
+
+        [SerializeField]
+        private List<CardData> _discard = new List<CardData>();
+
+        [SerializeField]
+        private List<CardData> _exhaust = new List<CardData>();
 
         [Header("Settings")]
-        [SerializeField] private int _maxHandSize = 10;
+        [SerializeField]
+        private int _maxHandSize = 10;
 
         private string _ownerName; // For logging purposes
-        private bool   _isPlayer;  // True for the player's deck; false for enemies
+        private bool _isPlayer; // True for the player's deck; false for enemies
 
-        // Cards retained at end of turn (not discarded; cleared after each EndTurn).
-        private readonly HashSet<CardData> _retainedCards = new HashSet<CardData>();
+        // Retain-mark bookkeeping (turn + battle scopes) — see RetainTracker for the rules.
+        private readonly RetainTracker _retain = new RetainTracker();
 
-        // Per-card AP cost reductions applied this battle (individual card effects).
-        // int.MaxValue signals "free" (0 AP regardless of base cost).
-        private readonly Dictionary<CardData, int> _cardCostReductions = new Dictionary<CardData, int>();
-
-        // Snapshot of _cardCostReductions taken before a "next-play-only" free-all pass.
-        // Non-null only while a MakeAllCardsFreeNextPlay is active; restored after the next card play.
-        private Dictionary<CardData, int> _costReductionSnapshot;
+        // Per-card AP cost reductions this battle (+ snapshot/restore for transient passes).
+        private readonly CardCostOverrides _costOverrides = new CardCostOverrides();
 
         // Cached ReadOnlyCollection wrappers — live views of the underlying lists.
         // AsReadOnly() returns a wrapper that reflects the list directly, so we only
@@ -59,6 +62,12 @@ namespace Crookedile.Gameplay.Battle
         /// Number of cards currently in hand.
         /// </summary>
         public int HandCount => _hand.Count;
+
+        // Scandals drawn since the start of the current turn — reset each StartTurn/StartBattle.
+        private int _scandalsDrawnThisTurn;
+
+        /// <summary>Number of Scandal cards drawn so far this turn (Celebrity on-draw payoffs).</summary>
+        public int ScandalsDrawnThisTurn => _scandalsDrawnThisTurn;
 
         /// <summary>
         /// Number of cards in the discard pile.
@@ -115,17 +124,22 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Creates a new DeckManager with an initial deck of cards.
         /// </summary>
-        public DeckManager(List<CardData> initialDeck, string ownerName = "Unknown", int maxHandSize = 10, bool isPlayer = true)
+        public DeckManager(
+            List<CardData> initialDeck,
+            string ownerName = "Unknown",
+            int maxHandSize = 10,
+            bool isPlayer = true
+        )
         {
-            _ownerName   = ownerName;
+            _ownerName = ownerName;
             _maxHandSize = maxHandSize;
-            _isPlayer    = isPlayer;
+            _isPlayer = isPlayer;
 
             // Create cached wrappers once — they track the underlying list by reference.
-            _handReadOnly    = _hand.AsReadOnly();
+            _handReadOnly = _hand.AsReadOnly();
             _discardReadOnly = _discard.AsReadOnly();
             _exhaustReadOnly = _exhaust.AsReadOnly();
-            _deckReadOnly    = _deck.AsReadOnly();
+            _deckReadOnly = _deck.AsReadOnly();
 
             InitializeDeck(initialDeck);
         }
@@ -139,11 +153,14 @@ namespace Crookedile.Gameplay.Battle
             _hand.Clear();
             _discard.Clear();
             _exhaust.Clear();
+            _retain.Reset();
 
             _deck.AddRange(cards);
             Shuffle();
 
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} deck initialized with {_deck.Count} cards");
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName} deck initialized with {_deck.Count} cards"
+            );
         }
 
         #endregion
@@ -169,7 +186,9 @@ namespace Crookedile.Gameplay.Battle
             }
 
             if (cardsDrawn > 0)
-                GameLogger.LogInfo<DeckManager>($"{_ownerName} drew {cardsDrawn} card(s). Hand: {HandCount}/{_maxHandSize}");
+                GameLogger.LogInfo<DeckManager>(
+                    $"{_ownerName} drew {cardsDrawn} card(s). Hand: {HandCount}/{_maxHandSize}"
+                );
 
             return cardsDrawn;
         }
@@ -182,7 +201,9 @@ namespace Crookedile.Gameplay.Battle
         {
             if (IsHandFull)
             {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot draw - hand is full ({_maxHandSize})");
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName} cannot draw - hand is full ({_maxHandSize})"
+                );
                 return false;
             }
 
@@ -192,7 +213,9 @@ namespace Crookedile.Gameplay.Battle
                     ShuffleDiscardIntoDeck();
                 else
                 {
-                    GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot draw - deck and discard are empty");
+                    GameLogger.LogWarning<DeckManager>(
+                        $"{_ownerName} cannot draw - deck and discard are empty"
+                    );
                     return false;
                 }
             }
@@ -201,6 +224,10 @@ namespace Crookedile.Gameplay.Battle
             CardData drawnCard = _deck[0];
             _deck.RemoveAt(0);
             _hand.Add(drawnCard);
+
+            // Track Scandals drawn this turn (Celebrity on-draw payoffs read this via the context).
+            if (drawnCard != null && drawnCard.CardType == Crookedile.Data.CardType.Scandal)
+                _scandalsDrawnThisTurn++;
 
             EventBus.Publish(new CardDrawnEvent { Card = drawnCard, IsPlayer = _isPlayer });
             return true;
@@ -211,28 +238,7 @@ namespace Crookedile.Gameplay.Battle
         #region Playing Cards
 
         /// <summary>
-        /// Plays a card from hand (moves it to discard pile).
-        /// </summary>
-        /// <param name="card">The card to play</param>
-        /// <returns>True if card was successfully played</returns>
-        public bool PlayCard(CardData card)
-        {
-            int idx = _hand.IndexOf(card);
-            if (idx < 0)
-            {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot play card - not in hand");
-                return false;
-            }
-
-            _hand.RemoveAt(idx);
-            _discard.Add(card);
-
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} played card: {card.CardName}");
-            return true;
-        }
-
-        /// <summary>
-        /// Plays a card by index in hand.
+        /// Plays a card by index in hand (moves it to the discard pile).
         /// </summary>
         public bool PlayCardAtIndex(int index)
         {
@@ -245,6 +251,7 @@ namespace Crookedile.Gameplay.Battle
             CardData card = _hand[index];
             _hand.RemoveAt(index);
             _discard.Add(card);
+            _retain.ConsumeMark(card); //a retained copy leaving the hand uses up its mark
 
             GameLogger.LogInfo<DeckManager>($"{_ownerName} played card: {card.CardName}");
             return true;
@@ -262,12 +269,15 @@ namespace Crookedile.Gameplay.Battle
             int idx = _hand.IndexOf(card);
             if (idx < 0)
             {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot discard card - not in hand");
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName} cannot discard card - not in hand"
+                );
                 return false;
             }
 
             _hand.RemoveAt(idx);
             _discard.Add(card);
+            _retain.ConsumeMark(card); //forced discard consumes the copy's retain mark too
 
             EventBus.Publish(new CardDiscardedEvent { Card = card, IsPlayer = _isPlayer });
             GameLogger.LogInfo<DeckManager>($"{_ownerName} discarded card: {card.CardName}");
@@ -282,19 +292,26 @@ namespace Crookedile.Gameplay.Battle
         public List<CardData> DiscardHand()
         {
             var discarded = new List<CardData>();
+
+            // Per-pass allowances so each retain mark protects exactly one copy this sweep.
+            var pass = _retain.BeginDiscardPass();
+
             for (int i = _hand.Count - 1; i >= 0; i--)
             {
                 CardData card = _hand[i];
-                if (_retainedCards.Contains(card)) continue;   // skip — stays in hand
+                if (card.InnateRetain || pass.TryRetain(card))
+                    continue; // skip — stays in hand
                 _hand.RemoveAt(i);
                 _discard.Add(card);
                 discarded.Add(card);
                 EventBus.Publish(new CardDiscardedEvent { Card = card, IsPlayer = _isPlayer });
             }
-            _retainedCards.Clear();   // retain only lasts one turn
+            _retain.ClearTurnMarks(); // one-turn retains expire; battle-long retains persist
 
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} discarded {discarded.Count} card(s). " +
-                                             $"Hand retained: {_hand.Count}");
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName} discarded {discarded.Count} card(s). "
+                    + $"Hand retained: {_hand.Count}"
+            );
             return discarded;
         }
 
@@ -310,7 +327,9 @@ namespace Crookedile.Gameplay.Battle
             int idx = _hand.IndexOf(card);
             if (idx < 0)
             {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot exhaust card - not in hand");
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName} cannot exhaust card - not in hand"
+                );
                 return false;
             }
 
@@ -330,43 +349,55 @@ namespace Crookedile.Gameplay.Battle
             int idx = _discard.IndexOf(card);
             if (idx < 0)
             {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot exhaust card - not in discard");
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName} cannot exhaust card - not in discard"
+                );
                 return false;
             }
 
             _discard.RemoveAt(idx);
             _exhaust.Add(card);
 
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} exhausted card from discard: {card.CardName}");
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName} exhausted card from discard: {card.CardName}"
+            );
             return true;
         }
 
         /// <summary>
         /// Moves a specific card from the discard pile directly into the hand.
-        /// Used by ChooseFromDiscardToHand effects and CardSelectionPanel confirm callbacks.
+        /// Used by ChooseFromDiscardToHand effects and card-choice confirm callbacks.
         /// Returns false if the card is not in discard or the hand is full.
         /// </summary>
         public bool MoveFromDiscardToHand(CardData card)
         {
             if (card == null)
             {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToHand — card is null");
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName}: MoveFromDiscardToHand — card is null"
+                );
                 return false;
             }
             int idx = _discard.IndexOf(card);
             if (idx < 0)
             {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToHand — card not in discard");
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName}: MoveFromDiscardToHand — card not in discard"
+                );
                 return false;
             }
             if (IsHandFull)
             {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToHand — hand is full");
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName}: MoveFromDiscardToHand — hand is full"
+                );
                 return false;
             }
             _discard.RemoveAt(idx);
             _hand.Add(card);
-            GameLogger.LogInfo<DeckManager>($"{_ownerName}: Moved {card.CardName} from discard to hand");
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: Moved {card.CardName} from discard to hand"
+            );
             EventBus.Publish(new CardRecoveredEvent { Card = card, IsPlayer = _isPlayer });
             return true;
         }
@@ -380,18 +411,24 @@ namespace Crookedile.Gameplay.Battle
         {
             if (card == null)
             {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToDeck — card is null");
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName}: MoveFromDiscardToDeck — card is null"
+                );
                 return false;
             }
             int idx = _discard.IndexOf(card);
             if (idx < 0)
             {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName}: MoveFromDiscardToDeck — card not in discard");
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName}: MoveFromDiscardToDeck — card not in discard"
+                );
                 return false;
             }
             _discard.RemoveAt(idx);
-            _deck.Insert(0, card);   // index 0 = top (DrawCard reads _deck[0])
-            GameLogger.LogInfo<DeckManager>($"{_ownerName}: Moved {card.CardName} from discard to top of draw pile");
+            _deck.Insert(0, card); // index 0 = top (DrawCard reads _deck[0])
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: Moved {card.CardName} from discard to top of draw pile"
+            );
             return true;
         }
 
@@ -405,28 +442,59 @@ namespace Crookedile.Gameplay.Battle
             int idx = _hand.IndexOf(oldCard);
             if (idx < 0 || newCard == null)
             {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName}: SwapCardInHand — card not found in hand or newCard is null");
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName}: SwapCardInHand — card not found in hand or newCard is null"
+                );
                 return false;
             }
             _hand[idx] = newCard;
-            GameLogger.LogInfo<DeckManager>($"{_ownerName}: Upgraded {oldCard.CardName} → {newCard.CardName} in hand");
-            EventBus.Publish(new CardUpgradedEvent { OldCard = oldCard, NewCard = newCard, IsPlayer = _isPlayer });
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: Upgraded {oldCard.CardName} → {newCard.CardName} in hand"
+            );
+            EventBus.Publish(
+                new CardUpgradedEvent
+                {
+                    OldCard = oldCard,
+                    NewCard = newCard,
+                    IsPlayer = _isPlayer,
+                }
+            );
             return true;
         }
 
         /// <summary>
-        /// Marks a card currently in hand as retained.
-        /// Retained cards are not discarded at end of turn; the flag clears after EndTurn.
+        /// Marks a card currently in hand as retained — it is not discarded at end of turn.
+        /// Default duration is one turn (flag clears after EndTurn); pass
+        /// <paramref name="untilEndOfBattle"/> = true for a retain that persists every turn
+        /// until the card is played or the battle ends.
         /// </summary>
-        public bool RetainCard(CardData card)
+        public bool RetainCard(CardData card, bool untilEndOfBattle = false)
         {
             if (!_hand.Contains(card))
             {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName}: RetainCard — {card?.CardName} is not in hand");
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName}: RetainCard — {card?.CardName} is not in hand"
+                );
                 return false;
             }
-            _retainedCards.Add(card);
-            GameLogger.LogInfo<DeckManager>($"{_ownerName}: {card.CardName} marked as retained");
+
+            int copiesInHand = 0;
+            foreach (var c in _hand)
+                if (c == card)
+                    copiesInHand++;
+
+            if (!_retain.TryMark(card, copiesInHand, untilEndOfBattle))
+            {
+                GameLogger.LogInfo<DeckManager>(
+                    $"{_ownerName}: all copies of {card.CardName} already retained"
+                );
+                return false;
+            }
+
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: {card.CardName} marked as retained"
+                    + (untilEndOfBattle ? " (until end of battle)" : " (this turn)")
+            );
             EventBus.Publish(new CardRetainedEvent { Card = card, IsPlayer = _isPlayer });
             return true;
         }
@@ -441,10 +509,12 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void ApplyCostReduction(CardData card, int reduction)
         {
-            if (card == null) return;
-            _cardCostReductions.TryGetValue(card, out int current);
-            _cardCostReductions[card] = current + reduction;
-            GameLogger.LogInfo<DeckManager>($"{_ownerName}: {card.CardName} cost −{reduction} (total reduction: {_cardCostReductions[card]})");
+            if (card == null)
+                return;
+            int total = _costOverrides.ApplyReduction(card, reduction);
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: {card.CardName} cost −{reduction} (total reduction: {total})"
+            );
         }
 
         /// <summary>
@@ -453,20 +523,20 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void MakeCardFreeThisBattle(CardData card)
         {
-            if (card == null) return;
-            _cardCostReductions[card] = int.MaxValue;
-            GameLogger.LogInfo<DeckManager>($"{_ownerName}: {card.CardName} is now free (0 AP) this battle");
+            if (card == null)
+                return;
+            _costOverrides.MakeFree(card);
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: {card.CardName} is now free (0 AP) this battle"
+            );
         }
 
         /// <summary>
         /// Returns the AP cost reduction that has been applied to this specific card this battle.
         /// Returns 0 if none was applied. Returns <see cref="int.MaxValue"/> if the card was made free.
         /// </summary>
-        public int GetCardCostReduction(CardData card)
-        {
-            if (card == null) return 0;
-            return _cardCostReductions.TryGetValue(card, out int r) ? r : 0;
-        }
+        public int GetCardCostReduction(CardData card) =>
+            card == null ? 0 : _costOverrides.GetReduction(card);
 
         /// <summary>
         /// Captures a snapshot of all current cost reductions so they can be restored later.
@@ -476,8 +546,10 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void SnapshotCostReductions()
         {
-            _costReductionSnapshot = new Dictionary<CardData, int>(_cardCostReductions);
-            GameLogger.LogInfo<DeckManager>($"{_ownerName}: Cost-reduction snapshot captured ({_costReductionSnapshot.Count} entries)");
+            int entries = _costOverrides.Snapshot();
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: Cost-reduction snapshot captured ({entries} entries)"
+            );
         }
 
         /// <summary>
@@ -488,12 +560,10 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void RestoreCostReductionSnapshot()
         {
-            if (_costReductionSnapshot == null) return;
-            _cardCostReductions.Clear();
-            foreach (var kvp in _costReductionSnapshot)
-                _cardCostReductions[kvp.Key] = kvp.Value;
-            _costReductionSnapshot = null;
-            GameLogger.LogInfo<DeckManager>($"{_ownerName}: Cost reductions restored from snapshot");
+            if (_costOverrides.RestoreSnapshot())
+                GameLogger.LogInfo<DeckManager>(
+                    $"{_ownerName}: Cost reductions restored from snapshot"
+                );
         }
 
         #endregion
@@ -533,7 +603,9 @@ namespace Crookedile.Gameplay.Battle
             _discard.Clear();
             Shuffle();
 
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} shuffled {count} cards from discard into deck");
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName} shuffled {count} cards from discard into deck"
+            );
         }
 
         #endregion
@@ -577,14 +649,27 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void StartBattle(int initialHandSize)
         {
-            DrawCards(initialHandSize);
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} drew initial hand of {initialHandSize} cards");
+            _scandalsDrawnThisTurn = 0;
+            int drawn = DrawCards(initialHandSize);
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName} drew initial hand of {drawn} cards (requested {initialHandSize}, "
+                    + $"deck {_deck.Count}, hand cap {_maxHandSize})"
+            );
+            if (initialHandSize <= 0)
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName}: initial hand size is {initialHandSize} — check "
+                        + "BattleManager > Starting Hand Size in the Inspector (should be > 0)."
+                );
         }
 
         /// <summary>
         /// Called at the start of each turn.
         /// </summary>
-        public void StartTurn(int cardsToDraw) => DrawCards(cardsToDraw);
+        public void StartTurn(int cardsToDraw)
+        {
+            _scandalsDrawnThisTurn = 0;
+            DrawCards(cardsToDraw);
+        }
 
         /// <summary>
         /// Called at the end of each turn - discards hand.
@@ -596,29 +681,17 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void EndBattle()
         {
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} battle ended. Exhausted: {_exhaust.Count} cards");
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName} battle ended. Exhausted: {_exhaust.Count} cards"
+            );
         }
 
         #endregion
 
         #region Card Generation
 
-        /// <summary>
-        /// Adds a card to the draw pile and shuffles.
-        /// </summary>
-        public void AddCardToDeck(CardData card)
-        {
-            if (card == null)
-            {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to deck");
-                return;
-            }
-
-            _deck.Add(card);
-            Shuffle();
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {card.CardName} to deck");
-            EventBus.Publish(new CardGrantedEvent { Card = card, IsPlayer = _isPlayer, Count = 1, ToDiscard = false });
-        }
+        /// <summary>Adds a card to the draw pile and shuffles.</summary>
+        public void AddCardToDeck(CardData card) => AddCardsToDeck(card, 1);
 
         /// <summary>
         /// Adds multiple copies of a card to the draw pile and shuffles.
@@ -636,33 +709,23 @@ namespace Crookedile.Gameplay.Battle
 
             Shuffle();
             GameLogger.LogInfo<DeckManager>($"{_ownerName} added {count}x {card.CardName} to deck");
-            EventBus.Publish(new CardGrantedEvent { Card = card, IsPlayer = _isPlayer, Count = count, ToDiscard = false });
+            EventBus.Publish(
+                new CardGrantedEvent
+                {
+                    Card = card,
+                    IsPlayer = _isPlayer,
+                    Count = count,
+                    ToDiscard = false,
+                }
+            );
         }
 
-        /// <summary>
-        /// Adds a card directly to hand (if space available).
-        /// </summary>
-        public bool AddCardToHand(CardData card)
-        {
-            if (card == null)
-            {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to hand");
-                return false;
-            }
-
-            if (IsHandFull)
-            {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add card to hand - hand is full");
-                return false;
-            }
-
-            _hand.Add(card);
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {card.CardName} to hand");
-            return true;
-        }
+        /// <summary>Adds a card directly to hand (if space available).</summary>
+        public bool AddCardToHand(CardData card) => AddCardsToHand(card, 1) == 1;
 
         /// <summary>
         /// Adds multiple copies of a card directly to hand (up to hand limit).
+        /// Returns the number of copies actually added.
         /// </summary>
         public int AddCardsToHand(CardData card, int count)
         {
@@ -679,25 +742,20 @@ namespace Crookedile.Gameplay.Battle
                 cardsAdded++;
             }
 
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {cardsAdded}x {card.CardName} to hand");
+            if (cardsAdded < count)
+                GameLogger.LogWarning<DeckManager>(
+                    $"{_ownerName} hand full — only {cardsAdded}/{count} copies added"
+                );
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName} added {cardsAdded}x {card.CardName} to hand"
+            );
             return cardsAdded;
         }
 
         /// <summary>
         /// Adds a card directly to the discard pile (e.g. a status or curse card granted by an enemy effect).
         /// </summary>
-        public void AddCardToDiscard(CardData card)
-        {
-            if (card == null)
-            {
-                GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to discard");
-                return;
-            }
-
-            _discard.Add(card);
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {card.CardName} to discard");
-            EventBus.Publish(new CardGrantedEvent { Card = card, IsPlayer = _isPlayer, Count = 1, ToDiscard = true });
-        }
+        public void AddCardToDiscard(CardData card) => AddCardsToDiscard(card, 1);
 
         /// <summary>
         /// Adds multiple copies of a card directly to the discard pile.
@@ -713,8 +771,18 @@ namespace Crookedile.Gameplay.Battle
             for (int i = 0; i < count; i++)
                 _discard.Add(card);
 
-            GameLogger.LogInfo<DeckManager>($"{_ownerName} added {count}x {card.CardName} to discard");
-            EventBus.Publish(new CardGrantedEvent { Card = card, IsPlayer = _isPlayer, Count = count, ToDiscard = true });
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName} added {count}x {card.CardName} to discard"
+            );
+            EventBus.Publish(
+                new CardGrantedEvent
+                {
+                    Card = card,
+                    IsPlayer = _isPlayer,
+                    Count = count,
+                    ToDiscard = true,
+                }
+            );
         }
 
         #endregion

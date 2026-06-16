@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using UnityEngine;
@@ -13,10 +13,12 @@ namespace Crookedile.Gameplay.Battle
     /// <see cref="CardDiscardedTrigger"/>, <see cref="CardExhaustedTrigger"/>, etc.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class IfCardTypeCondition : PassiveConditionBase
     {
         [Tooltip("The passive fires only if the triggering card is of this type.")]
-        [SerializeField] private CardType _requiredType = CardType.Pressure;
+        [SerializeField]
+        private CardType _requiredType = CardType.Pressure;
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {

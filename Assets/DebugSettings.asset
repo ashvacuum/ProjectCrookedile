@@ -15,7 +15,6 @@ MonoBehaviour:
   globalLoggingEnabled: 1
   globalLogLevel: 3
   showTimestamp: 1
-  showStackTrace: 0
   categories:
   - categoryName: Gameplay
     enabled: 0

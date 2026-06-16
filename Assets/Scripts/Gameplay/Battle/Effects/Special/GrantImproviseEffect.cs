@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
@@ -13,11 +13,13 @@ namespace Crookedile.Gameplay.Battle
     /// when and how often this fires (e.g. TurnStartTrigger each turn).
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class DiscardHandAndRedrawEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            if (ctx.Deck == null) return; // guard: enemies have no deck
+            if (ctx.Deck == null)
+                return; // guard: enemies have no deck
 
             var hand = new List<CardData>(ctx.Deck.Hand);
             int count = hand.Count;
@@ -33,7 +35,8 @@ namespace Crookedile.Gameplay.Battle
 
             int drawn = ctx.Deck.DrawCards(count);
             GameLogger.LogInfo<DiscardHandAndRedrawEffect>(
-                $"Improvise: discarded {count} card(s), drew {drawn} back.");
+                $"Improvise: discarded {count} card(s), drew {drawn} back."
+            );
         }
 
         public override string GetDescription() =>

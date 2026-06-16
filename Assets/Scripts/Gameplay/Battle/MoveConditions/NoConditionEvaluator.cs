@@ -8,7 +8,10 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public class NoConditionEvaluator : IMoveConditionEvaluator
     {
-        public bool IsMet(EnemyMoveData move, IReadOnlyList<EnemyController> allEnemies, EnemyController self)
-            => true;
+        public bool IsMet(
+            EnemyMoveData move,
+            IReadOnlyList<EnemyController> allEnemies,
+            EnemyController self
+        ) => true;
     }
 }

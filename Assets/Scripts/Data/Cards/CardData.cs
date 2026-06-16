@@ -1,9 +1,9 @@
-using System.Collections.Generic;
-using UnityEngine;
-using Sirenix.OdinInspector;
+﻿using System.Collections.Generic;
 using Crookedile.Data;
 using Crookedile.Data.VFX;
 using Crookedile.Gameplay.Battle;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Data.Cards
 {
@@ -20,117 +20,158 @@ namespace Crookedile.Data.Cards
         [ReadOnly]
         [HideLabel]
         [Tooltip("Unique identifier for this card. Auto-generated GUID.")]
-        [SerializeField] private string _id;
+        [SerializeField]
+        private string _id;
 
         [Tooltip("Display name of the card shown to players")]
-        [SerializeField] private string _cardName;
+        [SerializeField]
+        private string _cardName;
 
         [Tooltip("Card type determines general behavior (Pressure, Rhetoric, Policy)")]
-        [SerializeField] private CardType _cardType;
+        [SerializeField]
+        private CardType _cardType;
 
         [Tooltip("Rarity affects card acquisition chance and power level")]
-        [SerializeField] private CardRarity _rarity;
+        [SerializeField]
+        private CardRarity _rarity;
 
         [Header("Visuals")]
         [Tooltip("Main artwork displayed on the front of the card")]
-        [SerializeField] private Sprite _artwork;
+        [SerializeField]
+        [PreviewField]
+        private Sprite _artwork;
 
         [FoldoutGroup("Description Override")]
-        [InfoBox("Leave blank — description is auto-generated from card effects at runtime. " +
-                 "Only fill this when the auto-generated text is insufficient.",
-                 InfoMessageType.Info)]
+        [InfoBox(
+            "Leave blank — description is auto-generated from card effects at runtime. "
+                + "Only fill this when the auto-generated text is insufficient.",
+            InfoMessageType.Info
+        )]
         [Tooltip("Optional explicit override. Leave blank to auto-generate from card effects.")]
         [TextArea(2, 5)]
-        [SerializeField] private string _description;
+        [SerializeField]
+        private string _description;
 
         [Tooltip("Optional flavor text for storytelling and theme (e.g., 'A direct threat.')")]
         [TextArea(2, 3)]
-        [SerializeField] private string _flavorText;
+        [SerializeField]
+        private string _flavorText;
 
         [Header("Costs")]
         [Tooltip("List of resources required to play this card (₱, Lagay, Energy, etc.)")]
-        [SerializeField] private List<CardCost> _costs = new List<CardCost>();
+        [SerializeField]
+        private List<CardCost> _costs = new List<CardCost>();
 
         [Header("Effects")]
-        [Tooltip("New polymorphic effect list — use this for all newly authored cards. " +
-                 "Add effects via the + button; each subclass shows only its own fields.")]
+        [Tooltip("Polymorphic effect list. Add effects via the + button.")]
         [SerializeReference]
-        [SerializeField] private List<BattleEffect> _newEffects = new List<BattleEffect>();
-
-        [Tooltip("Legacy effect list — kept for backwards compatibility during migration. " +
-                 "Run Crookedile / Tools / Migrate Effects to convert. Do not author new effects here.")]
-        [FoldoutGroup("Legacy Effects (Migration)")]
-        [SerializeField] private List<CardEffect> _effects = new List<CardEffect>();
+        [SerializeField]
+        private List<BattleEffect> _effects = new List<BattleEffect>();
 
         [Header("Card Passives")]
-        [Tooltip("Battle-scoped passives that fire on broad battle events (turn start, damage dealt, etc.) " +
-                 "for the entire battle regardless of card location in the deck.\n\n" +
-                 "Each entry has its own polymorphic trigger, optional conditions, and a list of " +
-                 "BattleEffects to execute. Add entries via the + button and use the type picker " +
-                 "to choose trigger and condition classes.")]
+        [Tooltip(
+            "Battle-scoped passives that fire on broad battle events (turn start, damage dealt, etc.) "
+                + "for the entire battle regardless of card location in the deck.\n\n"
+                + "Each entry has its own polymorphic trigger, optional conditions, and a list of "
+                + "BattleEffects to execute. Add entries via the + button and use the type picker "
+                + "to choose trigger and condition classes."
+        )]
         [SerializeReference]
-        [SerializeField] private List<BattlePassive> _passives = new List<BattlePassive>();
+        [SerializeField]
+        private List<BattlePassive> _passives = new List<BattlePassive>();
 
-        // ─── Upgrade ──────────────────────────────────────────────────────────────
-
+        #region Upgrade
         [FoldoutGroup("Upgrade")]
         [Tooltip("Is this card currently in its upgraded state?")]
-        [SerializeField] private bool _isUpgraded = false;
+        [SerializeField]
+        private bool _isUpgraded = false;
 
         [FoldoutGroup("Upgrade")]
         [Tooltip("Overridden costs when this card is upgraded. If empty, base costs are used.")]
-        [SerializeField] private List<CardCost> _upgradedCosts = new List<CardCost>();
+        [SerializeField]
+        private List<CardCost> _upgradedCosts = new List<CardCost>();
 
         [FoldoutGroup("Upgrade")]
         [Tooltip("Overridden effects when this card is upgraded. If empty, base effects are used.")]
         [SerializeReference]
-        [SerializeField] private List<BattleEffect> _upgradedEffects = new List<BattleEffect>();
+        [SerializeField]
+        private List<BattleEffect> _upgradedEffects = new List<BattleEffect>();
 
         [FoldoutGroup("Upgrade")]
-        [Tooltip("Overridden battle-scoped passives when this card is upgraded. If empty, base passives are used.")]
+        [Tooltip(
+            "Overridden battle-scoped passives when this card is upgraded. If empty, base passives are used."
+        )]
         [SerializeReference]
-        [SerializeField] private List<BattlePassive> _upgradedPassives = new List<BattlePassive>();
+        [SerializeField]
+        private List<BattlePassive> _upgradedPassives = new List<BattlePassive>();
 
-        // ─── Metadata ─────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Metadata
         [Header("Metadata")]
         [Tooltip("Tags for searching/filtering (e.g., 'violence', 'corruption', 'persuasion')")]
-        [SerializeField] private List<string> _tags = new List<string>();
+        [SerializeField]
+        private List<string> _tags = new List<string>();
 
         [Tooltip("Is this card included in starter decks?")]
-        [SerializeField] private bool _isStarterCard = false;
+        [SerializeField]
+        private bool _isStarterCard = false;
 
         [Tooltip("Must this card be unlocked through progression?")]
-        [SerializeField] private bool _isUnlockable = false;
+        [SerializeField]
+        private bool _isUnlockable = false;
 
-        [ShowIf("_cardType", CardType.Status)]
-        [Tooltip("If true, this Status card is shown in the hand but cannot be played. " +
-                 "All Curses are always unplayable regardless of this flag.")]
-        [SerializeField] private bool _isUnplayable = false;
+        [ShowIf("_cardType", CardType.Heckle)]
+        [Tooltip(
+            "If true, this Status card is shown in the hand but cannot be played. "
+                + "All Scandals are always unplayable regardless of this flag."
+        )]
+        [SerializeField]
+        private bool _isUnplayable = false;
+
+        [Tooltip(
+            "If true, this card is never discarded at end of turn — it stays in hand until "
+                + "played. A card property (like Unplayable), not an effect."
+        )]
+        [SerializeField]
+        private bool _innateRetain = false;
 
         [Header("Policy")]
         [ShowIf("_cardType", CardType.Policy)]
-        [Tooltip("The political lean of this Policy card.\n" +
-                 "Left: Progressives −1 hostility, Traditionals +1 hostility\n" +
-                 "Center: Moderates −1 hostility\n" +
-                 "Right: Traditionals −1 hostility, Progressives +1 hostility\n" +
-                 "None: No demographic hostility shift when played")]
-        [SerializeField] private PolicyLean _policyLean = PolicyLean.None;
+        [Tooltip(
+            "The political lean of this Policy card.\n"
+                + "Left: Progressives −1 hostility, Traditionals +1 hostility\n"
+                + "Center: Moderates −1 hostility\n"
+                + "Right: Traditionals −1 hostility, Progressives +1 hostility\n"
+                + "None: No demographic hostility shift when played"
+        )]
+        [SerializeField]
+        private PolicyLean _policyLean = PolicyLean.None;
 
         [Header("VFX")]
-        [Tooltip("VFX played when this card is used. Leave null for no card VFX.\n" +
-                 "Add an 'ApplyEffects' AnimationEvent at the hit frame to resolve damage in sync with the animation.")]
-        [SerializeField] private VFXEvent _cardVFX;
+        [Tooltip(
+            "VFX played when this card is used. Leave null for no card VFX.\n"
+                + "Add an 'ApplyEffects' AnimationEvent at the hit frame to resolve damage in sync with the animation."
+        )]
+        [SerializeField]
+        private VFXEvent _cardVFX;
 
-        // ─── Configuration Tracking ───────────────────────────────────────────────
+        #endregion
 
+        #region Configuration Tracking
         [FoldoutGroup("Configuration")]
-        [InfoBox("Outstanding setup steps — see notes below. Clear this field when done.",
-            InfoMessageType.Warning, "NeedsConfiguration")]
-        [Tooltip("Designer notes for effects/passives still needing manual Inspector setup. " +
-                 "Populated by the card generator. Clear this field when all steps are complete.")]
+        [InfoBox(
+            "Outstanding setup steps — see notes below. Clear this field when done.",
+            InfoMessageType.Warning,
+            "NeedsConfiguration"
+        )]
+        [Tooltip(
+            "Designer notes for effects/passives still needing manual Inspector setup. "
+                + "Populated by the card generator. Clear this field when all steps are complete."
+        )]
         [TextArea(2, 6)]
-        [SerializeField] private string _configurationNotes;
+        [SerializeField]
+        private string _configurationNotes;
 
         #region Properties
 
@@ -162,15 +203,8 @@ namespace Crookedile.Data.Cards
         /// <summary>List of costs required to play this card.</summary>
         public List<CardCost> Costs => _costs;
 
-        /// <summary>
-        /// Polymorphic effect list for this card.
-        /// Returns <c>_newEffects</c> when populated (new system); falls back to the legacy
-        /// <c>_effects</c> list during the migration window.
-        /// </summary>
-        public List<BattleEffect> NewEffects => _newEffects;
-
-        /// <summary>Legacy effect list — read by the migration tool and the old EffectResolver path.</summary>
-        public List<CardEffect> Effects => _effects;
+        /// <summary>Polymorphic effect list for this card.</summary>
+        public List<BattleEffect> Effects => _effects;
 
         /// <summary>Is this card currently in its upgraded state?</summary>
         public bool IsUpgraded => _isUpgraded;
@@ -188,12 +222,15 @@ namespace Crookedile.Data.Cards
         /// Can this card be upgraded? True if it is not already upgraded and has at least one
         /// upgraded field defined (costs, effects, or passives).
         /// </summary>
-        public bool CanUpgrade => _cardType != CardType.Curse &&
-                               _cardType != CardType.Status &&
-                               !_isUpgraded && (
-            _upgradedCosts.Count > 0 ||
-            _upgradedEffects.Count > 0 ||
-            _upgradedPassives.Count > 0);
+        public bool CanUpgrade =>
+            _cardType != CardType.Scandal
+            && _cardType != CardType.Heckle
+            && !_isUpgraded
+            && (
+                _upgradedCosts.Count > 0
+                || _upgradedEffects.Count > 0
+                || _upgradedPassives.Count > 0
+            );
 
         /// <summary>Tags for searching and filtering.</summary>
         public List<string> Tags => _tags;
@@ -205,11 +242,17 @@ namespace Crookedile.Data.Cards
         public bool IsUnlockable => _isUnlockable;
 
         /// <summary>
-        /// True if this card can never be played: all Curses, and Status cards flagged as unplayable.
+        /// True if this card always stays in hand at end of turn (never discarded until played).
+        /// Checked by <c>DeckManager.DiscardHand</c> alongside per-turn granted retains.
+        /// </summary>
+        public bool InnateRetain => _innateRetain;
+
+        /// <summary>
+        /// True if this card can never be played: all Scandals, and Status cards flagged as unplayable.
         /// The hand displays these cards at half alpha; dragging is blocked.
         /// </summary>
-        public bool IsUnplayable => _cardType == CardType.Curse ||
-                                    (_cardType == CardType.Status && _isUnplayable);
+        public bool IsUnplayable =>
+            _cardType == CardType.Scandal || (_cardType == CardType.Heckle && _isUnplayable);
 
         /// <summary>
         /// Political lean of this card. Only relevant for CardType.Policy.
@@ -219,9 +262,18 @@ namespace Crookedile.Data.Cards
 
         /// <summary>
         /// Battle-scoped passives that fire on broad battle events for the entire battle.
-        /// Registered by PassiveResolver at the start of each battle.
+        /// For non-Power cards these are registered by PassiveResolver at the start of each battle;
+        /// for <see cref="IsPower"/> cards they are activated only when the card is played.
         /// </summary>
         public IReadOnlyList<BattlePassive> Passives => _passives;
+
+        /// <summary>
+        /// True if this is a Power card: its <see cref="Passives"/> activate on play (not at battle
+        /// start) and the card is exhausted afterwards. See PassiveResolver / BattleManager.PlayCard.
+        /// Now derived — every <see cref="CardType.Policy"/> card is a Power (the old per-card
+        /// <c>_isPower</c> toggle was redundant and was removed).
+        /// </summary>
+        public bool IsPower => _cardType == CardType.Policy;
 
         /// <summary>
         /// VFX played when this card is used. Null means effects resolve immediately (no regression).
@@ -240,14 +292,6 @@ namespace Crookedile.Data.Cards
         /// Human-readable description of what still needs to be configured in the Unity Inspector.
         /// </summary>
         public string ConfigurationNotes => _configurationNotes;
-
-        /// <summary>
-        /// True if this card still has legacy <see cref="CardEffect"/> entries and no new
-        /// <see cref="BattleEffect"/> entries. Used by the editor to surface un-migrated cards.
-        /// </summary>
-        public bool UsesLegacyEffects =>
-            _effects != null && _effects.Count > 0 &&
-            (_newEffects == null || _newEffects.Count == 0);
 
         /// <summary>
         /// True if this card has no artwork assigned and is therefore not yet ready for gameplay.
@@ -279,17 +323,18 @@ namespace Crookedile.Data.Cards
         private void DuplicateCard()
         {
             string currentPath = UnityEditor.AssetDatabase.GetAssetPath(this);
-            string directory   = System.IO.Path.GetDirectoryName(currentPath);
-            string fileName    = System.IO.Path.GetFileNameWithoutExtension(currentPath);
-            string newPath     = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(
-                $"{directory}/{fileName} Copy.asset");
+            string directory = System.IO.Path.GetDirectoryName(currentPath);
+            string fileName = System.IO.Path.GetFileNameWithoutExtension(currentPath);
+            string newPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(
+                $"{directory}/{fileName} Copy.asset"
+            );
 
-            CardData duplicate                    = Instantiate(this);
-            duplicate._id                         = System.Guid.NewGuid().ToString();
-            duplicate._cardName                   = $"{_cardName} Copy";
-            duplicate._isUpgraded       = false;
-            duplicate._upgradedCosts    = new List<CardCost>();
-            duplicate._upgradedEffects  = new List<BattleEffect>();
+            CardData duplicate = Instantiate(this);
+            duplicate._id = System.Guid.NewGuid().ToString();
+            duplicate._cardName = $"{_cardName} Copy";
+            duplicate._isUpgraded = false;
+            duplicate._upgradedCosts = new List<CardCost>();
+            duplicate._upgradedEffects = new List<BattleEffect>();
             duplicate._upgradedPassives = new List<BattlePassive>();
 
             UnityEditor.AssetDatabase.CreateAsset(duplicate, newPath);
@@ -339,15 +384,15 @@ namespace Crookedile.Data.Cards
         }
 
         /// <summary>
-        /// Gets the new polymorphic effects to use, respecting upgrade state.
+        /// Gets the polymorphic effects to use, respecting upgrade state.
         /// Returns <see cref="_upgradedEffects"/> when upgraded and the list is non-empty;
-        /// falls back to base <see cref="_newEffects"/> otherwise.
+        /// falls back to base <see cref="_effects"/> otherwise.
         /// </summary>
         public List<BattleEffect> GetNewEffects(bool useUpgraded = true)
         {
             if (useUpgraded && _isUpgraded && _upgradedEffects.Count > 0)
                 return _upgradedEffects;
-            return _newEffects;
+            return _effects;
         }
 
         /// <summary>
@@ -362,9 +407,6 @@ namespace Crookedile.Data.Cards
             return _passives;
         }
 
-        /// <summary>Gets the legacy effects for this card.</summary>
-        public List<CardEffect> GetEffects(bool useUpgraded = true) => _effects;
-
         /// <summary>
         /// Gets the description for this card.
         /// Returns the manual override if set, otherwise auto-generates from the card's effects.
@@ -375,33 +417,23 @@ namespace Crookedile.Data.Cards
         /// <summary>
         /// Builds a description string by concatenating <see cref="BattleEffect.GetDescription"/>
         /// from all effects. Uses the new BattleEffect system first, falls back to legacy
-        /// CardEffect descriptions. Returns an empty string if no effects are present.
+        /// effect descriptions. Returns an empty string if no effects are present.
         /// </summary>
         private string BuildAutoDescription()
         {
-            // New BattleEffect system takes priority
-            if (_newEffects != null && _newEffects.Count > 0)
-            {
-                var parts = new System.Collections.Generic.List<string>(_newEffects.Count);
-                foreach (var e in _newEffects)
-                {
-                    if (e == null) continue;
-                    string d = e.GetDescription();
-                    if (!string.IsNullOrEmpty(d)) parts.Add(d);
-                }
-                if (parts.Count > 0) return string.Join(". ", parts);
-            }
+            if (_effects == null || _effects.Count == 0)
+                return string.Empty;
 
-            // Legacy CardEffect fallback
-            if (_effects != null && _effects.Count > 0)
+            var parts = new System.Collections.Generic.List<string>(_effects.Count);
+            foreach (var e in _effects)
             {
-                var parts = new System.Collections.Generic.List<string>(_effects.Count);
-                foreach (var e in _effects)
-                    parts.Add(e.GetDescription());
-                return string.Join(". ", parts);
+                if (e == null)
+                    continue;
+                string d = e.GetDescription();
+                if (!string.IsNullOrEmpty(d))
+                    parts.Add(d);
             }
-
-            return string.Empty;
+            return parts.Count > 0 ? string.Join(". ", parts) : string.Empty;
         }
 
         /// <summary>Gets the artwork for this card.</summary>
@@ -429,3 +461,4 @@ namespace Crookedile.Data.Cards
 #endif
     }
 }
+        #endregion

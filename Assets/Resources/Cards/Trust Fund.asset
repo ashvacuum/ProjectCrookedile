@@ -17,7 +17,7 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: ba2fe25ba33df794a9b1a7dd348aeb0b, type: 3}
-  _description: Gain 2 Composure. Gain 1 Action Point this turn.
+  _description: Gain 2 Support. Gain 1 Action Point this turn.
   _flavorText: Family always provides.
   _costs:
   - _costType: 1
@@ -87,7 +87,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608336531357818
-      type: {class: GainComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 2

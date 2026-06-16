@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 4
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: 'Doubt creeps in. Lose 4 Composure at end of turn while held. (Configure
-    TurnEnd passive: LoseComposure 4 via Inspector.)'
+  _description: 'Doubt creeps in. Lose 4 Support at end of turn while held. (Configure
+    TurnEnd passive: LoseShield 4 via Inspector.)'
   _flavorText: 
   _costs:
   - _costType: 0

@@ -33,6 +33,6 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Battle has ended - victory or defeat.
         /// </summary>
-        BattleEnd
+        BattleEnd,
     }
 }

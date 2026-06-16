@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Data.Enemy
 {
@@ -32,8 +32,11 @@ namespace Crookedile.Data.Enemy
     [CreateAssetMenu(fileName = "DefaultIntentTheme", menuName = "Crookedile/Enemy/Intent Theme")]
     public class EnemyIntentTheme : ScriptableObject
     {
-        [Tooltip("One entry per EnemyMoveType. Missing types fall back to (null icon, white badge).")]
-        [SerializeField] private EnemyIntentEntry[] _entries;
+        [Tooltip(
+            "One entry per EnemyMoveType. Missing types fall back to (null icon, white badge)."
+        )]
+        [SerializeField]
+        private EnemyIntentEntry[] _entries;
 
         private Dictionary<EnemyMoveType, EnemyIntentEntry> _lookup;
 
@@ -42,7 +45,8 @@ namespace Crookedile.Data.Enemy
         private void BuildLookup()
         {
             _lookup = new Dictionary<EnemyMoveType, EnemyIntentEntry>();
-            if (_entries == null) return;
+            if (_entries == null)
+                return;
             foreach (var entry in _entries)
                 _lookup[entry.Type] = entry;
         }
@@ -53,7 +57,8 @@ namespace Crookedile.Data.Enemy
         /// </summary>
         public (Sprite icon, Color color) GetVisual(EnemyMoveType type)
         {
-            if (_lookup == null) BuildLookup();
+            if (_lookup == null)
+                BuildLookup();
             return _lookup.TryGetValue(type, out var entry)
                 ? (entry.Icon, entry.Color)
                 : (null, Color.white);

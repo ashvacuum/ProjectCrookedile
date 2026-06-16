@@ -1,0 +1,17 @@
+{
+    "name": "Crookedile.Utilities",
+    "rootNamespace": "Crookedile.Utilities",
+    "references": [
+        "UniTask",
+        "Crookedile.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

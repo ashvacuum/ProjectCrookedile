@@ -1,57 +1,40 @@
-# Philippine Political Card Game
+# Crookedile
 
-A roguelike collectible card game set in the Philippines where you play as a politician in the final 45 days before an election.
+*A Filipino political roguelite deck-builder. Working title (formerly "Palakasan" / "Philippine Political Card Game").*
 
----
-
-## Quick Start
-
-**Genre:** Roguelike Deck-Builder + Social Navigation
-**Tone:** Absurdist Political Satire
-**Objective:** Reach 10,000 Support Points by Day 45 without exceeding 100 Heat
+> You are not winning a fight. You are working a crowd — managing who speaks, how loudly, and in what direction they push public opinion.
 
 ---
 
-## Core Concept
+> [!IMPORTANT]
+> **The design is in active flux.** The game went through a major combat + class redesign. The **canonical, current** design lives in the two docs under `docs/` below. Most of the *other* root-level `.md` files predate that redesign and are flagged as historical — don't trust their specifics until reconciled.
 
-Navigate a Potionomics-style town map, build relationships through card battles, manage corruption, and win the election through charm, intimidation, faith, or family connections.
+## Start here (canonical, current)
+- **[`docs/core-design.md`](docs/core-design.md)** — core fantasy, the **Opinion Meter**, hostility, the **Echo Chamber** rule, voice intents, turn structure, and the **three archetypes**.
+- **[`docs/crookedile-starter-decks.md`](docs/crookedile-starter-decks.md)** — per-class starter decks and the reward-pool "potential" layer.
 
----
+## What the game is (current)
+- **Roguelite deck-builder**, political satire. The card **battles are the core** and the current focus — but they're wrapped in an **overworld campaign**: you navigate a town map and accumulate **Support** toward winning the election by a deadline. That campaign layer is still part of the vision, just **deferred and unsettled** (its exact shape — an abstract StS-style node map vs. a Potionomics-style navigable town — is an open design question; see `docs/core-design.md` §10 and the campaign-era docs below).
+- **No HP.** The per-battle battleground is a shared **Opinion Meter** (win at 100, lose at 0, Judgment at the turn limit). Directional session shields — **Support** (guards against drops) and **Denial** (guards against rises) — protect it. *(Note: per-battle "Support" the shield is distinct from campaign "Support points" the win condition — a naming overlap to resolve.)*
+- **Hostility** is a signed per-enemy stance you manage (hostile ↔ receptive). The central tension is the **Echo Chamber**: convert the *whole* room and your gains halve and your lead decays — so you always want a villain present.
+- **Three archetypes:** **Nepo Baby** (summon bodies; a hand-gated *Patronage* economy), **Celebrity** (an "open canvas" that drafts into Attention / Scandal / Drama King), **Faith Leader** (stack statuses to convert enemies into one-turn meter-pumping followers).
 
-## 📚 Documentation
+## Codebase orientation
+- Engine: **Unity 2021+ (C#)**. Active branch: `test-new-gameplay`.
+- Gameplay: `Assets/Scripts/Gameplay/Battle/` — `BattleManager` (FSM/flow), `OpinionLedger` (opinion + shields), `CrowdReactions` (hostility/echo/turncoat), `PassiveResolver`, the polymorphic `BattleEffect` system under `Effects/`.
+- Data: ScriptableObjects in `Assets/Scripts/Data/`. UI: `Assets/Scripts/UI/Battle/`. Editor tools: `Assets/Scripts/Editor/` (incl. the **Card Database** dashboard window).
+- Architecture in one line: a static **EventBus** for *notifications only* (never gameplay commands), an FSM for turn flow, and `[SerializeReference]` polymorphic effects authored as data.
 
-### Start Here
-- **[GAME_WIKI.md](GAME_WIKI.md)** — Single consolidated reference: all game systems, mechanics, origins, cards, resources, progression
-- **[SYSTEMS_STUDY.md](SYSTEMS_STUDY.md)** — Architecture analysis, system interdependencies, implementation status, blockers, inconsistencies
+## Legacy / historical docs (pre-redesign — flagged, may be inaccurate)
+These were the original campaign-era design + setup notes. Kept for reference; **reconcile against the canonical docs before trusting**:
 
-### Source Design Documents
-- **[Game Overview](game_overview.md)** - Core mechanics, game loop, and victory conditions
-- **[Origins](origins.md)** - Four playable character classes with unique abilities
-- **[Resources](resources.md)** - Currency and stat management systems
-- **[Cards](cards.md)** - Complete card system and deck building
-- **[Locations](locations.md)** - Map navigation, venues, and location mechanics
-- **[Events](events.md)** - Random events, special mechanics, and milestone encounters
-- **[Progression](progression.md)** - Roguelike elements, unlocks, and meta progression
-- **[Technical Notes](technical.md)** - Implementation details and architecture
+- Design source: `game_overview.md`, `origins.md`, `resources.md`, `cards.md`, `locations.md`, `events.md`, `progression.md`, `technical.md`
+- Consolidated wiki / study: `GAME_WIKI.md`, `SYSTEMS_STUDY.md`, `IMPLEMENTATION_STATUS.md`
+- Battle/UI/setup guides: `BATTLE_SYSTEM.md`, `BATTLE_SYSTEM_TASKS.md`, `BATTLE_INTEGRATION_FLOW.md`, `BATTLE_UI_SETUP.md`, `CARD_2D_SETUP.md`, `CARD_ACQUISITION.md`, `CARD_EFFECTS.md`, `SCENE_SETUP_GUIDE.md`, `STARTER_CARDS_GUIDE.md`, `cards.md`
+- Other current docs under `docs/`: `naming-glossary.md`, `opinion-meter-passes.md`
 
-## Design Pillars
-
-1. **Meaningful Choices** - Every decision has consequences
-2. **Dark Humor** - Serious topics treated with satirical edge
-3. **Replayability** - Roguelike structure ensures variety
-4. **Cultural Authenticity** - Grounded in Philippine political reality (exaggerated)
-5. **Strategic Depth** - Multiple paths to victory
-
-## Content Warning
-
-This game contains satirical content about:
-- Political violence and corruption
-- Religious manipulation
-- Class inequality and nepotism
-- Dark humor about serious topics
-
-No real-world politicians are depicted. All content is fictional parody.
+## Content note
+Satire of political violence, corruption, religious manipulation, class inequality, and nepotism. No real politicians are depicted; all content is fictional parody.
 
 ---
-
-*Version 0.1 - Design Phase*
+*Status: active development — the single-encounter battle loop is the current focus. The overworld campaign (town map, Support-to-win) remains part of the design but is deferred and not yet locked.*

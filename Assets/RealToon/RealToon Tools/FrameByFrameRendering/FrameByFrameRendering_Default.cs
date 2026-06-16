@@ -1,6 +1,5 @@
 ﻿//RealToon - Frame By Frame Rendering V1.0.0
-//MJQStudioWorks
-//©2025
+//©MJQStudioWorks
 
 using UnityEngine;
 using System.Collections;

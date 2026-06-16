@@ -12,27 +12,38 @@ namespace Crookedile.Data.Cards
     public class CardCost
     {
         [Tooltip("Type of cost (None or ActionPoints)")]
-        [SerializeField] private CostType _costType;
+        [SerializeField]
+        private CostType _costType;
 
         [Tooltip("Base amount of Action Points required (0 = free)")]
-        [SerializeField] private int _baseAmount;
+        [SerializeField]
+        private int _baseAmount;
 
         [Tooltip("If true, this card costs all remaining Action Points (X cost)")]
-        [SerializeField] private bool _isXCost;
+        [SerializeField]
+        private bool _isXCost;
 
         [Header("Dynamic Cost Modifiers")]
-        [Tooltip("Cost reduction/increase per turn (-1 = decreases by 1 each turn, +1 = increases)")]
-        [SerializeField] private int _costChangePerTurn;
+        [Tooltip(
+            "Cost reduction/increase per turn (-1 = decreases by 1 each turn, +1 = increases)"
+        )]
+        [SerializeField]
+        private int _costChangePerTurn;
 
         [Tooltip("Minimum cost (can't go below this, even with reductions)")]
-        [SerializeField] private int _minimumCost = 0;
+        [SerializeField]
+        private int _minimumCost = 0;
 
         [Tooltip("Maximum cost (can't go above this, even with increases)")]
-        [SerializeField] private int _maximumCost = 99;
+        [SerializeField]
+        private int _maximumCost = 99;
 
         // Runtime cost modifier (applied during battle)
-        [NonSerialized] private int _runtimeCostModifier = 0;
-        [NonSerialized] private int _turnsInHand = 0;
+        [NonSerialized]
+        private int _runtimeCostModifier = 0;
+
+        [NonSerialized]
+        private int _turnsInHand = 0;
 
         /// <summary>
         /// Type of cost (None or ActionPoints).
@@ -91,7 +102,12 @@ namespace Crookedile.Data.Cards
         /// <param name="amount">Base amount required</param>
         /// <param name="isXCost">If true, costs all remaining AP</param>
         /// <param name="costChangePerTurn">Cost change per turn in hand</param>
-        public CardCost(CostType costType, int amount, bool isXCost = false, int costChangePerTurn = 0)
+        public CardCost(
+            CostType costType,
+            int amount,
+            bool isXCost = false,
+            int costChangePerTurn = 0
+        )
         {
             _costType = costType;
             _baseAmount = amount;

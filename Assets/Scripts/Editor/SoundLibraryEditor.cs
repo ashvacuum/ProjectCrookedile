@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Crookedile.Data.Audio;
 using Sirenix.OdinInspector.Editor;
@@ -20,8 +20,18 @@ namespace Crookedile.Editor
         private bool sortDescending = false;
         private ViewMode viewMode = ViewMode.Statistics;
 
-        private enum ViewMode  { Statistics, SoundBrowser }
-        private enum SortMode  { Name, ID, Category }
+        private enum ViewMode
+        {
+            Statistics,
+            SoundBrowser,
+        }
+
+        private enum SortMode
+        {
+            Name,
+            ID,
+            Category,
+        }
 
         protected override void OnEnable()
         {
@@ -32,23 +42,27 @@ namespace Crookedile.Editor
 
         public override void OnInspectorGUI()
         {
-            if (database == null) return;
+            if (database == null)
+                return;
             DrawHeader();
             DrawViewModeSelector();
             EditorGUILayout.Space(10);
 
             switch (viewMode)
             {
-                case ViewMode.Statistics:  DrawStatisticsView();  break;
-                case ViewMode.SoundBrowser: DrawSoundBrowserView(); break;
+                case ViewMode.Statistics:
+                    DrawStatisticsView();
+                    break;
+                case ViewMode.SoundBrowser:
+                    DrawSoundBrowserView();
+                    break;
             }
 
             EditorGUILayout.Space(10);
             DrawDefaultInspector();
         }
 
-        // ─── Header ──────────────────────────────────────────────────────────
-
+        #region Header
         private void DrawHeader()
         {
             SirenixEditorGUI.BeginBox();
@@ -86,10 +100,26 @@ namespace Crookedile.Editor
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Toggle(viewMode == ViewMode.Statistics, "Statistics", SirenixGUIStyles.Button, GUILayout.Width(120), GUILayout.Height(25)))
+            if (
+                GUILayout.Toggle(
+                    viewMode == ViewMode.Statistics,
+                    "Statistics",
+                    SirenixGUIStyles.Button,
+                    GUILayout.Width(120),
+                    GUILayout.Height(25)
+                )
+            )
                 viewMode = ViewMode.Statistics;
 
-            if (GUILayout.Toggle(viewMode == ViewMode.SoundBrowser, "Sound Browser", SirenixGUIStyles.Button, GUILayout.Width(120), GUILayout.Height(25)))
+            if (
+                GUILayout.Toggle(
+                    viewMode == ViewMode.SoundBrowser,
+                    "Sound Browser",
+                    SirenixGUIStyles.Button,
+                    GUILayout.Width(120),
+                    GUILayout.Height(25)
+                )
+            )
             {
                 viewMode = ViewMode.SoundBrowser;
                 RefreshFilteredClips();
@@ -99,8 +129,9 @@ namespace Crookedile.Editor
             GUILayout.EndHorizontal();
         }
 
-        // ─── Statistics View ──────────────────────────────────────────────────
+        #endregion
 
+        #region Statistics View
         private void DrawStatisticsView()
         {
             SirenixEditorGUI.BeginBox();
@@ -116,7 +147,9 @@ namespace Crookedile.Editor
 
             var categories = allClips
                 .Select(c => string.IsNullOrEmpty(c.Category) ? "(uncategorised)" : c.Category)
-                .Distinct().OrderBy(c => c).ToList();
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
 
             foreach (var cat in categories)
             {
@@ -138,16 +171,19 @@ namespace Crookedile.Editor
             SirenixEditorGUI.BeginVerticalList();
             GUILayout.Label("Quick Health Check", EditorStyles.boldLabel);
 
-            int nullClips  = allClips.Count(c => c.Clip == null);
-            int emptyIds   = allClips.Count(c => string.IsNullOrEmpty(c.ID));
-            int dupIds     = allClips.GroupBy(c => c.ID).Count(g => g.Count() > 1);
+            int nullClips = allClips.Count(c => c.Clip == null);
+            int emptyIds = allClips.Count(c => string.IsNullOrEmpty(c.ID));
+            int dupIds = allClips.GroupBy(c => c.ID).Count(g => g.Count() > 1);
             int emptyNames = allClips.Count(c => string.IsNullOrEmpty(c.ClipName));
-            int dupNames   = allClips.Where(c => !string.IsNullOrEmpty(c.ClipName)).GroupBy(c => c.ClipName, System.StringComparer.OrdinalIgnoreCase).Count(g => g.Count() > 1);
+            int dupNames = allClips
+                .Where(c => !string.IsNullOrEmpty(c.ClipName))
+                .GroupBy(c => c.ClipName, System.StringComparer.OrdinalIgnoreCase)
+                .Count(g => g.Count() > 1);
 
-            DrawHealthRow("Null Clips",      nullClips);
-            DrawHealthRow("Empty IDs",       emptyIds);
-            DrawHealthRow("Duplicate IDs",   dupIds);
-            DrawHealthRow("Empty Names",     emptyNames);
+            DrawHealthRow("Null Clips", nullClips);
+            DrawHealthRow("Empty IDs", emptyIds);
+            DrawHealthRow("Duplicate IDs", dupIds);
+            DrawHealthRow("Empty Names", emptyNames);
             DrawHealthRow("Duplicate Names", dupNames);
 
             SirenixEditorGUI.EndVerticalList();
@@ -161,7 +197,10 @@ namespace Crookedile.Editor
             GUILayout.Label($"{label}:", GUILayout.Width(140));
             Color prev = GUI.color;
             GUI.color = issueCount == 0 ? Color.green : Color.red;
-            GUILayout.Label(issueCount == 0 ? "✓ OK" : $"✗ {issueCount}", SirenixGUIStyles.BoldLabel);
+            GUILayout.Label(
+                issueCount == 0 ? "✓ OK" : $"✗ {issueCount}",
+                SirenixGUIStyles.BoldLabel
+            );
             GUI.color = prev;
             GUILayout.EndHorizontal();
         }
@@ -172,13 +211,17 @@ namespace Crookedile.Editor
             float fill = max > 0 ? current / (float)max : 0f;
 
             EditorGUI.DrawRect(rect, new Color(0.2f, 0.2f, 0.2f, 0.5f));
-            EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width * fill, rect.height), new Color(0.3f, 0.7f, 1f, 0.6f));
+            EditorGUI.DrawRect(
+                new Rect(rect.x, rect.y, rect.width * fill, rect.height),
+                new Color(0.3f, 0.7f, 1f, 0.6f)
+            );
             SirenixEditorGUI.DrawBorders(rect, 1);
             GUI.Label(rect, label, SirenixGUIStyles.CenteredWhiteMiniLabel);
         }
 
-        // ─── Sound Browser View ───────────────────────────────────────────────
+        #endregion
 
+        #region Sound Browser View
         private void DrawSoundBrowserView()
         {
             SirenixEditorGUI.BeginBox();
@@ -190,18 +233,27 @@ namespace Crookedile.Editor
             GUILayout.BeginHorizontal();
             GUILayout.Label("Search:", GUILayout.Width(60));
             string newSearch = EditorGUILayout.TextField(searchFilter);
-            if (newSearch != searchFilter) { searchFilter = newSearch; RefreshFilteredClips(); }
+            if (newSearch != searchFilter)
+            {
+                searchFilter = newSearch;
+                RefreshFilteredClips();
+            }
             if (GUILayout.Button("Clear", GUILayout.Width(50)))
             {
-                searchFilter = ""; filterByCategory = null;
-                RefreshFilteredClips(); GUI.FocusControl(null);
+                searchFilter = "";
+                filterByCategory = null;
+                RefreshFilteredClips();
+                GUI.FocusControl(null);
             }
             GUILayout.EndHorizontal();
 
             // Category filter buttons
-            var cats = database.GetAll()
+            var cats = database
+                .GetAll()
                 .Select(c => string.IsNullOrEmpty(c.Category) ? "(uncategorised)" : c.Category)
-                .Distinct().OrderBy(c => c).ToList();
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
 
             if (cats.Count > 0)
             {
@@ -209,13 +261,21 @@ namespace Crookedile.Editor
                 GUILayout.Label("Category:", GUILayout.Width(60));
                 if (GUILayout.Toggle(filterByCategory == null, "All", SirenixGUIStyles.MiniButton))
                 {
-                    if (filterByCategory != null) { filterByCategory = null; RefreshFilteredClips(); }
+                    if (filterByCategory != null)
+                    {
+                        filterByCategory = null;
+                        RefreshFilteredClips();
+                    }
                 }
                 foreach (var cat in cats)
                 {
                     if (GUILayout.Toggle(filterByCategory == cat, cat, SirenixGUIStyles.MiniButton))
                     {
-                        if (filterByCategory != cat) { filterByCategory = cat; RefreshFilteredClips(); }
+                        if (filterByCategory != cat)
+                        {
+                            filterByCategory = cat;
+                            RefreshFilteredClips();
+                        }
                     }
                 }
                 GUILayout.EndHorizontal();
@@ -229,17 +289,29 @@ namespace Crookedile.Editor
             GUILayout.Label("Sort By:", GUILayout.Width(60));
             foreach (SortMode mode in System.Enum.GetValues(typeof(SortMode)))
             {
-                if (GUILayout.Toggle(currentSortMode == mode, mode.ToString(), SirenixGUIStyles.MiniButton))
+                if (
+                    GUILayout.Toggle(
+                        currentSortMode == mode,
+                        mode.ToString(),
+                        SirenixGUIStyles.MiniButton
+                    )
+                )
                 {
-                    if (currentSortMode == mode) sortDescending = !sortDescending;
-                    else { currentSortMode = mode; sortDescending = false; }
+                    if (currentSortMode == mode)
+                        sortDescending = !sortDescending;
+                    else
+                    {
+                        currentSortMode = mode;
+                        sortDescending = false;
+                    }
                     RefreshFilteredClips();
                 }
             }
             GUILayout.FlexibleSpace();
             if (GUILayout.Button(sortDescending ? "↓" : "↑", GUILayout.Width(30)))
             {
-                sortDescending = !sortDescending; RefreshFilteredClips();
+                sortDescending = !sortDescending;
+                RefreshFilteredClips();
             }
             GUILayout.EndHorizontal();
 
@@ -254,10 +326,16 @@ namespace Crookedile.Editor
             }
             else
             {
-                GUILayout.Label($"Showing {filteredClips.Count} clip(s)", SirenixGUIStyles.CenteredGreyMiniLabel);
+                GUILayout.Label(
+                    $"Showing {filteredClips.Count} clip(s)",
+                    SirenixGUIStyles.CenteredGreyMiniLabel
+                );
                 EditorGUILayout.Space(5);
 
-                scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.MaxHeight(400));
+                scrollPosition = EditorGUILayout.BeginScrollView(
+                    scrollPosition,
+                    GUILayout.MaxHeight(400)
+                );
                 for (int i = 0; i < filteredClips.Count; i++)
                     DrawClipEntry(filteredClips[i], i);
                 EditorGUILayout.EndScrollView();
@@ -269,18 +347,33 @@ namespace Crookedile.Editor
         private void DrawClipEntry(AudioClipData clip, int index)
         {
             bool isOdd = index % 2 == 1;
-            Color bg = isOdd ? new Color(0.25f, 0.25f, 0.25f, 0.3f) : new Color(0.2f, 0.2f, 0.2f, 0.2f);
+            Color bg = isOdd
+                ? new Color(0.25f, 0.25f, 0.25f, 0.3f)
+                : new Color(0.2f, 0.2f, 0.2f, 0.2f);
 
             Rect lineRect = EditorGUILayout.GetControlRect(GUILayout.Height(24));
             if (Event.current.type == EventType.Repaint)
                 EditorGUI.DrawRect(lineRect, bg);
 
-            Rect content = new Rect(lineRect.x + 5, lineRect.y + 2, lineRect.width - 10, lineRect.height - 4);
+            Rect content = new Rect(
+                lineRect.x + 5,
+                lineRect.y + 2,
+                lineRect.width - 10,
+                lineRect.height - 4
+            );
             float x = content.x;
 
             // ClipName (primary) — click to select asset
-            string displayName = string.IsNullOrEmpty(clip.ClipName) ? "⚠ (no name)" : clip.ClipName;
-            if (GUI.Button(new Rect(x, content.y, 160, 20), displayName, SirenixGUIStyles.LeftAlignedWhiteMiniLabel))
+            string displayName = string.IsNullOrEmpty(clip.ClipName)
+                ? "⚠ (no name)"
+                : clip.ClipName;
+            if (
+                GUI.Button(
+                    new Rect(x, content.y, 160, 20),
+                    displayName,
+                    SirenixGUIStyles.LeftAlignedWhiteMiniLabel
+                )
+            )
             {
                 Selection.activeObject = clip;
                 EditorGUIUtility.PingObject(clip);
@@ -288,8 +381,14 @@ namespace Crookedile.Editor
             x += 165;
 
             // ID truncated (first 8 chars) — secondary reference
-            string shortId = string.IsNullOrEmpty(clip.ID) ? "(no id)" : clip.ID.Substring(0, Mathf.Min(8, clip.ID.Length)) + "…";
-            GUI.Label(new Rect(x, content.y, 80, 18), shortId, SirenixGUIStyles.CenteredGreyMiniLabel);
+            string shortId = string.IsNullOrEmpty(clip.ID)
+                ? "(no id)"
+                : clip.ID.Substring(0, Mathf.Min(8, clip.ID.Length)) + "…";
+            GUI.Label(
+                new Rect(x, content.y, 80, 18),
+                shortId,
+                SirenixGUIStyles.CenteredGreyMiniLabel
+            );
             x += 85;
 
             // Category badge
@@ -302,26 +401,54 @@ namespace Crookedile.Editor
 
             // AudioClip asset name
             string clipName = clip.Clip != null ? clip.Clip.name : "⚠ null";
-            GUI.Label(new Rect(x, content.y, 130, 18), clipName, SirenixGUIStyles.CenteredGreyMiniLabel);
+            GUI.Label(
+                new Rect(x, content.y, 130, 18),
+                clipName,
+                SirenixGUIStyles.CenteredGreyMiniLabel
+            );
             x += 135;
 
             // Volume + pitch
-            GUI.Label(new Rect(x, content.y, 105, 18), $"Vol:{clip.Volume:F2}  P:{clip.Pitch:F2}", SirenixGUIStyles.CenteredGreyMiniLabel);
+            GUI.Label(
+                new Rect(x, content.y, 105, 18),
+                $"Vol:{clip.Volume:F2}  P:{clip.Pitch:F2}",
+                SirenixGUIStyles.CenteredGreyMiniLabel
+            );
         }
 
-        // ─── Filtering / Sorting ──────────────────────────────────────────────
+        #endregion
 
+        #region Filtering / Sorting
         private void RefreshFilteredClips()
         {
-            if (database == null) return;
+            if (database == null)
+                return;
             filteredClips = database.GetAll();
 
             if (!string.IsNullOrWhiteSpace(searchFilter))
-                filteredClips = filteredClips.Where(c =>
-                    (!string.IsNullOrEmpty(c.ClipName) && c.ClipName.IndexOf(searchFilter, System.StringComparison.OrdinalIgnoreCase) >= 0) ||
-                    (!string.IsNullOrEmpty(c.ID)       && c.ID.IndexOf(searchFilter, System.StringComparison.OrdinalIgnoreCase) >= 0)       ||
-                    (c.Clip != null                    && c.Clip.name.IndexOf(searchFilter, System.StringComparison.OrdinalIgnoreCase) >= 0)
-                ).ToList();
+                filteredClips = filteredClips
+                    .Where(c =>
+                        (
+                            !string.IsNullOrEmpty(c.ClipName)
+                            && c.ClipName.IndexOf(
+                                searchFilter,
+                                System.StringComparison.OrdinalIgnoreCase
+                            ) >= 0
+                        )
+                        || (
+                            !string.IsNullOrEmpty(c.ID)
+                            && c.ID.IndexOf(searchFilter, System.StringComparison.OrdinalIgnoreCase)
+                                >= 0
+                        )
+                        || (
+                            c.Clip != null
+                            && c.Clip.name.IndexOf(
+                                searchFilter,
+                                System.StringComparison.OrdinalIgnoreCase
+                            ) >= 0
+                        )
+                    )
+                    .ToList();
 
             if (filterByCategory != null)
             {
@@ -331,15 +458,22 @@ namespace Crookedile.Editor
 
             filteredClips = currentSortMode switch
             {
-                SortMode.Name     => sortDescending ? filteredClips.OrderByDescending(c => c.ClipName).ToList() : filteredClips.OrderBy(c => c.ClipName).ToList(),
-                SortMode.ID       => sortDescending ? filteredClips.OrderByDescending(c => c.ID).ToList()       : filteredClips.OrderBy(c => c.ID).ToList(),
-                SortMode.Category => sortDescending ? filteredClips.OrderByDescending(c => c.Category).ToList() : filteredClips.OrderBy(c => c.Category).ToList(),
-                _ => filteredClips
+                SortMode.Name => sortDescending
+                    ? filteredClips.OrderByDescending(c => c.ClipName).ToList()
+                    : filteredClips.OrderBy(c => c.ClipName).ToList(),
+                SortMode.ID => sortDescending
+                    ? filteredClips.OrderByDescending(c => c.ID).ToList()
+                    : filteredClips.OrderBy(c => c.ID).ToList(),
+                SortMode.Category => sortDescending
+                    ? filteredClips.OrderByDescending(c => c.Category).ToList()
+                    : filteredClips.OrderBy(c => c.Category).ToList(),
+                _ => filteredClips,
             };
         }
 
-        // ─── Validation ───────────────────────────────────────────────────────
+        #endregion
 
+        #region Validation
         private void ValidateSoundLibrary(SoundLibrary db)
         {
             var allClips = db.GetAll();
@@ -353,7 +487,9 @@ namespace Crookedile.Editor
             foreach (var grp in dupIdGroups)
             {
                 issueCount++;
-                report.AppendLine($"Duplicate ID \"{grp.Key}\": {grp.Count()} assets share this ID.");
+                report.AppendLine(
+                    $"Duplicate ID \"{grp.Key}\": {grp.Count()} assets share this ID."
+                );
                 foreach (var c in grp)
                 {
                     report.AppendLine($"  - {c.name}");
@@ -366,15 +502,21 @@ namespace Crookedile.Editor
             var dupNameGroups = allClips
                 .Where(c => !string.IsNullOrEmpty(c.ClipName))
                 .GroupBy(c => c.ClipName, System.StringComparer.OrdinalIgnoreCase)
-                .Where(g => g.Count() > 1).ToList();
+                .Where(g => g.Count() > 1)
+                .ToList();
             foreach (var grp in dupNameGroups)
             {
                 issueCount++;
-                report.AppendLine($"Duplicate Name \"{grp.Key}\": {grp.Count()} assets share this name.");
+                report.AppendLine(
+                    $"Duplicate Name \"{grp.Key}\": {grp.Count()} assets share this name."
+                );
                 foreach (var c in grp)
                 {
                     report.AppendLine($"  - {c.name}");
-                    Debug.LogWarning($"[SoundLibrary] Duplicate Name \"{grp.Key}\" on: {c.name}", c);
+                    Debug.LogWarning(
+                        $"[SoundLibrary] Duplicate Name \"{grp.Key}\" on: {c.name}",
+                        c
+                    );
                 }
                 report.AppendLine();
             }
@@ -383,9 +525,12 @@ namespace Crookedile.Editor
             foreach (var clip in allClips)
             {
                 var issues = new System.Text.StringBuilder();
-                if (string.IsNullOrEmpty(clip.ID))       issues.AppendLine("  - ID is empty");
-                if (string.IsNullOrEmpty(clip.ClipName)) issues.AppendLine("  - ClipName is empty");
-                if (clip.Clip == null)                   issues.AppendLine("  - AudioClip is null");
+                if (string.IsNullOrEmpty(clip.ID))
+                    issues.AppendLine("  - ID is empty");
+                if (string.IsNullOrEmpty(clip.ClipName))
+                    issues.AppendLine("  - ClipName is empty");
+                if (clip.Clip == null)
+                    issues.AppendLine("  - AudioClip is null");
 
                 if (issues.Length > 0)
                 {
@@ -399,14 +544,25 @@ namespace Crookedile.Editor
 
             if (issueCount == 0)
             {
-                Debug.Log(report.AppendLine($"All {allClips.Count} clips passed validation!").ToString());
-                EditorUtility.DisplayDialog("Sound Library", $"All {allClips.Count} clips passed validation!", "OK");
+                Debug.Log(
+                    report.AppendLine($"All {allClips.Count} clips passed validation!").ToString()
+                );
+                EditorUtility.DisplayDialog(
+                    "Sound Library",
+                    $"All {allClips.Count} clips passed validation!",
+                    "OK"
+                );
             }
             else
             {
                 Debug.LogWarning(report.ToString());
-                EditorUtility.DisplayDialog("Sound Library", $"Found {issueCount} issue(s).\nCheck the Console for details.", "OK");
+                EditorUtility.DisplayDialog(
+                    "Sound Library",
+                    $"Found {issueCount} issue(s).\nCheck the Console for details.",
+                    "OK"
+                );
             }
         }
     }
 }
+        #endregion

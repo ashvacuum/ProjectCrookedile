@@ -1,4 +1,4 @@
-using Crookedile.Core;
+﻿using Crookedile.Core;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 
@@ -10,21 +10,25 @@ using Crookedile.Data.Enemy;
 //   Unsubscribe: EventBus.Unsubscribe<FooEvent>(OnFoo);     // call in OnDisable
 //   Publish:     EventBus.Publish(new FooEvent { ... });
 //
-// ── Lifecycle ────────────────────────────────────────────────────────────────
+#region Lifecycle
 //   BattleStartedEvent       Publisher: BattleManager.StartBattle
 //                            Subscribers: BattleUI, EnemyController
 //
 //   BattleEndedEvent         Publisher: BattleManager (BattleEndState)
 //                            Subscribers: BattleUI, CampaignManager
 //
-// ── Turns ────────────────────────────────────────────────────────────────────
+#endregion
+
+#region Turns
 //   TurnStartedEvent         Publisher: BattleManager (TurnStartState)
 //                            Subscribers: BattleUI, EnemyController
 //
 //   TurnEndedEvent           Publisher: BattleManager (TurnEndState)
 //                            Subscribers: BattleUI
 //
-// ── Cards ────────────────────────────────────────────────────────────────────
+#endregion
+
+#region Cards
 //   CardDrawnEvent           Publisher: DeckManager.DrawCards
 //                            Subscribers: BattleUI, PassiveResolver (future)
 //
@@ -37,10 +41,9 @@ using Crookedile.Data.Enemy;
 //   CardExhaustedEvent       Publisher: DeckManager.ExhaustCard
 //                            Subscribers: BattleUI
 //
-// ── Effects ──────────────────────────────────────────────────────────────────
-//   EffectAppliedEvent       Publisher: EffectResolver (per card effect)
-//                            Subscribers: BattleUI (future), analytics
-//
+#endregion
+
+#region Effects
 //   DamageDealtEvent         Publisher: EffectResolver
 //                            Subscribers: BattleUI combat log
 //
@@ -50,25 +53,53 @@ using Crookedile.Data.Enemy;
 //   StatusEffectAppliedEvent Publisher: EffectResolver
 //                            Subscribers: BattleUI status icons
 //
-// ── Resources ────────────────────────────────────────────────────────────────
+#endregion
+
+#region Resources
 //   ActionPointsChangedEvent Publisher: BattleStats (GainActionPoints / PayCost)
 //                            Subscribers: BattleUI AP display
 //
-//   ResolveChangedEvent      Publisher: BattleStats (DamageResolve / RestoreResolve)
-//                            Subscribers: BattleUI health bar
+//   SupportChangedEvent      Publisher: OpinionLedger (gain / absorb / decay)
+//                            Subscribers: BattleUI Support display
+//   DenialChangedEvent       Publisher: OpinionLedger (gain / absorb / decay)
+//                            Subscribers: BattleUI Denial display
 //
-//   ComposureChangedEvent    Publisher: BattleStats (GainComposure / LoseComposure)
-//                            Subscribers: BattleUI composure display
+//   HostilityChangedEvent      Publisher: BattleStats (any hostility change)
+//                              Subscribers: BattleUI hostility bar, EnemySlotUI
 //
-//   HostilityChangedEvent    Publisher: BattleStats (GainHostility / ReduceHostility)
-//                            Subscribers: BattleUI hostility bar, EnemySlotUI
+//   EnemyMaxedHostilityEvent   Publisher: BattleStats (below-max → max)
+//                              Subscribers: PassiveResolver (EnemyMaxedHostilityTrigger)
+//   EnemyMaxedReceptiveEvent   Publisher: BattleStats (above-min → min)
+//                              Subscribers: PassiveResolver (EnemyMaxedReceptiveTrigger)
+//   EnemyBecameHostileEvent    Publisher: BattleStats (≤0 → >0 crossing)
+//                              Subscribers: PassiveResolver (EnemyBecameHostileTrigger)
+//   EnemyBecameReceptiveEvent  Publisher: BattleStats (≥0 → <0 crossing)
+//                              Subscribers: PassiveResolver (EnemyBecameReceptiveTrigger)
+//   EnemyNeutralizedEvent      Publisher: BattleStats (non-zero → 0)
+//                              Subscribers: PassiveResolver (EnemyNeutralizedTrigger)
 //
-// ── Enemy ────────────────────────────────────────────────────────────────────
+#endregion
+
+#region Opinion Meter
+//   OpinionChangedEvent        Publisher: OpinionLedger (Raise / Lower)
+//                              Subscribers: BattleUI (OpinionMeterUI)
+//
+//   JudgmentEvent              Publisher: BattleManager (TurnEndState — turn limit reached)
+//                              Subscribers: BattleUI (result log)
+//
+//   TurnLimitUpdatedEvent      Publisher: BattleManager (TurnEndState — each player turn)
+//                              Subscribers: BattleUI (OpinionMeterUI countdown)
+//
+//   EnemySkippedTurnEvent      Publisher: BattleManager (OpponentTurnState — receptive skip)
+//                              Subscribers: BattleUI (battle log)
+//
+#endregion
+
+#region Enemy
 //   EnemyIntentDeclaredEvent   Publisher: EnemyController (at start of player turn)
 //                              Subscribers: BattleUI (EnemySlotUI)
 //
-//   EnemyHostilityChangedEvent Publisher: BattleManager.PlayCard (policy hostility shift)
-//                              Subscribers: BattleUI (EnemySlotUI)
+//   (Hostility changes flow through HostilityChangedEvent — see Resources section above.)
 //
 //   EnemyDefeatedEvent         Publisher: BattleManager
 //                              Subscribers: BattleUI, BattleManager (focus auto-advance)
@@ -76,12 +107,11 @@ using Crookedile.Data.Enemy;
 //   EnemySummonedEvent         Publisher: BattleManager.SummonMinions
 //                              Subscribers: BattleUI (spawns new enemy slot)
 //
-// ── Player Input ─────────────────────────────────────────────────────────────
-//   EndTurnRequestedEvent    Publisher: BattleUI end-turn button
-//                            Subscribers: BattleManager
-//
-//   PlayCardRequestedEvent   Publisher: BattleUI card button click
-//                            Subscribers: BattleManager
+#endregion
+
+//   (Player input — end turn, play card — is a DIRECT METHOD CALL on BattleManager
+//    (RequestEndTurn / RequestPlayCard), not an event. The bus carries notifications
+//    only; commands go through references.)
 //
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -90,6 +120,17 @@ namespace Crookedile.Gameplay.Battle
     #region Battle Lifecycle Events
 
     /// <summary>
+    /// Published by <c>BattleManager</c> whenever it transitions between states.
+    /// This is the single authoritative event for driving structural UI changes — panels,
+    /// buttons, and hand visibility should all be gated on this rather than on individual
+    /// turn/battle events.
+    /// </summary>
+    public struct BattleStateChangedEvent : IGameEvent
+    {
+        public BattleState Previous;
+        public BattleState Current;
+    }
+
     /// Published by <c>BattleManager.StartBattle()</c> once the battle is fully initialized.
     /// Subscribers should use this to do any first-frame setup that requires a live BattleManager.
     /// </summary>
@@ -173,14 +214,16 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by <c>BattleManager</c> once a played card's VFX animation fully completes,
-    /// or immediately after effects resolve when the card has no VFX.
-    /// <c>BattleUI</c> subscribes to this to begin the card discard animation, ensuring the
-    /// sequence is always: VFX resolves → card flies to discard → new draws appear.
+    /// Notification published ONLY by <c>BattleManager</c> once a played card has fully
+    /// resolved — VFX finished (or none) and effects applied. <c>BattleUI</c> subscribes
+    /// to begin the card discard animation, ensuring the sequence is always:
+    /// VFX resolves → card flies to discard → new draws appear.
+    /// The VFX sequencing itself is a direct callback handshake via
+    /// <see cref="ICardPlayFeedback"/>, not bus events.
     /// </summary>
-    public struct CardVFXCompleteEvent : IGameEvent
+    public struct CardPlayResolvedEvent : IGameEvent
     {
-        /// <summary>The card whose VFX (or immediate resolution) just finished.</summary>
+        /// <summary>The card whose play sequence just finished.</summary>
         public CardData Card;
     }
 
@@ -234,28 +277,23 @@ namespace Crookedile.Gameplay.Battle
 
     #region Effect Events
 
-    /// <summary>
-    /// Published by <c>EffectResolver</c> once per <see cref="CardEffect"/> after it resolves.
-    /// Fires regardless of target or effect type — useful for analytics, achievement tracking,
-    /// and implementing triggered card effects that react to specific effect types.
-    /// </summary>
-    public struct EffectAppliedEvent : IGameEvent
-    {
-        /// <summary>The individual card effect that was applied (type, amount, target, etc.).</summary>
-        public CardEffect Effect;
-
-        /// <summary>True = the effect was applied by/for the player; false = by/for an enemy.</summary>
-        public bool IsPlayer;
-    }
 
     /// <summary>
-    /// Published by <c>EffectResolver</c> whenever Resolve damage is successfully dealt (after all modifiers).
+    /// Published by <c>OpinionLedger.ApplyPressure</c> whenever opinion-meter pressure resolves
+    /// (after shields and meter mutation, so the payload carries the honest outcome).
     /// Only fires when <c>Amount &gt; 0</c>.
     /// </summary>
     public struct DamageDealtEvent : IGameEvent
     {
-        /// <summary>Actual Resolve damage dealt after composure reduction and hostility multiplier.</summary>
+        /// <summary>Opinion pressure applied after modifiers/hostility, before session-shield absorption.</summary>
         public int Amount;
+
+        /// <summary>Portion of <see cref="Amount"/> eaten by the session shield (Support/Denial).</summary>
+        public int Absorbed;
+
+        /// <summary>Delta the opinion meter actually moved (post echo-halving and 0/max clamping).
+        /// Show THIS to the player — <see cref="Amount"/> overstates the hit when shields absorb.</summary>
+        public int Applied;
 
         /// <summary>True = player is the damage target; false = an enemy is the target.</summary>
         public bool IsToPlayer;
@@ -273,12 +311,12 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by <c>EffectResolver</c> whenever Resolve healing is applied.
+    /// Published when Opinion is raised directly (bypassing the Denial pipeline).
     /// Only fires when <c>Amount &gt; 0</c>.
     /// </summary>
     public struct HealingAppliedEvent : IGameEvent
     {
-        /// <summary>Amount of Resolve restored (capped by max Resolve).</summary>
+        /// <summary>Amount of Opinion restored directly.</summary>
         public int Amount;
 
         /// <summary>True = player received the healing; false = an enemy received it.</summary>
@@ -290,14 +328,21 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public struct StatusEffectAppliedEvent : IGameEvent
     {
-        /// <summary>The type of status effect applied (e.g. Burning, Shielded, Stunned).</summary>
-        public StatusEffectType StatusType;
+        /// <summary>The status applied (canonical behavior instance from the registry).</summary>
+        public StatusBehavior Behavior;
+
+        /// <summary>Stable id of the applied status (e.g. "guilt"), or null.</summary>
+        public string StatusId => Behavior?.Id;
 
         /// <summary>Number of stacks applied (positive = added; negative = removed).</summary>
         public int Stacks;
 
         /// <summary>True = applied to the player; false = applied to an enemy.</summary>
         public bool IsToPlayer;
+
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> the status was applied to,
+        /// or -1 for the player. Lets the UI refresh the correct enemy slot.</summary>
+        public int EnemyIndex;
     }
 
     #endregion
@@ -321,41 +366,65 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by <c>BattleStats</c> whenever Resolve changes (damage or healing).
-    /// Used by the UI to update health bars reactively.
+    /// Published by <c>BattleManager</c> whenever the player's banked Patronage changes (Nepo Baby).
+    /// Patronage is generated by sacrificing cards and spent on summons/installations; it persists
+    /// across turns (unlike AP). Subscribers: a future Patronage HUD element.
     /// </summary>
-    public struct ResolveChangedEvent : IGameEvent
+    public struct PatronageChangedEvent : IGameEvent
     {
-        /// <summary>Resolve value before the change.</summary>
+        /// <summary>Patronage value before the change.</summary>
         public int OldValue;
 
-        /// <summary>Resolve value after the change (clamped to [0, MaxResolve]).</summary>
+        /// <summary>Patronage value after the change.</summary>
         public int NewValue;
-
-        /// <summary>True = the player's Resolve changed; false = an enemy's Resolve changed.</summary>
-        public bool IsPlayer;
     }
 
     /// <summary>
-    /// Published by <c>BattleStats</c> whenever Composure stacks change (gained or lost).
-    /// Composure reduces incoming Resolve damage while stacks remain.
+    /// Published by <c>BattleManager</c> whenever the player's banked Attention changes (Celebrity).
+    /// Attention is courted/provoked, banks across turns, and is spent as a big opinion-meter hit.
+    /// Subscribers: a future Attention HUD element.
     /// </summary>
-    public struct ComposureChangedEvent : IGameEvent
+    public struct AttentionChangedEvent : IGameEvent
     {
-        /// <summary>Composure stack count before the change.</summary>
+        /// <summary>Attention value before the change.</summary>
         public int OldValue;
 
-        /// <summary>Composure stack count after the change.</summary>
+        /// <summary>Attention value after the change.</summary>
+        public int NewValue;
+    }
+
+    /// <summary>
+    /// Published by <c>BattleManager</c> whenever the session's Support buffer changes.
+    /// Support absorbs opinion drops before they reach the opinion meter.
+    /// </summary>
+    public struct SupportChangedEvent : IGameEvent
+    {
+        public int OldValue;
         public int NewValue;
 
-        /// <summary>True = the player's Composure changed; false = an enemy's Composure changed.</summary>
-        public bool IsPlayer;
+        /// <summary>True when the change is ambient turn-start expiry (DecayShields), not an
+        /// attack or spend — feedback layers skip the "shield lost" sting for decay.</summary>
+        public bool IsDecay;
+    }
+
+    /// <summary>
+    /// Published by <c>BattleManager</c> whenever the session's Denial buffer changes.
+    /// Denial absorbs opinion rises before they reach the opinion meter.
+    /// </summary>
+    public struct DenialChangedEvent : IGameEvent
+    {
+        public int OldValue;
+        public int NewValue;
+
+        /// <summary>True when the change is ambient turn-start expiry (DecayShields), not an
+        /// attack or spend — feedback layers skip the "shield lost" sting for decay.</summary>
+        public bool IsDecay;
     }
 
     /// <summary>
     /// Published by <c>BattleStats</c> whenever an <em>enemy's</em> Hostility number changes.
     /// Hostility is an enemy-only stat — negative = receptive, zero = neutral, positive = hostile.
-    /// Hostility multiplies incoming Resolve damage; the player does not have a Hostility value.
+    /// Hostility multiplies incoming opinion-meter pressure; the player does not have a Hostility value.
     /// </summary>
     public struct HostilityChangedEvent : IGameEvent
     {
@@ -368,6 +437,155 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>True = the player's hostility changed; false = an enemy's hostility changed.
         /// Note: in current design the player's hostility stays 0 — this flag is reserved for symmetry.</summary>
         public bool IsPlayer;
+
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> whose hostility changed, or -1 for the player.
+        /// This is the single authoritative hostility event — every hostility change (cards, enemy moves,
+        /// policy shifts, mood effects) flows through it, so the UI can refresh the correct enemy slot.</summary>
+        public int EnemyIndex;
+    }
+
+    /// <summary>Published when an enemy's hostility crosses from below-max to max. Does not re-fire if already at max.</summary>
+    public struct EnemyMaxedHostilityEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that maxed out.</summary>
+        public int EnemyIndex;
+    }
+
+    /// <summary>Published when an enemy's hostility crosses from above-min to min. Does not re-fire if already at min.</summary>
+    public struct EnemyMaxedReceptiveEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that bottomed out.</summary>
+        public int EnemyIndex;
+    }
+
+    /// <summary>Published when an enemy's hostility crosses from ≤0 to >0 (first step into hostile territory).</summary>
+    public struct EnemyBecameHostileEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that became hostile.</summary>
+        public int EnemyIndex;
+    }
+
+    /// <summary>Published when an enemy's hostility crosses from ≥0 to &lt;0 (first step into receptive territory).</summary>
+    public struct EnemyBecameReceptiveEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that became receptive.</summary>
+        public int EnemyIndex;
+    }
+
+    /// <summary>Published when an enemy's hostility returns to exactly 0 from any non-zero value.</summary>
+    public struct EnemyNeutralizedEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that was neutralized.</summary>
+        public int EnemyIndex;
+    }
+
+    /// <summary>
+    /// Published when an enemy crosses from receptive (&lt;0) straight to hostile (&gt;0) — a betrayal.
+    /// <c>BattleManager</c> reacts with the Turncoat cascade (status, opinion hit, adjacency nudge,
+    /// forced-aggressive intent). Distinct from <see cref="EnemyBecameHostileEvent"/>, which also fires
+    /// for a neutral enemy turning hostile.
+    /// </summary>
+    public struct EnemyTurncoatEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that turned coat.</summary>
+        public int EnemyIndex;
+    }
+
+    /// <summary>
+    /// Published by the Faith Leader pacify-conversion engine when an enemy's stacked pacify statuses
+    /// reach the threshold and are consumed. A normal enemy fires a one-turn meter burst then reverts
+    /// to neutral and gains a Jaded stack (<see cref="WasSilenced"/> = false); a Hardened enemy can't
+    /// be converted and is silenced instead (<see cref="WasSilenced"/> = true, <see cref="OpinionBurst"/> = 0).
+    /// </summary>
+    public struct EnemyConvertedEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that was converted/silenced.</summary>
+        public int EnemyIndex;
+
+        /// <summary>Opinion pumped into the meter by the conversion burst (0 when silenced).</summary>
+        public int OpinionBurst;
+
+        /// <summary>True when the enemy was Hardened and got silenced instead of converted.</summary>
+        public bool WasSilenced;
+    }
+
+    #endregion
+
+    #region Opinion Meter Events
+
+    /// <summary>
+    /// Published by <c>BattleManager</c> whenever the shared Opinion Meter changes.
+    /// Fired by both <c>RaiseOpinion</c> (player deals damage) and <c>LowerOpinion</c> (enemy deals damage).
+    /// </summary>
+    public struct OpinionChangedEvent : IGameEvent
+    {
+        /// <summary>Opinion value before the change.</summary>
+        public int OldValue;
+
+        /// <summary>Opinion value after the change (clamped to [0, MaxValue]).</summary>
+        public int NewValue;
+
+        /// <summary>Maximum possible opinion value for this battle.</summary>
+        public int MaxValue;
+
+        /// <summary>True = player's action raised opinion; false = enemy attack lowered it.</summary>
+        public bool WasRaisedByPlayer;
+    }
+
+    /// <summary>
+    /// Published by <c>BattleManager.TurnEndState</c> when the turn limit expires.
+    /// The battle transitions to BattleEnd immediately after this fires.
+    /// </summary>
+    public struct JudgmentEvent : IGameEvent
+    {
+        /// <summary>Opinion value at the moment judgment was called.</summary>
+        public int FinalOpinion;
+
+        /// <summary>The threshold opinion must exceed for a victory (MaxOpinion / 2).</summary>
+        public int Threshold;
+
+        /// <summary>True = opinion exceeded the threshold (player wins); false = player loses.</summary>
+        public bool IsVictory;
+    }
+
+    /// <summary>
+    /// Published by <c>BattleManager</c> when the room enters or leaves an echo chamber
+    /// (every living enemy is receptive). While active, opinion gains are halved and the meter
+    /// decays each player turn until a non-receptive enemy is present. UI should warn the player.
+    /// </summary>
+    public struct EchoChamberChangedEvent : IGameEvent
+    {
+        /// <summary>True = the room just became an echo chamber; false = it was just broken.</summary>
+        public bool Active;
+    }
+
+    /// <summary>
+    /// Published by <c>BattleManager.TurnEndState</c> each time a player turn ends,
+    /// so the UI countdown always reflects the latest turn count.
+    /// </summary>
+    public struct TurnLimitUpdatedEvent : IGameEvent
+    {
+        /// <summary>Number of player turns that have fully completed.</summary>
+        public int PlayerTurnsElapsed;
+
+        /// <summary>Total player turns allowed this battle (0 = no limit).</summary>
+        public int MaxTurns;
+
+        /// <summary>How many player turns remain before Judgment (0 when limit is reached).</summary>
+        public int TurnsRemaining;
+    }
+
+    /// <summary>
+    /// Published by <c>BattleManager.OpponentTurnState</c> when a receptive enemy
+    /// rolls to skip their action this turn.
+    /// </summary>
+    public struct EnemySkippedTurnEvent : IGameEvent
+    {
+        /// <summary>Zero-based index of the skipping enemy in <c>BattleManager.Enemies</c>.</summary>
+        public int EnemyIndex;
+
+        /// <summary>Display name of the skipping enemy (for battle log).</summary>
+        public string EnemyName;
     }
 
     #endregion
@@ -389,29 +607,13 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
-    /// Published by <c>BattleManager.PlayCard()</c> when a card's policy lean shifts an enemy's Hostility.
-    /// Negative = moved toward receptive; positive = moved toward hostile.
-    /// </summary>
-    public struct EnemyHostilityChangedEvent : IGameEvent
-    {
-        /// <summary>Hostility value before the card was played.</summary>
-        public int OldValue;
-
-        /// <summary>Hostility value after applying the card's policy-lean shift.</summary>
-        public int NewValue;
-
-        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> whose hostility shifted.</summary>
-        public int EnemyIndex;
-    }
-
-    /// <summary>
-    /// Published by <c>BattleManager</c> the moment an enemy's Resolve reaches zero.
-    /// The enemy is removed from active combat after this event fires.
+    /// Published by <c>BattleManager</c> when an enemy is removed from active combat.
+    /// In the opinion-meter model this fires on explicit defeat conditions, not HP reaching zero.
     /// </summary>
     public struct EnemyDefeatedEvent : IGameEvent
     {
         /// <summary>Zero-based index of the defeated enemy in <c>BattleManager.Enemies</c>.</summary>
-        public int    EnemyIndex;
+        public int EnemyIndex;
 
         /// <summary>Display name of the defeated enemy (for battle log and UI feedback).</summary>
         public string EnemyName;
@@ -448,29 +650,6 @@ namespace Crookedile.Gameplay.Battle
 
     #endregion
 
-    #region Player Input Events
-
-    /// <summary>
-    /// Published by <c>BattleUI</c> when the player clicks the End Turn button.
-    /// <c>BattleManager</c> validates and processes the turn transition on receipt.
-    /// </summary>
-    public struct EndTurnRequestedEvent : IGameEvent { }
-
-    /// <summary>
-    /// Published by <c>BattleUI</c> when the player clicks a card in their hand.
-    /// <c>BattleManager</c> validates affordability and triggers card resolution on receipt.
-    /// </summary>
-    public struct PlayCardRequestedEvent : IGameEvent
-    {
-        /// <summary>The card data the player wants to play.</summary>
-        public CardData Card;
-
-        /// <summary>Zero-based index of this card in the player's current hand (used to remove the correct copy if duplicates exist).</summary>
-        public int HandIndex;
-    }
-
-    #endregion
-
     #region Card Choice Events
 
     /// <summary>
@@ -491,8 +670,18 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>All cards available to pick from.</summary>
         public System.Collections.Generic.IReadOnlyList<CardData> Choices;
 
-        /// <summary>Exact number of cards the player must select before Confirm activates.</summary>
+        /// <summary>
+        /// Number of cards to select. When <see cref="AllowFewer"/> is false this is an exact
+        /// requirement (Confirm activates only at exactly this many). When true it is a maximum —
+        /// the player may confirm with any number from 0 up to this (e.g. the Nepo Baby mulligan).
+        /// </summary>
         public int RequiredCount;
+
+        /// <summary>
+        /// When true, <see cref="RequiredCount"/> is treated as a maximum and the player may confirm
+        /// with fewer (including zero). When false, an exact count is required. Default false.
+        /// </summary>
+        public bool AllowFewer;
 
         /// <summary>
         /// Invoked with the confirmed selection once the player presses Confirm.
@@ -516,8 +705,9 @@ namespace Crookedile.Gameplay.Battle
         public bool IsPlayer;
     }
 
-    // ── Card Retention / Recovery ─────────────────────────────────────────────
+    #endregion
 
+    #region Card Retention / Recovery
     /// <summary>
     /// Published by <c>DeckManager.RetainCard()</c> when a card in hand is marked to be
     /// retained at end of turn instead of being discarded.
@@ -545,5 +735,4 @@ namespace Crookedile.Gameplay.Battle
     }
 
     #endregion
-
 }

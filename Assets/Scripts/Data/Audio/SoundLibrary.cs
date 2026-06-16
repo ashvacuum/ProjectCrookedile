@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Crookedile.Data.Database;
 
@@ -17,15 +17,17 @@ namespace Crookedile.Data.Audio
     /// Usage (AnimationEvent — accepts either ID or ClipName):
     ///   Function: PlaySound   String: "crack_hit"
     /// </summary>
-    [UnityEngine.CreateAssetMenu(fileName = "SoundLibrary", menuName = "Crookedile/Database/Sound Library")]
+    [UnityEngine.CreateAssetMenu(
+        fileName = "SoundLibrary",
+        menuName = "Crookedile/Database/Sound Library"
+    )]
     public class SoundLibrary : GameDatabase<AudioClipData>
     {
         private Dictionary<string, AudioClipData> _nameMap;
 
         protected override string GetItemID(AudioClipData item) => item.ID;
 
-        // ─── Initialisation ───────────────────────────────────────────────
-
+        #region Initialisation
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -42,7 +44,9 @@ namespace Crookedile.Data.Audio
 
         private void BuildNameMap()
         {
-            _nameMap = new Dictionary<string, AudioClipData>(System.StringComparer.OrdinalIgnoreCase);
+            _nameMap = new Dictionary<string, AudioClipData>(
+                System.StringComparer.OrdinalIgnoreCase
+            );
             foreach (var item in _items)
             {
                 if (item != null && !string.IsNullOrEmpty(item.ClipName))
@@ -50,19 +54,22 @@ namespace Crookedile.Data.Audio
             }
         }
 
-        // ─── ID Lookup ────────────────────────────────────────────────────
+        #endregion
 
+        #region ID Lookup
         // GetByID(string id) inherited from GameDatabase<T>
 
-        // ─── Name Lookup ──────────────────────────────────────────────────
+        #endregion
 
+        #region Name Lookup
         /// <summary>
         /// Returns the clip whose ClipName matches (case-insensitive).
         /// Returns null if not found.
         /// </summary>
         public AudioClipData GetByName(string clipName)
         {
-            if (_nameMap == null) BuildNameMap();
+            if (_nameMap == null)
+                BuildNameMap();
             return _nameMap.TryGetValue(clipName, out var result) ? result : null;
         }
 
@@ -72,22 +79,32 @@ namespace Crookedile.Data.Audio
         /// </summary>
         public AudioClipData GetByIDOrName(string value)
         {
-            if (string.IsNullOrEmpty(value)) return null;
+            if (string.IsNullOrEmpty(value))
+                return null;
             return GetByID(value) ?? GetByName(value);
         }
 
-        // ─── Simple Queries ───────────────────────────────────────────────
+        #endregion
 
+        #region Simple Queries
         /// <summary>Returns all clips belonging to the given category (case-insensitive).</summary>
-        public List<AudioClipData> GetByCategory(string category)
-            => FindAll(c => string.Equals(c.Category, category, System.StringComparison.OrdinalIgnoreCase));
+        public List<AudioClipData> GetByCategory(string category) =>
+            FindAll(c =>
+                string.Equals(c.Category, category, System.StringComparison.OrdinalIgnoreCase)
+            );
 
         /// <summary>Returns all distinct category strings present in the library.</summary>
-        public List<string> GetAllCategories()
-            => GetAll().Select(c => c.Category).Where(c => !string.IsNullOrEmpty(c)).Distinct().OrderBy(c => c).ToList();
+        public List<string> GetAllCategories() =>
+            GetAll()
+                .Select(c => c.Category)
+                .Where(c => !string.IsNullOrEmpty(c))
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
 
-        // ─── Advanced Search ──────────────────────────────────────────────
+        #endregion
 
+        #region Advanced Search
         /// <summary>
         /// Performs a filtered search. All non-empty criteria are AND-ed together.
         /// </summary>
@@ -96,13 +113,35 @@ namespace Crookedile.Data.Audio
             var results = GetAll();
 
             if (!string.IsNullOrEmpty(query.Category))
-                results = results.Where(c => string.Equals(c.Category, query.Category, System.StringComparison.OrdinalIgnoreCase)).ToList();
+                results = results
+                    .Where(c =>
+                        string.Equals(
+                            c.Category,
+                            query.Category,
+                            System.StringComparison.OrdinalIgnoreCase
+                        )
+                    )
+                    .ToList();
 
             if (!string.IsNullOrEmpty(query.IdContains))
-                results = results.Where(c => c.ID != null && c.ID.IndexOf(query.IdContains, System.StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                results = results
+                    .Where(c =>
+                        c.ID != null
+                        && c.ID.IndexOf(query.IdContains, System.StringComparison.OrdinalIgnoreCase)
+                            >= 0
+                    )
+                    .ToList();
 
             if (!string.IsNullOrEmpty(query.NameContains))
-                results = results.Where(c => c.ClipName != null && c.ClipName.IndexOf(query.NameContains, System.StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                results = results
+                    .Where(c =>
+                        c.ClipName != null
+                        && c.ClipName.IndexOf(
+                            query.NameContains,
+                            System.StringComparison.OrdinalIgnoreCase
+                        ) >= 0
+                    )
+                    .ToList();
 
             return results;
         }
@@ -122,3 +161,4 @@ namespace Crookedile.Data.Audio
         public string NameContains;
     }
 }
+        #endregion

@@ -13,98 +13,148 @@ MonoBehaviour:
   m_Name: StatusEffectIconMap
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Battle.StatusEffectIconMapSO
   _entries:
-  - type: 0
+  - id: weakened
     icon: {fileID: 648246831, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: Reduced Damage Dealt by 25%
-  - type: 1
+  - id: vulnerable
     icon: {fileID: -928613997, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: Increases Damage Received by 50%
-  - type: 2
+  - id: frail
     icon: {fileID: -949628480, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
-    description: Reduces Composure Gained by 25%
-  - type: 3
+    description: Reduces Shield Gained by 25%
+  - id: entangled
     icon: {fileID: -1455384912, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: Disables use of Pressure Cards
-  - type: 4
+  - id: exposed
     icon: {fileID: -2141919793, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - type: 5
+  - id: smear
     icon: {fileID: -529419605, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - type: 6
+  - id: confused
     icon: {fileID: 2099413619, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - type: 7
+  - id: silenced
     icon: {fileID: 893964791, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - type: 8
+  - id: stunned
     icon: {fileID: 1790912913747163299, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - type: 9
+  - id: rattled
     icon: {fileID: -237358296, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - type: 10
+  - id: guilt
     icon: {fileID: -638447516, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - type: 11
+  - id: shame
     icon: {fileID: -371255345, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - type: 12
+  - id: doubt
     icon: {fileID: 113071119, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
-    description: Provides 3 Composure at the end of turn.
-  - type: 13
+    description: Provides 3 Shield at the end of turn.
+  - id: jaded
     icon: {fileID: 610889023, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - type: 14
+  - id: strength
     icon: {fileID: -1700718424, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - type: 15
+  - id: dexterity
     icon: {fileID: -919203351, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: Thorns
     description: Deals 1 damage per stack when attacked
-  - type: 16
+  - id: focus
     icon: {fileID: -1750313214, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - type: 17
+  - id: energized
     icon: {fileID: 1661807162, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - type: 18
+  - id: plated
     icon: {fileID: -605739430, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
+  - id: devotion
+    icon: {fileID: 21300000, guid: 41e9fd312b776bf4fa73001a8968921c, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: echo
+    icon: {fileID: 21300000, guid: d709162c7886d9048be8c0f5e41e2d1f, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: fanatic
+    icon: {fileID: 21300000, guid: 604ecca3cb10ed843bb67a5618b08522, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: hardened
+    icon: {fileID: 21300000, guid: a7eef88d7c0c15641acccf4ac77de595, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: intangible
+    icon: {fileID: 21300000, guid: 8ce92f4a49f47734685c68cd95e150aa, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: ritual
+    icon: {fileID: 21300000, guid: 41e5b1b6717dbcb429b61440d9adf787, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: regeneration
+    icon: {fileID: 21300000, guid: e42ef51eeb26a334a8b2e8a38f6da38e, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: momentum
+    icon: {fileID: 21300000, guid: b1dbbedc69a1b8c42825ba955aff7634, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: 
+    description: 
+  - id: thorns
+    icon: {fileID: 21300000, guid: d2f229c5c676097459dffff65c646453, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: Thorns
+    description: Reflect 1 pressure when hit.
+  - id: turncoat
+    icon: {fileID: 21300000, guid: ee165b1d7ddab5c4ea7346c34da99516, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: Turncoat
+    description: 'Freshly betrayed: deals +1 pressure.'

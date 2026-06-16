@@ -14,10 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.BattleSession
   rounds:
   - label: Round 1
-    enemies: []
+    enemies:
+    - {fileID: 11400000, guid: 2fa6b2b1bc5267e4f8052005db94e5a9, type: 2}
+    - {fileID: 11400000, guid: 2fa6b2b1bc5267e4f8052005db94e5a9, type: 2}
+    - {fileID: 11400000, guid: 2fa6b2b1bc5267e4f8052005db94e5a9, type: 2}
+    maxTurns: 10
+    startingOpinion: 65
   - label: Round 2
     enemies: []
+    maxTurns: 10
+    startingOpinion: 50
   - label: Round 3
     enemies: []
-  - label: Round 4
-    enemies: []
+    maxTurns: 10
+    startingOpinion: 50

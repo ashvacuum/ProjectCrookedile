@@ -1,3 +1,6 @@
+> [!WARNING]
+> **Pre-redesign document — may be inaccurate (flagged 2026-06).** Crookedile underwent a major combat + class redesign. Canonical design now lives in [`docs/core-design.md`](docs/core-design.md) and [`docs/crookedile-starter-decks.md`](docs/crookedile-starter-decks.md); current code/architecture is summarized in [`readme.md`](readme.md). Treat specifics below as historical until reconciled.
+
 # Card Effect Library
 
 Complete reference of all battle effects that cards can perform in Crookedile. Use this as a design guide when creating new cards.

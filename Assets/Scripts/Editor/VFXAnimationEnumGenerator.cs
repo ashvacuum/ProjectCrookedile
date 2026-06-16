@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,32 +25,37 @@ namespace Crookedile.Editor
     public class VFXAnimationEnumGenerator : AssetPostprocessor
     {
         internal const string ControllerPath = "Assets/Resources/BaseAnimationVFX.controller";
-        private  const string OutputPath     = "Assets/Scripts/Data/VFX/VFXAnimationState.cs";
+        private const string OutputPath = "Assets/Scripts/Data/VFX/VFXAnimationState.cs";
 
-        // ─── Auto-trigger ──────────────────────────────────────────────────────
-
+        #region Auto-trigger
         /// <summary>
         /// Called by Unity after assets are imported. Regenerates the enum whenever the
         /// VFX controller is saved so manually-added states appear in the dropdown automatically.
         /// </summary>
         static void OnPostprocessAllAssets(
-            string[] importedAssets, string[] deletedAssets,
-            string[] movedAssets,    string[] movedFromAssetPaths)
+            string[] importedAssets,
+            string[] deletedAssets,
+            string[] movedAssets,
+            string[] movedFromAssetPaths
+        )
         {
             if (importedAssets.Contains(ControllerPath) || movedAssets.Contains(ControllerPath))
                 Regenerate();
         }
 
-        // ─── Manual trigger ────────────────────────────────────────────────────
+        #endregion
 
+        #region Manual trigger
         [MenuItem("Tools/Crookedile/Regenerate VFX Animation Enum")]
         public static void Regenerate()
         {
             var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
             if (controller == null)
             {
-                Debug.LogError($"[VFXEnum] AnimatorController not found at '{ControllerPath}'. " +
-                               "Check the ControllerPath constant in VFXAnimationEnumGenerator.");
+                Debug.LogError(
+                    $"[VFXEnum] AnimatorController not found at '{ControllerPath}'. "
+                        + "Check the ControllerPath constant in VFXAnimationEnumGenerator."
+                );
                 return;
             }
 
@@ -68,18 +73,22 @@ namespace Crookedile.Editor
             {
                 var clip = FindClipForState(controller, name);
                 var size = ReadFirstSpriteSize(clip);
-                if (size.HasValue) nativeSizes[name] = size.Value;
+                if (size.HasValue)
+                    nativeSizes[name] = size.Value;
             }
 
             WriteFile(stateNames, nativeSizes);
             AssetDatabase.Refresh();
 
-            Debug.Log($"[VFXEnum] Regenerated {stateNames.Count} state(s): " +
-                      string.Join(", ", stateNames));
+            Debug.Log(
+                $"[VFXEnum] Regenerated {stateNames.Count} state(s): "
+                    + string.Join(", ", stateNames)
+            );
         }
 
-        // ─── Helpers ───────────────────────────────────────────────────────────
+        #endregion
 
+        #region Helpers
         private static void CollectStates(AnimatorStateMachine sm, List<string> names)
         {
             foreach (var child in sm.states)
@@ -95,7 +104,8 @@ namespace Crookedile.Editor
         /// </summary>
         private static Vector2? ReadFirstSpriteSize(AnimationClip clip)
         {
-            if (clip == null) return null;
+            if (clip == null)
+                return null;
             foreach (var binding in AnimationUtility.GetObjectReferenceCurveBindings(clip))
             {
                 var keys = AnimationUtility.GetObjectReferenceCurve(clip, binding);
@@ -109,17 +119,24 @@ namespace Crookedile.Editor
         /// Searches every layer (and sub-state machine) of <paramref name="controller"/> for a state
         /// whose name matches <paramref name="stateName"/> and returns its motion clip, or null.
         /// </summary>
-        private static AnimationClip FindClipForState(AnimatorController controller, string stateName)
+        private static AnimationClip FindClipForState(
+            AnimatorController controller,
+            string stateName
+        )
         {
             foreach (var layer in controller.layers)
             {
                 var clip = FindClipInStateMachine(layer.stateMachine, stateName);
-                if (clip != null) return clip;
+                if (clip != null)
+                    return clip;
             }
             return null;
         }
 
-        private static AnimationClip FindClipInStateMachine(AnimatorStateMachine sm, string stateName)
+        private static AnimationClip FindClipInStateMachine(
+            AnimatorStateMachine sm,
+            string stateName
+        )
         {
             foreach (var child in sm.states)
                 if (child.state.name == stateName && child.state.motion is AnimationClip c)
@@ -127,7 +144,8 @@ namespace Crookedile.Editor
             foreach (var sub in sm.stateMachines)
             {
                 var c = FindClipInStateMachine(sub.stateMachine, stateName);
-                if (c != null) return c;
+                if (c != null)
+                    return c;
             }
             return null;
         }
@@ -144,13 +162,13 @@ namespace Crookedile.Editor
         /// </summary>
         internal static string ToEnumName(string stateName)
         {
-            var parts = Regex.Split(stateName, @"[^a-zA-Z0-9]+")
-                             .Where(p => p.Length > 0);
+            var parts = Regex.Split(stateName, @"[^a-zA-Z0-9]+").Where(p => p.Length > 0);
             var sb = new StringBuilder();
             foreach (string part in parts)
             {
                 sb.Append(char.ToUpper(part[0]));
-                if (part.Length > 1) sb.Append(part, 1, part.Length - 1);
+                if (part.Length > 1)
+                    sb.Append(part, 1, part.Length - 1);
             }
 
             string result = sb.ToString();
@@ -162,17 +180,24 @@ namespace Crookedile.Editor
             return string.IsNullOrEmpty(result) ? "_Unknown" : result;
         }
 
-        private static void WriteFile(List<string> stateNames, Dictionary<string, Vector2> nativeSizes)
+        private static void WriteFile(
+            List<string> stateNames,
+            Dictionary<string, Vector2> nativeSizes
+        )
         {
             var sb = new StringBuilder();
 
-            // ── Header ──
+        #endregion
+
+            #region Header
             sb.AppendLine("// <auto-generated>");
             sb.AppendLine("// Generated by VFXAnimationEnumGenerator.cs — do NOT edit manually.");
             sb.AppendLine("// Source: Assets/Resources/BaseAnimationVFX.controller");
             sb.AppendLine("// Regenerate via:");
             sb.AppendLine("//   • Tools → Crookedile → Regenerate VFX Animation Enum");
-            sb.AppendLine("//   • Right-click sprite sheet → Crookedile → Generate Anim from Sprite Sheet");
+            sb.AppendLine(
+                "//   • Right-click sprite sheet → Crookedile → Generate Anim from Sprite Sheet"
+            );
             sb.AppendLine("//   • Save BaseAnimationVFX.controller (auto)");
             sb.AppendLine("// </auto-generated>");
             sb.AppendLine();
@@ -182,7 +207,9 @@ namespace Crookedile.Editor
             sb.AppendLine("namespace Crookedile.Data.VFX");
             sb.AppendLine("{");
 
-            // ── Enum ──
+            #endregion
+
+            #region Enum
             sb.AppendLine("    /// <summary>");
             sb.AppendLine("    /// Auto-generated enum of all states in <c>BaseAnimationVFX</c>.");
             sb.AppendLine("    /// Use <see cref=\"VFXAnimationStateExtensions.ToStateName\"/> to");
@@ -196,45 +223,75 @@ namespace Crookedile.Editor
             sb.AppendLine("    }");
             sb.AppendLine();
 
-            // ── Extension ──
-            sb.AppendLine("    /// <summary>Extension methods for <see cref=\"VFXAnimationState\"/>.</summary>");
+            #endregion
+
+            #region Extension
+            sb.AppendLine(
+                "    /// <summary>Extension methods for <see cref=\"VFXAnimationState\"/>.</summary>"
+            );
             sb.AppendLine("    public static class VFXAnimationStateExtensions");
             sb.AppendLine("    {");
-            sb.AppendLine("        private static readonly Dictionary<VFXAnimationState, string> StateNames =");
+            sb.AppendLine(
+                "        private static readonly Dictionary<VFXAnimationState, string> StateNames ="
+            );
             sb.AppendLine("            new Dictionary<VFXAnimationState, string>");
             sb.AppendLine("        {");
             sb.AppendLine("            { VFXAnimationState.None, string.Empty },");
             foreach (var name in stateNames)
-                sb.AppendLine($"            {{ VFXAnimationState.{ToEnumName(name)}, \"{name}\" }},");
+                sb.AppendLine(
+                    $"            {{ VFXAnimationState.{ToEnumName(name)}, \"{name}\" }},"
+                );
             sb.AppendLine("        };");
             sb.AppendLine();
             sb.AppendLine("        /// <summary>");
-            sb.AppendLine("        /// Native pixel dimensions of the first sprite in each animation clip.");
-            sb.AppendLine("        /// Auto-populated at code-gen time by reading the clip's object-reference curves.");
-            sb.AppendLine("        /// States with no sprite keys (e.g. the Empty state) are omitted.");
-            sb.AppendLine("        /// Used by <see cref=\"Crookedile.UI.VFXAnimatedImage.PlayAnimation\"/> to set the");
-            sb.AppendLine("        /// RectTransform size on activation so each animation displays at its correct dimensions.");
+            sb.AppendLine(
+                "        /// Native pixel dimensions of the first sprite in each animation clip."
+            );
+            sb.AppendLine(
+                "        /// Auto-populated at code-gen time by reading the clip's object-reference curves."
+            );
+            sb.AppendLine(
+                "        /// States with no sprite keys (e.g. the Empty state) are omitted."
+            );
+            sb.AppendLine(
+                "        /// Used by <see cref=\"Crookedile.UI.VFXAnimatedImage.PlayAnimation\"/> to set the"
+            );
+            sb.AppendLine(
+                "        /// RectTransform size on activation so each animation displays at its correct dimensions."
+            );
             sb.AppendLine("        /// </summary>");
-            sb.AppendLine("        public static readonly Dictionary<string, Vector2> NativeSizes =");
+            sb.AppendLine(
+                "        public static readonly Dictionary<string, Vector2> NativeSizes ="
+            );
             sb.AppendLine("            new Dictionary<string, Vector2>");
             sb.AppendLine("        {");
             foreach (var kvp in nativeSizes)
-                sb.AppendLine($"            {{ \"{kvp.Key}\", new Vector2({kvp.Value.x}f, {kvp.Value.y}f) }},");
+                sb.AppendLine(
+                    $"            {{ \"{kvp.Key}\", new Vector2({kvp.Value.x}f, {kvp.Value.y}f) }},"
+                );
             sb.AppendLine("        };");
             sb.AppendLine();
             sb.AppendLine("        /// <summary>");
-            sb.AppendLine("        /// Returns the exact Animator state name string for <c>Animator.Play()</c>.");
-            sb.AppendLine("        /// Returns <see cref=\"string.Empty\"/> for <c>VFXAnimationState.None</c>.");
+            sb.AppendLine(
+                "        /// Returns the exact Animator state name string for <c>Animator.Play()</c>."
+            );
+            sb.AppendLine(
+                "        /// Returns <see cref=\"string.Empty\"/> for <c>VFXAnimationState.None</c>."
+            );
             sb.AppendLine("        /// </summary>");
             sb.AppendLine("        public static string ToStateName(this VFXAnimationState state)");
-            sb.AppendLine("            => StateNames.TryGetValue(state, out var name) ? name : string.Empty;");
+            sb.AppendLine(
+                "            => StateNames.TryGetValue(state, out var name) ? name : string.Empty;"
+            );
             sb.AppendLine("    }");
             sb.AppendLine("}");
 
             string dir = Path.GetDirectoryName(OutputPath)!;
-            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
             File.WriteAllText(OutputPath, sb.ToString(), Encoding.UTF8);
         }
     }
 }
+            #endregion
 #endif

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Crookedile.Core;
 using Crookedile.Data.Cards;
@@ -8,11 +8,13 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Upgrades every upgradeable card currently in the player's hand for this battle.</summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class UpgradeAllCardsInHandEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            if (ctx.Deck == null) return;
+            if (ctx.Deck == null)
+                return;
 
             // Collect (old, upgraded) pairs first — don't modify the list while iterating
             var pairs = new List<(CardData old, CardData upgraded)>();
@@ -23,7 +25,9 @@ namespace Crookedile.Gameplay.Battle
             foreach (var (old, upgraded) in pairs)
                 ctx.Deck.SwapCardInHand(old, upgraded);
 
-            GameLogger.LogInfo<UpgradeAllCardsInHandEffect>($"Upgraded {pairs.Count} cards in hand");
+            GameLogger.LogInfo<UpgradeAllCardsInHandEffect>(
+                $"Upgraded {pairs.Count} cards in hand"
+            );
         }
 
         public override string GetDescription() => "Upgrade all cards in your hand this battle";

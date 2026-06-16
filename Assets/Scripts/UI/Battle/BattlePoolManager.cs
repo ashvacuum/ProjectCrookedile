@@ -1,8 +1,8 @@
-using UnityEngine;
-using Crookedile.Core;
+﻿using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
+using UnityEngine;
 
 namespace Crookedile.UI.Battle
 {
@@ -27,75 +27,131 @@ namespace Crookedile.UI.Battle
     {
         [Header("Card Prefabs — one per CardType")]
         [Tooltip("CardButton prefab used for Pressure cards.")]
-        [SerializeField] private CardButton _pressureCardPrefab;
+        [SerializeField]
+        private CardButton _pressureCardPrefab;
+
         [Tooltip("CardButton prefab used for Rhetoric cards.")]
-        [SerializeField] private CardButton _rhetoricCardPrefab;
+        [SerializeField]
+        private CardButton _rhetoricCardPrefab;
+
         [Tooltip("CardButton prefab used for Policy cards.")]
-        [SerializeField] private CardButton _policyCardPrefab;
+        [SerializeField]
+        private CardButton _policyCardPrefab;
+
         [Tooltip("CardButton prefab used for Status cards.")]
-        [SerializeField] private CardButton _statusCardPrefab;
+        [SerializeField]
+        private CardButton _statusCardPrefab;
+
         [Tooltip("CardButton prefab used for Curse cards.")]
-        [SerializeField] private CardButton _curseCardPrefab;
+        [SerializeField]
+        private CardButton _curseCardPrefab;
 
         [Tooltip("EnemySlotUI component on the root of the enemy slot prefab.")]
-        [SerializeField] private EnemySlotUI _enemySlotPrefab;
+        [SerializeField]
+        private EnemySlotUI _enemySlotPrefab;
 
         [Header("Pool Sizes")]
         [Tooltip("Pre-warmed Pressure card button count (default 15).")]
-        [SerializeField] private int _pressurePoolSize = 15;
-        [Tooltip("Pre-warmed Rhetoric card button count (default 15).")]
-        [SerializeField] private int _rhetoricPoolSize  = 15;
-        [Tooltip("Pre-warmed Policy card button count (default 10).")]
-        [SerializeField] private int _policyPoolSize    = 10;
-        [Tooltip("Pre-warmed Status card button count (default 8).")]
-        [SerializeField] private int _statusPoolSize    =  8;
-        [Tooltip("Pre-warmed Curse card button count (default 8).")]
-        [SerializeField] private int _cursePoolSize     =  8;
-        [Tooltip("Pre-warmed enemy slot count. Should equal max enemies per battle (default 5).")]
-        [SerializeField] private int _enemySlotPoolSize =  5;
+        [SerializeField]
+        private int _pressurePoolSize = 15;
 
-        private ObjectPool<CardButton>  _pressurePool;
-        private ObjectPool<CardButton>  _rhetoricPool;
-        private ObjectPool<CardButton>  _policyPool;
-        private ObjectPool<CardButton>  _statusPool;
-        private ObjectPool<CardButton>  _cursePool;
+        [Tooltip("Pre-warmed Rhetoric card button count (default 15).")]
+        [SerializeField]
+        private int _rhetoricPoolSize = 15;
+
+        [Tooltip("Pre-warmed Policy card button count (default 10).")]
+        [SerializeField]
+        private int _policyPoolSize = 10;
+
+        [Tooltip("Pre-warmed Status card button count (default 8).")]
+        [SerializeField]
+        private int _statusPoolSize = 8;
+
+        [Tooltip("Pre-warmed Curse card button count (default 8).")]
+        [SerializeField]
+        private int _cursePoolSize = 8;
+
+        [Tooltip("Pre-warmed enemy slot count. Should equal max enemies per battle (default 5).")]
+        [SerializeField]
+        private int _enemySlotPoolSize = 5;
+
+        private ObjectPool<CardButton> _pressurePool;
+        private ObjectPool<CardButton> _rhetoricPool;
+        private ObjectPool<CardButton> _policyPool;
+        private ObjectPool<CardButton> _statusPool;
+        private ObjectPool<CardButton> _cursePool;
         private ObjectPool<EnemySlotUI> _slotPool;
 
         protected override void OnAwake()
         {
             if (_pressureCardPrefab != null)
-                _pressurePool = new ObjectPool<CardButton>(_pressureCardPrefab, _pressurePoolSize, transform);
+                _pressurePool = new ObjectPool<CardButton>(
+                    _pressureCardPrefab,
+                    _pressurePoolSize,
+                    transform
+                );
             else
-                Debug.LogWarning("[BattlePoolManager] Pressure card prefab is not assigned — Pressure pool not created.");
+                Debug.LogWarning(
+                    "[BattlePoolManager] Pressure card prefab is not assigned — Pressure pool not created."
+                );
 
             if (_rhetoricCardPrefab != null)
-                _rhetoricPool = new ObjectPool<CardButton>(_rhetoricCardPrefab, _rhetoricPoolSize, transform);
+                _rhetoricPool = new ObjectPool<CardButton>(
+                    _rhetoricCardPrefab,
+                    _rhetoricPoolSize,
+                    transform
+                );
             else
-                Debug.LogWarning("[BattlePoolManager] Rhetoric card prefab is not assigned — Rhetoric pool not created.");
+                Debug.LogWarning(
+                    "[BattlePoolManager] Rhetoric card prefab is not assigned — Rhetoric pool not created."
+                );
 
             if (_policyCardPrefab != null)
-                _policyPool = new ObjectPool<CardButton>(_policyCardPrefab, _policyPoolSize, transform);
+                _policyPool = new ObjectPool<CardButton>(
+                    _policyCardPrefab,
+                    _policyPoolSize,
+                    transform
+                );
             else
-                Debug.LogWarning("[BattlePoolManager] Policy card prefab is not assigned — Policy pool not created.");
+                Debug.LogWarning(
+                    "[BattlePoolManager] Policy card prefab is not assigned — Policy pool not created."
+                );
 
             if (_statusCardPrefab != null)
-                _statusPool = new ObjectPool<CardButton>(_statusCardPrefab, _statusPoolSize, transform);
+                _statusPool = new ObjectPool<CardButton>(
+                    _statusCardPrefab,
+                    _statusPoolSize,
+                    transform
+                );
             else
-                Debug.LogWarning("[BattlePoolManager] Status card prefab is not assigned — Status pool not created.");
+                Debug.LogWarning(
+                    "[BattlePoolManager] Status card prefab is not assigned — Status pool not created."
+                );
 
             if (_curseCardPrefab != null)
-                _cursePool = new ObjectPool<CardButton>(_curseCardPrefab, _cursePoolSize, transform);
+                _cursePool = new ObjectPool<CardButton>(
+                    _curseCardPrefab,
+                    _cursePoolSize,
+                    transform
+                );
             else
-                Debug.LogWarning("[BattlePoolManager] Curse card prefab is not assigned — Curse pool not created.");
+                Debug.LogWarning(
+                    "[BattlePoolManager] Curse card prefab is not assigned — Curse pool not created."
+                );
 
             if (_enemySlotPrefab != null)
-                _slotPool = new ObjectPool<EnemySlotUI>(_enemySlotPrefab, _enemySlotPoolSize, transform);
+                _slotPool = new ObjectPool<EnemySlotUI>(
+                    _enemySlotPrefab,
+                    _enemySlotPoolSize,
+                    transform
+                );
             else
-                Debug.LogWarning("[BattlePoolManager] Enemy slot prefab is not assigned — slot pool not created.");
+                Debug.LogWarning(
+                    "[BattlePoolManager] Enemy slot prefab is not assigned — slot pool not created."
+                );
         }
 
-        // ─── Card Buttons ─────────────────────────────────────────────────────────
-
+        #region Card Buttons
         /// <summary>
         /// Rents a <see cref="CardButton"/> of the matching <paramref name="cardType"/> from the
         /// appropriate pool and re-parents it under <paramref name="parent"/>.
@@ -104,9 +160,16 @@ namespace Crookedile.UI.Battle
         public CardButton RentCard(CardType cardType, Transform parent)
         {
             ObjectPool<CardButton> pool = PoolForType(cardType);
-            if (pool == null) return null;
+            if (pool == null)
+                return null;
             CardButton btn = pool.Get();
             btn.transform.SetParent(parent, false);
+            GameLogger.LogVerbose(
+                "Card",
+                $"RentCard {cardType} → parented under '{(parent != null ? parent.name : "null")}' "
+                    + $"(active={btn.gameObject.activeSelf})",
+                btn
+            );
             return btn;
         }
 
@@ -118,34 +181,43 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void ReturnCard(CardButton btn)
         {
-            if (btn == null) return;
+            if (btn == null)
+                return;
 
             ObjectPool<CardButton> pool = PoolForType(btn.PooledCardType);
-            if (pool == null) return;
+            if (pool == null)
+                return;
 
             // Restore interaction flags that display-only panels may have disabled.
             var cg = btn.GetComponent<CanvasGroup>();
             if (cg != null)
             {
-                cg.interactable   = true;
+                cg.interactable = true;
                 cg.blocksRaycasts = true;
-                cg.alpha          = 1f;
+                cg.alpha = 1f;
             }
-            
+
             btn.transform.localScale = Vector3.one;
             btn.transform.SetParent(transform, false);
             pool.Return(btn);
+            GameLogger.LogVerbose(
+                "Card",
+                $"ReturnCard '{btn.CardData?.CardName}' → back to pool '{name}' (deactivated)",
+                btn
+            );
         }
 
-        // ─── Enemy Slots ──────────────────────────────────────────────────────────
+        #endregion
 
+        #region Enemy Slots
         /// <summary>
         /// Rents an <see cref="EnemySlotUI"/> from the pool and re-parents it under
         /// <paramref name="parent"/>. Returns <c>null</c> if the pool was not initialized.
         /// </summary>
         public EnemySlotUI RentSlot(Transform parent)
         {
-            if (_slotPool == null) return null;
+            if (_slotPool == null)
+                return null;
             EnemySlotUI slot = _slotPool.Get();
             slot.transform.SetParent(parent, false);
             return slot;
@@ -158,7 +230,8 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void ReturnSlot(EnemySlotUI slot)
         {
-            if (slot == null || _slotPool == null) return;
+            if (slot == null || _slotPool == null)
+                return;
 
             // Clear static targeting reference so the next battle starts clean.
             if (EnemySlotUI.TargetedSlot == slot)
@@ -168,18 +241,20 @@ namespace Crookedile.UI.Battle
             _slotPool.Return(slot);
         }
 
-        // ─── Helpers ──────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Helpers
         private ObjectPool<CardButton> PoolForType(CardType cardType)
         {
             return cardType switch
             {
                 CardType.Rhetoric => _rhetoricPool,
-                CardType.Policy   => _policyPool,
-                CardType.Status   => _statusPool,
-                CardType.Curse    => _cursePool,
-                _                 => _pressurePool,   // Pressure fallback
+                CardType.Policy => _policyPool,
+                CardType.Heckle => _statusPool,
+                CardType.Scandal => _cursePool,
+                _ => _pressurePool, // Pressure fallback
             };
         }
     }
 }
+        #endregion

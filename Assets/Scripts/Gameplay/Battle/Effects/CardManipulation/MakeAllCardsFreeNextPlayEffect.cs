@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 using Crookedile.Core;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -20,6 +20,7 @@ namespace Crookedile.Gameplay.Battle
     /// post-play rearrange pass, no extra UI refresh logic is required.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class MakeAllCardsFreeNextPlayEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
@@ -40,7 +41,8 @@ namespace Crookedile.Gameplay.Battle
                 ctx.Deck.MakeCardFreeThisBattle(card);
 
             GameLogger.LogInfo<MakeAllCardsFreeNextPlayEffect>(
-                $"Made {hand.Count} card(s) free — will revert after the next card played");
+                $"Made {hand.Count} card(s) free — will revert after the next card played"
+            );
 
             // Register a one-shot listener on CardPlayedEvent to restore the snapshot.
             // The lambda captures the DeckManager reference; the EventBus subscription is
@@ -48,11 +50,13 @@ namespace Crookedile.Gameplay.Battle
             DeckManager deckRef = ctx.Deck;
             void OnNextCardPlayed(CardPlayedEvent e)
             {
-                if (!e.IsPlayer) return;                            // ignore enemy plays
+                if (!e.IsPlayer)
+                    return; // ignore enemy plays
                 EventBus.Unsubscribe<CardPlayedEvent>(OnNextCardPlayed);
                 deckRef.RestoreCostReductionSnapshot();
                 GameLogger.LogInfo<MakeAllCardsFreeNextPlayEffect>(
-                    "Next-play revert fired — cost reductions restored to pre-effect state");
+                    "Next-play revert fired — cost reductions restored to pre-effect state"
+                );
             }
             EventBus.Subscribe<CardPlayedEvent>(OnNextCardPlayed);
         }

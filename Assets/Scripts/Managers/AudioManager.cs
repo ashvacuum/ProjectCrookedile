@@ -1,8 +1,10 @@
 using System.Collections.Generic;
-using UnityEngine;
+using System.Threading;
 using Crookedile.Core;
-using Crookedile.Utilities;
 using Crookedile.Data.Audio;
+using Crookedile.Utilities;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Crookedile.Managers
 {
@@ -10,18 +12,31 @@ namespace Crookedile.Managers
     public class AudioManager : Singleton<AudioManager>
     {
         [Header("Audio Sources")]
-        [SerializeField] private AudioSource _musicSource;
-        [SerializeField] private AudioSource _sfxSource;
-        [SerializeField] private int _sfxPoolSize = 10;
+        [SerializeField]
+        private AudioSource _musicSource;
+
+        [SerializeField]
+        private AudioSource _sfxSource;
+
+        [SerializeField]
+        private int _sfxPoolSize = 10;
 
         [Header("Settings")]
-        [SerializeField] private float _masterVolume = 1f;
-        [SerializeField] private float _musicVolume = 1f;
-        [SerializeField] private float _sfxVolume = 1f;
+        [SerializeField]
+        private float _masterVolume = 1f;
+
+        [SerializeField]
+        private float _musicVolume = 1f;
+
+        [SerializeField]
+        private float _sfxVolume = 1f;
 
         [Header("Sound Library")]
-        [Tooltip("ScriptableObject database of named clips. Use 'Refresh Database' on the asset to auto-populate.")]
-        [SerializeField] private SoundLibrary _soundLibrary;
+        [Tooltip(
+            "ScriptableObject database of named clips. Use 'Refresh Database' on the asset to auto-populate."
+        )]
+        [SerializeField]
+        private SoundLibrary _soundLibrary;
 
         private Queue<AudioSource> _sfxPool = new Queue<AudioSource>();
         private List<AudioSource> _activeSfxSources = new List<AudioSource>();
@@ -66,13 +81,7 @@ namespace Crookedile.Managers
 
             if (fadeDuration > 0f)
             {
-                StartCoroutine(FadeMusicOut(fadeDuration / 2f, () =>
-                {
-                    _musicSource.clip = clip;
-                    _musicSource.loop = loop;
-                    _musicSource.Play();
-                    StartCoroutine(FadeMusicIn(fadeDuration / 2f));
-                }));
+                CrossfadeTo(clip, loop, fadeDuration).Forget();
             }
             else
             {
@@ -84,47 +93,66 @@ namespace Crookedile.Managers
             GameLogger.LogInfo("Audio", $"Playing music: {clip.name}");
         }
 
-        private System.Collections.IEnumerator FadeMusicIn(float duration)
+        /// <summary>
+        /// Cancellation source for the active music fade. Each new fade cancels the previous
+        /// one so overlapping PlayMusic/StopMusic calls can't fight over the volume.
+        /// </summary>
+        private CancellationTokenSource _musicFadeCts;
+
+        private CancellationToken NextMusicFadeToken()
         {
-            float elapsed = 0f;
-            float targetVolume = _musicVolume * _masterVolume;
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.deltaTime;
-                _musicSource.volume = Mathf.Lerp(0f, targetVolume, elapsed / duration);
-                yield return null;
-            }
-
-            _musicSource.volume = targetVolume;
+            _musicFadeCts?.Cancel();
+            _musicFadeCts?.Dispose();
+            _musicFadeCts = CancellationTokenSource.CreateLinkedTokenSource(
+                this.GetCancellationTokenOnDestroy()
+            );
+            return _musicFadeCts.Token;
         }
 
-        private System.Collections.IEnumerator FadeMusicOut(float duration, System.Action onComplete = null)
+        private async UniTaskVoid CrossfadeTo(AudioClip clip, bool loop, float fadeDuration)
+        {
+            var ct = NextMusicFadeToken();
+            await FadeMusicVolume(_musicSource.volume, 0f, fadeDuration / 2f, ct);
+            _musicSource.clip = clip;
+            _musicSource.loop = loop;
+            _musicSource.Play();
+            await FadeMusicVolume(0f, _musicVolume * _masterVolume, fadeDuration / 2f, ct);
+        }
+
+        private async UniTask FadeMusicVolume(
+            float from,
+            float to,
+            float duration,
+            CancellationToken ct
+        )
         {
             float elapsed = 0f;
-            float startVolume = _musicSource.volume;
-
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
-                _musicSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
-                yield return null;
+                _musicSource.volume = Mathf.Lerp(from, to, elapsed / duration);
+                await UniTask.Yield(ct);
             }
-
-            _musicSource.volume = 0f;
-            onComplete?.Invoke();
+            _musicSource.volume = to;
         }
 
         public void StopMusic(float fadeDuration = 0f)
         {
             if (fadeDuration > 0f)
             {
-                StartCoroutine(FadeMusicOut(fadeDuration, () => _musicSource.Stop()));
+                FadeOutAndStop(fadeDuration).Forget();
             }
             else
             {
                 _musicSource.Stop();
             }
+        }
+
+        private async UniTaskVoid FadeOutAndStop(float fadeDuration)
+        {
+            var ct = NextMusicFadeToken();
+            await FadeMusicVolume(_musicSource.volume, 0f, fadeDuration, ct);
+            _musicSource.Stop();
         }
 
         public void PlaySfx(AudioClip clip, float volumeScale = 1f)
@@ -148,7 +176,8 @@ namespace Crookedile.Managers
         /// <param name="pitch">Pitch multiplier (1 = normal speed). Applies to the shared _sfxSource before the one-shot.</param>
         public void PlaySfxOneShot(AudioClip clip, float volumeScale = 1f, float pitch = 1f)
         {
-            if (clip == null) return;
+            if (clip == null)
+                return;
             _sfxSource.pitch = pitch;
             _sfxSource.PlayOneShot(clip, _sfxVolume * _masterVolume * volumeScale);
         }
@@ -161,7 +190,8 @@ namespace Crookedile.Managers
         public void PlaySoundByID(string id)
         {
             var data = ResolveClip(id, byName: false);
-            if (data != null) PlaySfxOneShot(data.Clip, data.Volume, data.Pitch);
+            if (data != null)
+                PlaySfxOneShot(data.Clip, data.Volume, data.Pitch);
         }
 
         /// <summary>
@@ -172,7 +202,8 @@ namespace Crookedile.Managers
         public void PlaySoundByName(string clipName)
         {
             var data = ResolveClip(clipName, byName: true);
-            if (data != null) PlaySfxOneShot(data.Clip, data.Volume, data.Pitch);
+            if (data != null)
+                PlaySfxOneShot(data.Clip, data.Volume, data.Pitch);
         }
 
         /// <summary>
@@ -181,16 +212,23 @@ namespace Crookedile.Managers
         /// </summary>
         public void PlaySound(string value)
         {
-            if (string.IsNullOrEmpty(value)) return;
+            if (string.IsNullOrEmpty(value))
+                return;
             if (_soundLibrary == null)
             {
-                GameLogger.LogWarning("Audio", "PlaySound: no SoundLibrary assigned on AudioManager.");
+                GameLogger.LogWarning(
+                    "Audio",
+                    "PlaySound: no SoundLibrary assigned on AudioManager."
+                );
                 return;
             }
             var data = _soundLibrary.GetByIDOrName(value);
             if (data == null)
             {
-                GameLogger.LogWarning("Audio", $"PlaySound: '{value}' not found in SoundLibrary by ID or name.");
+                GameLogger.LogWarning(
+                    "Audio",
+                    $"PlaySound: '{value}' not found in SoundLibrary by ID or name."
+                );
                 return;
             }
             PlaySfxOneShot(data.Clip, data.Volume, data.Pitch);
@@ -198,10 +236,14 @@ namespace Crookedile.Managers
 
         private Data.Audio.AudioClipData ResolveClip(string value, bool byName)
         {
-            if (string.IsNullOrEmpty(value)) return null;
+            if (string.IsNullOrEmpty(value))
+                return null;
             if (_soundLibrary == null)
             {
-                GameLogger.LogWarning("Audio", "PlaySound: no SoundLibrary assigned on AudioManager.");
+                GameLogger.LogWarning(
+                    "Audio",
+                    "PlaySound: no SoundLibrary assigned on AudioManager."
+                );
                 return null;
             }
             var data = byName ? _soundLibrary.GetByName(value) : _soundLibrary.GetByID(value);

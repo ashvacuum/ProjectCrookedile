@@ -1,7 +1,7 @@
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Crookedile.Core;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Managers
 {
@@ -16,20 +16,25 @@ namespace Crookedile.Managers
     {
         [Header("Cheat Settings")]
         [Tooltip("Show cheat panel in game UI")]
-        [SerializeField] private bool _showCheatPanel = false;
+        [SerializeField]
+        private bool _showCheatPanel = false;
 
         [Tooltip("Enable hotkeys for common cheats")]
-        [SerializeField] private bool _hotkeysEnabled = true;
+        [SerializeField]
+        private bool _hotkeysEnabled = true;
 
         [Header("Current State")]
         [ReadOnly]
-        [SerializeField] private bool _godModeActive = false;
+        [SerializeField]
+        private bool _godModeActive = false;
 
         [ReadOnly]
-        [SerializeField] private bool _unlimitedResourcesActive = false;
+        [SerializeField]
+        private bool _unlimitedResourcesActive = false;
 
         [ReadOnly]
-        [SerializeField] private float _timeScale = 1f;
+        [SerializeField]
+        private float _timeScale = 1f;
 
         public bool GodModeActive => _godModeActive;
         public bool UnlimitedResourcesActive => _unlimitedResourcesActive;
@@ -49,7 +54,8 @@ namespace Crookedile.Managers
 #if !CHEATS_ENABLED
             return;
 #endif
-            if (!_hotkeysEnabled) return;
+            if (!_hotkeysEnabled)
+                return;
 
             // Hotkey: F1 - Toggle Cheat Panel
             if (Input.GetKeyDown(KeyCode.F1))
@@ -115,9 +121,14 @@ namespace Crookedile.Managers
         public void ToggleUnlimitedResources()
         {
             _unlimitedResourcesActive = !_unlimitedResourcesActive;
-            GameLogger.LogInfo("Cheats", $"Unlimited Resources: {(_unlimitedResourcesActive ? "ON" : "OFF")}");
+            GameLogger.LogInfo(
+                "Cheats",
+                $"Unlimited Resources: {(_unlimitedResourcesActive ? "ON" : "OFF")}"
+            );
 
-            EventBus.Publish(new UnlimitedResourcesToggleEvent { Enabled = _unlimitedResourcesActive });
+            EventBus.Publish(
+                new UnlimitedResourcesToggleEvent { Enabled = _unlimitedResourcesActive }
+            );
         }
 
         [FoldoutGroup("General Cheats")]
@@ -126,7 +137,10 @@ namespace Crookedile.Managers
         public void ToggleCheatPanel()
         {
             _showCheatPanel = !_showCheatPanel;
-            GameLogger.LogInfo("Cheats", $"Cheat Panel: {(_showCheatPanel ? "VISIBLE" : "HIDDEN")}");
+            GameLogger.LogInfo(
+                "Cheats",
+                $"Cheat Panel: {(_showCheatPanel ? "VISIBLE" : "HIDDEN")}"
+            );
         }
 
         #endregion
@@ -145,13 +159,18 @@ namespace Crookedile.Managers
 
         [FoldoutGroup("Resource Cheats")]
         [Button("Give Resources")]
-        [CheatCommand("give", "Give resources (money, lagay, utang, heat, support)", Category = "Resources")]
+        [CheatCommand(
+            "give",
+            "Give resources (money, lagay, utang, heat, support)",
+            Category = "Resources"
+        )]
         public void GiveResources(
             [LabelText("₱")] int campaignFunds = 1000,
             [LabelText("L")] int lagay = 10,
             [LabelText("U")] int utangNaLoob = 10,
             [LabelText("H")] int heat = 0,
-            [LabelText("Support")] int support = 5000)
+            [LabelText("Support")] int support = 5000
+        )
         {
             var resourceEvent = new CheatGiveResourcesEvent
             {
@@ -159,11 +178,14 @@ namespace Crookedile.Managers
                 Lagay = lagay,
                 UtangNaLoob = utangNaLoob,
                 Heat = heat,
-                Support = support
+                Support = support,
             };
 
             EventBus.Publish(resourceEvent);
-            GameLogger.LogInfo("Cheats", $"Gave resources: ₱{campaignFunds}, {lagay}L, {utangNaLoob}U, {heat}H, {support} Support");
+            GameLogger.LogInfo(
+                "Cheats",
+                $"Gave resources: ₱{campaignFunds}, {lagay}L, {utangNaLoob}U, {heat}H, {support} Support"
+            );
         }
 
         [FoldoutGroup("Resource Cheats")]
@@ -279,7 +301,8 @@ namespace Crookedile.Managers
         [CheatCommand("mute_music", "Mute/unmute music", Category = "Audio")]
         public void ToggleMusic()
         {
-            if (AudioManager.Instance == null) return;
+            if (AudioManager.Instance == null)
+                return;
             // AudioManager.Instance.SetMusicVolume(0f); // Example
             GameLogger.LogInfo("Cheats", "Toggled music");
         }
@@ -290,7 +313,8 @@ namespace Crookedile.Managers
         [CheatCommand("loadscene", "Load a scene by name", Category = "Scene")]
         public void LoadScene(string sceneName)
         {
-            if (SceneLoader.Instance == null) return;
+            if (SceneLoader.Instance == null)
+                return;
             SceneLoader.Instance.LoadScene(sceneName);
             GameLogger.LogInfo("Cheats", $"Loading scene: {sceneName}");
         }
@@ -301,11 +325,13 @@ namespace Crookedile.Managers
         [CheatCommand("setlang", "Set language (english/tagalog)", Category = "Localization")]
         public void SetLanguage(string language)
         {
-            if (LocalizationManager.Instance == null) return;
+            if (LocalizationManager.Instance == null)
+                return;
 
-            UnityEngine.SystemLanguage lang = language.ToLower() == "tagalog"
-                ? UnityEngine.SystemLanguage.Unknown // Using Unknown for Filipino
-                : UnityEngine.SystemLanguage.English;
+            UnityEngine.SystemLanguage lang =
+                language.ToLower() == "tagalog"
+                    ? UnityEngine.SystemLanguage.Unknown // Using Unknown for Filipino
+                    : UnityEngine.SystemLanguage.English;
 
             LocalizationManager.Instance.SetLanguage(lang);
             GameLogger.LogInfo("Cheats", $"Language set to: {language}");
@@ -332,8 +358,16 @@ namespace Crookedile.Managers
 
     #region Cheat Events
 
-    public class GodModeToggleEvent : IGameEvent { public bool Enabled; }
-    public class UnlimitedResourcesToggleEvent : IGameEvent { public bool Enabled; }
+    public class GodModeToggleEvent : IGameEvent
+    {
+        public bool Enabled;
+    }
+
+    public class UnlimitedResourcesToggleEvent : IGameEvent
+    {
+        public bool Enabled;
+    }
+
     public class CheatGiveResourcesEvent : IGameEvent
     {
         public int CampaignFunds;
@@ -342,14 +376,31 @@ namespace Crookedile.Managers
         public int Heat;
         public int Support;
     }
+
     public class CheatClearHeatEvent : IGameEvent { }
-    public class CheatDrawCardsEvent : IGameEvent { public int Amount; }
+
+    public class CheatDrawCardsEvent : IGameEvent
+    {
+        public int Amount;
+    }
+
     public class CheatRefreshHandEvent : IGameEvent { }
+
     public class CheatUnlockAllCardsEvent : IGameEvent { }
+
     public class CheatSkipDayEvent : IGameEvent { }
-    public class CheatJumpToDayEvent : IGameEvent { public int Day; }
+
+    public class CheatJumpToDayEvent : IGameEvent
+    {
+        public int Day;
+    }
+
     public class CheatWinBattleEvent : IGameEvent { }
-    public class CheatSetOpponentConfidenceEvent : IGameEvent { public int Confidence; }
+
+    public class CheatSetOpponentConfidenceEvent : IGameEvent
+    {
+        public int Confidence;
+    }
 
     #endregion
 }

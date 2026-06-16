@@ -1,3 +1,6 @@
+> [!WARNING]
+> **Pre-redesign document — may be inaccurate (flagged 2026-06).** Crookedile underwent a major combat + class redesign. Canonical design now lives in [`docs/core-design.md`](docs/core-design.md) and [`docs/crookedile-starter-decks.md`](docs/crookedile-starter-decks.md); current code/architecture is summarized in [`readme.md`](readme.md). Treat specifics below as historical until reconciled.
+
 # 2D Card System — Unity Setup Guide
 
 The 3D card system (Card3DView, CardHandManager, CardInputHandler, CardPrefabSetup, BattleCardHandBridge) has been removed. The `CardButton` component is now the single card view — it handles artwork, frames, hover, affordability dimming, and MMFeedbacks.

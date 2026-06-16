@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
+using UnityEngine;
 
 namespace Crookedile.Data
 {
@@ -17,37 +17,30 @@ namespace Crookedile.Data
     /// </summary>
     public class RunState
     {
-        // ── Static accessor ───────────────────────────────────────────────────
-
+        #region Static accessor
         /// <summary>The active run, or <c>null</c> if no run has been created yet.</summary>
         public static RunState Current { get; private set; }
 
-        // ── Run data ──────────────────────────────────────────────────────────
+        #endregion
 
+        #region Run data
         /// <summary>The player's chosen origin for this run.</summary>
-        public OriginType     Origin { get; private set; }
+        public OriginType Origin { get; private set; }
 
         /// <summary>
         /// The player's current deck — includes starter cards plus all cards
         /// picked up via reward screens during this run.
         /// </summary>
-        public List<CardData> Deck   { get; private set; }
+        public List<CardData> Deck { get; private set; }
 
-        // ── HP carry-over ─────────────────────────────────────────────────────
+        #endregion
 
-        /// <summary>
-        /// The player's Resolve (HP) at the end of the last battle.
-        /// 0 means the value hasn't been set yet (first battle of run should use max HP).
-        /// </summary>
-        public int CurrentResolve { get; private set; }
-
-        // ── Battle queue ──────────────────────────────────────────────────────
-
+        #region Battle queue
         /// <summary>
         /// Ordered list of enemy groups — one per encounter.
         /// <c>null</c> when no session was defined (single-round mode).
         /// </summary>
-        public List<List<EnemyData>> BattleQueue      { get; private set; }
+        public List<List<EnemyData>> BattleQueue { get; private set; }
 
         /// <summary>Index of the current battle in <see cref="BattleQueue"/>.</summary>
         public int CurrentBattleIndex { get; private set; }
@@ -65,8 +58,9 @@ namespace Crookedile.Data
                 ? BattleQueue[CurrentBattleIndex]
                 : null;
 
-        // ── Construction ──────────────────────────────────────────────────────
+        #endregion
 
+        #region Construction
         private RunState() { }
 
         /// <summary>
@@ -75,25 +69,23 @@ namespace Crookedile.Data
         /// </summary>
         /// <param name="origin">The origin the player selected.</param>
         /// <param name="starterDeck">Initial deck cards (shallow copy is taken).</param>
-        /// <param name="initialResolve">Starting HP for the run (typically the class's max HP).</param>
         /// <param name="battleQueue">
         /// Optional ordered list of enemy groups (one per round).
         /// Pass <c>null</c> for a single-round session where <c>BattleTestStarter</c>
         /// handles enemy selection directly.
         /// </param>
-        public static RunState Create(OriginType origin, List<CardData> starterDeck,
-                                      int initialResolve,
-                                      List<List<EnemyData>> battleQueue = null)
+        public static RunState Create(
+            OriginType origin,
+            List<CardData> starterDeck,
+            List<List<EnemyData>> battleQueue = null
+        )
         {
             Current = new RunState
             {
-                Origin             = origin,
-                Deck               = starterDeck != null
-                                         ? new List<CardData>(starterDeck)
-                                         : new List<CardData>(),
-                CurrentResolve     = Mathf.Max(0, initialResolve),
+                Origin = origin,
+                Deck = starterDeck != null ? new List<CardData>(starterDeck) : new List<CardData>(),
                 CurrentBattleIndex = 0,
-                BattleQueue        = battleQueue,
+                BattleQueue = battleQueue,
             };
             return Current;
         }
@@ -104,8 +96,9 @@ namespace Crookedile.Data
         /// </summary>
         public static void Clear() => Current = null;
 
-        // ── Mutation ──────────────────────────────────────────────────────────
+        #endregion
 
+        #region Mutation
         /// <summary>
         /// Appends <paramref name="card"/> to the deck.
         /// No-op if <paramref name="card"/> is <c>null</c>.
@@ -126,11 +119,9 @@ namespace Crookedile.Data
                 Deck.Remove(card);
         }
 
-        /// <summary>
-        /// Saves the player's current HP so it carries into the next battle.
-        /// Clamped to [0, ∞) — the actual max is enforced by <c>BattleStats</c>.
-        /// </summary>
-        public void UpdateResolve(int value) => CurrentResolve = Mathf.Max(0, value);
+        /// <summary>Records that the current battle was won (advances meta state).</summary>
+        public void RecordBattleVictory() { /* meta popularity update deferred */
+        }
 
         /// <summary>
         /// Advances to the next battle in <see cref="BattleQueue"/>.
@@ -143,3 +134,4 @@ namespace Crookedile.Data
         }
     }
 }
+        #endregion

@@ -48,7 +48,8 @@ namespace Crookedile.Data
         private const string DATE_FORMAT = "o"; // ISO 8601 format (UTC)
 
         // Dirty flag tracking (not serialized)
-        [NonSerialized] private bool _isDirty = false;
+        [NonSerialized]
+        private bool _isDirty = false;
 
         /// <summary>
         /// Marks this save data as modified (needs saving).
@@ -94,7 +95,11 @@ namespace Crookedile.Data
         /// <summary>
         /// Creates a new save with specific origin and starting resources.
         /// </summary>
-        public SaveData(OriginType selectedOrigin, int startingFunds = 100, int startingInfluence = 0)
+        public SaveData(
+            OriginType selectedOrigin,
+            int startingFunds = 100,
+            int startingInfluence = 0
+        )
         {
             deck = new List<CardInstance>();
             funds = startingFunds;
@@ -176,7 +181,14 @@ namespace Crookedile.Data
         /// </summary>
         public DateTime? GetSaveDateTime()
         {
-            if (DateTime.TryParse(lastSaveTime, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime result))
+            if (
+                DateTime.TryParse(
+                    lastSaveTime,
+                    null,
+                    System.Globalization.DateTimeStyles.RoundtripKind,
+                    out DateTime result
+                )
+            )
             {
                 return result;
             }

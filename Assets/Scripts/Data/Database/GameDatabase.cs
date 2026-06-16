@@ -4,9 +4,11 @@ using UnityEngine;
 
 namespace Crookedile.Data.Database
 {
-    public abstract class GameDatabase<T> : ScriptableObject, IDatabase<T> where T : ScriptableObject
+    public abstract class GameDatabase<T> : ScriptableObject, IDatabase<T>
+        where T : ScriptableObject
     {
-        [SerializeField] protected List<T> _items = new List<T>();
+        [SerializeField]
+        protected List<T> _items = new List<T>();
 
         protected Dictionary<string, T> _itemDictionary;
         protected bool _isInitialized = false;
@@ -23,7 +25,8 @@ namespace Crookedile.Data.Database
             // Guard against both the normal "already done" case AND the edge case where
             // _isInitialized is true but _itemDictionary was cleared by a domain reload
             // (non-serialized fields are reset between Editor play sessions).
-            if (_isInitialized && _itemDictionary != null) return;
+            if (_isInitialized && _itemDictionary != null)
+                return;
 
             _itemDictionary = new Dictionary<string, T>();
 
@@ -46,9 +49,11 @@ namespace Crookedile.Data.Database
 
         public virtual T GetByID(string id)
         {
-            if (!_isInitialized || _itemDictionary == null) Initialize();
+            if (!_isInitialized || _itemDictionary == null)
+                Initialize();
 
-            if (_itemDictionary == null) return null;
+            if (_itemDictionary == null)
+                return null;
             if (_itemDictionary.TryGetValue(id, out T item))
             {
                 return item;
@@ -64,7 +69,8 @@ namespace Crookedile.Data.Database
 
         public virtual bool Contains(string id)
         {
-            if (!_isInitialized || _itemDictionary == null) Initialize();
+            if (!_isInitialized || _itemDictionary == null)
+                Initialize();
             return _itemDictionary != null && _itemDictionary.ContainsKey(id);
         }
 
@@ -80,13 +86,15 @@ namespace Crookedile.Data.Database
 
         public virtual T GetRandom()
         {
-            if (_items.Count == 0) return null;
+            if (_items.Count == 0)
+                return null;
             return _items[Random.Range(0, _items.Count)];
         }
 
         public virtual List<T> GetRandom(int count)
         {
-            if (_items.Count == 0) return new List<T>();
+            if (_items.Count == 0)
+                return new List<T>();
 
             List<T> shuffled = new List<T>(_items);
             for (int i = shuffled.Count - 1; i > 0; i--)

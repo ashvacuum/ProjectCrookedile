@@ -1,0 +1,18 @@
+{
+    "name": "Crookedile.Tests",
+    "rootNamespace": "Crookedile.Tests",
+    "references": [
+        "Crookedile.Core",
+        "Crookedile.Utilities",
+        "Crookedile.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

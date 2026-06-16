@@ -1,9 +1,9 @@
-using System;
-using UnityEngine;
-using Sirenix.OdinInspector;
+﻿using System;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -16,10 +16,12 @@ namespace Crookedile.Gameplay.Battle
     /// when the source is a player card/passive.
     /// </summary>
     [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class RaiseAllOpponentsHostilityEffect : BattleEffect
     {
         [MinValue(1)]
-        [SerializeField] private int _amount = 3;
+        [SerializeField]
+        private int _amount = 3;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
@@ -34,10 +36,10 @@ namespace Crookedile.Gameplay.Battle
             }
 
             GameLogger.LogInfo<RaiseAllOpponentsHostilityEffect>(
-                $"Raised Hostility on {count} opponent(s) by {amount}");
+                $"Raised Hostility on {count} opponent(s) by {amount}"
+            );
         }
 
-        public override string GetDescription() =>
-            $"Raise all enemies' Hostility by {_amount}";
+        public override string GetDescription() => $"Raise all enemies' Hostility by {_amount}";
     }
 }

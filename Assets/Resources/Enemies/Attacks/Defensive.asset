@@ -15,39 +15,20 @@ MonoBehaviour:
   _moveName: Defend
   _moveType: 1
   _intentDescription: 
-  _newEffects:
-  - rid: 4738608336531357823
   _effects:
-  - _name: 
-    _category: 1
-    _target: 1
-    _damageType: 0
-    _damageAmount: 3
-    _randomDamageRange: {x: 3, y: 9}
-    _resourceType: 0
-    _resourceAmount: 3
-    _cardManipulationType: 0
-    _cardAmount: 2
-    _cardToAdd: {fileID: 0}
-    _cardSelectionMode: 0
-    _filterCardType: 0
-    _discardDrawAmount: 0
-    _costReduction: 1
-    _chancePercent: 50
-    _chanceEffects: []
-    _statusEffectType: 0
-    _statusStacks: 2
-    _statusDuration: 0
-    _amountSource: 0
+  - rid: 4823698507066769519
   _moveVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
+  _condition: 0
+  _conditionTurn: 1
+  _stanceRequirement: 7
   references:
     version: 2
     RefIds:
-    - rid: 4738608336531357823
-      type: {class: GainComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+    - rid: 4823698507066769519
+      type: {class: RaiseOpinionTrackedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 3
+        _amount: 5
         _amountSource: 0
