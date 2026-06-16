@@ -11,6 +11,10 @@ For users who first time use Unity
 Note:
 *Install the latest unity version or latest LTS version.
 
+*Easy way to import:
+On the welcome screen, just click the button "RealToon URP/HDRP" under the Packages section.
+
+*Manual way to import:
 If your project is 3D or Built-In RP:
 1.Go to folder "RealToon Shader Packages -> Built-In RP [3D]"
 2.Double click "RealToon Built-In RP [3D]", the latest one with the 'Later' word on it.
@@ -45,11 +49,14 @@ Unity SRP/Scriptable Render Pipeline (LWRP,URP and HDRP) are the new unity rende
 Import/Unpack RealToon Shaders Packages
 ===========================================================================
 
+*Easy way to import RealToon Shader package:
+On the welcome screen, just click the button "RealToon URP/HDRP" under the Packages section.
+
+===========================================================================
+
 If your project is Unity Built-In RP/3D:
 1.Go to folder "RealToon Shader Packages -> Built-In RP"
 2.Double click the RealToon Built-In version package you want to use.
-
-===========================================================================
 
 If your project is Unity SRP:
 1.Go to folder "RealToon Shader Packages -> SRP (LWRP - URP - HDRP)"
@@ -61,19 +68,19 @@ For LWRP:
 
 For URP:
 1.Open the folder "URP".
-2.Double click the RealToon LWRP version package you want to use.
+2.Double click the RealToon URP version package you want to use.
 3.Click "Import".
 
 For HDRP:
 1.Open the folder "HDRP".
-2.Double click the RealToon LWRP version package you want to use.
+2.Double click the RealToon HDRP version package you want to use.
 3.Click "Import".
 
 Note:
 'Below' means older verion.
 'Later' means Current and later future version.
 
-There are 2 folder each SRP(URP & HDRP):
+There are 2 folders, SRP(URP & HDRP):
 *Unity 6 folder is for Unity 6.0 to later/latest unity version.
 *Unity 2023 and Below folder is for Unity 2023,2022,2021 and 2019
 
@@ -81,10 +88,10 @@ There are 2 folder each SRP(URP & HDRP):
 ===========================================================================
 
 Accessing the shader:
-[RealToon Built-In RP/3D] The shaders are in "RealToon" folder.
-[RealToon LWRP] The shaders are in "Lightweight Render Pipeline" folder.
-[RealToon URP] The shader is in "Universal Render Pipeline" folder.
-[RealToon HDRP] The shader is in "HDRP" folder.
+[RealToon Built-In RP/3D] The shaders are in the "RealToon" shader category.
+[RealToon LWRP] The shaders are in "Lightweight Render Pipeline" shader category.
+[RealToon URP] The shader is in "Universal Render Pipeline" shader category.
+[RealToon HDRP] The shader is in "HDRP" shader category.
 
 ===========================================================================
 
@@ -105,7 +112,7 @@ Unity 2023.2.0 to before 2023.2.20 - HDRP 16
 Unity 2022.2.0 to before 2022.3.0 - HDRP 14 to 15
 
 Recommended Unity versions for Built-In RP/3D:
-From Unity 5 to current latest unity version.
+From Unity 5 to Unity 6.4.0
 
 ===========================================================================
 

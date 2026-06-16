@@ -1,12 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 using Crookedile.Data.VFX;
+using UnityEngine;
 
 namespace Crookedile.Data.Audio
 {
-    // ─── Trigger Enum ─────────────────────────────────────────────────────────
-
+    #region Trigger Enum
     /// <summary>
     /// Every battle moment that can trigger audio and/or visual feedback.
     /// Used as the key in <see cref="BattleSoundMap"/> to look up the correct
@@ -41,14 +40,15 @@ namespace Crookedile.Data.Audio
         EnemyHostilityChanged,
 
         // Resources
-        ComposureGained,
-        ComposureLost,
+        ShieldGained,
+        ShieldLost,
         APSpent,
         APGained,
     }
 
-    // ─── ScriptableObject ─────────────────────────────────────────────────────
+    #endregion
 
+    #region ScriptableObject
     /// <summary>
     /// Maps every <see cref="BattleAudioTrigger"/> to an optional audio clip and/or visual effect.
     ///
@@ -60,8 +60,9 @@ namespace Crookedile.Data.Audio
     [CreateAssetMenu(menuName = "Crookedile/Audio/Battle Sound Map", fileName = "BattleSoundMap")]
     public class BattleSoundMap : ScriptableObject
     {
-        // ─── Inspector Types ──────────────────────────────────────────────────
+    #endregion
 
+        #region Inspector Types
         [Serializable]
         public struct Entry
         {
@@ -75,13 +76,16 @@ namespace Crookedile.Data.Audio
             public VFXEvent Visual;
         }
 
-        // ─── Inspector Fields ─────────────────────────────────────────────────
+        #endregion
 
+        #region Inspector Fields
         [Tooltip("One entry per battle trigger. Triggers without an entry are silently ignored.")]
-        [SerializeField] private Entry[] _entries;
+        [SerializeField]
+        private Entry[] _entries;
 
-        // ─── Runtime ─────────────────────────────────────────────────────────
+        #endregion
 
+        #region Runtime
         private Dictionary<BattleAudioTrigger, Entry> _map;
 
         private void OnEnable() => BuildMap();
@@ -89,27 +93,34 @@ namespace Crookedile.Data.Audio
         private void BuildMap()
         {
             _map = new Dictionary<BattleAudioTrigger, Entry>();
-            if (_entries == null) return;
+            if (_entries == null)
+                return;
 
             foreach (var entry in _entries)
             {
                 if (_map.ContainsKey(entry.Trigger))
-                    Debug.LogWarning($"[BattleSoundMap] Duplicate trigger '{entry.Trigger}' in '{name}' — skipping.", this);
+                    Debug.LogWarning(
+                        $"[BattleSoundMap] Duplicate trigger '{entry.Trigger}' in '{name}' — skipping.",
+                        this
+                    );
                 else
                     _map[entry.Trigger] = entry;
             }
         }
 
-        // ─── Public API ───────────────────────────────────────────────────────
+        #endregion
 
+        #region Public API
         /// <summary>
         /// Returns true and populates <paramref name="entry"/> if the trigger has a mapping.
         /// Returns false (no audio/VFX) if the trigger is not in the map.
         /// </summary>
         public bool TryGet(BattleAudioTrigger trigger, out Entry entry)
         {
-            if (_map == null) BuildMap();
+            if (_map == null)
+                BuildMap();
             return _map.TryGetValue(trigger, out entry);
         }
     }
 }
+        #endregion

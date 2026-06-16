@@ -1,12 +1,12 @@
-using UnityEngine;
-using UnityEditor;
-using Crookedile.Data.Cards;
-using Crookedile.Gameplay.Battle;
-using Crookedile.Gameplay;
-using Sirenix.OdinInspector.Editor;
-using Sirenix.OdinInspector;
-using Sirenix.Utilities.Editor;
 using System.Collections.Generic;
+using Crookedile.Data.Cards;
+using Crookedile.Gameplay;
+using Crookedile.Gameplay.Battle;
+using Sirenix.OdinInspector;
+using Sirenix.OdinInspector.Editor;
+using Sirenix.Utilities.Editor;
+using UnityEditor;
+using UnityEngine;
 
 namespace Crookedile.Editor
 {
@@ -28,7 +28,8 @@ namespace Crookedile.Editor
         [InfoBox("Select a card to test its effects in simulated battle conditions.")]
         [AssetSelector(Paths = "Assets/Resources/Cards")]
         [Required]
-        [SerializeField] private CardData _cardToTest;
+        [SerializeField]
+        private CardData _cardToTest;
 
         #endregion
 
@@ -36,54 +37,46 @@ namespace Crookedile.Editor
 
         [Title("Battle Simulation")]
         [FoldoutGroup("Player Stats")]
-        [LabelText("Resolve")]
-        [PropertyRange(0, 100)]
-        [SerializeField] private int _playerResolve = 20;
-
-        [FoldoutGroup("Player Stats")]
-        [LabelText("Max Resolve")]
-        [PropertyRange(1, 100)]
-        [SerializeField] private int _playerMaxResolve = 20;
-
-        [FoldoutGroup("Player Stats")]
         [LabelText("Action Points")]
         [PropertyRange(0, 10)]
-        [SerializeField] private int _playerActionPoints = 3;
+        [SerializeField]
+        private int _playerActionPoints = 3;
 
         [FoldoutGroup("Player Stats")]
-        [LabelText("Composure")]
+        [Tooltip(
+            "Starting Support for the test. Session-level — set directly on BattleManager in a real battle."
+        )]
+        [LabelText("Starting Support")]
         [PropertyRange(0, 50)]
-        [SerializeField] private int _playerComposure = 0;
+        [SerializeField]
+        private int _playerSupport = 0;
 
         [FoldoutGroup("Player Stats")]
         [LabelText("Hostility")]
         [PropertyRange(0, 50)]
-        [SerializeField] private int _playerHostility = 0;
-
-        [FoldoutGroup("Opponent Stats")]
-        [LabelText("Resolve")]
-        [PropertyRange(0, 100)]
-        [SerializeField] private int _opponentResolve = 20;
-
-        [FoldoutGroup("Opponent Stats")]
-        [LabelText("Max Resolve")]
-        [PropertyRange(1, 100)]
-        [SerializeField] private int _opponentMaxResolve = 20;
+        [SerializeField]
+        private int _playerHostility = 0;
 
         [FoldoutGroup("Opponent Stats")]
         [LabelText("Action Points")]
         [PropertyRange(0, 10)]
-        [SerializeField] private int _opponentActionPoints = 3;
+        [SerializeField]
+        private int _opponentActionPoints = 3;
 
         [FoldoutGroup("Opponent Stats")]
-        [LabelText("Composure")]
+        [Tooltip(
+            "Starting Denial for the test. Session-level — set directly on BattleManager in a real battle."
+        )]
+        [LabelText("Starting Denial")]
         [PropertyRange(0, 50)]
-        [SerializeField] private int _opponentComposure = 0;
+        [SerializeField]
+        private int _opponentDenial = 0;
 
         [FoldoutGroup("Opponent Stats")]
         [LabelText("Hostility")]
         [PropertyRange(0, 50)]
-        [SerializeField] private int _opponentHostility = 0;
+        [SerializeField]
+        private int _opponentHostility = 0;
 
         #endregion
 
@@ -93,12 +86,14 @@ namespace Crookedile.Editor
         [FoldoutGroup("Player Status Effects")]
         [InfoBox("Configure status effects active on the player.")]
         [TableList(AlwaysExpanded = true, ShowIndexLabels = false)]
-        [SerializeField] private List<StatusEffectSetup> _playerStatusEffects = new List<StatusEffectSetup>();
+        [SerializeField]
+        private List<StatusEffectSetup> _playerStatusEffects = new List<StatusEffectSetup>();
 
         [FoldoutGroup("Opponent Status Effects")]
         [InfoBox("Configure status effects active on the opponent.")]
         [TableList(AlwaysExpanded = true, ShowIndexLabels = false)]
-        [SerializeField] private List<StatusEffectSetup> _opponentStatusEffects = new List<StatusEffectSetup>();
+        [SerializeField]
+        private List<StatusEffectSetup> _opponentStatusEffects = new List<StatusEffectSetup>();
 
         #endregion
 
@@ -108,32 +103,38 @@ namespace Crookedile.Editor
         [FoldoutGroup("Player Deck")]
         [LabelText("Cards in Hand")]
         [PropertyRange(0, 10)]
-        [SerializeField] private int _playerHandSize = 5;
+        [SerializeField]
+        private int _playerHandSize = 5;
 
         [FoldoutGroup("Player Deck")]
         [LabelText("Cards in Draw Pile")]
         [PropertyRange(0, 30)]
-        [SerializeField] private int _playerDrawPileSize = 10;
+        [SerializeField]
+        private int _playerDrawPileSize = 10;
 
         [FoldoutGroup("Player Deck")]
         [LabelText("Cards in Discard Pile")]
         [PropertyRange(0, 30)]
-        [SerializeField] private int _playerDiscardPileSize = 2;
+        [SerializeField]
+        private int _playerDiscardPileSize = 2;
 
         [FoldoutGroup("Opponent Deck")]
         [LabelText("Cards in Hand")]
         [PropertyRange(0, 10)]
-        [SerializeField] private int _opponentHandSize = 5;
+        [SerializeField]
+        private int _opponentHandSize = 5;
 
         [FoldoutGroup("Opponent Deck")]
         [LabelText("Cards in Draw Pile")]
         [PropertyRange(0, 30)]
-        [SerializeField] private int _opponentDrawPileSize = 10;
+        [SerializeField]
+        private int _opponentDrawPileSize = 10;
 
         [FoldoutGroup("Opponent Deck")]
         [LabelText("Cards in Discard Pile")]
         [PropertyRange(0, 30)]
-        [SerializeField] private int _opponentDiscardPileSize = 2;
+        [SerializeField]
+        private int _opponentDiscardPileSize = 2;
 
         #endregion
 
@@ -146,13 +147,20 @@ namespace Crookedile.Editor
         {
             if (_cardToTest == null)
             {
-                EditorUtility.DisplayDialog("Card Effect Tester", "Please select a card to test!", "OK");
+                EditorUtility.DisplayDialog(
+                    "Card Effect Tester",
+                    "Please select a card to test!",
+                    "OK"
+                );
                 return;
             }
 
             // Clear console for clean test output
             var logEntries = System.Type.GetType("UnityEditor.LogEntries, UnityEditor.dll");
-            var clearMethod = logEntries.GetMethod("Clear", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+            var clearMethod = logEntries.GetMethod(
+                "Clear",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public
+            );
             clearMethod?.Invoke(null, null);
 
             Debug.Log("=== CARD EFFECT TEST START ===");
@@ -161,35 +169,30 @@ namespace Crookedile.Editor
             Debug.Log("");
 
             // Setup battle stats
-            BattleStats playerStats = CreateBattleStats(_playerMaxResolve, _playerActionPoints);
+            BattleStats playerStats = CreateBattleStats(_playerActionPoints);
+            // Support/Denial are session-level; no per-stat shield in tester.
+            if (_playerHostility > 0)
+                playerStats.GainHostility(_playerHostility);
 
-            // Set resolve by damage if needed
-            if (_playerResolve < _playerMaxResolve)
-            {
-                int damageNeeded = _playerMaxResolve - _playerResolve;
-                playerStats.DamageResolve(damageNeeded);
-            }
+            BattleStats opponentStats = CreateBattleStats(_opponentActionPoints);
 
-            // Set composure and hostility
-            if (_playerComposure > 0) playerStats.GainComposure(_playerComposure);
-            if (_playerHostility > 0) playerStats.GainHostility(_playerHostility);
-
-            BattleStats opponentStats = CreateBattleStats(_opponentMaxResolve, _opponentActionPoints);
-
-            // Set resolve by damage if needed
-            if (_opponentResolve < _opponentMaxResolve)
-            {
-                int damageNeeded = _opponentMaxResolve - _opponentResolve;
-                opponentStats.DamageResolve(damageNeeded);
-            }
-
-            // Set composure and hostility
-            if (_opponentComposure > 0) opponentStats.GainComposure(_opponentComposure);
-            if (_opponentHostility > 0) opponentStats.GainHostility(_opponentHostility);
+            // Set hostility
+            if (_opponentHostility > 0)
+                opponentStats.GainHostility(_opponentHostility);
 
             // Create dummy decks
-            DeckManager playerDeck = CreateDummyDeck("Player", _playerHandSize, _playerDrawPileSize, _playerDiscardPileSize);
-            DeckManager opponentDeck = CreateDummyDeck("Opponent", _opponentHandSize, _opponentDrawPileSize, _opponentDiscardPileSize);
+            DeckManager playerDeck = CreateDummyDeck(
+                "Player",
+                _playerHandSize,
+                _playerDrawPileSize,
+                _playerDiscardPileSize
+            );
+            DeckManager opponentDeck = CreateDummyDeck(
+                "Opponent",
+                _opponentHandSize,
+                _opponentDrawPileSize,
+                _opponentDiscardPileSize
+            );
 
             Debug.Log("--- INITIAL STATE ---");
             LogBattleState("Player", playerStats, playerDeck);
@@ -208,11 +211,15 @@ namespace Crookedile.Editor
                 Debug.Log("--- STATUS EFFECTS APPLIED ---");
                 if (_playerStatusEffects.Count > 0)
                 {
-                    Debug.Log($"Player Status Effects: {string.Join(", ", _playerStatusEffects.ConvertAll(s => $"{s.Type} x{s.Stacks}"))}");
+                    Debug.Log(
+                        $"Player Status Effects: {string.Join(", ", _playerStatusEffects.ConvertAll(s => $"{s.Behavior?.DisplayName ?? "(none)"} x{s.Stacks}"))}"
+                    );
                 }
                 if (_opponentStatusEffects.Count > 0)
                 {
-                    Debug.Log($"Opponent Status Effects: {string.Join(", ", _opponentStatusEffects.ConvertAll(s => $"{s.Type} x{s.Stacks}"))}");
+                    Debug.Log(
+                        $"Opponent Status Effects: {string.Join(", ", _opponentStatusEffects.ConvertAll(s => $"{s.Behavior?.DisplayName ?? "(none)"} x{s.Stacks}"))}"
+                    );
                 }
                 Debug.Log("");
             }
@@ -241,16 +248,12 @@ namespace Crookedile.Editor
         {
             _cardToTest = null;
 
-            _playerResolve = 20;
-            _playerMaxResolve = 20;
             _playerActionPoints = 3;
-            _playerComposure = 0;
+            _playerSupport = 0;
             _playerHostility = 0;
 
-            _opponentResolve = 20;
-            _opponentMaxResolve = 20;
             _opponentActionPoints = 3;
-            _opponentComposure = 0;
+            _opponentDenial = 0;
             _opponentHostility = 0;
 
             _playerStatusEffects.Clear();
@@ -269,12 +272,14 @@ namespace Crookedile.Editor
 
         #region Helper Methods
 
-        private BattleStats CreateBattleStats(int maxResolve, int maxAP)
-        {
-            return new BattleStats(maxResolve, maxAP);
-        }
+        private BattleStats CreateBattleStats(int maxAP) => new BattleStats(maxAP);
 
-        private DeckManager CreateDummyDeck(string ownerName, int handSize, int drawPileSize, int discardPileSize)
+        private DeckManager CreateDummyDeck(
+            string ownerName,
+            int handSize,
+            int drawPileSize,
+            int discardPileSize
+        )
         {
             // Create a simple dummy card for testing
             var dummyCards = new List<CardData>();
@@ -289,21 +294,25 @@ namespace Crookedile.Editor
             return deck;
         }
 
-        private void ApplyStatusEffects(StatusEffectManager manager, List<StatusEffectSetup> effects)
+        private void ApplyStatusEffects(
+            StatusEffectManager manager,
+            List<StatusEffectSetup> effects
+        )
         {
             foreach (var effect in effects)
             {
-                manager.ApplyStatusEffect(effect.Type, effect.Stacks, effect.Duration);
+                manager.ApplyStatus(effect.Behavior, effect.Stacks, effect.Duration);
             }
         }
 
         private void LogBattleState(string name, BattleStats stats, DeckManager deck)
         {
             Debug.Log($"<b>{name}:</b>");
-            Debug.Log($"  Resolve: {stats.CurrentResolve}/{stats.MaxResolve}");
             Debug.Log($"  Action Points: {stats.CurrentActionPoints}/{stats.MaxActionPoints}");
-            Debug.Log($"  Composure: {stats.CurrentComposure} | Hostility: {stats.CurrentHostility}");
-            Debug.Log($"  Hand: {deck.HandCount} | Draw: {deck.DeckCount} | Discard: {deck.DiscardCount}");
+            Debug.Log($"  Hostility: {stats.CurrentHostility}");
+            Debug.Log(
+                $"  Hand: {deck.HandCount} | Draw: {deck.DeckCount} | Discard: {deck.DiscardCount}"
+            );
         }
 
         #endregion
@@ -312,19 +321,11 @@ namespace Crookedile.Editor
 
         [Title("Quick Presets")]
         [HorizontalGroup("Presets")]
-        [Button("Low Health Test")]
-        private void PresetLowHealth()
+        [Button("High Support Test")]
+        private void PresetHighSupport()
         {
-            _playerResolve = 3;
-            _opponentResolve = 3;
-        }
-
-        [HorizontalGroup("Presets")]
-        [Button("High Composure Test")]
-        private void PresetHighComposure()
-        {
-            _playerComposure = 15;
-            _opponentComposure = 15;
+            _playerSupport = 15;
+            _opponentDenial = 15;
         }
 
         [HorizontalGroup("Presets")]
@@ -332,11 +333,32 @@ namespace Crookedile.Editor
         private void PresetStatusEffects()
         {
             _playerStatusEffects.Clear();
-            _playerStatusEffects.Add(new StatusEffectSetup { Type = StatusEffectType.Strength, Stacks = 3, Duration = StatusDurationType.DecreasePerTurn });
-            _playerStatusEffects.Add(new StatusEffectSetup { Type = StatusEffectType.Vulnerable, Stacks = 2, Duration = StatusDurationType.DecreasePerTurn });
+            _playerStatusEffects.Add(
+                new StatusEffectSetup
+                {
+                    Behavior = new StrengthStatus(),
+                    Stacks = 3,
+                    Duration = StatusDurationType.DecreasePerTurn,
+                }
+            );
+            _playerStatusEffects.Add(
+                new StatusEffectSetup
+                {
+                    Behavior = new VulnerableStatus(),
+                    Stacks = 2,
+                    Duration = StatusDurationType.DecreasePerTurn,
+                }
+            );
 
             _opponentStatusEffects.Clear();
-            _opponentStatusEffects.Add(new StatusEffectSetup { Type = StatusEffectType.Weakened, Stacks = 2, Duration = StatusDurationType.DecreasePerTurn });
+            _opponentStatusEffects.Add(
+                new StatusEffectSetup
+                {
+                    Behavior = new WeakenedStatus(),
+                    Stacks = 2,
+                    Duration = StatusDurationType.DecreasePerTurn,
+                }
+            );
         }
 
         [HorizontalGroup("Presets")]
@@ -356,7 +378,8 @@ namespace Crookedile.Editor
         [HideLabel]
         [HorizontalGroup]
         [LabelWidth(50)]
-        public StatusEffectType Type;
+        [SerializeReference]
+        public StatusBehavior Behavior;
 
         [HorizontalGroup]
         [LabelText("Stacks")]

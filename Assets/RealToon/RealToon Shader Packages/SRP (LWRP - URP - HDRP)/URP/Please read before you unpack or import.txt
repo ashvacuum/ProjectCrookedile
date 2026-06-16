@@ -4,7 +4,6 @@ Note:
 ===========================================================
 
 URP is universal, from mobile, console to high end.
-Tessellation will be coming soon.
 
 ===========================================================
 *How to download, import and unpack RealToon (URP) Shader Packages Video Tutorial:

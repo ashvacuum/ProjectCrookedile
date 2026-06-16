@@ -2,17 +2,26 @@ using System;
 
 namespace Crookedile.Gameplay.Battle
 {
-    /// <summary>Fires when the player loses any composure stacks.</summary>
+    /// <summary>Fires when the session's Support decreases.</summary>
     [Serializable]
-    public class ComposureLostTrigger : PassiveTriggerBase
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(
+        true,
+        "Crookedile.Gameplay.Battle",
+        "Assembly-CSharp",
+        "ComposureLostTrigger"
+    )]
+    public class ShieldLostTrigger : PassiveTriggerBase
     {
         public override bool Matches(PassiveEventContext ctx)
         {
-            if (!ctx.Is<ComposureChangedEvent>()) return false;
-            var e = ctx.As<ComposureChangedEvent>();
-            return e.IsPlayer && e.NewValue < e.OldValue;
+            if (!ctx.Is<SupportChangedEvent>())
+                return false;
+            var e = ctx.As<SupportChangedEvent>();
+            return e.NewValue < e.OldValue;
         }
 
-        public override string TriggerLabel => "When you lose composure";
+        public override Type EventType => typeof(SupportChangedEvent);
+
+        public override string TriggerLabel => "When you lose Support";
     }
 }

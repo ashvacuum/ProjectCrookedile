@@ -10,14 +10,14 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public class RandomSequentialMoveSelector : IMovePatternSelector
     {
-        private int  _index;
+        private int _index;
         private bool _initialized;
 
         public EnemyMoveData SelectMove(IReadOnlyList<EnemyMoveData> eligibleMoves)
         {
             if (!_initialized)
             {
-                _index       = Random.Range(0, eligibleMoves.Count);
+                _index = Random.Range(0, eligibleMoves.Count);
                 _initialized = true;
             }
 
@@ -28,7 +28,7 @@ namespace Crookedile.Gameplay.Battle
 
         public void Reset()
         {
-            _index       = 0;
+            _index = 0;
             _initialized = false;
         }
     }

@@ -5,8 +5,8 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public enum ComparisonType
     {
-        AtLeast,  // value >= threshold
-        AtMost,   // value <= threshold
-        Equals,   // value == threshold
+        AtLeast, // value >= threshold
+        AtMost, // value <= threshold
+        Equals, // value == threshold
     }
 }

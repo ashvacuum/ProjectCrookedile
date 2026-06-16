@@ -1,6 +1,5 @@
 ﻿//RealToon - SmoothObjectNomal [Helper]
-//MJQStudioWorks
-//©2025
+//©MJQStudioWorks
 
 using UnityEngine;
 

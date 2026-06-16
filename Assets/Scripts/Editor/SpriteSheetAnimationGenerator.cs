@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -32,8 +32,7 @@ namespace Crookedile.Editor
     /// </summary>
     public static class SpriteSheetAnimationGenerator
     {
-        // ─── Tunable constants ────────────────────────────────────────────────────
-
+        #region Tunable constants
         /// <summary>Playback rate written into each generated clip. Matches the manual workflow (30fps keyframes, 60fps sample rate).</summary>
         private const float DEFAULT_FRAME_RATE = 30f;
 
@@ -68,14 +67,20 @@ namespace Crookedile.Editor
         /// Texture filenames treated as generic — the parent folder name is used as the
         /// animation name instead. Case-insensitive.
         /// </summary>
-        private static readonly HashSet<string> GenericTextureNames =
-            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                "spritesheet", "sprites", "atlas", "sheet", "texture",
-            };
+        private static readonly HashSet<string> GenericTextureNames = new HashSet<string>(
+            StringComparer.OrdinalIgnoreCase
+        )
+        {
+            "spritesheet",
+            "sprites",
+            "atlas",
+            "sheet",
+            "texture",
+        };
 
-        // ─── Menu entry ───────────────────────────────────────────────────────────
+        #endregion
 
+        #region Menu entry
         [MenuItem("Assets/Crookedile/Generate Anim from Sprite Sheet", false, 2000)]
         private static void GenerateAnimations()
         {
@@ -84,22 +89,24 @@ namespace Crookedile.Editor
             {
                 EditorUtility.DisplayDialog(
                     "Template Not Found",
-                    $"Could not find '{TEMPLATE_CLIP_NAME}.anim' anywhere in the project.\n" +
-                    "Make sure Fireball.anim exists (e.g. Assets/Resources/VFXAnimations/Fireball.anim) " +
-                    "and try again.",
-                    "OK");
+                    $"Could not find '{TEMPLATE_CLIP_NAME}.anim' anywhere in the project.\n"
+                        + "Make sure Fireball.anim exists (e.g. Assets/Resources/VFXAnimations/Fireball.anim) "
+                        + "and try again.",
+                    "OK"
+                );
                 return;
             }
 
             string templateText = File.ReadAllText(templatePath);
 
             int generated = 0;
-            int skipped   = 0;
+            int skipped = 0;
 
             foreach (UnityEngine.Object selected in Selection.objects)
             {
                 string assetPath = AssetDatabase.GetAssetPath(selected);
-                if (string.IsNullOrEmpty(assetPath)) continue;
+                if (string.IsNullOrEmpty(assetPath))
+                    continue;
 
                 if (AssetDatabase.IsValidFolder(assetPath))
                 {
@@ -108,14 +115,18 @@ namespace Crookedile.Editor
                     foreach (string guid in guids)
                     {
                         string texPath = AssetDatabase.GUIDToAssetPath(guid);
-                        if (TryGenerateAnim(texPath, templateText)) generated++;
-                        else                                         skipped++;
+                        if (TryGenerateAnim(texPath, templateText))
+                            generated++;
+                        else
+                            skipped++;
                     }
                 }
                 else
                 {
-                    if (TryGenerateAnim(assetPath, templateText)) generated++;
-                    else                                          skipped++;
+                    if (TryGenerateAnim(assetPath, templateText))
+                        generated++;
+                    else
+                        skipped++;
                 }
             }
 
@@ -124,19 +135,23 @@ namespace Crookedile.Editor
 
             EditorUtility.DisplayDialog(
                 "Generate Anim from Sprite Sheet",
-                $"Generated {generated} animation{(generated == 1 ? "" : "s")}." +
-                (skipped > 0
-                    ? $"\nSkipped {skipped} (not a sliced sprite sheet, or no sprites found)."
-                    : ""),
-                "OK");
+                $"Generated {generated} animation{(generated == 1 ? "" : "s")}."
+                    + (
+                        skipped > 0
+                            ? $"\nSkipped {skipped} (not a sliced sprite sheet, or no sprites found)."
+                            : ""
+                    ),
+                "OK"
+            );
         }
 
         [MenuItem("Assets/Crookedile/Generate Anim from Sprite Sheet", true)]
         private static bool ValidateGenerateAnimations() =>
             Selection.objects != null && Selection.objects.Length > 0;
 
-        // ─── Core generation ──────────────────────────────────────────────────────
+        #endregion
 
+        #region Core generation
         /// <summary>
         /// Patches the template YAML and writes a <c>.anim</c> next to <paramref name="texturePath"/>.
         /// Returns <c>false</c> (and logs a warning) when the texture should be skipped.
@@ -145,18 +160,21 @@ namespace Crookedile.Editor
         {
             // Only process sliced sprite sheets.
             var importer = AssetImporter.GetAtPath(texturePath) as TextureImporter;
-            if (importer == null) return false;
+            if (importer == null)
+                return false;
 
             if (importer.spriteImportMode != SpriteImportMode.Multiple)
             {
                 Debug.LogWarning(
-                    $"[AnimGen] Skipped '{texturePath}' — spriteImportMode is not Multiple.");
+                    $"[AnimGen] Skipped '{texturePath}' — spriteImportMode is not Multiple."
+                );
                 return false;
             }
 
             // Load and sort the sub-sprites using natural order so _2 comes before _10.
             // Lexicographic sort gives _1, _10, _11 … _2 which produces wrong frame order.
-            Sprite[] sprites = AssetDatabase.LoadAllAssetsAtPath(texturePath)
+            Sprite[] sprites = AssetDatabase
+                .LoadAllAssetsAtPath(texturePath)
                 .OfType<Sprite>()
                 .OrderBy(s => s.name, NaturalStringComparer.Instance)
                 .ToArray();
@@ -164,8 +182,9 @@ namespace Crookedile.Editor
             if (sprites.Length == 0)
             {
                 Debug.LogWarning(
-                    $"[AnimGen] Skipped '{texturePath}' — no sprites found " +
-                    "(the sheet may not have been sliced in the importer yet).");
+                    $"[AnimGen] Skipped '{texturePath}' — no sprites found "
+                        + "(the sheet may not have been sliced in the importer yet)."
+                );
                 return false;
             }
 
@@ -173,16 +192,22 @@ namespace Crookedile.Editor
             string nl = templateText.Contains("\r\n") ? "\r\n" : "\n";
 
             // Build the two sprite-reference blocks that replace the template's sections.
-            var curveBlock   = new StringBuilder();
+            var curveBlock = new StringBuilder();
             var mappingBlock = new StringBuilder();
 
             for (int i = 0; i < sprites.Length; i++)
             {
-                if (!AssetDatabase.TryGetGUIDAndLocalFileIdentifier(
-                        sprites[i], out string guid, out long fileId))
+                if (
+                    !AssetDatabase.TryGetGUIDAndLocalFileIdentifier(
+                        sprites[i],
+                        out string guid,
+                        out long fileId
+                    )
+                )
                 {
                     Debug.LogWarning(
-                        $"[AnimGen] Could not resolve file ID for sprite '{sprites[i].name}' — skipped.");
+                        $"[AnimGen] Could not resolve file ID for sprite '{sprites[i].name}' — skipped."
+                    );
                     continue;
                 }
 
@@ -199,38 +224,46 @@ namespace Crookedile.Editor
             string animName = ResolveAnimationName(texturePath);
 
             string yaml = PatchTemplate(
-                templateText, animName,
-                curveBlock.ToString(), mappingBlock.ToString(),
-                stopTime);
+                templateText,
+                animName,
+                curveBlock.ToString(),
+                mappingBlock.ToString(),
+                stopTime
+            );
 
             // Output path: same folder as the texture.
-            string outputDir      = Path.GetDirectoryName(texturePath)?.Replace('\\', '/') ?? "Assets";
-            string outputPath     = $"{outputDir}/{animName}.anim";
-            string fullAnimPath   = Path.GetFullPath(outputPath);
-            string fullMetaPath   = fullAnimPath + ".meta";
+            string outputDir = Path.GetDirectoryName(texturePath)?.Replace('\\', '/') ?? "Assets";
+            string outputPath = $"{outputDir}/{animName}.anim";
+            string fullAnimPath = Path.GetFullPath(outputPath);
+            string fullMetaPath = fullAnimPath + ".meta";
 
             // Preserve the existing GUID when regenerating, so any Animator Controller
             // references to this clip continue to resolve without manual rewiring.
             string existingGuid = TryReadMetaGuid(fullMetaPath);
-            string metaGuid     = existingGuid ?? Guid.NewGuid().ToString("N");
+            string metaGuid = existingGuid ?? Guid.NewGuid().ToString("N");
 
             // Write the .anim YAML (overwrite in-place; no DeleteAsset so the old meta GUID survives).
-            File.WriteAllText(fullAnimPath, yaml,
-                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            File.WriteAllText(
+                fullAnimPath,
+                yaml,
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)
+            );
 
             // Always write the .meta explicitly with mainObjectFileID: 7400000.
             // Unity sometimes generates mainObjectFileID: 0 for files written via File.WriteAllText,
             // which prevents the AnimationClip from being recognised as the main asset.
-            File.WriteAllText(fullMetaPath,
-                "fileFormatVersion: 2\n" +
-                $"guid: {metaGuid}\n" +
-                "NativeFormatImporter:\n" +
-                "  externalObjects: {}\n" +
-                "  mainObjectFileID: 7400000\n" +
-                "  userData: \n" +
-                "  assetBundleName: \n" +
-                "  assetBundleVariant: \n",
-                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            File.WriteAllText(
+                fullMetaPath,
+                "fileFormatVersion: 2\n"
+                    + $"guid: {metaGuid}\n"
+                    + "NativeFormatImporter:\n"
+                    + "  externalObjects: {}\n"
+                    + "  mainObjectFileID: 7400000\n"
+                    + "  userData: \n"
+                    + "  assetBundleName: \n"
+                    + "  assetBundleVariant: \n",
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)
+            );
 
             // Import after writing both files so Unity picks up the .meta we wrote.
             AssetDatabase.ImportAsset(outputPath, ImportAssetOptions.ForceSynchronousImport);
@@ -243,12 +276,20 @@ namespace Crookedile.Editor
             var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(outputPath);
             if (clip != null)
             {
-                float w = sprites[0].rect.width  * DISPLAY_SCALE;
+                float w = sprites[0].rect.width * DISPLAY_SCALE;
                 float h = sprites[0].rect.height * DISPLAY_SCALE;
-                clip.SetCurve("", typeof(RectTransform), "m_SizeDelta.x",
-                    AnimationCurve.Constant(0f, stopTimeValue, w));
-                clip.SetCurve("", typeof(RectTransform), "m_SizeDelta.y",
-                    AnimationCurve.Constant(0f, stopTimeValue, h));
+                clip.SetCurve(
+                    "",
+                    typeof(RectTransform),
+                    "m_SizeDelta.x",
+                    AnimationCurve.Constant(0f, stopTimeValue, w)
+                );
+                clip.SetCurve(
+                    "",
+                    typeof(RectTransform),
+                    "m_SizeDelta.y",
+                    AnimationCurve.Constant(0f, stopTimeValue, h)
+                );
                 EditorUtility.SetDirty(clip);
                 AssetDatabase.SaveAssets();
             }
@@ -257,20 +298,26 @@ namespace Crookedile.Editor
             RegisterInController(outputPath, animName);
 
             Debug.Log(
-                $"[AnimGen] Created: {outputPath}  ({sprites.Length} frames @ {DEFAULT_FRAME_RATE} fps)");
+                $"[AnimGen] Created: {outputPath}  ({sprites.Length} frames @ {DEFAULT_FRAME_RATE} fps)"
+            );
             return true;
         }
 
-        // ─── Template patching ────────────────────────────────────────────────────
+        #endregion
 
+        #region Template patching
         /// <summary>
         /// Performs the four targeted replacements on the template YAML text.
         /// All other content (bindings, wrapMode, classID, loop settings, …) is kept
         /// verbatim from the template so the output matches it exactly.
         /// </summary>
-        private static string PatchTemplate(string template, string animName,
-                                            string curveBlock, string mappingBlock,
-                                            string stopTime)
+        private static string PatchTemplate(
+            string template,
+            string animName,
+            string curveBlock,
+            string mappingBlock,
+            string stopTime
+        )
         {
             // 1. Clip name  →  "  m_Name: <name>"
             //    Use a MatchEvaluator lambda — never use "$1value" replacement strings
@@ -278,7 +325,8 @@ namespace Crookedile.Editor
             template = Regex.Replace(
                 template,
                 @"(  m_Name: )[^\r\n]*",
-                m => m.Groups[1].Value + animName);
+                m => m.Groups[1].Value + animName
+            );
 
             // 2. Sprite keyframes — the indented block sitting between "    curve:" and
             //    the next "    attribute:" line.  Each entry is two lines:
@@ -287,39 +335,44 @@ namespace Crookedile.Editor
             template = Regex.Replace(
                 template,
                 @"(    curve:\r?\n)(?:    - time: [^\r\n]*\r?\n      value: [^\r\n]*\r?\n)+",
-                m => m.Groups[1].Value + curveBlock);
+                m => m.Groups[1].Value + curveBlock
+            );
 
             // 3. Clip stop time inside m_AnimationClipSettings.
             template = Regex.Replace(
                 template,
                 @"(    m_StopTime: )[^\r\n]*",
-                m => m.Groups[1].Value + stopTime);
+                m => m.Groups[1].Value + stopTime
+            );
 
             // 4. pptrCurveMapping — one "{fileID: …}" entry per sprite.
             template = Regex.Replace(
                 template,
                 @"(    pptrCurveMapping:\r?\n)(?:    - \{[^\r\n]*\r?\n)+",
-                m => m.Groups[1].Value + mappingBlock);
+                m => m.Groups[1].Value + mappingBlock
+            );
 
             return template;
         }
 
-        // ─── Helpers ──────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Helpers
         /// <summary>
         /// Searches the entire project for an <see cref="AnimationClip"/> named
         /// <see cref="TEMPLATE_CLIP_NAME"/> and returns its asset path, or <c>null</c>.
         /// </summary>
         private static string FindTemplatePath()
         {
-            string[] guids = AssetDatabase.FindAssets(
-                $"{TEMPLATE_CLIP_NAME} t:AnimationClip");
+            string[] guids = AssetDatabase.FindAssets($"{TEMPLATE_CLIP_NAME} t:AnimationClip");
 
             foreach (string guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
-                if (Path.GetFileNameWithoutExtension(path)
-                        .Equals(TEMPLATE_CLIP_NAME, StringComparison.OrdinalIgnoreCase))
+                if (
+                    Path.GetFileNameWithoutExtension(path)
+                        .Equals(TEMPLATE_CLIP_NAME, StringComparison.OrdinalIgnoreCase)
+                )
                     return path;
             }
             return null;
@@ -354,8 +407,9 @@ namespace Crookedile.Editor
             if (controller == null)
             {
                 Debug.LogWarning(
-                    $"[AnimGen] VFX controller not found at '{VFX_CONTROLLER_PATH}' — " +
-                    "state not registered. Check the VFX_CONTROLLER_PATH constant.");
+                    $"[AnimGen] VFX controller not found at '{VFX_CONTROLLER_PATH}' — "
+                        + "state not registered. Check the VFX_CONTROLLER_PATH constant."
+                );
                 return;
             }
 
@@ -375,15 +429,20 @@ namespace Crookedile.Editor
             if (clip == null)
             {
                 Debug.LogWarning(
-                    $"[AnimGen] Could not load clip at '{clipPath}' to register in controller.");
+                    $"[AnimGen] Could not load clip at '{clipPath}' to register in controller."
+                );
                 return;
             }
 
             // Continue the diagonal layout used by existing states (+35 x, +65 y per step).
-            Vector3 pos = sm.states.Length > 0
-                ? new Vector3(sm.states[sm.states.Length - 1].position.x + 35f,
-                              sm.states[sm.states.Length - 1].position.y + 65f, 0f)
-                : new Vector3(200f, 0f, 0f);
+            Vector3 pos =
+                sm.states.Length > 0
+                    ? new Vector3(
+                        sm.states[sm.states.Length - 1].position.x + 35f,
+                        sm.states[sm.states.Length - 1].position.y + 65f,
+                        0f
+                    )
+                    : new Vector3(200f, 0f, 0f);
 
             AnimatorState state = sm.AddState(stateName, pos);
             state.motion = clip;
@@ -406,7 +465,8 @@ namespace Crookedile.Editor
         /// </summary>
         private static string TryReadMetaGuid(string metaFullPath)
         {
-            if (!File.Exists(metaFullPath)) return null;
+            if (!File.Exists(metaFullPath))
+                return null;
 
             const string prefix = "guid: ";
             foreach (string line in File.ReadLines(metaFullPath))
@@ -423,7 +483,8 @@ namespace Crookedile.Editor
         /// </summary>
         private static string FloatToYaml(float value)
         {
-            if (value == 0f) return "0";
+            if (value == 0f)
+                return "0";
             return value.ToString("R", CultureInfo.InvariantCulture);
         }
     }
@@ -444,11 +505,15 @@ namespace Crookedile.Editor
 
         public int Compare(string a, string b)
         {
-            if (ReferenceEquals(a, b)) return 0;
-            if (a == null) return -1;
-            if (b == null) return  1;
+            if (ReferenceEquals(a, b))
+                return 0;
+            if (a == null)
+                return -1;
+            if (b == null)
+                return 1;
 
-            int i = 0, j = 0;
+            int i = 0,
+                j = 0;
 
             while (i < a.Length && j < b.Length)
             {
@@ -458,21 +523,25 @@ namespace Crookedile.Editor
                 if (aDigit && bDigit)
                 {
                     // Numeric chunk — parse and compare as long.
-                    int ai = i, bi = j;
-                    while (i < a.Length && char.IsDigit(a[i])) i++;
-                    while (j < b.Length && char.IsDigit(b[j])) j++;
+                    int ai = i,
+                        bi = j;
+                    while (i < a.Length && char.IsDigit(a[i]))
+                        i++;
+                    while (j < b.Length && char.IsDigit(b[j]))
+                        j++;
 
                     long numA = long.Parse(a.Substring(ai, i - ai));
                     long numB = long.Parse(b.Substring(bi, j - bi));
                     int cmp = numA.CompareTo(numB);
-                    if (cmp != 0) return cmp;
+                    if (cmp != 0)
+                        return cmp;
                 }
                 else
                 {
                     // Non-digit chunk — compare single character, case-insensitive.
-                    int cmp = char.ToUpperInvariant(a[i])
-                                  .CompareTo(char.ToUpperInvariant(b[j]));
-                    if (cmp != 0) return cmp;
+                    int cmp = char.ToUpperInvariant(a[i]).CompareTo(char.ToUpperInvariant(b[j]));
+                    if (cmp != 0)
+                        return cmp;
                     i++;
                     j++;
                 }
@@ -483,4 +552,5 @@ namespace Crookedile.Editor
         }
     }
 }
+        #endregion
 #endif

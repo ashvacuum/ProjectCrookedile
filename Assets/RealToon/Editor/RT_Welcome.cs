@@ -5,6 +5,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEditor.PackageManager;
+using System.Linq;
 
 
 namespace RealToon.Editor.Welcome
@@ -22,11 +23,16 @@ namespace RealToon.Editor.Welcome
         static string CurrRPDisp;
         static string CurrRPVer;
         static string CurrRPFullVer;
+        static char UniVerRev;
         static string UniVer;
         static string UniVerFull = null;
         static string VRC_LV_Stat;
+
+        #pragma warning disable CS0414
         static bool VRC_LV_CHK;
         static bool SRP_CHK_AVAI;
+        #pragma warning restore CS0414
+
         static Object RT_Pack;
         static string RT_pac_name;
         static Object RP_ReMe;
@@ -163,13 +169,25 @@ namespace RealToon.Editor.Welcome
                     {
                         RT_pac_name = "RealToon URP (Unity 6.0)";
                     }
-                    else if (UniVerFull.Substring(0, 6) == "6000.1" || (int.Parse(UniVerFull.Substring(0, 1)) == 6 && int.Parse(UniVerFull.Substring(5, 1)) >= 1))
+                    else if (UniVerFull.Substring(0, 6) == "6000.1")
                     {
-                        RT_pac_name = "RealToon URP (Unity 6.1 and 6.2)";
+                        RT_pac_name = "RealToon URP (Unity 6.1)";
                     }
-                    else if (UniVerFull.Substring(0, 6) == "6000.3" || (int.Parse(UniVerFull.Substring(0, 1)) == 6 && int.Parse(UniVerFull.Substring(5, 1)) >= 3))
+                    else if (UniVerFull.Substring(0, 6) == "6000.2")
                     {
-                        RT_pac_name = "RealToon URP (Unity 6.3 To Later)";
+                        RT_pac_name = "RealToon URP (Unity 6.2)";
+                    }
+                    else if (UniVerFull.Substring(0, 6) == "6000.3" || UniVerFull.Substring(0, 6) == "6000.4")
+                    {
+                        RT_pac_name = "RealToon URP (Unity 6.3 and 6.4)";
+                    }
+                    else if (UniVerFull.Substring(0, 6) == "6000.5" || (int.Parse(UniVerFull.Substring(0, 1)) == 6 && int.Parse(UniVerFull.Substring(5, 1)) >= 5) )
+                    {
+                        RT_pac_name = "RealToon URP (Unity 6.5 To Later)";
+                    }
+                    else if ( (int.Parse(UniVerFull.Substring(0, 1)) == 6 && int.Parse(UniVerFull.Substring(5, 1)) >= 5 && ( (UniVerRev.ToString() == "a") || (UniVerRev.ToString() == "b") ) )  )
+                    {
+                        RT_pac_name = "RealToon URP (Unity 6.5 To Later)";
                     }
 
                     var ids_reme = AssetDatabase.FindAssets("Please read before you unpack or import", new[] { "Assets/RealToon/RealToon Shader Packages/SRP (LWRP - URP - HDRP)/URP" });
@@ -213,9 +231,17 @@ namespace RealToon.Editor.Welcome
                     {
                         RT_pac_name = "RealToon HDRP (Unity 6.0)";
                     }
-                    else if (UniVerFull.Substring(0, 6) == "6000.1" || (int.Parse(UniVerFull.Substring(0, 1)) == 6 && int.Parse(UniVerFull.Substring(5, 1)) >= 1))
+                    else if (UniVerFull.Substring(0, 6) == "6000.1" || UniVerFull.Substring(0, 6) == "6000.2" || UniVerFull.Substring(0, 6) == "6000.3")
                     {
-                        RT_pac_name = "RealToon HDRP (Unity 6.1 To Later)";
+                        RT_pac_name = "RealToon HDRP (Unity 6.1 To 6.4)";
+                    }
+                    else if (UniVerFull.Substring(0, 6) == "6000.5" || (int.Parse(UniVerFull.Substring(0, 1)) == 6 && int.Parse(UniVerFull.Substring(5, 1)) >= 5))
+                    {
+                        RT_pac_name = "RealToon HDRP (Unity 6.5 To Later)";
+                    }
+                    else if ((int.Parse(UniVerFull.Substring(0, 1)) == 6 && int.Parse(UniVerFull.Substring(5, 1)) >= 5 && ((UniVerRev.ToString() == "a") || (UniVerRev.ToString() == "b"))))
+                    {
+                        RT_pac_name = "RealToon HDRP (Unity 6.5 To Later)";
                     }
 
                     var ids_reme = AssetDatabase.FindAssets("Please read before you unpack or import", new[] { "Assets/RealToon/RealToon Shader Packages/SRP (LWRP - URP - HDRP)/HDRP" });
@@ -535,11 +561,13 @@ namespace RealToon.Editor.Welcome
         }
         private void OnEnable()
         {
-            check_srp_ver();
-            check_vrc_lv();
             UniVer = Application.unityVersion.Substring(0, 4);
             UniVerFull = Application.unityVersion;
-            rt_pac_set();
+            string[] UniVerPar = Application.unityVersion.Split('.');
+            UniVerRev = UniVerPar[2].FirstOrDefault(char.IsLetter);
+            check_srp_ver();
+            check_vrc_lv();
+            rt_pac_set();               
         }
 
         private void OnDestroy()

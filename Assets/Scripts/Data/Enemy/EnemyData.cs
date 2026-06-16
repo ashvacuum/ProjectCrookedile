@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using Crookedile.Data;
 using Crookedile.Gameplay.Battle;
+using UnityEngine;
 
 namespace Crookedile.Data.Enemy
 {
@@ -17,7 +17,7 @@ namespace Crookedile.Data.Enemy
         Random,
 
         /// <summary>Like Sequential but picks a random starting offset — then cycles in order from there.</summary>
-        RandomSequential
+        RandomSequential,
     }
 
     /// <summary>
@@ -30,76 +30,116 @@ namespace Crookedile.Data.Enemy
     [CreateAssetMenu(fileName = "New Enemy", menuName = "Crookedile/Enemy/Enemy Data")]
     public class EnemyData : ScriptableObject
     {
-        // ─── Identity ─────────────────────────────────────────────────────────────
-
+        #region Identity
         [Header("Identity")]
         [Tooltip("Display name shown in the battle UI")]
-        [SerializeField] private string _enemyName = "Unknown Enemy";
+        [SerializeField]
+        private string _enemyName = "Unknown Enemy";
 
         [Tooltip("Portrait or artwork sprite shown in the battle scene")]
-        [SerializeField] private Sprite _portrait;
+        [SerializeField]
+        private Sprite _portrait;
 
-        // ─── Stats ────────────────────────────────────────────────────────────────
+        #endregion
 
-        [Header("Stats")]
-        [Tooltip("Starting and maximum Resolve (HP equivalent). Reaches 0 = enemy defeated.")]
-        [SerializeField] private int _maxResolve = 30;
-
-        // Note: Enemies have no Action Points or deck — those systems are player-only.
-
-        // ─── Hostility ────────────────────────────────────────────────────────────
-
+        #region Hostility
         [Header("Hostility")]
-        [Tooltip("Starting position on the hostility number line. " +
-                 "Negative = receptive (open to persuasion), 0 = neutral/guarded, positive = hostile.")]
-        [SerializeField] private int _startingHostility = 0;
+        [Tooltip(
+            "Starting position on the hostility number line. "
+                + "Negative = receptive (open to persuasion), 0 = neutral/guarded, positive = hostile."
+        )]
+        [SerializeField]
+        private int _startingHostility = 0;
 
         [Tooltip("Maximum hostile level this enemy can reach (positive). Default 5.")]
-        [SerializeField] private int _maxHostility = 5;
+        [SerializeField]
+        private int _maxHostility = 5;
 
         [Tooltip("Maximum receptive level this enemy can reach (negative). Default -3.")]
-        [SerializeField] private int _minHostility = -3;
+        [SerializeField]
+        private int _minHostility = -3;
 
-        // ─── Demographics ─────────────────────────────────────────────────────────
+        #endregion
 
+        #region Demographics
         [Header("Demographics")]
-        [Tooltip("Socioeconomic class of this NPC. Used for demographic targeting by Policy cards.")]
-        [SerializeField] private DemographicClass _demographicClass = DemographicClass.Middle;
+        [Tooltip(
+            "Socioeconomic class of this NPC. Used for demographic targeting by Policy cards."
+        )]
+        [SerializeField]
+        private DemographicClass _demographicClass = DemographicClass.Middle;
 
-        [Tooltip("Political values of this NPC. Determines how Policy card leans affect their hostility.\n" +
-                 "Left cards: Progressive −1, Traditional +1\n" +
-                 "Center cards: Moderate −1\n" +
-                 "Right cards: Traditional −1, Progressive +1")]
-        [SerializeField] private DemographicValues _demographicValues = DemographicValues.Moderate;
+        [Tooltip(
+            "Political values of this NPC. Determines how Policy card leans affect their hostility.\n"
+                + "Left cards: Progressive −1, Traditional +1\n"
+                + "Center cards: Moderate −1\n"
+                + "Right cards: Traditional −1, Progressive +1"
+        )]
+        [SerializeField]
+        private DemographicValues _demographicValues = DemographicValues.Moderate;
 
-        // ─── Starting Status Effects ───────────────────────────────────────────────
+        #endregion
 
+        #region Starting Status Effects
         [Header("Starting Effects")]
-        [Tooltip("Status effects (buffs or debuffs) applied to this enemy at the start of every battle.")]
-        [SerializeField] private List<StatusEffect> _startingEffects = new List<StatusEffect>();
+        [Tooltip(
+            "Status effects (buffs or debuffs) applied to this enemy at the start of every battle."
+        )]
+        [SerializeField]
+        private List<StartingStatusEntry> _startingEffects = new List<StartingStatusEntry>();
 
-        // ─── Move Set ─────────────────────────────────────────────────────────────
+        #endregion
 
+        #region Move Set
         [Header("Move Set")]
         [Tooltip("How the enemy selects their move each turn.")]
-        [SerializeField] private EnemyMovePattern _movePattern = EnemyMovePattern.Sequential;
+        [SerializeField]
+        private EnemyMovePattern _movePattern = EnemyMovePattern.Sequential;
 
-        [Tooltip("The moves this enemy can perform. Must have at least one entry. " +
-                 "For Sequential pattern, moves play in order 0 → 1 → 2 → 0 …")]
-        [SerializeField] private List<EnemyMoveData> _moves = new List<EnemyMoveData>();
+        [Tooltip(
+            "The moves this enemy can perform. Must have at least one entry. "
+                + "For Sequential pattern, moves play in order 0 → 1 → 2 → 0 …"
+        )]
+        [SerializeField]
+        private List<EnemyMoveData> _moves = new List<EnemyMoveData>();
 
-        // ─── Properties ───────────────────────────────────────────────────────────
+        #endregion
 
-        public string           EnemyName         => _enemyName;
-        public Sprite           Portrait           => _portrait;
-        public int              MaxResolve         => _maxResolve;
-        public int              StartingHostility  => _startingHostility;
-        public int              MaxHostility       => _maxHostility;
-        public int              MinHostility       => _minHostility;
-        public DemographicClass  DemographicClass  => _demographicClass;
+        #region Properties
+        public string EnemyName => _enemyName;
+        public Sprite Portrait => _portrait;
+        public int StartingHostility => _startingHostility;
+        public int MaxHostility => _maxHostility;
+        public int MinHostility => _minHostility;
+        public DemographicClass DemographicClass => _demographicClass;
         public DemographicValues DemographicValues => _demographicValues;
-        public EnemyMovePattern MovePattern        => _movePattern;
-        public IReadOnlyList<EnemyMoveData> Moves  => _moves;
-        public IReadOnlyList<StatusEffect> StartingEffects => _startingEffects;
+        public EnemyMovePattern MovePattern => _movePattern;
+        public IReadOnlyList<EnemyMoveData> Moves => _moves;
+        public IReadOnlyList<StartingStatusEntry> StartingEffects => _startingEffects;
+    }
+
+    /// <summary>
+    /// Authoring entry for a status applied at battle start: a polymorphic
+    /// <see cref="StatusBehavior"/> (inspector type dropdown) plus stacks and duration.
+    /// </summary>
+    [System.Serializable]
+    public class StartingStatusEntry
+    {
+        [Tooltip("The status to apply — pick a StatusBehavior subclass from the type dropdown.")]
+        [SerializeReference]
+        private StatusBehavior _behavior;
+
+        [Tooltip("Number of stacks applied at battle start.")]
+        [SerializeField]
+        private int _stacks = 1;
+
+        [Tooltip("How the status duration is tracked.")]
+        [SerializeField]
+        private StatusDurationType _duration = StatusDurationType.Permanent;
+
+        public StatusBehavior Behavior => _behavior;
+        public int Stacks => _stacks;
+        public StatusDurationType Duration => _duration;
     }
 }
+        #endregion

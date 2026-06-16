@@ -15,42 +15,20 @@ MonoBehaviour:
   _moveName: StandAndFight
   _moveType: 4
   _intentDescription: 
-  _newEffects:
-  - rid: 4738608375284105303
   _effects:
-  - _name: 
-    _category: 1
-    _target: 1
-    _damageType: 0
-    _damageAmount: 3
-    _randomDamageRange: {x: 3, y: 9}
-    _resourceType: 0
-    _resourceAmount: 3
-    _cardManipulationType: 0
-    _cardAmount: 2
-    _cardToAdd: {fileID: 0}
-    _cardSelectionMode: 0
-    _filterCardType: 0
-    _discardDrawAmount: 0
-    _costReduction: 1
-    _chancePercent: 50
-    _chanceEffects: []
-    _statusEffectType: 0
-    _statusStacks: 2
-    _statusDuration: 0
-    _amountSource: 0
+  - rid: 4823698419005784190
   _moveVFX: {fileID: 0}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
   _condition: 0
+  _conditionTurn: 1
+  _stanceRequirement: 1
   references:
     version: 2
     RefIds:
-    - rid: 4738608375284105303
-      type: {class: ApplyStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+    - rid: 4823698419005784190
+      type: {class: RaiseAlliesHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _target: 0
-        _statusType: 16
-        _stacks: 3
-        _duration: 0
+        _amount: 2
+        _includeSelf: 1

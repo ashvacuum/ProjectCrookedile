@@ -20,22 +20,13 @@ namespace Crookedile.Utilities
         public bool globalLoggingEnabled = true;
         public LogLevel globalLogLevel = LogLevel.Info;
         public bool showTimestamp = true;
-        public bool showStackTrace = false;
 
         [Header("Category Settings")]
         public List<CategoryDebugInfo> categories = new List<CategoryDebugInfo>();
 
         public void ApplySettings()
         {
-            if (DebugLogger.Instance == null) return;
-
-            DebugLogger.Instance.SetGlobalLoggingEnabled(globalLoggingEnabled);
-            DebugLogger.Instance.SetGlobalLogLevel(globalLogLevel);
-
-            foreach (var category in categories)
-            {
-                DebugLogger.Instance.RegisterCategory(category.categoryName, category.enabled, category.logLevel);
-            }
+            GameLogger.Configure(this);
         }
 
         public CategoryDebugInfo GetOrCreateCategory(string categoryName)
@@ -66,7 +57,8 @@ namespace Crookedile.Utilities
                     var types = assembly.GetTypes();
                     foreach (var type in types)
                     {
-                        var attribute = (DebuggableAttribute)Attribute.GetCustomAttribute(type, typeof(DebuggableAttribute));
+                        var attribute = (DebuggableAttribute)
+                            Attribute.GetCustomAttribute(type, typeof(DebuggableAttribute));
                         if (attribute != null)
                         {
                             CategoryDebugInfo category = GetOrCreateCategory(attribute.Category);

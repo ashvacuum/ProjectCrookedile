@@ -12,7 +12,8 @@ namespace Crookedile.Core
     /// </summary>
     public static class EventBus
     {
-        private static readonly Dictionary<Type, List<Delegate>> subscribers = new Dictionary<Type, List<Delegate>>();
+        private static readonly Dictionary<Type, List<Delegate>> subscribers =
+            new Dictionary<Type, List<Delegate>>();
 
         /// <summary>
         /// Registers a handler to receive events of type <typeparamref name="T"/>.
@@ -21,9 +22,11 @@ namespace Crookedile.Core
         /// </summary>
         /// <typeparam name="T">The event struct type to listen for (must implement <see cref="IGameEvent"/>).</typeparam>
         /// <param name="handler">The method to invoke when the event is published. Must not be null.</param>
-        public static void Subscribe<T>(Action<T> handler) where T : IGameEvent
+        public static void Subscribe<T>(Action<T> handler)
+            where T : IGameEvent
         {
-            if (handler == null) return;
+            if (handler == null)
+                return;
 
             var eventType = typeof(T);
 
@@ -42,9 +45,11 @@ namespace Crookedile.Core
         /// </summary>
         /// <typeparam name="T">The event struct type to stop listening for.</typeparam>
         /// <param name="handler">The exact handler reference passed to <see cref="Subscribe{T}"/>.</param>
-        public static void Unsubscribe<T>(Action<T> handler) where T : IGameEvent
+        public static void Unsubscribe<T>(Action<T> handler)
+            where T : IGameEvent
         {
-            if (handler == null) return;
+            if (handler == null)
+                return;
 
             var eventType = typeof(T);
 
@@ -68,13 +73,19 @@ namespace Crookedile.Core
         /// </summary>
         /// <typeparam name="T">The event struct type to publish.</typeparam>
         /// <param name="gameEvent">The event data to pass to each subscriber.</param>
-        public static void Publish<T>(T gameEvent) where T : IGameEvent
+        public static void Publish<T>(T gameEvent)
+            where T : IGameEvent
         {
-            if (gameEvent == null) return;
+            // Null-guard only reference-type events. The typeof(T).IsValueType test is a JIT
+            // constant, so for struct events (the vast majority) this whole branch is elided —
+            // avoiding the box that a bare `gameEvent == null` would emit on every publish.
+            if (!typeof(T).IsValueType && gameEvent == null)
+                return;
 
             var eventType = typeof(T);
 
-            if (!subscribers.ContainsKey(eventType)) return;
+            if (!subscribers.ContainsKey(eventType))
+                return;
 
             var handlerList = subscribers[eventType];
 
@@ -98,8 +109,9 @@ namespace Crookedile.Core
                     // Target Unity object was destroyed without unsubscribing.
                     // Auto-remove so it never fires again; warn so the missing Unsubscribe call is visible.
                     UnityEngine.Debug.LogWarning(
-                        $"[EventBus] Removed stale handler '{handler.Method.Name}' for {eventType.Name} " +
-                        $"— target was destroyed without calling Unsubscribe.");
+                        $"[EventBus] Removed stale handler '{handler.Method.Name}' for {eventType.Name} "
+                            + $"— target was destroyed without calling Unsubscribe."
+                    );
                     handlerList.RemoveAt(i);
                 }
                 catch (Exception ex)
@@ -107,8 +119,9 @@ namespace Crookedile.Core
                     // Handler threw an unexpected exception.
                     // Auto-remove to prevent repeat errors on every future publish; log as error so the bug is visible.
                     UnityEngine.Debug.LogError(
-                        $"[EventBus] Removed bad handler '{handler.Method.Name}' for {eventType.Name} " +
-                        $"after unhandled exception: {ex}");
+                        $"[EventBus] Removed bad handler '{handler.Method.Name}' for {eventType.Name} "
+                            + $"after unhandled exception: {ex}"
+                    );
                     handlerList.RemoveAt(i);
                 }
             }
@@ -128,7 +141,8 @@ namespace Crookedile.Core
         /// Prefer this over <see cref="Clear()"/> when only one event type needs resetting.
         /// </summary>
         /// <typeparam name="T">The event struct type whose subscribers should be cleared.</typeparam>
-        public static void Clear<T>() where T : IGameEvent
+        public static void Clear<T>()
+            where T : IGameEvent
         {
             var eventType = typeof(T);
             if (subscribers.ContainsKey(eventType))

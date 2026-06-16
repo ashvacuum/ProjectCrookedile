@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
   _id: 94665e04-5b3a-4cb9-a000-771bc0f65df5
   _cardName: Holy Patience
-  _cardType: 0
+  _cardType: 1
   _rarity: 1
   _artwork: {fileID: 0}
   _description: Wait for the right moment. Holding this card rewards patience. (Add
-    MakeCardRetain + end-of-turn 6 Composure trigger via Inspector.)
+    MakeCardRetain + end-of-turn 6 Support trigger via Inspector.)
   _flavorText: 
   _costs:
   - _costType: 1
@@ -27,30 +27,8 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
-  _newEffects:
-  - rid: 4738608375284105333
   _effects:
-  - _name: 
-    _category: 1
-    _target: 0
-    _damageType: 0
-    _damageAmount: 3
-    _randomDamageRange: {x: 3, y: 9}
-    _resourceType: 0
-    _resourceAmount: 6
-    _cardManipulationType: 0
-    _cardAmount: 2
-    _cardToAdd: {fileID: 0}
-    _cardSelectionMode: 0
-    _filterCardType: 0
-    _discardDrawAmount: 0
-    _costReduction: 1
-    _chancePercent: 50
-    _chanceEffects: []
-    _statusEffectType: 0
-    _statusStacks: 2
-    _statusDuration: 0
-    _amountSource: 0
+  - rid: 4823698507066769572
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
@@ -67,9 +45,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4738608375284105333
-      type: {class: GainComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+    - rid: 4823698507066769572
+      type: {class: BufferEqualToHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 6
-        _amountSource: 0

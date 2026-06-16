@@ -21,13 +21,12 @@ MonoBehaviour:
     Exhaust.
   _flavorText: 
   _costs:
-  - _costType: 1
-    _baseAmount: 1
+  - _costType: 0
+    _baseAmount: 0
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
-  _newEffects: []
   _effects: []
   _passives:
   - rid: 4738608375284105304
@@ -35,11 +34,11 @@ MonoBehaviour:
   _upgradedCosts: []
   _upgradedEffects: []
   _upgradedPassives: []
-  _tags:
-  - faithleader
+  _tags: []
   _isStarterCard: 0
   _isUnlockable: 0
   _isUnplayable: 1
+  _innateRetain: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
@@ -47,23 +46,32 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608375284105304
-      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: New Passive
+        _name: End Turn
         _trigger:
           rid: 4738608375284105307
         _conditions: []
         _oneShot: 0
         _effects:
-        - rid: 4738608375284105315
+        - rid: 4823698419005784183
+        - rid: 4823698419005784185
     - rid: 4738608375284105307
-      type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 4738608375284105315
-      type: {class: ApplyStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+    - rid: 4823698419005784183
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _target: 1
-        _statusType: 9
-        _stacks: -1
+        _target: 0
+        _behavior:
+          rid: 4823698419005784184
+        _stacks: 1
         _duration: 0
+    - rid: 4823698419005784184
+      type: {class: RattledStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 4823698419005784185
+      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 

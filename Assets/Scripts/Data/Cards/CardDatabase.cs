@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
+using Crookedile.Data;
 using Crookedile.Data.Database;
 using Crookedile.Utilities;
-using Crookedile.Data;
+using UnityEngine;
 
 namespace Crookedile.Data.Cards
 {
@@ -25,8 +25,7 @@ namespace Crookedile.Data.Cards
     [CreateAssetMenu(fileName = "CardDatabase", menuName = "Crookedile/Database/Card Database")]
     public class CardDatabase : GameDatabase<CardData>
     {
-        // ─── Constants ────────────────────────────────────────────────────────────
-
+        #region Constants
         /// <summary>
         /// Tag applied to cards that are eligible for any origin's reward pool.
         /// Use this constant wherever tag comparisons are needed to avoid magic strings.
@@ -37,11 +36,14 @@ namespace Crookedile.Data.Cards
         /// Rarity weights used for reward card selection.
         /// Adjust values here to tune drop rates; add a new entry when adding a new CardRarity.
         /// </summary>
-        private static readonly Dictionary<CardRarity, float> RewardWeights = new Dictionary<CardRarity, float>
+        private static readonly Dictionary<CardRarity, float> RewardWeights = new Dictionary<
+            CardRarity,
+            float
+        >
         {
-            [CardRarity.Basic]    = 70f,
+            [CardRarity.Basic] = 70f,
             [CardRarity.Enhanced] = 25f,
-            [CardRarity.Rare]     =  5f,
+            [CardRarity.Rare] = 5f,
         };
 
         /// <summary>
@@ -205,7 +207,9 @@ namespace Crookedile.Data.Cards
 
             if (!string.IsNullOrEmpty(query.NameContains))
             {
-                results = results.Where(c => c.CardName.ToLower().Contains(query.NameContains.ToLower())).ToList();
+                results = results
+                    .Where(c => c.CardName.ToLower().Contains(query.NameContains.ToLower()))
+                    .ToList();
             }
 
             return results;
@@ -248,8 +252,10 @@ namespace Crookedile.Data.Cards
         {
             // Get all starter cards tagged with the origin name
             string originTag = origin.ToString().ToLower();
-            return FindAll(card => card.IsStarterCard &&
-                                 (card.Tags.Count == 0 || card.HasTag(originTag) || card.HasTag(UniversalTag)));
+            return FindAll(card =>
+                card.IsStarterCard
+                && (card.Tags.Count == 0 || card.HasTag(originTag) || card.HasTag(UniversalTag))
+            );
         }
 
         #endregion
@@ -277,23 +283,31 @@ namespace Crookedile.Data.Cards
         /// List of unique <see cref="CardData"/> offers. May be shorter than <paramref name="count"/>
         /// if the eligible pool is exhausted.
         /// </returns>
-        public List<CardData> GenerateRewardOffer(OriginType origin, int count = 3, CardType? typeFilter = null)
+        public List<CardData> GenerateRewardOffer(
+            OriginType origin,
+            int count = 3,
+            CardType? typeFilter = null
+        )
         {
             string originTag = origin.ToString().ToLower();
 
             // Build the candidate pool ─────────────────────────────────────────────────
             List<CardData> candidates = new List<CardData>();
 
-            bool includePolicy   = typeFilter == null || typeFilter == CardType.Policy;
+            bool includePolicy = typeFilter == null || typeFilter == CardType.Policy;
             bool includePressure = typeFilter == null || typeFilter == CardType.Pressure;
             bool includeRhetoric = typeFilter == null || typeFilter == CardType.Rhetoric;
 
             foreach (CardData card in GetAll())
             {
-                if (card == null)          continue;
-                if (card.IsStarterCard)    continue;
-                if (card.IsUpgraded)       continue;   // offer base version only
-                if (card.IsInDevelopment)  continue;   // no artwork — not ready for play
+                if (card == null)
+                    continue;
+                if (card.IsStarterCard)
+                    continue;
+                if (card.IsUpgraded)
+                    continue; // offer base version only
+                if (card.IsInDevelopment)
+                    continue; // no artwork — not ready for play
 
                 switch (card.CardType)
                 {
@@ -303,42 +317,52 @@ namespace Crookedile.Data.Cards
                         break;
 
                     case CardType.Pressure:
-                        if (includePressure && (card.HasTag(originTag) || card.HasTag(UniversalTag)))
+                        if (
+                            includePressure && (card.HasTag(originTag) || card.HasTag(UniversalTag))
+                        )
                             candidates.Add(card);
                         break;
 
                     case CardType.Rhetoric:
-                        if (includeRhetoric && (card.HasTag(originTag) || card.HasTag(UniversalTag)))
+                        if (
+                            includeRhetoric && (card.HasTag(originTag) || card.HasTag(UniversalTag))
+                        )
                             candidates.Add(card);
                         break;
                 }
             }
 
-            if (candidates.Count == 0) return new List<CardData>();
+            if (candidates.Count == 0)
+                return new List<CardData>();
 
             // Split into rarity buckets ────────────────────────────────────────────────
-            var basicBucket    = candidates.Where(c => c.Rarity == CardRarity.Basic).ToList();
+            var basicBucket = candidates.Where(c => c.Rarity == CardRarity.Basic).ToList();
             var enhancedBucket = candidates.Where(c => c.Rarity == CardRarity.Enhanced).ToList();
-            var rareBucket     = candidates.Where(c => c.Rarity == CardRarity.Rare).ToList();
+            var rareBucket = candidates.Where(c => c.Rarity == CardRarity.Rare).ToList();
 
             var result = new List<CardData>(count);
 
             for (int i = 0; i < count; i++)
             {
                 if (basicBucket.Count == 0 && enhancedBucket.Count == 0 && rareBucket.Count == 0)
-                    break;   // pool exhausted
+                    break; // pool exhausted
 
                 // Weighted pick among non-empty buckets
                 List<CardData> bucket = PickWeightedBucket(
-                    basicBucket,    RewardWeights[CardRarity.Basic],
-                    enhancedBucket, RewardWeights[CardRarity.Enhanced],
-                    rareBucket,     RewardWeights[CardRarity.Rare]);
+                    basicBucket,
+                    RewardWeights[CardRarity.Basic],
+                    enhancedBucket,
+                    RewardWeights[CardRarity.Enhanced],
+                    rareBucket,
+                    RewardWeights[CardRarity.Rare]
+                );
 
-                if (bucket == null || bucket.Count == 0) break;
+                if (bucket == null || bucket.Count == 0)
+                    break;
 
-                int idx  = UnityEngine.Random.Range(0, bucket.Count);
+                int idx = UnityEngine.Random.Range(0, bucket.Count);
                 var pick = bucket[idx];
-                bucket.RemoveAt(idx);   // prevent duplicates
+                bucket.RemoveAt(idx); // prevent duplicates
 
                 result.Add(pick);
             }
@@ -352,15 +376,23 @@ namespace Crookedile.Data.Cards
         /// Returns <c>null</c> if all buckets are empty.
         /// </summary>
         private static List<CardData> PickWeightedBucket(
-            List<CardData> basic,    float wBasic,
-            List<CardData> enhanced, float wEnhanced,
-            List<CardData> rare,     float wRare)
+            List<CardData> basic,
+            float wBasic,
+            List<CardData> enhanced,
+            float wEnhanced,
+            List<CardData> rare,
+            float wRare
+        )
         {
             float total = 0f;
-            if (basic.Count    > 0) total += wBasic;
-            if (enhanced.Count > 0) total += wEnhanced;
-            if (rare.Count     > 0) total += wRare;
-            if (total <= 0f) return null;
+            if (basic.Count > 0)
+                total += wBasic;
+            if (enhanced.Count > 0)
+                total += wEnhanced;
+            if (rare.Count > 0)
+                total += wRare;
+            if (total <= 0f)
+                return null;
 
             float roll = UnityEngine.Random.Range(0f, total);
             float cursor = 0f;
@@ -368,12 +400,14 @@ namespace Crookedile.Data.Cards
             if (basic.Count > 0)
             {
                 cursor += wBasic;
-                if (roll < cursor) return basic;
+                if (roll < cursor)
+                    return basic;
             }
             if (enhanced.Count > 0)
             {
                 cursor += wEnhanced;
-                if (roll < cursor) return enhanced;
+                if (roll < cursor)
+                    return enhanced;
             }
             return rare.Count > 0 ? rare : null;
         }
@@ -397,7 +431,9 @@ namespace Crookedile.Data.Cards
     [System.Serializable]
     public class CardSearchQuery
     {
-        [Tooltip("Filter by card types (Pressure, Rhetoric, Policy). Cards matching ANY type will be included.")]
+        [Tooltip(
+            "Filter by card types (Pressure, Rhetoric, Policy). Cards matching ANY type will be included."
+        )]
         public List<CardType> CardTypes;
 
         [Tooltip("Filter by rarity. Cards matching ANY rarity will be included.")]
@@ -435,3 +471,4 @@ namespace Crookedile.Data.Cards
         }
     }
 }
+        #endregion

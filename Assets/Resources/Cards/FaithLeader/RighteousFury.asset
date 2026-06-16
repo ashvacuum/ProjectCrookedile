@@ -17,7 +17,7 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: Channel your outrage into an attack. Composure gives way to righteous
+  _description: Channel your outrage into an attack. Support gives way to righteous
     anger.
   _flavorText: 
   _costs:
@@ -90,14 +90,14 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608375284105342
-      type: {class: DealDamageEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
       data:
         _name: 
         _target: 1
         _amount: 4
         _amountSource: 0
     - rid: 4738608375284105343
-      type: {class: LoseComposureEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: LoseBufferEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 3

@@ -22,6 +22,14 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public abstract bool Matches(PassiveEventContext ctx);
 
+        /// <summary>
+        /// The single <see cref="Core.IGameEvent"/> type this trigger listens for. Used by
+        /// <see cref="PassiveResolver"/> to bucket passives by event type so dispatch only visits
+        /// passives that can possibly match — <see cref="Matches"/> remains the authority on the
+        /// trigger's additional filter criteria (amount, direction, card type, etc.).
+        /// </summary>
+        public abstract Type EventType { get; }
+
         /// <summary>Human-readable label for UI / GetDescription().</summary>
         public abstract string TriggerLabel { get; }
     }

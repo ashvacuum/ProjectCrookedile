@@ -7,11 +7,22 @@ namespace Crookedile.Data
     /// </summary>
     public enum CardType
     {
-        Pressure,    // Green  - Persuasion, de-escalation, relationship building
-        Rhetoric,    // Red    - Aggressive framing, attacks, pressure tactics
-        Policy,      // Blue   - Policy positions; lean shifts all enemy hostility by demographic
-        Status,      // Purple - Temporary effect cards; some are unplayable
-        Curse        // Dark   - Always unplayable; negative cards forced into the deck
+        Pressure, // Green  - Persuasion, de-escalation, relationship building
+        Rhetoric, // Red    - Aggressive framing, attacks, pressure tactics
+        Policy, // Blue   - Policy positions; lean shifts all enemy hostility by demographic
+        Heckle, // Purple - Temporary effect cards; some are unplayable
+        Scandal, // Dark  - Manufactured controversy: unplayable, clogs the hand; the Celebrity exploits these
+    }
+
+    /// <summary>
+    /// How a card-manipulation effect picks which card(s) it acts on.
+    /// (Ordinals are serialized on effect assets — do not reorder.)
+    /// </summary>
+    public enum CardSelectionMode
+    {
+        PlayerChoice, // 0 — prompt the player via CardChoiceRequestedEvent
+        RandomAny, // 1 — pick randomly from the whole pool
+        RandomByType, // 2 — filter by a CardType, then pick randomly
     }
 
     /// <summary>
@@ -19,9 +30,9 @@ namespace Crookedile.Data
     /// </summary>
     public enum CardRarity
     {
-        Basic,      // Basic cards from shops and starter decks
-        Enhanced,   // Enhanced effects, moderate acquisition difficulty
-        Rare        // Powerful effects, harder to acquire
+        Basic, // Basic cards from shops and starter decks
+        Enhanced, // Enhanced effects, moderate acquisition difficulty
+        Rare, // Powerful effects, harder to acquire
     }
 
     /// <summary>
@@ -30,9 +41,9 @@ namespace Crookedile.Data
     /// </summary>
     public enum OriginType
     {
-        FaithLeader,    // Religious leader - defensive, Confidence-focused
-        NepoBaby,       // Nepo baby - resource manipulation, Influence-focused
-        Actor           // Celebrity/Actor - charismatic, versatile
+        FaithLeader, // Religious leader - defensive, Confidence-focused
+        NepoBaby, // Nepo baby - resource manipulation, Influence-focused
+        Actor, // Celebrity/Actor - charismatic, versatile
     }
 
     /// <summary>
@@ -41,67 +52,9 @@ namespace Crookedile.Data
     /// </summary>
     public enum CampaignResourceType
     {
-        Funds,      // ₱ - Campaign funds for buying cards, upgrades, etc.
-        Heat,       // H - Scandal meter (0-100), lose if too high
-        Influence   // Political influence/power, win condition
-    }
-
-    /// <summary>
-    /// Battle-specific effect types for in-combat card effects.
-    /// Separates battle mechanics from campaign/overworld effects.
-    /// </summary>
-    public enum BattleEffectType
-    {
-        // Core Damage/Healing
-        ResolveDamage,                  // Damage opponent's Resolve (HP)
-        ResolveHeal,                    // Restore your Resolve (HP)
-        RandomDamage,                   // Deal random damage (Actor All or Nothing)
-
-        // Composure (Offensive Buff)
-        GainComposure,                  // Build Composure stacks (+damage)
-        LoseComposure,                  // Lose Composure stacks
-        ResolveDamageEqualToComposure,  // Deal damage = Composure (Faith Leader Blessing)
-        ConsumeAllComposure,            // Remove all Composure stacks
-
-        // Hostility (Self-Inflicted Debuff)
-        GainHostility,                  // Gain Hostility (opponent deals more damage)
-        ReduceHostility,                // Reduce Hostility stacks
-        ComposureEqualToHostility,      // Gain Composure = Hostility (Actor Ego Trip)
-
-        // Resource Types
-        GainActionPoints,               // Gain extra action points this turn
-        GainActionPointsNextTurn,       // Gain AP next turn (Nepo Baby Backroom Deal)
-        DrawCards,                      // Draw cards from deck
-        DiscardCards,                   // Discard cards from hand (self or opponent)
-
-        // Status Effects - Debuffs
-        ApplyWeakened,                  // Deal X less damage
-        ApplyVulnerable,                // Take 50% more damage
-        ApplyFrail,                     // Gain 25% less Composure
-        ApplyEntangled,                 // Cards cost +1 AP
-        ApplyExposed,                   // Next attack deals double damage
-        ApplyScandal,                   // Take X damage at end of turn
-        ApplyConfused,                  // Random card costs +1 AP each turn
-        ApplySilenced,                  // Cannot play Policy cards
-
-        // Status Effects - Buffs
-        ApplyStrength,                  // Deal X more damage
-        ApplyDexterity,                 // Gain X more Composure per card
-        ApplyFocus,                     // Cards cost X less AP (this turn only)
-        ApplyEnergized,                 // Draw X extra cards next turn
-        ApplyPlated,                    // Reduce incoming damage by X
-        ApplyRegeneration,              // Heal X Resolve at end of turn
-        ApplyIntangible,                // Take only 1 damage from attacks
-        ApplyThorns,                    // Deal X damage back when attacked
-
-        // Status Effects - Special
-        ApplyBlock,                     // Temporary damage reduction
-        ApplyRitual,                    // Gain X Composure at start of turn
-        ApplyMomentum,                  // Gain X damage per card played this turn
-        ApplyEcho,                      // Next card is played twice
-
-        // Special
-        ExhaustCard                     // Remove card from deck until end of battle
+        Funds, // ₱ - Campaign funds for buying cards, upgrades, etc.
+        Heat, // H - Scandal meter (0-100), lose if too high
+        Influence, // Political influence/power, win condition
     }
 
     /// <summary>
@@ -111,34 +64,38 @@ namespace Crookedile.Data
     public enum CampaignEffectType
     {
         // Resource Gains/Losses (3 core resources only)
-        GainFunds,              // Gain ₱
-        LoseFunds,              // Lose ₱
-        GainHeat,               // Increase Heat (scandal)
-        LoseHeat,               // Decrease Heat
-        GainInfluence,          // Gain Influence (political power)
-        LoseInfluence,          // Lose Influence
+        GainFunds, // Gain ₱
+        LoseFunds, // Lose ₱
+        GainHeat, // Increase Heat (scandal)
+        LoseHeat, // Decrease Heat
+        GainInfluence, // Gain Influence (political power)
+        LoseInfluence, // Lose Influence
 
         // Card Collection
-        AddCardToDeck,          // Permanently add card to deck
-        RemoveCardFromDeck,     // Permanently remove card from deck
-        UpgradeCard,            // Upgrade a card to + version
-        TransformCard,          // Transform one card into another
+        AddCardToDeck, // Permanently add card to deck
+        RemoveCardFromDeck, // Permanently remove card from deck
+        UpgradeCard, // Upgrade a card to + version
+        TransformCard, // Transform one card into another
 
         // Progression
-        UnlockLocation,         // Unlock new map location
-        UnlockCard,             // Unlock card for future acquisition
-        TriggerEvent,           // Trigger a specific event
-        AdvanceDay              // Skip to next day
+        UnlockLocation, // Unlock new map location
+        UnlockCard, // Unlock card for future acquisition
+        TriggerEvent, // Trigger a specific event
+        AdvanceDay, // Skip to next day
     }
 
     public enum TargetType
     {
         Self,
-        Opponent,       // Single focused enemy (player) or the player (enemy)
-        All,            // Player + ALL living enemies
-        Random,         // Random single opponent
-        AllOpponents,   // Player card → all living enemies | Enemy card → the player
-        AllAllies       // Enemy card → all living enemies  | Player card → self
+        Opponent, // Single focused enemy (player) or the player (enemy)
+        All, // Player + ALL living enemies
+        Random, // Random single opponent
+        AllOpponents, // Player card → all living enemies | Enemy card → the player
+        AllAllies, // Enemy card → all living enemies  | Player card → self
+        Adjacent, // Focused enemy + immediate row neighbours (player); the player (enemy)
+        AllHostile, // Every living enemy with Hostility > 0 (the dissenters)
+        AllReceptive, // Every living enemy with Hostility < 0 (the supporters)
+        RandomReceptive, // One random living receptive enemy (e.g. Sway: convert a supporter)
     }
 
     /// <summary>
@@ -148,20 +105,9 @@ namespace Crookedile.Data
     /// </summary>
     public enum CostType
     {
-        None,           // Free to play
-        ActionPoints    // Battle resource - energy to play cards (THE ONLY CARD COST IN BATTLE)
-    }
-
-    /// <summary>
-    /// Battle-specific resources that exist only during card battles.
-    /// Griftlands-inspired negotiation resources.
-    /// </summary>
-    public enum BattleResourceType
-    {
-        Resolve,        // HP - Both player and opponent have this (reduce to 0 = win/lose)
-        Composure,      // Offensive buff - Each stack = +1 damage (consumed on attack)
-        Hostility,      // Self-inflicted debuff - Opponent deals more damage based on this
-        ActionPoints    // Energy to play cards each turn (3-4 depending on origin)
+        None, // Free to play
+        ActionPoints, // Battle resource - energy to play cards
+        Patronage, // Nepo Baby's banked currency (generated by sacrificing cards). Persists across turns; spent on summons/installations.
     }
 
     public enum GamePhase
@@ -173,7 +119,7 @@ namespace Crookedile.Data
         Event,
         Shop,
         GameOver,
-        Victory
+        Victory,
     }
 
     public enum BattlePhase
@@ -182,7 +128,7 @@ namespace Crookedile.Data
         PlayerTurn,
         OpponentTurn,
         Victory,
-        Defeat
+        Defeat,
     }
 
     /// <summary>
@@ -195,7 +141,7 @@ namespace Crookedile.Data
         Left,
         Center,
         Right,
-        None    // Default for Pressure/Rhetoric cards — no hostility shift applied
+        None, // Default for Pressure/Rhetoric cards — no hostility shift applied
     }
 
     /// <summary>
@@ -206,7 +152,7 @@ namespace Crookedile.Data
     {
         Upper,
         Middle,
-        Lower
+        Lower,
     }
 
     /// <summary>
@@ -217,7 +163,7 @@ namespace Crookedile.Data
     {
         Progressive,
         Moderate,
-        Traditional
+        Traditional,
     }
 
     /// <summary>
@@ -227,13 +173,20 @@ namespace Crookedile.Data
     /// </summary>
     public enum EffectContextValue
     {
-        FixedAmount,            // 0 — use the inspector-authored value (shows fixed amount fields)
-        LastDamageDealt,        // 1 — ctx.LastDamageDealt  — e.g. lifesteal
-        LastHealAmount,         // 2 — ctx.LastHealAmount
-        LastComposureGained,    // 3 — ctx.LastComposureGained
-        LastComposureLost,      // 4 — ctx.LastComposureLost — e.g. bonus damage equal to composure spent
-        CurrentComposure,       // 5 — caster.CurrentComposure at time of trigger
-        CurrentHostility,       // 6 — focused target.CurrentHostility at time of trigger
-        None                    // 7 — return 0; hides fixed amount fields (use when amount is irrelevant)
+        FixedAmount, // 0 — use the inspector-authored value (shows fixed amount fields)
+        LastDamageDealt, // 1 — ctx.LastDamageDealt  — e.g. lifesteal
+        LastHealAmount, // 2 — ctx.LastHealAmount
+        LastSupportGained, // 3 — ctx.LastSupportGained
+        LastSupportLost, // 4 — ctx.LastSupportLost — e.g. bonus pressure equal to Support spent
+        CurrentSupport, // 5 — session CurrentSupport at time of trigger
+        CurrentHostility, // 6 — focused target.CurrentHostility at time of trigger
+        None, // 7 — return 0; hides fixed amount fields (use when amount is irrelevant)
+        HostileEnemyCount, // 8 — number of living enemies with Hostility > 0
+        ReceptiveEnemyCount, // 9 — number of living enemies with Hostility < 0
+        ConversionsThisTurn, // 10 — Faith Leader pacify conversions made this player turn (Sermon harvest)
+        CurrentPatronage, // 11 — Nepo Baby's current banked Patronage
+        ScandalsInHand, // 12 — Scandal cards currently clogging the player's hand (Celebrity Scandal line)
+        ScandalsDrawnThisTurn, // 13 — Scandal cards drawn so far this turn (Celebrity on-draw payoffs)
+        CurrentAttention, // 14 — Celebrity's banked Attention (spotlight resource)
     }
 }

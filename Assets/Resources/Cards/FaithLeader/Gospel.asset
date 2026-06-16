@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
+  m_Name: Gospel
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
+  _id: 22bdbd1b-1e3c-4f6a-8d81-e344268fb029
+  _cardName: Gospel
+  _cardType: 2
+  _rarity: 1
+  _artwork: {fileID: 0}
+  _description: 
+  _flavorText: 
+  _costs:
+  - _costType: 1
+    _baseAmount: 2
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _effects: []
+  _passives:
+  - rid: 4823698577809473633
+  _isUpgraded: 0
+  _upgradedCosts: []
+  _upgradedEffects: []
+  _upgradedPassives: []
+  _tags:
+  - faithleader
+  _isStarterCard: 0
+  _isUnlockable: 0
+  _isUnplayable: 0
+  _innateRetain: 0
+  _policyLean: 3
+  _cardVFX: {fileID: 0}
+  _configurationNotes: 
+  references:
+    version: 2
+    RefIds:
+    - rid: 4823698577809473633
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: New Passive
+        _trigger:
+          rid: 4823698577809473634
+        _conditions:
+        - rid: 4823698577809473636
+        _oneShot: 0
+        _effects:
+        - rid: 4823698577809473637
+    - rid: 4823698577809473634
+      type: {class: StatusAppliedToEnemyTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _filterByStatus: 1
+        _filterStatus:
+          rid: 4823698577809473635
+    - rid: 4823698577809473635
+      type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 4823698577809473636
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 4823698577809473637
+      type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 2
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1

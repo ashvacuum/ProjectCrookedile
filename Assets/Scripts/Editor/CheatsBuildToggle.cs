@@ -15,7 +15,9 @@ namespace Crookedile.Editor
         [MenuItem("Crookedile/Toggle Cheats Build %#C")] // Ctrl+Shift+C
         public static void ToggleCheatsEnabled()
         {
-            NamedBuildTarget buildTarget = NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            NamedBuildTarget buildTarget = NamedBuildTarget.FromBuildTargetGroup(
+                EditorUserBuildSettings.selectedBuildTargetGroup
+            );
             string defines = PlayerSettings.GetScriptingDefineSymbols(buildTarget);
 
             bool isEnabled = defines.Contains(CHEATS_DEFINE);
@@ -46,7 +48,9 @@ namespace Crookedile.Editor
         [MenuItem("Crookedile/Toggle Cheats Build %#C", true)]
         public static bool ToggleCheatsEnabledValidate()
         {
-            NamedBuildTarget buildTarget = NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            NamedBuildTarget buildTarget = NamedBuildTarget.FromBuildTargetGroup(
+                EditorUserBuildSettings.selectedBuildTargetGroup
+            );
             string defines = PlayerSettings.GetScriptingDefineSymbols(buildTarget);
             bool isEnabled = defines.Contains(CHEATS_DEFINE);
 
@@ -60,7 +64,8 @@ namespace Crookedile.Editor
             foreach (BuildTarget target in System.Enum.GetValues(typeof(BuildTarget)))
             {
                 BuildTargetGroup group = BuildPipeline.GetBuildTargetGroup(target);
-                if (group == BuildTargetGroup.Unknown) continue;
+                if (group == BuildTargetGroup.Unknown)
+                    continue;
 
                 try
                 {
@@ -92,7 +97,8 @@ namespace Crookedile.Editor
             foreach (BuildTarget target in System.Enum.GetValues(typeof(BuildTarget)))
             {
                 BuildTargetGroup group = BuildPipeline.GetBuildTargetGroup(target);
-                if (group == BuildTargetGroup.Unknown) continue;
+                if (group == BuildTargetGroup.Unknown)
+                    continue;
 
                 try
                 {

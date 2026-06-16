@@ -13,13 +13,14 @@ namespace Crookedile.UI.Battle
     ///   2. Ensure the Image has <b>Raycast Target = true</b>.
     ///   3. Assign the parent <see cref="EnemySlotUI"/> to the <c>_slot</c> field.
     /// </summary>
-    public class HPBarHoverTrigger : MonoBehaviour,
-                                     IPointerEnterHandler,
-                                     IPointerExitHandler
+    public class HPBarHoverTrigger : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
-        [Tooltip("The EnemySlotUI that owns this HP bar. " +
-                 "The trigger calls ShowNameLabel / HideNameLabel on it.")]
-        [SerializeField] private EnemySlotUI _slot;
+        [Tooltip(
+            "The EnemySlotUI that owns this HP bar. "
+                + "The trigger calls ShowNameLabel / HideNameLabel on it."
+        )]
+        [SerializeField]
+        private EnemySlotUI _slot;
 
         public void OnPointerEnter(PointerEventData eventData) => _slot?.ShowNameLabel();
 
