@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Loyal Partisan
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _enemyName: Loyal Partisan
+  _portrait: {fileID: 0}
+  _startingHostility: 2
+  _maxHostility: 5
+  _minHostility: -2
+  _demographicClass: 1
+  _demographicValues: 1
+  _startingEffects: []
+  _movePattern: 0
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: 1c9787da1febac84b832308f01ebed84, type: 2}
+  - {fileID: 11400000, guid: 187fdd9d5f468f74b9ae25f300df91f1, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: 81de217a5c82cf94a8a2dd4472fdf304, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: c1962c436ea840546878c8c8d2304fd5, type: 2}
+  references:
+    version: 2
+    RefIds: []

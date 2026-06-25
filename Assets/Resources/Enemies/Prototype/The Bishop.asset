@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: The Bishop
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _enemyName: The Bishop
+  _portrait: {fileID: 0}
+  _startingHostility: 1
+  _maxHostility: 5
+  _minHostility: 0
+  _demographicClass: 1
+  _demographicValues: 1
+  _startingEffects:
+  - _behavior:
+      rid: 4823698825199484946
+    _stacks: 1
+    _duration: 2
+  _movePattern: 0
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: 263efc181a14876459da9535c4a02e57, type: 2}
+  - {fileID: 11400000, guid: 04086544edd1068418ad36986e2192ef, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: 1492cc83d55793f47aa3df2b46ed8da7, type: 2}
+  _receptiveMoves: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 4823698825199484946
+      type: {class: HardenedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

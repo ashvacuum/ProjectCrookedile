@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Spin Doctor
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _enemyName: Spin Doctor
+  _portrait: {fileID: 0}
+  _startingHostility: 0
+  _maxHostility: 4
+  _minHostility: -2
+  _demographicClass: 1
+  _demographicValues: 1
+  _startingEffects: []
+  _movePattern: 0
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: f35da92aa06e9264b84d047668b7e059, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: 7bea1e29ff74bfc48bea513de3353b15, type: 2}
+  - {fileID: 11400000, guid: 2143a68f8ae25c341bd7dc0fc870fab5, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: 7dbf793ee75b27340a06084780887088, type: 2}
+  references:
+    version: 2
+    RefIds: []

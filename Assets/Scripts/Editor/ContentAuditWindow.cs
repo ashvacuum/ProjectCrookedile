@@ -505,8 +505,10 @@ namespace Crookedile.EditorTools
                     var issues = new List<AuditIssue>();
                     bool junk =
                         card.CardType == CardType.Heckle || card.CardType == CardType.Scandal;
-                    if (!junk && (card.Effects == null || card.Effects.Count == 0))
-                        issues.Add(new AuditIssue(Severity.Error, "No effects."));
+                    bool hasEffects = card.Effects != null && card.Effects.Count > 0;
+                    bool hasPassives = card.Passives != null && card.Passives.Count > 0;
+                    if (!junk && !hasEffects && !hasPassives)
+                        issues.Add(new AuditIssue(Severity.Error, "No effects or passives."));
                     if (card.IsInDevelopment)
                         issues.Add(
                             new AuditIssue(Severity.Warning, "No artwork (in development).")
