@@ -28,6 +28,7 @@ MonoBehaviour:
     _maximumCost: 99
   _effects:
   - rid: 4823698577809473640
+  - rid: 8259631972304027650
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
@@ -53,3 +54,8 @@ MonoBehaviour:
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
+    - rid: 8259631972304027650
+      type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 1

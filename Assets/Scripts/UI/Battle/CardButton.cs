@@ -7,6 +7,7 @@ using MoreMountains.Feedbacks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Crookedile.UI.Battle
@@ -46,6 +47,13 @@ namespace Crookedile.UI.Battle
 
         [SerializeField]
         private TMP_Text cardCostText;
+
+        [Tooltip(
+            "Optional: root of the cost badge (background image + number). Hidden entirely on cards "
+                + "with no cost item. Falls back to hiding just the cost text when left unassigned."
+        )]
+        [SerializeField]
+        private GameObject _costBadge;
 
         [SerializeField]
         private TMP_Text cardDescriptionText;
@@ -215,6 +223,9 @@ namespace Crookedile.UI.Battle
         /// <summary>The card currently being dragged, or null.</summary>
         public static CardButton DraggedCard { get; private set; }
 
+        /// <summary>The card currently armed for click-to-target play (clicked in hand), or null.</summary>
+        public static CardButton ArmedCard { get; private set; }
+
         /// <summary>True while a card drag has crossed the upward threshold and targeting mode is active.</summary>
         public static bool IsTargeting { get; private set; }
 
@@ -275,6 +286,20 @@ namespace Crookedile.UI.Battle
         {
             _parentCanvasCache = null;
             _handLayoutCache = null;
+        }
+
+        private void OnDisable()
+        {
+            // Returning to the pool / leaving play must not strand an armed-targeting session.
+            // Clear statics directly — no tweens on a deactivating object.
+            if (ArmedCard != this)
+                return;
+
+            ArmedCard = null;
+            _isTargeting = false;
+            IsTargeting = false;
+            CardTargetingArrow.Instance?.Hide();
+            EnemySlotUI.ClearTargetedSlot();
         }
 
         #endregion
@@ -495,11 +520,47 @@ namespace Crookedile.UI.Battle
                 + hoverEdgePadding;
         }
 
-        /// <summary>Picker-mode selection. Hand cards are played by dragging, so they ignore plain clicks.</summary>
+        /// <summary>
+        /// Hybrid hand input that coexists with drag-to-play:
+        ///  • Targeted card → a click arms it; the arrow follows the cursor until an enemy slot
+        ///    is clicked. Clicking the card again, empty space, or Esc cancels.
+        ///  • Non-targeted card → a double-click plays it on the current focus.
+        /// Picker grids keep their plain single-click selection.
+        /// </summary>
         public void OnPointerClick(PointerEventData eventData)
         {
             if (_pickerMode)
+            {
                 onClickCallback?.Invoke();
+                return;
+            }
+
+            if (_isDragging)
+                return; // a drag already handled this interaction
+
+            if (!isPlayable)
+            {
+                PlayUnplayableNudge();
+                return;
+            }
+
+            if (RequiresSpecificTarget())
+            {
+                // Click toggles the armed targeting state.
+                if (ArmedCard == this)
+                    Disarm();
+                else
+                    ArmForTargeting(eventData.pressEventCamera);
+
+                return;
+            }
+
+            // Non-targeted (AOE / self): a double-click plays on the current focus.
+            if (eventData.clickCount >= 2)
+            {
+                DisarmCurrent();
+                ConfirmPlay();
+            }
         }
 
         #endregion
@@ -510,14 +571,12 @@ namespace Crookedile.UI.Battle
             if (_pickerMode)
                 return; // pickers select by click, never drag-to-play
 
+            // A drag overrides any click-armed targeting.
+            DisarmCurrent();
+
             if (!isPlayable)
             {
-                // Visible "nope" so a rejected drag reads as unplayable, not unresponsive.
-                transform.DOKill();
-                transform.localRotation = baseRotation;
-                transform
-                    .DOPunchRotation(new Vector3(0f, 0f, 6f), 0.3f, vibrato: 8, elasticity: 1f)
-                    .SetLink(gameObject);
+                PlayUnplayableNudge(); // visible "nope" so a rejected drag reads as unplayable
                 return;
             }
 
@@ -611,9 +670,7 @@ namespace Crookedile.UI.Battle
                         $"AOE/self card '{cardData?.CardName}' — playing on current focus",
                         this
                     );
-                    LastPlayedRect = GetComponent<RectTransform>();
-                    selectFeedback?.PlayFeedbacks();
-                    onClickCallback?.Invoke();
+                    ConfirmPlay();
                 }
                 else
                 {
@@ -649,13 +706,17 @@ namespace Crookedile.UI.Battle
         #endregion
 
         #region Targeting API (called by EnemySlotUI)
-        /// <summary>Plays the card after a successful targeting release onto an enemy slot.</summary>
-        public void PlayFromDrop()
+        /// <summary>
+        /// Plays this card on the current focus. Single play entry shared by drag-release (AOE),
+        /// double-click, and — via <see cref="EnemySlotUI.PlayCardOnEnemy"/> — targeted plays
+        /// (the caller sets the focused enemy first when a specific target was chosen).
+        /// </summary>
+        public void ConfirmPlay()
         {
             LastPlayedRect = GetComponent<RectTransform>();
             GameLogger.LogInfo(
                 "Card",
-                $"PlayFromDrop: '{cardData?.CardName}' (callback={(onClickCallback != null ? "set" : "null")})",
+                $"ConfirmPlay: '{cardData?.CardName}' (callback={(onClickCallback != null ? "set" : "null")})",
                 this
             );
             selectFeedback?.PlayFeedbacks();
@@ -716,6 +777,97 @@ namespace Crookedile.UI.Battle
                 if (effect != null && effect.Target == TargetType.Opponent)
                     return true;
             return false;
+        }
+
+        #endregion
+
+        #region Click-to-Target (hybrid input)
+        /// <summary>
+        /// Per-frame upkeep for the armed card only: the targeting arrow tracks the cursor and
+        /// snaps to a hovered enemy slot; Esc or a press on empty space cancels. Every other
+        /// card early-outs on the first line, so this stays cheap.
+        /// </summary>
+        private void Update()
+        {
+            if (ArmedCard != this)
+                return;
+
+            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            {
+                Disarm();
+                return;
+            }
+
+            if (Mouse.current == null)
+                return;
+
+            EnemySlotUI snap = EnemySlotUI.TargetedSlot;
+            if (snap != null)
+                CardTargetingArrow.Instance?.SnapTo(snap.GetComponent<RectTransform>());
+            else
+                CardTargetingArrow.Instance?.Unsnap();
+
+            CardTargetingArrow.Instance?.UpdateEndPoint(Mouse.current.position.ReadValue());
+
+            // A press on empty space (no UI raycast target under the cursor) cancels. Presses on
+            // a card or an enemy slot are handled by their own click handlers instead.
+            bool pressedEmptySpace =
+                Mouse.current.leftButton.wasPressedThisFrame
+                && (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject());
+            if (pressedEmptySpace)
+                Disarm();
+        }
+
+        /// <summary>
+        /// Arms this card for click-targeting: scales it up, shows the arrow, and flips the
+        /// shared <see cref="IsTargeting"/> flag so enemy slots highlight on hover.
+        /// </summary>
+        private void ArmForTargeting(Camera eventCamera)
+        {
+            if (ArmedCard != null && ArmedCard != this)
+                ArmedCard.Disarm();
+
+            ArmedCard = this;
+            _isTargeting = true;
+            IsTargeting = true;
+
+            transform.DOKill();
+            transform.DOScale(baseScale * hoverScale, hoverTweenDuration).SetEase(Ease.OutQuad);
+
+            CardTargetingArrow.Instance?.Show(GetComponent<RectTransform>(), eventCamera);
+        }
+
+        /// <summary>Cancels this card's armed targeting and restores its resting scale.</summary>
+        private void Disarm()
+        {
+            if (ArmedCard == this)
+                ArmedCard = null;
+
+            _isTargeting = false;
+            IsTargeting = false;
+
+            transform.DOKill();
+            transform.DOScale(baseScale, hoverTweenDuration).SetEase(Ease.OutQuad);
+
+            CardTargetingArrow.Instance?.Hide();
+            EnemySlotUI.ClearTargetedSlot();
+        }
+
+        /// <summary>Static cancel — drops whatever card is currently armed, if any.</summary>
+        public static void DisarmCurrent()
+        {
+            if (ArmedCard != null)
+                ArmedCard.Disarm();
+        }
+
+        /// <summary>Visible "nope" punch when an unplayable card is clicked or dragged.</summary>
+        private void PlayUnplayableNudge()
+        {
+            transform.DOKill();
+            transform.localRotation = baseRotation;
+            transform
+                .DOPunchRotation(new Vector3(0f, 0f, 6f), 0.3f, vibrato: 8, elasticity: 1f)
+                .SetLink(gameObject);
         }
 
         #endregion
@@ -783,16 +935,29 @@ namespace Crookedile.UI.Battle
 
             if (cardCostText != null)
             {
-                cardCostText.text = GetCostString();
+                // Show the cost only for cards that carry an Energy or Patronage cost. Cards with no
+                // cost item at all (empty Costs) have nothing to pay, so the whole cost badge is
+                // hidden rather than rendered as a "0"/"Free" label. Playable Scandals/Status that
+                // DO have a real cost keep it. Toggling both the badge root and the text covers any
+                // prefab layout, and re-shows the cost when a pooled button is reused by a normal card.
+                bool hasCost = HasDisplayableCost();
+                cardCostText.gameObject.SetActive(hasCost);
+                if (_costBadge != null && _costBadge != cardCostText.gameObject)
+                    _costBadge.SetActive(hasCost);
 
-                if (
-                    _isCostDiscounted
-                    && visualSettings != null
-                    && visualSettings.DiscountedCostColor.a > 0f
-                )
-                    cardCostText.color = visualSettings.DiscountedCostColor;
-                else
-                    cardCostText.color = _defaultCostColor;
+                if (hasCost)
+                {
+                    cardCostText.text = GetCostString();
+
+                    if (
+                        _isCostDiscounted
+                        && visualSettings != null
+                        && visualSettings.DiscountedCostColor.a > 0f
+                    )
+                        cardCostText.color = visualSettings.DiscountedCostColor;
+                    else
+                        cardCostText.color = _defaultCostColor;
+                }
             }
 
             if (cardDescriptionText != null)
@@ -813,10 +978,41 @@ namespace Crookedile.UI.Battle
 
         private void UpdateAffordability()
         {
-            // Dim the whole card if it can't be played
             var group = GetComponent<CanvasGroup>();
-            if (group != null)
+            if (group == null)
+                return;
+
+            // Inherently-unplayable cards (Scandals, Status — IsUnplayable) must NOT borrow the
+            // "can't afford" dim; that reads as "playable once you have more energy", which is
+            // wrong. They stay at full opacity (and show no cost). Cards merely blocked this turn
+            // (Silenced Rhetoric) still dim, signalling a temporary block — as does a card you
+            // genuinely can't afford.
+            if (cardData.IsUnplayable)
+                group.alpha = 1f;
+            else
                 group.alpha = isPlayable ? 1f : 0.5f;
+        }
+
+        /// <summary>
+        /// True if the card carries a cost worth showing — an Energy (ActionPoints) or Patronage
+        /// cost. Cards with no Costs, or only a None entry, have nothing to display and hide the
+        /// cost image entirely.
+        /// </summary>
+        private bool HasDisplayableCost()
+        {
+            if (cardData?.Costs == null)
+                return false;
+
+            foreach (var cost in cardData.Costs)
+            {
+                if (
+                    cost.CostType == CostType.ActionPoints
+                    || cost.CostType == CostType.Patronage
+                )
+                    return true;
+            }
+
+            return false;
         }
 
         private string GetCostString()
@@ -905,6 +1101,8 @@ namespace Crookedile.UI.Battle
             transform.DOKill();
             if (DraggedCard == this)
                 DraggedCard = null;
+            if (ArmedCard == this)
+                ArmedCard = null;
             if (_isTargeting)
             {
                 IsTargeting = false;

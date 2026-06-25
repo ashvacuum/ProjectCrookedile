@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Crookedile.Data;
 using Crookedile.Gameplay.Battle;
 using UnityEngine;
@@ -18,6 +19,23 @@ namespace Crookedile.Data.Enemy
 
         /// <summary>Like Sequential but picks a random starting offset — then cycles in order from there.</summary>
         RandomSequential,
+    }
+
+    /// <summary>
+    /// The enemy's behavioural stance, derived from its current hostility. Each stance
+    /// maps to its own move list on <see cref="EnemyData"/>, so an enemy's available moves
+    /// are driven entirely by how it currently feels about the player.
+    /// </summary>
+    public enum EnemyStance
+    {
+        /// <summary>Hostility &gt; 0 — uses the aggressive move list.</summary>
+        Aggressive,
+
+        /// <summary>Hostility == 0 — uses the neutral move list.</summary>
+        Neutral,
+
+        /// <summary>Hostility &lt; 0 — uses the receptive move list.</summary>
+        Receptive,
     }
 
     /// <summary>
@@ -97,11 +115,25 @@ namespace Crookedile.Data.Enemy
         private EnemyMovePattern _movePattern = EnemyMovePattern.Sequential;
 
         [Tooltip(
-            "The moves this enemy can perform. Must have at least one entry. "
+            "Moves used while the enemy is Aggressive (Hostility > 0). "
                 + "For Sequential pattern, moves play in order 0 → 1 → 2 → 0 …"
         )]
         [SerializeField]
-        private List<EnemyMoveData> _moves = new List<EnemyMoveData>();
+        private List<EnemyMoveData> _aggressiveMoves = new List<EnemyMoveData>();
+
+        [Tooltip(
+            "Moves used while the enemy is Neutral (Hostility == 0). "
+                + "For Sequential pattern, moves play in order 0 → 1 → 2 → 0 …"
+        )]
+        [SerializeField]
+        private List<EnemyMoveData> _neutralMoves = new List<EnemyMoveData>();
+
+        [Tooltip(
+            "Moves used while the enemy is Receptive (Hostility < 0). "
+                + "For Sequential pattern, moves play in order 0 → 1 → 2 → 0 …"
+        )]
+        [SerializeField]
+        private List<EnemyMoveData> _receptiveMoves = new List<EnemyMoveData>();
 
         #endregion
 
@@ -114,8 +146,35 @@ namespace Crookedile.Data.Enemy
         public DemographicClass DemographicClass => _demographicClass;
         public DemographicValues DemographicValues => _demographicValues;
         public EnemyMovePattern MovePattern => _movePattern;
-        public IReadOnlyList<EnemyMoveData> Moves => _moves;
+
+        /// <summary>Moves used while Aggressive (Hostility &gt; 0).</summary>
+        public IReadOnlyList<EnemyMoveData> AggressiveMoves => _aggressiveMoves;
+
+        /// <summary>Moves used while Neutral (Hostility == 0).</summary>
+        public IReadOnlyList<EnemyMoveData> NeutralMoves => _neutralMoves;
+
+        /// <summary>Moves used while Receptive (Hostility &lt; 0).</summary>
+        public IReadOnlyList<EnemyMoveData> ReceptiveMoves => _receptiveMoves;
+
+        /// <summary>
+        /// Every authored move across all three stance lists. Allocates a new list each call —
+        /// intended for editor tooling and validation, not per-frame gameplay use.
+        /// </summary>
+        public IReadOnlyList<EnemyMoveData> Moves =>
+            _aggressiveMoves.Concat(_neutralMoves).Concat(_receptiveMoves).ToList();
+
         public IReadOnlyList<StartingStatusEntry> StartingEffects => _startingEffects;
+
+        /// <summary>
+        /// Returns the move list that backs the given <paramref name="stance"/>.
+        /// </summary>
+        public IReadOnlyList<EnemyMoveData> GetMovesForStance(EnemyStance stance) =>
+            stance switch
+            {
+                EnemyStance.Aggressive => _aggressiveMoves,
+                EnemyStance.Receptive => _receptiveMoves,
+                _ => _neutralMoves,
+            };
     }
 
     /// <summary>

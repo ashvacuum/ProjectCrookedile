@@ -2,6 +2,7 @@
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
+using DG.Tweening;
 using UnityEngine;
 
 namespace Crookedile.UI.Battle
@@ -196,6 +197,12 @@ namespace Crookedile.UI.Battle
                 cg.blocksRaycasts = true;
                 cg.alpha = 1f;
             }
+
+            // Kill any tween still targeting this button — draw pop-in, hover lift, discard fly,
+            // targeting punch. A pooled button MUST be inert: a surviving DOTween would keep
+            // driving its scale/position after it's deactivated or re-rented for another card.
+            // This is the "drawn card never appears because its button was recycled mid-pop" race.
+            btn.transform.DOKill();
 
             btn.transform.localScale = Vector3.one;
             btn.transform.SetParent(transform, false);

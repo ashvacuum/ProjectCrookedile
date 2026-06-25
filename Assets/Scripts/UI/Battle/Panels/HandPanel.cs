@@ -249,6 +249,9 @@ namespace Crookedile.UI.Battle
         /// <summary>Returns all active card buttons to the pool and clears the list.</summary>
         public void ClearHand()
         {
+            // Stop any staggered draw first so it can't re-touch buttons we're about to pool.
+            CardFlyAnimator.Instance?.CancelDraw();
+
             foreach (var btn in _activeButtons)
                 ReturnCard(btn);
             _activeButtons.Clear();
