@@ -33,11 +33,16 @@ namespace Crookedile.EditorTools
                 total++;
                 int baseCount = card.Effects?.Count ?? 0;
                 int upgradedCount = card.UpgradedEffects?.Count ?? 0;
+                int passiveCount = card.Passives?.Count ?? 0;
 
-                if (baseCount == 0)
+                // A Power card carries its mechanics in passives, not effects — only flag
+                // cards that have neither.
+                if (baseCount == 0 && passiveCount == 0)
                 {
                     empty++;
-                    sb.AppendLine($"  EMPTY  base=0 upgraded={upgradedCount}  {card.name}  ({path})");
+                    sb.AppendLine(
+                        $"  EMPTY  base=0 passives=0 upgraded={upgradedCount}  {card.name}  ({path})"
+                    );
                 }
             }
 

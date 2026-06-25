@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Heckler
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _enemyName: Heckler
+  _portrait: {fileID: 0}
+  _startingHostility: 0
+  _maxHostility: 4
+  _minHostility: -2
+  _demographicClass: 1
+  _demographicValues: 1
+  _startingEffects: []
+  _movePattern: 0
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: fe504da75725e604bb7bc35d102823df, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: 6579e8848ea0dcb43b657f6fb711c80d, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: 9b01037f75754d447980f78d2228c505, type: 2}
+  references:
+    version: 2
+    RefIds: []
