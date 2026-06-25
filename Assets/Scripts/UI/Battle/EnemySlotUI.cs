@@ -19,7 +19,11 @@ namespace Crookedile.UI.Battle
     /// Designed to be used as a prefab: assign text/button/image references in the Inspector.
     /// </summary>
     [Debuggable("Card", LogLevel.Info)]
-    public class EnemySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    public class EnemySlotUI
+        : MonoBehaviour,
+            IPointerEnterHandler,
+            IPointerExitHandler,
+            IPointerClickHandler
     {
         [Header("Display")]
         [SerializeField]
@@ -293,7 +297,22 @@ namespace Crookedile.UI.Battle
                 this
             );
             _battleManager.SetFocusedEnemy(_enemyIndex);
-            card.PlayFromDrop();
+            card.ConfirmPlay();
+        }
+
+        /// <summary>
+        /// Click-to-target play: if a card is armed (clicked in hand), play it on this enemy.
+        /// With no armed card a click is ignored — focus advances via gameplay, not manual clicks.
+        /// </summary>
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            CardButton armed = CardButton.ArmedCard;
+            if (armed == null)
+                return;
+
+            // Hide the arrow before the play triggers a hand rebuild, then play on this slot.
+            CardButton.DisarmCurrent();
+            PlayCardOnEnemy(armed);
         }
 
         /// <summary>Shows the targeting highlight when the arrow enters this slot during targeting mode.</summary>

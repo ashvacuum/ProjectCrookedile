@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
-  m_Name: Student
+  m_Name: Curious Student
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Enemy.EnemyData
   _enemyName: Curious Student
   _portrait: {fileID: 21300000, guid: edaf660ecaa3bf34dbf9aa3f97320181, type: 3}
@@ -21,9 +21,13 @@ MonoBehaviour:
   _demographicValues: 0
   _startingEffects: []
   _movePattern: 0
-  _moves:
+  _aggressiveMoves:
   - {fileID: 11400000, guid: 840cb7f1c3234024d8c13dcb7b49b315, type: 2}
   - {fileID: 11400000, guid: 7166da6120f286d489521eb57e951328, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: 840cb7f1c3234024d8c13dcb7b49b315, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: 840cb7f1c3234024d8c13dcb7b49b315, type: 2}
   references:
     version: 2
     RefIds: []

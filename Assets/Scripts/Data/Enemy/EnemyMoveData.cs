@@ -42,20 +42,6 @@ namespace Crookedile.Data.Enemy
     }
 
     /// <summary>
-    /// Which stances a move is usable in. Combinable flags — a move can serve two stances
-    /// (e.g. Neutral | Receptive). Stored value 0 on assets authored before this field
-    /// existed is treated as Any by the selection filter, so old data keeps working.
-    /// </summary>
-    [System.Flags]
-    public enum MoveStanceMask
-    {
-        Hostile = 1 << 0, // Usable while hostility > 0
-        Neutral = 1 << 1, // Usable while hostility == 0
-        Receptive = 1 << 2, // Usable while hostility < 0
-        Any = Hostile | Neutral | Receptive,
-    }
-
-    /// <summary>
     /// One scripted move an enemy can perform on their turn.
     /// Effects use the polymorphic BattleEffect system — EffectResolver handles them
     /// with isPlayerCard=false (enemy is caster, player is target).
@@ -151,14 +137,6 @@ namespace Crookedile.Data.Enemy
         [SerializeField]
         private int _conditionTurn = 1;
 
-        [Tooltip(
-            "Which stances this move is usable in. The enemy only picks moves matching its "
-                + "current stance; if none match, all condition-eligible moves are used as a "
-                + "fallback so the enemy is never stuck."
-        )]
-        [SerializeField]
-        private MoveStanceMask _stanceRequirement = MoveStanceMask.Any;
-
         #endregion
 
         #region Properties
@@ -190,13 +168,6 @@ namespace Crookedile.Data.Enemy
         public int MinionCount => _minionCount;
         public EnemyMoveCondition Condition => _condition;
         public int ConditionTurn => _conditionTurn;
-
-        /// <summary>
-        /// Stance gate, with the value 0 (assets serialized before this field existed)
-        /// normalized to <see cref="MoveStanceMask.Any"/>.
-        /// </summary>
-        public MoveStanceMask StanceRequirement =>
-            _stanceRequirement == 0 ? MoveStanceMask.Any : _stanceRequirement;
     }
 }
         #endregion

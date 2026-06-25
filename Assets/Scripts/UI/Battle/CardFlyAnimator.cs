@@ -120,9 +120,23 @@ namespace Crookedile.UI.Battle
             {
                 if (btn == null)
                     continue;
+
+                // Guard the pop against being stranded invisible. The pop is a SCALE tween, but
+                // hover-spread (CardButton.SetLayoutTarget), an animated re-arrange, and a pool
+                // return all call transform.DOKill() and then re-animate position/rotation only —
+                // which would freeze a mid-pop card at a partial (often zero) scale. OnKill snaps
+                // it to full size, so an interrupted draw can never leave a drawn card invisible.
+                CardButton captured = btn;
                 _drawSeq.Insert(
                     at,
-                    btn.transform.DOScale(Vector3.one, _drawPopDuration).SetEase(Ease.OutBack)
+                    captured
+                        .transform.DOScale(Vector3.one, _drawPopDuration)
+                        .SetEase(Ease.OutBack)
+                        .OnKill(() =>
+                        {
+                            if (captured != null)
+                                captured.transform.localScale = Vector3.one;
+                        })
                 );
                 at += _drawStaggerDelay;
             }
@@ -131,6 +145,17 @@ namespace Crookedile.UI.Battle
                 _drawSeq = null;
                 onComplete?.Invoke();
             });
+        }
+
+        /// <summary>
+        /// Cancels any in-flight staggered draw, snapping its cards to full scale. Call when the
+        /// hand is torn down or fully rebuilt so a stale draw sequence can't keep driving the
+        /// scale of buttons that have since been returned to the pool or re-rented.
+        /// </summary>
+        public void CancelDraw()
+        {
+            _drawSeq?.Kill(complete: true);
+            _drawSeq = null;
         }
 
         #endregion

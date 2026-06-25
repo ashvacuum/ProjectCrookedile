@@ -121,7 +121,14 @@ namespace Crookedile.Gameplay.Battle
         /// <returns>The selected move, or null if no moves are defined or all are blocked.</returns>
         public EnemyMoveData SelectNextMove(IReadOnlyList<EnemyController> allEnemies = null)
         {
-            var moves = _enemyData?.Moves;
+            // The enemy's stance picks the move pool: aggressive / neutral / receptive.
+            var moves = _enemyData?.GetMovesForStance(CurrentStance);
+
+            // Fall back to the full move set if no moves are authored for this stance, so an
+            // enemy is never left without anything to do just because its stance changed.
+            if (moves == null || moves.Count == 0)
+                moves = _enemyData?.Moves;
+
             if (moves == null || moves.Count == 0)
             {
                 CurrentIntent = null;
@@ -138,43 +145,20 @@ namespace Crookedile.Gameplay.Battle
                 return null;
             }
 
-            // Stance gate: prefer moves authored for the current stance (hostile/neutral/receptive).
-            // If nothing matches, fall back to the full condition-eligible pool — an enemy is
-            // never left without a move just because its stance changed.
-            var stanceEligible = eligible.Where(m => MatchesCurrentStance(m)).ToList();
-            if (stanceEligible.Count > 0)
-                eligible = stanceEligible;
-
-            // Turncoat: a freshly-betrayed enemy lashes out — force an offensive move this once.
+            // Turncoat: a freshly-betrayed enemy lashes out — force an offensive move from the
+            // aggressive pool this once, regardless of its current stance.
             if (_forceAggressiveIntent)
             {
                 _forceAggressiveIntent = false;
-                var offensive = eligible.Where(m => IsOffensiveMove(m.MoveType)).ToList();
+                var offensive = (_enemyData?.AggressiveMoves ?? eligible)
+                    .Where(m => IsMoveEligible(m, allEnemies) && IsOffensiveMove(m.MoveType))
+                    .ToList();
                 if (offensive.Count > 0)
                 {
                     CurrentIntent = offensive[Random.Range(0, offensive.Count)];
                     return CurrentIntent;
                 }
                 // No offensive move available — fall through to normal selection.
-            }
-
-            // When receptive (negative hostility), prefer non-offensive moves.
-            if (Stats.IsReceptive)
-            {
-                var nonOffensiveMoves = eligible
-                    .Where(m =>
-                        m.MoveType != EnemyMoveType.Attack
-                        && m.MoveType != EnemyMoveType.OffensiveBuff
-                        && m.MoveType != EnemyMoveType.DebuffAttack
-                    )
-                    .ToList();
-
-                if (nonOffensiveMoves.Count > 0)
-                {
-                    CurrentIntent = nonOffensiveMoves[Random.Range(0, nonOffensiveMoves.Count)];
-                    return CurrentIntent;
-                }
-                // No non-offensive moves available — fall through to normal selection.
             }
 
             CurrentIntent = _moveSelector.SelectMove(eligible);
@@ -235,16 +219,13 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// True if the move's <see cref="EnemyMoveData.StanceRequirement"/> includes this
-        /// enemy's current stance (hostile &gt; 0, neutral == 0, receptive &lt; 0).
+        /// The enemy's current stance, derived from its hostility
+        /// (hostile &gt; 0 → Aggressive, receptive &lt; 0 → Receptive, otherwise Neutral).
         /// </summary>
-        private bool MatchesCurrentStance(EnemyMoveData move)
-        {
-            MoveStanceMask current = Stats.IsHostile ? MoveStanceMask.Hostile
-                : Stats.IsReceptive ? MoveStanceMask.Receptive
-                : MoveStanceMask.Neutral;
-            return (move.StanceRequirement & current) != 0;
-        }
+        private EnemyStance CurrentStance =>
+            Stats.IsHostile ? EnemyStance.Aggressive
+            : Stats.IsReceptive ? EnemyStance.Receptive
+            : EnemyStance.Neutral;
         #endregion
     }
 }
