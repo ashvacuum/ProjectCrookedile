@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
-  m_Name: Spin Story
+  m_Name: Bishop Absolve
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Spin Story
-  _moveType: 8
-  _intentDescription: 'Spins the story: +6 Denial'
+  _moveName: Bishop Absolve
+  _moveType: 2
+  _intentDescription: 'Absolves allies: removes your statuses from them'
   _effects:
-  - rid: 4823698825199484933
+  - rid: 4823698825199485076
   _moveVFX: {fileID: 0}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
@@ -25,11 +25,13 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4823698825199484933
-      type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4823698825199485076
+      type: {class: CleanseStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 6
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1
+        _target: 5
+        _mode: 1
+        _behavior:
+          rid: -2

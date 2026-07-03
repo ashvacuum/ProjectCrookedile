@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
-  m_Name: Bishop Bless
+  m_Name: Bishop Sermonize
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Bishop Bless
-  _moveType: 2
-  _intentDescription: 'Blesses allies: removes your statuses from them'
+  _moveName: Bishop Sermonize
+  _moveType: 0
+  _intentDescription: 'Sermonizes: -4 Opinion'
   _effects:
-  - rid: 4823698825199484945
+  - rid: 4823698825199485077
   _moveVFX: {fileID: 0}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
@@ -25,13 +25,12 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
-    - rid: 4823698825199484945
-      type: {class: CleanseStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 4823698825199485077
+      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _target: 5
-        _mode: 1
-        _behavior:
-          rid: -2
+        _amount: 4
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _target: 1

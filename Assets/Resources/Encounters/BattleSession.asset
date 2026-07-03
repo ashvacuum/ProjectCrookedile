@@ -15,19 +15,30 @@ MonoBehaviour:
   rounds:
   - label: Round 1
     enemies:
-    - {fileID: 11400000, guid: 2fa6b2b1bc5267e4f8052005db94e5a9, type: 2}
-    - {fileID: 11400000, guid: 2fa6b2b1bc5267e4f8052005db94e5a9, type: 2}
-    - {fileID: 11400000, guid: 2fa6b2b1bc5267e4f8052005db94e5a9, type: 2}
+    - {fileID: 11400000, guid: 628c20c44b592fc4b80177c4e0a4f2af, type: 2}
+    - {fileID: 11400000, guid: 628c20c44b592fc4b80177c4e0a4f2af, type: 2}
+    - {fileID: 11400000, guid: d5405064066c0604eaf6030507f67e3b, type: 2}
+    - {fileID: 11400000, guid: d5405064066c0604eaf6030507f67e3b, type: 2}
+    - {fileID: 11400000, guid: 628c20c44b592fc4b80177c4e0a4f2af, type: 2}
     maxTurns: 10
-    maxOpinion: 100
-    startingOpinion: 25
+    maxOpinion: 130
+    startingOpinion: 50
   - label: Round 2
-    enemies: []
+    enemies:
+    - {fileID: 11400000, guid: 2fa6b2b1bc5267e4f8052005db94e5a9, type: 2}
+    - {fileID: 11400000, guid: ae5d1ba53d25faf4daed62e21c4ba8c6, type: 2}
+    - {fileID: 11400000, guid: f2760c6f1c00650438b4042308fcc23a, type: 2}
+    - {fileID: 11400000, guid: f2760c6f1c00650438b4042308fcc23a, type: 2}
     maxTurns: 10
-    maxOpinion: 100
-    startingOpinion: 50
+    maxOpinion: 140
+    startingOpinion: 40
   - label: Round 3
-    enemies: []
+    enemies:
+    - {fileID: 11400000, guid: a416833577c45704b94db78550671b37, type: 2}
+    - {fileID: 11400000, guid: a416833577c45704b94db78550671b37, type: 2}
+    - {fileID: 11400000, guid: f2760c6f1c00650438b4042308fcc23a, type: 2}
+    - {fileID: 11400000, guid: 628c20c44b592fc4b80177c4e0a4f2af, type: 2}
+    - {fileID: 11400000, guid: d5405064066c0604eaf6030507f67e3b, type: 2}
     maxTurns: 10
-    maxOpinion: 100
-    startingOpinion: 50
+    maxOpinion: 125
+    startingOpinion: 40

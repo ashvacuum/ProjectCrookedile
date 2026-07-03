@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
-  m_Name: Heckle Jeer
+  m_Name: Partisan Tirade
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Heckle Jeer
-  _moveType: 3
-  _intentDescription: 'Heckles: you can''t play Rhetoric next turn'
+  _moveName: Partisan Tirade
+  _moveType: 0
+  _intentDescription: 'Tirade: -4 Opinion'
   _effects:
-  - rid: 4823698825199484938
+  - rid: 4823698825199485062
   _moveVFX: {fileID: 0}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
@@ -25,15 +25,12 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4823698825199484938
-      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 4823698825199485062
+      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
+        _amount: 4
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
         _target: 1
-        _behavior:
-          rid: 4823698825199484939
-        _stacks: 1
-        _duration: 0
-    - rid: 4823698825199484939
-      type: {class: SilencedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 

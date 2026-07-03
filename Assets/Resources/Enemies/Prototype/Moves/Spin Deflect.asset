@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
-  m_Name: Swing Reconsider
+  m_Name: Spin Deflect
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Swing Reconsider
+  _moveName: Spin Deflect
   _moveType: 0
-  _intentDescription: 'Reconsiders: -2 Opinion'
+  _intentDescription: 'Deflects: -3 Opinion'
   _effects:
-  - rid: 4823698825199484948
+  - rid: 4823698825199485067
   _moveVFX: {fileID: 0}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
@@ -25,11 +25,11 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4823698825199484948
+    - rid: 4823698825199485067
       type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 2
+        _amount: 3
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1

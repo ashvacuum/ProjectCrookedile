@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
-  m_Name: Firebrand Provoke
+  m_Name: Heckle Jeer
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Firebrand Provoke
-  _moveType: 9
-  _intentDescription: 'Provokes: +1 Hostility to other enemies'
+  _moveName: Heckle Jeer
+  _moveType: 3
+  _intentDescription: 'Heckles: you can''t play Rhetoric next turn'
   _effects:
-  - rid: 4823698825199484942
+  - rid: 4823698825199485071
   _moveVFX: {fileID: 0}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
@@ -25,9 +25,15 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4823698825199484942
-      type: {class: RaiseAlliesHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 4823698825199485071
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 1
-        _includeSelf: 0
+        _target: 1
+        _behavior:
+          rid: 4823698825199485072
+        _stacks: 1
+        _duration: 0
+    - rid: 4823698825199485072
+      type: {class: SilencedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

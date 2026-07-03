@@ -10,23 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
-  m_Name: Heckler
+  m_Name: The Fixer
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
-  _enemyName: Heckler
-  _portrait: {fileID: 0}
+  _enemyName: The Fixer
+  _portrait: {fileID: 21300000, guid: 99837cd1bb396a147af2beeee6ef6b25, type: 3}
   _startingHostility: 0
-  _maxHostility: 4
-  _minHostility: -2
+  _maxHostility: 5
+  _minHostility: -9
   _demographicClass: 1
   _demographicValues: 1
   _startingEffects: []
-  _movePattern: 0
+  _movePattern: 2
   _aggressiveMoves:
-  - {fileID: 11400000, guid: fe504da75725e604bb7bc35d102823df, type: 2}
+  - {fileID: 11400000, guid: 9a0acc09c5ce91248b831d50640de598, type: 2}
   _neutralMoves:
-  - {fileID: 11400000, guid: 6579e8848ea0dcb43b657f6fb711c80d, type: 2}
+  - {fileID: 11400000, guid: a1b4732f8163f384881bcfd66019ad23, type: 2}
+  - {fileID: 11400000, guid: a19b874279a59a64ea279dcdcb036860, type: 2}
   _receptiveMoves:
-  - {fileID: 11400000, guid: 9b01037f75754d447980f78d2228c505, type: 2}
+  - {fileID: 11400000, guid: 53ebcca197fc6c34c8efe8d90cabe908, type: 2}
   references:
     version: 2
     RefIds: []

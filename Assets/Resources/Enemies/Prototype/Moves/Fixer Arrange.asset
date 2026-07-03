@@ -10,14 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
-  m_Name: Spin Smear
+  m_Name: Fixer Arrange
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Spin Smear
-  _moveType: 5
-  _intentDescription: 'Smears: -4 Opinion, +4 Denial'
+  _moveName: Fixer Arrange
+  _moveType: 0
+  _intentDescription: 'Arranges: -3 Opinion'
   _effects:
-  - rid: 4823698825199484931
-  - rid: 4823698825199484932
+  - rid: 4823698825199485083
   _moveVFX: {fileID: 0}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
@@ -26,20 +25,12 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4823698825199484931
+    - rid: 4823698825199485083
       type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 4
+        _amount: 3
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
         _target: 1
-    - rid: 4823698825199484932
-      type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _amount: 4
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1

@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
-  m_Name: Partisan Tirade
+  m_Name: Fixer Pull Strings
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Partisan Tirade
+  _moveName: Fixer Pull Strings
   _moveType: 0
-  _intentDescription: 'Tirade: -4 Opinion'
+  _intentDescription: 'Pulls strings: -4 Opinion'
   _effects:
-  - rid: 4823698825199484929
+  - rid: 4823698825199485082
   _moveVFX: {fileID: 0}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
@@ -25,7 +25,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4823698825199484929
+    - rid: 4823698825199485082
       type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
