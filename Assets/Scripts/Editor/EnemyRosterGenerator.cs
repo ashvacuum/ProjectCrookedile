@@ -30,12 +30,14 @@ namespace Crookedile.EditorTools
     /// </summary>
     public static class EnemyRosterGenerator
     {
-        private const string Folder = "Assets/Resources/Enemies/Prototype";
+        private const string EnemyFolder = "Assets/Resources/Enemies/Prototype/Enemies";
+        private const string MoveFolder = "Assets/Resources/Enemies/Prototype/Moves";
 
         [MenuItem("Crookedile/Generate/Enemy Roster")]
         public static void Generate()
         {
-            Directory.CreateDirectory(Folder);
+            Directory.CreateDirectory(EnemyFolder);
+            Directory.CreateDirectory(MoveFolder);
             AssetDatabase.Refresh();
 
             // 1. Loyal Partisan -- the basic hostile attacker.
@@ -172,7 +174,7 @@ namespace Crookedile.EditorTools
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log($"[EnemyRosterGenerator] Generated 7 enemies + moves in {Folder}");
+            Debug.Log($"[EnemyRosterGenerator] Generated 7 enemies in {EnemyFolder}, moves in {MoveFolder}");
         }
 
         // --- Assembly -----------------------------------------------------------
@@ -199,7 +201,7 @@ namespace Crookedile.EditorTools
             SetField(enemy, "_neutralMoves", new List<EnemyMoveData>(neutral ?? Array.Empty<EnemyMoveData>()));
             SetField(enemy, "_receptiveMoves", new List<EnemyMoveData>(receptive ?? Array.Empty<EnemyMoveData>()));
 
-            string path = $"{Folder}/{name}.asset";
+            string path = $"{EnemyFolder}/{name}.asset";
             AssetDatabase.DeleteAsset(path);
             AssetDatabase.CreateAsset(enemy, path);
             return enemy;
@@ -218,7 +220,7 @@ namespace Crookedile.EditorTools
             SetField(move, "_intentDescription", intent);
             SetField(move, "_effects", new List<BattleEffect>(effects));
 
-            string path = $"{Folder}/{name}.asset";
+            string path = $"{MoveFolder}/{name}.asset";
             AssetDatabase.DeleteAsset(path);
             AssetDatabase.CreateAsset(move, path);
             return move;
@@ -238,7 +240,7 @@ namespace Crookedile.EditorTools
             SetField(move, "_minionCount", count);
             SetField(move, "_condition", EnemyMoveCondition.OnlyIfNoMinionsAlive);
 
-            string path = $"{Folder}/{name}.asset";
+            string path = $"{MoveFolder}/{name}.asset";
             AssetDatabase.DeleteAsset(path);
             AssetDatabase.CreateAsset(move, path);
             return move;

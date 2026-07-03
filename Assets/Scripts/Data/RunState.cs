@@ -33,6 +33,12 @@ namespace Crookedile.Data
         /// </summary>
         public List<CardData> Deck { get; private set; }
 
+        /// <summary>
+        /// Relics acquired this run. Their passives are registered with every battle's
+        /// PassiveResolver, so they behave exactly like origin passives in battle.
+        /// </summary>
+        public List<RelicData> Relics { get; private set; }
+
         #endregion
 
         #region Battle queue
@@ -84,6 +90,7 @@ namespace Crookedile.Data
             {
                 Origin = origin,
                 Deck = starterDeck != null ? new List<CardData>(starterDeck) : new List<CardData>(),
+                Relics = new List<RelicData>(),
                 CurrentBattleIndex = 0,
                 BattleQueue = battleQueue,
             };
@@ -117,6 +124,16 @@ namespace Crookedile.Data
         {
             if (card != null)
                 Deck.Remove(card);
+        }
+
+        /// <summary>
+        /// Adds <paramref name="relic"/> to the run. Duplicates and <c>null</c> are ignored
+        /// (relics are unique per run, StS-style).
+        /// </summary>
+        public void AddRelic(RelicData relic)
+        {
+            if (relic != null && !Relics.Contains(relic))
+                Relics.Add(relic);
         }
 
         /// <summary>Records that the current battle was won (advances meta state).</summary>

@@ -23,6 +23,7 @@ namespace Crookedile.Gameplay.Battle
     public class PassiveResolver : IDisposable
     {
         private readonly OriginPassive _passive;
+        private readonly IReadOnlyList<BattlePassive> _runPassives;
         private readonly BattleStats _playerStats;
         private DeckManager _deck;
         private Func<float> _getOpinionPercentage;
@@ -67,7 +68,8 @@ namespace Crookedile.Gameplay.Battle
             IReadOnlyList<EnemyController> enemies = null,
             StatusEffectManager playerStatusEffects = null,
             Func<float> getOpinionPercentage = null,
-            BattleManager battleManager = null
+            BattleManager battleManager = null,
+            IReadOnlyList<BattlePassive> runPassives = null
         )
         {
             _passive = passive;
@@ -77,6 +79,7 @@ namespace Crookedile.Gameplay.Battle
             _playerStatusEffects = playerStatusEffects;
             _getOpinionPercentage = getOpinionPercentage ?? (() => 0f);
             _battleManager = battleManager;
+            _runPassives = runPassives;
             _allPassives = new List<BattlePassive>();
 
             SubscribeToAllEventsForNewSystem();
@@ -148,6 +151,15 @@ namespace Crookedile.Gameplay.Battle
             if (_passive?.Passives != null)
             {
                 foreach (var bp in _passive.Passives)
+                    if (bp != null)
+                        _allPassives.Add(bp);
+            }
+
+            // Run-level passives (relics) — persist across battles on RunState, re-registered
+            // fresh each battle so their one-shot/fire-count state resets like any other passive.
+            if (_runPassives != null)
+            {
+                foreach (var bp in _runPassives)
                     if (bp != null)
                         _allPassives.Add(bp);
             }

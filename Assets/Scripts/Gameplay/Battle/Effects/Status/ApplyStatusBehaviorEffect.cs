@@ -75,7 +75,13 @@ namespace Crookedile.Gameplay.Battle
             }
         }
 
-        public override string GetDescription() =>
-            $"Apply {_stacks} {_behavior?.DisplayName ?? "(none)"} ({_duration}) to {_target}";
+        public override string GetDescription()
+        {
+            if (_behavior == null)
+                return "Apply a status (none assigned)";
+            string targetStr = _target == TargetType.Opponent ? "" : $" to {_target}";
+            // Surface the status's own description so cards explain what e.g. Doubt does.
+            return $"Apply {_stacks} {_behavior.DisplayName}{targetStr} — {_behavior.Describe(_stacks)}";
+        }
     }
 }

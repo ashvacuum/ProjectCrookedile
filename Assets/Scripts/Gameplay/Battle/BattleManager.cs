@@ -261,6 +261,26 @@ namespace Crookedile.Gameplay.Battle
                         p => p != null && p.Origin == _playerOrigin
                     )
                     : null;
+            // Relic passives — run-level, pulled from the active run (null when battles are
+            // started standalone, e.g. BattleTestStarter without a run).
+            List<BattlePassive> relicPassives = null;
+            var runRelics = RunState.Current?.Relics;
+            if (runRelics != null && runRelics.Count > 0)
+            {
+                relicPassives = new List<BattlePassive>();
+                foreach (var relic in runRelics)
+                {
+                    if (relic?.Passives == null)
+                        continue;
+                    foreach (var bp in relic.Passives)
+                        if (bp != null)
+                            relicPassives.Add(bp);
+                }
+                GameLogger.LogInfo<BattleManager>(
+                    $"Registering {relicPassives.Count} relic passive(s) from {runRelics.Count} relic(s)."
+                );
+            }
+
             _passiveResolver = new PassiveResolver(
                 passive,
                 _playerStats,
@@ -268,7 +288,8 @@ namespace Crookedile.Gameplay.Battle
                 _enemies,
                 _effectResolver.PlayerStatusEffects,
                 () => OpinionPercentage,
-                this
+                this,
+                relicPassives
             );
             // Event subscriptions are managed internally by PassiveResolver via EventBus
 

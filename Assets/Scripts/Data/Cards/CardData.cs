@@ -41,6 +41,53 @@ namespace Crookedile.Data.Cards
         [PreviewField]
         private Sprite _artwork;
 
+        [Button("Assign Unused Character Art")]
+        [Tooltip("Picks a random Character_ sprite not already used by any other card.")]
+        private void AssignUnusedCharacterArt()
+        {
+#if UNITY_EDITOR
+            const string charDir = "Assets/Art/CCG Fantasy Game UI/Sprites/Characters";
+
+            // Sprites already in use by every OTHER card.
+            var used = new HashSet<string>();
+            foreach (var cardGuid in UnityEditor.AssetDatabase.FindAssets("t:CardData"))
+            {
+                var card = UnityEditor.AssetDatabase.LoadAssetAtPath<CardData>(
+                    UnityEditor.AssetDatabase.GUIDToAssetPath(cardGuid)
+                );
+                if (card == null || card == this || card._artwork == null)
+                    continue;
+                var sp = UnityEditor.AssetDatabase.GetAssetPath(card._artwork);
+                if (!string.IsNullOrEmpty(sp))
+                    used.Add(UnityEditor.AssetDatabase.AssetPathToGUID(sp));
+            }
+
+            // Character_ sprites not used by any other card.
+            var candidates = new List<Sprite>();
+            foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:Sprite", new[] { charDir }))
+            {
+                if (used.Contains(guid))
+                    continue;
+                var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                if (!System.IO.Path.GetFileName(path).StartsWith("Character_"))
+                    continue;
+                var sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                if (sprite != null)
+                    candidates.Add(sprite);
+            }
+
+            if (candidates.Count == 0)
+            {
+                Debug.LogWarning($"[{name}] No unused Character_ sprites left in {charDir}.");
+                return;
+            }
+
+            _artwork = candidates[Random.Range(0, candidates.Count)];
+            UnityEditor.EditorUtility.SetDirty(this);
+            Debug.Log($"[{name}] Assigned unused art: {_artwork.name}");
+#endif
+        }
+
         [FoldoutGroup("Description Override")]
         [InfoBox(
             "Leave blank — description is auto-generated from card effects at runtime. "
