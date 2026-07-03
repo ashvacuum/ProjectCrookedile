@@ -15,7 +15,8 @@ MonoBehaviour:
   _moveName: 
   _moveType: 0
   _intentDescription: 
-  _effects: []
+  _effects:
+  - rid: 4823698825199485093
   _moveVFX: {fileID: 0}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
@@ -23,4 +24,16 @@ MonoBehaviour:
   _conditionTurn: 1
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 4823698825199485093
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _target: 1
+        _behavior:
+          rid: 4823698825199485094
+        _stacks: 1
+        _duration: 0
+    - rid: 4823698825199485094
+      type: {class: DoubtStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

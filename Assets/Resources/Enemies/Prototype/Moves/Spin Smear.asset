@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
-  m_Name: Heckle Shout Down
+  m_Name: Spin Smear
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Heckle Shout Down
+  _moveName: Spin Smear
   _moveType: 5
-  _intentDescription: 'Shouts you down: Silence + -3 Opinion'
+  _intentDescription: 'Smears: -4 Opinion, +4 Denial'
   _effects:
-  - rid: 4823698825199484935
-  - rid: 4823698825199484936
+  - rid: 4823698825199485064
+  - rid: 4823698825199485065
   _moveVFX: {fileID: 0}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
@@ -26,24 +26,20 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4823698825199484935
-      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _target: 1
-        _behavior:
-          rid: 4823698825199484937
-        _stacks: 1
-        _duration: 0
-    - rid: 4823698825199484936
+    - rid: 4823698825199485064
       type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 3
+        _amount: 4
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
         _target: 1
-    - rid: 4823698825199484937
-      type: {class: SilencedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
+    - rid: 4823698825199485065
+      type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 4
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1

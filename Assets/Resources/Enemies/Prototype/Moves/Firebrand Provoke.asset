@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
-  m_Name: Partisan Condemn
+  m_Name: Firebrand Provoke
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Partisan Condemn
-  _moveType: 0
-  _intentDescription: 'Condemns: -6 Opinion'
+  _moveName: Firebrand Provoke
+  _moveType: 9
+  _intentDescription: 'Provokes: +1 Hostility to other enemies'
   _effects:
-  - rid: 4823698825199484928
+  - rid: 4823698825199485075
   _moveVFX: {fileID: 0}
   _minionToSummon: {fileID: 0}
   _minionCount: 1
@@ -25,12 +25,9 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4823698825199484928
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 4823698825199485075
+      type: {class: RaiseAlliesHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 6
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1
-        _target: 1
+        _amount: 1
+        _includeSelf: 0

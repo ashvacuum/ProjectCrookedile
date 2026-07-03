@@ -13,18 +13,18 @@ MonoBehaviour:
   m_Name: The Bishop
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
   _enemyName: The Bishop
-  _portrait: {fileID: 0}
+  _portrait: {fileID: 21300000, guid: 01cb05158f52ff14cac88cfa4ea4e380, type: 3}
   _startingHostility: 1
-  _maxHostility: 5
-  _minHostility: 0
+  _maxHostility: 7
+  _minHostility: -4
   _demographicClass: 1
   _demographicValues: 1
   _startingEffects:
   - _behavior:
-      rid: 4823698825199484946
+      rid: 4823698825199485079
     _stacks: 1
     _duration: 2
-  _movePattern: 0
+  _movePattern: 2
   _aggressiveMoves:
   - {fileID: 11400000, guid: 263efc181a14876459da9535c4a02e57, type: 2}
   - {fileID: 11400000, guid: 04086544edd1068418ad36986e2192ef, type: 2}
@@ -34,6 +34,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4823698825199484946
+    - rid: 4823698825199485079
       type: {class: HardenedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
