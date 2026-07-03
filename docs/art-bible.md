@@ -8,9 +8,9 @@
 
 ## 0.1 Style reference (WORKING DIRECTION — not locked)
 
-> **Rendering touchstone: the anime _Odd Taxi_** — flat, muted, sophisticated, deadpan; grounded anthropomorphic cast played with dry restraint. See `docs/reference/style-mock-prompt.md` (v4) for the full generation prompt.
+> **Rendering direction: the anime _Odd Taxi_** — flat, muted, sophisticated, deadpan; grounded anthropomorphic cast played with dry restraint. Full generation prompt: `docs/reference/style-mock-prompt.md` (v4).
 >
-> The existing mock `docs/design/dc411063-…png` nailed the **layout, UI furniture, and cast** but its **dark oil-painting render is superseded** — we're moving to the flat Odd Taxi look. So: keep the composition/palette-role notes below as layout reference; ignore the "painterly realism / near-black" rendering language.
+> **Reference of record: `docs/design/crookedile-style-v4-oddtaxi.png`** (approved 2026-07-03 — the flat muted committee-hall mock). This is the look to match: flat cel shading, dusty warm palette (mustard/teal/brick/cream/olive), thin clean lines, deadpan grounded animal-people, even soft lighting. The earlier dark-painterly mock is superseded.
 
 **Rendering style:** dark painterly realism (digital-oil), low-key lighting, one warm key light on the speaker/subject, crowd falls into near-black vignette. No cel-shading, no flat vector. Grain/texture over gradient banding.
 
