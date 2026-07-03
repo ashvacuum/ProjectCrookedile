@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Excommunicate
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: f8fddb35491bc834bad07b1d816a5dc9, type: 3}
   _description: 'Cast them out. Weakens their position significantly. '
   _flavorText: 
   _costs:

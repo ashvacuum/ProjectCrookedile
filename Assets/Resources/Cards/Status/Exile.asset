@@ -10,62 +10,60 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Doubt
+  m_Name: Exile
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: 82c97304-91ef-4a72-8ac8-d129da8f0683
-  _cardName: Doubt
-  _cardType: 4
+  _id: 3abec8ff-b814-4dbd-b72b-84599119c174
+  _cardName: Self Pity
+  _cardType: 3
   _rarity: 0
-  _artwork: {fileID: 21300000, guid: a052daaa8da3dab4aba7d87244c826fe, type: 3}
-  _description: Uncertainty strikes the moment this enters your hand. Lose 2 Support
-    on at end of turn.
+  _artwork: {fileID: 21300000, guid: bb48b16af0dcae14db7302688a43c080, type: 3}
+  _description: 
   _flavorText: 
   _costs:
-  - _costType: 0
-    _baseAmount: 0
+  - _costType: 1
+    _baseAmount: 1
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
   _effects: []
   _passives:
-  - rid: 4823698507066769512
+  - rid: 4738608375284105304
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
   _upgradedPassives: []
-  _tags:
-  - faithleader
+  _tags: []
   _isStarterCard: 0
   _isUnlockable: 0
-  _isUnplayable: 1
+  _isUnplayable: 0
+  _innateRetain: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
   references:
     version: 2
     RefIds:
-    - rid: 4823698507066769512
+    - rid: 4738608375284105304
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: New Passive
         _trigger:
-          rid: 4823698507066769513
-        _conditions:
-        - rid: 4823698507066769514
+          rid: 4738608375284105307
+        _conditions: []
         _oneShot: 0
         _effects:
-        - rid: 4823698507066769515
-    - rid: 4823698507066769513
+        - rid: 4823698825199485060
+        - rid: 4823698507066769524
+    - rid: 4738608375284105307
       type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 4823698507066769514
-      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 4823698507066769515
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 4823698507066769524
+      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: -2
-        _amountSource: 0
-        _target: 1
+    - rid: 4823698825199485060
+      type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 1

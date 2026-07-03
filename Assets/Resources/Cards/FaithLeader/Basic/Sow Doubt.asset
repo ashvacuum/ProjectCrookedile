@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Sow Doubt
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: a43367896b67a2d409e1cbcf57de69ae, type: 3}
   _description: 
   _flavorText: 
   _costs:

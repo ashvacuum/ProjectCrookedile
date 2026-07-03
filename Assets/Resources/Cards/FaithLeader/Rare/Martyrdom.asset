@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Martyrdom
   _cardType: 1
   _rarity: 2
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: bfa1a2820467bd1449ff58301b6c71eb, type: 3}
   _description: Deal 8 damage. Raise all enemies' Hostility by 2.
   _flavorText: 
   _costs:

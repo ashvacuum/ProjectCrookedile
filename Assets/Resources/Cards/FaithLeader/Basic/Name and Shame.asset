@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Name and Shame
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 0fe03c670be76594e9829d8dc3ed3e0c, type: 3}
   _description: 
   _flavorText: 
   _costs:
