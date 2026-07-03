@@ -848,12 +848,15 @@ namespace Crookedile.EditorTools
                 {
                     yield return new Row(
                         "(none)",
-                        "no relics authored yet (future layer)",
+                        "no relics authored yet — run Crookedile → Generate → Relic Set",
                         null,
                         new List<AuditIssue>()
                     );
                     yield break;
                 }
+
+                var databases = LoadAll<RelicDatabase>();
+                var seenIds = new Dictionary<string, string>();
                 foreach (var relic in relics.OrderBy(r => r.name))
                 {
                     var issues = new List<AuditIssue>();
@@ -861,8 +864,55 @@ namespace Crookedile.EditorTools
                         issues.Add(new AuditIssue(Severity.Warning, "No display name."));
                     if (relic.Icon == null)
                         issues.Add(new AuditIssue(Severity.Info, "No icon."));
+
+                    // Id must be unique — RelicDatabase indexes by it (last one wins silently).
+                    if (string.IsNullOrEmpty(relic.Id))
+                        issues.Add(new AuditIssue(Severity.Error, "Empty id."));
+                    else if (seenIds.TryGetValue(relic.Id, out var other))
+                        issues.Add(
+                            new AuditIssue(Severity.Error, $"Duplicate id (also on {other}).")
+                        );
+                    else
+                        seenIds[relic.Id] = relic.name;
+
+                    // Unregistered relics are invisible to acquisition (boss/event offers).
+                    if (!databases.Any(db => db.Relics != null && db.Relics.Contains(relic)))
+                        issues.Add(
+                            new AuditIssue(
+                                Severity.Warning,
+                                "Not in any RelicDatabase — acquisition can't offer it."
+                            )
+                        );
+
                     if (relic.Passives == null || relic.Passives.Count == 0)
+                    {
                         issues.Add(new AuditIssue(Severity.Warning, "No passives (does nothing)."));
+                    }
+                    else
+                    {
+                        // A passive without a trigger is never bucketed by PassiveResolver;
+                        // without effects it fires into nothing. Both are silent at runtime.
+                        foreach (var bp in relic.Passives)
+                        {
+                            if (bp == null)
+                                continue;
+                            if (bp.Trigger == null)
+                                issues.Add(
+                                    new AuditIssue(
+                                        Severity.Warning,
+                                        $"Passive '{bp.Name}' has no trigger (never fires)."
+                                    )
+                                );
+                            if (bp.Effects == null || bp.Effects.Count == 0)
+                                issues.Add(
+                                    new AuditIssue(
+                                        Severity.Warning,
+                                        $"Passive '{bp.Name}' has no effects."
+                                    )
+                                );
+                        }
+                    }
+
                     yield return new Row(
                         relic.RelicName ?? relic.name,
                         relic.Rarity.ToString(),
