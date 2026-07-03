@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Doubt
   _cardType: 4
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: a052daaa8da3dab4aba7d87244c826fe, type: 3}
   _description: Uncertainty strikes the moment this enters your hand. Lose 2 Support
     on at end of turn.
   _flavorText: 

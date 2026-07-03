@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: False Accusations
   _cardType: 4
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: c5f5ad4febf9ac44abe1b9c3ce632779, type: 3}
   _description: 'Chaos enters your hand when this does. Discard a random card on
     draw. (Configure OnDraw passive: DiscardRandom 1 via Inspector.)'
   _flavorText: 

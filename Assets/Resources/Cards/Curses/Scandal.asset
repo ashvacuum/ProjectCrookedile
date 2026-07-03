@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Scandal
   _cardType: 4
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: e17b6a2dbb6f37c4bb918b02773a5763, type: 3}
   _description: 'The headlines hurt. Lose 3 Resolve at turn end while held. (Configure
     TurnStart passive: LoseResolve 3 via Inspector.)'
   _flavorText: 

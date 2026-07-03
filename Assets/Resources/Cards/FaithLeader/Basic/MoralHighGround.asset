@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Moral High Ground
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: e076eba4bdf2fc447b9a797efba14504, type: 3}
   _description: "Stand firm and de-escalate. (Retain \u2014 configure in Inspector.)"
   _flavorText: 
   _costs:

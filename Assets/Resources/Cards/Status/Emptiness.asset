@@ -20,7 +20,6 @@ MonoBehaviour:
   _description: When drawn removes 1 action point.
   _flavorText: 
   _costs: []
-  _newEffects: []
   _effects: []
   _passives:
   - rid: 4738608375284105321
@@ -32,6 +31,7 @@ MonoBehaviour:
   _isStarterCard: 0
   _isUnlockable: 0
   _isUnplayable: 0
+  _innateRetain: 0
   _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
@@ -39,7 +39,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4738608375284105321
-      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: New Passive
         _trigger:
@@ -48,15 +48,15 @@ MonoBehaviour:
         - rid: 4738608375284105323
         _oneShot: 0
         _effects:
-        - rid: 4738608375284105324
+        - rid: 4823698825199485059
     - rid: 4738608375284105322
-      type: {class: CardDrawnTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: CardDrawnTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
     - rid: 4738608375284105323
-      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 4738608375284105324
-      type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+    - rid: 4823698825199485059
+      type: {class: LoseActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: -1
+        _amount: 1

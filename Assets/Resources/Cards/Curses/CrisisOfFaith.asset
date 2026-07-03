@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Crisis of Faith
   _cardType: 4
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 83288bcd78413154bb4a2927058b9782, type: 3}
   _description: 'Doubt creeps in. Lose 4 Support at end of turn while held. (Configure
     TurnEnd passive: LoseShield 4 via Inspector.)'
   _flavorText: 

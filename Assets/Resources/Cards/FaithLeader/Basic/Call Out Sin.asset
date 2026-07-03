@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Call Out Sin
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: ad9813d824da8d246badedf8891e497c, type: 3}
   _description: 
   _flavorText: 
   _costs:
@@ -28,6 +28,7 @@ MonoBehaviour:
     _maximumCost: 99
   _effects:
   - rid: 4823698825199484954
+  - rid: 4823698825199485085
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
@@ -53,4 +54,16 @@ MonoBehaviour:
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
-        _target: 9
+        _target: 1
+    - rid: 4823698825199485085
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _target: 1
+        _behavior:
+          rid: 4823698825199485086
+        _stacks: 2
+        _duration: 0
+    - rid: 4823698825199485086
+      type: {class: ShameStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

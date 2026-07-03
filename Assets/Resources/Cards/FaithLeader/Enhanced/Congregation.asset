@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Congregation
   _cardType: 2
   _rarity: 1
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 6d4d249f9f78a9b4394ca308622507e7, type: 3}
   _description: Rally your followers. Draw strength every turn.
   _flavorText: 
   _costs:
