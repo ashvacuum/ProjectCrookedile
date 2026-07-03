@@ -410,13 +410,7 @@ MonoBehaviour:
   battleUI: {fileID: 507472321}
   battleSession: {fileID: 11400000, guid: a0e0214204e47474da56aa150321e5c7, type: 2}
   faithLeaderDeck:
-  - card: {fileID: 11400000, guid: db153cdeec1e6aa4580e235f5c10216a, type: 2}
-    count: 4
-  - card: {fileID: 11400000, guid: 5043ac386a8696f46a406f6e0f8876b4, type: 2}
-    count: 4
-  - card: {fileID: 11400000, guid: 3855b085a3656a44593be64970ba4036, type: 2}
-    count: 1
-  - card: {fileID: 11400000, guid: 5adb05a49b1771a4e96b29fee99ef8da, type: 2}
+  - card: {fileID: 0}
     count: 1
   nepoBabyDeck: []
   actorDeck: []
