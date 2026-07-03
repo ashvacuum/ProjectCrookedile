@@ -55,8 +55,10 @@ When re-keying `StatusEffectIconMapSO` by Id (work-now §1): does it grow into t
 
 ## 9. Deferred wholesale (don't detail yet)
 
-Per the core doc's own caution — lock the single-encounter loop first:
-- Relic design space (scaffold exists; no acquisition/persistence).
-- Metagame: viral moments, News Cycle track, reward-quality scaling, campaign overworld.
+**(2026-07-02) Partially un-deferred:** the campaign metagame + relic runtime are now planned
+in `metagame-campaign.md` (Potionomics-style free-roam map, campaign HQ, hour budget, event
+nodes; relics from bosses + events; reward-quality scaling in v1). Its ⚑ open questions live
+there. Still deferred:
+- Viral moments / News Cycle track.
 - Production resource HUD (debug overlay suffices for playtesting).
 - `EnemyConvertedEvent` bespoke flourish/animation.
