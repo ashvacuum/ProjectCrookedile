@@ -3,7 +3,6 @@ using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
 using DG.Tweening;
-using MoreMountains.Feedbacks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -131,24 +130,6 @@ namespace Crookedile.UI.Battle
 
         #endregion
 
-        #region MMFeedbacks
-        [Header("Feedbacks")]
-        [Tooltip("Plays when this card is drawn into hand")]
-        public MMFeedbacks drawFeedback;
-
-        [Tooltip("Plays when mouse enters the card")]
-        public MMFeedbacks hoverEnterFeedback;
-
-        [Tooltip("Plays when mouse leaves the card")]
-        public MMFeedbacks hoverExitFeedback;
-
-        [Tooltip("Plays when the card is selected / clicked")]
-        public MMFeedbacks selectFeedback;
-
-        [Tooltip("Plays when the card is discarded from hand")]
-        public MMFeedbacks discardFeedback;
-
-        #endregion
 
         #region Policy-Only Elements
         [Header("Policy-Only Elements")]
@@ -411,22 +392,6 @@ namespace Crookedile.UI.Battle
             baseSiblingIndex = index;
         }
 
-        /// <summary>
-        /// Plays the draw feedback. Call from BattleUI when this card enters hand.
-        /// </summary>
-        public void PlayDrawAnimation()
-        {
-            drawFeedback?.PlayFeedbacks();
-        }
-
-        /// <summary>
-        /// Plays the discard feedback. Call from BattleUI before destroying this card.
-        /// </summary>
-        public void PlayDiscardAnimation()
-        {
-            discardFeedback?.PlayFeedbacks();
-        }
-
         #endregion
 
         #region Pointer Handlers
@@ -442,7 +407,6 @@ namespace Crookedile.UI.Battle
                 transform.DOKill();
                 transform.DOScale(baseScale * hoverScale, hoverTweenDuration).SetEase(Ease.OutQuad);
                 transform.SetAsLastSibling();
-                hoverEnterFeedback?.PlayFeedbacks();
                 return;
             }
 
@@ -461,7 +425,6 @@ namespace Crookedile.UI.Battle
             // Bring this card in front of all its neighbours while hovered.
             transform.SetAsLastSibling();
 
-            hoverEnterFeedback?.PlayFeedbacks();
             HandLayout?.SetHoverSpread(true, this);
         }
 
@@ -475,7 +438,6 @@ namespace Crookedile.UI.Battle
             {
                 transform.DOKill();
                 transform.DOScale(baseScale, hoverTweenDuration).SetEase(Ease.OutQuad);
-                hoverExitFeedback?.PlayFeedbacks();
                 return;
             }
 
@@ -487,7 +449,6 @@ namespace Crookedile.UI.Battle
                 .SetEase(Ease.OutQuad);
             transform.SetSiblingIndex(baseSiblingIndex);
 
-            hoverExitFeedback?.PlayFeedbacks();
             HandLayout?.SetHoverSpread(false);
         }
 
@@ -719,7 +680,6 @@ namespace Crookedile.UI.Battle
                 $"ConfirmPlay: '{cardData?.CardName}' (callback={(onClickCallback != null ? "set" : "null")})",
                 this
             );
-            selectFeedback?.PlayFeedbacks();
             onClickCallback?.Invoke();
         }
 

@@ -211,8 +211,6 @@ namespace Crookedile.UI.Battle
 
             if (CardFlyAnimator.Instance != null && newButtons.Count > 0)
             {
-                foreach (var btn in newButtons)
-                    btn.PlayDrawAnimation();
                 CardFlyAnimator.Instance.AnimateDrawIn(_activeButtons, newButtons, cardButtonContainer);
             }
             else
