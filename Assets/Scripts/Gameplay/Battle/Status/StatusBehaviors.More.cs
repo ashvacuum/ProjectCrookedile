@@ -227,6 +227,22 @@ namespace Crookedile.Gameplay.Battle
 
     // ---- Special ----------------------------------------------------------
 
+    /// <summary>
+    /// Protector's guard — each stack absorbs the next hostility change or incoming debuff,
+    /// then is consumed (BattleStats blocks the shift; StatusEffectManager blocks the debuff).
+    /// The warded enemy stays fully targetable; burning the stacks IS the counterplay.
+    /// </summary>
+    [Serializable]
+    public sealed class WardedStatus : StatusBehavior
+    {
+        public override string Id => "warded";
+        public override string DisplayName => "Warded";
+        public override bool IsDebuff => false;
+        public override StatusCategory Category => StatusCategory.Special;
+        public override string Describe(int stacks) =>
+            $"Blocks the next {stacks} hostility change(s) or debuff(s).";
+    }
+
     /// <summary>Deal X to a random enemy per card played this turn (read by type by BattleManager).</summary>
     [Serializable]
     public sealed class MomentumStatus : StatusBehavior

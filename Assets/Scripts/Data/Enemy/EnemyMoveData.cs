@@ -25,6 +25,8 @@ namespace Crookedile.Data.Enemy
         Idle = 7, // Does nothing this turn — waits or holds position
         DefendOpinion = 8, // Gains Denial to shield the opinion meter from the player's pressure
         RileOthers = 9, // Raises the other enemies' Hostility, amplifying their attacks
+        Ward = 10, // Protector: applies Warded stacks to allies (guards them from hostility shifts / debuffs)
+        Counter = 11, // Conditional punish: fires only if the player played CounterCardType this turn, else fizzles to Idle
     }
 
     /// <summary>
@@ -39,6 +41,8 @@ namespace Crookedile.Data.Enemy
         OnTurnOrAfter, // Eligible from turn ConditionTurn onward (Escalator clocks)
         BeforeTurn, // Eligible only before turn ConditionTurn (opening behavior)
         EveryNTurns, // Eligible only on turns divisible by ConditionTurn (periodic moves)
+        OpinionAtOrAbove, // Eligible while the opinion meter is at/above ConditionPercent (desperation moves, boss phases)
+        OpinionAtOrBelow, // Eligible while the opinion meter is at/below ConditionPercent (finisher moves, boss phases)
     }
 
     /// <summary>
@@ -95,6 +99,19 @@ namespace Crookedile.Data.Enemy
 
         #endregion
 
+        #region Counter
+        [Header("Counter")]
+        [ShowIf("_moveType", EnemyMoveType.Counter)]
+        [Tooltip(
+            "The card type that triggers this counter. The move's effects only resolve if the "
+                + "player played at least one card of this type during their turn; otherwise the "
+                + "move fizzles (the enemy idles)."
+        )]
+        [SerializeField]
+        private CardType _counterCardType = CardType.Rhetoric;
+
+        #endregion
+
         #region Summon
         [Header("Summon")]
         [ShowIf("_moveType", EnemyMoveType.SummonMinion)]
@@ -137,6 +154,19 @@ namespace Crookedile.Data.Enemy
         [SerializeField]
         private int _conditionTurn = 1;
 
+        [ShowIf(
+            "@_condition == EnemyMoveCondition.OpinionAtOrAbove || "
+                + "_condition == EnemyMoveCondition.OpinionAtOrBelow"
+        )]
+        [Range(0, 100)]
+        [Tooltip(
+            "Opinion-meter percentage for the selected condition.\n"
+                + "OpinionAtOrAbove: eligible while the meter is at/above this percent.\n"
+                + "OpinionAtOrBelow: eligible while the meter is at/below this percent."
+        )]
+        [SerializeField]
+        private int _conditionPercent = 50;
+
         #endregion
 
         #region Properties
@@ -168,6 +198,8 @@ namespace Crookedile.Data.Enemy
         public int MinionCount => _minionCount;
         public EnemyMoveCondition Condition => _condition;
         public int ConditionTurn => _conditionTurn;
+        public int ConditionPercent => _conditionPercent;
+        public CardType CounterCardType => _counterCardType;
+        #endregion
     }
 }
-        #endregion

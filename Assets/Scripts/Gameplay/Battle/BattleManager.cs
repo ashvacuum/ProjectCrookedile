@@ -223,7 +223,9 @@ namespace Crookedile.Gameplay.Battle
             foreach (var enemyData in setup.enemies)
             {
                 if (enemyData != null)
-                    _enemies.Add(new EnemyController(enemyData, () => CurrentTurn));
+                    _enemies.Add(
+                        new EnemyController(enemyData, () => CurrentTurn, () => OpinionPercentage)
+                    );
             }
             // Register each enemy's roster index so its BattleStats can stamp hostility events.
             for (int i = 0; i < _enemies.Count; i++)
@@ -400,7 +402,11 @@ namespace Crookedile.Gameplay.Battle
 
             for (int i = 0; i < count; i++)
             {
-                var controller = new EnemyController(data, () => CurrentTurn);
+                var controller = new EnemyController(
+                    data,
+                    () => CurrentTurn,
+                    () => OpinionPercentage
+                );
                 int newIndex = _enemies.Count;
                 _enemies.Add(controller);
                 controller.Stats.SetOwnerEnemyIndex(newIndex);
@@ -595,6 +601,13 @@ namespace Crookedile.Gameplay.Battle
         /// (CardButton / HandPanel read it through the manager).
         /// </summary>
         public int GetEffectiveCardCost(CardData card) => _cards?.GetEffectiveCardCost(card) ?? 0;
+
+        /// <summary>
+        /// True if the player played at least one card of <paramref name="cardType"/> this turn.
+        /// Read by OpponentTurnState to resolve Counter intents.
+        /// </summary>
+        public bool WasCardTypePlayedThisTurn(CardType cardType) =>
+            _cards?.WasTypePlayedThisTurn(cardType) ?? false;
 
         #endregion
 

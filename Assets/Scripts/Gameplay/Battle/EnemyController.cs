@@ -30,6 +30,8 @@ namespace Crookedile.Gameplay.Battle
             [EnemyMoveCondition.OnTurnOrAfter] = new OnTurnOrAfterEvaluator(),
             [EnemyMoveCondition.BeforeTurn] = new BeforeTurnEvaluator(),
             [EnemyMoveCondition.EveryNTurns] = new EveryNTurnsEvaluator(),
+            [EnemyMoveCondition.OpinionAtOrAbove] = new OpinionAtOrAboveEvaluator(),
+            [EnemyMoveCondition.OpinionAtOrBelow] = new OpinionAtOrBelowEvaluator(),
         };
 
         #endregion
@@ -38,6 +40,7 @@ namespace Crookedile.Gameplay.Battle
         private readonly EnemyData _enemyData;
         private readonly IMovePatternSelector _moveSelector;
         private readonly System.Func<int> _turnProvider;
+        private readonly System.Func<float> _opinionProvider; // 0–1 meter fill, from BattleManager
 
         // Hostile-this-turn tracking — used by BattleManager to award bonus card draws
         private int _hostilityAtTurnStart;
@@ -80,11 +83,24 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public int CurrentBattleTurn => _turnProvider?.Invoke() ?? 0;
 
+        /// <summary>
+        /// Current opinion meter fill as a 0–100 percentage, read from the provider passed at
+        /// construction. -1 when no provider was wired (e.g. test harnesses) — opinion-gated
+        /// move conditions treat that as "always eligible".
+        /// </summary>
+        public float CurrentOpinionPercent =>
+            _opinionProvider != null ? _opinionProvider.Invoke() * 100f : -1f;
+
         #region Constructor
-        public EnemyController(EnemyData enemyData, System.Func<int> turnProvider = null)
+        public EnemyController(
+            EnemyData enemyData,
+            System.Func<int> turnProvider = null,
+            System.Func<float> opinionProvider = null
+        )
         {
             _enemyData = enemyData;
             _turnProvider = turnProvider;
+            _opinionProvider = opinionProvider;
 
             // Factory switch — acceptable here: construction happens once per enemy instance.
             // To add a new pattern, add an enum value + a new IMovePatternSelector class.

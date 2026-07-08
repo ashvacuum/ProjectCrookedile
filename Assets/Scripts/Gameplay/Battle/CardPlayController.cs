@@ -32,6 +32,10 @@ namespace Crookedile.Gameplay.Battle
         // Confused status — maps hand index → randomized effect amounts (one per effect on the card)
         private readonly Dictionary<int, int[]> _confusedOverrides = new Dictionary<int, int[]>();
 
+        // Card types the player has played this turn — read by Counter intents at enemy-turn
+        // resolution ("Counter-Argues IF you played Rhetoric").
+        private readonly HashSet<CardType> _typesPlayedThisTurn = new HashSet<CardType>();
+
         public CardPlayController(BattleManager manager) => _mgr = manager;
 
         /// <summary>True while a card play (VFX) is still resolving — input should be blocked.</summary>
@@ -46,7 +50,12 @@ namespace Crookedile.Gameplay.Battle
             _firstCardPlayedThisBattle = false;
             _vfxInFlight = false;
             _confusedOverrides.Clear();
+            _typesPlayedThisTurn.Clear();
         }
+
+        /// <summary>True if the player played at least one card of this type this turn.</summary>
+        public bool WasTypePlayedThisTurn(CardType cardType) =>
+            _typesPlayedThisTurn.Contains(cardType);
 
         /// <summary>
         /// Per-player-turn upkeep: randomizes hand amounts while Confused, clears stale
@@ -54,6 +63,8 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void OnPlayerTurnStart()
         {
+            _typesPlayedThisTurn.Clear();
+
             if (_mgr.PlayerStatusEffects.HasStatus<ConfusedStatus>())
                 ApplyConfusedOverrides();
             else
@@ -72,6 +83,9 @@ namespace Crookedile.Gameplay.Battle
                 GameLogger.LogWarning<CardPlayController>($"Cannot play card: {card.CardName}");
                 return;
             }
+
+            // Counter intents check this at enemy-turn resolution.
+            _typesPlayedThisTurn.Add(card.CardType);
 
             // Celebrity passive ("mastering his craft"): the first card played each battle is played
             // as its upgraded version. Swap to the upgraded instance before paying costs so the

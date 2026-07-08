@@ -96,6 +96,7 @@ namespace Crookedile.Data
         AllHostile, // Every living enemy with Hostility > 0 (the dissenters)
         AllReceptive, // Every living enemy with Hostility < 0 (the supporters)
         RandomReceptive, // One random living receptive enemy (e.g. Sway: convert a supporter)
+        AdjacentAllies, // Enemy card → caster's immediate living neighbours, EXCLUDING caster (Protector wards allies, never itself) | Player card → self
     }
 
     /// <summary>

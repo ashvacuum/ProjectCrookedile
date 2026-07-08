@@ -243,6 +243,21 @@ namespace Crookedile.Gameplay.Battle
                     }
                     break;
 
+                case TargetType.AdjacentAllies:
+                    // Protector ward: the caster's immediate living neighbours, never the caster
+                    // itself (warding yourself would make the Protector un-pacifiable).
+                    if (!IsPlayerCard && AllEnemies != null && AttackerEnemyIndex >= 0)
+                    {
+                        AddEnemyAt(pairs, AttackerEnemyIndex - 1);
+                        AddEnemyAt(pairs, AttackerEnemyIndex + 1);
+                    }
+                    else
+                    {
+                        // Player has no row neighbours — degrade to Self.
+                        pairs.Add((Caster, CasterStatusEffects));
+                    }
+                    break;
+
                 case TargetType.AllHostile:
                     // The hostile dissenters in the crowd (the enemy row), regardless of caster.
                     AddLivingEnemiesWhere(pairs, e => e.Stats.IsHostile);
@@ -383,6 +398,6 @@ namespace Crookedile.Gameplay.Battle
                     count++;
             return count;
         }
+        #endregion
     }
 }
-        #endregion
