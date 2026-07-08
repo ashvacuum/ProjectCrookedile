@@ -43,6 +43,10 @@ namespace Crookedile.Gameplay
         // Devotion resist — hostility gains are reduced by this much (synced from Devotion stacks).
         private int _devotionResist;
 
+        // Warded (Protector) — registered by StatusEffectManager; returns true if a ward stack
+        // was consumed to absorb the incoming hostility change.
+        private Func<bool> _tryConsumeWard;
+
         #region Properties
 
         /// <summary>ReduceHostility is a no-op while true (won't listen to reason).</summary>
@@ -109,6 +113,12 @@ namespace Crookedile.Gameplay
         /// <summary>Sets how much each hostility gain is reduced (Devotion status — steadfast loyalty).</summary>
         public void SetDevotionResist(int value) => _devotionResist = Mathf.Max(0, value);
 
+        /// <summary>
+        /// Registers the Warded consumer (StatusEffectManager). Invoked before a hostility
+        /// change lands; returning true means a ward stack absorbed it.
+        /// </summary>
+        public void SetWardConsumer(Func<bool> tryConsumeWard) => _tryConsumeWard = tryConsumeWard;
+
         #endregion
 
         #region Hostility Management
@@ -134,6 +144,10 @@ namespace Crookedile.Gameplay
             amount = Mathf.Max(0, amount - _devotionResist);
             if (amount <= 0)
                 return;
+            // Warded absorbs the change that would otherwise land (checked after the free
+            // no-op gates so flags don't waste a ward stack).
+            if (_tryConsumeWard?.Invoke() == true)
+                return;
             int old = _currentHostility;
             _currentHostility = Mathf.Min(_maxHostility, _currentHostility + amount);
             PublishHostilityEvents(old, _currentHostility);
@@ -144,6 +158,8 @@ namespace Crookedile.Gameplay
         {
             if (IsHardened)
                 return 0;
+            if (_tryConsumeWard?.Invoke() == true)
+                return 0;
             int old = _currentHostility;
             _currentHostility = Mathf.Max(_minHostility, _currentHostility - amount);
             PublishHostilityEvents(old, _currentHostility);
@@ -151,7 +167,7 @@ namespace Crookedile.Gameplay
         }
 
         /// <summary>
-        /// Sets hostility to an exact value, bypassing Hardened/Fanatic.
+        /// Sets hostility to an exact value, bypassing Hardened/Fanatic/Warded.
         /// Used for initialisation and direct mood-setting effects.
         /// </summary>
         public void SetHostility(int value)
