@@ -33,6 +33,22 @@ namespace Crookedile.Gameplay.Battle
         {
             _ownerName = ownerName;
             _owner = owner;
+            // Warded (Protector): BattleStats asks us to spend a ward stack when a hostility
+            // change is about to land.
+            _owner?.SetWardConsumer(TryConsumeWardStack);
+        }
+
+        /// <summary>
+        /// Spends one Warded stack if any are active. Returns true if a stack absorbed the hit.
+        /// </summary>
+        public bool TryConsumeWardStack()
+        {
+            if (GetStacks<WardedStatus>() <= 0)
+                return false;
+
+            RemoveStacksNotify<WardedStatus>(1);
+            GameLogger.LogInfo<StatusEffectManager>($"{_ownerName}: Warded absorbed the hit");
+            return true;
         }
 
         #region Apply/Remove Effects
@@ -50,6 +66,16 @@ namespace Crookedile.Gameplay.Battle
             {
                 GameLogger.LogWarning<StatusEffectManager>(
                     $"{_ownerName}: ApplyStatus called with a null behavior — ignored"
+                );
+                return;
+            }
+
+            // Warded (Protector): a ward stack eats an incoming debuff before it lands.
+            // Only genuine applications (positive stacks) are blocked — stack removals pass.
+            if (stacks > 0 && behavior.IsDebuff && TryConsumeWardStack())
+            {
+                GameLogger.LogInfo<StatusEffectManager>(
+                    $"{_ownerName}: Warded blocked {behavior.DisplayName}"
                 );
                 return;
             }

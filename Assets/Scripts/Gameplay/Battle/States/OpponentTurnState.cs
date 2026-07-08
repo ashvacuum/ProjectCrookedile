@@ -138,6 +138,23 @@ namespace Crookedile.Gameplay.Battle
                 }
             }
 
+            // Counter intents only fire if the player played the trigger card type this turn —
+            // otherwise the threat fizzles and the enemy idles (the bluffable "don't play X" tax).
+            if (
+                enemy.CurrentIntent.MoveType == EnemyMoveType.Counter
+                && !_manager.WasCardTypePlayedThisTurn(enemy.CurrentIntent.CounterCardType)
+            )
+            {
+                GameLogger.LogInfo<BattleManager>(
+                    $"Enemy [{i}] {enemy.EnemyData.EnemyName}: Counter "
+                        + $"({enemy.CurrentIntent.CounterCardType}) not triggered — fizzles"
+                );
+                EventBus.Publish(
+                    new EnemySkippedTurnEvent { EnemyIndex = i, EnemyName = enemy.EnemyData.EnemyName }
+                );
+                return;
+            }
+
             // Signal the UI: this enemy is about to act (shake + highlight intent panel)
             EventBus.Publish(new EnemyActingEvent { EnemyIndex = i, Move = enemy.CurrentIntent });
 
