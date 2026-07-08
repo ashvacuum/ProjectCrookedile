@@ -369,6 +369,6 @@ namespace Crookedile.UI.Battle
                         .SetEase(Ease.OutQuad)
                 );
         }
+        #endregion
     }
 }
-        #endregion

@@ -121,6 +121,6 @@ namespace Crookedile.Data.Audio
                 BuildMap();
             return _map.TryGetValue(trigger, out entry);
         }
+        #endregion
     }
 }
-        #endregion

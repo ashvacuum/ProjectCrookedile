@@ -91,6 +91,6 @@ namespace Crookedile.Data.Audio
                 return;
             AudioManager.Instance.PlayMusic(_clip, true, fadeDuration);
         }
+        #endregion
     }
 }
-        #endregion

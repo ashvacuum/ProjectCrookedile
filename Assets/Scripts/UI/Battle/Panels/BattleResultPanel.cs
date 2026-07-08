@@ -63,6 +63,6 @@ namespace Crookedile.UI.Battle
             if (defeatPanel != null)
                 defeatPanel.SetActive(false);
         }
+        #endregion
     }
 }
-        #endregion

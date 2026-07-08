@@ -133,6 +133,6 @@ namespace Crookedile.UI.Battle
             if (_panel != null)
                 _panel.gameObject.SetActive(false);
         }
+        #endregion
     }
 }
-        #endregion

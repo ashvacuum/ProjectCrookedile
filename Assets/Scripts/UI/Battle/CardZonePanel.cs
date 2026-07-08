@@ -140,6 +140,6 @@ namespace Crookedile.UI.Battle
                 return null;
             return Instantiate(prefab, cardContainer);
         }
+        #endregion
     }
 }
-        #endregion
