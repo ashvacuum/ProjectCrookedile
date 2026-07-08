@@ -45,13 +45,6 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private TMP_Text phaseText;
 
-        [Header("Result (optional)")]
-        [Tooltip(
-            "Assign the shared BattleResultPanel if this overlay needs to show victory/defeat."
-        )]
-        [SerializeField]
-        private BattleResultPanel resultPanel;
-
         private BattleManager battleManager;
 
         #region Initialization

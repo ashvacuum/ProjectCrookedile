@@ -18,8 +18,9 @@ namespace Crookedile.UI.Battle
     /// picker mode, so a missing pool simply shows nothing (no fallback prefabs).
     ///
     /// Attach to a panel that is inactive by default; <c>cardContainer</c> should use a GridLayoutGroup.
+    /// Opens as a router popup (dimmer + input blocking) when the router is wired.
     /// </summary>
-    public class CardPickerPanel : MonoBehaviour
+    public class CardPickerPanel : UIView
     {
         [Header("UI References")]
         [SerializeField]
@@ -81,7 +82,7 @@ namespace Crookedile.UI.Battle
             ClearCards();
             SpawnCards(choices);
             RefreshConfirmButton();
-            gameObject.SetActive(true);
+            PushAsPopup();
         }
 
         /// <summary>
@@ -109,7 +110,7 @@ namespace Crookedile.UI.Battle
             ClearCards();
             _onConfirmed = null;
             _selected.Clear();
-            gameObject.SetActive(false);
+            CloseAsPopup();
         }
 
         private void SpawnCards(IReadOnlyList<CardData> choices)
@@ -194,6 +195,19 @@ namespace Crookedile.UI.Battle
             var callback = _onConfirmed;
             Close();
             callback?.Invoke(new List<CardData>()); // empty = skip / no-op
+        }
+
+        /// <summary>
+        /// Router dismissal (ESC) = Cancel: flush the buttons back to the pool and report an
+        /// empty selection so the pending flow (e.g. BattleUI's card choice) always resolves.
+        /// No-op after a normal Confirm/Cancel — the callback is already consumed by then.
+        /// </summary>
+        public override void OnPopped()
+        {
+            var callback = _onConfirmed;
+            _onConfirmed = null;
+            ClearCards();
+            callback?.Invoke(new List<CardData>());
         }
 
         private void RefreshConfirmButton()
