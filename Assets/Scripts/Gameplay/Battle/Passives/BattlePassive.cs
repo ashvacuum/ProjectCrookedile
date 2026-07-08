@@ -156,6 +156,6 @@ namespace Crookedile.Gameplay.Battle
 
             return sb.ToString();
         }
+        #endregion
     }
 }
-        #endregion

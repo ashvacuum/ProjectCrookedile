@@ -563,6 +563,6 @@ namespace Crookedile.Editor
                 );
             }
         }
+        #endregion
     }
 }
-        #endregion

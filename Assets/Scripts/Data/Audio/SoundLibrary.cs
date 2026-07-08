@@ -159,6 +159,6 @@ namespace Crookedile.Data.Audio
 
         /// <summary>Filter to ClipNames containing this substring (case-insensitive). Empty = all.</summary>
         public string NameContains;
+        #endregion
     }
 }
-        #endregion

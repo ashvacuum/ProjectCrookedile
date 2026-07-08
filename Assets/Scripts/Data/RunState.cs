@@ -149,6 +149,6 @@ namespace Crookedile.Data
             if (BattleQueue != null)
                 CurrentBattleIndex = Mathf.Min(CurrentBattleIndex + 1, BattleQueue.Count);
         }
+        #endregion
     }
 }
-        #endregion

@@ -1635,8 +1635,8 @@ namespace Crookedile.Editor
         }
 
         #endregion
+        #endregion
+        #endregion
+        #endregion
     }
 }
-        #endregion
-        #endregion
-        #endregion

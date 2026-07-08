@@ -159,6 +159,6 @@ namespace Crookedile.UI.Battle
             if (_arrowHead != null)
                 _arrowHead.gameObject.SetActive(visible);
         }
+        #endregion
     }
 }
-        #endregion

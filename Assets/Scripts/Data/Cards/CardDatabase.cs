@@ -469,6 +469,6 @@ namespace Crookedile.Data.Cards
             Rarities = new List<CardRarity>();
             Tags = new List<string>();
         }
+        #endregion
     }
 }
-        #endregion

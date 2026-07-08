@@ -199,6 +199,6 @@ namespace Crookedile.Data.Enemy
         public StatusBehavior Behavior => _behavior;
         public int Stacks => _stacks;
         public StatusDurationType Duration => _duration;
+        #endregion
     }
 }
-        #endregion

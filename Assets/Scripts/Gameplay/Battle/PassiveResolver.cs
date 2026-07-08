@@ -359,7 +359,7 @@ namespace Crookedile.Gameplay.Battle
             _playerTurnNumber = playerTurnNumber;
             // New system fires via EventBus.Subscribe<TurnStartedEvent> (published after this call)
         }
+        #endregion
+        #endregion
     }
 }
-        #endregion
-        #endregion

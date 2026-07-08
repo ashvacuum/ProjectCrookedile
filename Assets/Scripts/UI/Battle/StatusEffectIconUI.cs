@@ -98,6 +98,6 @@ namespace Crookedile.UI.Battle
         {
             BattleTooltipUI.Instance?.Hide();
         }
+        #endregion
     }
 }
-        #endregion

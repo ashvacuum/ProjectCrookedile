@@ -506,6 +506,6 @@ namespace Crookedile.Data.Cards
             _id = System.Guid.NewGuid().ToString();
         }
 #endif
+        #endregion
     }
 }
-        #endregion
