@@ -180,6 +180,7 @@ namespace Crookedile.UI
             if (
                 _escapePopsPopup
                 && HasOpenPopup
+                && TopPopup.EscapeClosable
                 && Keyboard.current != null
                 && Keyboard.current.escapeKey.wasPressedThisFrame
             )

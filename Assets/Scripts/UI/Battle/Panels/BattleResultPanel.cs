@@ -14,8 +14,11 @@ namespace Crookedile.UI.Battle
     /// The <see cref="OnContinueClicked"/> event fires when the player presses Continue
     /// on the victory panel. BattleUI subscribes to this to trigger the reward screen.
     /// </summary>
-    public class BattleResultPanel : MonoBehaviour
+    public class BattleResultPanel : UIView
     {
+        /// <summary>The player must press Continue — ESC never dismisses the result.</summary>
+        public override bool EscapeClosable => false;
+
         [Header("Result Panels")]
         [SerializeField]
         private GameObject victoryPanel;
@@ -40,23 +43,30 @@ namespace Crookedile.UI.Battle
         private void Awake()
         {
             _continueButton?.onClick.AddListener(() => OnContinueClicked?.Invoke());
-            Hide();
+            HideFaces();
         }
 
         #endregion
 
         #region Public API
-        /// <summary>Shows the victory or defeat panel based on <paramref name="isVictory"/>.</summary>
+        /// <summary>Opens the result popup showing the victory or defeat face.</summary>
         public void Show(bool isVictory)
         {
             if (victoryPanel != null)
                 victoryPanel.SetActive(isVictory);
             if (defeatPanel != null)
                 defeatPanel.SetActive(!isVictory);
+            PushAsPopup();
         }
 
-        /// <summary>Hides both panels.</summary>
-        public void Hide()
+        /// <summary>Hides the popup and both faces.</summary>
+        public override void Hide()
+        {
+            HideFaces();
+            base.Hide();
+        }
+
+        private void HideFaces()
         {
             if (victoryPanel != null)
                 victoryPanel.SetActive(false);
