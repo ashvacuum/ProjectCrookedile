@@ -10,7 +10,7 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
     /// Owns how the room (the enemy crowd) reacts during a battle:
-    ///   • hostility shifts from played cards (policy lean + singling someone out),
+    ///   • hostility shifts from played cards (singling someone out),
     ///   • the Echo Chamber rule (all-receptive → halved gains + decay),
     ///   • the Turncoat cascade (a receptive enemy flipping hostile).
     ///
@@ -111,37 +111,14 @@ namespace Crookedile.Gameplay.Battle
         #region Card reactions
 
         /// <summary>
-        /// Applies the room's reaction to a played card: policy-lean hostility shifts across the row,
-        /// the single-target "singling someone out" hostility bump, and an echo-chamber refresh.
+        /// Applies the room's reaction to a played card: the single-target "singling someone out"
+        /// hostility bump and an echo-chamber refresh. Policy cards author their hostility
+        /// shifts as explicit effects — no implicit demographic reaction.
         /// </summary>
         public void OnCardPlayed(CardData card, EnemyController focusedEnemy, int focusedIndex)
         {
-            ApplyPolicyHostilityShifts(card);
             ApplySingleTargetHostilityRaise(card, focusedEnemy, focusedIndex);
             RefreshEchoChamberState();
-        }
-
-        /// <summary>
-        /// If the played card is a Policy card, shifts EVERY living enemy's hostility based on how
-        /// their DemographicValues aligns with the card's PolicyLean (agreement −1, disagreement +1).
-        /// </summary>
-        private void ApplyPolicyHostilityShifts(CardData card)
-        {
-            if (card.CardType != CardType.Policy)
-                return;
-
-            foreach (var enemy in LivingEnemies)
-            {
-                int shift = GetPolicyHostilityShift(card.PolicyLean, enemy.EnemyData.DemographicValues);
-                if (shift == 0)
-                    continue;
-
-                // BattleStats publishes the indexed HostilityChangedEvent itself.
-                if (shift > 0)
-                    enemy.Stats.GainHostility(shift);
-                else
-                    enemy.Stats.ReduceHostility(-shift);
-            }
         }
 
         /// <summary>
@@ -183,19 +160,6 @@ namespace Crookedile.Gameplay.Battle
                     $"Single-target card '{card.CardName}' raised hostility on [{focusedIndex}] "
                         + $"{focusedEnemy.EnemyData.EnemyName}: {old} → {focusedEnemy.Stats.CurrentHostility}"
                 );
-        }
-
-        private static int GetPolicyHostilityShift(PolicyLean lean, DemographicValues values)
-        {
-            return (lean, values) switch
-            {
-                (PolicyLean.Left, DemographicValues.Progressive) => -1,
-                (PolicyLean.Left, DemographicValues.Traditional) => +1,
-                (PolicyLean.Right, DemographicValues.Traditional) => -1,
-                (PolicyLean.Right, DemographicValues.Progressive) => +1,
-                (PolicyLean.Center, DemographicValues.Moderate) => -1,
-                _ => 0,
-            };
         }
 
         #endregion

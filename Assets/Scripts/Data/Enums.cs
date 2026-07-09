@@ -3,13 +3,13 @@ namespace Crookedile.Data
     /// <summary>
     /// Card types for political negotiation.
     /// Pressure = persuasion / de-escalation, Rhetoric = aggressive framing,
-    /// Policy = policy positions with a left/center/right lean that shifts demographics.
+    /// Policy = policy positions that shift crowd hostility (authored per card).
     /// </summary>
     public enum CardType
     {
         Pressure, // Green  - Persuasion, de-escalation, relationship building
         Rhetoric, // Red    - Aggressive framing, attacks, pressure tactics
-        Policy, // Blue   - Policy positions; lean shifts all enemy hostility by demographic
+        Policy, // Blue   - Policy positions; hostility shifts authored as explicit effects
         Heckle, // Purple - Temporary effect cards; some are unplayable
         Scandal, // Dark  - Manufactured controversy: unplayable, clogs the hand; the Celebrity exploits these
     }
@@ -130,41 +130,6 @@ namespace Crookedile.Data
         OpponentTurn,
         Victory,
         Defeat,
-    }
-
-    /// <summary>
-    /// Political lean of a Policy card.
-    /// Determines which demographics become more or less hostile when the card is played.
-    /// None = not a Policy card (or Policy card with no lean effect).
-    /// </summary>
-    public enum PolicyLean
-    {
-        Left,
-        Center,
-        Right,
-        None, // Default for Pressure/Rhetoric cards — no hostility shift applied
-    }
-
-    /// <summary>
-    /// Socioeconomic class of an enemy demographic.
-    /// Used for card targeting and thematic identification.
-    /// </summary>
-    public enum DemographicClass
-    {
-        Upper,
-        Middle,
-        Lower,
-    }
-
-    /// <summary>
-    /// Political values of an enemy demographic.
-    /// Determines how they react to Policy cards based on lean alignment.
-    /// </summary>
-    public enum DemographicValues
-    {
-        Progressive,
-        Moderate,
-        Traditional,
     }
 
     /// <summary>

@@ -79,25 +79,6 @@ namespace Crookedile.Data.Enemy
 
         #endregion
 
-        #region Demographics
-        [Header("Demographics")]
-        [Tooltip(
-            "Socioeconomic class of this NPC. Used for demographic targeting by Policy cards."
-        )]
-        [SerializeField]
-        private DemographicClass _demographicClass = DemographicClass.Middle;
-
-        [Tooltip(
-            "Political values of this NPC. Determines how Policy card leans affect their hostility.\n"
-                + "Left cards: Progressive −1, Traditional +1\n"
-                + "Center cards: Moderate −1\n"
-                + "Right cards: Traditional −1, Progressive +1"
-        )]
-        [SerializeField]
-        private DemographicValues _demographicValues = DemographicValues.Moderate;
-
-        #endregion
-
         #region Starting Status Effects
         [Header("Starting Effects")]
         [Tooltip(
@@ -143,8 +124,6 @@ namespace Crookedile.Data.Enemy
         public int StartingHostility => _startingHostility;
         public int MaxHostility => _maxHostility;
         public int MinHostility => _minHostility;
-        public DemographicClass DemographicClass => _demographicClass;
-        public DemographicValues DemographicValues => _demographicValues;
         public EnemyMovePattern MovePattern => _movePattern;
 
         /// <summary>Moves used while Aggressive (Hostility &gt; 0).</summary>

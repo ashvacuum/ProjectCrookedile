@@ -131,28 +131,6 @@ namespace Crookedile.UI.Battle
         #endregion
 
 
-        #region Policy-Only Elements
-        [Header("Policy-Only Elements")]
-        [Tooltip(
-            "Icon shown when this Policy card leans Left. Leave null on Pressure/Rhetoric prefabs."
-        )]
-        [SerializeField]
-        private Image _policyLeanLeftIcon;
-
-        [Tooltip(
-            "Icon shown when this Policy card leans Center. Leave null on Pressure/Rhetoric prefabs."
-        )]
-        [SerializeField]
-        private Image _policyLeanCenterIcon;
-
-        [Tooltip(
-            "Icon shown when this Policy card leans Right. Leave null on Pressure/Rhetoric prefabs."
-        )]
-        [SerializeField]
-        private Image _policyLeanRightIcon;
-
-        #endregion
-
         #region Selection (CardChoicePanel)
         [Header("Selection")]
         [Tooltip(
@@ -843,7 +821,6 @@ namespace Crookedile.UI.Battle
             UpdateText();
             UpdateTypeColor();
             UpdateAffordability();
-            UpdatePolicyLean();
         }
 
         private void UpdateArtwork()
@@ -1008,24 +985,6 @@ namespace Crookedile.UI.Battle
 
             // No Energy/Patronage cost — Free (None) or unknown.
             return cardData.Costs[0].CostType == CostType.None ? "Free" : "0";
-        }
-
-        /// <summary>
-        /// Shows only the lean icon that matches this Policy card's <see cref="PolicyLean"/>.
-        /// All three image references are optional — Pressure/Rhetoric prefabs leave them null
-        /// and nothing breaks.
-        /// </summary>
-        private void UpdatePolicyLean()
-        {
-            bool isPolicy = cardData?.CardType == CardType.Policy;
-
-            if (_policyLeanLeftIcon != null)
-                _policyLeanLeftIcon.enabled = isPolicy && cardData.PolicyLean == PolicyLean.Left;
-            if (_policyLeanCenterIcon != null)
-                _policyLeanCenterIcon.enabled =
-                    isPolicy && cardData.PolicyLean == PolicyLean.Center;
-            if (_policyLeanRightIcon != null)
-                _policyLeanRightIcon.enabled = isPolicy && cardData.PolicyLean == PolicyLean.Right;
         }
 
         private bool CanAfford(int currentAP)

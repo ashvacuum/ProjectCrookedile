@@ -183,18 +183,6 @@ namespace Crookedile.Data.Cards
         [SerializeField]
         private bool _innateRetain = false;
 
-        [Header("Policy")]
-        [ShowIf("_cardType", CardType.Policy)]
-        [Tooltip(
-            "The political lean of this Policy card.\n"
-                + "Left: Progressives −1 hostility, Traditionals +1 hostility\n"
-                + "Center: Moderates −1 hostility\n"
-                + "Right: Traditionals −1 hostility, Progressives +1 hostility\n"
-                + "None: No demographic hostility shift when played"
-        )]
-        [SerializeField]
-        private PolicyLean _policyLean = PolicyLean.None;
-
         [Header("VFX")]
         [Tooltip(
             "VFX played when this card is used. Leave null for no card VFX.\n"
@@ -300,12 +288,6 @@ namespace Crookedile.Data.Cards
         /// </summary>
         public bool IsUnplayable =>
             _cardType == CardType.Scandal || (_cardType == CardType.Heckle && _isUnplayable);
-
-        /// <summary>
-        /// Political lean of this card. Only relevant for CardType.Policy.
-        /// Determines which demographics become more or less hostile when played.
-        /// </summary>
-        public PolicyLean PolicyLean => _policyLean;
 
         /// <summary>
         /// Battle-scoped passives that fire on broad battle events for the entire battle.
