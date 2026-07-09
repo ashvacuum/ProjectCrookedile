@@ -38,7 +38,7 @@ namespace Crookedile.Data.Cards
         [SerializeField]
         private Sprite _rhetoricFrame;
 
-        [Tooltip("Frame for Policy cards (Blue - policy positions with lean)")]
+        [Tooltip("Frame for Policy cards (Blue - policy positions)")]
         [SerializeField]
         private Sprite _policyFrame;
 
