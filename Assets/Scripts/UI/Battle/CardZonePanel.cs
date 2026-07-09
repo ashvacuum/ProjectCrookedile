@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
+using Crookedile.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -29,16 +30,6 @@ namespace Crookedile.UI.Battle
 
         [SerializeField]
         private Button closeButton;
-
-        [Header("Fallback Prefabs (used only when BattlePoolManager singleton is absent)")]
-        [SerializeField]
-        private CardButton _pressurePrefab;
-
-        [SerializeField]
-        private CardButton _rhetoricPrefab;
-
-        [SerializeField]
-        private CardButton _policyPrefab;
 
         #region Runtime
         private readonly List<CardButton> _spawnedButtons = new List<CardButton>();
@@ -71,14 +62,20 @@ namespace Crookedile.UI.Battle
             if (emptyLabel != null)
                 emptyLabel.gameObject.SetActive(isEmpty);
 
+            if (BattlePoolManager.Instance == null)
+                GameLogger.LogWarning(
+                    "CardZonePanel",
+                    "BattlePoolManager missing — the pool is REQUIRED, zone view will be empty"
+                );
+
             // Newest-first: iterate backwards
             for (int i = cards.Count - 1; i >= 0; i--)
             {
                 CardData cardData = cards[i];
-                CardButton card =
-                    BattlePoolManager.Instance != null
-                        ? BattlePoolManager.Instance.RentCard(cardData.CardType, cardContainer)
-                        : InstantiateFallback(cardData.CardType);
+                CardButton card = BattlePoolManager.Instance?.RentCard(
+                    cardData.CardType,
+                    cardContainer
+                );
 
                 if (card == null)
                     continue;
@@ -117,28 +114,9 @@ namespace Crookedile.UI.Battle
         private void ClearCards()
         {
             foreach (var btn in _spawnedButtons)
-            {
-                if (btn == null)
-                    continue;
-                if (BattlePoolManager.Instance != null)
-                    BattlePoolManager.Instance.ReturnCard(btn);
-                else
-                    Destroy(btn.gameObject);
-            }
+                if (btn != null)
+                    BattlePoolManager.Instance?.ReturnCard(btn);
             _spawnedButtons.Clear();
-        }
-
-        private CardButton InstantiateFallback(CardType cardType)
-        {
-            CardButton prefab = cardType switch
-            {
-                CardType.Rhetoric => _rhetoricPrefab,
-                CardType.Policy => _policyPrefab,
-                _ => _pressurePrefab,
-            };
-            if (prefab == null)
-                return null;
-            return Instantiate(prefab, cardContainer);
         }
         #endregion
     }

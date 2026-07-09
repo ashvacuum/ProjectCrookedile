@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Crookedile.Core;
 using Crookedile.Gameplay.Battle;
+using Crookedile.Utilities;
 using UnityEngine;
 
 namespace Crookedile.UI.Battle
@@ -20,10 +21,6 @@ namespace Crookedile.UI.Battle
         [Tooltip("Parent transform that enemy slot panels are spawned into.")]
         [SerializeField]
         private Transform enemySlotContainer;
-
-        [Tooltip("Prefab with an EnemySlotUI component — instantiated once per enemy.")]
-        [SerializeField]
-        private GameObject enemySlotPrefab;
 
         private BattleManager _bm;
         private readonly List<EnemySlotUI> _slots = new List<EnemySlotUI>();
@@ -160,22 +157,14 @@ namespace Crookedile.UI.Battle
 
         private void BuildSlots()
         {
-            // Return all current slots to the pool (or destroy if no pool).
+            // Return all current slots to the pool.
             foreach (var slot in _slots)
-            {
-                if (slot == null)
-                    continue;
-                if (BattlePoolManager.Instance != null)
-                    BattlePoolManager.Instance.ReturnSlot(slot);
-                else
-                    Destroy(slot.gameObject);
-            }
+                if (slot != null)
+                    BattlePoolManager.Instance?.ReturnSlot(slot);
 
             _slots.Clear();
 
             if (enemySlotContainer == null || _bm == null)
-                return;
-            if (BattlePoolManager.Instance == null && enemySlotPrefab == null)
                 return;
 
             for (int i = 0; i < _bm.Enemies.Count; i++)
@@ -186,8 +175,6 @@ namespace Crookedile.UI.Battle
         {
             if (enemySlotContainer == null || _bm == null)
                 return;
-            if (BattlePoolManager.Instance == null && enemySlotPrefab == null)
-                return;
             if (index >= _bm.Enemies.Count)
                 return;
             SpawnSlot(index);
@@ -195,13 +182,15 @@ namespace Crookedile.UI.Battle
 
         private void SpawnSlot(int index)
         {
-            EnemySlotUI slot =
-                BattlePoolManager.Instance != null
-                    ? BattlePoolManager.Instance.RentSlot(enemySlotContainer)
-                    : Instantiate(enemySlotPrefab, enemySlotContainer).GetComponent<EnemySlotUI>();
-
+            EnemySlotUI slot = BattlePoolManager.Instance?.RentSlot(enemySlotContainer);
             if (slot == null)
+            {
+                GameLogger.LogWarning(
+                    "EnemyRow",
+                    "BattlePoolManager missing — the pool is REQUIRED, enemy slot not spawned"
+                );
                 return;
+            }
 
             slot.Initialize(index, _bm, _bm.Enemies[index].EnemyData);
             _slots.Add(slot);
