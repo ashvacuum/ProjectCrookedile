@@ -68,10 +68,6 @@ namespace Crookedile.Gameplay.Battle
                         EnemyIndex = targetStats.OwnerEnemyIndex,
                     }
                 );
-
-                // Faith Leader pacify-conversion: a pacify status on an enemy may cross the threshold.
-                if (stacks > 0 && _behavior.CountsTowardPacify && targetStats != ctx.PlayerStats)
-                    ctx.BattleManager?.TryPacifyConvert(targetStats, statusMgr);
             }
         }
 

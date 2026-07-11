@@ -4,10 +4,11 @@ using Crookedile.Utilities;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Faith Leader conversion engine, extracted from BattleManager. Call
-    /// <see cref="TryConvert"/> after a pacify status (Guilt/Shame/Doubt) lands on an enemy.
-    /// When the enemy's total pacify stacks reach <c>3 + its Jaded stacks</c>, the pacify
-    /// statuses are consumed and the enemy converts:
+    /// Faith Leader conversion engine, extracted from BattleManager. Conversion is
+    /// CARD-DRIVEN: <see cref="ConvertPacifiedEffect"/> calls <see cref="TryConvert"/> when an
+    /// explicit conversion card is played (the old auto-convert on pacify-status application
+    /// was removed by design). When the target's total pacify stacks reach
+    /// <c>3 + its Jaded stacks</c>, the pacify statuses are consumed and the enemy converts:
     /// <list type="bullet">
     ///   <item>Hardened enemy — can't be converted; silenced instead (no burst, no Jaded).</item>
     ///   <item>Any other enemy — a one-turn Fanatic burst pumps the meter, then it reverts to
