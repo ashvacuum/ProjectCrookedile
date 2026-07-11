@@ -13,7 +13,7 @@ namespace Crookedile.EditorTools
     /// Generates the prototype relic set + the RelicDatabase asset so the relic runtime
     /// layer (RunState.Relics → PassiveResolver) has content to prove the pipeline.
     ///
-    /// Same reflection pattern as EnemyRosterGenerator: sets live private serialized fields,
+    /// Reflection pattern: sets live private serialized fields,
     /// re-runnable (deletes + recreates each asset). Icons are NOT set — author in Inspector.
     ///
     /// Menu: Crookedile → Generate → Relic Set
