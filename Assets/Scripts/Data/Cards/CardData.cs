@@ -89,9 +89,17 @@ namespace Crookedile.Data.Cards
         }
 
         [FoldoutGroup("Description Override")]
+        [ShowInInspector]
+        [ReadOnly]
+        [MultiLineProperty(4)]
+        [PropertyTooltip("Live preview of the auto-generated description (from the effect list). Fill the override below to replace it with something shorter.")]
+        private string AutoDescriptionPreview =>
+            _effects == null || _effects.Count == 0 ? "(no effects)" : BuildAutoDescription();
+
+        [FoldoutGroup("Description Override")]
         [InfoBox(
-            "Leave blank — description is auto-generated from card effects at runtime. "
-                + "Only fill this when the auto-generated text is insufficient.",
+            "Leave blank — description is auto-generated from card effects at runtime "
+                + "(preview above). Only fill this when the auto-generated text is too long or unclear.",
             InfoMessageType.Info
         )]
         [Tooltip("Optional explicit override. Leave blank to auto-generate from card effects.")]
