@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Crookedile.Core;
 using Crookedile.Utilities;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -47,18 +49,43 @@ namespace Crookedile.Gameplay.Battle
         public static bool IsPacifyStatus(StatusBehavior behavior) =>
             behavior != null && behavior.CountsTowardPacify;
 
+        /// <summary>The default conversion fuel: the Guilt/Shame/Doubt trio.</summary>
+        private static readonly StatusBehavior[] DefaultPacifyStatuses =
+        {
+            StatusRegistry.Get<GuiltStatus>(),
+            StatusRegistry.Get<ShameStatus>(),
+            StatusRegistry.Get<DoubtStatus>(),
+        };
+
         /// <summary>
         /// Runs the conversion check. No-op when the threshold isn't met. Player target is ignored.
         /// </summary>
-        public void TryConvert(BattleStats enemyStats, StatusEffectManager mgr)
+        /// <param name="statuses">
+        /// Which statuses count toward (and are consumed by) this conversion. Null/empty =
+        /// the default pacify trio (Guilt/Shame/Doubt).
+        /// </param>
+        /// <param name="maxStacks">
+        /// Cap on stacks consumed; 0 = consume everything. The threshold is still checked
+        /// against the FULL total of the selected statuses — the cap only limits what is
+        /// spent (leftovers stay on the enemy; the burst scales with what was consumed).
+        /// </param>
+        public void TryConvert(
+            BattleStats enemyStats,
+            StatusEffectManager mgr,
+            IReadOnlyList<StatusBehavior> statuses = null,
+            int maxStacks = 0
+        )
         {
             if (enemyStats == null || mgr == null || enemyStats == _playerStats)
                 return;
 
-            int guilt = mgr.GetStacks<GuiltStatus>();
-            int shame = mgr.GetStacks<ShameStatus>();
-            int doubt = mgr.GetStacks<DoubtStatus>();
-            int total = guilt + shame + doubt;
+            if (statuses == null || statuses.Count == 0)
+                statuses = DefaultPacifyStatuses;
+
+            int total = 0;
+            foreach (var status in statuses)
+                if (status != null)
+                    total += mgr.GetStacks(status);
 
             int threshold = BaseThreshold + mgr.GetStacks<JadedStatus>();
             if (total < threshold)
@@ -66,10 +93,20 @@ namespace Crookedile.Gameplay.Battle
 
             int idx = enemyStats.OwnerEnemyIndex;
 
-            // Consume the pacify statuses — spent whether we convert or (Hardened) silence.
-            mgr.RemoveStatusNotify(StatusRegistry.Get<GuiltStatus>());
-            mgr.RemoveStatusNotify(StatusRegistry.Get<ShameStatus>());
-            mgr.RemoveStatusNotify(StatusRegistry.Get<DoubtStatus>());
+            // Consume the selected statuses (up to the cap, in authored order) — spent
+            // whether we convert or (Hardened) silence.
+            int toConsume = maxStacks > 0 ? Mathf.Min(maxStacks, total) : total;
+            int consumed = 0;
+            foreach (var status in statuses)
+            {
+                if (status == null || consumed >= toConsume)
+                    continue;
+                int stacks = Mathf.Min(mgr.GetStacks(status), toConsume - consumed);
+                if (stacks <= 0)
+                    continue;
+                mgr.RemoveStacksNotify(status, stacks);
+                consumed += stacks;
+            }
 
             // A true non-believer can't be converted — shut them up instead.
             if (enemyStats.IsHardened)
@@ -94,7 +131,7 @@ namespace Crookedile.Gameplay.Battle
             }
 
             // Convert: one-turn Fanatic burst pumping the meter (generous, scales with stacks eaten).
-            int burst = total * BurstPerStack;
+            int burst = consumed * BurstPerStack;
             _opinion.RaiseDirect(burst);
 
             // Revert to neutral and gain a permanent Jaded stack (raises the next conversion cost).
@@ -104,8 +141,8 @@ namespace Crookedile.Gameplay.Battle
             ConversionsThisTurn++;
 
             GameLogger.LogInfo<PacifyConversionEngine>(
-                $"Enemy [{idx}] converted — {total} pacify stacks → {burst} opinion burst "
-                    + $"(now Jaded {mgr.GetStacks<JadedStatus>()})"
+                $"Enemy [{idx}] converted — {consumed}/{total} pacify stacks → {burst} opinion "
+                    + $"burst (now Jaded {mgr.GetStacks<JadedStatus>()})"
             );
             EventBus.Publish(
                 new EnemyConvertedEvent
