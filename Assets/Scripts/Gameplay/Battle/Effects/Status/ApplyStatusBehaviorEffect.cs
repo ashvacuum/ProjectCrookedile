@@ -27,9 +27,25 @@ namespace Crookedile.Gameplay.Battle
         [SerializeReference]
         private StatusBehavior _behavior;
 
-        [Tooltip("Number of stacks to apply.")]
+        [Tooltip("Base number of stacks to apply. Ignored when Stacks Source is not Fixed.")]
+        [ShowIf("@_stacksSource == EffectContextValue.FixedAmount")]
         [SerializeField]
         private int _stacks = 1;
+
+        [Tooltip("Where to read the stack count from at runtime (e.g. HostileEnemyCount).")]
+        [SerializeField]
+        private EffectContextValue _stacksSource = EffectContextValue.FixedAmount;
+
+        [Tooltip(
+            "Optional scaling: multiply the stacks by this context value "
+                + "(e.g. base 1 × HostileEnemyCount = 1 stack per hostile enemy). None = no scaling."
+        )]
+        [SerializeField]
+        private EffectContextValue _perXSource = EffectContextValue.None;
+
+        [Tooltip("Optional flat multiplier applied last. Values <= 0 are treated as 1.")]
+        [SerializeField]
+        private float _multiplier = 1f;
 
         [Tooltip("How the status duration is tracked.")]
         [SerializeField]
@@ -45,7 +61,16 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
 
-            int stacks = amountOverride ?? _stacks;
+            int stacks = ResolveScaledAmount(
+                ctx,
+                amountOverride,
+                _stacks,
+                _stacksSource,
+                _perXSource,
+                _multiplier
+            );
+            if (stacks == 0)
+                return;
 
             foreach (var (targetStats, statusMgr) in ctx.GetTargets(_target))
             {
@@ -76,8 +101,9 @@ namespace Crookedile.Gameplay.Battle
             if (_behavior == null)
                 return "Apply a status (none assigned)";
             string targetStr = _target == TargetType.Opponent ? "" : $" to {_target}";
+            string amount = DescribeScaledAmount(_stacks, _stacksSource, _perXSource, _multiplier);
             // Surface the status's own description so cards explain what e.g. Doubt does.
-            return $"Apply {_stacks} {_behavior.DisplayName}{targetStr} — {_behavior.Describe(_stacks)}";
+            return $"Apply {amount} {_behavior.DisplayName}{targetStr} — {_behavior.Describe(_stacks)}";
         }
     }
 }
