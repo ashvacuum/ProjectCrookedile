@@ -608,6 +608,75 @@ namespace Crookedile.Gameplay.Battle
             );
         }
 
+        /// <summary>Where <see cref="RepositionCard"/> sends a card.</summary>
+        public enum CardDestination
+        {
+            TopOfDrawPile = 0,
+            BottomOfDrawPile = 1,
+            ShuffledIntoDrawPile = 2,
+            Hand = 3,
+            Discard = 4,
+        }
+
+        /// <summary>
+        /// Moves one copy of <paramref name="card"/> from the draw pile or discard to the given
+        /// destination. Used by passive effects that reposition their own card without it being
+        /// played (MoveOwnerCardEffect).
+        /// ponytail: hand and exhaust are deliberately NOT valid sources — pulling a card out of
+        /// the hand mid-turn needs hand-UI choreography; add when a card actually wants it.
+        /// </summary>
+        public bool RepositionCard(CardData card, CardDestination destination)
+        {
+            if (card == null)
+                return false;
+
+            // Locate the card: draw pile first, then discard. Hand/exhaust are not sources.
+            List<CardData> source = _deck.Contains(card) ? _deck
+                : _discard.Contains(card) ? _discard
+                : null;
+            if (source == null)
+            {
+                GameLogger.LogInfo<DeckManager>(
+                    $"{_ownerName}: RepositionCard — {card.CardName} not in draw/discard, skipped"
+                );
+                return false;
+            }
+
+            if (destination == CardDestination.Hand && IsHandFull)
+            {
+                GameLogger.LogInfo<DeckManager>(
+                    $"{_ownerName}: RepositionCard — hand full, {card.CardName} stays put"
+                );
+                return false;
+            }
+
+            source.Remove(card);
+            switch (destination)
+            {
+                case CardDestination.TopOfDrawPile:
+                    _deck.Insert(0, card); // index 0 = top (DrawCard reads _deck[0])
+                    break;
+                case CardDestination.BottomOfDrawPile:
+                    _deck.Add(card);
+                    break;
+                case CardDestination.ShuffledIntoDrawPile:
+                    _deck.Insert(RandomHelper.Range(0, _deck.Count + 1), card);
+                    break;
+                case CardDestination.Hand:
+                    _hand.Add(card);
+                    EventBus.Publish(new CardRecoveredEvent { Card = card, IsPlayer = _isPlayer });
+                    break;
+                case CardDestination.Discard:
+                    _discard.Add(card);
+                    break;
+            }
+
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: Repositioned {card.CardName} → {destination}"
+            );
+            return true;
+        }
+
         #endregion
 
         #region Queries

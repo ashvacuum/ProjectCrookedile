@@ -39,6 +39,11 @@ namespace Crookedile.Gameplay.Battle
         private readonly Dictionary<Type, List<BattlePassive>> _passivesByEvent =
             new Dictionary<Type, List<BattlePassive>>();
 
+        // Owning card per card-sourced passive (default AND activated) — lets passive effects
+        // act on the card itself (MoveOwnerCardEffect). Origin/relic passives have no owner.
+        private readonly Dictionary<BattlePassive, CardData> _ownerByPassive =
+            new Dictionary<BattlePassive, CardData>();
+
         private readonly EffectResolver _effectResolver;
         private IReadOnlyList<EnemyController> _enemies;
         private StatusEffectManager _playerStatusEffects;
@@ -146,6 +151,7 @@ namespace Crookedile.Gameplay.Battle
         private void RegisterCardPassives(DeckManager deck)
         {
             _allPassives.Clear();
+            _ownerByPassive.Clear();
 
             // Origin passive — new-system entries (when present)
             if (_passive?.Passives != null)
@@ -178,16 +184,22 @@ namespace Crookedile.Gameplay.Battle
                 {
                     foreach (var card in zone)
                     {
-                        // Power cards are excluded: their passives activate only when the card is
-                        // played (see ActivateCardPassives), Slay-the-Spire style — not from battle start.
-                        if (card == null || card.IsPower)
+                        // Activated-passive (Policy) cards are excluded: their passives switch on
+                        // only when the card is played (see ActivateCardPassives). Everything else
+                        // is a DEFAULT passive — ambient from battle start, owner card recorded so
+                        // effects can act on the card itself (e.g. MoveOwnerCardEffect).
+                        if (card == null || card.IsActivatedPassive)
                             continue;
                         var cardPassives = card.GetPassives();
                         if (cardPassives == null)
                             continue;
                         foreach (var bp in cardPassives)
-                            if (bp != null)
-                                _allPassives.Add(bp);
+                        {
+                            if (bp == null)
+                                continue;
+                            _allPassives.Add(bp);
+                            _ownerByPassive[bp] = card;
+                        }
                     }
                 }
             }
@@ -237,13 +249,14 @@ namespace Crookedile.Gameplay.Battle
                 if (bp == null)
                     continue;
                 _allPassives.Add(bp);
+                _ownerByPassive[bp] = card;
                 BucketPassive(bp);
                 added++;
             }
 
             if (added > 0)
                 GameLogger.LogInfo<PassiveResolver>(
-                    $"Activated {added} Power passive(s) from '{card.CardName}'."
+                    $"Activated {added} passive(s) from '{card.CardName}'."
                 );
         }
 
@@ -288,6 +301,9 @@ namespace Crookedile.Gameplay.Battle
                 // AmountSource (e.g. LastDamageDealt for lifesteal-style passives).
                 var execCtx = _effectResolver.CreateContext(isPlayerCard: true);
                 EnrichContextFromEvent(evtCtx, execCtx);
+                // Card-sourced passives know their owning card (null for origin/relic passives).
+                _ownerByPassive.TryGetValue(passive, out var ownerCard);
+                execCtx.OwnerCard = ownerCard;
                 passive.TryFire(evtCtx, evalCtx, execCtx);
             }
         }
