@@ -62,6 +62,118 @@ namespace Crookedile.EditorTools
             return tree;
         }
 
+        #region CSV export
+
+        /// <summary>
+        /// Writes the whole catalog (Effects, Triggers, Conditions, Statuses) to
+        /// docs/authoring-bible.csv — the spreadsheet twin of this window.
+        /// </summary>
+        [MenuItem("Crookedile/Export/Authoring Bible CSV")]
+        public static void ExportCsv()
+        {
+            var rows = new List<string[]>();
+
+            CollectGroup<BattleEffect>(rows, "Effect", e => Safe(() => e.GetDescription()));
+            CollectGroup<PassiveTriggerBase>(rows, "Trigger", t => Safe(() => t.TriggerLabel));
+            CollectGroup<PassiveConditionBase>(rows, "Condition", c => Safe(() => c.ConditionLabel));
+
+            foreach (var b in StatusRegistry.All.OrderBy(b => b.DisplayName))
+            {
+                rows.Add(
+                    new[]
+                    {
+                        "Status",
+                        b.DisplayName,
+                        b.GetType().Name,
+                        Safe(() => b.Describe(1)),
+                        FlattenFields(SerializedFields(b.GetType())),
+                        $"Id={b.Id}; IsDebuff={b.IsDebuff}; Category={b.Category}; "
+                            + $"Pacify={b.CountsTowardPacify}",
+                    }
+                );
+            }
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("Kind,Name,TypeName,Description,SerializedFields,Extra");
+            foreach (var row in rows)
+            {
+                for (int i = 0; i < row.Length; i++)
+                {
+                    if (i > 0)
+                        sb.Append(',');
+                    sb.Append(EscapeCsv(row[i]));
+                }
+                sb.AppendLine();
+            }
+
+            string fullPath = System.IO.Path.Combine(
+                System.IO.Directory.GetParent(Application.dataPath).FullName,
+                "docs/authoring-bible.csv"
+            );
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(fullPath));
+            System.IO.File.WriteAllText(fullPath, sb.ToString(), System.Text.Encoding.UTF8);
+
+            Debug.Log($"[AuthoringCatalog] Exported {rows.Count} entries → {fullPath}");
+            EditorUtility.RevealInFinder(fullPath);
+        }
+
+        // Mirror of AddGroup, collecting CSV rows instead of tree entries.
+        private static void CollectGroup<T>(List<string[]> rows, string kind, Func<T, string> describe)
+            where T : class
+        {
+            Type baseType = typeof(T);
+            var group = new List<string[]>();
+
+            foreach (Type t in baseType.Assembly.GetTypes())
+            {
+                if (t.IsAbstract || t == baseType || !baseType.IsAssignableFrom(t))
+                    continue;
+
+                string desc =
+                    t.GetConstructor(Type.EmptyTypes) != null
+                        ? Safe(() => describe((T)Activator.CreateInstance(t)) ?? "")
+                        : "(no parameterless constructor)";
+
+                group.Add(
+                    new[]
+                    {
+                        kind,
+                        Prettify(t.Name),
+                        t.Name,
+                        desc,
+                        FlattenFields(SerializedFields(t)),
+                        t.IsSerializable ? "" : "NOT [Serializable] — hidden from pickers",
+                    }
+                );
+            }
+
+            group.Sort((a, b) => string.CompareOrdinal(a[1], b[1]));
+            rows.AddRange(group);
+        }
+
+        private static string FlattenFields(List<FieldRow> fields)
+        {
+            var parts = new List<string>();
+            foreach (var f in fields)
+                parts.Add(
+                    string.IsNullOrEmpty(f.Tooltip)
+                        ? $"{f.Name} ({f.Type})"
+                        : $"{f.Name} ({f.Type}): {f.Tooltip.Replace("\n", " ")}"
+                );
+            return string.Join(" | ", parts);
+        }
+
+        private static string EscapeCsv(string field)
+        {
+            if (string.IsNullOrEmpty(field))
+                return "";
+            if (field.Contains(",") || field.Contains("\"") || field.Contains("\n"))
+                return "\"" + field.Replace("\"", "\"\"") + "\"";
+            return field;
+        }
+
+        #endregion
+
         // Reflects every concrete subclass of T, builds a catalog entry from a default instance.
         private static void AddGroup<T>(OdinMenuTree tree, string group, Func<T, string> describe)
             where T : class
