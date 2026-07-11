@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Pray
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: d4f4994e-4fbd-4bb7-9289-418efccc06b4
+  _id: e2fd5ebf-838d-4613-a252-368114105d6a
   _cardName: Pray
-  _cardType: 0
+  _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 21300000, guid: 0cce94ee10f61b6498a4ee005d68d6e8, type: 3}
+  _artwork: {fileID: 21300000, guid: d3c01a15b3a6ce741abd46c986821b3f, type: 3}
   _description: 
   _flavorText: 
   _costs:
@@ -27,12 +27,12 @@ MonoBehaviour:
     _minimumCost: 0
     _maximumCost: 99
   _effects:
-  - rid: 4823698825199484952
-  - rid: 4823698825199484953
+  - rid: 5004226203391361026
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 5004226203391361027
   _upgradedPassives: []
   _tags:
   - faithleader
@@ -40,25 +40,24 @@ MonoBehaviour:
   _isUnlockable: 0
   _isUnplayable: 0
   _innateRetain: 0
-  _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
   references:
     version: 2
     RefIds:
-    - rid: 4823698825199484952
+    - rid: 5004226203391361026
+      type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 4
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+    - rid: 5004226203391361027
       type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 5
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1
-    - rid: 4823698825199484953
-      type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _amount: 1
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1

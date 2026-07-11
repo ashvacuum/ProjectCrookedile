@@ -10,28 +10,33 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Preach
-  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: a6edf7b0-09fe-442e-b16a-261def419f19
-  _cardName: Preach
+  m_Name: Unwavering
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
+  _id: 5292a599-0de3-41c3-af18-48c358c2f518
+  _cardName: Unwavering
   _cardType: 0
-  _rarity: 0
-  _artwork: {fileID: 21300000, guid: d37888b5dc7798c469d7f9c2789f24e7, type: 3}
-  _description: Press your moral argument. Your conviction grows as you speak.
+  _rarity: 1
+  _artwork: {fileID: 21300000, guid: 0cce94ee10f61b6498a4ee005d68d6e8, type: 3}
+  _description: 
   _flavorText: 
   _costs:
+  - _costType: 1
+    _baseAmount: 2
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _effects:
+  - rid: 5004226217420259328
+  _passives: []
+  _isUpgraded: 0
+  _upgradedCosts:
   - _costType: 1
     _baseAmount: 1
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
-  _effects:
-  - rid: 4823698825199485087
-  - rid: 4823698825199485088
-  _passives: []
-  _isUpgraded: 0
-  _upgradedCosts: []
   _upgradedEffects: []
   _upgradedPassives: []
   _tags:
@@ -40,30 +45,20 @@ MonoBehaviour:
   _isUnlockable: 0
   _isUnplayable: 0
   _innateRetain: 0
-  _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
   references:
     version: 2
     RefIds:
-    - rid: 4823698825199485087
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _amount: 4
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1
-        _target: 1
-    - rid: 4823698825199485088
+    - rid: 5004226217420259328
       type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _target: 0
+        _target: 4
         _behavior:
-          rid: 4823698825199485089
-        _stacks: 2
+          rid: 5004226217420259329
+        _stacks: 1
         _duration: 0
-    - rid: 4823698825199485089
-      type: {class: StrengthStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 5004226217420259329
+      type: {class: SilencedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 

@@ -27,7 +27,6 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
-  _newEffects: []
   _effects: []
   _passives:
   - rid: 4738608375284105304
@@ -35,19 +34,18 @@ MonoBehaviour:
   _upgradedCosts: []
   _upgradedEffects: []
   _upgradedPassives: []
-  _tags:
-  - faithleader
+  _tags: []
   _isStarterCard: 0
   _isUnlockable: 0
   _isUnplayable: 1
-  _policyLean: 3
+  _innateRetain: 0
   _cardVFX: {fileID: 0}
   _configurationNotes: 
   references:
     version: 2
     RefIds:
     - rid: 4738608375284105304
-      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: New Passive
         _trigger:
@@ -56,5 +54,5 @@ MonoBehaviour:
         _oneShot: 0
         _effects: []
     - rid: 4738608375284105307
-      type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Assembly-CSharp}
+      type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
