@@ -677,8 +677,9 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Runs start-of-turn effects for the current combatant(s).</summary>
         public void StartTurn()
         {
-            // Session shields decay at the start of every turn, then Ritual refills them.
-            _opinion.DecayShields();
+            // The current side's stale shield decays (Support at player turn start, Denial at
+            // enemy turn start) so each shield protects through one full opposing turn.
+            _opinion.DecayShields(_isPlayerTurn);
 
             if (_isPlayerTurn)
             {

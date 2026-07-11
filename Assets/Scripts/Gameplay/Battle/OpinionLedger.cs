@@ -204,11 +204,18 @@ namespace Crookedile.Gameplay.Battle
             return spent;
         }
 
-        /// <summary>Both shields decay to 0 at the start of every turn (Ritual refills them after).</summary>
-        public void DecayShields()
+        /// <summary>
+        /// A shield decays at the start of its OWNER'S turn, so it lives through the opponent's
+        /// full turn: Support banked on your turn absorbs enemy attacks and expires when your
+        /// next turn starts; Denial banked on the enemy turn blocks your cards and expires when
+        /// the enemy's next turn starts. (Ritual refills right after the wipe.)
+        /// </summary>
+        public void DecayShields(bool isPlayerTurn)
         {
-            ConsumeAllSupport();
-            ConsumeAllDenial();
+            if (isPlayerTurn)
+                ConsumeAllSupport();
+            else
+                ConsumeAllDenial();
         }
 
         private int AbsorbThroughSupport(int pressure)
