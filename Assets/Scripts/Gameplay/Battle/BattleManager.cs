@@ -547,8 +547,12 @@ namespace Crookedile.Gameplay.Battle
         /// Faith Leader conversion check — see <see cref="PacifyConversionEngine.TryConvert"/>.
         /// Kept as a facade because effects reach it via <c>ctx.BattleManager</c>.
         /// </summary>
-        public void TryPacifyConvert(BattleStats enemyStats, StatusEffectManager mgr) =>
-            _pacify?.TryConvert(enemyStats, mgr);
+        public void TryPacifyConvert(
+            BattleStats enemyStats,
+            StatusEffectManager mgr,
+            System.Collections.Generic.IReadOnlyList<StatusBehavior> statuses = null,
+            int maxStacks = 0
+        ) => _pacify?.TryConvert(enemyStats, mgr, statuses, maxStacks);
 
         #endregion
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Crookedile.Data;
 using Crookedile.Utilities;
 using UnityEngine;
@@ -23,6 +24,22 @@ namespace Crookedile.Gameplay.Battle
 
         public override TargetType Target => _target;
 
+        [Tooltip(
+            "Which statuses fuel this conversion (counted toward the threshold AND consumed, "
+                + "in this order). Leave EMPTY for the default Guilt/Shame/Doubt trio."
+        )]
+        [SerializeReference]
+        private List<StatusBehavior> _statusesToConvert = new List<StatusBehavior>();
+
+        [Min(0)]
+        [Tooltip(
+            "Max stacks consumed per target. 0 = consume everything. The threshold "
+                + "(3 + Jaded) is still checked against the target's FULL total — the cap only "
+                + "limits what is spent, so leftovers stay and the burst scales with what was eaten."
+        )]
+        [SerializeField]
+        private int _maxStacksToConsume = 0;
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             if (ctx.BattleManager == null)
@@ -36,15 +53,34 @@ namespace Crookedile.Gameplay.Battle
                 if (targetStats == null || statusMgr == null || targetStats == ctx.PlayerStats)
                     continue;
 
-                ctx.BattleManager.TryPacifyConvert(targetStats, statusMgr);
+                ctx.BattleManager.TryPacifyConvert(
+                    targetStats,
+                    statusMgr,
+                    _statusesToConvert,
+                    _maxStacksToConsume
+                );
             }
         }
 
         public override string GetDescription()
         {
             string targetStr = _target == TargetType.Opponent ? "an enemy" : $"{_target}";
-            return $"Convert {targetStr} with enough Guilt/Shame/Doubt (3 + Jaded) — "
-                + "consume the stacks for an opinion burst.";
+            string fuel =
+                _statusesToConvert == null || _statusesToConvert.Count == 0
+                    ? "Guilt/Shame/Doubt"
+                    : DescribeStatusList();
+            string cap = _maxStacksToConsume > 0 ? $" (max {_maxStacksToConsume} stacks)" : "";
+            return $"Convert {targetStr} with enough {fuel} (3 + Jaded) — "
+                + $"consume the stacks{cap} for an opinion burst.";
+        }
+
+        private string DescribeStatusList()
+        {
+            var names = new List<string>();
+            foreach (var status in _statusesToConvert)
+                if (status != null)
+                    names.Add(status.DisplayName);
+            return names.Count > 0 ? string.Join("/", names) : "Guilt/Shame/Doubt";
         }
     }
 }
