@@ -37,7 +37,7 @@ namespace Crookedile.Gameplay.Battle
             {
                 if (!_includeSelf && stats == ctx.Caster)
                     continue;
-                stats.GainHostility(amount);
+                ctx.LastHostilityGained += stats.GainHostility(amount);
                 count++;
             }
 

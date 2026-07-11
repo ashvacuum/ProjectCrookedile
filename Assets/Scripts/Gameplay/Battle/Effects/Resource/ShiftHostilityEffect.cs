@@ -66,9 +66,9 @@ namespace Crookedile.Gameplay.Battle
             foreach (var (stats, _) in ctx.GetTargets(_target))
             {
                 if (amount > 0)
-                    stats.GainHostility(amount); // rile — Fanatic blocks
+                    ctx.LastHostilityGained += stats.GainHostility(amount); // rile — Fanatic blocks
                 else
-                    stats.ReduceHostility(-amount); // de-escalate — Hardened blocks
+                    ctx.LastHostilityLost += stats.ReduceHostility(-amount); // de-escalate — Hardened blocks
                 touched++;
             }
 

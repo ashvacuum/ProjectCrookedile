@@ -342,6 +342,15 @@ namespace Crookedile.Gameplay.Battle
                 else if (delta < 0)
                     execCtx.LastSupportLost = -delta;
             }
+            else if (evtCtx.Is<HostilityChangedEvent>())
+            {
+                var e = evtCtx.As<HostilityChangedEvent>();
+                int delta = e.NewValue - e.OldValue;
+                if (delta > 0)
+                    execCtx.LastHostilityGained = delta;
+                else if (delta < 0)
+                    execCtx.LastHostilityLost = -delta;
+            }
             else if (evtCtx.Is<EnemyDefeatedEvent>())
             {
                 execCtx.LastTargetDied = true;

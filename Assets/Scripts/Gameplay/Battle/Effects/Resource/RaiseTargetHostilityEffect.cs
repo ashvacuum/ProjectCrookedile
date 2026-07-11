@@ -56,7 +56,7 @@ namespace Crookedile.Gameplay.Battle
             if (amount <= 0)
                 return;
             foreach (var (stats, _) in ctx.GetTargets(_target))
-                stats.GainHostility(amount);
+                ctx.LastHostilityGained += stats.GainHostility(amount);
             GameLogger.LogInfo<RaiseTargetHostilityEffect>(
                 $"Raised Hostility by {amount} ({_target})"
             );
