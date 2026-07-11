@@ -47,8 +47,15 @@ namespace Crookedile.EditorTools
             );
 
             // StatusBehaviors come from the registry's canonical instances (no reflection needed).
+            var iconMap = Resources.Load<Crookedile.Data.Battle.StatusEffectIconMapSO>(
+                "StatusEffectIconMap"
+            );
             foreach (var b in StatusRegistry.All.OrderBy(b => b.DisplayName))
             {
+                Sprite icon = null;
+                bool mapped =
+                    iconMap != null && iconMap.TryGet(b.Id, out icon, out _) && icon != null;
+
                 var usages = UsagesFor(usage, b.GetType());
                 var entry = new Entry
                 {
@@ -64,8 +71,14 @@ namespace Crookedile.EditorTools
                     },
                     Fields = SerializedFields(b.GetType()),
                     Usages = usages,
+                    Icon = icon,
+                    IconMap = iconMap,
+                    IsStatus = true,
                 };
-                tree.Add($"Statuses/{b.DisplayName} ({usages.Count})", entry);
+                tree.Add(
+                    $"Statuses/{b.DisplayName} ({usages.Count}){(mapped ? "" : "  ⚠ no icon")}",
+                    entry
+                );
             }
 
             return tree;
@@ -451,11 +464,40 @@ namespace Crookedile.EditorTools
             public List<FieldRow> Fields;
             public List<(string label, string value)> Extra;
             public List<UnityEngine.Object> Usages;
+            public Sprite Icon;
+            public UnityEngine.Object IconMap;
+            public bool IsStatus;
 
             [Sirenix.OdinInspector.OnInspectorGUI]
             private void Draw()
             {
                 SirenixEditorGUI.Title(Title, TypeName, TextAlignment.Left, true);
+
+                if (IsStatus)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    if (Icon != null)
+                    {
+                        GUILayout.Label(
+                            AssetPreview.GetAssetPreview(Icon) ?? Icon.texture,
+                            GUILayout.Width(48),
+                            GUILayout.Height(48)
+                        );
+                    }
+                    else
+                    {
+                        SirenixEditorGUI.MessageBox(
+                            "No icon in StatusEffectIconMap — run the seeder, then assign a sprite.",
+                            MessageType.Warning
+                        );
+                    }
+                    if (IconMap != null && GUILayout.Button("Open Icon Map", GUILayout.Width(110)))
+                    {
+                        Selection.activeObject = IconMap;
+                        EditorGUIUtility.PingObject(IconMap);
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
 
                 if (!Serializable)
                     SirenixEditorGUI.MessageBox(
