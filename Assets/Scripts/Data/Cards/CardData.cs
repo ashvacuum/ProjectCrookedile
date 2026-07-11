@@ -298,19 +298,20 @@ namespace Crookedile.Data.Cards
             _cardType == CardType.Scandal || (_cardType == CardType.Heckle && _isUnplayable);
 
         /// <summary>
-        /// Battle-scoped passives that fire on broad battle events for the entire battle.
-        /// For non-Power cards these are registered by PassiveResolver at the start of each battle;
-        /// for <see cref="IsPower"/> cards they are activated only when the card is played.
+        /// Battle-scoped passives that fire on broad battle events.
+        /// DEFAULT passives (every non-Policy card): active from battle start while the card is
+        /// anywhere in the deck — the card never needs to be played.
+        /// ACTIVATED passives (Policy cards, <see cref="IsActivatedPassive"/>): switch on only
+        /// when the card is played, then the card exhausts.
         /// </summary>
         public IReadOnlyList<BattlePassive> Passives => _passives;
 
         /// <summary>
-        /// True if this is a Power card: its <see cref="Passives"/> activate on play (not at battle
-        /// start) and the card is exhausted afterwards. See PassiveResolver / BattleManager.PlayCard.
-        /// Now derived — every <see cref="CardType.Policy"/> card is a Power (the old per-card
-        /// <c>_isPower</c> toggle was redundant and was removed).
+        /// True for Policy cards: their <see cref="Passives"/> activate on play (not at battle
+        /// start) and the card is exhausted afterwards. Every other card type carries DEFAULT
+        /// passives — ambient from battle start. See PassiveResolver / CardPlayController.
         /// </summary>
-        public bool IsPower => _cardType == CardType.Policy;
+        public bool IsActivatedPassive => _cardType == CardType.Policy;
 
         /// <summary>
         /// VFX played when this card is used. Null means effects resolve immediately (no regression).

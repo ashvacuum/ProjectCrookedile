@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Crookedile.Core;
 using Crookedile.Data;
+using Crookedile.Data.Cards;
 using Crookedile.Utilities;
 using UnityEngine;
 
@@ -101,6 +102,14 @@ namespace Crookedile.Gameplay.Battle
         /// can move the card from the discard pile to the exhaust pile after all effects resolve.
         /// </summary>
         public bool ShouldExhaust { get; set; }
+
+        /// <summary>
+        /// For card-sourced passive dispatches: the card the firing passive lives on, so effects
+        /// can act on the card itself (e.g. <see cref="MoveOwnerCardEffect"/> repositioning it in
+        /// the deck without it ever being played). Null for played-card resolution and for
+        /// origin/relic passives. Set by PassiveResolver.
+        /// </summary>
+        public CardData OwnerCard { get; set; }
 
         #endregion
 
