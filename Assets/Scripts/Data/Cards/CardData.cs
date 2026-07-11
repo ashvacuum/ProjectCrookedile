@@ -176,6 +176,13 @@ namespace Crookedile.Data.Cards
         [SerializeField]
         private bool _isUnlockable = false;
 
+        [Tooltip(
+            "Generated in-game only (by effects, summons, events). Never offered by the reward "
+                + "randomizer or any other acquisition pool."
+        )]
+        [SerializeField]
+        private bool _isGeneratedOnly = false;
+
         [ShowIf("_cardType", CardType.Heckle)]
         [Tooltip(
             "If true, this Status card is shown in the hand but cannot be played. "
@@ -280,6 +287,12 @@ namespace Crookedile.Data.Cards
 
         /// <summary>Whether this card appears in starter decks.</summary>
         public bool IsStarterCard => _isStarterCard;
+
+        /// <summary>
+        /// Generated in-game only (by effects/summons/events) — excluded from the reward
+        /// randomizer and every other acquisition pool.
+        /// </summary>
+        public bool IsGeneratedOnly => _isGeneratedOnly;
 
         /// <summary>Whether this card must be unlocked.</summary>
         public bool IsUnlockable => _isUnlockable;

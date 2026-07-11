@@ -308,6 +308,8 @@ namespace Crookedile.Data.Cards
                     continue; // offer base version only
                 if (card.IsInDevelopment)
                     continue; // no artwork — not ready for play
+                if (card.IsGeneratedOnly)
+                    continue; // battle-generated token — never in acquisition pools
 
                 switch (card.CardType)
                 {
