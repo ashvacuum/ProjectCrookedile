@@ -39,6 +39,9 @@ namespace Crookedile.Editor
                         card.Rarity.ToString(),
                         DescribeCosts(card),
                         card.IsStarterCard ? "yes" : "",
+                        card.IsUpgraded ? "is upgrade"
+                        : card.CanUpgrade ? "yes"
+                        : "MISSING",
                         card.IsActivatedPassive ? "yes" : "",
                         card.IsUnplayable ? "yes" : "",
                         card.InnateRetain ? "yes" : "",
@@ -63,8 +66,8 @@ namespace Crookedile.Editor
 
             var sb = new StringBuilder();
             sb.AppendLine(
-                "Class,Name,Type,Rarity,Cost,Starter,ActivatedPassive,Unplayable,InnateRetain,"
-                    + "Effects,Passives,Tags,Description,ConfigNotes,AssetPath"
+                "Class,Name,Type,Rarity,Cost,Starter,Upgrade,ActivatedPassive,Unplayable,"
+                    + "InnateRetain,Effects,Passives,Tags,Description,ConfigNotes,AssetPath"
             );
             foreach (var row in rows)
             {

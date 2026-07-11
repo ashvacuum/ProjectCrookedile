@@ -1277,6 +1277,16 @@ namespace Crookedile.Editor
             if (!hasEffects && !hasPassives && !card.IsUnplayable)
                 issues.Add("No effects or passives — card has no behavior when played");
 
+            // Every base card needs an authored upgrade to be shippable. Scandal/Heckle junk
+            // can't upgrade by design, and upgraded variants are complete by definition.
+            if (
+                !card.IsUpgraded
+                && card.CardType != Crookedile.Data.CardType.Scandal
+                && card.CardType != Crookedile.Data.CardType.Heckle
+                && !card.CanUpgrade
+            )
+                issues.Add("No upgrade authored — base card is incomplete");
+
             // Per-effect checks (null entries + each effect's own configuration issues)
             if (card.Effects != null)
             {
