@@ -35,13 +35,21 @@ namespace Crookedile.EditorTools
             var tree = new OdinMenuTree(false);
             tree.Config.DrawSearchToolbar = true;
 
-            AddGroup<BattleEffect>(tree, "Effects", e => Safe(() => e.GetDescription()));
-            AddGroup<PassiveTriggerBase>(tree, "Triggers", t => Safe(() => t.TriggerLabel));
-            AddGroup<PassiveConditionBase>(tree, "Conditions", c => Safe(() => c.ConditionLabel));
+            var usage = BuildUsageIndex();
+
+            AddGroup<BattleEffect>(tree, "Effects", e => Safe(() => e.GetDescription()), usage);
+            AddGroup<PassiveTriggerBase>(tree, "Triggers", t => Safe(() => t.TriggerLabel), usage);
+            AddGroup<PassiveConditionBase>(
+                tree,
+                "Conditions",
+                c => Safe(() => c.ConditionLabel),
+                usage
+            );
 
             // StatusBehaviors come from the registry's canonical instances (no reflection needed).
             foreach (var b in StatusRegistry.All.OrderBy(b => b.DisplayName))
             {
+                var usages = UsagesFor(usage, b.GetType());
                 var entry = new Entry
                 {
                     Title = b.DisplayName,
@@ -55,8 +63,9 @@ namespace Crookedile.EditorTools
                         ("CountsTowardPacify", b.CountsTowardPacify.ToString()),
                     },
                     Fields = SerializedFields(b.GetType()),
+                    Usages = usages,
                 };
-                tree.Add($"Statuses/{b.DisplayName}", entry);
+                tree.Add($"Statuses/{b.DisplayName} ({usages.Count})", entry);
             }
 
             return tree;
@@ -72,13 +81,25 @@ namespace Crookedile.EditorTools
         public static void ExportCsv()
         {
             var rows = new List<string[]>();
+            var usage = BuildUsageIndex();
 
-            CollectGroup<BattleEffect>(rows, "Effect", e => Safe(() => e.GetDescription()));
-            CollectGroup<PassiveTriggerBase>(rows, "Trigger", t => Safe(() => t.TriggerLabel));
-            CollectGroup<PassiveConditionBase>(rows, "Condition", c => Safe(() => c.ConditionLabel));
+            CollectGroup<BattleEffect>(rows, "Effect", e => Safe(() => e.GetDescription()), usage);
+            CollectGroup<PassiveTriggerBase>(
+                rows,
+                "Trigger",
+                t => Safe(() => t.TriggerLabel),
+                usage
+            );
+            CollectGroup<PassiveConditionBase>(
+                rows,
+                "Condition",
+                c => Safe(() => c.ConditionLabel),
+                usage
+            );
 
             foreach (var b in StatusRegistry.All.OrderBy(b => b.DisplayName))
             {
+                var usages = UsagesFor(usage, b.GetType());
                 rows.Add(
                     new[]
                     {
@@ -89,12 +110,14 @@ namespace Crookedile.EditorTools
                         FlattenFields(SerializedFields(b.GetType())),
                         $"Id={b.Id}; IsDebuff={b.IsDebuff}; Category={b.Category}; "
                             + $"Pacify={b.CountsTowardPacify}",
+                        usages.Count.ToString(),
+                        JoinUsages(usages),
                     }
                 );
             }
 
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine("Kind,Name,TypeName,Description,SerializedFields,Extra");
+            sb.AppendLine("Kind,Name,TypeName,Description,SerializedFields,Extra,UsageCount,UsedBy");
             foreach (var row in rows)
             {
                 for (int i = 0; i < row.Length; i++)
@@ -118,7 +141,12 @@ namespace Crookedile.EditorTools
         }
 
         // Mirror of AddGroup, collecting CSV rows instead of tree entries.
-        private static void CollectGroup<T>(List<string[]> rows, string kind, Func<T, string> describe)
+        private static void CollectGroup<T>(
+            List<string[]> rows,
+            string kind,
+            Func<T, string> describe,
+            Dictionary<Type, List<UnityEngine.Object>> usage
+        )
             where T : class
         {
             Type baseType = typeof(T);
@@ -134,6 +162,7 @@ namespace Crookedile.EditorTools
                         ? Safe(() => describe((T)Activator.CreateInstance(t)) ?? "")
                         : "(no parameterless constructor)";
 
+                var usages = UsagesFor(usage, t);
                 group.Add(
                     new[]
                     {
@@ -143,12 +172,25 @@ namespace Crookedile.EditorTools
                         desc,
                         FlattenFields(SerializedFields(t)),
                         t.IsSerializable ? "" : "NOT [Serializable] — hidden from pickers",
+                        usages.Count.ToString(),
+                        JoinUsages(usages),
                     }
                 );
             }
 
             group.Sort((a, b) => string.CompareOrdinal(a[1], b[1]));
             rows.AddRange(group);
+        }
+
+        private static string JoinUsages(List<UnityEngine.Object> usages)
+        {
+            if (usages == null || usages.Count == 0)
+                return "";
+            var names = new List<string>();
+            foreach (var a in usages)
+                if (a != null)
+                    names.Add(a.name);
+            return string.Join("; ", names);
         }
 
         private static string FlattenFields(List<FieldRow> fields)
@@ -175,7 +217,12 @@ namespace Crookedile.EditorTools
         #endregion
 
         // Reflects every concrete subclass of T, builds a catalog entry from a default instance.
-        private static void AddGroup<T>(OdinMenuTree tree, string group, Func<T, string> describe)
+        private static void AddGroup<T>(
+            OdinMenuTree tree,
+            string group,
+            Func<T, string> describe,
+            Dictionary<Type, List<UnityEngine.Object>> usage
+        )
             where T : class
         {
             Type baseType = typeof(T);
@@ -211,13 +258,131 @@ namespace Crookedile.EditorTools
                         Description = desc,
                         Serializable = t.IsSerializable,
                         Fields = SerializedFields(t),
+                        Usages = UsagesFor(usage, t),
                     }
                 );
             }
 
             foreach (var e in entries.OrderBy(e => e.Title))
-                tree.Add($"{group}/{e.Title}", e);
+                tree.Add($"{group}/{e.Title} ({e.Usages.Count})", e);
         }
+
+        #region Usage index
+
+        private static readonly Type[] ScannedAssetTypes =
+        {
+            typeof(Crookedile.Data.Cards.CardData),
+            typeof(Crookedile.Data.Enemy.EnemyMoveData),
+            typeof(Crookedile.Data.Enemy.EnemyData),
+            typeof(Crookedile.Data.OriginPassive),
+            typeof(Crookedile.Data.RelicData),
+        };
+
+        /// <summary>
+        /// Scans every content asset (cards, enemy moves, enemies, origin passives, relics) and
+        /// records which concrete effect/trigger/condition/status types each one contains,
+        /// including nested references (a StatusBehavior inside an ApplyStatusBehaviorEffect
+        /// inside a passive). Nested asset references are NOT followed — an EnemyData that uses
+        /// an EnemyMoveData attributes the move's contents to the move, not the enemy.
+        /// </summary>
+        private static Dictionary<Type, List<UnityEngine.Object>> BuildUsageIndex()
+        {
+            var index = new Dictionary<Type, HashSet<UnityEngine.Object>>();
+
+            foreach (Type assetType in ScannedAssetTypes)
+            {
+                foreach (string guid in AssetDatabase.FindAssets($"t:{assetType.Name}"))
+                {
+                    var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(
+                        AssetDatabase.GUIDToAssetPath(guid)
+                    );
+                    if (asset == null || !assetType.IsInstanceOfType(asset))
+                        continue;
+                    Walk(asset, asset, index, new HashSet<object>());
+                }
+            }
+
+            var result = new Dictionary<Type, List<UnityEngine.Object>>();
+            foreach (var kvp in index)
+                result[kvp.Key] = kvp.Value.OrderBy(a => a.name).ToList();
+            return result;
+        }
+
+        private static void Walk(
+            object node,
+            UnityEngine.Object asset,
+            Dictionary<Type, HashSet<UnityEngine.Object>> index,
+            HashSet<object> seen
+        )
+        {
+            if (node == null)
+                return;
+            Type t = node.GetType();
+            if (t.IsPrimitive || t.IsEnum || node is string)
+                return;
+            // Don't follow references INTO other assets — they get scanned on their own.
+            if (node is UnityEngine.Object && !ReferenceEquals(node, asset))
+                return;
+            if (!seen.Add(node))
+                return;
+
+            if (
+                node is BattleEffect
+                || node is StatusBehavior
+                || node is PassiveTriggerBase
+                || node is PassiveConditionBase
+            )
+            {
+                if (!index.TryGetValue(t, out var set))
+                    index[t] = set = new HashSet<UnityEngine.Object>();
+                set.Add(asset);
+            }
+
+            foreach (
+                var f in t.GetFields(
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+                )
+            )
+            {
+                if (f.IsStatic || f.Name.Contains("<"))
+                    continue;
+                bool serialized = f.IsPublic
+                    ? f.GetCustomAttribute<NonSerializedAttribute>() == null
+                    : f.GetCustomAttribute<SerializeField>() != null
+                        || f.GetCustomAttribute<SerializeReference>() != null;
+                if (!serialized)
+                    continue;
+                if (f.FieldType.IsPrimitive || f.FieldType.IsEnum || f.FieldType == typeof(string))
+                    continue;
+
+                object value;
+                try
+                {
+                    value = f.GetValue(node);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if (value is System.Collections.IEnumerable list && !(value is string))
+                {
+                    foreach (var item in list)
+                        Walk(item, asset, index, seen);
+                }
+                else
+                {
+                    Walk(value, asset, index, seen);
+                }
+            }
+        }
+
+        private static List<UnityEngine.Object> UsagesFor(
+            Dictionary<Type, List<UnityEngine.Object>> usage,
+            Type t
+        ) => usage.TryGetValue(t, out var list) ? list : new List<UnityEngine.Object>();
+
+        #endregion
 
         /// <summary>Public instance fields + private ones marked [SerializeField], with tooltips.</summary>
         private static List<FieldRow> SerializedFields(Type t)
@@ -285,6 +450,7 @@ namespace Crookedile.EditorTools
             public bool Serializable = true;
             public List<FieldRow> Fields;
             public List<(string label, string value)> Extra;
+            public List<UnityEngine.Object> Usages;
 
             [Sirenix.OdinInspector.OnInspectorGUI]
             private void Draw()
@@ -328,6 +494,41 @@ namespace Crookedile.EditorTools
                         EditorStyles.wordWrappedMiniLabel
                     );
                     EditorGUILayout.EndHorizontal();
+                }
+                SirenixEditorGUI.EndBox();
+
+                SirenixEditorGUI.BeginBox();
+                SirenixEditorGUI.Title(
+                    $"Used by ({Usages?.Count ?? 0})",
+                    "",
+                    TextAlignment.Left,
+                    false
+                );
+                if (Usages == null || Usages.Count == 0)
+                {
+                    EditorGUILayout.LabelField(
+                        "UNUSED — no card, enemy move, enemy, origin passive, or relic references this.",
+                        EditorStyles.wordWrappedMiniLabel
+                    );
+                }
+                else
+                {
+                    foreach (var asset in Usages)
+                    {
+                        if (asset == null)
+                            continue;
+                        EditorGUILayout.BeginHorizontal();
+                        EditorGUILayout.LabelField(
+                            $"{asset.name}  ({asset.GetType().Name})",
+                            GUILayout.MinWidth(200)
+                        );
+                        if (GUILayout.Button("Select", GUILayout.Width(60)))
+                        {
+                            Selection.activeObject = asset;
+                            EditorGUIUtility.PingObject(asset);
+                        }
+                        EditorGUILayout.EndHorizontal();
+                    }
                 }
                 SirenixEditorGUI.EndBox();
             }
