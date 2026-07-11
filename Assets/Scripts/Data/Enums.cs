@@ -154,5 +154,7 @@ namespace Crookedile.Data
         ScandalsInHand, // 12 — Scandal cards currently clogging the player's hand (Celebrity Scandal line)
         ScandalsDrawnThisTurn, // 13 — Scandal cards drawn so far this turn (Celebrity on-draw payoffs)
         CurrentAttention, // 14 — Celebrity's banked Attention (spotlight resource)
+        LastHostilityGained, // 15 — hostility actually ADDED by this card's effects (post Fanatic/Devotion/Ward)
+        LastHostilityLost, // 16 — hostility actually REMOVED by this card's effects (post Hardened/Ward)
     }
 }

@@ -57,6 +57,7 @@ namespace Crookedile.Gameplay.Battle
             int total = 0;
             foreach (var (stats, _) in ctx.GetTargets(_target))
                 total += stats.ReduceHostility(amount);
+            ctx.LastHostilityLost += total;
             GameLogger.LogInfo<ReduceHostilityEffect>($"Reduced {total} Hostility ({_target})");
         }
 

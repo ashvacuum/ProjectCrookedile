@@ -31,7 +31,7 @@ namespace Crookedile.Gameplay.Battle
             int count = 0;
             foreach (var (stats, _) in targets)
             {
-                stats.GainHostility(amount);
+                ctx.LastHostilityGained += stats.GainHostility(amount);
                 count++;
             }
 

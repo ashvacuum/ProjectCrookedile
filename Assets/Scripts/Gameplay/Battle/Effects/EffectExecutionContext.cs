@@ -97,6 +97,12 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>True if any target was defeated during this card's resolution.</summary>
         public bool LastTargetDied { get; set; }
 
+        /// <summary>Hostility actually added by this card's effects (post Fanatic/Devotion/Ward).</summary>
+        public int LastHostilityGained { get; set; }
+
+        /// <summary>Hostility actually removed by this card's effects (post Hardened/Ward).</summary>
+        public int LastHostilityLost { get; set; }
+
         /// <summary>
         /// Set by <see cref="ExhaustThisCardEffect"/> so <c>BattleManager</c>
         /// can move the card from the discard pile to the exhaust pile after all effects resolve.
@@ -378,6 +384,8 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.ScandalsInHand => CountScandalsInHand(),
                 EffectContextValue.ScandalsDrawnThisTurn => Deck?.ScandalsDrawnThisTurn ?? 0,
                 EffectContextValue.CurrentAttention => BattleManager?.CurrentAttention ?? 0,
+                EffectContextValue.LastHostilityGained => LastHostilityGained,
+                EffectContextValue.LastHostilityLost => LastHostilityLost,
                 _ => 0, // FixedAmount / None — use authored value
             };
 

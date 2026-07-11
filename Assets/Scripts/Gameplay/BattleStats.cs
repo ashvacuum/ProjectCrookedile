@@ -135,22 +135,24 @@ namespace Crookedile.Gameplay
 
         /// <summary>
         /// Shifts hostility upward (more hostile). No-op when Fanatic; reduced by Devotion resist.
+        /// Returns the hostility actually applied (0 when blocked/clamped away).
         /// </summary>
-        public void GainHostility(int amount)
+        public int GainHostility(int amount)
         {
             if (IsFanatic)
-                return;
+                return 0;
             // Devotion (steadfast) softens incoming riling.
             amount = Mathf.Max(0, amount - _devotionResist);
             if (amount <= 0)
-                return;
+                return 0;
             // Warded absorbs the change that would otherwise land (checked after the free
             // no-op gates so flags don't waste a ward stack).
             if (_tryConsumeWard?.Invoke() == true)
-                return;
+                return 0;
             int old = _currentHostility;
             _currentHostility = Mathf.Min(_maxHostility, _currentHostility + amount);
             PublishHostilityEvents(old, _currentHostility);
+            return _currentHostility - old;
         }
 
         /// <summary>Shifts hostility downward (more receptive). No-op when Hardened.</summary>
