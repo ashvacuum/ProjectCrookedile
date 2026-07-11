@@ -27,20 +27,19 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
-  _newEffects: []
   _effects: []
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
   _upgradedPassives: []
-  _tags:
-  - faithleader
+  _tags: []
   _isStarterCard: 0
   _isUnlockable: 0
   _isUnplayable: 1
-  _policyLean: 3
+  _innateRetain: 0
   _cardVFX: {fileID: 0}
+  _configurationNotes: 
   references:
     version: 2
     RefIds: []

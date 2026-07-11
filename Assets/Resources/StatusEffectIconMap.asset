@@ -158,3 +158,8 @@ MonoBehaviour:
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: Turncoat
     description: 'Freshly betrayed: deals +1 pressure.'
+  - id: warded
+    icon: {fileID: 21300000, guid: b19bf5acd36fd7a448eddafde9a5ac4b, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: Warded
+    description: 
