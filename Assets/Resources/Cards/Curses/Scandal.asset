@@ -37,6 +37,7 @@ MonoBehaviour:
   _tags: []
   _isStarterCard: 0
   _isUnlockable: 0
+  _isGeneratedOnly: 0
   _isUnplayable: 1
   _innateRetain: 0
   _cardVFX: {fileID: 0}
@@ -50,9 +51,23 @@ MonoBehaviour:
         _name: New Passive
         _trigger:
           rid: 4738608375284105307
-        _conditions: []
+        _conditions:
+        - rid: 5004226238482481152
         _oneShot: 0
-        _effects: []
+        _effects:
+        - rid: 5004226238482481154
     - rid: 4738608375284105307
       type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
+    - rid: 5004226238482481152
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226238482481154
+      type: {class: ChangeOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: -3
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _bypassSupport: 0
