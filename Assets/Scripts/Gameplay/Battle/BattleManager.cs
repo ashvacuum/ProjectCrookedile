@@ -551,8 +551,10 @@ namespace Crookedile.Gameplay.Battle
             BattleStats enemyStats,
             StatusEffectManager mgr,
             System.Collections.Generic.IReadOnlyList<StatusBehavior> statuses = null,
-            int maxStacks = 0
-        ) => _pacify?.TryConvert(enemyStats, mgr, statuses, maxStacks);
+            int maxStacks = 0,
+            StatusBehavior awardStatus = null,
+            int awardStacks = 1
+        ) => _pacify?.TryConvert(enemyStats, mgr, statuses, maxStacks, awardStatus, awardStacks);
 
         #endregion
 

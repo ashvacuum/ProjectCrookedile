@@ -69,11 +69,19 @@ namespace Crookedile.Gameplay.Battle
         /// against the FULL total of the selected statuses — the cap only limits what is
         /// spent (leftovers stay on the enemy; the burst scales with what was consumed).
         /// </param>
+        /// <param name="awardStatus">
+        /// The permanent status stamped on the enemy after a successful conversion — the
+        /// escalator that ALSO raises this conversion's threshold by its current stacks.
+        /// Null = the default Jaded.
+        /// </param>
+        /// <param name="awardStacks">Stacks of the award status applied per conversion.</param>
         public void TryConvert(
             BattleStats enemyStats,
             StatusEffectManager mgr,
             IReadOnlyList<StatusBehavior> statuses = null,
-            int maxStacks = 0
+            int maxStacks = 0,
+            StatusBehavior awardStatus = null,
+            int awardStacks = 1
         )
         {
             if (enemyStats == null || mgr == null || enemyStats == _playerStats)
@@ -81,13 +89,17 @@ namespace Crookedile.Gameplay.Battle
 
             if (statuses == null || statuses.Count == 0)
                 statuses = DefaultPacifyStatuses;
+            if (awardStatus == null)
+                awardStatus = StatusRegistry.Get<JadedStatus>();
 
             int total = 0;
             foreach (var status in statuses)
                 if (status != null)
                     total += mgr.GetStacks(status);
 
-            int threshold = BaseThreshold + mgr.GetStacks<JadedStatus>();
+            // The award status is the escalator: whatever this conversion stamps on the enemy
+            // is what makes the NEXT one cost more.
+            int threshold = BaseThreshold + mgr.GetStacks(awardStatus);
             if (total < threshold)
                 return;
 
@@ -134,15 +146,16 @@ namespace Crookedile.Gameplay.Battle
             int burst = consumed * BurstPerStack;
             _opinion.RaiseDirect(burst);
 
-            // Revert to neutral and gain a permanent Jaded stack (raises the next conversion cost).
+            // Revert to neutral and stamp the award status (raises the next conversion's cost).
             enemyStats.SetHostility(0);
-            mgr.ApplyStatus(StatusRegistry.Get<JadedStatus>(), 1, StatusDurationType.Permanent);
+            if (awardStacks > 0)
+                mgr.ApplyStatus(awardStatus, awardStacks, StatusDurationType.Permanent);
 
             ConversionsThisTurn++;
 
             GameLogger.LogInfo<PacifyConversionEngine>(
                 $"Enemy [{idx}] converted — {consumed}/{total} pacify stacks → {burst} opinion "
-                    + $"burst (now Jaded {mgr.GetStacks<JadedStatus>()})"
+                    + $"burst (now {awardStatus.DisplayName} {mgr.GetStacks(awardStatus)})"
             );
             EventBus.Publish(
                 new EnemyConvertedEvent
