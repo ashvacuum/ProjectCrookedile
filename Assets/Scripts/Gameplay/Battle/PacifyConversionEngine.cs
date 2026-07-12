@@ -64,56 +64,56 @@ namespace Crookedile.Gameplay.Battle
         /// Which statuses count toward (and are consumed by) this conversion. Null/empty =
         /// the default pacify trio (Guilt/Shame/Doubt).
         /// </param>
-        /// <param name="maxStacks">
-        /// Cap on stacks consumed; 0 = consume everything. The threshold is still checked
-        /// against the FULL total of the selected statuses — the cap only limits what is
-        /// spent (leftovers stay on the enemy; the burst scales with what was consumed).
+        /// <summary>What a conversion attempt did — the caller applies awards on Converted.</summary>
+        public enum Outcome
+        {
+            NotReady = 0, // threshold unmet — nothing happened
+            Silenced = 1, // Hardened target: fuel consumed, silenced, no awards
+            Converted = 2, // full conversion: burst fired, reverted to neutral
+        }
+
+        /// <param name="bufferStatus">
+        /// The escalator status: the threshold is 3 + the target's current stacks of it.
+        /// Null = the default Jaded. The CALLER is responsible for awarding it on success —
+        /// the engine only reads it.
         /// </param>
-        /// <param name="awardStatus">
-        /// The permanent status stamped on the enemy after a successful conversion — the
-        /// escalator that ALSO raises this conversion's threshold by its current stacks.
-        /// Null = the default Jaded.
-        /// </param>
-        /// <param name="awardStacks">Stacks of the award status applied per conversion.</param>
-        public void TryConvert(
+        /// <param name="consumed">Fuel stacks actually consumed (0 on NotReady).</param>
+        public Outcome TryConvert(
             BattleStats enemyStats,
             StatusEffectManager mgr,
-            IReadOnlyList<StatusBehavior> statuses = null,
-            int maxStacks = 0,
-            StatusBehavior awardStatus = null,
-            int awardStacks = 1
+            IReadOnlyList<StatusBehavior> statuses,
+            StatusBehavior bufferStatus,
+            out int consumed
         )
         {
+            consumed = 0;
             if (enemyStats == null || mgr == null || enemyStats == _playerStats)
-                return;
+                return Outcome.NotReady;
 
             if (statuses == null || statuses.Count == 0)
                 statuses = DefaultPacifyStatuses;
-            if (awardStatus == null)
-                awardStatus = StatusRegistry.Get<JadedStatus>();
+            if (bufferStatus == null)
+                bufferStatus = StatusRegistry.Get<JadedStatus>();
 
             int total = 0;
             foreach (var status in statuses)
                 if (status != null)
                     total += mgr.GetStacks(status);
 
-            // The award status is the escalator: whatever this conversion stamps on the enemy
-            // is what makes the NEXT one cost more.
-            int threshold = BaseThreshold + mgr.GetStacks(awardStatus);
+            // The buffer status is the escalator: its stacks raise this conversion's cost.
+            int threshold = BaseThreshold + mgr.GetStacks(bufferStatus);
             if (total < threshold)
-                return;
+                return Outcome.NotReady;
 
             int idx = enemyStats.OwnerEnemyIndex;
 
-            // Consume the selected statuses (up to the cap, in authored order) — spent
-            // whether we convert or (Hardened) silence.
-            int toConsume = maxStacks > 0 ? Mathf.Min(maxStacks, total) : total;
-            int consumed = 0;
+            // Consume ALL selected fuel (authored order) — spent whether we convert or
+            // (Hardened) silence.
             foreach (var status in statuses)
             {
-                if (status == null || consumed >= toConsume)
+                if (status == null)
                     continue;
-                int stacks = Mathf.Min(mgr.GetStacks(status), toConsume - consumed);
+                int stacks = mgr.GetStacks(status);
                 if (stacks <= 0)
                     continue;
                 mgr.RemoveStacksNotify(status, stacks);
@@ -139,23 +139,21 @@ namespace Crookedile.Gameplay.Battle
                         WasSilenced = true,
                     }
                 );
-                return;
+                return Outcome.Silenced;
             }
 
             // Convert: one-turn Fanatic burst pumping the meter (generous, scales with stacks eaten).
             int burst = consumed * BurstPerStack;
             _opinion.RaiseDirect(burst);
 
-            // Revert to neutral and stamp the award status (raises the next conversion's cost).
+            // Revert to neutral. Awards (buffer/Jaded, Fanatic, ...) are the CALLER's job —
+            // ConvertPacifiedEffect applies its authored award list on Outcome.Converted.
             enemyStats.SetHostility(0);
-            if (awardStacks > 0)
-                mgr.ApplyStatus(awardStatus, awardStacks, StatusDurationType.Permanent);
 
             ConversionsThisTurn++;
 
             GameLogger.LogInfo<PacifyConversionEngine>(
-                $"Enemy [{idx}] converted — {consumed}/{total} pacify stacks → {burst} opinion "
-                    + $"burst (now {awardStatus.DisplayName} {mgr.GetStacks(awardStatus)})"
+                $"Enemy [{idx}] converted — {consumed} pacify stacks → {burst} opinion burst"
             );
             EventBus.Publish(
                 new EnemyConvertedEvent
@@ -165,6 +163,7 @@ namespace Crookedile.Gameplay.Battle
                     WasSilenced = false,
                 }
             );
+            return Outcome.Converted;
         }
     }
 }
