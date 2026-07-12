@@ -49,6 +49,6 @@ namespace Crookedile.Gameplay.Battle
         }
 
         public override string GetDescription() =>
-            $"Clear all Scandals from your hand; raise Opinion by {_opinionPerScandal} per Scandal cleared";
+            $"Clear your Scandals: +{_opinionPerScandal} Opinion each";
     }
 }

@@ -43,6 +43,6 @@ namespace Crookedile.Gameplay.Battle
             };
 
         public override string GetDescription() =>
-            $"Apply {_minDamage}–{_maxDamage} pressure to the Opinion Meter";
+            $"Apply {_minDamage}–{_maxDamage} Pressure";
     }
 }

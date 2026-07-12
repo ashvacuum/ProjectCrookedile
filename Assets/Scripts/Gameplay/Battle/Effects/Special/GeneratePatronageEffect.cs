@@ -77,7 +77,8 @@ namespace Crookedile.Gameplay.Battle
         public override string GetDescription()
         {
             string what = _cardsToSacrifice == 1 ? "a card" : $"{_cardsToSacrifice} cards";
-            return $"Sacrifice {what} to gain Patronage equal to its cost (+1 if Rare, +1 if Upgraded; 0-cost and junk cards give 1)";
+            // Keyword-short: the Patronage tooltip carries the value formula.
+            return $"Sacrifice {what} for Patronage";
         }
 
         /// <summary>
