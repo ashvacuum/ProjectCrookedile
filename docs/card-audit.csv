@@ -1,0 +1,26 @@
+﻿Class,Name,Type,Rarity,Cost,Starter,Upgrade,ActivatedPassive,Unplayable,GeneratedOnly,InnateRetain,Effects,Passives,Tags,Description,ConfigNotes,AssetPath
+(root),Tax the Rich,Policy,Basic,3 ActionPoints,,MISSING,yes,,,,1,0,,Apply 5 pressure to the Opinion Meter,,Assets/Resources/Cards/Tax The Rich.asset
+Curses,Crisis of Faith,Scandal,Basic,0 None,,MISSING,,yes,,,0,0,,Doubt creeps in. Lose 4 Support at end of turn while held. (Configure TurnEnd passive: LoseShield 4 via Inspector.),,Assets/Resources/Cards/Curses/CrisisOfFaith.asset
+Curses,Doubt,Scandal,Basic,0 None,,MISSING,,yes,,,0,1,,Uncertainty strikes the moment this enters your hand. Lose 2 Support on at end of turn.,,Assets/Resources/Cards/Curses/Doubt.asset
+Curses,False Accusations,Scandal,Basic,0 None,,MISSING,,yes,,,0,1,,Chaos enters your hand when this does. Discard a random card on draw. (Configure OnDraw passive: DiscardRandom 1 via Inspector.),,Assets/Resources/Cards/Curses/FalseAccusations.asset
+Curses,Scandal,Scandal,Basic,0 None,,MISSING,,yes,,,0,1,,The headlines hurt. Lose 3 Resolve at turn end while held. (Configure TurnStart passive: LoseResolve 3 via Inspector.),,Assets/Resources/Cards/Curses/Scandal.asset
+FaithLeader,Absolve Sins,Pressure,Enhanced,1 ActionPoints,,yes,,,,,2,0,faithleader,If target is Hostile: Reduce target's Hostility by CurrentHostility. Apply 5 pressure to the Opinion Meter,,Assets/Resources/Cards/FaithLeader/Enhanced/Absolve Sins.asset
+FaithLeader,Call out the Wicked,Rhetoric,Enhanced,2 ActionPoints,,yes,,,,,1,0,faithleader,Apply HostileEnemyCount ×2 Strength to Self — Deals 1 more pressure.,,Assets/Resources/Cards/FaithLeader/Enhanced/Call out the Wicked.asset
+FaithLeader,Faith,Rhetoric,Enhanced,3 ActionPoints,,yes,,,,,2,0,,If target is Hostile: Reduce target's Hostility by CurrentHostility ×2. Gain LastHostilityLost Support,,Assets/Resources/Cards/FaithLeader/Enhanced/Faith.asset
+FaithLeader,Guilt,Pressure,Basic,1 ActionPoints,yes,yes,,,,,1,0,faithleader,Apply 2 Guilt — Pacify: deals 2 less pressure. Counts toward conversion.,,Assets/Resources/Cards/FaithLeader/Basic/Guilt.asset
+FaithLeader,Insinuate,Rhetoric,Enhanced,2 ActionPoints,,yes,,,,,1,0,faithleader,"If target is Hostile: Apply 2 Doubt — Pacify: ~50% chance to hold back. Counts toward conversion., Apply CurrentHostility pressure to the Opinion Meter",,Assets/Resources/Cards/FaithLeader/Enhanced/Insinuate.asset
+FaithLeader,Name and Shame,Pressure,Enhanced,2 ActionPoints,,yes,,,,,1,0,faithleader,"If target is Receptive: Apply 1 Silenced — Silenced — no voice this turn., Raise target's Hostility by CurrentHostility ×2",,Assets/Resources/Cards/FaithLeader/Enhanced/Name and Shame.asset
+FaithLeader,Praise,Rhetoric,Enhanced,1 ActionPoints,,yes,,,,,1,0,faithleader,If target is Receptive: Reduce Hostility by 2 (AdjacentAllies),,Assets/Resources/Cards/FaithLeader/Enhanced/Praise.asset
+FaithLeader,Pray,Rhetoric,Basic,1 ActionPoints,yes,yes,,,,,1,0,faithleader,Gain 4 Support,,Assets/Resources/Cards/FaithLeader/Basic/Pray.asset
+FaithLeader,Preach,Pressure,Enhanced,1 ActionPoints,,yes,,,,,2,0,faithleader,Draw 1 card. Apply 8 pressure to the Opinion Meter,,Assets/Resources/Cards/FaithLeader/Enhanced/Preach.asset
+FaithLeader,Rebuke,Pressure,Basic,1 ActionPoints,yes,yes,,,,,1,0,faithleader,Apply 5 pressure to the Opinion Meter,,Assets/Resources/Cards/FaithLeader/Basic/Rebuke.asset
+FaithLeader,Retribution,Pressure,Enhanced,1 ActionPoints,,yes,,,,,1,0,faithleader,Apply HostileEnemyCount ×3 pressure to the Opinion Meter,,Assets/Resources/Cards/FaithLeader/Enhanced/Retribution.asset
+FaithLeader,Sacrificial Lamb,Pressure,Enhanced,1 ActionPoints,,yes,,,,,2,0,faithleader,Apply 10 pressure to the Opinion Meter. Raise target's Hostility by 10,,Assets/Resources/Cards/FaithLeader/Enhanced/Sacrificial Lamb.asset
+FaithLeader,Stir the Flock,Rhetoric,Basic,1 ActionPoints,yes,yes,,,,,2,0,faithleader,Draw 2 cards. Raise Hostility by 3 (AllOpponents),,Assets/Resources/Cards/FaithLeader/Basic/Stir the Flock.asset
+FaithLeader,Unwavering,Pressure,Enhanced,2 ActionPoints,,yes,,,,,1,0,faithleader,Apply 1 Silenced to AllOpponents — Silenced — no voice this turn.,,Assets/Resources/Cards/FaithLeader/Enhanced/Unwavering.asset
+Status,Deflated,Heckle,Basic,Free,,MISSING,,yes,,,0,1,,A missing sense of purpose. Unplayable. Ethereal.,,Assets/Resources/Cards/Status/Deflated.asset
+Status,Disappointed,Heckle,Basic,1 ActionPoints,,MISSING,,yes,,,1,1,,A missing sense of purpose. Unplayable. Ethereal.,,Assets/Resources/Cards/Status/Disappointed.asset
+Status,Emptiness,Heckle,Enhanced,Free,,MISSING,,,,,0,1,,When drawn removes 1 action point.,,Assets/Resources/Cards/Status/Emptiness.asset
+Status,Self Doubt,Heckle,Basic,0 None,,MISSING,,yes,,,0,1,,The headlines hurt. Lose 1 Strength at turn end when left in hand.  Exhaust.,,Assets/Resources/Cards/Status/Self Doubt.asset
+Status,Self Pity,Heckle,Basic,1 ActionPoints,,MISSING,,,,,0,1,,You're pathetic. Lose 1 Resolve at turn end while held. Exhaust.,,Assets/Resources/Cards/Status/Self Pity.asset
+Status,Self Pity,Heckle,Basic,1 ActionPoints,,MISSING,,,,,0,1,,,,Assets/Resources/Cards/Status/Exile.asset
