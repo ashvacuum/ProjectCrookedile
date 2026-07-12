@@ -34,11 +34,25 @@ namespace Crookedile.Gameplay.Battle
         [Min(0)]
         [Tooltip(
             "Max stacks consumed per target. 0 = consume everything. The threshold "
-                + "(3 + Jaded) is still checked against the target's FULL total — the cap only "
-                + "limits what is spent, so leftovers stay and the burst scales with what was eaten."
+                + "(3 + award-status stacks) is still checked against the target's FULL total — "
+                + "the cap only limits what is spent, so leftovers stay and the burst scales "
+                + "with what was eaten."
         )]
         [SerializeField]
         private int _maxStacksToConsume = 0;
+
+        [Tooltip(
+            "Permanent status stamped on the enemy after a successful conversion — the "
+                + "escalator that also raises this card's threshold by its current stacks. "
+                + "Leave EMPTY for the default Jaded."
+        )]
+        [SerializeReference]
+        private StatusBehavior _awardStatus;
+
+        [Min(0)]
+        [Tooltip("Stacks of the award status applied per conversion. 0 = award nothing (no escalation).")]
+        [SerializeField]
+        private int _awardStacks = 1;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
@@ -57,7 +71,9 @@ namespace Crookedile.Gameplay.Battle
                     targetStats,
                     statusMgr,
                     _statusesToConvert,
-                    _maxStacksToConsume
+                    _maxStacksToConsume,
+                    _awardStatus,
+                    _awardStacks
                 );
             }
         }
@@ -70,7 +86,8 @@ namespace Crookedile.Gameplay.Battle
                     ? "Guilt/Shame/Doubt"
                     : DescribeStatusList();
             string cap = _maxStacksToConsume > 0 ? $" (max {_maxStacksToConsume} stacks)" : "";
-            return $"Convert {targetStr} with enough {fuel} (3 + Jaded) — "
+            string award = _awardStatus?.DisplayName ?? "Jaded";
+            return $"Convert {targetStr} with enough {fuel} (3 + {award}) — "
                 + $"consume the stacks{cap} for an opinion burst.";
         }
 
