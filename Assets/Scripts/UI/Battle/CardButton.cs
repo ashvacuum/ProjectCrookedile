@@ -21,6 +21,7 @@ namespace Crookedile.UI.Battle
         : MonoBehaviour,
             IPointerEnterHandler,
             IPointerExitHandler,
+            IPointerMoveHandler,
             IPointerClickHandler,
             IBeginDragHandler,
             IDragHandler,
@@ -406,8 +407,65 @@ namespace Crookedile.UI.Battle
             HandLayout?.SetHoverSpread(true, this);
         }
 
+        /// <summary>
+        /// Keyword tooltips: while hovered, probe the description text for a TMP link under
+        /// the cursor and drive BattleTooltipUI from the glossary. No raycast target needed on
+        /// the text — the probe is geometric.
+        /// </summary>
+        public void OnPointerMove(PointerEventData eventData)
+        {
+            if (!isHovered || _isDragging || cardDescriptionText == null)
+                return;
+            if (BattleTooltipUI.Instance == null)
+                return;
+
+            Canvas canvas = ParentCanvas;
+            Camera cam =
+                canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay
+                    ? canvas.worldCamera
+                    : null;
+
+            int linkIndex = TMP_TextUtilities.FindIntersectingLink(
+                cardDescriptionText,
+                eventData.position,
+                cam
+            );
+
+            string linkId =
+                linkIndex >= 0
+                    ? cardDescriptionText.textInfo.linkInfo[linkIndex].GetLinkID()
+                    : null;
+
+            if (linkId == _activeKeywordLink)
+                return; // unchanged — no tooltip churn
+
+            _activeKeywordLink = linkId;
+            if (
+                linkId != null
+                && Crookedile.Gameplay.Battle.KeywordGlossary.TryGet(
+                    linkId,
+                    out string title,
+                    out string description
+                )
+            )
+                BattleTooltipUI.Instance.Show(title, description);
+            else
+                BattleTooltipUI.Instance.Hide();
+        }
+
+        private string _activeKeywordLink;
+
+        private void HideKeywordTooltip()
+        {
+            if (_activeKeywordLink == null)
+                return;
+            _activeKeywordLink = null;
+            BattleTooltipUI.Instance?.Hide();
+        }
+
         public void OnPointerExit(PointerEventData eventData)
         {
+            HideKeywordTooltip();
             if (!isHovered)
                 return;
             isHovered = false;
@@ -509,6 +567,8 @@ namespace Crookedile.UI.Battle
         {
             if (_pickerMode)
                 return; // pickers select by click, never drag-to-play
+
+            HideKeywordTooltip();
 
             // A drag overrides any click-armed targeting.
             DisarmCurrent();
@@ -898,7 +958,9 @@ namespace Crookedile.UI.Battle
             }
 
             if (cardDescriptionText != null)
-                cardDescriptionText.text = cardData.Description;
+                cardDescriptionText.text = Crookedile.Gameplay.Battle.KeywordGlossary.Linkify(
+                    cardData.Description
+                );
 
             if (flavorText != null)
             {
