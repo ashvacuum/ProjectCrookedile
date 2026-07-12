@@ -59,15 +59,20 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Wraps every known keyword in <c>&lt;link&gt;</c> + underline TMP tags for tooltip
-        /// hover detection. Idempotent-enough for card text (call on plain descriptions only).
+        /// Wraps every known keyword in a <c>&lt;link&gt;</c> tag (hover detection) plus the
+        /// "Keyword" TMP style — the visual treatment lives in the TMP Settings default style
+        /// sheet, editable any time without touching code. An undefined style renders as plain
+        /// text, so the system degrades gracefully until the style is authored.
         /// </summary>
         public static string Linkify(string text)
         {
             if (string.IsNullOrEmpty(text))
                 return text;
             EnsureBuilt();
-            return _matcher.Replace(text, m => $"<link=\"{LinkPrefix}{m.Value}\"><u>{m.Value}</u></link>");
+            return _matcher.Replace(
+                text,
+                m => $"<link=\"{LinkPrefix}{m.Value}\"><style=\"Keyword\">{m.Value}</style></link>"
+            );
         }
 
         /// <summary>Resolves a link id (from TMP hover) back to tooltip content.</summary>
