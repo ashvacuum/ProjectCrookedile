@@ -127,15 +127,14 @@ namespace Crookedile.Gameplay.Battle
 
         public override string GetDescription()
         {
+            // Keyword-short: "Convert" is a glossary term — the tooltip explains the
+            // threshold/consume/burst mechanic. Only name what THIS card customizes.
             string targetStr = _target == TargetType.Opponent ? "an enemy" : $"{_target}";
             string fuel =
                 _statusesToConvert == null || _statusesToConvert.Count == 0
-                    ? "Guilt/Shame/Doubt"
-                    : JoinNames(_statusesToConvert);
-            string buffer = _bufferStatus?.DisplayName ?? "Jaded";
-            string awards = DescribeAwards();
-            return $"Convert {targetStr} with enough {fuel} (3 + {buffer}): consume the stacks "
-                + $"for an opinion burst and apply {awards}.";
+                    ? ""
+                    : $" using {JoinNames(_statusesToConvert)}";
+            return $"Convert {targetStr}{fuel}. Awards {DescribeAwards()}.";
         }
 
         private string DescribeAwards()
