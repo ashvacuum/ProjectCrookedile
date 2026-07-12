@@ -93,8 +93,14 @@ namespace Crookedile.Data.Cards
         [ReadOnly]
         [MultiLineProperty(4)]
         [PropertyTooltip("Live preview of the auto-generated description (from the effect list). Fill the override below to replace it with something shorter.")]
-        private string AutoDescriptionPreview =>
-            _effects == null || _effects.Count == 0 ? "(no effects)" : BuildAutoDescription();
+        private string AutoDescriptionPreview
+        {
+            get
+            {
+                string text = BuildAutoDescription();
+                return string.IsNullOrEmpty(text) ? "(no effects or passives)" : text;
+            }
+        }
 
         [FoldoutGroup("Description Override")]
         [InfoBox(
@@ -467,24 +473,38 @@ namespace Crookedile.Data.Cards
             !string.IsNullOrEmpty(_description) ? _description : BuildAutoDescription();
 
         /// <summary>
-        /// Builds a description string by concatenating <see cref="BattleEffect.GetDescription"/>
-        /// from all effects. Uses the new BattleEffect system first, falls back to legacy
-        /// effect descriptions. Returns an empty string if no effects are present.
+        /// Builds a description string from the card's effects, then its passives — so
+        /// passive-only cards (Policies, default-passive carriers) still describe themselves.
+        /// Returns an empty string only when the card has neither.
         /// </summary>
         private string BuildAutoDescription()
         {
-            if (_effects == null || _effects.Count == 0)
-                return string.Empty;
+            var parts = new System.Collections.Generic.List<string>();
 
-            var parts = new System.Collections.Generic.List<string>(_effects.Count);
-            foreach (var e in _effects)
+            if (_effects != null)
             {
-                if (e == null)
-                    continue;
-                string d = e.GetDescription();
-                if (!string.IsNullOrEmpty(d))
-                    parts.Add(d);
+                foreach (var e in _effects)
+                {
+                    if (e == null)
+                        continue;
+                    string d = e.GetDescription();
+                    if (!string.IsNullOrEmpty(d))
+                        parts.Add(d);
+                }
             }
+
+            if (_passives != null)
+            {
+                foreach (var p in _passives)
+                {
+                    if (p == null)
+                        continue;
+                    string d = p.GetDescription();
+                    if (!string.IsNullOrEmpty(d))
+                        parts.Add(d);
+                }
+            }
+
             return parts.Count > 0 ? string.Join(". ", parts) : string.Empty;
         }
 
