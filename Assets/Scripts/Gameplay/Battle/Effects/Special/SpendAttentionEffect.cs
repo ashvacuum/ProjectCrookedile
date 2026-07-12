@@ -44,7 +44,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override string GetDescription() =>
             _attentionToSpend <= 0
-                ? $"Spend all banked Attention; raise Opinion by {_opinionPerAttention} per Attention spent"
-                : $"Spend up to {_attentionToSpend} Attention; raise Opinion by {_opinionPerAttention} per Attention spent";
+                ? $"Spend all Attention: +{_opinionPerAttention} Opinion each"
+                : $"Spend up to {_attentionToSpend} Attention: +{_opinionPerAttention} Opinion each";
     }
 }

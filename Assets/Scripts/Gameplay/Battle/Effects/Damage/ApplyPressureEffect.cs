@@ -91,7 +91,7 @@ namespace Crookedile.Gameplay.Battle
                 TargetType.AllOpponents => " to all enemies",
                 _ => $" ({_target})",
             };
-            return $"Apply {amountStr} pressure to the Opinion Meter{targetStr}";
+            return $"Apply {amountStr} Pressure{targetStr}";
         }
     }
 }
