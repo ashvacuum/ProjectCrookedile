@@ -277,9 +277,10 @@ namespace Crookedile.Data.Cards
             && _cardType != CardType.Heckle
             && !_isUpgraded
             && (
-                _upgradedCosts.Count > 0
-                || _upgradedEffects.Count > 0
-                || _upgradedPassives.Count > 0
+                // Null-tolerant: older assets deserialize with null upgraded lists.
+                (_upgradedCosts?.Count ?? 0) > 0
+                || (_upgradedEffects?.Count ?? 0) > 0
+                || (_upgradedPassives?.Count ?? 0) > 0
             );
 
         /// <summary>Tags for searching and filtering.</summary>
@@ -429,7 +430,7 @@ namespace Crookedile.Data.Cards
         /// </summary>
         public List<CardCost> GetCosts(bool useUpgraded = true)
         {
-            if (useUpgraded && _isUpgraded && _upgradedCosts.Count > 0)
+            if (useUpgraded && _isUpgraded && (_upgradedCosts?.Count ?? 0) > 0)
                 return _upgradedCosts;
             return _costs;
         }
@@ -441,7 +442,7 @@ namespace Crookedile.Data.Cards
         /// </summary>
         public List<BattleEffect> GetNewEffects(bool useUpgraded = true)
         {
-            if (useUpgraded && _isUpgraded && _upgradedEffects.Count > 0)
+            if (useUpgraded && _isUpgraded && (_upgradedEffects?.Count ?? 0) > 0)
                 return _upgradedEffects;
             return _effects;
         }
@@ -453,7 +454,7 @@ namespace Crookedile.Data.Cards
         /// </summary>
         public IReadOnlyList<BattlePassive> GetPassives(bool useUpgraded = true)
         {
-            if (useUpgraded && _isUpgraded && _upgradedPassives.Count > 0)
+            if (useUpgraded && _isUpgraded && (_upgradedPassives?.Count ?? 0) > 0)
                 return _upgradedPassives;
             return _passives;
         }
