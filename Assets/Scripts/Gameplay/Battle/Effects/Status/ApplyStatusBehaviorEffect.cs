@@ -102,8 +102,9 @@ namespace Crookedile.Gameplay.Battle
                 return "Apply a status (none assigned)";
             string targetStr = _target == TargetType.Opponent ? "" : $" to {_target}";
             string amount = DescribeScaledAmount(_stacks, _stacksSource, _perXSource, _multiplier);
-            // Surface the status's own description so cards explain what e.g. Doubt does.
-            return $"Apply {amount} {_behavior.DisplayName}{targetStr} — {_behavior.Describe(_stacks)}";
+            // Keyword-short: the status name is a hoverable keyword (KeywordGlossary tooltip
+            // carries the full explanation) — no inline "— what it does" suffix.
+            return $"Apply {amount} {_behavior.DisplayName}{targetStr}";
         }
     }
 }
