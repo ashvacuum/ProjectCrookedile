@@ -717,6 +717,9 @@ namespace Crookedile.Gameplay.Battle
 
                 // Confused: randomize card effect amounts for this turn (owned by CardPlayController)
                 _cards.OnPlayerTurnStart();
+
+                // "Next turn: X" cards (DelayedEffect) fire now.
+                ResolveDueDelayedEffects();
             }
             else
             {
@@ -823,7 +826,61 @@ namespace Crookedile.Gameplay.Battle
             _patronage.Reset();
             _attention.Reset();
             _cards.ResetForBattle();
+            _delayedEffects.Clear();
         }
+
+        #region Delayed effects (DelayedEffect wrapper)
+
+        private sealed class DelayedEntry
+        {
+            public int TurnsRemaining;
+            public List<BattleEffect> Effects;
+        }
+
+        private readonly List<DelayedEntry> _delayedEffects = new List<DelayedEntry>();
+
+        /// <summary>
+        /// Queues effects to resolve at the start of a future player turn (1 = next turn).
+        /// Called by <see cref="DelayedEffect"/>.
+        /// </summary>
+        public void QueueDelayedEffects(List<BattleEffect> effects, int turnsDelay)
+        {
+            _delayedEffects.Add(
+                new DelayedEntry
+                {
+                    TurnsRemaining = Mathf.Max(1, turnsDelay),
+                    Effects = effects,
+                }
+            );
+            GameLogger.LogInfo<BattleManager>(
+                $"Queued {effects.Count} delayed effect(s), due in {turnsDelay} turn(s)"
+            );
+        }
+
+        /// <summary>
+        /// Ticks the delayed-effect queue at player turn start: due entries resolve with a
+        /// fresh context (single-target effects hit the currently focused enemy).
+        /// </summary>
+        private void ResolveDueDelayedEffects()
+        {
+            for (int i = _delayedEffects.Count - 1; i >= 0; i--)
+            {
+                var entry = _delayedEffects[i];
+                entry.TurnsRemaining--;
+                if (entry.TurnsRemaining > 0)
+                    continue;
+
+                _delayedEffects.RemoveAt(i);
+                var ctx = _effectResolver.CreateContext(isPlayerCard: true);
+                foreach (var effect in entry.Effects)
+                    effect?.Execute(ctx);
+                GameLogger.LogInfo<BattleManager>(
+                    $"Resolved {entry.Effects.Count} delayed effect(s)"
+                );
+            }
+        }
+
+        #endregion
 
         /// <summary>Advances the player-turn counter and fires per-player-turn passives (TurnStartState).</summary>
         internal void FirePlayerTurnStartPassives()
