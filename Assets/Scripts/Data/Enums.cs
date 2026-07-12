@@ -97,6 +97,7 @@ namespace Crookedile.Data
         AllReceptive, // Every living enemy with Hostility < 0 (the supporters)
         RandomReceptive, // One random living receptive enemy (e.g. Sway: convert a supporter)
         AdjacentAllies, // Enemy card → caster's immediate living neighbours, EXCLUDING caster (Protector wards allies, never itself) | Player card → self
+        TriggeringEnemy, // Passive effects only: the enemy the triggering event happened to (falls back to the focused enemy outside passive dispatch)
     }
 
     /// <summary>

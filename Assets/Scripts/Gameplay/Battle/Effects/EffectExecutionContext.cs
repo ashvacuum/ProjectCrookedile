@@ -117,6 +117,13 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public CardData OwnerCard { get; set; }
 
+        /// <summary>
+        /// For passive dispatches: the roster index of the enemy the triggering event happened
+        /// to (e.g. who just received the status), or -1 when the event names no enemy.
+        /// Resolved by <see cref="TargetType.TriggeringEnemy"/>. Set by PassiveResolver.
+        /// </summary>
+        public int TriggeringEnemyIndex { get; set; } = -1;
+
         #endregion
 
         #region Constructor
@@ -271,6 +278,20 @@ namespace Crookedile.Gameplay.Battle
                         // Player has no row neighbours — degrade to Self.
                         pairs.Add((Caster, CasterStatusEffects));
                     }
+                    break;
+
+                case TargetType.TriggeringEnemy:
+                    // The enemy the triggering passive event happened to. Outside passive
+                    // dispatch (or when the event named no enemy) degrade to the focused target
+                    // so a mis-authored card still does something sensible.
+                    if (
+                        AllEnemies != null
+                        && TriggeringEnemyIndex >= 0
+                        && TriggeringEnemyIndex < AllEnemies.Count
+                    )
+                        AddEnemyAt(pairs, TriggeringEnemyIndex);
+                    else
+                        pairs.Add((Target, TargetStatusEffects));
                     break;
 
                 case TargetType.AllHostile:

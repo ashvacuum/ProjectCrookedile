@@ -304,8 +304,34 @@ namespace Crookedile.Gameplay.Battle
                 // Card-sourced passives know their owning card (null for origin/relic passives).
                 _ownerByPassive.TryGetValue(passive, out var ownerCard);
                 execCtx.OwnerCard = ownerCard;
+                // The enemy the event happened to — resolved by TargetType.TriggeringEnemy.
+                execCtx.TriggeringEnemyIndex = ExtractEnemyIndex(evtCtx);
                 passive.TryFire(evtCtx, evalCtx, execCtx);
             }
+        }
+
+        // FieldInfo cache for the EnemyIndex probe — one reflection lookup per event TYPE, ever.
+        private static readonly Dictionary<Type, System.Reflection.FieldInfo> _enemyIndexFields =
+            new Dictionary<Type, System.Reflection.FieldInfo>();
+
+        /// <summary>
+        /// Reads the conventional <c>EnemyIndex</c> field off whatever event fired, so
+        /// <see cref="TargetType.TriggeringEnemy"/> can hit the enemy the event happened to.
+        /// Returns -1 when the event has no such field (or it points at the player).
+        /// Reflection-by-convention: any current or future event with an EnemyIndex field is
+        /// covered automatically — no per-event case to maintain.
+        /// </summary>
+        private static int ExtractEnemyIndex(PassiveEventContext evtCtx)
+        {
+            if (!_enemyIndexFields.TryGetValue(evtCtx.EventType, out var field))
+            {
+                field = evtCtx.EventType.GetField("EnemyIndex");
+                _enemyIndexFields[evtCtx.EventType] = field; // null cached too — probe once
+            }
+
+            if (field == null || field.FieldType != typeof(int))
+                return -1;
+            return (int)field.GetValue(evtCtx.RawEvent);
         }
 
         /// <summary>

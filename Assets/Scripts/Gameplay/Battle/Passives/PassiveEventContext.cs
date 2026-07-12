@@ -19,6 +19,9 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>The runtime type of the wrapped event (never null).</summary>
         public Type EventType { get; }
 
+        /// <summary>The boxed event — for reflection-based reads (e.g. the EnemyIndex probe).</summary>
+        public object RawEvent => _rawEvent;
+
         public PassiveEventContext(IGameEvent evt)
         {
             _rawEvent = evt; // boxing — structs become objects
