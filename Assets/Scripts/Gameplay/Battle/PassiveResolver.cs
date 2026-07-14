@@ -131,6 +131,16 @@ namespace Crookedile.Gameplay.Battle
             Subscribe<EnemyDefeatedEvent>();
             Subscribe<EnemySummonedEvent>();
             Subscribe<EnemyActingEvent>();
+
+            // Hostility events — HostilityChangedTrigger plus the threshold triggers
+            // (BecameHostile/BecameReceptive/Neutralized/Maxed*), which existed but were
+            // never subscribed and silently never fired.
+            Subscribe<HostilityChangedEvent>();
+            Subscribe<EnemyBecameHostileEvent>();
+            Subscribe<EnemyBecameReceptiveEvent>();
+            Subscribe<EnemyNeutralizedEvent>();
+            Subscribe<EnemyMaxedHostilityEvent>();
+            Subscribe<EnemyMaxedReceptiveEvent>();
         }
 
         /// <summary>Unsubscribes all EventBus listeners. Call when the battle ends.</summary>
