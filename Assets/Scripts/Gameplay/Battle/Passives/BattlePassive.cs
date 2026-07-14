@@ -25,10 +25,6 @@ namespace Crookedile.Gameplay.Battle
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class BattlePassive
     {
-        [Tooltip("Display name used in logs and tooltips.")]
-        [SerializeField]
-        private string _name = "New Passive";
-
         [Tooltip("Which battle event causes this passive to attempt to fire.")]
         [SerializeReference]
         private PassiveTriggerBase _trigger;
@@ -55,7 +51,13 @@ namespace Crookedile.Gameplay.Battle
         #endregion
 
         #region Properties
-        public string Name => _name;
+        /// <summary>
+        /// Derived identity for logs and audit messages — the trigger label, which can never
+        /// go stale (the old hand-authored _name field defaulted to "New Passive" everywhere
+        /// and was removed).
+        /// </summary>
+        public string Name => _trigger?.TriggerLabel ?? "(no trigger)";
+
         public PassiveTriggerBase Trigger => _trigger;
         public IReadOnlyList<PassiveConditionBase> Conditions => _conditions;
         public bool OneShot => _oneShot;
@@ -102,7 +104,7 @@ namespace Crookedile.Gameplay.Battle
                 effect?.Execute(execCtx);
 
             GameLogger.LogInfo<BattlePassive>(
-                $"[Passive: {_name}] fired (fire #{_fireCount}{(_oneShot ? ", one-shot" : "")})"
+                $"[Passive: {Name}] fired (fire #{_fireCount}{(_oneShot ? ", one-shot" : "")})"
             );
 
             return true;
