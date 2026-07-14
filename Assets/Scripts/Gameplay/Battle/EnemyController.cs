@@ -213,6 +213,13 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void FlagForcedAggressiveIntent() => _forceAggressiveIntent = true;
 
+        /// <summary>
+        /// Replaces the already-declared intent with <paramref name="move"/> — the player
+        /// commanding this enemy ("Send them Forth" hijacking a Fanatic's turn). Lasts until
+        /// the next SelectNextMove; the caller publishes the intent-changed notification.
+        /// </summary>
+        public void OverrideIntent(EnemyMoveData move) => CurrentIntent = move;
+
         private static bool IsOffensiveMove(EnemyMoveType type) =>
             type == EnemyMoveType.Attack
             || type == EnemyMoveType.OffensiveBuff
