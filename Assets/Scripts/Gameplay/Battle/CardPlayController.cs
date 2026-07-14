@@ -32,9 +32,11 @@ namespace Crookedile.Gameplay.Battle
         // Confused status — maps hand index → randomized effect amounts (one per effect on the card)
         private readonly Dictionary<int, int[]> _confusedOverrides = new Dictionary<int, int[]>();
 
-        // Card types the player has played this turn — read by Counter intents at enemy-turn
-        // resolution ("Counter-Argues IF you played Rhetoric").
-        private readonly HashSet<CardType> _typesPlayedThisTurn = new HashSet<CardType>();
+        // Per-type play counts this turn — Counter intents read presence; payoff effects read
+        // counts via EffectContextValue (e.g. "X per Policy played this turn").
+        private readonly Dictionary<CardType, int> _typeCountsThisTurn =
+            new Dictionary<CardType, int>();
+        private int _cardsPlayedThisTurn;
 
         public CardPlayController(BattleManager manager) => _mgr = manager;
 
@@ -50,12 +52,20 @@ namespace Crookedile.Gameplay.Battle
             _firstCardPlayedThisBattle = false;
             _vfxInFlight = false;
             _confusedOverrides.Clear();
-            _typesPlayedThisTurn.Clear();
+            _typeCountsThisTurn.Clear();
+            _cardsPlayedThisTurn = 0;
         }
 
         /// <summary>True if the player played at least one card of this type this turn.</summary>
         public bool WasTypePlayedThisTurn(CardType cardType) =>
-            _typesPlayedThisTurn.Contains(cardType);
+            _typeCountsThisTurn.TryGetValue(cardType, out int n) && n > 0;
+
+        /// <summary>How many cards of this type the player has played this turn.</summary>
+        public int CountPlayedThisTurn(CardType cardType) =>
+            _typeCountsThisTurn.TryGetValue(cardType, out int n) ? n : 0;
+
+        /// <summary>Total cards played this turn (includes the one currently resolving).</summary>
+        public int CardsPlayedThisTurn => _cardsPlayedThisTurn;
 
         /// <summary>
         /// Per-player-turn upkeep: randomizes hand amounts while Confused, clears stale
@@ -63,7 +73,8 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void OnPlayerTurnStart()
         {
-            _typesPlayedThisTurn.Clear();
+            _typeCountsThisTurn.Clear();
+            _cardsPlayedThisTurn = 0;
 
             if (_mgr.PlayerStatusEffects.HasStatus<ConfusedStatus>())
                 ApplyConfusedOverrides();
@@ -84,8 +95,11 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
 
-            // Counter intents check this at enemy-turn resolution.
-            _typesPlayedThisTurn.Add(card.CardType);
+            // Counter intents check presence; payoff effects read counts. Incremented before
+            // effects resolve, so "per Policy played this turn" INCLUDES the card being played.
+            _typeCountsThisTurn.TryGetValue(card.CardType, out int played);
+            _typeCountsThisTurn[card.CardType] = played + 1;
+            _cardsPlayedThisTurn++;
 
             // Celebrity passive ("mastering his craft"): the first card played each battle is played
             // as its upgraded version. Swap to the upgraded instance before paying costs so the

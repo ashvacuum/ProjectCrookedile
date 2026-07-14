@@ -407,6 +407,16 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.CurrentAttention => BattleManager?.CurrentAttention ?? 0,
                 EffectContextValue.LastHostilityGained => LastHostilityGained,
                 EffectContextValue.LastHostilityLost => LastHostilityLost,
+                EffectContextValue.CardsPlayedThisTurn => BattleManager?.CardsPlayedThisTurn ?? 0,
+                EffectContextValue.PressurePlayedThisTurn => BattleManager?.CountPlayedThisTurn(
+                    CardType.Pressure
+                ) ?? 0,
+                EffectContextValue.RhetoricPlayedThisTurn => BattleManager?.CountPlayedThisTurn(
+                    CardType.Rhetoric
+                ) ?? 0,
+                EffectContextValue.PolicyPlayedThisTurn => BattleManager?.CountPlayedThisTurn(
+                    CardType.Policy
+                ) ?? 0,
                 _ => 0, // FixedAmount / None — use authored value
             };
 

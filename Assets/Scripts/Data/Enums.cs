@@ -157,5 +157,9 @@ namespace Crookedile.Data
         CurrentAttention, // 14 — Celebrity's banked Attention (spotlight resource)
         LastHostilityGained, // 15 — hostility actually ADDED by this card's effects (post Fanatic/Devotion/Ward)
         LastHostilityLost, // 16 — hostility actually REMOVED by this card's effects (post Hardened/Ward)
+        CardsPlayedThisTurn, // 17 — total cards played this turn (includes the card resolving now)
+        PressurePlayedThisTurn, // 18 — Pressure cards played this turn
+        RhetoricPlayedThisTurn, // 19 — Rhetoric cards played this turn
+        PolicyPlayedThisTurn, // 20 — Policy cards played this turn
     }
 }
