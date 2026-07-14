@@ -304,7 +304,27 @@ namespace Crookedile.Gameplay.Battle
             int reduction = _mgr.PlayerDeck?.GetCardCostReduction(card) ?? 0;
             if (reduction == int.MaxValue)
                 return 0; // MakeCardFree sentinel
-            return Mathf.Max(0, baseCost - reduction);
+
+            // Dynamic printed discount ("costs 1 less per X") — live board read each query.
+            int dynamic = GetDynamicCostReduction(card);
+
+            return Mathf.Max(0, baseCost - reduction - dynamic);
+        }
+
+        /// <summary>
+        /// Live "costs 1 less per X" discount from <see cref="CardData.CostReductionPerX"/>.
+        /// Sentinels (None/FixedAmount) mean no discount, matching the per-X scaling convention.
+        /// </summary>
+        private int GetDynamicCostReduction(CardData card)
+        {
+            var perX = card.CostReductionPerX;
+            if (perX == EffectContextValue.None || perX == EffectContextValue.FixedAmount)
+                return 0;
+            if (_mgr.Resolver == null)
+                return 0;
+            // ponytail: fresh context per query (a few per hand per repaint) — pool if profiling
+            // ever cares.
+            return Mathf.Max(0, _mgr.Resolver.CreateContext(isPlayerCard: true).GetValue(perX));
         }
 
         #endregion
