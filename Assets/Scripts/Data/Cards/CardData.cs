@@ -123,6 +123,14 @@ namespace Crookedile.Data.Cards
         [SerializeField]
         private List<CardCost> _costs = new List<CardCost>();
 
+        [Tooltip(
+            "Dynamic printed discount: the AP cost is reduced by 1 per unit of this context "
+                + "value, LIVE (e.g. ReceptiveEnemyCount = costs 1 less per receptive enemy). "
+                + "None = no dynamic discount."
+        )]
+        [SerializeField]
+        private EffectContextValue _costReductionPerX = EffectContextValue.None;
+
         [Header("Effects")]
         [Tooltip("Polymorphic effect list. Add effects via the + button.")]
         [SerializeReference]
@@ -258,6 +266,13 @@ namespace Crookedile.Data.Cards
 
         /// <summary>List of costs required to play this card.</summary>
         public List<CardCost> Costs => _costs;
+
+        /// <summary>
+        /// Dynamic printed discount: AP cost reduced by 1 per unit of this context value, live.
+        /// Sentinels: None AND FixedAmount mean "no discount" (missing enum fields deserialize
+        /// to FixedAmount = 0, matching the per-X scaling convention).
+        /// </summary>
+        public EffectContextValue CostReductionPerX => _costReductionPerX;
 
         /// <summary>Polymorphic effect list for this card.</summary>
         public List<BattleEffect> Effects => _effects;
@@ -504,6 +519,12 @@ namespace Crookedile.Data.Cards
                         parts.Add(d);
                 }
             }
+
+            if (
+                _costReductionPerX != EffectContextValue.None
+                && _costReductionPerX != EffectContextValue.FixedAmount
+            )
+                parts.Add($"Costs 1 less per {_costReductionPerX}");
 
             return parts.Count > 0 ? string.Join(". ", parts) : string.Empty;
         }
