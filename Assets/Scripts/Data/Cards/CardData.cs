@@ -103,6 +103,24 @@ namespace Crookedile.Data.Cards
         }
 
         [FoldoutGroup("Description Override")]
+        [ShowInInspector]
+        [ReadOnly]
+        [MultiLineProperty(4)]
+        [ShowIf(
+            "@(_upgradedEffects != null && _upgradedEffects.Count > 0) "
+                + "|| (_upgradedPassives != null && _upgradedPassives.Count > 0)"
+        )]
+        [PropertyTooltip("Live preview of what the UPGRADED variant of this card will read.")]
+        private string UpgradedDescriptionPreview
+        {
+            get
+            {
+                string text = BuildAutoDescription(upgraded: true);
+                return string.IsNullOrEmpty(text) ? "(same as base)" : text;
+            }
+        }
+
+        [FoldoutGroup("Description Override")]
         [InfoBox(
             "Leave blank — description is auto-generated from card effects at runtime "
                 + "(preview above). Only fill this when the auto-generated text is too long or unclear.",
@@ -259,7 +277,7 @@ namespace Crookedile.Data.Cards
         /// Returns the manual override if set, otherwise auto-generates from the card's effects.
         /// </summary>
         public string Description =>
-            !string.IsNullOrEmpty(_description) ? _description : BuildAutoDescription();
+            !string.IsNullOrEmpty(_description) ? _description : BuildAutoDescription(_isUpgraded);
 
         /// <summary>Flavor text for storytelling and theme.</summary>
         public string FlavorText => _flavorText;
@@ -485,20 +503,31 @@ namespace Crookedile.Data.Cards
         /// Returns the manual override if set, otherwise auto-generates from the card's effects.
         /// </summary>
         public string GetDescription(bool useUpgraded = true) =>
-            !string.IsNullOrEmpty(_description) ? _description : BuildAutoDescription();
+            !string.IsNullOrEmpty(_description)
+                ? _description
+                : BuildAutoDescription(useUpgraded && _isUpgraded);
 
         /// <summary>
         /// Builds a description string from the card's effects, then its passives — so
         /// passive-only cards (Policies, default-passive carriers) still describe themselves.
+        /// Pass <paramref name="upgraded"/> to describe the upgraded variant (falls back to
+        /// the base list wherever no upgraded list is authored, mirroring GetNewEffects).
         /// Returns an empty string only when the card has neither.
         /// </summary>
-        private string BuildAutoDescription()
+        private string BuildAutoDescription(bool upgraded = false)
         {
             var parts = new System.Collections.Generic.List<string>();
 
-            if (_effects != null)
+            var effects =
+                upgraded && (_upgradedEffects?.Count ?? 0) > 0 ? _upgradedEffects : _effects;
+            var passives =
+                upgraded && (_upgradedPassives?.Count ?? 0) > 0
+                    ? (System.Collections.Generic.IReadOnlyList<BattlePassive>)_upgradedPassives
+                    : _passives;
+
+            if (effects != null)
             {
-                foreach (var e in _effects)
+                foreach (var e in effects)
                 {
                     if (e == null)
                         continue;
@@ -508,9 +537,9 @@ namespace Crookedile.Data.Cards
                 }
             }
 
-            if (_passives != null)
+            if (passives != null)
             {
-                foreach (var p in _passives)
+                foreach (var p in passives)
                 {
                     if (p == null)
                         continue;
