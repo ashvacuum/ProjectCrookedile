@@ -26,6 +26,7 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
+  _costReductionPerX: 7
   _effects: []
   _passives:
   - rid: 5004226247261945856
@@ -56,7 +57,6 @@ MonoBehaviour:
     - rid: 5004226247261945856
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: New Passive
         _trigger:
           rid: 5004226247261945865
         _conditions: []

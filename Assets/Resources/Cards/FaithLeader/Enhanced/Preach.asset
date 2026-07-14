@@ -26,6 +26,7 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
+  _costReductionPerX: 7
   _effects:
   - rid: 5004226220983844875
   - rid: 5004226220983844876
@@ -44,6 +45,7 @@ MonoBehaviour:
   - faithleader
   _isStarterCard: 0
   _isUnlockable: 0
+  _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}

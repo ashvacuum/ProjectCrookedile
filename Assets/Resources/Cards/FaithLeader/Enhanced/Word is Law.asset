@@ -26,10 +26,10 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
+  _costReductionPerX: 7
   _effects:
   - rid: 5004226247261945973
-  _passives:
-  - rid: 5004226247261945971
+  _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects:
@@ -47,8 +47,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
     - rid: 5004226247261945968
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
@@ -65,15 +63,6 @@ MonoBehaviour:
         _perXSource: 7
         _multiplier: 1
         _target: 1
-    - rid: 5004226247261945971
-      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: New Passive
-        _trigger:
-          rid: -2
-        _conditions: []
-        _oneShot: 0
-        _effects: []
     - rid: 5004226247261945973
       type: {class: DelayedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

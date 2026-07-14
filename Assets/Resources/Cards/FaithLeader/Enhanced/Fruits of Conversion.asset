@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Fruits of Conversion
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: 5292a599-0de3-41c3-af18-48c358c2f518
-  _cardName: I am speaking
+  _cardName: Fruits of Conversion
   _cardType: 2
   _rarity: 1
   _artwork: {fileID: 21300000, guid: 4acad8d59be6b734b8cfe9fab9e96ace, type: 3}
@@ -26,6 +26,7 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
+  _costReductionPerX: 7
   _effects: []
   _passives:
   - rid: 5004226247261945856
@@ -54,7 +55,6 @@ MonoBehaviour:
     - rid: 5004226247261945856
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: New Passive
         _trigger:
           rid: 5004226247261945857
         _conditions:

@@ -26,6 +26,7 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
+  _costReductionPerX: 7
   _effects:
   - rid: 5004226220983844987
   _passives: []
@@ -43,6 +44,7 @@ MonoBehaviour:
   - faithleader
   _isStarterCard: 0
   _isUnlockable: 0
+  _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
@@ -66,6 +68,9 @@ MonoBehaviour:
         _behavior:
           rid: 5004226220983844989
         _stacks: 1
+        _stacksSource: 0
+        _perXSource: 7
+        _multiplier: 1
         _duration: 0
     - rid: 5004226220983844989
       type: {class: SilencedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}

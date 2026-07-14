@@ -1,0 +1,101 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
+  m_Name: Sheperd's Joy
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
+  _id: e2fd5ebf-838d-4613-a252-368114105d6a
+  _cardName: Shepherd's Joy
+  _cardType: 1
+  _rarity: 0
+  _artwork: {fileID: 21300000, guid: a418f4537ea9c25459c7e5d3fdecae51, type: 3}
+  _description: 
+  _flavorText: 
+  _costs:
+  - _costType: 1
+    _baseAmount: 1
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _costReductionPerX: 7
+  _effects:
+  - rid: 5004226271355076610
+  _passives: []
+  _isUpgraded: 0
+  _upgradedCosts: []
+  _upgradedEffects:
+  - rid: 5004226271355076615
+  _upgradedPassives: []
+  _tags:
+  - faithleader
+  _isStarterCard: 1
+  _isUnlockable: 0
+  _isGeneratedOnly: 0
+  _isUnplayable: 0
+  _innateRetain: 0
+  _cardVFX: {fileID: 0}
+  _configurationNotes: 
+  references:
+    version: 2
+    RefIds:
+    - rid: 5004226271355076610
+      type: {class: GrantTurnPassiveEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _passive:
+          _trigger:
+            rid: 5004226271355076612
+          _conditions:
+          - rid: 5004226271355076613
+          _oneShot: 0
+          _effects:
+          - rid: 5004226271355076614
+    - rid: 5004226271355076612
+      type: {class: EnemyBecameReceptiveTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226271355076613
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226271355076614
+      type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 3
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+    - rid: 5004226271355076615
+      type: {class: GrantTurnPassiveEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _passive:
+          _trigger:
+            rid: 5004226271355076616
+          _conditions:
+          - rid: 5004226271355076617
+          _oneShot: 0
+          _effects:
+          - rid: 5004226271355076618
+    - rid: 5004226271355076616
+      type: {class: EnemyBecameReceptiveTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226271355076617
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226271355076618
+      type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 5
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1

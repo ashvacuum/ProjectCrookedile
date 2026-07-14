@@ -37,6 +37,7 @@ MonoBehaviour:
   _tags: []
   _isStarterCard: 0
   _isUnlockable: 0
+  _isGeneratedOnly: 0
   _isUnplayable: 1
   _innateRetain: 0
   _cardVFX: {fileID: 0}
@@ -54,19 +55,19 @@ MonoBehaviour:
         - rid: 4823698507066769514
         _oneShot: 0
         _effects:
-        - rid: 4823698507066769515
+        - rid: 5004226267226832991
     - rid: 4823698507066769513
       type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
     - rid: 4823698507066769514
       type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 4823698507066769515
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 5004226267226832991
+      type: {class: ChangeOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: -2
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
-        _target: 1
+        _bypassSupport: 0

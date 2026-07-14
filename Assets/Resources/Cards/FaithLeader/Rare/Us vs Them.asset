@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
+  m_Name: Us vs Them
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
+  _id: 202382ac-a5cc-409c-ba2e-b65e559f048b
+  _cardName: Us vs Them
+  _cardType: 2
+  _rarity: 2
+  _artwork: {fileID: 21300000, guid: 0939c90a27108f04593dab37f30e73b2, type: 3}
+  _description: 
+  _flavorText: 
+  _costs:
+  - _costType: 1
+    _baseAmount: 3
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _costReductionPerX: 7
+  _effects: []
+  _passives:
+  - rid: 5004226271355076650
+  _isUpgraded: 0
+  _upgradedCosts:
+  - _costType: 1
+    _baseAmount: 2
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _upgradedEffects: []
+  _upgradedPassives: []
+  _tags:
+  - faithleader
+  _isStarterCard: 0
+  _isUnlockable: 0
+  _isGeneratedOnly: 0
+  _isUnplayable: 0
+  _innateRetain: 0
+  _cardVFX: {fileID: 0}
+  _configurationNotes: 
+  references:
+    version: 2
+    RefIds:
+    - rid: 5004226271355076650
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 5004226271355076651
+        _conditions:
+        - rid: 5004226271355076657
+        _oneShot: 0
+        _effects:
+        - rid: 5004226271355076656
+    - rid: 5004226271355076651
+      type: {class: StatusAppliedToEnemyTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _filterByStatus: 1
+        _filterStatus:
+          rid: 5004226271355076652
+    - rid: 5004226271355076652
+      type: {class: JadedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226271355076656
+      type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _condition: 9
+        _effects:
+        - rid: 5004226271355076658
+    - rid: 5004226271355076657
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226271355076658
+      type: {class: CleanseStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _target: 11
+        _mode: 0
+        _behavior:
+          rid: 5004226271355076659
+    - rid: 5004226271355076659
+      type: {class: JadedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

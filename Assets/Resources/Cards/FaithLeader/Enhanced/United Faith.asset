@@ -26,6 +26,7 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
+  _costReductionPerX: 7
   _effects:
   - rid: 5004226247261945966
   _passives: []
