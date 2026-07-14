@@ -48,7 +48,36 @@ namespace Crookedile.Gameplay.Battle
             _turncoatAdjacentNudge = turncoatAdjacentNudge;
 
             EventBus.Subscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
+            EventBus.Subscribe<HostilityChangedEvent>(OnHostilityChanged);
         }
+
+        #region Turn hostility tallies
+
+        /// <summary>Total enemy hostility gained this player turn, from ANY source.</summary>
+        public int HostilityGainedThisTurn { get; private set; }
+
+        /// <summary>Total enemy hostility lost this player turn, from ANY source.</summary>
+        public int HostilityLostThisTurn { get; private set; }
+
+        /// <summary>Resets the per-turn hostility tallies. Called at player turn start.</summary>
+        public void ResetTurnTallies()
+        {
+            HostilityGainedThisTurn = 0;
+            HostilityLostThisTurn = 0;
+        }
+
+        private void OnHostilityChanged(HostilityChangedEvent evt)
+        {
+            if (evt.IsPlayer)
+                return;
+            int delta = evt.NewValue - evt.OldValue;
+            if (delta > 0)
+                HostilityGainedThisTurn += delta;
+            else if (delta < 0)
+                HostilityLostThisTurn -= delta;
+        }
+
+        #endregion
 
         /// <summary>
         /// Supplies the opinion ledger. Called by BattleManager after the ledger is built (the ledger
@@ -57,7 +86,11 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void AttachLedger(OpinionLedger opinion) => _opinion = opinion;
 
-        public void Dispose() => EventBus.Unsubscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
+        public void Dispose()
+        {
+            EventBus.Unsubscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
+            EventBus.Unsubscribe<HostilityChangedEvent>(OnHostilityChanged);
+        }
 
         private IEnumerable<EnemyController> LivingEnemies => _enemies.Where(e => !e.IsDefeated);
 

@@ -99,6 +99,7 @@ namespace Crookedile.Data
         RandomReceptive, // One random living receptive enemy (e.g. Sway: convert a supporter)
         AdjacentAllies, // Enemy card → caster's immediate living neighbours, EXCLUDING caster (Protector wards allies, never itself) | Player card → self
         TriggeringEnemy, // Passive effects only: the enemy the triggering event happened to (falls back to the focused enemy outside passive dispatch)
+        RandomHostile, // One random living hostile enemy (e.g. per Fanatic, Silence a random heckler)
     }
 
     /// <summary>
@@ -162,5 +163,7 @@ namespace Crookedile.Data
         PressurePlayedThisTurn, // 18 — Pressure cards played this turn
         RhetoricPlayedThisTurn, // 19 — Rhetoric cards played this turn
         PolicyPlayedThisTurn, // 20 — Policy cards played this turn
+        HostilityGainedThisTurn, // 21 — total enemy hostility gained this turn, any source (Blessed are the Persecuted)
+        HostilityLostThisTurn, // 22 — total enemy hostility lost this turn, any source
     }
 }

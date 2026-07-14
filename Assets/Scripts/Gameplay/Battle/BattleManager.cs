@@ -627,6 +627,12 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Total cards played this turn, including the one currently resolving.</summary>
         public int CardsPlayedThisTurn => _cards?.CardsPlayedThisTurn ?? 0;
 
+        /// <summary>Total enemy hostility gained this turn, any source (CrowdReactions tally).</summary>
+        public int HostilityGainedThisTurn => _crowd?.HostilityGainedThisTurn ?? 0;
+
+        /// <summary>Total enemy hostility lost this turn, any source (CrowdReactions tally).</summary>
+        public int HostilityLostThisTurn => _crowd?.HostilityLostThisTurn ?? 0;
+
         #endregion
 
         #region Victory Conditions
@@ -697,8 +703,9 @@ namespace Crookedile.Gameplay.Battle
 
             if (_isPlayerTurn)
             {
-                // Fresh tally each player turn for Sermon-style harvest scaling.
+                // Fresh tallies each player turn (conversion harvest + hostility-shift payoffs).
                 _pacify?.ResetTurnTally();
+                _crowd?.ResetTurnTallies();
 
                 _playerStats.StartTurn();
                 _effectResolver.PlayerStatusEffects.OnTurnStart(_playerStats);

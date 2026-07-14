@@ -310,6 +310,11 @@ namespace Crookedile.Gameplay.Battle
                     AddRandomEnemyWhere(pairs, e => e.Stats.IsReceptive);
                     break;
 
+                case TargetType.RandomHostile:
+                    // One random hostile enemy (e.g. per-Fanatic Silence on a random heckler).
+                    AddRandomEnemyWhere(pairs, e => e.Stats.IsHostile);
+                    break;
+
                 default:
                     GameLogger.LogWarning<EffectExecutionContext>(
                         $"Unhandled TargetType {targetType} — falling back to Opponent"
@@ -418,6 +423,10 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.PolicyPlayedThisTurn => BattleManager?.CountPlayedThisTurn(
                     CardType.Policy
                 ) ?? 0,
+                EffectContextValue.HostilityGainedThisTurn => BattleManager
+                    ?.HostilityGainedThisTurn ?? 0,
+                EffectContextValue.HostilityLostThisTurn => BattleManager?.HostilityLostThisTurn
+                    ?? 0,
                 _ => 0, // FixedAmount / None — use authored value
             };
 
