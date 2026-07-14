@@ -110,10 +110,11 @@ namespace Crookedile.Gameplay.Battle
         public bool ShouldExhaust { get; set; }
 
         /// <summary>
-        /// For card-sourced passive dispatches: the card the firing passive lives on, so effects
-        /// can act on the card itself (e.g. <see cref="MoveOwnerCardEffect"/> repositioning it in
-        /// the deck without it ever being played). Null for played-card resolution and for
-        /// origin/relic passives. Set by PassiveResolver.
+        /// The card these effects are printed on: the played card during card resolution
+        /// (set by EffectResolver), or the passive's owning card during card-sourced passive
+        /// dispatches (set by PassiveResolver). Lets effects act on their own card
+        /// (CardSelectionMode.ThisCard, <see cref="MoveOwnerCardEffect"/>). Null for enemy
+        /// moves and origin/relic passives.
         /// </summary>
         public CardData OwnerCard { get; set; }
 

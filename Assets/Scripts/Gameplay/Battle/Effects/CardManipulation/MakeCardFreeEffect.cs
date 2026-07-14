@@ -27,7 +27,9 @@ namespace Crookedile.Gameplay.Battle
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            if (ctx.Deck == null || ctx.Deck.HandCount == 0)
+            if (ctx.Deck == null)
+                return;
+            if (_selectionMode != CardSelectionMode.ThisCard && ctx.Deck.HandCount == 0)
             {
                 GameLogger.LogInfo<MakeCardFreeEffect>("Hand is empty — no-op");
                 return;
@@ -42,7 +44,8 @@ namespace Crookedile.Gameplay.Battle
                 {
                     if (chosen.Count > 0)
                         ctx.Deck.MakeCardFreeThisBattle(chosen[0]);
-                }
+                },
+                thisCard: ctx.OwnerCard
             );
         }
 
@@ -52,6 +55,7 @@ namespace Crookedile.Gameplay.Battle
             {
                 CardSelectionMode.RandomAny => "a random card",
                 CardSelectionMode.RandomByType => $"a random {_filterType} card",
+                CardSelectionMode.ThisCard => "this card",
                 _ => "a card",
             };
             return $"Make {suffix} cost 0 this battle";
