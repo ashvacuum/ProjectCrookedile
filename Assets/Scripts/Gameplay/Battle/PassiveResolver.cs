@@ -162,6 +162,7 @@ namespace Crookedile.Gameplay.Battle
         {
             _allPassives.Clear();
             _ownerByPassive.Clear();
+            _temporaryPassives.Clear();
 
             // Origin passive — new-system entries (when present)
             if (_passive?.Passives != null)
@@ -223,6 +224,44 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<PassiveResolver>(
                 $"Registered {_allPassives.Count} BattlePassive(s) for this battle."
             );
+        }
+
+        // Passives granted "this turn" by GrantTurnPassiveEffect — removed at player turn end.
+        private readonly List<BattlePassive> _temporaryPassives = new List<BattlePassive>();
+
+        /// <summary>
+        /// Registers a passive until the end of the current player turn ("Whenever X this
+        /// turn, do Y" cards). Playing the granting card again re-registers the same instance —
+        /// it then fires once per registration per event.
+        /// </summary>
+        public void ActivateTemporaryPassive(BattlePassive bp, CardData ownerCard = null)
+        {
+            if (bp == null)
+                return;
+            _temporaryPassives.Add(bp);
+            _allPassives.Add(bp);
+            if (ownerCard != null)
+                _ownerByPassive[bp] = ownerCard;
+            BucketPassive(bp);
+            GameLogger.LogInfo<PassiveResolver>($"Temporary passive active this turn: {bp.Name}");
+        }
+
+        /// <summary>Removes all turn-scoped passives. Called at player turn end.</summary>
+        public void ClearTemporaryPassives()
+        {
+            if (_temporaryPassives.Count == 0)
+                return;
+            foreach (var bp in _temporaryPassives)
+            {
+                _allPassives.Remove(bp);
+                var eventType = bp.Trigger?.EventType;
+                if (eventType != null && _passivesByEvent.TryGetValue(eventType, out var bucket))
+                    bucket.Remove(bp);
+            }
+            GameLogger.LogInfo<PassiveResolver>(
+                $"Cleared {_temporaryPassives.Count} turn-scoped passive(s)"
+            );
+            _temporaryPassives.Clear();
         }
 
         /// <summary>Resets a passive for this battle and files it under its trigger's event type.</summary>

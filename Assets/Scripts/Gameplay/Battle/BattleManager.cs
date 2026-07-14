@@ -761,6 +761,9 @@ namespace Crookedile.Gameplay.Battle
                 // Checked after the player's full turn, so breaking the chamber this turn avoids it.
                 _crowd.ApplyTurnEndDecay();
 
+                // "This turn" passives (GrantTurnPassiveEffect) expire now.
+                _passiveResolver?.ClearTemporaryPassives();
+
                 _playerDeck.EndTurn();
             }
             else
