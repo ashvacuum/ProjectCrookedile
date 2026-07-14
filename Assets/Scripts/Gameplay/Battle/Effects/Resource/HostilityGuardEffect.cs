@@ -22,6 +22,8 @@ namespace Crookedile.Gameplay.Battle
         AllEnemiesReceptive, // Every living enemy is receptive
         NoEnemiesHostile, // No living enemies are hostile (all neutral or receptive)
         NoEnemiesReceptive, // No living enemies are receptive (all neutral or hostile)
+        MoreHostileThanReceptive, // Hostile enemies strictly outnumber receptive ones
+        MoreReceptiveThanHostile, // Receptive enemies strictly outnumber hostile ones
     }
 
     /// <summary>
@@ -74,6 +76,10 @@ namespace Crookedile.Gameplay.Battle
                 HostilityCondition.AllEnemiesReceptive => "If all enemies are Receptive",
                 HostilityCondition.NoEnemiesHostile => "If no enemies are Hostile",
                 HostilityCondition.NoEnemiesReceptive => "If no enemies are Receptive",
+                HostilityCondition.MoreHostileThanReceptive =>
+                    "If Hostile enemies outnumber Receptive",
+                HostilityCondition.MoreReceptiveThanHostile =>
+                    "If Receptive enemies outnumber Hostile",
                 _ => _condition.ToString(),
             };
 
@@ -103,6 +109,14 @@ namespace Crookedile.Gameplay.Battle
                 HostilityCondition.AllEnemiesReceptive => AllLiving(ctx, e => e.Stats.IsReceptive),
                 HostilityCondition.NoEnemiesHostile => !AnyLiving(ctx, e => e.Stats.IsHostile),
                 HostilityCondition.NoEnemiesReceptive => !AnyLiving(ctx, e => e.Stats.IsReceptive),
+                HostilityCondition.MoreHostileThanReceptive => CountLiving(
+                    ctx,
+                    e => e.Stats.IsHostile
+                ) > CountLiving(ctx, e => e.Stats.IsReceptive),
+                HostilityCondition.MoreReceptiveThanHostile => CountLiving(
+                    ctx,
+                    e => e.Stats.IsReceptive
+                ) > CountLiving(ctx, e => e.Stats.IsHostile),
                 _ => false,
             };
         }
@@ -131,6 +145,20 @@ namespace Crookedile.Gameplay.Battle
                 if (!enemy.IsDefeated && !predicate(enemy))
                     return false;
             return true;
+        }
+
+        private static int CountLiving(
+            EffectExecutionContext ctx,
+            Func<EnemyController, bool> predicate
+        )
+        {
+            if (ctx.AllEnemies == null)
+                return 0;
+            int count = 0;
+            foreach (var enemy in ctx.AllEnemies)
+                if (!enemy.IsDefeated && predicate(enemy))
+                    count++;
+            return count;
         }
 
         #endregion
