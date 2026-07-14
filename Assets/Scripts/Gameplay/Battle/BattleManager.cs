@@ -620,6 +620,13 @@ namespace Crookedile.Gameplay.Battle
         public bool WasCardTypePlayedThisTurn(CardType cardType) =>
             _cards?.WasTypePlayedThisTurn(cardType) ?? false;
 
+        /// <summary>How many cards of this type were played this turn (payoff scaling).</summary>
+        public int CountPlayedThisTurn(CardType cardType) =>
+            _cards?.CountPlayedThisTurn(cardType) ?? 0;
+
+        /// <summary>Total cards played this turn, including the one currently resolving.</summary>
+        public int CardsPlayedThisTurn => _cards?.CardsPlayedThisTurn ?? 0;
+
         #endregion
 
         #region Victory Conditions
