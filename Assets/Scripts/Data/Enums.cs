@@ -23,6 +23,7 @@ namespace Crookedile.Data
         PlayerChoice, // 0 — prompt the player via CardChoiceRequestedEvent
         RandomAny, // 1 — pick randomly from the whole pool
         RandomByType, // 2 — filter by a CardType, then pick randomly
+        ThisCard, // 3 — the card this effect is printed on (self; ignores the pool)
     }
 
     /// <summary>

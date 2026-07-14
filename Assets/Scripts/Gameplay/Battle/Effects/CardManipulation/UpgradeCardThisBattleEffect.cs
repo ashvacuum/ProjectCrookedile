@@ -31,6 +31,17 @@ namespace Crookedile.Gameplay.Battle
             if (ctx.Deck == null)
                 return;
 
+            // Self-upgrade is unsupported: the played card is already in the discard and the
+            // swap works on the hand. "This card upgrades when played" is the Celebrity
+            // first-play passive pattern, not this effect.
+            if (_selectionMode == CardSelectionMode.ThisCard)
+            {
+                GameLogger.LogWarning<UpgradeCardThisBattleEffect>(
+                    "ThisCard mode not supported for upgrades — author a different mode"
+                );
+                return;
+            }
+
             var upgradeable = new System.Collections.Generic.List<CardData>();
             foreach (var c in ctx.Deck.Hand)
                 if (c != null && c.CanUpgrade)

@@ -118,6 +118,9 @@ namespace Crookedile.Gameplay.Battle
             );
 
             var execCtx = CreateContext(isPlayerCard);
+            // Effects know the card they're printed on (CardSelectionMode.ThisCard,
+            // MoveOwnerCardEffect). Passive dispatches set this separately in PassiveResolver.
+            execCtx.OwnerCard = card;
 
             // Honour the card's upgrade state — GetNewEffects returns the upgraded effect list when
             // the card is upgraded (and one is authored), else the base list. Identical to .Effects

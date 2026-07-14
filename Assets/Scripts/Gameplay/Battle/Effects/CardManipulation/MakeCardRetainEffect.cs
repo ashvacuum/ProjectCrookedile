@@ -34,7 +34,11 @@ namespace Crookedile.Gameplay.Battle
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            if (ctx.Deck == null || ctx.Deck.HandCount == 0)
+            if (ctx.Deck == null)
+                return;
+            // ThisCard marks the played card itself (works from discard — the retain mark
+            // applies whenever a copy is in hand at end of turn); other modes need a hand.
+            if (_selectionMode != CardSelectionMode.ThisCard && ctx.Deck.HandCount == 0)
             {
                 GameLogger.LogInfo<MakeCardRetainEffect>("Hand is empty — no-op");
                 return;
@@ -49,7 +53,8 @@ namespace Crookedile.Gameplay.Battle
                 {
                     if (chosen.Count > 0)
                         ctx.Deck.RetainCard(chosen[0], _untilEndOfBattle);
-                }
+                },
+                thisCard: ctx.OwnerCard
             );
         }
 
@@ -59,6 +64,7 @@ namespace Crookedile.Gameplay.Battle
             {
                 CardSelectionMode.RandomAny => "a random card",
                 CardSelectionMode.RandomByType => $"a random {_filterType} card",
+                CardSelectionMode.ThisCard => "this card",
                 _ => "a card",
             };
             return _untilEndOfBattle

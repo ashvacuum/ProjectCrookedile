@@ -317,6 +317,7 @@
         ///   <item><see cref="CardSelectionMode.PlayerChoice"/> — publishes <see cref="CardChoiceRequestedEvent"/></item>
         ///   <item><see cref="CardSelectionMode.RandomAny"/> — picks randomly from full pool</item>
         ///   <item><see cref="CardSelectionMode.RandomByType"/> — filters by <paramref name="filterType"/>, then picks randomly</item>
+        ///   <item><see cref="CardSelectionMode.ThisCard"/> — resolves to <paramref name="thisCard"/> (ctx.OwnerCard), ignoring the pool</item>
         /// </list>
         /// </summary>
         protected static void ResolveCardSelection(
@@ -326,9 +327,21 @@
             string choiceTitle,
             int count,
             Action<List<CardData>> onResolved,
-            bool allowFewer = false
+            bool allowFewer = false,
+            CardData thisCard = null
         )
         {
+            // ThisCard: the card the effect is printed on — bypasses the pool entirely (the
+            // played card sits in the discard, not the hand, at resolve time).
+            if (mode == CardSelectionMode.ThisCard)
+            {
+                var self = new List<CardData>();
+                if (thisCard != null)
+                    self.Add(thisCard);
+                onResolved?.Invoke(self);
+                return;
+            }
+
             var candidates = new List<CardData>();
             foreach (var c in pool)
             {
