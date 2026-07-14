@@ -10,38 +10,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Sacrificial Lamb
+  m_Name: Congregation
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: 5292a599-0de3-41c3-af18-48c358c2f518
-  _cardName: Sacrificial Lamb
-  _cardType: 0
+  _cardName: Congregation
+  _cardType: 1
   _rarity: 1
   _artwork: {fileID: 21300000, guid: 0cce94ee10f61b6498a4ee005d68d6e8, type: 3}
   _description: 
   _flavorText: 
   _costs:
   - _costType: 1
-    _baseAmount: 1
+    _baseAmount: 2
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 5004226220983844873
-  - rid: 5004226220983844874
+  - rid: 5004226267226832981
   _passives: []
   _isUpgraded: 0
-  _upgradedCosts:
-  - _costType: 1
-    _baseAmount: 1
-    _isXCost: 0
-    _costChangePerTurn: 0
-    _minimumCost: 0
-    _maximumCost: 99
+  _upgradedCosts: []
   _upgradedEffects:
-  - rid: 5004226220983844877
-  - rid: 5004226220983844878
+  - rid: 5004226271355076666
   _upgradedPassives: []
   _tags:
   - faithleader
@@ -55,39 +47,53 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 5004226220983844873
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 5004226267226832981
+      type: {class: DelayedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 10
+        _turnsDelay: 1
+        _effects:
+        - rid: 5004226267226832983
+        - rid: 5004226267226832984
+    - rid: 5004226267226832983
+      type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 3
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
         _target: 1
-    - rid: 5004226220983844874
-      type: {class: RaiseTargetHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 5004226267226832984
+      type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 10
+        _amount: 2
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+    - rid: 5004226271355076666
+      type: {class: DelayedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _turnsDelay: 1
+        _effects:
+        - rid: 5004226271355076667
+        - rid: 5004226271355076668
+    - rid: 5004226271355076667
+      type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 5
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
         _target: 1
-    - rid: 5004226220983844877
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 5004226271355076668
+      type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 10
+        _amount: 2
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
-        _target: 1
-    - rid: 5004226220983844878
-      type: {class: RaiseTargetHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _amount: 4
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1
-        _target: 1

@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Gospel
+  m_Name: Zealotry
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: 5292a599-0de3-41c3-af18-48c358c2f518
-  _cardName: Gospel
+  _cardName: Zealotry
   _cardType: 2
-  _rarity: 1
-  _artwork: {fileID: 21300000, guid: 4acad8d59be6b734b8cfe9fab9e96ace, type: 3}
+  _rarity: 2
+  _artwork: {fileID: 21300000, guid: 476ec9559adfb7c42a409f6d8bbaffdd, type: 3}
   _description: 
   _flavorText: 
   _costs:
@@ -52,59 +52,40 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
     - rid: 5004226247261945856
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _trigger:
           rid: 5004226247261945865
-        _conditions: []
+        _conditions:
+        - rid: 5004226267226833029
         _oneShot: 0
         _effects:
-        - rid: 5004226247261945862
-    - rid: 5004226247261945862
-      type: {class: ConvertPacifiedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _target: 4
-        _statusesToConvert:
-        - rid: 5004226247261945866
-        - rid: 5004226247261945867
-        - rid: 5004226247261945868
-        _bufferStatus:
-          rid: 5004226247261945961
-        _stacksPerAward: 1
-        _awards:
-        - Behavior:
-            rid: 5004226247261945962
-          Stacks: 1
-          Duration: 2
-        - Behavior:
-            rid: 5004226247261945963
-          Stacks: 1
-          Duration: 0
+        - rid: 5004226267226833027
     - rid: 5004226247261945865
       type: {class: StatusAppliedToEnemyTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _filterByStatus: 0
+        _filterByStatus: 1
         _filterStatus:
-          rid: -2
-    - rid: 5004226247261945866
-      type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 5004226247261945867
-      type: {class: ShameStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 5004226247261945868
-      type: {class: DoubtStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 5004226247261945961
-      type: {class: JadedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 5004226247261945962
-      type: {class: JadedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 5004226247261945963
+          rid: 5004226267226833026
+    - rid: 5004226267226833026
       type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226267226833027
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _target: 11
+        _behavior:
+          rid: 5004226267226833028
+        _stacks: 1
+        _stacksSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _duration: 0
+    - rid: 5004226267226833028
+      type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226267226833029
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 

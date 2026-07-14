@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Call out the Wicked
+  m_Name: Hallelujah
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: 5292a599-0de3-41c3-af18-48c358c2f518
-  _cardName: Call out the Wicked
+  _cardName: Hallelujah
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 21300000, guid: 0cce94ee10f61b6498a4ee005d68d6e8, type: 3}
+  _artwork: {fileID: 21300000, guid: d37888b5dc7798c469d7f9c2789f24e7, type: 3}
   _description: 
   _flavorText: 
   _costs:
@@ -28,7 +28,7 @@ MonoBehaviour:
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 5004226220983844992
+  - rid: 5004226271355076648
   _passives: []
   _isUpgraded: 0
   _upgradedCosts:
@@ -38,8 +38,7 @@ MonoBehaviour:
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
-  _upgradedEffects:
-  - rid: 5004226220983845000
+  _upgradedEffects: []
   _upgradedPassives: []
   _tags:
   - faithleader
@@ -53,33 +52,17 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 5004226220983844992
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5004226271355076648
       type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _target: 0
+        _target: 1
         _behavior:
-          rid: 5004226220983844997
+          rid: -2
         _stacks: 1
-        _stacksSource: 8
-        _perXSource: 0
-        _multiplier: 2
-        _duration: 1
-    - rid: 5004226220983844997
-      type: {class: StrengthStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 5004226220983845000
-      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _target: 0
-        _behavior:
-          rid: 5004226220983845001
-        _stacks: 1
-        _stacksSource: 8
-        _perXSource: 0
-        _multiplier: 2
-        _duration: 1
-    - rid: 5004226220983845001
-      type: {class: StrengthStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
+        _stacksSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _duration: 0

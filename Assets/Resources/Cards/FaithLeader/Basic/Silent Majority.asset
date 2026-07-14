@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Praise
+  m_Name: Silent Majority
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 5292a599-0de3-41c3-af18-48c358c2f518
-  _cardName: Praise
+  _id: 35792898-aece-4bd9-81eb-7f77182c27a9
+  _cardName: 
   _cardType: 1
-  _rarity: 1
-  _artwork: {fileID: 21300000, guid: 0cce94ee10f61b6498a4ee005d68d6e8, type: 3}
+  _rarity: 0
+  _artwork: {fileID: 21300000, guid: f37bd3655d9785644b481f0e478ab5c2, type: 3}
   _description: 
   _flavorText: 
   _costs:
@@ -28,15 +28,14 @@ MonoBehaviour:
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 5004226220983844864
+  - rid: 5004226271355076619
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects:
-  - rid: 5004226220983844866
+  - rid: 5004226271355076625
   _upgradedPassives: []
-  _tags:
-  - faithleader
+  _tags: []
   _isStarterCard: 0
   _isUnlockable: 0
   _isGeneratedOnly: 0
@@ -47,35 +46,47 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 5004226220983844864
+    - rid: 5004226271355076619
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _condition: 1
+        _condition: 9
         _effects:
-        - rid: 5004226220983844865
-    - rid: 5004226220983844865
-      type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+        - rid: 5004226271355076623
+    - rid: 5004226271355076623
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 2
-        _amountSource: 0
+        _target: 7
+        _behavior:
+          rid: 5004226271355076624
+        _stacks: 1
+        _stacksSource: 0
         _perXSource: 7
         _multiplier: 1
-        _target: 10
-    - rid: 5004226220983844866
+        _duration: 0
+    - rid: 5004226271355076624
+      type: {class: DoubtStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226271355076625
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _condition: 1
+        _condition: 9
         _effects:
-        - rid: 5004226220983844867
-    - rid: 5004226220983844867
-      type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+        - rid: 5004226271355076626
+    - rid: 5004226271355076626
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 4
-        _amountSource: 0
+        _target: 7
+        _behavior:
+          rid: 5004226271355076627
+        _stacks: 2
+        _stacksSource: 0
         _perXSource: 7
         _multiplier: 1
-        _target: 10
+        _duration: 0
+    - rid: 5004226271355076627
+      type: {class: DoubtStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

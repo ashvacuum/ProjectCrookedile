@@ -10,39 +10,34 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Insinuate
+  m_Name: Traitor to the Cause
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 5292a599-0de3-41c3-af18-48c358c2f518
-  _cardName: Insinuate
+  _id: e2fd5ebf-838d-4613-a252-368114105d6a
+  _cardName: Traitor to the Cause
   _cardType: 1
-  _rarity: 1
-  _artwork: {fileID: 21300000, guid: 0cce94ee10f61b6498a4ee005d68d6e8, type: 3}
+  _rarity: 0
+  _artwork: {fileID: 21300000, guid: 6d0a4f17c76454c48b66176d60d04bdb, type: 3}
   _description: 
   _flavorText: 
   _costs:
-  - _costType: 1
-    _baseAmount: 2
-    _isXCost: 0
-    _costChangePerTurn: 0
-    _minimumCost: 0
-    _maximumCost: 99
-  _costReductionPerX: 7
-  _effects:
-  - rid: 5004226220983844868
-  _passives: []
-  _isUpgraded: 0
-  _upgradedCosts:
   - _costType: 1
     _baseAmount: 1
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
+  _costReductionPerX: 7
+  _effects:
+  - rid: 5004226267226833032
+  _passives: []
+  _isUpgraded: 0
+  _upgradedCosts: []
   _upgradedEffects: []
-  _upgradedPassives: []
+  _upgradedPassives:
+  - rid: 5004226267226833035
   _tags:
   - faithleader
-  _isStarterCard: 0
+  _isStarterCard: 1
   _isUnlockable: 0
   _isGeneratedOnly: 0
   _isUnplayable: 0
@@ -52,35 +47,47 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 5004226220983844868
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5004226267226833032
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _condition: 0
+        _condition: 2
         _effects:
-        - rid: 5004226220983844869
-        - rid: 5004226220983844872
-    - rid: 5004226220983844869
+        - rid: 5004226267226833033
+    - rid: 5004226267226833033
       type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _target: 1
         _behavior:
-          rid: 5004226220983844870
+          rid: 5004226267226833034
         _stacks: 2
         _stacksSource: 0
         _perXSource: 7
         _multiplier: 1
         _duration: 0
-    - rid: 5004226220983844870
-      type: {class: DoubtStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 5004226267226833034
+      type: {class: ShameStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 5004226220983844872
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 5004226267226833035
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: -2
+        _conditions:
+        - rid: 5004226267226833036
+        _oneShot: 0
+        _effects:
+        - rid: 5004226267226833037
+    - rid: 5004226267226833036
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226267226833037
+      type: {class: MakeCardRetainEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 5
-        _amountSource: 6
-        _perXSource: 0
-        _multiplier: 1
-        _target: 1
+        _selectionMode: 3
+        _filterType: 0
+        _untilEndOfBattle: 1

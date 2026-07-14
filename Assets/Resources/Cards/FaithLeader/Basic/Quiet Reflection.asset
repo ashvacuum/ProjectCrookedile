@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
+  m_Name: Quiet Reflection
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
+  _id: f5a16559-5d84-425c-8c6b-10b72f8fd940
+  _cardName: Quiet Reflection
+  _cardType: 1
+  _rarity: 0
+  _artwork: {fileID: 21300000, guid: a9b6833eafb96f4458f5bb82d0e152d5, type: 3}
+  _description: 
+  _flavorText: 
+  _costs: []
+  _costReductionPerX: 7
+  _effects:
+  - rid: 5004226271355076635
+  _passives: []
+  _isUpgraded: 0
+  _upgradedCosts: []
+  _upgradedEffects:
+  - rid: 5004226271355076640
+  _upgradedPassives: []
+  _tags: []
+  _isStarterCard: 0
+  _isUnlockable: 0
+  _isGeneratedOnly: 0
+  _isUnplayable: 0
+  _innateRetain: 0
+  _cardVFX: {fileID: 0}
+  _configurationNotes: 
+  references:
+    version: 2
+    RefIds:
+    - rid: 5004226271355076635
+      type: {class: DelayedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _turnsDelay: 1
+        _effects:
+        - rid: 5004226271355076636
+    - rid: 5004226271355076636
+      type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 8
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+    - rid: 5004226271355076640
+      type: {class: DelayedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _turnsDelay: 1
+        _effects:
+        - rid: 5004226271355076641
+    - rid: 5004226271355076641
+      type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 10
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1

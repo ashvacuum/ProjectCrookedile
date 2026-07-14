@@ -10,30 +10,35 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Praise
+  m_Name: The World Is Against Us
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 5292a599-0de3-41c3-af18-48c358c2f518
-  _cardName: Praise
+  _id: 7cd870e8-7cfd-4c2c-8a90-f98d14cf0f9b
+  _cardName: The World Is Against Us
   _cardType: 1
-  _rarity: 1
-  _artwork: {fileID: 21300000, guid: 0cce94ee10f61b6498a4ee005d68d6e8, type: 3}
+  _rarity: 2
+  _artwork: {fileID: 21300000, guid: e66052841596e7241b3b2ec62c1d1385, type: 3}
   _description: 
   _flavorText: 
   _costs:
   - _costType: 1
-    _baseAmount: 1
+    _baseAmount: 3
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 5004226220983844864
+  - rid: 5004226271355076660
   _passives: []
   _isUpgraded: 0
-  _upgradedCosts: []
-  _upgradedEffects:
-  - rid: 5004226220983844866
+  _upgradedCosts:
+  - _costType: 1
+    _baseAmount: 2
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _upgradedEffects: []
   _upgradedPassives: []
   _tags:
   - faithleader
@@ -47,35 +52,25 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 5004226220983844864
+    - rid: 5004226271355076660
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _condition: 1
+        _condition: 9
         _effects:
-        - rid: 5004226220983844865
-    - rid: 5004226220983844865
-      type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+        - rid: 5004226271355076661
+    - rid: 5004226271355076661
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 2
-        _amountSource: 0
+        _target: 8
+        _behavior:
+          rid: 5004226271355076662
+        _stacks: 1
+        _stacksSource: 0
         _perXSource: 7
         _multiplier: 1
-        _target: 10
-    - rid: 5004226220983844866
-      type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _condition: 1
-        _effects:
-        - rid: 5004226220983844867
-    - rid: 5004226220983844867
-      type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _amount: 4
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1
-        _target: 10
+        _duration: 0
+    - rid: 5004226271355076662
+      type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
