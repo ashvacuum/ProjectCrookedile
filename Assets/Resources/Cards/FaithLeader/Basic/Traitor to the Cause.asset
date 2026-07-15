@@ -33,8 +33,8 @@ MonoBehaviour:
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
-  _upgradedPassives:
-  - rid: 5004226267226833035
+  _upgradedPassives: []
+  _upgradedInnateRetain: 1
   _tags:
   - faithleader
   _isStarterCard: 1
@@ -47,8 +47,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
     - rid: 5004226267226833032
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
@@ -71,23 +69,3 @@ MonoBehaviour:
     - rid: 5004226267226833034
       type: {class: ShameStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 5004226267226833035
-      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _trigger:
-          rid: -2
-        _conditions:
-        - rid: 5004226267226833036
-        _oneShot: 0
-        _effects:
-        - rid: 5004226267226833037
-    - rid: 5004226267226833036
-      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 5004226267226833037
-      type: {class: MakeCardRetainEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _selectionMode: 3
-        _filterType: 0
-        _untilEndOfBattle: 1

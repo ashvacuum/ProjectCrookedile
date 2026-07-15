@@ -45,7 +45,7 @@ namespace Crookedile.Editor
                         card.IsActivatedPassive ? "yes" : "",
                         card.IsUnplayable ? "yes" : "",
                         card.IsGeneratedOnly ? "yes" : "",
-                        card.InnateRetain ? "yes" : "",
+                        card.GetInnateRetain(useUpgraded: false) ? "yes" : "",
                         (card.Effects?.Count ?? 0).ToString(),
                         (card.Passives?.Count ?? 0).ToString(),
                         string.Join(" ", card.Tags ?? new List<string>()),

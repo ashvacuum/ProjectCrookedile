@@ -540,6 +540,7 @@ namespace Crookedile.Gameplay.Battle
         {
             _activeEffects.Remove(effect);
             _byId.Remove(effect.Id);
+            effect.Behavior.OnDepleted(_owner);
         }
 
         private void RemoveEffectAt(int index)
@@ -547,6 +548,7 @@ namespace Crookedile.Gameplay.Battle
             StatusEffect effect = _activeEffects[index];
             _activeEffects.RemoveAt(index);
             _byId.Remove(effect.Id);
+            effect.Behavior.OnDepleted(_owner);
         }
 
         #endregion

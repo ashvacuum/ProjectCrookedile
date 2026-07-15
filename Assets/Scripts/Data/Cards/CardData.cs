@@ -108,7 +108,8 @@ namespace Crookedile.Data.Cards
         [MultiLineProperty(4)]
         [ShowIf(
             "@(_upgradedEffects != null && _upgradedEffects.Count > 0) "
-                + "|| (_upgradedPassives != null && _upgradedPassives.Count > 0)"
+                + "|| (_upgradedPassives != null && _upgradedPassives.Count > 0) "
+                + "|| _upgradedInnateRetain"
         )]
         [PropertyTooltip("Live preview of what the UPGRADED variant of this card will read.")]
         private string UpgradedDescriptionPreview
@@ -191,6 +192,11 @@ namespace Crookedile.Data.Cards
         [SerializeReference]
         [SerializeField]
         private List<BattlePassive> _upgradedPassives = new List<BattlePassive>();
+
+        [FoldoutGroup("Upgrade")]
+        [Tooltip("Overridden Innate Retain when this card is upgraded. Base retain is used otherwise.")]
+        [SerializeField]
+        private bool _upgradedInnateRetain = false;
 
         #endregion
 
@@ -309,7 +315,7 @@ namespace Crookedile.Data.Cards
 
         /// <summary>
         /// Can this card be upgraded? True if it is not already upgraded and has at least one
-        /// upgraded field defined (costs, effects, or passives).
+        /// upgraded field defined (costs, effects, passives, or retain).
         /// </summary>
         public bool CanUpgrade =>
             _cardType != CardType.Scandal
@@ -320,6 +326,7 @@ namespace Crookedile.Data.Cards
                 (_upgradedCosts?.Count ?? 0) > 0
                 || (_upgradedEffects?.Count ?? 0) > 0
                 || (_upgradedPassives?.Count ?? 0) > 0
+                || _upgradedInnateRetain
             );
 
         /// <summary>Tags for searching and filtering.</summary>
@@ -341,7 +348,12 @@ namespace Crookedile.Data.Cards
         /// True if this card always stays in hand at end of turn (never discarded until played).
         /// Checked by <c>DeckManager.DiscardHand</c> alongside per-turn granted retains.
         /// </summary>
-        public bool InnateRetain => _innateRetain;
+        /// <summary>
+        /// Never discarded at end of turn. When <paramref name="useUpgraded"/> and the card is
+        /// upgraded, reads the upgraded override instead of the base flag.
+        /// </summary>
+        public bool GetInnateRetain(bool useUpgraded = true) =>
+            useUpgraded && _isUpgraded ? _upgradedInnateRetain : _innateRetain;
 
         /// <summary>
         /// True if this card can never be played: all Scandals, and Status cards flagged as unplayable.
@@ -517,6 +529,9 @@ namespace Crookedile.Data.Cards
         private string BuildAutoDescription(bool upgraded = false)
         {
             var parts = new System.Collections.Generic.List<string>();
+
+            if (upgraded ? _upgradedInnateRetain : _innateRetain)
+                parts.Add("Retain");
 
             var effects =
                 upgraded && (_upgradedEffects?.Count ?? 0) > 0 ? _upgradedEffects : _effects;

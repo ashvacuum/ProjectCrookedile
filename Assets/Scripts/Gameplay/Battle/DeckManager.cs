@@ -299,7 +299,7 @@ namespace Crookedile.Gameplay.Battle
             for (int i = _hand.Count - 1; i >= 0; i--)
             {
                 CardData card = _hand[i];
-                if (card.InnateRetain || pass.TryRetain(card))
+                if (card.GetInnateRetain() || pass.TryRetain(card))
                     continue; // skip — stays in hand
                 _hand.RemoveAt(i);
                 _discard.Add(card);

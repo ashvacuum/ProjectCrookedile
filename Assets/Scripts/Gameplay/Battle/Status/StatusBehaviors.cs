@@ -66,6 +66,10 @@ namespace Crookedile.Gameplay.Battle
         public override StatusCategory Category => StatusCategory.HostilityFlag;
         public override bool BlocksHostilityGain => true;
         public override string Describe(int stacks) => "Can't be riled up; can still be won over.";
+
+        // Grace period's over — snaps back hostile. Clamped per-enemy by SetHostility, so
+        // low-cap enemies (e.g. MaxHostility 5) just land at their own max.
+        public override void OnDepleted(BattleStats owner) => owner?.SetHostility(0);
     }
 
     /// <summary>Steadfast — resists hostility gains by X per stack (protects converts).</summary>
