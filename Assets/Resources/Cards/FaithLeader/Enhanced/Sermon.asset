@@ -10,40 +10,35 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Preach
+  m_Name: Sermon
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 5292a599-0de3-41c3-af18-48c358c2f518
-  _cardName: Preach
+  _id: 1177750a-4080-42e9-93c9-25d95cbd4ca9
+  _cardName: Sermon
   _cardType: 0
-  _rarity: 1
-  _artwork: {fileID: 21300000, guid: 0cce94ee10f61b6498a4ee005d68d6e8, type: 3}
+  _rarity: 0
+  _artwork: {fileID: 21300000, guid: 2a76fce97b8b8f24c878182b2fb23b49, type: 3}
   _description: 
   _flavorText: 
   _costs:
-  - _costType: 1
-    _baseAmount: 1
+  - _costType: 0
+    _baseAmount: 0
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 5004226220983844875
-  - rid: 5004226220983844876
+  - rid: 5004226315283595378
+  - rid: 5004226315283595379
   _passives: []
   _isUpgraded: 0
-  _upgradedCosts:
-  - _costType: 1
-    _baseAmount: 1
-    _isXCost: 0
-    _costChangePerTurn: 0
-    _minimumCost: 0
-    _maximumCost: 99
-  _upgradedEffects: []
+  _upgradedCosts: []
+  _upgradedEffects:
+  - rid: 5004226315283595380
+  - rid: 5004226315283595381
   _upgradedPassives: []
   _upgradedInnateRetain: 0
-  _tags:
-  - faithleader
+  _tags: []
   _isStarterCard: 0
   _isUnlockable: 1
   _isGeneratedOnly: 0
@@ -54,20 +49,31 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 5004226220983844875
-      type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _amount: 1
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1
-    - rid: 5004226220983844876
+    - rid: 5004226315283595378
       type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 8
+        _amount: 5
         _amountSource: 0
-        _perXSource: 7
+        _perXSource: 8
         _multiplier: 1
         _target: 1
+    - rid: 5004226315283595379
+      type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 5
+    - rid: 5004226315283595380
+      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 5
+        _amountSource: 0
+        _perXSource: 8
+        _multiplier: 1
+        _target: 1
+    - rid: 5004226315283595381
+      type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 2

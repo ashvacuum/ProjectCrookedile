@@ -21,29 +21,31 @@ MonoBehaviour:
   _flavorText: 
   _costs:
   - _costType: 1
-    _baseAmount: 2
+    _baseAmount: 3
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 5004226271355076648
+  - rid: 5004226315283595264
   _passives: []
   _isUpgraded: 0
   _upgradedCosts:
   - _costType: 1
-    _baseAmount: 1
+    _baseAmount: 2
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 5004226315283595269
   _upgradedPassives: []
+  _upgradedInnateRetain: 0
   _tags:
   - faithleader
   _isStarterCard: 0
-  _isUnlockable: 0
+  _isUnlockable: 1
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -52,17 +54,69 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
-    - rid: 5004226271355076648
+    - rid: 5004226315283595264
+      type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _condition: 9
+        _effects:
+        - rid: 5004226315283595265
+    - rid: 5004226315283595265
+      type: {class: ForEachEnemyWithStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _filterStatus:
+          rid: 5004226315283595266
+        _effects:
+        - rid: 5004226315283595267
+    - rid: 5004226315283595266
+      type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226315283595267
       type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _target: 1
+        _target: 11
         _behavior:
-          rid: -2
-        _stacks: 1
+          rid: 5004226315283595268
+        _stacks: 2
         _stacksSource: 0
         _perXSource: 7
         _multiplier: 1
         _duration: 0
+    - rid: 5004226315283595268
+      type: {class: StrengthStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226315283595269
+      type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _condition: 9
+        _effects:
+        - rid: 5004226315283595270
+    - rid: 5004226315283595270
+      type: {class: ForEachEnemyWithStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _filterStatus:
+          rid: 5004226315283595271
+        _effects:
+        - rid: 5004226315283595272
+    - rid: 5004226315283595271
+      type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226315283595272
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _target: 11
+        _behavior:
+          rid: 5004226315283595273
+        _stacks: 2
+        _stacksSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _duration: 0
+    - rid: 5004226315283595273
+      type: {class: StrengthStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
