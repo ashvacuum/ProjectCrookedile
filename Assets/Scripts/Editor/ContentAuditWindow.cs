@@ -1188,17 +1188,17 @@ namespace Crookedile.EditorTools
                                         $"Passive #{i + 1} has no effects."
                                     )
                                 );
-                            // Known caveat: ShieldGainedTrigger fires on ANY Support increase, so a
+                            // Known caveat: SupportGainedTrigger fires on ANY Support increase, so a
                             // turn-1 receptive/Ritual Support gain can consume a "first time" passive
-                            // before the intended shield card.
+                            // before the intended Support card.
                             if (
                                 bp.Trigger != null
-                                && bp.Trigger.GetType().Name == "ShieldGainedTrigger"
+                                && bp.Trigger.GetType().Name == "SupportGainedTrigger"
                             )
                                 issues.Add(
                                     new AuditIssue(
                                         Severity.Info,
-                                        "ShieldGainedTrigger fires on any Support increase — verify a "
+                                        "SupportGainedTrigger fires on any Support increase — verify a "
                                             + "turn-1 Support gain can't consume a first-time passive early."
                                     )
                                 );

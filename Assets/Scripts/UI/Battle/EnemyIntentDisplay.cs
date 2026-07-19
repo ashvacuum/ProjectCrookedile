@@ -287,7 +287,7 @@ namespace Crookedile.UI.Battle
                 randMax = 0;
             bool hasFixed = false,
                 hasRandom = false,
-                hasShield = false;
+                hasSupport = false;
 
             foreach (var p in previews)
             {
@@ -302,15 +302,15 @@ namespace Crookedile.UI.Battle
                         randMax += p.MaxAmount;
                         hasRandom = true;
                         break;
-                    case DamagePreviewType.EqualToShield:
-                        hasShield = true;
+                    case DamagePreviewType.EqualToSupport:
+                        hasSupport = true;
                         break;
                 }
             }
 
-            if (!hasFixed && !hasRandom && !hasShield)
+            if (!hasFixed && !hasRandom && !hasSupport)
                 return string.Empty;
-            if (hasShield)
+            if (hasSupport)
                 return hasFixed ? $"{fixedTotal}+" : "?";
 
             // Apply full two-step preview pipeline

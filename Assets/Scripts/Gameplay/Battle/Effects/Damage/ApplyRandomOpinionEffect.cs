@@ -7,22 +7,27 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Applies a random amount of pressure to the shared Opinion Meter (rolled between min and max inclusive).
+    /// Shifts the shared Opinion Meter by a random amount (rolled between min and max inclusive).
     /// Direction is determined by <see cref="EffectExecutionContext.IsPlayerCard"/> — no target field needed.
     /// The Confused status effect's <c>amountOverride</c> is intentionally ignored here —
     /// Confused randomises authored fixed amounts, not pre-authored random ranges.
     /// </summary>
     [Serializable]
-    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class ApplyRandomPressureEffect : BattleEffect
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(
+        true,
+        "Crookedile.Gameplay.Battle",
+        null,
+        "ApplyRandomPressureEffect"
+    )]
+    public class ApplyRandomOpinionEffect : BattleEffect
     {
         [MinValue(1)]
-        [Tooltip("Minimum pressure (inclusive).")]
+        [Tooltip("Minimum Opinion shift (inclusive).")]
         [SerializeField]
         private int _minDamage = 3;
 
         [MinValue(1)]
-        [Tooltip("Maximum pressure (inclusive).")]
+        [Tooltip("Maximum Opinion shift (inclusive).")]
         [SerializeField]
         private int _maxDamage = 8;
 
@@ -30,8 +35,8 @@ namespace Crookedile.Gameplay.Battle
         {
             // amountOverride ignored intentionally — Confused randomises authored amounts only
             int rolled = RandomHelper.Range(_minDamage, _maxDamage + 1);
-            BattleStats pressureTarget = ctx.IsPlayerCard ? ctx.Target : ctx.PlayerStats;
-            ApplyPressure(pressureTarget, ctx.Caster, rolled, ctx);
+            BattleStats opinionTarget = ctx.IsPlayerCard ? ctx.Target : ctx.PlayerStats;
+            ApplyOpinion(opinionTarget, ctx.Caster, rolled, ctx);
         }
 
         public override DamagePreview? GetDamagePreview() =>
@@ -43,6 +48,6 @@ namespace Crookedile.Gameplay.Battle
             };
 
         public override string GetDescription() =>
-            $"Apply {_minDamage}–{_maxDamage} Pressure";
+            $"Shift Opinion by {_minDamage}–{_maxDamage}";
     }
 }

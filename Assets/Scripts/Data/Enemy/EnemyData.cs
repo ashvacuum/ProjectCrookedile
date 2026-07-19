@@ -2,6 +2,7 @@
 using System.Linq;
 using Crookedile.Data;
 using Crookedile.Gameplay.Battle;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Data.Enemy
@@ -50,6 +51,13 @@ namespace Crookedile.Data.Enemy
     {
         #region Identity
         [Header("Identity")]
+        [HorizontalGroup("ID")]
+        [ReadOnly]
+        [HideLabel]
+        [Tooltip("Unique identifier for this enemy. Auto-generated GUID.")]
+        [SerializeField]
+        private string _id;
+
         [Tooltip("Display name shown in the battle UI")]
         [SerializeField]
         private string _enemyName = "Unknown Enemy";
@@ -89,6 +97,20 @@ namespace Crookedile.Data.Enemy
 
         #endregion
 
+        #region Passives
+        [Header("Passives")]
+        [Tooltip(
+            "Reactive abilities that fire off this enemy's own battle events — hostility rising/"
+                + "falling, maxing out, crossing into receptive/hostile, etc. Reuses the same "
+                + "trigger/condition/effect system as card and origin passives; TargetType.Self "
+                + "and .AllAllies resolve relative to this enemy."
+        )]
+        [SerializeReference]
+        [SerializeField]
+        private List<BattlePassive> _passives = new List<BattlePassive>();
+
+        #endregion
+
         #region Move Set
         [Header("Move Set")]
         [Tooltip("How the enemy selects their move each turn.")]
@@ -119,6 +141,8 @@ namespace Crookedile.Data.Enemy
         #endregion
 
         #region Properties
+        /// <summary>Unique identifier for this enemy. Auto-generated GUID.</summary>
+        public string ID => _id;
         public string EnemyName => _enemyName;
         public Sprite Portrait => _portrait;
         public int StartingHostility => _startingHostility;
@@ -144,6 +168,9 @@ namespace Crookedile.Data.Enemy
 
         public IReadOnlyList<StartingStatusEntry> StartingEffects => _startingEffects;
 
+        /// <summary>Reactive passives that fire off this enemy's own battle events.</summary>
+        public IReadOnlyList<BattlePassive> Passives => _passives;
+
         /// <summary>
         /// Returns the move list that backs the given <paramref name="stance"/>.
         /// </summary>
@@ -154,6 +181,31 @@ namespace Crookedile.Data.Enemy
                 EnemyStance.Receptive => _receptiveMoves,
                 _ => _neutralMoves,
             };
+
+        /// <summary>Copies the enemy ID to the clipboard.</summary>
+        [Button("Copy ID", ButtonSizes.Small)]
+        [HorizontalGroup("ID", Width = 80)]
+        private void CopyIDToClipboard()
+        {
+            GUIUtility.systemCopyBuffer = _id;
+            Debug.Log($"Copied enemy ID to clipboard: {_id}");
+        }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (string.IsNullOrEmpty(_id))
+            {
+                _id = System.Guid.NewGuid().ToString();
+                UnityEditor.EditorUtility.SetDirty(this);
+            }
+        }
+
+        private void Reset()
+        {
+            _id = System.Guid.NewGuid().ToString();
+        }
+#endif
     }
 
     /// <summary>

@@ -52,7 +52,7 @@ namespace Crookedile.EditorTools
                         "Teleprompter",
                         new BattleStartTrigger(),
                         oneShot: false,
-                        Effect<GainBufferShieldEffect>(("_amount", 3))
+                        Effect<GainSupportEffect>(("_amount", 3))
                     )
                 ),
                 Relic(
@@ -87,7 +87,7 @@ namespace Crookedile.EditorTools
                         "Golden Rooster",
                         new TurnStartTrigger(),
                         oneShot: false,
-                        Effect<GainBufferShieldEffect>(("_amount", 1))
+                        Effect<GainSupportEffect>(("_amount", 1))
                     )
                 ),
             };

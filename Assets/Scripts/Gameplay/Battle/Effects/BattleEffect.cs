@@ -13,7 +13,7 @@
     {
         Fixed,
         Random,
-        EqualToShield,
+        EqualToSupport,
     }
 
     public struct DamagePreview
@@ -81,7 +81,7 @@
         /// <summary>
         /// Executes this effect using the provided execution context.
         /// The context carries all dependencies (caster, target, deck, status managers)
-        /// and accumulates results (pressure applied, opinion raised, support gained) for
+        /// and accumulates results (Opinion shifted, Support gained) for
         /// triggered effects to read.
         /// </summary>
         /// <param name="ctx">Shared context for this card/move resolution.</param>
@@ -180,26 +180,26 @@
 
         #endregion
 
-        #region Shared pressure helpers
+        #region Shared opinion helpers
         /// <summary>
-        /// Applies opinion-meter pressure from <paramref name="attacker"/> to <paramref name="target"/>.
-        /// Routes through <see cref="OpinionLedger.ApplyPressure"/> which absorbs through the session
-        /// shield, moves the meter, and publishes <see cref="DamageDealtEvent"/> as a notification.
-        /// Hostile-enemy multiplier still applies when enemies attack. Thorns on the target reflects
-        /// pressure back through the same ledger.
+        /// Shifts Opinion from <paramref name="attacker"/> toward <paramref name="target"/>.
+        /// Routes through <see cref="OpinionLedger.ApplyOpinionShift"/> which absorbs through the
+        /// session shield, moves the meter, and publishes <see cref="DamageDealtEvent"/> as a
+        /// notification. Hostile-enemy multiplier still applies when enemies attack. Thorns on
+        /// the target reflects the shift back through the same ledger.
         /// </summary>
-        /// <returns>Pressure that reached the opinion meter, pre session-shield absorption.</returns>
-        protected static int ApplyPressure(
+        /// <returns>The Opinion shift that reached the meter, pre session-shield absorption.</returns>
+        protected static int ApplyOpinion(
             BattleStats target,
             BattleStats attacker,
-            int basePressure,
+            int baseAmount,
             EffectExecutionContext ctx
         )
         {
             StatusEffectManager attackerMgr = ctx.GetStatusEffectManager(attacker);
             StatusEffectManager targetMgr = ctx.GetStatusEffectManager(target);
 
-            int mod = attackerMgr?.ModifyDamageDealt(basePressure) ?? basePressure;
+            int mod = attackerMgr?.ModifyDamageDealt(baseAmount) ?? baseAmount;
             int thornsReflected = 0;
             if (targetMgr != null)
                 mod = targetMgr.ModifyDamageTaken(
@@ -209,14 +209,14 @@
                     thornsReflected: out thornsReflected
                 );
 
-            // Hostile enemies amplify their opinion-meter pressure.
+            // Hostile enemies amplify their Opinion shift.
             // HostilityDamageMultiplier already floors at 0.1, so no extra clamp needed.
             if (!ctx.IsPlayerCard && attacker.CurrentHostility > 0)
                 mod = Mathf.RoundToInt(mod * attacker.HostilityDamageMultiplier);
 
             // Thorns reflects back at the attacker's side first (preserving prior ordering).
             if (thornsReflected > 0)
-                RoutePressure(
+                RouteOpinion(
                     ctx,
                     thornsReflected,
                     toPlayer: ctx.IsPlayerCard,
@@ -225,7 +225,7 @@
                     targetEnemyIndex: -1
                 );
 
-            RoutePressure(
+            RouteOpinion(
                 ctx,
                 mod,
                 toPlayer: target == ctx.PlayerStats,
@@ -239,11 +239,11 @@
         }
 
         /// <summary>
-        /// Sends opinion pressure through the battle's <see cref="OpinionLedger"/> (the command path).
+        /// Sends an Opinion shift through the battle's <see cref="OpinionLedger"/> (the command path).
         /// When no BattleManager is present (e.g. the unit-test harness), falls back to publishing
         /// the notification only — there is no meter to move.
         /// </summary>
-        private static void RoutePressure(
+        private static void RouteOpinion(
             EffectExecutionContext ctx,
             int amount,
             bool toPlayer,
@@ -258,7 +258,7 @@
             OpinionLedger ledger = ctx.BattleManager?.Opinion;
             if (ledger != null)
             {
-                ledger.ApplyPressure(
+                ledger.ApplyOpinionShift(
                     amount,
                     toPlayer,
                     attackerName,
@@ -286,7 +286,7 @@
 
         #endregion
 
-        #region Session shield helpers
+        #region Session Support/Denial helpers
 
         protected static void ApplyGainSupport(int amount, EffectExecutionContext ctx)
         {

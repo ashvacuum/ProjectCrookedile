@@ -15,7 +15,7 @@ namespace Crookedile.Gameplay.Battle
     /// Negative = lose your own standing (gambles, Scandal fallout); routes through Support
     ///            unless Bypass Support is set (true unavoidable cost).
     ///
-    /// Player cards only. Enemies change opinion via the caster-directional ApplyPressureEffect,
+    /// Player cards only. Enemies change opinion via the caster-directional ApplyOpinionEffect,
     /// which is intentionally NOT sign-based (its direction comes from who casts it).
     /// </summary>
     [Serializable]
@@ -53,7 +53,7 @@ namespace Crookedile.Gameplay.Battle
             if (!ctx.IsPlayerCard)
             {
                 GameLogger.LogWarning<ChangeOpinionEffect>(
-                    "Authored on an enemy move — no-op (enemies use ApplyPressureEffect)"
+                    "Authored on an enemy move — no-op (enemies use ApplyOpinionEffect)"
                 );
                 return;
             }
@@ -72,7 +72,7 @@ namespace Crookedile.Gameplay.Battle
             if (amount > 0)
             {
                 // Win the crowd — same routing as the old RaiseOpinionEffect.
-                ApplyPressure(ctx.Target, ctx.Caster, amount, ctx);
+                ApplyOpinion(ctx.Target, ctx.Caster, amount, ctx);
                 GameLogger.LogInfo<ChangeOpinionEffect>($"Raised Opinion by {amount}");
                 return;
             }
@@ -85,7 +85,7 @@ namespace Crookedile.Gameplay.Battle
             if (_bypassSupport)
                 ledger.DecayOpinion(loss);
             else
-                ledger.ApplyPressure(
+                ledger.ApplyOpinionShift(
                     loss,
                     toPlayer: true,
                     attackerName: ctx.AttackerName ?? "Self",

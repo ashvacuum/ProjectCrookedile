@@ -407,7 +407,7 @@ namespace Crookedile.Gameplay.Battle
         {
             float final = baseDamage;
             foreach (StatusEffect e in _activeEffects)
-                final = e.Behavior.ModifyOutgoingPressure(final, e.Stacks);
+                final = e.Behavior.ModifyOutgoingOpinion(final, e.Stacks);
             return Mathf.Max(0, Mathf.RoundToInt(final));
         }
 
@@ -434,14 +434,14 @@ namespace Crookedile.Gameplay.Battle
             foreach (StatusEffect e in _activeEffects)
             {
                 if (!e.Behavior.IncomingOverride)
-                    final = e.Behavior.ModifyIncomingPressure(final, e.Stacks, attackerHostility);
+                    final = e.Behavior.ModifyIncomingOpinion(final, e.Stacks, attackerHostility);
                 if (e.Behavior.ConsumedOnIncomingHit)
                     (consumed ??= new List<StatusEffect>()).Add(e);
             }
             foreach (StatusEffect e in _activeEffects)
             {
                 if (e.Behavior.IncomingOverride)
-                    final = e.Behavior.ModifyIncomingPressure(final, e.Stacks, attackerHostility);
+                    final = e.Behavior.ModifyIncomingOpinion(final, e.Stacks, attackerHostility);
             }
 
             if (consumed != null)
@@ -481,12 +481,12 @@ namespace Crookedile.Gameplay.Battle
             foreach (StatusEffect e in _activeEffects)
             {
                 if (!e.Behavior.IncomingOverride)
-                    final = e.Behavior.ModifyIncomingPressure(final, e.Stacks, attackerHostility);
+                    final = e.Behavior.ModifyIncomingOpinion(final, e.Stacks, attackerHostility);
             }
             foreach (StatusEffect e in _activeEffects)
             {
                 if (e.Behavior.IncomingOverride)
-                    final = e.Behavior.ModifyIncomingPressure(final, e.Stacks, attackerHostility);
+                    final = e.Behavior.ModifyIncomingOpinion(final, e.Stacks, attackerHostility);
             }
             return Mathf.Max(0, Mathf.RoundToInt(final));
         }

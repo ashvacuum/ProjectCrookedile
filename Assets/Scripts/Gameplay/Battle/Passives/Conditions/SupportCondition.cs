@@ -4,16 +4,16 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Passes when the player's Shield (Support) stack count satisfies the configured comparison.
+    /// Passes when the player's Support stack count satisfies the configured comparison.
     /// </summary>
     [Serializable]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(
         true,
         "Crookedile.Gameplay.Battle",
         "Assembly-CSharp",
-        "ComposureCondition"
+        "ShieldCondition"
     )]
-    public class ShieldCondition : PassiveConditionBase
+    public class SupportCondition : PassiveConditionBase
     {
         [Tooltip("How to compare the player's Support against the threshold.")]
         [SerializeField]
@@ -25,12 +25,12 @@ namespace Crookedile.Gameplay.Battle
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
-            int shield = ctx.BattleManager?.CurrentSupport ?? 0;
+            int support = ctx.BattleManager?.CurrentSupport ?? 0;
             return _comparison switch
             {
-                ComparisonType.AtLeast => shield >= _value,
-                ComparisonType.AtMost => shield <= _value,
-                ComparisonType.Equals => shield == _value,
+                ComparisonType.AtLeast => support >= _value,
+                ComparisonType.AtMost => support <= _value,
+                ComparisonType.Equals => support == _value,
                 _ => true,
             };
         }

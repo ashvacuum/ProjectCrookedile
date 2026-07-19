@@ -2,7 +2,6 @@
 using System.Linq;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
-using Crookedile.Data.Enemy;
 using Crookedile.Gameplay.Battle;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
@@ -37,7 +36,7 @@ namespace Crookedile.Editor
         {
             Name,
             HighestDamage,
-            HighestShield,
+            HighestSupport,
             MostEffects,
             CheapestCost,
             Type,
@@ -51,7 +50,6 @@ namespace Crookedile.Editor
             NeedsSetup,
             InDevelopment,
             CardHealth,
-            EnemyAudit,
         }
 
         [MenuItem("Crookedile/Card Database")]
@@ -125,9 +123,6 @@ namespace Crookedile.Editor
                     break;
                 case ViewMode.CardHealth:
                     DrawCardHealthView();
-                    break;
-                case ViewMode.EnemyAudit:
-                    DrawEnemyAuditView();
                     break;
             }
         }
@@ -256,17 +251,6 @@ namespace Crookedile.Editor
                 )
             )
                 viewMode = ViewMode.CardHealth;
-
-            if (
-                GUILayout.Toggle(
-                    viewMode == ViewMode.EnemyAudit,
-                    "Enemy Audit",
-                    SirenixGUIStyles.Button,
-                    GUILayout.Width(120),
-                    GUILayout.Height(25)
-                )
-            )
-                viewMode = ViewMode.EnemyAudit;
 
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
@@ -409,16 +393,16 @@ namespace Crookedile.Editor
                 );
             }
 
-            // Most Shield Gain
-            var mostShieldCard = allCards
-                .OrderByDescending(c => GetMaxShieldGain(c))
+            // Most Support Gain
+            var mostSupportCard = allCards
+                .OrderByDescending(c => GetMaxSupportGain(c))
                 .FirstOrDefault();
-            if (mostShieldCard != null && GetMaxShieldGain(mostShieldCard) > 0)
+            if (mostSupportCard != null && GetMaxSupportGain(mostSupportCard) > 0)
             {
                 DrawNotableCard(
-                    "Highest Shield",
-                    mostShieldCard,
-                    $"+{GetMaxShieldGain(mostShieldCard)} shield"
+                    "Highest Support",
+                    mostSupportCard,
+                    $"+{GetMaxSupportGain(mostSupportCard)} Support"
                 );
             }
 
@@ -656,7 +640,7 @@ namespace Crookedile.Editor
                         currentSortMode = mode;
                         sortDescending = (
                             mode == SortMode.HighestDamage
-                            || mode == SortMode.HighestShield
+                            || mode == SortMode.HighestSupport
                             || mode == SortMode.MostEffects
                         );
                     }
@@ -718,7 +702,7 @@ namespace Crookedile.Editor
             int cost = GetMinCost(card);
             int effectCount = card.Effects?.Count ?? 0;
             int damage = GetMaxDamage(card);
-            int shield = GetMaxShieldGain(card);
+            int support = GetMaxSupportGain(card);
 
             // Use a simple rect approach instead of nested Begin/End
             Rect lineRect = EditorGUILayout.GetControlRect(GUILayout.Height(24));
@@ -793,11 +777,11 @@ namespace Crookedile.Editor
             );
             xOffset += 65;
 
-            // Shield
-            string composureText = shield > 0 ? $"+{shield} SHD" : "";
+            // Support
+            string supportText = support > 0 ? $"+{support} SUP" : "";
             GUI.Label(
                 new Rect(xOffset, contentRect.y, 70, 18),
-                composureText,
+                supportText,
                 SirenixGUIStyles.RightAlignedGreyMiniLabel
             );
         }
@@ -867,7 +851,7 @@ namespace Crookedile.Editor
             {
                 SortMode.Name => cards.OrderBy(c => c.CardName),
                 SortMode.HighestDamage => cards.OrderBy(c => GetMaxDamage(c)),
-                SortMode.HighestShield => cards.OrderBy(c => GetMaxShieldGain(c)),
+                SortMode.HighestSupport => cards.OrderBy(c => GetMaxSupportGain(c)),
                 SortMode.MostEffects => cards.OrderBy(c => c.Effects?.Count ?? 0),
                 SortMode.CheapestCost => cards.OrderBy(c => GetMinCost(c)),
                 SortMode.Type => cards.OrderBy(c => c.CardType),
@@ -905,7 +889,7 @@ namespace Crookedile.Editor
             return maxDamage;
         }
 
-        private int GetMaxShieldGain(CardData card)
+        private int GetMaxSupportGain(CardData card)
         {
             if (card?.Effects == null)
                 return 0;
@@ -913,8 +897,8 @@ namespace Crookedile.Editor
             int total = 0;
             foreach (var effect in card.Effects)
             {
-                if (effect is GainBufferShieldEffect shield)
-                    total += shield.PreviewSupportAmount;
+                if (effect is GainSupportEffect gainSupport)
+                    total += gainSupport.PreviewSupportAmount;
             }
             return total;
         }
@@ -1342,228 +1326,6 @@ namespace Crookedile.Editor
                     }
                 }
             }
-
-            return issues;
-        }
-
-            #endregion
-
-        #region Enemy Audit View
-
-        private void DrawEnemyAuditView()
-        {
-            // Load all enemy and move assets from the project
-            var enemies = AssetDatabase
-                .FindAssets("t:EnemyData")
-                .Select(g =>
-                    AssetDatabase.LoadAssetAtPath<EnemyData>(AssetDatabase.GUIDToAssetPath(g))
-                )
-                .Where(e => e != null)
-                .OrderBy(e => e.EnemyName)
-                .ToList();
-
-            var moves = AssetDatabase
-                .FindAssets("t:EnemyMoveData")
-                .Select(g =>
-                    AssetDatabase.LoadAssetAtPath<EnemyMoveData>(AssetDatabase.GUIDToAssetPath(g))
-                )
-                .Where(m => m != null)
-                .OrderBy(m => m.MoveName)
-                .ToList();
-
-            var enemiesWithIssues = enemies
-                .Select(e => (enemy: e, issues: GetEnemyIssues(e)))
-                .Where(x => x.issues.Count > 0)
-                .ToList();
-
-            var movesWithIssues = moves
-                .Select(m => (move: m, issues: GetMoveIssues(m)))
-                .Where(x => x.issues.Count > 0)
-                .ToList();
-
-            int totalIssues = enemiesWithIssues.Count + movesWithIssues.Count;
-
-            SirenixEditorGUI.BeginBox();
-
-        #endregion
-
-            #region Header
-            SirenixEditorGUI.BeginBoxHeader();
-            GUILayout.BeginHorizontal();
-
-            if (totalIssues > 0)
-            {
-                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
-                labelStyle.normal.textColor = new Color(1f, 0.65f, 0f);
-                GUILayout.Label(
-                    $"⚠  {enemiesWithIssues.Count} enemy issue(s)  ·  {movesWithIssues.Count} move issue(s)",
-                    labelStyle
-                );
-            }
-            else
-            {
-                var labelStyle = new GUIStyle(SirenixGUIStyles.BoldTitle);
-                labelStyle.normal.textColor = new Color(0.4f, 0.85f, 0.4f);
-                GUILayout.Label(
-                    $"✓  All {enemies.Count} enemies and {moves.Count} moves are ready",
-                    labelStyle
-                );
-            }
-
-            GUILayout.FlexibleSpace();
-            GUILayout.Label(
-                $"{enemies.Count} enemies  ·  {moves.Count} moves",
-                SirenixGUIStyles.RightAlignedGreyMiniLabel
-            );
-            GUILayout.EndHorizontal();
-            SirenixEditorGUI.EndBoxHeader();
-
-            EditorGUILayout.Space(5);
-
-            if (totalIssues == 0)
-            {
-                EditorGUILayout.Space(10);
-                GUILayout.Label(
-                    "All enemies and moves are ready for gameplay.",
-                    SirenixGUIStyles.CenteredGreyMiniLabel
-                );
-                EditorGUILayout.Space(10);
-                SirenixEditorGUI.EndBox();
-                return;
-            }
-
-            scrollPosition = EditorGUILayout.BeginScrollView(
-                scrollPosition,
-                GUILayout.MaxHeight(500)
-            );
-
-            #endregion
-
-            #region Enemy issues
-            if (enemiesWithIssues.Count > 0)
-            {
-                GUILayout.Label("Enemies", EditorStyles.boldLabel);
-                EditorGUILayout.Space(4);
-
-                foreach (var (enemy, issues) in enemiesWithIssues)
-                {
-                    SirenixEditorGUI.BeginVerticalList();
-                    GUILayout.BeginHorizontal();
-
-                    GUILayout.BeginVertical();
-                    GUILayout.Label(enemy.EnemyName, EditorStyles.boldLabel);
-                    GUILayout.Label(
-                        $"Moves: {enemy.Moves?.Count ?? 0}",
-                        SirenixGUIStyles.LeftAlignedGreyLabel
-                    );
-                    GUILayout.EndVertical();
-
-                    GUILayout.FlexibleSpace();
-
-                    if (GUILayout.Button("Select", GUILayout.Width(60), GUILayout.Height(30)))
-                    {
-                        Selection.activeObject = enemy;
-                        EditorGUIUtility.PingObject(enemy);
-                    }
-
-                    GUILayout.EndHorizontal();
-
-                    foreach (var issue in issues)
-                        GUILayout.Label($"• {issue}", EditorStyles.helpBox);
-
-                    SirenixEditorGUI.EndVerticalList();
-                    EditorGUILayout.Space(4);
-                }
-
-                EditorGUILayout.Space(8);
-            }
-
-            #endregion
-
-            #region Move issues
-            if (movesWithIssues.Count > 0)
-            {
-                GUILayout.Label("Enemy Moves", EditorStyles.boldLabel);
-                EditorGUILayout.Space(4);
-
-                foreach (var (move, issues) in movesWithIssues)
-                {
-                    SirenixEditorGUI.BeginVerticalList();
-                    GUILayout.BeginHorizontal();
-
-                    string displayName = string.IsNullOrWhiteSpace(move.MoveName)
-                        ? "[Unnamed Move]"
-                        : move.MoveName;
-
-                    GUILayout.BeginVertical();
-                    GUILayout.Label(displayName, EditorStyles.boldLabel);
-                    GUILayout.Label($"{move.MoveType}", SirenixGUIStyles.LeftAlignedGreyLabel);
-                    GUILayout.EndVertical();
-
-                    GUILayout.FlexibleSpace();
-
-                    if (GUILayout.Button("Select", GUILayout.Width(60), GUILayout.Height(30)))
-                    {
-                        Selection.activeObject = move;
-                        EditorGUIUtility.PingObject(move);
-                    }
-
-                    GUILayout.EndHorizontal();
-
-                    foreach (var issue in issues)
-                        GUILayout.Label($"• {issue}", EditorStyles.helpBox);
-
-                    SirenixEditorGUI.EndVerticalList();
-                    EditorGUILayout.Space(4);
-                }
-            }
-
-            EditorGUILayout.EndScrollView();
-            SirenixEditorGUI.EndBox();
-        }
-
-        /// <summary>Returns validation issues for an enemy asset.</summary>
-        private static List<string> GetEnemyIssues(EnemyData enemy)
-        {
-            var issues = new List<string>();
-
-            if (enemy.Portrait == null)
-                issues.Add("Missing portrait — battle UI will show a broken image slot");
-
-            if (enemy.Moves == null || enemy.Moves.Count == 0)
-                issues.Add("No moves defined — enemy cannot act on their turn");
-            else
-            {
-                for (int i = 0; i < enemy.Moves.Count; i++)
-                    if (enemy.Moves[i] == null)
-                        issues.Add(
-                            $"Move slot [{i}] is null — will cause a NullReferenceException at runtime"
-                        );
-            }
-
-            return issues;
-        }
-
-        /// <summary>Returns validation issues for an enemy move asset.</summary>
-        private static List<string> GetMoveIssues(EnemyMoveData move)
-        {
-            var issues = new List<string>();
-
-            if (string.IsNullOrWhiteSpace(move.MoveName))
-                issues.Add("No move name — intent display will be blank in logs and debug UI");
-
-            if (string.IsNullOrWhiteSpace(move.IntentDescription))
-                issues.Add("No intent description — player cannot see what this move will do");
-
-            bool hasEffects = move.Effects != null && move.Effects.Count > 0;
-
-            if (!hasEffects && move.MoveType != EnemyMoveType.SummonMinion)
-                issues.Add("No effects defined — move resolves but does nothing");
-
-            if (move.MoveType == EnemyMoveType.SummonMinion && move.MinionToSummon == null)
-                issues.Add(
-                    "SummonMinion move has no MinionToSummon set — summon will silently fail"
-                );
 
             return issues;
         }

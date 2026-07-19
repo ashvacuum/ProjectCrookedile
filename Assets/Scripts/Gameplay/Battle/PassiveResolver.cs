@@ -44,6 +44,15 @@ namespace Crookedile.Gameplay.Battle
         private readonly Dictionary<BattlePassive, CardData> _ownerByPassive =
             new Dictionary<BattlePassive, CardData>();
 
+        // Owning enemy per enemy-sourced passive (EnemyData.Passives) — lets DispatchEvent
+        // self-filter to that enemy's own events and cast effects as that enemy rather than
+        // the player. ponytail: keyed by BattlePassive reference, so two live EnemyControllers
+        // sharing the same EnemyData asset (e.g. two summoned copies of the same minion) would
+        // share one passive's fire-count/one-shot state. Fine for unique/boss enemies; clone
+        // EnemyData.Passives per EnemyController if a duplicated minion type ever needs one.
+        private readonly Dictionary<BattlePassive, EnemyController> _ownerEnemyByPassive =
+            new Dictionary<BattlePassive, EnemyController>();
+
         private readonly EffectResolver _effectResolver;
         private IReadOnlyList<EnemyController> _enemies;
         private StatusEffectManager _playerStatusEffects;
@@ -162,6 +171,7 @@ namespace Crookedile.Gameplay.Battle
         {
             _allPassives.Clear();
             _ownerByPassive.Clear();
+            _ownerEnemyByPassive.Clear();
             _temporaryPassives.Clear();
 
             // Origin passive — new-system entries (when present)
@@ -211,6 +221,25 @@ namespace Crookedile.Gameplay.Battle
                             _allPassives.Add(bp);
                             _ownerByPassive[bp] = card;
                         }
+                    }
+                }
+            }
+
+            // Enemy passives — each living enemy's EnemyData.Passives react to that enemy's own
+            // events (hostility crossing thresholds, etc.), self-filtered in DispatchEvent.
+            if (_enemies != null)
+            {
+                foreach (var enemy in _enemies)
+                {
+                    var enemyPassives = enemy?.EnemyData?.Passives;
+                    if (enemyPassives == null)
+                        continue;
+                    foreach (var bp in enemyPassives)
+                    {
+                        if (bp == null)
+                            continue;
+                        _allPassives.Add(bp);
+                        _ownerEnemyByPassive[bp] = enemy;
                     }
                 }
             }
@@ -343,8 +372,25 @@ namespace Crookedile.Gameplay.Battle
                 _battleManager
             );
 
+            int eventEnemyIndex = ExtractEnemyIndex(evtCtx);
+
             foreach (var passive in bucket)
             {
+                if (_ownerEnemyByPassive.TryGetValue(passive, out var ownerEnemy))
+                {
+                    // Enemy-owned passive: self-filter to its own events when the event names an
+                    // enemy at all (events with no EnemyIndex, e.g. CardPlayedEvent, fire for
+                    // every enemy that listens for them).
+                    if (eventEnemyIndex >= 0 && eventEnemyIndex != ownerEnemy.Stats.OwnerEnemyIndex)
+                        continue;
+
+                    var enemyExecCtx = _effectResolver.CreateEnemyPassiveContext(ownerEnemy);
+                    EnrichContextFromEvent(evtCtx, enemyExecCtx);
+                    enemyExecCtx.TriggeringEnemyIndex = eventEnemyIndex;
+                    passive.TryFire(evtCtx, evalCtx, enemyExecCtx);
+                    continue;
+                }
+
                 // Fresh execution context per passive prevents state bleed between passives.
                 // Enrich it with values from the triggering event so passive effects can use
                 // AmountSource (e.g. LastDamageDealt for lifesteal-style passives).
@@ -354,7 +400,7 @@ namespace Crookedile.Gameplay.Battle
                 _ownerByPassive.TryGetValue(passive, out var ownerCard);
                 execCtx.OwnerCard = ownerCard;
                 // The enemy the event happened to — resolved by TargetType.TriggeringEnemy.
-                execCtx.TriggeringEnemyIndex = ExtractEnemyIndex(evtCtx);
+                execCtx.TriggeringEnemyIndex = eventEnemyIndex;
                 passive.TryFire(evtCtx, evalCtx, execCtx);
             }
         }

@@ -24,7 +24,7 @@ namespace Crookedile.Gameplay.Battle
                 enemies.StatusEffects.RemoveStacks<DoubtStatus>(doubt);
             }
 
-            ApplyPressure(ctx.Target, ctx.Caster, damage, ctx);
+            ApplyOpinion(ctx.Target, ctx.Caster, damage, ctx);
         }
 
         public override string GetDescription() =>

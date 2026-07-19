@@ -10,7 +10,7 @@ namespace Crookedile.Gameplay.Battle
     /// <summary>
     /// Lowers the player's OWN opinion — the self-cost half of risk/reward cards
     /// (gambles, desperate plays, Scandal fallout). Player cards only; an enemy
-    /// authoring this is a no-op (enemies lower opinion via normal pressure).
+    /// authoring this is a no-op (enemies lower opinion via a normal Opinion shift).
     ///
     /// Routing: by default the loss goes through Support like an attack (shields can
     /// soak the cost); enable Bypass Support for a true unavoidable cost.
@@ -50,7 +50,7 @@ namespace Crookedile.Gameplay.Battle
             if (!ctx.IsPlayerCard)
             {
                 GameLogger.LogWarning<LowerOwnOpinionEffect>(
-                    "Authored on an enemy move — no-op (use ApplyPressureEffect instead)"
+                    "Authored on an enemy move — no-op (use ApplyOpinionEffect instead)"
                 );
                 return;
             }
@@ -73,7 +73,7 @@ namespace Crookedile.Gameplay.Battle
             if (_bypassSupport)
                 ledger.DecayOpinion(amount);
             else
-                ledger.ApplyPressure(
+                ledger.ApplyOpinionShift(
                     amount,
                     toPlayer: true,
                     attackerName: ctx.AttackerName ?? "Self",

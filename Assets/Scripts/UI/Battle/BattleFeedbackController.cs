@@ -6,6 +6,7 @@ using Crookedile.Gameplay.Battle;
 using Crookedile.Managers;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Crookedile.UI.Battle
 {
@@ -49,13 +50,14 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private Color _healColor = new Color(0.2f, 0.9f, 0.2f);
 
-        [Tooltip("Color of the 'Blocked' text when a shield fully absorbs a hit.")]
+        [Tooltip("Color of the 'Blocked' text when Support/Denial fully absorbs a hit.")]
         [SerializeField]
         private Color _blockedColor = new Color(0.7f, 0.7f, 0.75f);
 
-        [Tooltip("Color of shield gain/loss numbers (Support / Denial) shown on the meter.")]
+        [Tooltip("Color of Support/Denial gain/loss numbers shown on the meter.")]
+        [FormerlySerializedAs("_shieldColor")]
         [SerializeField]
-        private Color _shieldColor = new Color(0.4f, 0.6f, 0.9f);
+        private Color _supportColor = new Color(0.4f, 0.6f, 0.9f);
 
         #region Lifecycle
         /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
@@ -169,8 +171,8 @@ namespace Crookedile.UI.Battle
             if (!evt.IsToPlayer)
                 ReactOnEnemy(evt.TargetEnemyIndex);
 
-            // Show what actually happened, not the raw pressure: the applied delta when the
-            // meter moved, "Blocked" when a shield ate the whole hit, nothing when the hit
+            // Show what actually happened, not the raw shift: the applied delta when the
+            // meter moved, "Blocked" when Support/Denial ate the whole hit, nothing when the hit
             // evaporated without a shield (echo-halved to 0 / meter already clamped).
             if (evt.Applied > 0)
                 FloatingTextManager.Instance?.Show(evt.Applied.ToString(), dmgTarget, _damageColor);
@@ -263,14 +265,14 @@ namespace Crookedile.UI.Battle
 
         // Support and Denial both live on the meter (rendered as bar segments), so their
         // gain/loss feedback anchors to the meter — not a player/enemy slot — just like the
-        // pressure numbers that move it.
+        // Opinion numbers that move it.
         private void OnSupportChanged(SupportChangedEvent evt) =>
-            ShieldFeedback(evt.OldValue, evt.NewValue, evt.IsDecay);
+            SupportFeedback(evt.OldValue, evt.NewValue, evt.IsDecay);
 
         private void OnDenialChanged(DenialChangedEvent evt) =>
-            ShieldFeedback(evt.OldValue, evt.NewValue, evt.IsDecay);
+            SupportFeedback(evt.OldValue, evt.NewValue, evt.IsDecay);
 
-        private void ShieldFeedback(int oldValue, int newValue, bool isDecay)
+        private void SupportFeedback(int oldValue, int newValue, bool isDecay)
         {
             // Ambient turn-start expiry is not an attack — no sting, no number.
             if (isDecay)
@@ -278,8 +280,8 @@ namespace Crookedile.UI.Battle
             var meter = _battleUI?.MeterTransform;
             Play(
                 newValue > oldValue
-                    ? BattleAudioTrigger.ShieldGained
-                    : BattleAudioTrigger.ShieldLost,
+                    ? BattleAudioTrigger.SupportGained
+                    : BattleAudioTrigger.SupportLost,
                 meter
             );
             int delta = newValue - oldValue;
@@ -287,7 +289,7 @@ namespace Crookedile.UI.Battle
                 FloatingTextManager.Instance?.Show(
                     (delta > 0 ? "+" : "") + delta,
                     meter,
-                    _shieldColor
+                    _supportColor
                 );
         }
 

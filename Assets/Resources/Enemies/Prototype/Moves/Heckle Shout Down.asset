@@ -36,7 +36,7 @@ MonoBehaviour:
         _stacks: 1
         _duration: 0
     - rid: 4823698825199485069
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 3

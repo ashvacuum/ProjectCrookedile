@@ -67,7 +67,7 @@ MonoBehaviour:
         _multiplier: 1
         _target: 1
     - rid: 5004226203391361036
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 5
@@ -83,7 +83,7 @@ MonoBehaviour:
         _effects:
         - rid: 5004226220983844973
     - rid: 5004226220983844972
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 5

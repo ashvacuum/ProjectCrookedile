@@ -9,19 +9,25 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Applies pressure scaled by the number of hostile (or receptive) enemies.
-    /// SUPERSEDED: prefer <see cref="ApplyPressureEffect"/> with Per X Source =
+    /// Shifts Opinion scaled by the number of hostile (or receptive) enemies.
+    /// SUPERSEDED: prefer <see cref="ApplyOpinionEffect"/> with Per X Source =
     /// HostileEnemyCount / ReceptiveEnemyCount — same result, more options.
     /// Kept because existing card assets (Condemnation) reference it.
     /// </summary>
     [Serializable]
-    public class ApplyPressureBasedOnHostility : BattleEffect
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(
+        true,
+        "Crookedile.Gameplay.Battle",
+        null,
+        "ApplyPressureBasedOnHostility"
+    )]
+    public class ApplyOpinionBasedOnHostility : BattleEffect
     {
         [Tooltip("Which crowd to count: AllHostile or AllReceptive.")]
         [SerializeField]
         private TargetType _targetType = TargetType.AllHostile;
 
-        [Tooltip("Pressure dealt per matching enemy.")]
+        [Tooltip("Opinion shift dealt per matching enemy.")]
         [MinValue(1)]
         [SerializeField]
         private int _damage = 1;
@@ -30,7 +36,7 @@ namespace Crookedile.Gameplay.Battle
         {
             if (_targetType != TargetType.AllHostile && _targetType != TargetType.AllReceptive)
             {
-                GameLogger.LogWarning<ApplyPressureBasedOnHostility>(
+                GameLogger.LogWarning<ApplyOpinionBasedOnHostility>(
                     "Target type must be AllHostile or AllReceptive — no-op"
                 );
                 return;
@@ -41,7 +47,7 @@ namespace Crookedile.Gameplay.Battle
             if (count <= 0 || perEnemy <= 0)
                 return;
 
-            ApplyPressure(ctx.Target, ctx.Caster, count * perEnemy, ctx);
+            ApplyOpinion(ctx.Target, ctx.Caster, count * perEnemy, ctx);
         }
 
 #if UNITY_EDITOR
@@ -53,7 +59,7 @@ namespace Crookedile.Gameplay.Battle
 #endif
 
         public override string GetDescription() =>
-            $"Apply {_damage} pressure per "
+            $"Shift Opinion by {_damage} per "
             + (
                 _targetType switch
                 {
