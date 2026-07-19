@@ -8,9 +8,9 @@ namespace Crookedile.Gameplay.Battle
         true,
         "Crookedile.Gameplay.Battle",
         "Assembly-CSharp",
-        "ComposureGainedTrigger"
+        "ShieldGainedTrigger"
     )]
-    public class ShieldGainedTrigger : PassiveTriggerBase
+    public class SupportGainedTrigger : PassiveTriggerBase
     {
         public override bool Matches(PassiveEventContext ctx)
         {

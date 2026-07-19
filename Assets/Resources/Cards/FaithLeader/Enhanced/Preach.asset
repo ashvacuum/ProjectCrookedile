@@ -63,7 +63,7 @@ MonoBehaviour:
         _perXSource: 7
         _multiplier: 1
     - rid: 5004226220983844876
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 8

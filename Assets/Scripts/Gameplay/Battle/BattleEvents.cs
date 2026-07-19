@@ -279,9 +279,9 @@ namespace Crookedile.Gameplay.Battle
 
 
     /// <summary>
-    /// Published by <c>OpinionLedger.ApplyPressure</c> whenever opinion-meter pressure resolves
-    /// (after shields and meter mutation, so the payload carries the honest outcome).
-    /// Only fires when <c>Amount &gt; 0</c>.
+    /// Published by <c>OpinionLedger.ApplyOpinionShift</c> whenever an Opinion shift resolves
+    /// (after Support/Denial absorption and meter mutation, so the payload carries the honest
+    /// outcome). Only fires when <c>Amount &gt; 0</c>.
     /// </summary>
     public struct DamageDealtEvent : IGameEvent
     {
@@ -402,8 +402,8 @@ namespace Crookedile.Gameplay.Battle
         public int OldValue;
         public int NewValue;
 
-        /// <summary>True when the change is ambient turn-start expiry (DecayShields), not an
-        /// attack or spend — feedback layers skip the "shield lost" sting for decay.</summary>
+        /// <summary>True when the change is ambient turn-start expiry (DecaySupportAndDenial), not
+        /// an attack or spend — feedback layers skip the "lost" sting for decay.</summary>
         public bool IsDecay;
     }
 
@@ -416,8 +416,8 @@ namespace Crookedile.Gameplay.Battle
         public int OldValue;
         public int NewValue;
 
-        /// <summary>True when the change is ambient turn-start expiry (DecayShields), not an
-        /// attack or spend — feedback layers skip the "shield lost" sting for decay.</summary>
+        /// <summary>True when the change is ambient turn-start expiry (DecaySupportAndDenial), not
+        /// an attack or spend — feedback layers skip the "lost" sting for decay.</summary>
         public bool IsDecay;
     }
 

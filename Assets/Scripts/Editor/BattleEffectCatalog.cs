@@ -65,7 +65,7 @@ namespace Crookedile.EditorTools
             return result.OrderBy(e => e.DisplayName).ToList();
         }
 
-        /// <summary>"ApplyPressureEffect" → "Deal Damage".</summary>
+        /// <summary>"ApplyOpinionEffect" → "Apply Opinion".</summary>
         private static string Prettify(string typeName)
         {
             string s = Regex.Replace(typeName, "([a-z0-9])([A-Z])", "$1 $2");

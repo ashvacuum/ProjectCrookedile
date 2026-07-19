@@ -16,7 +16,7 @@ namespace Crookedile.Data.Enemy
     public enum EnemyMoveType
     {
         Attack = 0, // Pure damage or debuffs to the player
-        Defend = 1, // Gains Shield or heals itself
+        Defend = 1, // Gains Denial or heals itself
         Buff = 2, // Applies a self-buff only
         Debuff = 3, // Applies a debuff to the player without direct damage
         OffensiveBuff = 4, // Attacks AND buffs itself in the same move

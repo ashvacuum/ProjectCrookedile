@@ -6,10 +6,15 @@ using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
-    /// <summary>Removes Support from the session shield by the given amount.</summary>
+    /// <summary>Removes Support by the given amount.</summary>
     [Serializable]
-    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class LoseBufferEffect : BattleEffect
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(
+        true,
+        "Crookedile.Gameplay.Battle",
+        null,
+        "LoseBufferEffect"
+    )]
+    public class LoseSupportEffect : BattleEffect
     {
         [MinValue(1)]
         [SerializeField]
@@ -21,7 +26,7 @@ namespace Crookedile.Gameplay.Battle
             if (ctx.BattleManager == null)
                 return;
             int actual = ctx.BattleManager.SpendSupport(amount);
-            GameLogger.LogInfo<LoseBufferEffect>($"Lost {actual} Support");
+            GameLogger.LogInfo<LoseSupportEffect>($"Lost {actual} Support");
         }
 
         public override string GetDescription() => $"Lose {_amount} Support";

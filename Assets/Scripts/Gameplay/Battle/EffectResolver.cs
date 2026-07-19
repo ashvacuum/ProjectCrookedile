@@ -105,6 +105,30 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
+        /// Builds a context for an enemy-owned passive reacting to its own event — caster is
+        /// that enemy, target is the player. Built directly from stored state rather than
+        /// <see cref="CreateContext"/>/<see cref="SetFocusedOpponent"/> so it never disturbs
+        /// whichever enemy the resolver is currently focused on for turn resolution.
+        /// </summary>
+        public EffectExecutionContext CreateEnemyPassiveContext(EnemyController owner)
+        {
+            return new EffectExecutionContext(
+                caster: owner.Stats,
+                target: _playerStats,
+                playerStats: _playerStats,
+                isPlayerCard: false,
+                deck: _playerDeck,
+                allEnemies: _allEnemies,
+                casterStatusEffects: owner.StatusEffects,
+                targetStatusEffects: _playerStatusEffects,
+                playerStatusEffects: _playerStatusEffects,
+                battleManager: _battleManager,
+                attackerName: owner.EnemyData != null ? owner.EnemyData.EnemyName : "Enemy",
+                attackerEnemyIndex: owner.Stats.OwnerEnemyIndex
+            );
+        }
+
+        /// <summary>
         /// Resolves a card's <see cref="BattleEffect"/> list using polymorphic dispatch.
         /// </summary>
         public EffectExecutionContext ResolveCardEffects(

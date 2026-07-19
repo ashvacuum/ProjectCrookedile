@@ -27,7 +27,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 4823698507066769505
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 3

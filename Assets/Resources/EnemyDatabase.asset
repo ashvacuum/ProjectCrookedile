@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7691484e9d18ad548b2eab79abba10d7, type: 3}
+  m_Name: EnemyDatabase
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyDatabase
+  _items:
+  - {fileID: 11400000, guid: 2fa6b2b1bc5267e4f8052005db94e5a9, type: 2}
+  - {fileID: 11400000, guid: a416833577c45704b94db78550671b37, type: 2}
+  - {fileID: 11400000, guid: f2760c6f1c00650438b4042308fcc23a, type: 2}
+  - {fileID: 11400000, guid: 628c20c44b592fc4b80177c4e0a4f2af, type: 2}
+  - {fileID: 11400000, guid: ae5d1ba53d25faf4daed62e21c4ba8c6, type: 2}
+  - {fileID: 11400000, guid: d5405064066c0604eaf6030507f67e3b, type: 2}
+  - {fileID: 11400000, guid: 6195703b449ca124682dbe9e4d06301e, type: 2}
+  - {fileID: 11400000, guid: 7e3fba2cf7e33ab4795a943451970686, type: 2}

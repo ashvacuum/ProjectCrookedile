@@ -59,7 +59,7 @@ MonoBehaviour:
       type: {class: TurnEndTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
     - rid: 4738608375284105308
-      type: {class: ApplyPressureEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 1

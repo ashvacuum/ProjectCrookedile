@@ -376,7 +376,7 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<CardPlayController>(
                 $"Momentum pressing opinion by {stacks} vs {_mgr.Enemies[targetIndex].EnemyData.EnemyName}"
             );
-            _mgr.Opinion.ApplyPressure(
+            _mgr.Opinion.ApplyOpinionShift(
                 stacks,
                 toPlayer: false,
                 attackerName: "Player",

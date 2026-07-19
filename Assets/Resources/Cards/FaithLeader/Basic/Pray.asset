@@ -46,7 +46,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 5004226203391361026
-      type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 4
@@ -54,7 +54,7 @@ MonoBehaviour:
         _perXSource: 7
         _multiplier: 1
     - rid: 5004226203391361027
-      type: {class: GainBufferShieldEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
         _amount: 5

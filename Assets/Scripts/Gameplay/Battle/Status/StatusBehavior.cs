@@ -42,19 +42,19 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Human-readable description for the given stack count.</summary>
         public virtual string Describe(int stacks) => DisplayName;
 
-        #region Pressure / resource pipeline (pure pass-through by default)
+        #region Opinion / resource pipeline (pure pass-through by default)
 
-        /// <summary>Adjusts the pressure this combatant DEALS to the meter (Strength/Weakened/Guilt/Turncoat).</summary>
-        public virtual float ModifyOutgoingPressure(float pressure, int stacks) => pressure;
+        /// <summary>Adjusts the Opinion shift this combatant DEALS to the meter (Strength/Weakened/Guilt/Turncoat).</summary>
+        public virtual float ModifyOutgoingOpinion(float amount, int stacks) => amount;
 
-        /// <summary>Adjusts the pressure this combatant TAKES (Vulnerable/Plated/Rattled).</summary>
-        public virtual float ModifyIncomingPressure(float pressure, int stacks, int attackerHostility) =>
-            pressure;
+        /// <summary>Adjusts the Opinion shift this combatant TAKES (Vulnerable/Plated/Rattled).</summary>
+        public virtual float ModifyIncomingOpinion(float amount, int stacks, int attackerHostility) =>
+            amount;
 
         /// <summary>Adjusts Support gained by the player (Dexterity/Frail).</summary>
         public virtual int ModifySupportGained(int support, int stacks) => support;
 
-        /// <summary>Adjusts Denial gained by an enemy (Shame drops the enemy's shield).</summary>
+        /// <summary>Adjusts Denial gained by an enemy (Shame drops the enemy's Denial).</summary>
         public virtual int ModifyDenialGained(int denial, int stacks) => denial;
 
         /// <summary>Adjusts card AP cost (Focus/Energized/Entangled).</summary>

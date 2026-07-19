@@ -5,18 +5,18 @@ namespace Crookedile.Gameplay.Battle
     // Foundation slice — representative behaviors covering each shape (debuff, pacify-outgoing,
     // pacify-denial, hostility flags, a manager-read buff). The rest are generated in the next phase.
 
-    /// <summary>Deals X less pressure per stack.</summary>
+    /// <summary>Deals X less Opinion per stack.</summary>
     [Serializable]
     public sealed class WeakenedStatus : StatusBehavior
     {
         public override string Id => "weakened";
         public override string DisplayName => "Weakened";
         public override bool IsDebuff => true;
-        public override float ModifyOutgoingPressure(float p, int stacks) => p - stacks;
-        public override string Describe(int stacks) => $"Deals {stacks} less pressure.";
+        public override float ModifyOutgoingOpinion(float p, int stacks) => p - stacks;
+        public override string Describe(int stacks) => $"Deals {stacks} less Opinion.";
     }
 
-    /// <summary>Pacify status — blunts the enemy's push: deals X less pressure per stack.</summary>
+    /// <summary>Pacify status — blunts the enemy's push: deals X less Opinion per stack.</summary>
     [Serializable]
     public sealed class GuiltStatus : StatusBehavior
     {
@@ -25,9 +25,9 @@ namespace Crookedile.Gameplay.Battle
         public override bool IsDebuff => true;
         public override StatusCategory Category => StatusCategory.Pacify;
         public override bool CountsTowardPacify => true;
-        public override float ModifyOutgoingPressure(float p, int stacks) => p - stacks;
+        public override float ModifyOutgoingOpinion(float p, int stacks) => p - stacks;
         public override string Describe(int stacks) =>
-            $"Pacify: deals {stacks} less pressure. Counts toward conversion.";
+            $"Pacify: deals {stacks} less Opinion. Counts toward conversion.";
     }
 
     /// <summary>Pacify status — drops the enemy's shield: gains X less Denial per stack.</summary>

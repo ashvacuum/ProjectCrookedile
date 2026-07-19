@@ -11,8 +11,13 @@ namespace Crookedile.Gameplay.Battle
     /// Respects Dexterity/Frail modifiers when the player gains Support.
     /// </summary>
     [Serializable]
-    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class GainBufferShieldEffect : BattleEffect
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(
+        true,
+        "Crookedile.Gameplay.Battle",
+        null,
+        "GainBufferShieldEffect"
+    )]
+    public class GainSupportEffect : BattleEffect
     {
         [Tooltip("Base amount to gain. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]

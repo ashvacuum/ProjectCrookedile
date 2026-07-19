@@ -6,22 +6,27 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Applies pressure to the shared Opinion Meter by a fixed or context-sourced amount.
+    /// Shifts the shared Opinion Meter by a fixed or context-sourced amount.
     /// Player cards raise opinion (routed through Denial); enemy cards lower opinion (routed through Support).
     /// Direction is determined by <see cref="EffectExecutionContext.IsPlayerCard"/> — no target field needed.
     /// </summary>
     [Serializable]
-    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class ApplyPressureEffect : BattleEffect
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(
+        true,
+        "Crookedile.Gameplay.Battle",
+        null,
+        "ApplyPressureEffect"
+    )]
+    public class ApplyOpinionEffect : BattleEffect
     {
-        [Tooltip("Base pressure amount. Ignored when Amount Source is not Fixed.")]
+        [Tooltip("Base Opinion amount. Ignored when Amount Source is not Fixed.")]
         [ShowIf("@_amountSource == EffectContextValue.FixedAmount")]
         [MinValue(1)]
         [SerializeField]
         private int _amount = 5;
 
         [Tooltip(
-            "Where to read the pressure amount from at runtime.\n"
+            "Where to read the Opinion amount from at runtime.\n"
                 + "FixedAmount = use the authored Amount field.\n"
                 + "Other options read accumulated values from the effect context (e.g. LastDamageDealt for chaining)."
         )]
@@ -40,9 +45,9 @@ namespace Crookedile.Gameplay.Battle
         private float _multiplier = 1f;
 
         [Tooltip(
-            "Which part of the crowd this pressure addresses (player cards). Opponent = the focused "
+            "Which part of the crowd this shift addresses (player cards). Opponent = the focused "
                 + "enemy; Adjacent = focused + neighbours; AllHostile / AllReceptive / AllOpponents = "
-                + "the matching group. Amount is applied per target. Enemy cards always pressure the player."
+                + "the matching group. Amount is applied per target. Enemy cards always shift the player's Opinion."
         )]
         [SerializeField]
         private TargetType _target = TargetType.Opponent;
@@ -63,14 +68,14 @@ namespace Crookedile.Gameplay.Battle
 
             if (ctx.IsPlayerCard)
             {
-                // Address the chosen part of the crowd — pressure applies per target.
+                // Address the chosen part of the crowd — the shift applies per target.
                 foreach (var (targetStats, _) in ctx.GetTargets(_target))
-                    ApplyPressure(targetStats, ctx.Caster, baseDamage, ctx);
+                    ApplyOpinion(targetStats, ctx.Caster, baseDamage, ctx);
             }
             else
             {
-                // Enemy cards always pressure the player.
-                ApplyPressure(ctx.PlayerStats, ctx.Caster, baseDamage, ctx);
+                // Enemy cards always shift the player's Opinion.
+                ApplyOpinion(ctx.PlayerStats, ctx.Caster, baseDamage, ctx);
             }
         }
 
@@ -91,7 +96,7 @@ namespace Crookedile.Gameplay.Battle
                 TargetType.AllOpponents => " to all enemies",
                 _ => $" ({_target})",
             };
-            return $"Apply {amountStr} Pressure{targetStr}";
+            return $"Shift Opinion by {amountStr}{targetStr}";
         }
     }
 }

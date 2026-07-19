@@ -8,7 +8,7 @@ namespace Crookedile.Gameplay.Battle
     /// Single owner of the shared battle resources: the Opinion Meter and the two session
     /// shields (Support absorbs opinion drops, Denial absorbs opinion rises).
     ///
-    /// This is the <b>command</b> side of opinion changes. Effects call <see cref="ApplyPressure"/>
+    /// This is the <b>command</b> side of opinion changes. Effects call <see cref="ApplyOpinionShift"/>
     /// (or <see cref="RaiseDirect"/>) directly rather than publishing a gameplay event and hoping a
     /// subscriber mutates state. The EventBus is then used purely for <i>notification</i>
     /// (<see cref="DamageDealtEvent"/>, <see cref="OpinionChangedEvent"/>, etc.) so UI and passives
@@ -20,7 +20,7 @@ namespace Crookedile.Gameplay.Battle
         private int _opinion;
         private readonly int _maxOpinion;
 
-        // Session shields — decay to 0 at turn start before Ritual refills them.
+        // Support/Denial — decay to 0 at turn start before Ritual refills them.
         private int _support; // absorbs opinion drops (enemy attacks)
         private int _denial; // absorbs opinion rises (player cards)
 
@@ -59,36 +59,36 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
-        #region Pressure pipeline (command)
+        #region Opinion pipeline (command)
 
         /// <summary>
-        /// Applies incoming opinion pressure. Enemy attacks (<paramref name="toPlayer"/> = true)
-        /// pass through Support before lowering opinion; player pressure passes through Denial
+        /// Applies an incoming Opinion shift. Enemy attacks (<paramref name="toPlayer"/> = true)
+        /// pass through Support before lowering opinion; player shifts pass through Denial
         /// before raising it. Publishes <see cref="DamageDealtEvent"/> AFTER resolution so the
         /// notification can carry the honest outcome: raw amount, shield-absorbed portion, and
         /// the delta the meter actually moved (post echo-halving and 0/max clamping).
         /// </summary>
-        public void ApplyPressure(
-            int pressure,
+        public void ApplyOpinionShift(
+            int amount,
             bool toPlayer,
             string attackerName,
             int sourceEnemyIndex,
             int targetEnemyIndex
         )
         {
-            if (pressure <= 0)
+            if (amount <= 0)
                 return;
 
             int remaining = toPlayer
-                ? AbsorbThroughSupport(pressure)
-                : AbsorbThroughDenial(pressure);
+                ? AbsorbThroughSupport(amount)
+                : AbsorbThroughDenial(amount);
             int applied = toPlayer ? Lower(remaining) : Raise(remaining);
 
             EventBus.Publish(
                 new DamageDealtEvent
                 {
-                    Amount = pressure,
-                    Absorbed = pressure - remaining,
+                    Amount = amount,
+                    Absorbed = amount - remaining,
                     Applied = applied,
                     IsToPlayer = toPlayer,
                     AttackerName = attackerName,
@@ -169,7 +169,7 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
-        #region Session shields (Support / Denial)
+        #region Support / Denial
 
         public void GainSupport(int amount)
         {
@@ -205,12 +205,12 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// A shield decays at the start of its OWNER'S turn, so it lives through the opponent's
-        /// full turn: Support banked on your turn absorbs enemy attacks and expires when your
-        /// next turn starts; Denial banked on the enemy turn blocks your cards and expires when
-        /// the enemy's next turn starts. (Ritual refills right after the wipe.)
+        /// Support/Denial decays at the start of its OWNER'S turn, so it lives through the
+        /// opponent's full turn: Support banked on your turn absorbs enemy attacks and expires
+        /// when your next turn starts; Denial banked on the enemy turn blocks your cards and
+        /// expires when the enemy's next turn starts. (Ritual refills right after the wipe.)
         /// </summary>
-        public void DecayShields(bool isPlayerTurn)
+        public void DecaySupportAndDenial(bool isPlayerTurn)
         {
             if (isPlayerTurn)
                 ConsumeAllSupport();
@@ -218,26 +218,26 @@ namespace Crookedile.Gameplay.Battle
                 ConsumeAllDenial();
         }
 
-        private int AbsorbThroughSupport(int pressure)
+        private int AbsorbThroughSupport(int amount)
         {
-            if (pressure <= 0 || _support <= 0)
-                return pressure;
-            int absorbed = Mathf.Min(pressure, _support);
+            if (amount <= 0 || _support <= 0)
+                return amount;
+            int absorbed = Mathf.Min(amount, _support);
             int old = _support;
             _support -= absorbed;
             EventBus.Publish(new SupportChangedEvent { OldValue = old, NewValue = _support });
-            return pressure - absorbed;
+            return amount - absorbed;
         }
 
-        private int AbsorbThroughDenial(int pressure)
+        private int AbsorbThroughDenial(int amount)
         {
-            if (pressure <= 0 || _denial <= 0)
-                return pressure;
-            int absorbed = Mathf.Min(pressure, _denial);
+            if (amount <= 0 || _denial <= 0)
+                return amount;
+            int absorbed = Mathf.Min(amount, _denial);
             int old = _denial;
             _denial -= absorbed;
             EventBus.Publish(new DenialChangedEvent { OldValue = old, NewValue = _denial });
-            return pressure - absorbed;
+            return amount - absorbed;
         }
 
         private void ConsumeAllSupport()
@@ -247,7 +247,7 @@ namespace Crookedile.Gameplay.Battle
             int old = _support;
             _support = 0;
             // IsDecay: ambient turn-start expiry, not an attack — feedback layers skip the
-            // "shield lost" sting for it.
+            // "Support lost" sting for it.
             EventBus.Publish(
                 new SupportChangedEvent
                 {

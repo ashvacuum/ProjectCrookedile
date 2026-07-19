@@ -52,7 +52,7 @@ namespace Crookedile.Gameplay.Battle
         private int _supportPerReceptiveEnemy = 1;
 
         [Header("Turncoat (receptive → hostile betrayal)")]
-        [Tooltip("Turncoat stacks applied to a betrayer. Each stack adds bonus pressure and fades 1/turn.")]
+        [Tooltip("Turncoat stacks applied to a betrayer. Each stack adds bonus Opinion shift and fades 1/turn.")]
         [SerializeField]
         private int _turncoatStacks = 2;
 
@@ -478,7 +478,7 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
-        #region Opinion Meter / Session Shields (delegates to OpinionLedger)
+        #region Opinion Meter / Support / Denial (delegates to OpinionLedger)
 
         /// <summary>Raises the Opinion Meter directly (bypassing Denial). Used by heal/rally effects.</summary>
         public void RaiseOpinion(int amount) => _opinion?.RaiseDirect(amount);
@@ -697,9 +697,9 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Runs start-of-turn effects for the current combatant(s).</summary>
         public void StartTurn()
         {
-            // The current side's stale shield decays (Support at player turn start, Denial at
-            // enemy turn start) so each shield protects through one full opposing turn.
-            _opinion.DecayShields(_isPlayerTurn);
+            // The current side's stale Support/Denial decays (Support at player turn start, Denial
+            // at enemy turn start) so each protects through one full opposing turn.
+            _opinion.DecaySupportAndDenial(_isPlayerTurn);
 
             if (_isPlayerTurn)
             {
@@ -794,7 +794,7 @@ namespace Crookedile.Gameplay.Battle
         {
             int smear = mgr.GetStacks<SmearStatus>();
             if (smear > 0)
-                _opinion.ApplyPressure(
+                _opinion.ApplyOpinionShift(
                     smear,
                     toPlayer: true,
                     attackerName: "Smear",

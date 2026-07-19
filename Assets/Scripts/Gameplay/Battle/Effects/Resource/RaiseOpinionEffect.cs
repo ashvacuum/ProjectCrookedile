@@ -52,7 +52,7 @@ namespace Crookedile.Gameplay.Battle
             if (amount <= 0)
                 return;
 
-            ApplyPressure(ctx.Target, ctx.Caster, amount, ctx);
+            ApplyOpinion(ctx.Target, ctx.Caster, amount, ctx);
             GameLogger.LogInfo<RaiseOpinionEffect>($"Raised Opinion by {amount}");
         }
 

@@ -1,17 +1,18 @@
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Crookedile.UI.Battle
 {
     /// <summary>
     /// Displays the shared Opinion Meter as three side-by-side elements inside a HorizontalLayoutGroup:
-    ///   [BarFill] [PlayerShield] [EnemyShield]
+    ///   [BarFill] [Support bar] [Denial bar]
     /// BarFill spans the FULL current opinion (so the fill never under-reports the label).
-    /// PlayerShield (Support) sits at the fill's right edge — incoming drops bite there first.
-    /// EnemyShield (Denial) sits beyond it — player gains must chew through it before the
-    /// fill grows. Both shields render in the unfilled region; the background track shows
+    /// The Support bar sits at the fill's right edge — incoming drops bite there first.
+    /// The Denial bar sits beyond it — player gains must chew through it before the
+    /// fill grows. Both bars render in the unfilled region; the background track shows
     /// through whatever remains. Widths tween smoothly on change.
     ///
     /// HorizontalLayoutGroup on _barContainer must have childControlWidth and childForceExpandWidth disabled.
@@ -20,7 +21,7 @@ namespace Crookedile.UI.Battle
     {
         [Header("Bar Container")]
         [Tooltip(
-            "RectTransform with HorizontalLayoutGroup — parent of PlayerShield, BarFill, EnemyShield."
+            "RectTransform with HorizontalLayoutGroup — parent of the Support bar, BarFill, Denial bar."
         )]
         [SerializeField]
         private RectTransform _barContainer;
@@ -29,8 +30,9 @@ namespace Crookedile.UI.Battle
         [Tooltip(
             "Support segment — rendered at the fill's right edge (drops bite there first). Width clamped to the unfilled region."
         )]
+        [FormerlySerializedAs("_playerShield")]
         [SerializeField]
-        private RectTransform _playerShield;
+        private RectTransform _playerSupportBar;
 
         [Tooltip("Opinion fill — plain Image (not fill-method). Width = full current opinion.")]
         [SerializeField]
@@ -39,8 +41,9 @@ namespace Crookedile.UI.Battle
         [Tooltip(
             "Denial segment — rendered after Support (gains chew through it). Width clamped to the remaining unfilled region."
         )]
+        [FormerlySerializedAs("_enemyShield")]
         [SerializeField]
-        private RectTransform _enemyShield;
+        private RectTransform _enemyDenialBar;
 
         [Header("Animation")]
         [Tooltip("Seconds for segment widths to tween to their new size. 0 = snap.")]
@@ -81,11 +84,11 @@ namespace Crookedile.UI.Battle
 
         private void Awake()
         {
-            // Enforce the [BarFill][PlayerShield][EnemyShield] sibling order regardless of
+            // Enforce the [BarFill][Support bar][Denial bar] sibling order regardless of
             // how the scene hierarchy happens to be arranged.
             _barFill?.rectTransform.SetSiblingIndex(0);
-            _playerShield?.SetSiblingIndex(1);
-            _enemyShield?.SetSiblingIndex(2);
+            _playerSupportBar?.SetSiblingIndex(1);
+            _enemyDenialBar?.SetSiblingIndex(2);
         }
 
         #endregion
@@ -93,7 +96,7 @@ namespace Crookedile.UI.Battle
         #region Public API
 
         /// <summary>
-        /// Anchor for VFX / floating numbers that target the meter itself (e.g. opinion pressure,
+        /// Anchor for VFX / floating numbers that target the meter itself (e.g. an Opinion shift,
         /// which moves this bar rather than depleting an enemy). Falls back to this transform.
         /// </summary>
         public RectTransform AnchorTransform =>
@@ -103,7 +106,7 @@ namespace Crookedile.UI.Battle
 
         /// <summary>
         /// Recalculates all three element widths (tweened) and updates text labels.
-        /// Call from BattleUI in response to opinion / shield / turn events.
+        /// Call from BattleUI in response to opinion / Support / Denial / turn events.
         /// </summary>
         public void Refresh(
             int currentOpinion,
@@ -130,26 +133,26 @@ namespace Crookedile.UI.Battle
 
             float pct = maxOpinion > 0 ? Mathf.Clamp01((float)currentOpinion / maxOpinion) : 0f;
 
-            // Fill = full current opinion; shields live in the unfilled region to its right.
+            // Fill = full current opinion; Support/Denial bars live in the unfilled region to its right.
             float barFillWidth = pct * total;
             float unfilled = total - barFillWidth;
 
-            float playerShieldWidth =
+            float playerSupportWidth =
                 maxOpinion > 0
                     ? Mathf.Min((float)playerSupport / maxOpinion * total, unfilled)
                     : 0f;
-            float enemyShieldWidth =
+            float enemyDenialWidth =
                 maxOpinion > 0
                     ? Mathf.Min(
                         (float)enemyDenial / maxOpinion * total,
-                        unfilled - playerShieldWidth
+                        unfilled - playerSupportWidth
                     )
                     : 0f;
 
             if (_barFill != null)
                 AnimateWidth(_barFill.rectTransform, barFillWidth);
-            AnimateWidth(_playerShield, playerShieldWidth);
-            AnimateWidth(_enemyShield, enemyShieldWidth);
+            AnimateWidth(_playerSupportBar, playerSupportWidth);
+            AnimateWidth(_enemyDenialBar, enemyDenialWidth);
             _hasPainted = true;
 
             if (_barFill != null)

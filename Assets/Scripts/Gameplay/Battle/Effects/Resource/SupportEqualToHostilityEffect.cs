@@ -9,8 +9,13 @@ namespace Crookedile.Gameplay.Battle
     /// Dexterity/Frail modifiers apply.
     /// </summary>
     [Serializable]
-    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class BufferEqualToHostilityEffect : BattleEffect
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(
+        true,
+        "Crookedile.Gameplay.Battle",
+        null,
+        "BufferEqualToHostilityEffect"
+    )]
+    public class SupportEqualToHostilityEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
@@ -21,7 +26,7 @@ namespace Crookedile.Gameplay.Battle
                         hostileCount++;
 
             ApplyGainSupport(hostileCount, ctx);
-            GameLogger.LogInfo<BufferEqualToHostilityEffect>(
+            GameLogger.LogInfo<SupportEqualToHostilityEffect>(
                 $"Gained Support equal to hostile enemy count ({hostileCount})"
             );
         }

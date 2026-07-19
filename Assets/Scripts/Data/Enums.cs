@@ -146,7 +146,7 @@ namespace Crookedile.Data
         LastDamageDealt, // 1 — ctx.LastDamageDealt  — e.g. lifesteal
         LastHealAmount, // 2 — ctx.LastHealAmount
         LastSupportGained, // 3 — ctx.LastSupportGained
-        LastSupportLost, // 4 — ctx.LastSupportLost — e.g. bonus pressure equal to Support spent
+        LastSupportLost, // 4 — ctx.LastSupportLost — e.g. bonus Opinion equal to Support spent
         CurrentSupport, // 5 — session CurrentSupport at time of trigger
         CurrentHostility, // 6 — focused target.CurrentHostility at time of trigger
         None, // 7 — return 0; hides fixed amount fields (use when amount is irrelevant)

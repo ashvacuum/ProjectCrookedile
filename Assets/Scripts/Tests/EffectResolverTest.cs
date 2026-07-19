@@ -39,10 +39,10 @@ namespace Crookedile.Tests
             SetupTestBattle();
 
             TestBasicDamage();
-            TestShieldAbsorption();
+            TestSupportAbsorption();
             TestHostilityDamageMultiplier();
             TestStatusEffectDamageModifiers();
-            TestShieldGainWithModifiers();
+            TestSupportGainWithModifiers();
             TestCardCostModifiers();
             TestTurnBasedStatusEffects();
 
@@ -69,7 +69,7 @@ namespace Crookedile.Tests
         }
 
         // TODO: Rewrite damage tests for the opinion-meter model.
-        // Cards apply pressure to the opinion meter via DamageDealtEvent â†’ BattleManager.
+        // Cards shift the opinion meter via DamageDealtEvent â†’ BattleManager.
         // Tests need a BattleManager mock or an EventBus listener to assert opinion changes.
 
         [ContextMenu("Test: Basic Damage")]
@@ -78,8 +78,8 @@ namespace Crookedile.Tests
             Debug.Log("\n--- TEST: Basic Damage (TODO: update for opinion model) ---");
         }
 
-        [ContextMenu("Test: Shield Absorption")]
-        public void TestShieldAbsorption()
+        [ContextMenu("Test: Support Absorption")]
+        public void TestSupportAbsorption()
         {
             // Support/Denial are now session-level on BattleManager, not per-BattleStats.
             // This test requires a full BattleManager instance â€” stub for now.
@@ -106,8 +106,8 @@ namespace Crookedile.Tests
             Debug.Log("\n--- TEST: Status Effect Damage Modifiers (TODO: opinion model) ---");
         }
 
-        [ContextMenu("Test: Shield Gain With Modifiers")]
-        public void TestShieldGainWithModifiers()
+        [ContextMenu("Test: Support Gain With Modifiers")]
+        public void TestSupportGainWithModifiers()
         {
             // Support is now session-level on BattleManager â€” requires BattleManager instance to test.
             Debug.Log(
@@ -169,7 +169,7 @@ namespace Crookedile.Tests
                     + "not by StatusEffectManager â€” this unit tester only decrements their stacks."
             );
 
-            // Test Ritual (gain Shield at start of turn)
+            // Test Ritual (gain Support at start of turn)
             effectResolver.PlayerStatusEffects.ApplyStatus(new RitualStatus(), 2);
             effectResolver.PlayerStatusEffects.OnTurnStart(playerStats);
 
@@ -185,8 +185,8 @@ namespace Crookedile.Tests
 
         private BattleEffect CreateDamageEffect(int amount)
         {
-            var effect = new ApplyPressureEffect();
-            var amountField = typeof(ApplyPressureEffect).GetField(
+            var effect = new ApplyOpinionEffect();
+            var amountField = typeof(ApplyOpinionEffect).GetField(
                 "_amount",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
             );
@@ -194,10 +194,10 @@ namespace Crookedile.Tests
             return effect;
         }
 
-        private BattleEffect CreateShieldEffect(int amount)
+        private BattleEffect CreateSupportEffect(int amount)
         {
-            var effect = new GainBufferShieldEffect();
-            var amountField = typeof(GainBufferShieldEffect).GetField(
+            var effect = new GainSupportEffect();
+            var amountField = typeof(GainSupportEffect).GetField(
                 "_amount",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
             );

@@ -8,16 +8,16 @@ namespace Crookedile.Gameplay.Battle
 
     // ---- Debuffs ----------------------------------------------------------
 
-    /// <summary>Takes 50% more pressure.</summary>
+    /// <summary>Takes 50% more Opinion.</summary>
     [Serializable]
     public sealed class VulnerableStatus : StatusBehavior
     {
         public override string Id => "vulnerable";
         public override string DisplayName => "Vulnerable";
         public override bool IsDebuff => true;
-        public override float ModifyIncomingPressure(float p, int stacks, int attackerHostility) =>
+        public override float ModifyIncomingOpinion(float p, int stacks, int attackerHostility) =>
             stacks > 0 ? p * 1.5f : p;
-        public override string Describe(int stacks) => "Takes 50% more pressure.";
+        public override string Describe(int stacks) => "Takes 50% more Opinion.";
     }
 
     /// <summary>Gains 25% less Support.</summary>
@@ -51,19 +51,19 @@ namespace Crookedile.Gameplay.Battle
         public override string DisplayName => "Exposed";
         public override bool IsDebuff => true;
         public override bool ConsumedOnIncomingHit => true;
-        public override float ModifyIncomingPressure(float p, int stacks, int attackerHostility) =>
+        public override float ModifyIncomingOpinion(float p, int stacks, int attackerHostility) =>
             stacks > 0 ? p * 2f : p;
         public override string Describe(int stacks) => "Next attack against it deals double.";
     }
 
-    /// <summary>Reputation bleed — take X pressure at end of turn (read at turn end by BattleManager).</summary>
+    /// <summary>Reputation bleed — take X Opinion at end of turn (read at turn end by BattleManager).</summary>
     [Serializable]
     public sealed class SmearStatus : StatusBehavior
     {
         public override string Id => "smear";
         public override string DisplayName => "Smear";
         public override bool IsDebuff => true;
-        public override string Describe(int stacks) => $"Take {stacks} pressure at end of turn.";
+        public override string Describe(int stacks) => $"Take {stacks} Opinion at end of turn.";
     }
 
     /// <summary>Effect values are randomised each turn (handled by BattleManager).</summary>
@@ -96,17 +96,17 @@ namespace Crookedile.Gameplay.Battle
         public override string Describe(int stacks) => "Skips its next action.";
     }
 
-    /// <summary>Takes bonus pressure equal to attacker Hostility per stack.</summary>
+    /// <summary>Takes bonus Opinion equal to attacker Hostility per stack.</summary>
     [Serializable]
     public sealed class RattledStatus : StatusBehavior
     {
         public override string Id => "rattled";
         public override string DisplayName => "Rattled";
         public override bool IsDebuff => true;
-        public override float ModifyIncomingPressure(float p, int stacks, int attackerHostility) =>
+        public override float ModifyIncomingOpinion(float p, int stacks, int attackerHostility) =>
             p + attackerHostility * stacks;
         public override string Describe(int stacks) =>
-            $"Takes bonus pressure = attacker Hostility x {stacks}.";
+            $"Takes bonus Opinion = attacker Hostility x {stacks}.";
     }
 
     /// <summary>Pacify status — soft chance to hold back its action per stack (skip read by type).</summary>
@@ -135,15 +135,15 @@ namespace Crookedile.Gameplay.Battle
 
     // ---- Buffs ------------------------------------------------------------
 
-    /// <summary>Deals X more pressure per stack.</summary>
+    /// <summary>Deals X more Opinion per stack.</summary>
     [Serializable]
     public sealed class StrengthStatus : StatusBehavior
     {
         public override string Id => "strength";
         public override string DisplayName => "Strength";
         public override bool IsDebuff => false;
-        public override float ModifyOutgoingPressure(float p, int stacks) => p + stacks;
-        public override string Describe(int stacks) => $"Deals {stacks} more pressure.";
+        public override float ModifyOutgoingOpinion(float p, int stacks) => p + stacks;
+        public override string Describe(int stacks) => $"Deals {stacks} more Opinion.";
     }
 
     /// <summary>Gains X more Support per card.</summary>
@@ -179,16 +179,16 @@ namespace Crookedile.Gameplay.Battle
         public override string Describe(int stacks) => $"Cards cost {stacks} less AP this turn.";
     }
 
-    /// <summary>Reduces incoming pressure by X.</summary>
+    /// <summary>Reduces incoming Opinion by X.</summary>
     [Serializable]
     public sealed class PlatedStatus : StatusBehavior
     {
         public override string Id => "plated";
         public override string DisplayName => "Plated";
         public override bool IsDebuff => false;
-        public override float ModifyIncomingPressure(float p, int stacks, int attackerHostility) =>
+        public override float ModifyIncomingOpinion(float p, int stacks, int attackerHostility) =>
             p - stacks;
-        public override string Describe(int stacks) => $"Reduces incoming pressure by {stacks}.";
+        public override string Describe(int stacks) => $"Reduces incoming Opinion by {stacks}.";
     }
 
     /// <summary>Raise Opinion by X at end of turn (read at turn end by BattleManager).</summary>
@@ -210,19 +210,19 @@ namespace Crookedile.Gameplay.Battle
         public override bool IsDebuff => false;
         public override bool ConsumedOnIncomingHit => true;
         public override bool IncomingOverride => true;
-        public override float ModifyIncomingPressure(float p, int stacks, int attackerHostility) =>
+        public override float ModifyIncomingOpinion(float p, int stacks, int attackerHostility) =>
             stacks > 0 ? 1f : p;
         public override string Describe(int stacks) => "Takes only 1 from attacks.";
     }
 
-    /// <summary>Reflect X pressure to the meter when hit (read by type for the reflection).</summary>
+    /// <summary>Reflect X Opinion to the meter when hit (read by type for the reflection).</summary>
     [Serializable]
     public sealed class ThornsStatus : StatusBehavior
     {
         public override string Id => "thorns";
         public override string DisplayName => "Thorns";
         public override bool IsDebuff => false;
-        public override string Describe(int stacks) => $"Reflect {stacks} pressure when hit.";
+        public override string Describe(int stacks) => $"Reflect {stacks} Opinion when hit.";
     }
 
     // ---- Special ----------------------------------------------------------
@@ -266,7 +266,7 @@ namespace Crookedile.Gameplay.Battle
         public override string Describe(int stacks) => "The next card played is resolved twice.";
     }
 
-    /// <summary>Freshly betrayed — deals +X bonus pressure per stack, fading over a turn or two.</summary>
+    /// <summary>Freshly betrayed — deals +X bonus Opinion per stack, fading over a turn or two.</summary>
     [Serializable]
     public sealed class TurncoatStatus : StatusBehavior
     {
@@ -274,7 +274,7 @@ namespace Crookedile.Gameplay.Battle
         public override string DisplayName => "Turncoat";
         public override bool IsDebuff => false;
         public override StatusCategory Category => StatusCategory.Special;
-        public override float ModifyOutgoingPressure(float p, int stacks) => p + stacks;
-        public override string Describe(int stacks) => $"Freshly betrayed: deals +{stacks} pressure.";
+        public override float ModifyOutgoingOpinion(float p, int stacks) => p + stacks;
+        public override string Describe(int stacks) => $"Freshly betrayed: deals +{stacks} Opinion.";
     }
 }

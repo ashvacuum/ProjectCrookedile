@@ -6,8 +6,13 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>Consumes all session Support, reducing it to zero.</summary>
     [Serializable]
-    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
-    public class ConsumeAllBufferEffect : BattleEffect
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(
+        true,
+        "Crookedile.Gameplay.Battle",
+        null,
+        "ConsumeAllBufferEffect"
+    )]
+    public class ConsumeAllSupportEffect : BattleEffect
     {
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
@@ -15,7 +20,7 @@ namespace Crookedile.Gameplay.Battle
                 return;
             int support = ctx.BattleManager.SpendSupport(ctx.BattleManager.CurrentSupport);
             ctx.LastSupportLost += support;
-            GameLogger.LogInfo<ConsumeAllBufferEffect>($"Consumed {support} Support");
+            GameLogger.LogInfo<ConsumeAllSupportEffect>($"Consumed {support} Support");
         }
 
         public override string GetDescription() => "Consume all Support";
