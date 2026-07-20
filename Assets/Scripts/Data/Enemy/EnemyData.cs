@@ -23,19 +23,20 @@ namespace Crookedile.Data.Enemy
     }
 
     /// <summary>
-    /// The enemy's behavioural stance, derived from its current hostility. Each stance
-    /// maps to its own move list on <see cref="EnemyData"/>, so an enemy's available moves
-    /// are driven entirely by how it currently feels about the player.
+    /// The enemy's behavioural stance, derived from its current hostility versus its
+    /// <see cref="EnemyData.NeutralZone"/>. Each stance maps to its own move list on
+    /// <see cref="EnemyData"/>, so an enemy's available moves are driven entirely by how it
+    /// currently feels about the player.
     /// </summary>
     public enum EnemyStance
     {
-        /// <summary>Hostility &gt; 0 — uses the aggressive move list.</summary>
+        /// <summary>Hostility &gt; NeutralZone — uses the aggressive move list.</summary>
         Aggressive,
 
-        /// <summary>Hostility == 0 — uses the neutral move list.</summary>
+        /// <summary>Hostility within ±NeutralZone of 0 — uses the neutral move list.</summary>
         Neutral,
 
-        /// <summary>Hostility &lt; 0 — uses the receptive move list.</summary>
+        /// <summary>Hostility &lt; -NeutralZone — uses the receptive move list.</summary>
         Receptive,
     }
 
@@ -85,6 +86,16 @@ namespace Crookedile.Data.Enemy
         [SerializeField]
         private int _minHostility = -3;
 
+        [Tooltip(
+            "Buffer around 0 the enemy must be pushed past before it's truly Hostile or Receptive "
+                + "— needs convincing before it commits to a side. E.g. 2 means hostility must exceed "
+                + "+2 to go Aggressive or drop below -2 to go Receptive; -2 to +2 all count as Neutral. "
+                + "0 reproduces the old behavior (any nonzero value picks a side)."
+        )]
+        [MinValue(0)]
+        [SerializeField]
+        private int _neutralZone = 0;
+
         #endregion
 
         #region Starting Status Effects
@@ -118,21 +129,21 @@ namespace Crookedile.Data.Enemy
         private EnemyMovePattern _movePattern = EnemyMovePattern.Sequential;
 
         [Tooltip(
-            "Moves used while the enemy is Aggressive (Hostility > 0). "
+            "Moves used while the enemy is Aggressive (Hostility > Neutral Zone). "
                 + "For Sequential pattern, moves play in order 0 → 1 → 2 → 0 …"
         )]
         [SerializeField]
         private List<EnemyMoveData> _aggressiveMoves = new List<EnemyMoveData>();
 
         [Tooltip(
-            "Moves used while the enemy is Neutral (Hostility == 0). "
+            "Moves used while the enemy is Neutral (Hostility within ± Neutral Zone of 0). "
                 + "For Sequential pattern, moves play in order 0 → 1 → 2 → 0 …"
         )]
         [SerializeField]
         private List<EnemyMoveData> _neutralMoves = new List<EnemyMoveData>();
 
         [Tooltip(
-            "Moves used while the enemy is Receptive (Hostility < 0). "
+            "Moves used while the enemy is Receptive (Hostility < -Neutral Zone). "
                 + "For Sequential pattern, moves play in order 0 → 1 → 2 → 0 …"
         )]
         [SerializeField]
@@ -148,15 +159,16 @@ namespace Crookedile.Data.Enemy
         public int StartingHostility => _startingHostility;
         public int MaxHostility => _maxHostility;
         public int MinHostility => _minHostility;
+        public int NeutralZone => _neutralZone;
         public EnemyMovePattern MovePattern => _movePattern;
 
-        /// <summary>Moves used while Aggressive (Hostility &gt; 0).</summary>
+        /// <summary>Moves used while Aggressive (Hostility &gt; NeutralZone).</summary>
         public IReadOnlyList<EnemyMoveData> AggressiveMoves => _aggressiveMoves;
 
-        /// <summary>Moves used while Neutral (Hostility == 0).</summary>
+        /// <summary>Moves used while Neutral (Hostility within ±NeutralZone of 0).</summary>
         public IReadOnlyList<EnemyMoveData> NeutralMoves => _neutralMoves;
 
-        /// <summary>Moves used while Receptive (Hostility &lt; 0).</summary>
+        /// <summary>Moves used while Receptive (Hostility &lt; -NeutralZone).</summary>
         public IReadOnlyList<EnemyMoveData> ReceptiveMoves => _receptiveMoves;
 
         /// <summary>

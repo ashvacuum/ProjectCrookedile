@@ -12,22 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
   m_Name: Curious Student
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Enemy.EnemyData
+  _id: c3b46bf4-9419-4712-81a0-ffdbd2c8dad2
   _enemyName: Curious Student
   _portrait: {fileID: 21300000, guid: edaf660ecaa3bf34dbf9aa3f97320181, type: 3}
   _startingHostility: 0
-  _maxHostility: 10
-  _minHostility: -6
-  _demographicClass: 2
-  _demographicValues: 0
+  _maxHostility: 15
+  _minHostility: -16
+  _neutralZone: 5
   _startingEffects: []
-  _movePattern: 0
+  _passives: []
+  _movePattern: 2
   _aggressiveMoves:
-  - {fileID: 11400000, guid: 840cb7f1c3234024d8c13dcb7b49b315, type: 2}
   - {fileID: 11400000, guid: 7166da6120f286d489521eb57e951328, type: 2}
+  - {fileID: 11400000, guid: 0a5b34cfda1589c42bf66d489c2c55bc, type: 2}
   _neutralMoves:
   - {fileID: 11400000, guid: 840cb7f1c3234024d8c13dcb7b49b315, type: 2}
+  - {fileID: 11400000, guid: 79f980544ca10114dbc50163d064bce6, type: 2}
   _receptiveMoves:
-  - {fileID: 11400000, guid: 840cb7f1c3234024d8c13dcb7b49b315, type: 2}
+  - {fileID: 11400000, guid: a10b6896e461c7e4ab1e3317d0b54b6a, type: 2}
+  - {fileID: 11400000, guid: e4b31db34c15a8f429acb82038362824, type: 2}
   references:
     version: 2
     RefIds: []

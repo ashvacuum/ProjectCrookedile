@@ -114,6 +114,7 @@ namespace Crookedile.Gameplay.Battle
 
             Stats = new BattleStats(maxActionPoints: 0, isPlayer: false);
             Stats.SetHostilityLimits(enemyData.MinHostility, enemyData.MaxHostility);
+            Stats.SetNeutralZone(enemyData.NeutralZone);
             Stats.SetHostility(enemyData.StartingHostility);
             StatusEffects = new StatusEffectManager(enemyData.EnemyName, Stats);
 
@@ -203,7 +204,11 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void CheckBecameHostile()
         {
-            if (!BecameHostileThisTurn && _hostilityAtTurnStart <= 0 && Stats.CurrentHostility > 0)
+            if (
+                !BecameHostileThisTurn
+                && _hostilityAtTurnStart <= Stats.NeutralZone
+                && Stats.CurrentHostility > Stats.NeutralZone
+            )
                 BecameHostileThisTurn = true;
         }
 
@@ -242,8 +247,9 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// The enemy's current stance, derived from its hostility
-        /// (hostile &gt; 0 → Aggressive, receptive &lt; 0 → Receptive, otherwise Neutral).
+        /// The enemy's current stance, derived from its hostility versus its NeutralZone
+        /// (hostile past the zone → Aggressive, receptive past the zone → Receptive, otherwise
+        /// Neutral — see <see cref="BattleStats.IsHostile"/>/<see cref="BattleStats.IsReceptive"/>).
         /// </summary>
         private EnemyStance CurrentStance =>
             Stats.IsHostile ? EnemyStance.Aggressive

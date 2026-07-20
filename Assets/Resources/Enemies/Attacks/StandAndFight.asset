@@ -13,22 +13,32 @@ MonoBehaviour:
   m_Name: StandAndFight
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Enemy.EnemyMoveData
   _moveName: StandAndFight
-  _moveType: 4
+  _moveType: 2
   _intentDescription: 
   _effects:
-  - rid: 4823698419005784190
+  - rid: 5004226405388779605
   _moveVFX: {fileID: 0}
+  _counterCardType: 1
   _minionToSummon: {fileID: 0}
   _minionCount: 1
   _condition: 0
   _conditionTurn: 1
-  _stanceRequirement: 1
+  _conditionPercent: 50
   references:
     version: 2
     RefIds:
-    - rid: 4823698419005784190
-      type: {class: RaiseAlliesHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 5004226405388779605
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 2
-        _includeSelf: 1
+        _target: 0
+        _behavior:
+          rid: 5004226405388779606
+        _stacks: 2
+        _stacksSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _duration: 2
+    - rid: 5004226405388779606
+      type: {class: StrengthStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

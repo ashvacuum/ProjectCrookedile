@@ -94,8 +94,8 @@ namespace Crookedile.Data
         AllOpponents, // Player card → all living enemies | Enemy card → the player
         AllAllies, // Enemy card → all living enemies  | Player card → self
         Adjacent, // Focused enemy + immediate row neighbours (player); the player (enemy)
-        AllHostile, // Every living enemy with Hostility > 0 (the dissenters)
-        AllReceptive, // Every living enemy with Hostility < 0 (the supporters)
+        AllHostile, // Every living enemy past its NeutralZone into Hostile (the dissenters)
+        AllReceptive, // Every living enemy past its NeutralZone into Receptive (the supporters)
         RandomReceptive, // One random living receptive enemy (e.g. Sway: convert a supporter)
         AdjacentAllies, // Enemy card → caster's immediate living neighbours, EXCLUDING caster (Protector wards allies, never itself) | Player card → self
         TriggeringEnemy, // Passive effects only: the enemy the triggering event happened to (falls back to the focused enemy outside passive dispatch)
@@ -150,8 +150,8 @@ namespace Crookedile.Data
         CurrentSupport, // 5 — session CurrentSupport at time of trigger
         CurrentHostility, // 6 — focused target.CurrentHostility at time of trigger
         None, // 7 — return 0; hides fixed amount fields (use when amount is irrelevant)
-        HostileEnemyCount, // 8 — number of living enemies with Hostility > 0
-        ReceptiveEnemyCount, // 9 — number of living enemies with Hostility < 0
+        HostileEnemyCount, // 8 — number of living enemies past their NeutralZone into Hostile
+        ReceptiveEnemyCount, // 9 — number of living enemies past their NeutralZone into Receptive
         ConversionsThisTurn, // 10 — Faith Leader pacify conversions made this player turn (Sermon harvest)
         CurrentPatronage, // 11 — Nepo Baby's current banked Patronage
         ScandalsInHand, // 12 — Scandal cards currently clogging the player's hand (Celebrity Scandal line)
