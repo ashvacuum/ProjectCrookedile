@@ -13,9 +13,9 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public enum HostilityCondition
     {
-        TargetIsHostile, // Focused target has Hostility > 0
-        TargetIsReceptive, // Focused target has Hostility < 0
-        TargetIsNeutral, // Focused target has Hostility == 0
+        TargetIsHostile, // Focused target is past its NeutralZone into Hostile
+        TargetIsReceptive, // Focused target is past its NeutralZone into Receptive
+        TargetIsNeutral, // Focused target is within its NeutralZone (neither Hostile nor Receptive)
         AnyEnemyHostile, // At least one living enemy is hostile
         AnyEnemyReceptive, // At least one living enemy is receptive
         AllEnemiesHostile, // Every living enemy is hostile

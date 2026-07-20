@@ -24,6 +24,10 @@ namespace Crookedile.Gameplay
         private int _maxHostility = 10;
         private int _minHostility = -10;
 
+        // Buffer around 0 the enemy must be pushed past before it's truly Hostile/Receptive —
+        // 0 reproduces the old snap-at-zero behavior. Set per-enemy via SetNeutralZone.
+        private int _neutralZone = 0;
+
         [Header("Turn Resources")]
         [SerializeField]
         private int _currentActionPoints;
@@ -69,14 +73,20 @@ namespace Crookedile.Gameplay
         public int MaxHostility => _maxHostility;
         public int MinHostility => _minHostility;
 
+        /// <summary>
+        /// Buffer around 0 the enemy must be pushed past before it's truly Hostile/Receptive.
+        /// 0 = old behavior (any positive/negative value counts).
+        /// </summary>
+        public int NeutralZone => _neutralZone;
+
         /// <summary>Index into BattleManager.Enemies for this combatant, or -1 for the player.</summary>
         public int OwnerEnemyIndex => _ownerEnemyIndex;
 
-        /// <summary>True when the enemy is actively hostile (positive hostility).</summary>
-        public bool IsHostile => _currentHostility > 0;
+        /// <summary>True when the enemy has been pushed past the neutral zone into hostile territory.</summary>
+        public bool IsHostile => _currentHostility > _neutralZone;
 
-        /// <summary>True when the enemy is receptive / de-escalated (negative hostility).</summary>
-        public bool IsReceptive => _currentHostility < 0;
+        /// <summary>True when the enemy has been pushed past the neutral zone into receptive territory.</summary>
+        public bool IsReceptive => _currentHostility < -_neutralZone;
 
         /// <summary>
         /// Hostility pressure multiplier for attacks on the opinion meter.
@@ -132,6 +142,9 @@ namespace Crookedile.Gameplay
             _minHostility = min;
             _maxHostility = max;
         }
+
+        /// <summary>Sets the per-enemy neutral zone. Called by EnemyController after construction.</summary>
+        public void SetNeutralZone(int zone) => _neutralZone = Mathf.Max(0, zone);
 
         /// <summary>
         /// Shifts hostility upward (more hostile). No-op when Fanatic; reduced by Devotion resist.
@@ -197,13 +210,18 @@ namespace Crookedile.Gameplay
                 EventBus.Publish(new EnemyMaxedHostilityEvent { EnemyIndex = _ownerEnemyIndex });
             if (oldValue > _minHostility && newValue == _minHostility)
                 EventBus.Publish(new EnemyMaxedReceptiveEvent { EnemyIndex = _ownerEnemyIndex });
-            if (oldValue <= 0 && newValue > 0)
+            // "Became" thresholds respect the neutral zone — an enemy needs convincing past the
+            // buffer, not just a single point, before it's genuinely Hostile/Receptive.
+            if (oldValue <= _neutralZone && newValue > _neutralZone)
                 EventBus.Publish(new EnemyBecameHostileEvent { EnemyIndex = _ownerEnemyIndex });
-            // Turncoat: a receptive enemy (<0) flipping all the way to hostile (>0) is a betrayal.
-            if (oldValue < 0 && newValue > 0)
+            // Turncoat: a receptive enemy (past the zone into <0) flipping all the way to hostile
+            // (past the zone into >0) in one shift is a betrayal.
+            if (oldValue < -_neutralZone && newValue > _neutralZone)
                 EventBus.Publish(new EnemyTurncoatEvent { EnemyIndex = _ownerEnemyIndex });
-            if (oldValue >= 0 && newValue < 0)
+            if (oldValue >= -_neutralZone && newValue < -_neutralZone)
                 EventBus.Publish(new EnemyBecameReceptiveEvent { EnemyIndex = _ownerEnemyIndex });
+            // Neutralized stays keyed to literal 0 — "returned to dead center" is still a distinct,
+            // narrower signal from merely re-entering the (possibly wider) neutral zone.
             if (oldValue != 0 && newValue == 0)
                 EventBus.Publish(new EnemyNeutralizedEvent { EnemyIndex = _ownerEnemyIndex });
         }

@@ -19,11 +19,12 @@ MonoBehaviour:
   - rid: 4823698507066769522
   - rid: 4823698419005784187
   _moveVFX: {fileID: 11400000, guid: c30a0880977bcf848bcee8173deef6e8, type: 2}
+  _counterCardType: 1
   _minionToSummon: {fileID: 0}
   _minionCount: 1
   _condition: 0
   _conditionTurn: 1
-  _stanceRequirement: 1
+  _conditionPercent: 50
   references:
     version: 2
     RefIds:
@@ -33,9 +34,14 @@ MonoBehaviour:
         _name: 
         _amount: -2
         _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
     - rid: 4823698507066769522
       type: {class: RaiseTargetHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _name: 
-        _amount: 2
-        _target: 0
+        _amount: 1
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _target: 10
