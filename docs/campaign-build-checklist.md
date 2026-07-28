@@ -147,11 +147,30 @@ come back. No events yet — `BattleEncounterData` is the only encounter type wi
       string `Id`, an `EncounterData`, unlock-requirements placeholder, repeatable flag).
       Requirements can be a stub bool for now — `RunRequirement` doesn't exist until M2,
       but the field/call-site shape should already anticipate `IsMet(RunState)`.
-- [ ] `campaign.unity` scene + `CampaignFlow` (Mono): plain button-per-location list (no
-      drawn map). `RefreshLocations()` — the single rebuild entry point — disables (not
-      hides) locations costing more Hours than remain; HQ button always enabled, calls
-      `AdvanceDay()`. Self-creates a debug `RunState` if none exists (mirrors
-      `BattleTestStarter`; dev-only path, not the defeat/game-over landing).
+- [x] `campaign.unity` scene + `CampaignFlow` (Mono). *(2026-07-28.)* Built as specified —
+      `RefreshLocations()` is the single rebuild entry point, insufficient-Hours locations are
+      disabled not hidden, HQ is always enabled and calls `AdvanceDay()`, and a debug
+      `RunState` self-creates when the scene is entered directly.
+      - **The view is IMGUI, deliberately.** Whether the map is an StS node chain or a
+        Potionomics-style town is still open (`core-design.md` §10); a uGUI screen would
+        commit to an answer. All state lives in `RunState` and `CampaignFlow`'s flow methods —
+        replacing `OnGUI` touches nothing else.
+      - Locations come from `EncounterPoolData.DrawForDay`, **not** `CampaignMapData` — the
+        pool already existed and does the job, so the hand-authored map list stays unbuilt.
+      - Consumes `RunState.NextEncounter`, so an event option can lead straight into a battle
+        without a map trip. Encounters have no unconditional chain of their own — the
+        per-asset `EncounterData.NextEncounter` was removed 2026-07-28 as contradicting
+        self-contained encounters.
+      - Event options carry `RunRequirement[]`; unmet ones render disabled with the reason
+        rather than being hidden, and availability is re-checked before outcomes apply.
+      - `Crookedile → Campaign → Create Campaign Scene` builds the scene and fixes Build
+        Settings; `Create Sample Content` writes a playable 3-encounter pool.
+- [x] **Bug found and fixed:** `PostBattleFlow.ReturnToCampaignOrRestart` cleared `RunState`
+      unconditionally, so a campaign run could not survive its first battle — winning an
+      encounter wiped the deck, Funds, Credibility, relics, and day counter. Now takes a
+      `runEnded` flag: only a genuine defeat clears. Test-harness path unchanged. *(2026-07-28.)*
+- [ ] `CampaignMapData` (SO: location list) + `MapLocation` — **deferred, possibly dead.**
+      The pool covers it for now; only needed if hand-placed, non-random maps are wanted.
 - [x] Battle handoff, **receiving half done**: `BattleTestStarter.StartTestBattle` now
       reads `RunState.Current.PendingBattle?.Session` as the effective session (falls back
       to the inspector field, untouched test path) and clears `PendingBattle` immediately
@@ -239,7 +258,7 @@ Only start once M1 is confirmed working in play.
         `GetUndrawable()` (weight ≤ 0, i.e. authored but can never be drawn).
   - [x] `RunState.Seed` — `Create(seed: 0)` (the default, and every existing call site)
         picks a random one; any other value replays that exact campaign.
-  - [x] `Crookedile → Encounter Gantt` editor window — day timeline per entry, a coverage
+  - [x] `Crookedile → Encounter Designer` (Timeline tab) — day timeline per entry, a coverage
         strip that flags days with nothing eligible, and a seed roller that runs the real
         `DrawForDay` across all days with once-per-run exclusions carried forward.
   - [ ] **Wiring:** nothing calls `DrawForDay` yet. `CampaignFlow` populates the day's

@@ -4,7 +4,8 @@
     "references": [
         "Crookedile.Core",
         "Crookedile.Utilities",
-        "Crookedile.Runtime"
+        "Crookedile.Runtime",
+        "Crookedile.UI"
     ],
     "includePlatforms": [
         "Editor"

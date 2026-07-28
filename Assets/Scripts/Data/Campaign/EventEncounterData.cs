@@ -21,6 +21,15 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private string _resultText;
 
+        [Tooltip(
+            "Conditions for this option to be pickable. ALL must hold.\n"
+                + "Unmet options are shown disabled with the reason, never hidden — seeing the "
+                + "door you can't open is most of what makes a gate interesting."
+        )]
+        [SerializeReference]
+        [SerializeField]
+        private List<RunRequirement> _requirements = new List<RunRequirement>();
+
         [Tooltip("Everything this choice does to the run. Applied in order, all of them.")]
         [SerializeReference]
         [SerializeField]
@@ -29,6 +38,28 @@ namespace Crookedile.Data.Campaign
         public string Label => _label;
         public string ResultText => _resultText;
         public IReadOnlyList<RunOutcome> Outcomes => _outcomes;
+        public IReadOnlyList<RunRequirement> Requirements => _requirements;
+
+        /// <summary>True when every requirement holds. A null state passes (edit-time preview).</summary>
+        public bool IsAvailable(RunState state)
+        {
+            if (state == null)
+                return true;
+            foreach (var req in _requirements)
+                if (req != null && !req.IsMet(state))
+                    return false;
+            return true;
+        }
+
+        /// <summary>Why this option is locked, for the disabled label. Empty when available.</summary>
+        public string DescribeRequirements()
+        {
+            var parts = new List<string>();
+            foreach (var req in _requirements)
+                if (req != null)
+                    parts.Add(req.GetDescription());
+            return string.Join(" + ", parts);
+        }
 
         /// <summary>
         /// Applies every outcome to <paramref name="state"/>. Null entries are skipped —
