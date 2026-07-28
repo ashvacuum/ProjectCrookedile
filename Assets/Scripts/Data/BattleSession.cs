@@ -6,9 +6,16 @@ using UnityEngine;
 namespace Crookedile.Data
 {
     /// <summary>
-    /// Defines an ordered series of encounters for one full test run.
+    /// An ordered gauntlet of fights — <b>a test-harness construct</b>, not campaign content.
     /// Assign to the <c>battleSession</c> field on <c>BattleTestStarter</c>; if left null
     /// the starter falls back to its single <c>enemies</c> list as a one-round session.
+    ///
+    /// <para><b>In the campaign, prefer one fight per encounter.</b> A multi-round session can
+    /// only chain battle → battle, with nothing possible between the fights. Sequences are built
+    /// from a <c>GoToEncounterOutcome</c> on an event choice instead, which can point at a
+    /// battle — so "refuse him and fight now" is one option on one event. A
+    /// <see cref="Campaign.BattleEncounterData"/> should normally wrap a session of exactly one
+    /// round.</para>
     ///
     /// Create via: Right-click → Crookedile / Battle Session
     /// </summary>

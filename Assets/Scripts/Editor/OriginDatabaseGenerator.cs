@@ -31,7 +31,9 @@ namespace Crookedile.EditorTools
             if (isNew)
                 db = ScriptableObject.CreateInstance<OriginDatabase>();
 
-            var entries = new List<OriginDatabase.Entry>(db.Entries ?? Array.Empty<OriginDatabase.Entry>());
+            var entries = new List<OriginDatabase.Entry>(
+                db.Entries ?? Array.Empty<OriginDatabase.Entry>()
+            );
             var present = new HashSet<OriginType>();
             foreach (var e in entries)
                 present.Add(e.Type);
@@ -84,6 +86,9 @@ namespace Crookedile.EditorTools
                             "The converter. Stack pacify statuses (Guilt/Shame/Doubt) to convert enemies "
                             + "into one-turn meter-pumping Fanatics.",
                         Resource = ArchetypeResource.None,
+                        // Broke but trusted — has to earn its way through events.
+                        StartingFunds = 20,
+                        StartingCredibility = 40,
                     };
                 case OriginType.NepoBaby:
                     return new OriginDatabase.Entry
@@ -93,6 +98,9 @@ namespace Crookedile.EditorTools
                         Description =
                             "The schemer. Sacrifice cards to bank Patronage, then summon bodies into the room.",
                         Resource = ArchetypeResource.Patronage,
+                        // Can buy any option on the board, and nobody believes a word.
+                        StartingFunds = 120,
+                        StartingCredibility = 10,
                     };
                 case OriginType.Actor:
                     return new OriginDatabase.Entry
@@ -103,9 +111,16 @@ namespace Crookedile.EditorTools
                             "The open canvas. Drafts into Attention, Scandal or Drama King; first card "
                             + "each battle is played upgraded.",
                         Resource = ArchetypeResource.Attention,
+                        // Famous, so comfortable and well-liked — until the first scandal.
+                        StartingFunds = 60,
+                        StartingCredibility = 30,
                     };
                 default:
-                    return new OriginDatabase.Entry { Type = origin, DisplayName = origin.ToString() };
+                    return new OriginDatabase.Entry
+                    {
+                        Type = origin,
+                        DisplayName = origin.ToString(),
+                    };
             }
         }
 

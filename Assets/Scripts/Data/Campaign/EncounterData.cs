@@ -48,6 +48,12 @@ namespace Crookedile.Data.Campaign
         /// </summary>
         public float DropWeight => _dropWeight;
 
+        // An encounter is self-contained: it has no "and then go here" of its own. Sequencing is
+        // a property of a *choice*, so it lives on EventOption as a GoToEncounterOutcome — which
+        // can point at a battle, making "refuse him and fight now" one option on one event.
+        // Later availability is a dependency instead: a HasVisitedEncounter requirement on a
+        // pool entry. See docs/campaign-encounters.md.
+
 #if UNITY_EDITOR
         protected virtual void OnValidate()
         {

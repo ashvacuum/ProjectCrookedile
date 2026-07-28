@@ -44,10 +44,42 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private bool _oncePerRun = true;
 
+        [Tooltip(
+            "Always appears on every day in its window, ahead of the random picks.\n"
+                + "This is how a day-7 boss or a day-1 opener is made certain — a weight alone "
+                + "only makes it likely, and 'likely' is not a structure you can design around."
+        )]
+        [SerializeField]
+        private bool _guaranteed;
+
+        [Header("Dependencies")]
+        [Tooltip(
+            "Hard gate: ALL must hold or this encounter can't appear at all.\n"
+                + "Use for \"B only exists once you've done A\"."
+        )]
+        [SerializeReference]
+        [SerializeField]
+        private List<RunRequirement> _requirements = new List<RunRequirement>();
+
+        [Tooltip(
+            "Soft nudge: when ALL of these hold, the draw weight is multiplied by Boost "
+                + "Multiplier. The encounter stays available either way.\n"
+                + "Use for \"A makes B more likely\"."
+        )]
+        [SerializeReference]
+        [SerializeField]
+        private List<RunRequirement> _boostIf = new List<RunRequirement>();
+
+        [Tooltip("Weight multiplier applied when every Boost If condition holds.")]
+        [Min(0f)]
+        [SerializeField]
+        private float _boostMultiplier = 2f;
+
         public EncounterData Encounter => _encounter;
         public int FirstDay => _firstDay;
         public int LastDay => _lastDay;
         public bool OncePerRun => _oncePerRun;
+        public bool Guaranteed => _guaranteed;
 
         /// <summary>True when this row is inheriting rather than overriding its weight.</summary>
         public bool InheritsWeight => _weight < 0f;
@@ -68,12 +100,70 @@ namespace Crookedile.Data.Campaign
         /// </summary>
         public string Id => _encounter != null ? _encounter.ID : null;
 
-        /// <summary>True when this entry's window covers <paramref name="day"/>.</summary>
-        public bool IsEligibleOn(int day) =>
+        /// <summary>True when every hard requirement holds. A null state skips the check.</summary>
+        public bool RequirementsMet(RunState state)
+        {
+            if (state == null)
+                return true;
+            foreach (var req in _requirements)
+                if (req != null && !req.IsMet(state))
+                    return false;
+            return true;
+        }
+
+        /// <summary>True when every boost condition holds — and there is at least one.</summary>
+        public bool BoostActive(RunState state)
+        {
+            if (state == null || _boostIf.Count == 0)
+                return false;
+            foreach (var req in _boostIf)
+                if (req != null && !req.IsMet(state))
+                    return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Draw weight for this run's current state: <see cref="ResolvedWeight"/>, multiplied
+        /// when the boost conditions hold.
+        /// </summary>
+        public float WeightFor(RunState state) =>
+            BoostActive(state) ? ResolvedWeight * _boostMultiplier : ResolvedWeight;
+
+        /// <summary>
+        /// True when this entry's window covers <paramref name="day"/> and its requirements hold.
+        /// A guaranteed entry ignores weight — it isn't competing for a slot, so authoring one
+        /// with weight 0 (a reasonable thing to assume) must not silently remove it.
+        /// </summary>
+        /// <param name="state">
+        /// Null means "no run to test against", which skips requirement checks so edit-time
+        /// tooling can show every authored entry rather than an empty board.
+        /// </param>
+        public bool IsEligibleOn(int day, RunState state = null) =>
             _encounter != null
-            && ResolvedWeight > 0f
+            && (_guaranteed || ResolvedWeight > 0f)
             && day >= _firstDay
-            && (_lastDay <= 0 || day <= _lastDay);
+            && (_lastDay <= 0 || day <= _lastDay)
+            && RequirementsMet(state);
+
+        /// <summary>True when this entry gates or boosts on anything — used by tooling.</summary>
+        public bool HasDependencies => _requirements.Count > 0 || _boostIf.Count > 0;
+
+        public IReadOnlyList<RunRequirement> Requirements => _requirements;
+        public IReadOnlyList<RunRequirement> BoostIf => _boostIf;
+        public float BoostMultiplier => _boostMultiplier;
+
+        /// <summary>Human-readable dependency summary for tooling.</summary>
+        public string DescribeDependencies()
+        {
+            var parts = new List<string>();
+            foreach (var r in _requirements)
+                if (r != null)
+                    parts.Add($"needs {r.GetDescription()}");
+            foreach (var r in _boostIf)
+                if (r != null)
+                    parts.Add($"×{_boostMultiplier:0.##} if {r.GetDescription()}");
+            return string.Join(", ", parts);
+        }
     }
 
     /// <summary>
@@ -86,7 +176,7 @@ namespace Crookedile.Data.Campaign
     /// <see cref="System.Random"/> rather than <c>RandomHelper</c>/<c>UnityEngine.Random</c>
     /// on purpose: seeding the campaign must not perturb battle RNG, and vice versa.
     ///
-    /// Author the entries here; visualise the day windows via Crookedile → Encounter Gantt.
+    /// Author the entries here; visualise the day windows via Crookedile → Encounter Designer.
     ///
     /// Create via: Assets → Create → Crookedile → Campaign → Encounter Pool
     /// </summary>
@@ -109,11 +199,14 @@ namespace Crookedile.Data.Campaign
         public IReadOnlyList<EncounterPoolEntry> Entries => _entries;
 
         #region Queries
-        /// <summary>Every entry whose window covers <paramref name="day"/>.</summary>
-        public IEnumerable<EncounterPoolEntry> EligibleOn(int day)
+        /// <summary>
+        /// Every entry whose window covers <paramref name="day"/> and whose requirements hold.
+        /// Pass null for <paramref name="state"/> to ignore requirements (edit-time preview).
+        /// </summary>
+        public IEnumerable<EncounterPoolEntry> EligibleOn(int day, RunState state = null)
         {
             foreach (var entry in _entries)
-                if (entry != null && entry.IsEligibleOn(day))
+                if (entry != null && entry.IsEligibleOn(day, state))
                     yield return entry;
         }
 
@@ -121,11 +214,11 @@ namespace Crookedile.Data.Campaign
         /// Summed weight of everything eligible on <paramref name="day"/>. Zero means that day
         /// has nothing to offer — the failure the Gantt view exists to make visible.
         /// </summary>
-        public float TotalWeightOn(int day)
+        public float TotalWeightOn(int day, RunState state = null)
         {
             float total = 0f;
-            foreach (var entry in EligibleOn(day))
-                total += entry.ResolvedWeight;
+            foreach (var entry in EligibleOn(day, state))
+                total += entry.WeightFor(state);
             return total;
         }
 
@@ -142,11 +235,16 @@ namespace Crookedile.Data.Campaign
         /// Ids already consumed this run (<c>RunState.VisitedLocationIds</c>). Only filters
         /// entries marked <see cref="EncounterPoolEntry.OncePerRun"/>.
         /// </param>
+        /// <param name="state">
+        /// The live run, used to evaluate dependency requirements and weight boosts. Null skips
+        /// both, which is what edit-time previews want.
+        /// </param>
         public List<EncounterData> DrawForDay(
             int day,
             int count,
             int seed,
-            ICollection<string> exclude = null
+            ICollection<string> exclude = null,
+            RunState state = null
         )
         {
             var drawn = new List<EncounterData>();
@@ -155,9 +253,22 @@ namespace Crookedile.Data.Campaign
             var rng = new System.Random(unchecked(seed * 397) ^ day);
             var takenThisDay = new HashSet<string>();
 
-            for (int i = 0; i < count; i++)
+            // Guaranteed entries come first and ignore `count` — a day-7 boss that got crowded
+            // out by a full slate of random events would silently break the run's structure.
+            foreach (var entry in EligibleOn(day, state))
             {
-                var pick = DrawOne(day, rng, exclude, takenThisDay);
+                if (!entry.Guaranteed)
+                    continue;
+                if (entry.OncePerRun && exclude != null && exclude.Contains(entry.Id))
+                    continue;
+                if (!takenThisDay.Add(entry.Id))
+                    continue;
+                drawn.Add(entry.Encounter);
+            }
+
+            for (int i = drawn.Count; i < count; i++)
+            {
+                var pick = DrawOne(day, rng, exclude, takenThisDay, state);
                 if (pick == null)
                     break;
                 takenThisDay.Add(pick.Id);
@@ -170,19 +281,20 @@ namespace Crookedile.Data.Campaign
             int day,
             System.Random rng,
             ICollection<string> exclude,
-            HashSet<string> takenThisDay
+            HashSet<string> takenThisDay,
+            RunState state
         )
         {
             float total = 0f;
             var candidates = new List<EncounterPoolEntry>();
-            foreach (var entry in EligibleOn(day))
+            foreach (var entry in EligibleOn(day, state))
             {
                 if (takenThisDay.Contains(entry.Id))
                     continue;
                 if (entry.OncePerRun && exclude != null && exclude.Contains(entry.Id))
                     continue;
                 candidates.Add(entry);
-                total += entry.ResolvedWeight;
+                total += entry.WeightFor(state);
             }
 
             if (candidates.Count == 0 || total <= 0f)
@@ -192,7 +304,7 @@ namespace Crookedile.Data.Campaign
             float running = 0f;
             foreach (var entry in candidates)
             {
-                running += entry.ResolvedWeight;
+                running += entry.WeightFor(state);
                 if (roll <= running)
                     return entry;
             }

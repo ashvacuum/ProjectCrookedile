@@ -87,7 +87,8 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 ### Editor tools (`Crookedile` menu)
 - **Card Database** / **Enemy Database** — dashboards with health views over authored content.
 - **Authoring Catalog** — reflection-built reference of every `[SerializeReference]` building block the inspector offers (effects, triggers, conditions, status behaviors).
-- **Encounter Gantt** — day timeline for an encounter pool, coverage warnings, and a seed roller that runs the real draw.
+- **Encounter Designer** — two tabs over an encounter pool: a **Timeline** Gantt with coverage warnings and a seed roller that runs the real draw, and a **Dependencies** node graph showing which encounters unlock or favour which.
+- **Campaign** — `Create Campaign Scene` (builds `campaign.unity` and fixes Build Settings) and `Create Sample Content` (a playable 7-day pool).
 
 ---
 

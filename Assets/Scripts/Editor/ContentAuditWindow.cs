@@ -4,6 +4,7 @@ using System.Linq;
 using Crookedile.Data;
 using Crookedile.Data.Audio;
 using Crookedile.Data.Battle;
+using Crookedile.Data.Campaign;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 using Crookedile.Data.Localization;
@@ -105,6 +106,8 @@ namespace Crookedile.EditorTools
                 new EnemiesProvider(),
                 new EnemyMovesProvider(),
                 new EncountersProvider(),
+                new CampaignEncountersProvider(),
+                new EncounterPoolsProvider(),
                 new SharedArtProvider(),
                 new CardVisualsProvider(),
                 new IntentsProvider(),
@@ -297,9 +300,7 @@ namespace Crookedile.EditorTools
 
                 if (shown == 0)
                     SirenixEditorGUI.MessageBox(
-                        _owner._problemsOnly
-                            ? "No problems in this category."
-                            : "Nothing to show.",
+                        _owner._problemsOnly ? "No problems in this category." : "Nothing to show.",
                         MessageType.Info
                     );
             }
@@ -962,12 +963,16 @@ namespace Crookedile.EditorTools
         }
 
         /// <summary>
-        /// Encounters: every BattleSession and its rounds. Flags empty sessions, rounds with no
-        /// enemies, null enemy slots, and rounds over the 5-enemy display cap.
+        /// Battle sessions: every <see cref="BattleSession"/> and its rounds. Flags empty
+        /// sessions, rounds with no enemies, null enemy slots, and rounds over the 5-enemy
+        /// display cap.
+        ///
+        /// Named "Battle sessions", not "Encounters": a session is a test-harness gauntlet.
+        /// Campaign encounters are audited by <see cref="CampaignEncountersProvider"/>.
         /// </summary>
         private sealed class EncountersProvider : IContentProvider
         {
-            public string Category => "Encounters";
+            public string Category => "Battle sessions";
 
             public IEnumerable<Row> Rows()
             {
@@ -998,9 +1003,7 @@ namespace Crookedile.EditorTools
                             ? $"Round {i + 1}"
                             : round.label;
                         if (enemies == 0)
-                            issues.Add(
-                                new AuditIssue(Severity.Error, $"{label}: no enemies.")
-                            );
+                            issues.Add(new AuditIssue(Severity.Error, $"{label}: no enemies."));
                         else
                         {
                             if (round.enemies.Any(e => e == null))
@@ -1017,10 +1020,268 @@ namespace Crookedile.EditorTools
                         }
                     }
 
+                    yield return new Row(session.name, $"{rounds} round(s)", session, issues);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Campaign encounters: every <see cref="EncounterData"/> asset, battles and events.
+        /// Catches the failures this content is actually prone to — an event with no options
+        /// (unleavable), an option that does nothing and says nothing, a battle encounter with
+        /// no session (refuses to start), and half-picked <c>[SerializeReference]</c> rows.
+        /// </summary>
+        private sealed class CampaignEncountersProvider : IContentProvider
+        {
+            public string Category => "Campaign encounters";
+
+            public IEnumerable<Row> Rows()
+            {
+                var encounters = LoadAll<EncounterData>();
+                if (encounters.Count == 0)
+                {
                     yield return new Row(
-                        session.name,
-                        $"{rounds} round(s)",
-                        session,
+                        "(none)",
+                        "no EncounterData assets authored yet",
+                        null,
+                        new List<AuditIssue> { new AuditIssue(Severity.Info, "No encounters.") }
+                    );
+                    yield break;
+                }
+
+                foreach (var encounter in encounters.OrderBy(e => e.name))
+                {
+                    var issues = new List<AuditIssue>();
+
+                    if (string.IsNullOrEmpty(encounter.ID))
+                        issues.Add(
+                            new AuditIssue(
+                                Severity.Error,
+                                "No ID — visited-state and pool exclusions key off it."
+                            )
+                        );
+                    if (string.IsNullOrWhiteSpace(encounter.DisplayName))
+                        issues.Add(
+                            new AuditIssue(
+                                Severity.Warning,
+                                "No display name (falls back to asset name)."
+                            )
+                        );
+
+                    string detail = encounter.GetType().Name;
+
+                    switch (encounter)
+                    {
+                        case BattleEncounterData battle:
+                            detail = battle.IsBoss ? "Battle (BOSS)" : "Battle";
+                            if (battle.Session == null)
+                                issues.Add(
+                                    new AuditIssue(
+                                        Severity.Error,
+                                        "No BattleSession — this encounter refuses to start."
+                                    )
+                                );
+                            else if (battle.Session.RoundCount > 1)
+                                issues.Add(
+                                    new AuditIssue(
+                                        Severity.Warning,
+                                        $"Session has {battle.Session.RoundCount} rounds. Campaign "
+                                            + "encounters should wrap one fight — chain with a "
+                                            + "GoToEncounterOutcome instead."
+                                    )
+                                );
+                            break;
+
+                        case EventEncounterData evt:
+                            detail = $"Event, {evt.Options.Count} option(s)";
+                            if (string.IsNullOrWhiteSpace(evt.Body))
+                                issues.Add(new AuditIssue(Severity.Warning, "No body text."));
+                            if (evt.Options.Count == 0)
+                                issues.Add(
+                                    new AuditIssue(
+                                        Severity.Error,
+                                        "No options — the player can't leave this event."
+                                    )
+                                );
+                            AuditOptions(evt, issues);
+                            break;
+                    }
+
+                    yield return new Row(encounter.name, detail, encounter, issues);
+                }
+            }
+
+            private static void AuditOptions(EventEncounterData evt, List<AuditIssue> issues)
+            {
+                for (int i = 0; i < evt.Options.Count; i++)
+                {
+                    var option = evt.Options[i];
+                    string tag = $"Option {i + 1}";
+                    if (option == null)
+                    {
+                        issues.Add(new AuditIssue(Severity.Error, $"{tag}: null."));
+                        continue;
+                    }
+                    if (string.IsNullOrWhiteSpace(option.Label))
+                        issues.Add(
+                            new AuditIssue(Severity.Error, $"{tag}: no label — blank button.")
+                        );
+
+                    // A null entry is a row added in the inspector whose type was never picked.
+                    if (option.Outcomes.Any(o => o == null))
+                        issues.Add(
+                            new AuditIssue(Severity.Error, $"{tag}: an outcome has no type picked.")
+                        );
+                    if (option.Requirements.Any(r => r == null))
+                        issues.Add(
+                            new AuditIssue(
+                                Severity.Error,
+                                $"{tag}: a requirement has no type picked."
+                            )
+                        );
+
+                    if (option.Outcomes.Count == 0 && string.IsNullOrWhiteSpace(option.ResultText))
+                        issues.Add(
+                            new AuditIssue(
+                                Severity.Warning,
+                                $"{tag}: no outcomes and no result text — picking it does and says nothing."
+                            )
+                        );
+                }
+            }
+        }
+
+        /// <summary>
+        /// Encounter pools: the scheduling layer. The headline check is day coverage — a day
+        /// with nothing eligible hands the player an empty map, and it's invisible from the
+        /// asset inspector.
+        /// </summary>
+        private sealed class EncounterPoolsProvider : IContentProvider
+        {
+            public string Category => "Encounter pools";
+
+            public IEnumerable<Row> Rows()
+            {
+                var pools = LoadAll<EncounterPoolData>();
+                if (pools.Count == 0)
+                {
+                    yield return new Row(
+                        "(none)",
+                        "no EncounterPoolData assets",
+                        null,
+                        new List<AuditIssue> { new AuditIssue(Severity.Info, "No pools.") }
+                    );
+                    yield break;
+                }
+
+                foreach (var pool in pools.OrderBy(p => p.name))
+                {
+                    var issues = new List<AuditIssue>();
+
+                    // Ids present in this pool — a dependency on anything outside it can never
+                    // be satisfied by playing, which is silent at runtime.
+                    var idsInPool = new HashSet<string>(
+                        pool.Entries.Where(e => e?.Encounter != null).Select(e => e.Id)
+                    );
+
+                    for (int i = 0; i < pool.Entries.Count; i++)
+                    {
+                        var entry = pool.Entries[i];
+                        string tag = $"Entry {i + 1}";
+                        if (entry?.Encounter == null)
+                        {
+                            issues.Add(new AuditIssue(Severity.Error, $"{tag}: no encounter set."));
+                            continue;
+                        }
+
+                        tag = entry.Encounter.name;
+
+                        if (entry.FirstDay > pool.Days)
+                            issues.Add(
+                                new AuditIssue(
+                                    Severity.Warning,
+                                    $"{tag}: starts day {entry.FirstDay}, past the pool's {pool.Days} days — unreachable."
+                                )
+                            );
+                        if (entry.LastDay > 0 && entry.LastDay < entry.FirstDay)
+                            issues.Add(
+                                new AuditIssue(
+                                    Severity.Error,
+                                    $"{tag}: last day {entry.LastDay} is before first day {entry.FirstDay}."
+                                )
+                            );
+                        if (!entry.Guaranteed && entry.ResolvedWeight <= 0f)
+                            issues.Add(
+                                new AuditIssue(
+                                    Severity.Warning,
+                                    $"{tag}: weight 0 and not guaranteed — can never be drawn."
+                                )
+                            );
+                        // Existing assets deserialize a missing multiplier as 0, which would
+                        // zero the weight of anything it's meant to favour.
+                        if (entry.BoostIf.Count > 0 && entry.BoostMultiplier <= 0f)
+                            issues.Add(
+                                new AuditIssue(
+                                    Severity.Error,
+                                    $"{tag}: boost multiplier is {entry.BoostMultiplier:0.##} — the boost erases the entry instead of favouring it."
+                                )
+                            );
+
+                        foreach (var req in entry.Requirements.Concat(entry.BoostIf))
+                        {
+                            if (req == null)
+                            {
+                                issues.Add(
+                                    new AuditIssue(
+                                        Severity.Error,
+                                        $"{tag}: a condition has no type picked."
+                                    )
+                                );
+                                continue;
+                            }
+                            if (
+                                req is HasVisitedEncounter visited
+                                && visited.Encounter != null
+                                && !idsInPool.Contains(visited.Encounter.ID)
+                            )
+                                issues.Add(
+                                    new AuditIssue(
+                                        Severity.Warning,
+                                        $"{tag}: depends on '{visited.Encounter.name}', which isn't in this pool — can never be satisfied here."
+                                    )
+                                );
+                        }
+                    }
+
+                    // Coverage: the failure the whole scheduling layer is prone to.
+                    var emptyDays = new List<int>();
+                    for (int day = 1; day <= pool.Days; day++)
+                        if (!pool.EligibleOn(day).Any())
+                            emptyDays.Add(day);
+
+                    if (emptyDays.Count > 0)
+                        issues.Add(
+                            new AuditIssue(
+                                Severity.Error,
+                                $"Nothing eligible on day(s) {string.Join(", ", emptyDays)} — empty map."
+                            )
+                        );
+
+                    bool hasBoss = pool.Entries.Any(e =>
+                        e?.Encounter is BattleEncounterData b && b.IsBoss
+                    );
+                    if (!hasBoss)
+                        issues.Add(
+                            new AuditIssue(
+                                Severity.Warning,
+                                "No boss encounter — the run has no finale, and End Day never becomes Face the boss."
+                            )
+                        );
+
+                    yield return new Row(
+                        pool.name,
+                        $"{pool.Days} days, {pool.Entries.Count} entries",
+                        pool,
                         issues
                     );
                 }
@@ -1078,15 +1339,8 @@ namespace Crookedile.EditorTools
                         }
                     )
                         if (settings.GetFrameForRarity(rarity) == null)
-                            issues.Add(
-                                new AuditIssue(Severity.Info, $"No {rarity} rarity frame.")
-                            );
-                    yield return new Row(
-                        "Card Visual Settings",
-                        settings.name,
-                        settings,
-                        issues
-                    );
+                            issues.Add(new AuditIssue(Severity.Info, $"No {rarity} rarity frame."));
+                    yield return new Row("Card Visual Settings", settings.name, settings, issues);
                 }
 
                 foreach (var atlas in LoadAll<CardVisualAtlas>().OrderBy(a => a.name))
@@ -1119,11 +1373,17 @@ namespace Crookedile.EditorTools
                     }
                     if (blankId > 0)
                         issues.Add(
-                            new AuditIssue(Severity.Warning, $"{blankId} mapping(s) with blank cardId.")
+                            new AuditIssue(
+                                Severity.Warning,
+                                $"{blankId} mapping(s) with blank cardId."
+                            )
                         );
                     if (noRef > 0)
                         issues.Add(
-                            new AuditIssue(Severity.Info, $"{noRef} mapping(s) with no CardData reference.")
+                            new AuditIssue(
+                                Severity.Info,
+                                $"{noRef} mapping(s) with no CardData reference."
+                            )
                         );
 
                     int count = mappings?.arraySize ?? 0;

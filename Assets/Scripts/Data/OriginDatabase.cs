@@ -49,11 +49,27 @@ namespace Crookedile.Data
             [Tooltip("The origin's starter passive asset.")]
             public OriginPassive Passive;
 
-            [Tooltip("Tag used to collect this origin's starter cards (CardDatabase.GetStarterDeck).")]
+            [Tooltip(
+                "Tag used to collect this origin's starter cards (CardDatabase.GetStarterDeck)."
+            )]
             public string StarterTag;
 
             [Tooltip("Max Action Points per turn.")]
             public int MaxActionPoints;
+
+            [Header("Campaign start")]
+            [Tooltip(
+                "Funds this origin starts a run with. A real design lever, not flavour — "
+                    + "Nepo Baby starting rich and Faith Leader starting broke changes which "
+                    + "event options are even reachable on day one."
+            )]
+            public int StartingFunds;
+
+            [Tooltip("Credibility this origin starts a run with.")]
+            public int StartingCredibility;
+
+            [Tooltip("Hours per campaign day. 0 falls back to the run's default.")]
+            public int MaxHours;
         }
 
         [SerializeField]
@@ -86,5 +102,37 @@ namespace Crookedile.Data
 
         public OriginPassive GetPassive(OriginType type) =>
             TryGet(type, out var e) ? e.Passive : null;
+
+        #region Campaign start
+        private const string ResourcePath = "Databases/OriginDatabase";
+        private static OriginDatabase _cached;
+
+        /// <summary>
+        /// The shared instance, resolved by path. Lets <see cref="RunState.Create"/> apply an
+        /// origin's starting values without every caller having to look them up and remember to
+        /// pass them along.
+        /// </summary>
+        public static OriginDatabase Shared
+        {
+            get
+            {
+                // Re-resolves on null rather than caching the miss — a domain reload clears this.
+                if (_cached == null)
+                    _cached = Resources.Load<OriginDatabase>(ResourcePath);
+                return _cached;
+            }
+        }
+
+        /// <summary>
+        /// Starting campaign values for <paramref name="type"/>. Returns all zeros when the
+        /// origin has no entry, which is the same as "starts with nothing" — a missing entry
+        /// should never block a run from being created.
+        /// </summary>
+        public (int funds, int credibility, int maxHours) GetCampaignStart(OriginType type) =>
+            TryGet(type, out var e)
+                ? (e.StartingFunds, e.StartingCredibility, e.MaxHours)
+                : (0, 0, 0);
+
+        #endregion
     }
 }

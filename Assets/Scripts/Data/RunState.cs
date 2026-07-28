@@ -68,6 +68,21 @@ namespace Crookedile.Data
         /// </summary>
         public int Seed { get; private set; }
 
+        /// <summary>
+        /// The run's campaign-level random stream, derived from <see cref="Seed"/>. Everything
+        /// the seed is supposed to reproduce draws from here: reward offers, random-card
+        /// outcomes, anything else decided on the map.
+        ///
+        /// <para><b>Battle RNG deliberately stays on <c>UnityEngine.Random</c>.</b> Two reasons:
+        /// a shared global stream would make this seed depend on how many times combat happened
+        /// to roll — so adding one shuffle anywhere silently changes every later campaign draw —
+        /// and seeding battle would make reloading a fight replay identical draws.</para>
+        ///
+        /// Note the seed fixes the *map*; the stream still diverges if the player makes
+        /// different choices, which is correct — identical play gives identical results.
+        /// </summary>
+        public System.Random Rng { get; private set; }
+
         /// <summary>Meta currency accumulated this run (placeholder name — see metagame-campaign.md).</summary>
         public int Funds { get; private set; }
 
@@ -88,6 +103,33 @@ namespace Crookedile.Data
         /// <summary>Stable ids of non-repeatable locations already resolved this run.</summary>
         public HashSet<string> VisitedLocationIds { get; private set; }
 
+        /// <summary>
+        /// The locations currently on offer, and the day they were drawn for.
+        ///
+        /// Lives here rather than on the map screen because it has to survive a scene load: a
+        /// battle unloads the campaign scene, and re-drawing the day on return would produce a
+        /// *different* offering — the just-visited location is now in
+        /// <see cref="VisitedLocationIds"/>, which shifts the exclude set and cascades through
+        /// the weighted rolls. The player would leave to fight one location and come back to a
+        /// different map for the same day.
+        /// </summary>
+        public List<EncounterData> TodaysLocations { get; private set; } =
+            new List<EncounterData>();
+
+        /// <summary>Day <see cref="TodaysLocations"/> was drawn for; -1 when nothing is drawn.</summary>
+        public int TodaysLocationsDay { get; private set; } = -1;
+
+        /// <summary>Records a freshly drawn day's offering.</summary>
+        public void SetTodaysLocations(int day, List<EncounterData> locations)
+        {
+            TodaysLocationsDay = day;
+            TodaysLocations = locations ?? new List<EncounterData>();
+        }
+
+        /// <summary>Drops a location from the current offering once it's been resolved.</summary>
+        public void RemoveTodaysLocation(EncounterData encounter) =>
+            TodaysLocations.Remove(encounter);
+
         /// <summary>Spends Hours, clamped so it never goes negative.</summary>
         public void SpendHours(int amount) => Hours = Mathf.Max(0, Hours - amount);
 
@@ -101,8 +143,7 @@ namespace Crookedile.Data
         /// <summary>Applies a signed change to Credibility, clamped at zero.</summary>
         // ponytail: floor only, no ceiling. Add a max if Credibility ever drives a threshold
         // that unbounded growth would trivialise.
-        public void AdjustCredibility(int delta) =>
-            Credibility = Mathf.Max(0, Credibility + delta);
+        public void AdjustCredibility(int delta) => Credibility = Mathf.Max(0, Credibility + delta);
 
         /// <summary>Ends the day: advances <see cref="Day"/> and refills <see cref="Hours"/>.</summary>
         public void AdvanceDay()
@@ -127,6 +168,24 @@ namespace Crookedile.Data
 
         /// <summary>Clears <see cref="PendingBattle"/> — call once it's been consumed.</summary>
         public void ClearPendingBattle() => PendingBattle = null;
+
+        /// <summary>
+        /// The encounter to resolve instead of returning to the map, when the one just finished
+        /// chained forward, which only a chosen event option can do — via
+        /// <c>GoToEncounterOutcome</c>. Encounters have no unconditional "and then" of their
+        /// own: sequencing is a property of a choice, not of an encounter.
+        ///
+        /// Distinct from <see cref="PendingBattle"/>, which is specifically "the battle scene
+        /// should load this on the next scene load". This one is a campaign-layer instruction:
+        /// don't go back to roaming yet.
+        /// </summary>
+        public EncounterData NextEncounter { get; private set; }
+
+        /// <summary>Queues the next encounter in a chain. Null clears it.</summary>
+        public void SetNextEncounter(EncounterData encounter) => NextEncounter = encounter;
+
+        /// <summary>Clears <see cref="NextEncounter"/> — call once it's been consumed.</summary>
+        public void ClearNextEncounter() => NextEncounter = null;
 
         /// <summary>Marks a map location as resolved so a non-repeatable one won't re-offer.</summary>
         public void MarkVisited(string locationId)
@@ -179,6 +238,15 @@ namespace Crookedile.Data
         /// Pass <c>null</c> for a single-round session where <c>BattleTestStarter</c>
         /// handles enemy selection directly.
         /// </param>
+        /// <param name="maxHours">
+        /// Hours per day. Overridden by the origin's own <c>MaxHours</c> when that is non-zero,
+        /// so day length can differ per archetype without every call site knowing.
+        /// </param>
+        /// <remarks>
+        /// Starting Funds and Credibility come from <see cref="OriginDatabase"/> rather than
+        /// parameters: they're tuned design data, and resolving them here means no run-creation
+        /// path can silently start a player at zero by forgetting to pass them.
+        /// </remarks>
         public static RunState Create(
             OriginType origin,
             List<CardData> starterDeck,
@@ -188,19 +256,28 @@ namespace Crookedile.Data
             int seed = 0
         )
         {
+            var start = OriginDatabase.Shared?.GetCampaignStart(origin) ?? (0, 0, 0);
+            int hours = start.maxHours > 0 ? start.maxHours : maxHours;
+            int resolvedSeed = seed != 0 ? seed : Environment.TickCount;
+
             Current = new RunState
             {
                 // 0 means "give me a run I didn't choose" — the normal play path. Any other
                 // value is someone deliberately replaying a specific campaign.
-                Seed = seed != 0 ? seed : Environment.TickCount,
+                Seed = resolvedSeed,
+                // Offset so the reward stream doesn't mirror the encounter draws, which derive
+                // from the same seed in EncounterPoolData.
+                Rng = new System.Random(unchecked(resolvedSeed * 31 + 17)),
+                Funds = start.funds,
+                Credibility = start.credibility,
                 Origin = origin,
                 Deck = starterDeck != null ? new List<CardData>(starterDeck) : new List<CardData>(),
                 Relics = new List<RelicData>(),
                 CurrentBattleIndex = 0,
                 BattleQueue = battleQueue,
                 IsCampaignRun = isCampaignRun,
-                MaxHours = maxHours,
-                Hours = maxHours,
+                MaxHours = hours,
+                Hours = hours,
                 VisitedLocationIds = new HashSet<string>(),
             };
             return Current;

@@ -76,16 +76,19 @@ namespace Crookedile.UI.Battle
                 || _rewardScreen == null
             )
             {
-                // Defeat (or reward infra not wired up) — wipe RunState. Campaign run:
-                // back to the map (provisional "run ended" — no game-over screen yet).
-                // Test run: unchanged reload-into-fresh-battle behavior.
-                ReturnToCampaignOrRestart();
+                // Defeat, or victory with reward infra not wired up. Only a genuine defeat
+                // ends the run — otherwise a missing reward screen would silently wipe a
+                // campaign that the player was actually winning.
+                bool defeated = _lastResult == null || !_lastResult.isVictory;
+                ReturnToCampaignOrRestart(runEnded: defeated);
                 return;
             }
 
             var offers = _cardDatabase.GenerateRewardOffer(
                 _bm != null ? _bm.PlayerOrigin : default,
-                count: 3
+                count: 3,
+                typeFilter: null,
+                rng: RunState.Current?.Rng
             );
             _rewardScreen.OpenSingle("Choose a Card", offers, "Take Card", OnRewardChosen);
         }
@@ -109,25 +112,36 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
-            // Encounter fully complete.
-            ReturnToCampaignOrRestart();
+            // Encounter fully complete — the player won, so the run continues.
+            ReturnToCampaignOrRestart(runEnded: false);
         }
 
         /// <summary>
-        /// Wipes RunState and sends the player back where they came from: the campaign map
-        /// for a campaign run, or a fresh reload of the current (test) scene otherwise.
-        /// Shared by the defeat path and the "encounter complete" path — both boil down to
-        /// "this run's current battle context is over."
+        /// Sends the player back where they came from: the campaign map for a campaign run,
+        /// or a fresh reload of the current (test) scene otherwise.
         /// </summary>
-        private void ReturnToCampaignOrRestart()
+        /// <param name="runEnded">
+        /// True only when the run is genuinely over (defeat). A campaign run that merely
+        /// *finished an encounter* must keep its RunState — clearing it would wipe the deck,
+        /// Funds, Credibility, relics, and the day counter, dropping the player onto the map
+        /// with a brand new run. Non-campaign (test) runs clear either way, unchanged.
+        /// </param>
+        private void ReturnToCampaignOrRestart(bool runEnded)
         {
-            bool isCampaignRun = RunState.Current?.IsCampaignRun == true;
-            RunState.Clear();
-
-            if (isCampaignRun)
-                SceneLoader.Instance?.LoadScene("campaign");
-            else
+            if (RunState.Current?.IsCampaignRun != true)
+            {
+                // Test-harness path, byte-for-byte as before.
+                RunState.Clear();
                 SceneLoader.Instance?.ReloadCurrentScene();
+                return;
+            }
+
+            // Campaign defeat is a provisional game-over: no menu screen exists yet, so the
+            // map scene shows a "run ended" state and offers a fresh run.
+            if (runEnded)
+                RunState.Clear();
+
+            SceneLoader.Instance?.LoadScene("campaign");
         }
     }
 }

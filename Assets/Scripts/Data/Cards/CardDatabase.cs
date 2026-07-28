@@ -224,18 +224,38 @@ namespace Crookedile.Data.Cards
         /// Basic: 70% chance, Enhanced: 25%, Rare: 5%
         /// </summary>
         /// <returns>Randomly selected card based on rarity weights</returns>
-        public CardData GetRandomByRarityWeight()
+        /// <param name="rng">
+        /// Stream to draw from — pass <c>RunState.Current.Rng</c> for a seed-reproducible draw.
+        /// Null falls back to <c>RandomHelper</c> / <c>UnityEngine.Random</c>.
+        /// </param>
+        public CardData GetRandomByRarityWeight(System.Random rng = null)
         {
             List<CardData> allCards = GetAll();
             List<float> weights = new List<float>();
 
+            float total = 0f;
             foreach (var card in allCards)
             {
                 float weight = RewardWeights.TryGetValue(card.Rarity, out float w) ? w : 1f;
                 weights.Add(weight);
+                total += weight;
             }
 
-            return RandomHelper.WeightedRandom(allCards, weights);
+            if (rng == null)
+                return RandomHelper.WeightedRandom(allCards, weights);
+
+            if (allCards.Count == 0 || total <= 0f)
+                return null;
+
+            double roll = rng.NextDouble() * total;
+            float cursor = 0f;
+            for (int i = 0; i < allCards.Count; i++)
+            {
+                cursor += weights[i];
+                if (roll <= cursor)
+                    return allCards[i];
+            }
+            return allCards[allCards.Count - 1]; // float drift guard
         }
 
         #endregion
@@ -283,10 +303,16 @@ namespace Crookedile.Data.Cards
         /// List of unique <see cref="CardData"/> offers. May be shorter than <paramref name="count"/>
         /// if the eligible pool is exhausted.
         /// </returns>
+        /// <param name="rng">
+        /// Stream to draw from — pass <c>RunState.Current.Rng</c> so the same seed produces the
+        /// same offers. Null falls back to <c>UnityEngine.Random</c>, which keeps editor tools
+        /// and any non-run caller working unchanged.
+        /// </param>
         public List<CardData> GenerateRewardOffer(
             OriginType origin,
             int count = 3,
-            CardType? typeFilter = null
+            CardType? typeFilter = null,
+            System.Random rng = null
         )
         {
             string originTag = origin.ToString().ToLower();
@@ -356,13 +382,14 @@ namespace Crookedile.Data.Cards
                     enhancedBucket,
                     RewardWeights[CardRarity.Enhanced],
                     rareBucket,
-                    RewardWeights[CardRarity.Rare]
+                    RewardWeights[CardRarity.Rare],
+                    rng
                 );
 
                 if (bucket == null || bucket.Count == 0)
                     break;
 
-                int idx = UnityEngine.Random.Range(0, bucket.Count);
+                int idx = NextIndex(rng, bucket.Count);
                 var pick = bucket[idx];
                 bucket.RemoveAt(idx); // prevent duplicates
 
@@ -377,13 +404,22 @@ namespace Crookedile.Data.Cards
         /// Buckets with zero remaining cards are excluded from selection.
         /// Returns <c>null</c> if all buckets are empty.
         /// </summary>
+        /// <summary>Index in [0, count) from <paramref name="rng"/>, or Unity's stream when null.</summary>
+        private static int NextIndex(System.Random rng, int count) =>
+            rng?.Next(count) ?? UnityEngine.Random.Range(0, count);
+
+        /// <summary>Float in [0, max) from <paramref name="rng"/>, or Unity's stream when null.</summary>
+        private static float NextFloat(System.Random rng, float max) =>
+            rng != null ? (float)(rng.NextDouble() * max) : UnityEngine.Random.Range(0f, max);
+
         private static List<CardData> PickWeightedBucket(
             List<CardData> basic,
             float wBasic,
             List<CardData> enhanced,
             float wEnhanced,
             List<CardData> rare,
-            float wRare
+            float wRare,
+            System.Random rng = null
         )
         {
             float total = 0f;
@@ -396,7 +432,7 @@ namespace Crookedile.Data.Cards
             if (total <= 0f)
                 return null;
 
-            float roll = UnityEngine.Random.Range(0f, total);
+            float roll = NextFloat(rng, total);
             float cursor = 0f;
 
             if (basic.Count > 0)
