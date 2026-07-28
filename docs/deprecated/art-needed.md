@@ -1,3 +1,11 @@
+> [!WARNING]
+> **Deprecated — no longer in use.** A thin gap checklist its own successor declares superseded.
+> Kept because the ideas may still be worth mining; the specifics are not.
+> **Superseded by:** [`docs/art-bible.md`](../art-bible.md)
+> Index: [`docs/deprecated/README.md`](README.md)  ·  Back to [`readme.md`](../../readme.md)
+
+---
+
 # Art Still Needed
 
 Have: card art, card frames/backs. Missing: **status icons, enemy intent icons, enemy portraits**.

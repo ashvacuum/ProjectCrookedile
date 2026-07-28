@@ -7,7 +7,7 @@
 ---
 
 > [!IMPORTANT]
-> **The design is in active flux.** The game went through a major combat + class redesign. Everything under `docs/` is current. Most root-level `SCREAMING_CASE.md` and lowercase design files predate that redesign and are flagged [historical](#historical-pre-redesign) — don't trust their specifics until reconciled.
+> **The design is in active flux.** The game went through a major combat + class redesign. Everything under `docs/` is current. Everything under [`docs/deprecated/`](docs/deprecated/README.md) predates that redesign and is not in use — kept only because some of its ideas are still worth mining.
 
 ## Start here
 
@@ -43,16 +43,16 @@
 ### Planning & tracking
 - [`roadmap.md`](docs/roadmap.md) — demo scope, phases, gates.
 - [`campaign-build-checklist.md`](docs/campaign-build-checklist.md) — execution tracker for the campaign layer (M1–M2), with the hardening decisions behind each call.
-- [`work-now.md`](docs/work-now.md) — tasks where the decision is made and only execution remains.
 - [`needs-detailing.md`](docs/needs-detailing.md) — design questions still awaiting a call, ordered by how much they block.
-- [`test-plan.md`](docs/test-plan.md) — rebuilding the test suite against the StatusBehavior API.
 - [`card-audit.md`](docs/card-audit.md) — every authored card against the fantasies in `core-design.md`.
 
 ### Art & audio
-- [`art-bible.md`](docs/art-bible.md) — canonical art direction + resolution spec for artists.
-- [`art-needed.md`](docs/art-needed.md) — the thin gap checklist (superseded by the art bible).
+- [`art-bible.md`](docs/art-bible.md) — canonical art direction + resolution spec for artists. The Content Hub tabs are the live blank-slot checker.
 - [`reference/style-mock-prompt.md`](docs/reference/style-mock-prompt.md) — style-mock generation prompt.
 - [`reference/music-prompt.md`](docs/reference/music-prompt.md) — BGM prompts.
+
+### Deprecated
+- [`deprecated/README.md`](docs/deprecated/README.md) — 23 superseded docs, each banner-marked with what superseded it, plus a short list of ideas still worth mining.
 
 ---
 
@@ -78,14 +78,6 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 - **Encounter Gantt** — day timeline for an encounter pool, coverage warnings, and a seed roller that runs the real draw.
 
 ---
-
-## Historical (pre-redesign)
-
-Original campaign-era design and setup notes. Kept for reference; **reconcile against the canonical docs before trusting**.
-
-- **Design source:** `game_overview.md`, `origins.md`, `resources.md`, `cards.md`, `locations.md`, `events.md`, `progression.md`, `technical.md`
-- **Consolidated wiki / study:** `GAME_WIKI.md`, `SYSTEMS_STUDY.md`, `IMPLEMENTATION_STATUS.md`
-- **Battle / UI / setup guides:** `BATTLE_SYSTEM.md`, `BATTLE_SYSTEM_TASKS.md`, `BATTLE_INTEGRATION_FLOW.md`, `BATTLE_UI_SETUP.md`, `CARD_2D_SETUP.md`, `CARD_ACQUISITION.md`, `CARD_EFFECTS.md`, `SCENE_SETUP_GUIDE.md`, `STARTER_CARDS_GUIDE.md`
 
 ## Content note
 

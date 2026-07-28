@@ -1,3 +1,11 @@
+> [!WARNING]
+> **Deprecated — no longer in use.** Completed. Scoped to branch `test-new-gameplay`, which no longer exists.
+> Kept because the ideas may still be worth mining; the specifics are not.
+> **Superseded by:** [`docs/roadmap.md`](../roadmap.md), [`docs/campaign-build-checklist.md`](../campaign-build-checklist.md)
+> Index: [`docs/deprecated/README.md`](README.md)  ·  Back to [`readme.md`](../../readme.md)
+
+---
+
 # Work Now — actionable engineering & content tasks
 
 *As of 2026-06-10, branch `test-new-gameplay`. These are tasks where the decision is already made and only execution remains. Design questions that still need a decision live in `needs-detailing.md`; the test rebuild has its own piece in `test-plan.md`.*
