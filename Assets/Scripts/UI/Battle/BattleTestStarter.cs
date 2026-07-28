@@ -339,12 +339,24 @@ namespace Crookedile.Gameplay.Battle
                 return new List<CardData>();
             }
 
-            CardData[] allCards = Resources.LoadAll<CardData>("Cards");
-            if (allCards == null || allCards.Length == 0)
+            // Reads the CardDatabase rather than Resources.LoadAll over the card folder: the
+            // database is the canonical card list (Refresh Database repopulates it), and going
+            // through it means the ~50 card assets don't have to live under Resources/ just to
+            // serve this test path.
+            var database = Resources.Load<CardDatabase>("Databases/CardDatabase");
+            if (database == null)
             {
                 Debug.LogError(
-                    "[BattleTestStarter] No CardData assets found in Resources/Cards/. "
-                        + "Make sure all card .asset files are in Assets/Resources/Cards/."
+                    "[BattleTestStarter] No CardDatabase found at Resources/Databases/CardDatabase."
+                );
+                return new List<CardData>();
+            }
+
+            List<CardData> allCards = database.GetAll();
+            if (allCards.Count == 0)
+            {
+                Debug.LogError(
+                    "[BattleTestStarter] CardDatabase is empty — open it and hit Refresh Database."
                 );
                 return new List<CardData>();
             }
@@ -353,9 +365,8 @@ namespace Crookedile.Gameplay.Battle
             foreach (var (cardName, count) in template)
             {
                 // Match by asset filename (c.name) first, then by CardData.CardName field.
-                CardData found = System.Array.Find(
-                    allCards,
-                    c => c.name == cardName || c.CardName == cardName
+                CardData found = allCards.Find(c =>
+                    c.name == cardName || c.CardName == cardName
                 );
 
                 if (found == null)

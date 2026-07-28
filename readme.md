@@ -67,6 +67,18 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 | `Assets/Scripts/Data/Campaign/` | Encounter types, event outcomes, encounter pools — see [`campaign-encounters.md`](docs/campaign-encounters.md) |
 | `Assets/Scripts/UI/Battle/` | Battle UI, decomposed into self-subscribing panel islands |
 | `Assets/Scripts/Editor/` | Authoring tools — see below |
+| `Assets/Data/` | Authored ScriptableObject assets — cards, enemies, passives, encounters, VFX events |
+| `Assets/Prefabs/` | `Battle/`, `UI/`, `VFX/` |
+| `Assets/Resources/` | **Only** what's loaded by runtime path — see below |
+
+> [!IMPORTANT]
+> **`Assets/Resources/` is deliberately near-empty (5 assets).** Everything in a Resources folder ships in every build, uncompressed and unstrippable, and is scanned at startup — so only assets genuinely loaded by *path string* belong there:
+> - `DOTweenSettings.asset` — pinned by DOTween's own loader
+> - `StatusEffectIconMap.asset` — `Resources.Load` by name, [AuthoringCatalogWindow.cs:50](Assets/Scripts/Editor/AuthoringCatalogWindow.cs:50)
+> - `Databases/CardDatabase.asset` — [BattleTestStarter.cs:346](Assets/Scripts/UI/Battle/BattleTestStarter.cs:346)
+> - `Databases/{EnemyDatabase,OriginDatabase}.asset` — kept alongside for symmetry
+>
+> Authored content is referenced by direct GUID reference and belongs in `Assets/Data/`. **Do not add assets to `Resources/` unless something loads them by string path.**
 
 **Architecture in one line:** a static `EventBus` for *notifications only* (never gameplay commands), an FSM for turn flow, and `[SerializeReference]` polymorphic effects authored as data.
 
