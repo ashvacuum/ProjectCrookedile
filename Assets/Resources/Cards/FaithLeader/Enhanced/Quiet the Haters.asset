@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Quiet the Haters
   _cardType: 0
   _rarity: 1
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 1167e0f0adc443c4dbfa3c8bd51ae832, type: 3}
   _description: 
   _flavorText: 
   _costs:

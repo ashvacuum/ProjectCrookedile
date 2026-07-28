@@ -479,7 +479,15 @@ MonoBehaviour:
   battleManager: {fileID: 507472318}
   battleUI: {fileID: 507472321}
   battleSession: {fileID: 11400000, guid: a0e0214204e47474da56aa150321e5c7, type: 2}
-  faithLeaderDeck: []
+  faithLeaderDeck:
+  - card: {fileID: 11400000, guid: 8d011eaa428c7c24ba579274d7adcccc, type: 2}
+    count: 4
+  - card: {fileID: 11400000, guid: 178a016c59202b84aba8415c5543b39c, type: 2}
+    count: 1
+  - card: {fileID: 11400000, guid: 4f1c7d9c3f8b1d842987a847763a9385, type: 2}
+    count: 4
+  - card: {fileID: 11400000, guid: 2e62e4f4d045d6f42af19422587d5440, type: 2}
+    count: 1
   nepoBabyDeck: []
   actorDeck: []
   startOnAwake: 1
