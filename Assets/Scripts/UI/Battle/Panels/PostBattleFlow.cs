@@ -76,9 +76,10 @@ namespace Crookedile.UI.Battle
                 || _rewardScreen == null
             )
             {
-                // Defeat — wipe RunState so the next scene load starts a fresh run.
-                RunState.Clear();
-                SceneLoader.Instance?.ReloadCurrentScene();
+                // Defeat (or reward infra not wired up) — wipe RunState. Campaign run:
+                // back to the map (provisional "run ended" — no game-over screen yet).
+                // Test run: unchanged reload-into-fresh-battle behavior.
+                ReturnToCampaignOrRestart();
                 return;
             }
 
@@ -101,20 +102,32 @@ namespace Crookedile.UI.Battle
 
             if (RunState.Current?.HasNextBattle == true)
             {
-                // More battles remain — advance the index and reload into the next fight.
+                // More rounds remain in THIS encounter — advance the index and reload into
+                // the next fight. Unchanged whether this is a campaign or test run.
                 RunState.Current.AdvanceToNextBattle();
                 SceneLoader.Instance?.ReloadCurrentScene();
+                return;
             }
+
+            // Encounter fully complete.
+            ReturnToCampaignOrRestart();
+        }
+
+        /// <summary>
+        /// Wipes RunState and sends the player back where they came from: the campaign map
+        /// for a campaign run, or a fresh reload of the current (test) scene otherwise.
+        /// Shared by the defeat path and the "encounter complete" path — both boil down to
+        /// "this run's current battle context is over."
+        /// </summary>
+        private void ReturnToCampaignOrRestart()
+        {
+            bool isCampaignRun = RunState.Current?.IsCampaignRun == true;
+            RunState.Clear();
+
+            if (isCampaignRun)
+                SceneLoader.Instance?.LoadScene("campaign");
             else
-            {
-                // Session complete (or no session). Clear RunState and restart for playtesting.
-                GameLogger.LogInfo(
-                    "PostBattleFlow",
-                    "Run complete! Clearing RunState — next scene load starts fresh."
-                );
-                RunState.Clear();
                 SceneLoader.Instance?.ReloadCurrentScene();
-            }
         }
     }
 }

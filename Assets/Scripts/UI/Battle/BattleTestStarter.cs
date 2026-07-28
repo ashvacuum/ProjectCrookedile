@@ -132,7 +132,12 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void StartTestBattle()
         {
-            if (battleSession == null || battleSession.RoundCount == 0)
+            // A campaign-chosen encounter overrides the inspector session; consume it
+            // immediately so a stray reload can't replay the same encounter twice.
+            BattleSession effectiveSession = RunState.Current?.PendingBattle?.Session ?? battleSession;
+            RunState.Current?.ClearPendingBattle();
+
+            if (effectiveSession == null || effectiveSession.RoundCount == 0)
             {
                 Debug.LogError(
                     "[BattleTestStarter] No BattleSession assigned (or it has no rounds). "
@@ -144,7 +149,7 @@ namespace Crookedile.Gameplay.Battle
             if (!EnsureRunState(out List<CardData> playerDeck))
                 return;
 
-            BattleSetup setup = BuildSetup(playerDeck);
+            BattleSetup setup = BuildSetup(playerDeck, effectiveSession);
             if (setup == null)
                 return;
 
@@ -211,8 +216,14 @@ namespace Crookedile.Gameplay.Battle
             return true;
         }
 
-        /// <summary>Resolves this round's enemies + opinion settings into a BattleSetup.</summary>
-        private BattleSetup BuildSetup(List<CardData> playerDeck)
+        /// <summary>
+        /// Resolves this round's enemies + opinion settings into a BattleSetup.
+        /// </summary>
+        /// <param name="session">
+        /// The session to read round metadata (turn limit, opinion) from — the inspector
+        /// field for a standalone test run, or the campaign's chosen encounter's session.
+        /// </param>
+        private BattleSetup BuildSetup(List<CardData> playerDeck, BattleSession session)
         {
             List<EnemyData> battleEnemies =
                 RunState.Current?.CurrentBattleEnemies?.Where(e => e != null).ToList()
@@ -233,7 +244,7 @@ namespace Crookedile.Gameplay.Battle
             );
 
             int battleIndex = RunState.Current?.CurrentBattleIndex ?? 0;
-            BattleSession.BattleRound currentRound = battleSession.GetRound(battleIndex);
+            BattleSession.BattleRound currentRound = session.GetRound(battleIndex);
 
             int roundMaxTurns = currentRound != null ? currentRound.maxTurns : 5;
             int roundStartOpinion = currentRound != null ? currentRound.startingOpinion : 50;

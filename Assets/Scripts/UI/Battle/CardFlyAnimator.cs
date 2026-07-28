@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Crookedile.Core;
+using Crookedile.Data.VFX;
+using Crookedile.Managers;
 using Crookedile.Utilities;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -73,6 +75,14 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private float _grantFlyDuration = 0.35f;
 
+        [Header("Fly Trail")]
+        [Tooltip(
+            "VFX played as a child of the card for the duration of a fly, so it rides along "
+                + "with the move tween. Leave empty for no trail."
+        )]
+        [SerializeField]
+        private VFXEvent _flyTrail;
+
         #endregion
 
         #region Runtime
@@ -81,6 +91,26 @@ namespace Crookedile.UI.Battle
         private bool _grantRunning;
 
         private Sequence _drawSeq;
+
+        #endregion
+
+        #region Fly Trail
+        /// <summary>
+        /// Spawns <see cref="_flyTrail"/> as a child of <paramref name="card"/> so the pooled VFX
+        /// image follows the move tween without any per-frame position copying. Returns null when
+        /// no trail is assigned; callers must stop the returned instance with
+        /// <see cref="VFXAnimatedImage.OnAnimationComplete"/> when the fly ends, since the clip
+        /// length and the tween duration are authored independently.
+        /// </summary>
+        // ponytail: trail is a child of the card, so it shrinks with the DOScale(0) on discard/grant
+        // flies. Reads as the trail collapsing into the pile. Parent it to the VFX canvas and copy
+        // position per frame if you ever want it to stay full-size and lag behind the path instead.
+        private VFXAnimatedImage StartTrail(Transform card)
+        {
+            if (_flyTrail == null || VFXManager.Instance == null)
+                return null;
+            return VFXManager.Instance.PlayAndGetInstance(_flyTrail, card as RectTransform);
+        }
 
         #endregion
 
@@ -175,6 +205,7 @@ namespace Crookedile.UI.Battle
 
             btn.transform.DOKill();
 
+            var trail = StartTrail(btn.transform);
             var seq = DOTween.Sequence().SetLink(btn.gameObject);
             if (_discardTransform != null)
                 seq.Join(
@@ -184,6 +215,9 @@ namespace Crookedile.UI.Battle
             seq.Join(btn.transform.DOScale(0f, _discardDuration).SetEase(Ease.InQuad));
             seq.OnComplete(() =>
             {
+                // Stop the trail BEFORE the button is pooled, otherwise VFXAnimatedImage.OnDisable
+                // hits its force-complete path and logs a warning on every discard.
+                trail?.OnAnimationComplete();
                 GameLogger.LogVerbose(
                     "Card",
                     $"Discard animation complete for '{btn.CardData?.CardName}'",
@@ -263,6 +297,7 @@ namespace Crookedile.UI.Battle
             btn.gameObject.SetActive(true);
 
             Vector3 endPos = targetZone != null ? targetZone.position : btn.transform.position;
+            VFXAnimatedImage trail = null;
 
             DOTween
                 .Sequence()
@@ -285,10 +320,12 @@ namespace Crookedile.UI.Battle
                 })
                 .AppendInterval(_grantHoldDuration)
                 // Phase 3: fly to zone while shrinking (ease-in² = accelerates toward zone)
+                .AppendCallback(() => trail = StartTrail(btn.transform))
                 .Append(btn.transform.DOMove(endPos, _grantFlyDuration).SetEase(Ease.InQuad))
                 .Join(btn.transform.DOScale(0f, _grantFlyDuration))
                 .OnComplete(() =>
                 {
+                    trail?.OnAnimationComplete();
                     btn.gameObject.SetActive(false);
                     btn.transform.localScale = Vector3.one;
                     btn.enabled = true;

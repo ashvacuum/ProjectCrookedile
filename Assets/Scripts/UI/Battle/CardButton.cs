@@ -142,6 +142,25 @@ namespace Crookedile.UI.Battle
 
         #endregion
 
+        #region Editor Preview
+        [Header("Editor Preview")]
+        [Tooltip("Assign a card to showcase it on this prefab in the editor, without entering Play mode.")]
+        [SerializeField]
+        private CardData previewCard;
+
+        private void OnValidate()
+        {
+            if (Application.isPlaying || previewCard == null)
+                return;
+            cardData = previewCard;
+            _effectiveCost =
+                previewCard.Costs is { Count: > 0 } ? previewCard.Costs[0].CurrentAmount : 0;
+            isPlayable = true;
+            UpdateDisplay();
+        }
+
+        #endregion
+
         #region Runtime State
         private CardData cardData;
         private int handIndex;
