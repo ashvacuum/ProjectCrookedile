@@ -1,3 +1,11 @@
+> [!WARNING]
+> **Deprecated — no longer in use.** Completed. Scoped to branch `test-new-gameplay`, which no longer exists.
+> Kept because the ideas may still be worth mining; the specifics are not.
+> **Superseded by:** [`docs/roadmap.md`](../roadmap.md), [`docs/campaign-build-checklist.md`](../campaign-build-checklist.md)
+> Index: [`docs/deprecated/README.md`](README.md)  ·  Back to [`readme.md`](../../readme.md)
+
+---
+
 # Test Plan — rebuilding the test suite
 
 *As of 2026-06-10. Current coverage is a single file (`EffectResolverTest.cs`) written against the enum-status world. The suite gets rebuilt against the StatusBehavior API and doubles as the gate for the destructive half of the status cutover (see `work-now.md` §1).*
