@@ -9,7 +9,8 @@
         "UnityEngine.UI",
         "Unity.TextMeshPro",
         "Unity.InputSystem",
-        "DOTween.Modules"
+        "DOTween.Modules",
+        "TMPEffects"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

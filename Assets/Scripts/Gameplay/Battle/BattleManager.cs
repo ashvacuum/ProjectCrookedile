@@ -283,6 +283,11 @@ namespace Crookedile.Gameplay.Battle
                 );
             }
 
+            // Dispose the previous run's resolver first, for the same reason _crowd is disposed
+            // below: StartBattle is public and re-entrant. Called twice without a scene reload
+            // in between, every fight would leave its passive subscriptions on the bus and
+            // effects would fire once per battle ever started.
+            _passiveResolver?.Dispose();
             _passiveResolver = new PassiveResolver(
                 passive,
                 _playerStats,

@@ -945,6 +945,7 @@ MonoBehaviour:
   _grantScaleInDuration: 0.15
   _grantHoldDuration: 0.7
   _grantFlyDuration: 0.35
+  _flyTrail: {fileID: 0}
 --- !u!1001 &1421528713
 PrefabInstance:
   m_ObjectHideFlags: 0

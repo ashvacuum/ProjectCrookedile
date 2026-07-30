@@ -257,7 +257,7 @@ MonoBehaviour:
   cardNameText: {fileID: 413795559635934545}
   cardCostText: {fileID: 4505275505405511148}
   cardDescriptionText: {fileID: 7265146301101566910}
-  flavorText: {fileID: 3251167615347165238}
+  targetText: {fileID: 3251167615347165238}
   cardTypeStrip: {fileID: 2968150544537297758}
   visualSettings: {fileID: 11400000, guid: 414d4ac5ada461d4fa61cbf2f7bae212, type: 2}
   pressureColor: {r: 0.2, g: 0.8, b: 0.2, a: 1}
@@ -867,7 +867,7 @@ GameObject:
   - component: {fileID: 6080665221589764716}
   - component: {fileID: 3251167615347165238}
   m_Layer: 5
-  m_Name: Flavor Text
+  m_Name: Target Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
