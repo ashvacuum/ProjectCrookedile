@@ -58,8 +58,10 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private TMP_Text cardDescriptionText;
 
+        [Tooltip("Bottom line: who the card aims at (\"1 Target\", \"Adjacent\", \"All\"...).")]
         [SerializeField]
-        private TMP_Text flavorText;
+        [UnityEngine.Serialization.FormerlySerializedAs("flavorText")]
+        private TMP_Text targetText;
 
         [Header("Card Type Color Strip")]
         [Tooltip("Optional colored strip at top/bottom indicating card type")]
@@ -981,10 +983,42 @@ namespace Crookedile.UI.Battle
                     cardData.Description
                 );
 
-            if (flavorText != null)
+            if (targetText != null)
+                targetText.text = GetTargetLabel();
+        }
+
+        /// <summary>
+        /// Bottom line of the card: who it aims at. Cards whose effects only touch the player's
+        /// own opinion meter (Self / AllAllies) have nothing to aim at, so they show their card
+        /// type instead. Multi-effect cards use the first aimed effect — mixed targets are rare
+        /// and the description spells them out anyway.
+        /// </summary>
+        private string GetTargetLabel()
+        {
+            if (cardData.Effects != null)
             {
-                flavorText.text = cardData.CardType.ToString();
+                foreach (var effect in cardData.Effects)
+                {
+                    if (effect == null)
+                        continue;
+                    if (effect.Target == TargetType.Self || effect.Target == TargetType.AllAllies)
+                        continue;
+
+                    return effect.Target switch
+                    {
+                        TargetType.Opponent or TargetType.TriggeringEnemy => "1 Target",
+                        TargetType.Adjacent => "Adjacent",
+                        TargetType.Random
+                        or TargetType.RandomHostile
+                        or TargetType.RandomReceptive => "Random",
+                        TargetType.AllHostile => "All Hostile",
+                        TargetType.AllReceptive => "All Receptive",
+                        _ => "All",
+                    };
+                }
             }
+
+            return cardData.CardType.ToString();
         }
 
         private void UpdateTypeColor()

@@ -54,6 +54,38 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private float _hostilityBarDuration = 0.25f;
 
+        [Header("Stance Badge")]
+        [Tooltip("Label reading Hostile / Neutral / Receptive, derived from hostility vs NeutralZone.")]
+        [SerializeField]
+        private TMP_Text _stanceText;
+
+        [Tooltip("Background behind the stance label — tinted by the stance colors below.")]
+        [SerializeField]
+        private Image _stanceBackground;
+
+        [SerializeField]
+        private Color _hostileStanceColor = new Color(0.75f, 0.18f, 0.18f);
+
+        [SerializeField]
+        private Color _neutralStanceColor = new Color(0.35f, 0.35f, 0.38f);
+
+        [SerializeField]
+        private Color _receptiveStanceColor = new Color(0.18f, 0.6f, 0.3f);
+
+        [Tooltip(
+            "TMPEffects animator on the stance label. Optional — without it the label still "
+                + "updates, just without the grow animation."
+        )]
+        [SerializeField]
+        private TMPEffects.Components.TMPAnimator _stanceAnimator;
+
+        [Tooltip(
+            "TMPEffects show-animation tag replayed whenever the stance changes. "
+                + "Tune the grow with parameters, e.g. <+grow d=0.25 start=0.4>."
+        )]
+        [SerializeField]
+        private string _stanceGrowTag = "<+grow>";
+
         [Header("Name Hover")]
         [Tooltip(
             "Duration in seconds for the enemy name to fade in or out when the HP bar is hovered."
@@ -117,6 +149,7 @@ namespace Crookedile.UI.Battle
             _intentDisplay?.ShowIntent(null); // hidden until intent is declared
 
             _statusEffectPanel?.Clear(); // reset any icons left over from a previously pooled slot
+            _currentStanceLabel = null; // first Refresh writes the badge without animating it
             Refresh();
 
             if (enemySprite != null)
@@ -163,11 +196,53 @@ namespace Crookedile.UI.Battle
                 hostilityText.text = $"{h:+0;-0;0}";
             }
 
+            UpdateStanceBadge(enemy.Stats);
+
             // Buff/debuff icons
             var effects = _battleManager?.Enemies[_enemyIndex]?.StatusEffects;
             if (effects != null)
                 _statusEffectPanel?.Refresh(effects);
         }
+
+        /// <summary>
+        /// Names the enemy's stance in words and colors the badge behind it. The signed number
+        /// tells you how far past the line they are; this tells you which side of it they're on.
+        /// Refresh() runs on every stat change, so the text/color writes are skipped when the
+        /// stance hasn't actually moved — otherwise the grow animation would replay constantly.
+        /// </summary>
+        private void UpdateStanceBadge(Crookedile.Gameplay.BattleStats stats)
+        {
+            string label =
+                stats.IsHostile ? "Hostile"
+                : stats.IsReceptive ? "Receptive"
+                : "Neutral";
+            if (label == _currentStanceLabel)
+                return;
+
+            bool firstWrite = _currentStanceLabel == null;
+            _currentStanceLabel = label;
+
+            if (_stanceBackground != null)
+                _stanceBackground.color =
+                    stats.IsHostile ? _hostileStanceColor
+                    : stats.IsReceptive ? _receptiveStanceColor
+                    : _neutralStanceColor;
+
+            if (_stanceAnimator != null && _stanceAnimator.isActiveAndEnabled)
+            {
+                // Go through the animator, not the TMP_Text — it owns the tag parsing. ShowAll
+                // drives every character back through the show animation, which is what replays
+                // the grow; SetText alone leaves them already "shown".
+                _stanceAnimator.SetText(_stanceGrowTag + label);
+                if (!firstWrite)
+                    _stanceAnimator.ShowAll();
+            }
+            else if (_stanceText != null)
+                _stanceText.SetText(label);
+        }
+
+        // Last stance word written to the badge; null until the first Refresh.
+        private string _currentStanceLabel;
 
         /// <summary>
         /// Updates the intent display when the enemy declares their next move.
@@ -203,6 +278,10 @@ namespace Crookedile.UI.Battle
                 nameText.gameObject.SetActive(false);
             if (hostilityText != null)
                 hostilityText.gameObject.SetActive(false);
+            if (_stanceBackground != null)
+                _stanceBackground.gameObject.SetActive(false);
+            else if (_stanceText != null)
+                _stanceText.gameObject.SetActive(false);
             if (_intentDisplay != null)
                 _intentDisplay.gameObject.SetActive(false);
             if (selectionHighlight != null)
