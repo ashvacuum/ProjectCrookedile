@@ -5,33 +5,26 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Single owner of the shared battle resources: the Opinion Meter and the two session
-    /// shields (Support absorbs opinion drops, Denial absorbs opinion rises).
-    ///
-    /// This is the <b>command</b> side of opinion changes. Effects call <see cref="ApplyOpinionShift"/>
-    /// (or <see cref="RaiseDirect"/>) directly rather than publishing a gameplay event and hoping a
-    /// subscriber mutates state. The EventBus is then used purely for <i>notification</i>
-    /// (<see cref="DamageDealtEvent"/>, <see cref="OpinionChangedEvent"/>, etc.) so UI and passives
-    /// can react. Centralising mutation here removes the re-entrancy bug class that came from
-    /// absorbing in one place and re-publishing in another.
+    /// Sole owner of the Opinion Meter and both session shields (Support absorbs drops, Denial
+    /// absorbs rises) — the command side, so effects mutate through here and the EventBus only
+    /// notifies, which is what keeps the old absorb-here-republish-there re-entrancy bugs out.
     /// </summary>
     public class OpinionLedger
     {
         private int _opinion;
         private readonly int _maxOpinion;
 
-        // Support/Denial — decay to 0 at turn start before Ritual refills them.
+        // Both decay to 0 at turn start, before Ritual refills them.
         private int _support; // absorbs opinion drops (enemy attacks)
         private int _denial; // absorbs opinion rises (player cards)
 
-        // Invoked whenever opinion reaches the maximum, so BattleManager can end the battle.
+        // Win condition — lets BattleManager end the battle.
         private readonly Action _onOpinionMaxed;
 
-        // Invoked whenever opinion hits 0 (the loss condition) — symmetric with _onOpinionMaxed.
+        // Loss condition, symmetric with _onOpinionMaxed.
         private readonly Action _onOpinionZeroed;
 
-        // True while the room is an echo chamber (all enemies receptive). Supplied by BattleManager,
-        // evaluated live so halving always reflects the current room state.
+        // Live-evaluated so halving always reflects current room state, not a stale snapshot.
         private readonly Func<bool> _isEchoChamber;
 
         public OpinionLedger(
@@ -62,11 +55,9 @@ namespace Crookedile.Gameplay.Battle
         #region Opinion pipeline (command)
 
         /// <summary>
-        /// Applies an incoming Opinion shift. Enemy attacks (<paramref name="toPlayer"/> = true)
-        /// pass through Support before lowering opinion; player shifts pass through Denial
-        /// before raising it. Publishes <see cref="DamageDealtEvent"/> AFTER resolution so the
-        /// notification can carry the honest outcome: raw amount, shield-absorbed portion, and
-        /// the delta the meter actually moved (post echo-halving and 0/max clamping).
+        /// Routes a shift through the matching shield (toPlayer through Support, else Denial) and
+        /// publishes <see cref="DamageDealtEvent"/> only after resolving, so the event can carry the
+        /// honest raw/absorbed/applied split rather than the requested amount.
         /// </summary>
         public void ApplyOpinionShift(
             int amount,
@@ -99,16 +90,14 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Raises the Opinion Meter directly, bypassing the Denial buffer.
-        /// Used by rallying/heal effects, Regeneration, and the pacify conversion burst.
-        /// NOTE (deliberate): echo-chamber halving STILL applies — "direct" bypasses the
-        /// Denial shield only, not the room-state penalty.
+        /// Raises opinion past the Denial shield (rally/Regeneration/pacify burst) — note "direct"
+        /// deliberately still eats echo-chamber halving, which is a room penalty, not a shield.
         /// </summary>
         public void RaiseDirect(int amount) => Raise(amount);
 
         /// <summary>
-        /// Echo-chamber decay: bleeds opinion toward 0 while the whole room is receptive.
-        /// Bypasses shields — it is ambient sentiment loss, not an attack.
+        /// Bleeds opinion toward 0 while the room is an echo chamber, bypassing shields because
+        /// it is ambient sentiment loss rather than an attack.
         /// </summary>
         public void DecayOpinion(int amount) => Lower(amount);
 
@@ -121,7 +110,7 @@ namespace Crookedile.Gameplay.Battle
         {
             if (amount <= 0)
                 return 0;
-            // Echo chamber: converting the whole room is inefficient — gains are halved.
+            // Converting an already-converted room is inefficient, so gains halve.
             if (_isEchoChamber())
                 amount /= 2;
             if (amount <= 0)
@@ -189,10 +178,7 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Publish(new DenialChangedEvent { OldValue = old, NewValue = _denial });
         }
 
-        /// <summary>
-        /// Drains up to <paramref name="amount"/> Support without routing anything to the meter.
-        /// Used by "lose Support" effects. Returns the amount actually removed.
-        /// </summary>
+        /// <summary>Drains up to <paramref name="amount"/> Support without touching the meter, returning what was actually removed.</summary>
         public int SpendSupport(int amount)
         {
             if (amount <= 0 || _support <= 0)
@@ -205,10 +191,8 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Support/Denial decays at the start of its OWNER'S turn, so it lives through the
-        /// opponent's full turn: Support banked on your turn absorbs enemy attacks and expires
-        /// when your next turn starts; Denial banked on the enemy turn blocks your cards and
-        /// expires when the enemy's next turn starts. (Ritual refills right after the wipe.)
+        /// Expires a shield at its OWNER'S turn start, not every half-turn, so each one survives
+        /// the opponent's full turn and actually gets a chance to absorb something.
         /// </summary>
         public void DecaySupportAndDenial(bool isPlayerTurn)
         {
@@ -246,8 +230,7 @@ namespace Crookedile.Gameplay.Battle
                 return;
             int old = _support;
             _support = 0;
-            // IsDecay: ambient turn-start expiry, not an attack — feedback layers skip the
-            // "Support lost" sting for it.
+            // IsDecay marks this as turn-start expiry so feedback skips the "Support lost" sting.
             EventBus.Publish(
                 new SupportChangedEvent
                 {
