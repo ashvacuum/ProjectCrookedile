@@ -17,7 +17,7 @@ MonoBehaviour:
   _intentDescription: 
   _effects:
   - rid: 4823698507066769522
-  - rid: 4823698419005784187
+  - rid: 5004226653047226467
   _moveVFX: {fileID: 11400000, guid: c30a0880977bcf848bcee8173deef6e8, type: 2}
   _counterCardType: 1
   _minionToSummon: {fileID: 0}
@@ -28,14 +28,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4823698419005784187
-      type: {class: RaiseOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _name: 
-        _amount: -2
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1
     - rid: 4823698507066769522
       type: {class: RaiseTargetHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
@@ -45,3 +37,12 @@ MonoBehaviour:
         _perXSource: 7
         _multiplier: 1
         _target: 10
+    - rid: 5004226653047226467
+      type: {class: ChangeOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: -2
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _bypassSupport: 0

@@ -179,8 +179,7 @@ namespace Crookedile.Data.Campaign
     /// Removes one copy of a specific card from the deck. Use for cleansing events — "confess,
     /// and lose a Doubt". No-op when the deck holds no copy.
     /// </summary>
-    // ponytail: specific card only. Player-choice removal ("remove any card") needs a deck-view
-    // picker outside battle, which does not exist yet — see the doc's Known gaps.
+    /// <remarks>For "remove any card" use <see cref="RemoveChosenCardOutcome"/>.</remarks>
     [Serializable]
     public class RemoveCardOutcome : RunOutcome
     {
@@ -191,6 +190,116 @@ namespace Crookedile.Data.Campaign
 
         public override string GetDescription() =>
             _card != null ? $"Remove {_card.CardName}" : "Remove card: (NONE SET)";
+    }
+
+    /// <summary>
+    /// Upgrades one random upgradeable card in the deck. Restrict by type for themed events —
+    /// "the seminary sharpens your sermons" upgrading a Rhetoric.
+    /// </summary>
+    [Serializable]
+    public class UpgradeRandomCardOutcome : RunOutcome
+    {
+        [Tooltip("Restrict the roll to one card type. Untick to upgrade any upgradeable card.")]
+        [SerializeField]
+        private bool _restrictType;
+
+        [ShowIf(nameof(_restrictType))]
+        [SerializeField]
+        private CardType _type = CardType.Pressure;
+
+        public override void Apply(RunState state)
+        {
+            var candidates = state.GetUpgradeableCards(_restrictType ? _type : (CardType?)null);
+            if (candidates.Count == 0)
+            {
+                // Silent no-op would read as a broken event, and the deck legitimately can run
+                // out of upgradeable cards late in a run.
+                Debug.LogWarning(
+                    "[UpgradeRandomCardOutcome] Nothing upgradeable in the deck — no-op."
+                );
+                return;
+            }
+
+            // The run's stream, so a replayed seed upgrades the same card.
+            state.UpgradeCardInDeck(candidates[state.Rng.Next(candidates.Count)]);
+        }
+
+        public override string GetDescription() =>
+            _restrictType ? $"Upgrade a random {_type} card" : "Upgrade a random card";
+    }
+
+    /// <summary>
+    /// Lets the player pick a card from the deck to upgrade. Raises a
+    /// <see cref="RunState.CardChoice"/> the campaign screen draws; no-op when nothing in the deck
+    /// can be upgraded, so the player is never shown a picker with no valid answer.
+    /// </summary>
+    [Serializable]
+    public class UpgradeChosenCardOutcome : RunOutcome
+    {
+        [Tooltip("Restrict the choice to one card type. Untick to offer any upgradeable card.")]
+        [SerializeField]
+        private bool _restrictType;
+
+        [ShowIf(nameof(_restrictType))]
+        [SerializeField]
+        private CardType _type = CardType.Pressure;
+
+        [Tooltip("Prompt shown above the card list.")]
+        [SerializeField]
+        private string _prompt = "Choose a card to upgrade";
+
+        public override void Apply(RunState state)
+        {
+            state.RequestCardChoice(
+                _prompt,
+                state.GetUpgradeableCards(_restrictType ? _type : (CardType?)null),
+                state.UpgradeCardInDeck
+            );
+        }
+
+        public override string GetDescription() =>
+            _restrictType ? $"Upgrade a chosen {_type} card" : "Upgrade a chosen card";
+    }
+
+    /// <summary>
+    /// Lets the player pick a card to remove from the deck — the classic "purge" reward. Offers
+    /// the whole deck; restrict by type for events that only clean up one kind of card.
+    /// </summary>
+    [Serializable]
+    public class RemoveChosenCardOutcome : RunOutcome
+    {
+        [Tooltip("Restrict the choice to one card type — e.g. only let Scandals be purged.")]
+        [SerializeField]
+        private bool _restrictType;
+
+        [ShowIf(nameof(_restrictType))]
+        [SerializeField]
+        private CardType _type = CardType.Scandal;
+
+        [Tooltip("Prompt shown above the card list.")]
+        [SerializeField]
+        private string _prompt = "Choose a card to remove";
+
+        public override void Apply(RunState state)
+        {
+            var candidates = new System.Collections.Generic.List<CardData>();
+
+            for (int i = 0; i < state.Deck.Count; i++)
+            {
+                CardData card = state.Deck[i];
+                if (card == null)
+                    continue;
+                if (_restrictType && card.CardType != _type)
+                    continue;
+
+                candidates.Add(card);
+            }
+
+            state.RequestCardChoice(_prompt, candidates, state.RemoveCardFromDeck);
+        }
+
+        public override string GetDescription() =>
+            _restrictType ? $"Remove a chosen {_type} card" : "Remove a chosen card";
     }
 
     /// <summary>

@@ -199,6 +199,59 @@ namespace Crookedile.Data
 
         #endregion
 
+        #region Card choice
+        /// <summary>
+        /// A "pick a card from your deck" prompt raised by an outcome and drawn by the campaign
+        /// screen. Runtime only — never serialized, never survives a scene load, because a choice
+        /// is always opened and answered inside one screen.
+        /// </summary>
+        public class CardChoice
+        {
+            public string Prompt;
+            public List<CardData> Candidates;
+            public Action<CardData> OnPicked;
+        }
+
+        /// <summary>Non-null while the player owes a card pick. The screen draws it over everything.</summary>
+        public CardChoice PendingCardChoice { get; private set; }
+
+        /// <summary>
+        /// Asks the player to pick one of <paramref name="candidates"/>. Ignored when the list is
+        /// empty — an outcome with nothing to offer must no-op rather than open a picker with no
+        /// answer, which the player could not get out of.
+        /// </summary>
+        public void RequestCardChoice(
+            string prompt,
+            List<CardData> candidates,
+            Action<CardData> onPicked
+        )
+        {
+            if (candidates == null || candidates.Count == 0 || onPicked == null)
+                return;
+
+            PendingCardChoice = new CardChoice
+            {
+                Prompt = prompt,
+                Candidates = candidates,
+                OnPicked = onPicked,
+            };
+        }
+
+        /// <summary>Answers the open choice. Clears it before invoking so the callback can raise another.</summary>
+        public void ResolveCardChoice(CardData picked)
+        {
+            CardChoice choice = PendingCardChoice;
+            if (choice == null)
+                return;
+
+            PendingCardChoice = null;
+
+            if (picked != null)
+                choice.OnPicked(picked);
+        }
+
+        #endregion
+
         #region Battle queue
         /// <summary>
         /// Ordered list of enemy groups — one per encounter.
@@ -310,6 +363,45 @@ namespace Crookedile.Data
         {
             if (card != null)
                 Deck.Remove(card);
+        }
+
+        /// <summary>
+        /// Swaps a deck card for its upgraded version, in place. No-op when the card isn't in the
+        /// deck or has no upgrade authored (<see cref="CardData.CanUpgrade"/>).
+        ///
+        /// <para>The replacement is a runtime <c>Instantiate</c> clone, so the deck ends up holding
+        /// an instance rather than the shared asset — deliberate, and the same thing the battle-side
+        /// upgrade does. It lives as long as the run references it.</para>
+        /// </summary>
+        public void UpgradeCardInDeck(CardData card)
+        {
+            if (card == null || !card.CanUpgrade)
+                return;
+
+            int index = Deck.IndexOf(card);
+            if (index < 0)
+                return;
+
+            Deck[index] = card.CreateUpgradedInstance();
+        }
+
+        /// <summary>Deck cards that can still be upgraded, optionally of one type only.</summary>
+        public List<CardData> GetUpgradeableCards(CardType? ofType = null)
+        {
+            var results = new List<CardData>();
+
+            for (int i = 0; i < Deck.Count; i++)
+            {
+                CardData card = Deck[i];
+                if (card == null || !card.CanUpgrade)
+                    continue;
+                if (ofType.HasValue && card.CardType != ofType.Value)
+                    continue;
+
+                results.Add(card);
+            }
+
+            return results;
         }
 
         /// <summary>

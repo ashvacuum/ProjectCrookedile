@@ -17,17 +17,18 @@ MonoBehaviour:
   _blurb: 
   _hourCost: 3
   _dropWeight: 1
-  _nextEncounter: {fileID: 11400000}
   _body: 
   _options:
   - _label: 
     _resultText: 
+    _requirements: []
     _outcomes:
-    - rid: 5004226606433042525
+    - rid: 5004226653047226466
   references:
     version: 2
     RefIds:
-    - rid: 5004226606433042525
-      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+    - rid: 5004226653047226466
+      type: {class: GainRandomCardOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
       data:
-        _amount: 5
+        _restrictRarity: 1
+        _rarity: 0
