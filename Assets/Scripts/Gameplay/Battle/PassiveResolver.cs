@@ -341,6 +341,12 @@ namespace Crookedile.Gameplay.Battle
         #endregion
 
         #region New-system: dispatch
+
+        /// <summary>Re-entrancy cap for <see cref="DispatchEvent{T}"/> — see the guard there.</summary>
+        private const int MaxDispatchDepth = 8;
+
+        private int _dispatchDepth;
+
         /// <summary>
         /// Boxes <paramref name="evt"/> and dispatches to all registered BattlePassives.
         /// Each passive handles its own trigger matching, condition evaluation, and effect execution.
@@ -360,6 +366,23 @@ namespace Crookedile.Gameplay.Battle
             )
                 return;
 
+            // A passive's effects can publish the very event that fired it (e.g. a
+            // DamageDealtTrigger passive that applies pressure), which recurses until the stack
+            // overflows — and a Unity stack overflow is a hard editor crash with no log. One-shot
+            // passives self-guard via Spent; everything else relies on this. The cap is deliberately
+            // loose: legitimate chains (a passive triggering a different passive) are only a few
+            // deep, so anything past this is a cycle.
+            // ponytail: flat depth cap, not cycle detection — swap if a real chain ever needs >8.
+            if (_dispatchDepth >= MaxDispatchDepth)
+            {
+                GameLogger.LogError<PassiveResolver>(
+                    $"Passive loop detected on {typeof(T).Name} (depth {_dispatchDepth}) — aborting "
+                        + "this dispatch. A passive's effect is republishing its own trigger event; "
+                        + "mark it one-shot or change its trigger."
+                );
+                return;
+            }
+
             var evtCtx = new PassiveEventContext(evt);
             var evalCtx = new PassiveEvaluationContext(
                 _playerStats,
@@ -374,8 +397,36 @@ namespace Crookedile.Gameplay.Battle
 
             int eventEnemyIndex = ExtractEnemyIndex(evtCtx);
 
-            foreach (var passive in bucket)
+            _dispatchDepth++;
+            try
             {
+                DispatchToBucket(bucket, evtCtx, evalCtx, eventEnemyIndex);
+            }
+            finally
+            {
+                _dispatchDepth--;
+            }
+        }
+
+        /// <summary>
+        /// Runs every passive in <paramref name="bucket"/> against the event. Indexed (not foreach)
+        /// because an effect can register a turn-scoped passive mid-dispatch
+        /// (<c>ActivateTemporaryPassive</c>); appending to the list being enumerated would throw.
+        /// A passive appended during this loop simply also fires for this event.
+        /// </summary>
+        private void DispatchToBucket(
+            List<BattlePassive> bucket,
+            PassiveEventContext evtCtx,
+            PassiveEvaluationContext evalCtx,
+            int eventEnemyIndex
+        )
+        {
+            for (int i = 0; i < bucket.Count; i++)
+            {
+                var passive = bucket[i];
+                if (passive == null)
+                    continue;
+
                 if (_ownerEnemyByPassive.TryGetValue(passive, out var ownerEnemy))
                 {
                     // Enemy-owned passive: self-filter to its own events when the event names an

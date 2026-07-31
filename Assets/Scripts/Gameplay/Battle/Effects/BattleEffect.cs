@@ -45,12 +45,6 @@
     )]
     public abstract class BattleEffect
     {
-        [SerializeField]
-        private string _name;
-
-        /// <summary>Optional designer label — shown in the inspector list for readability.</summary>
-        public string Name => _name;
-
         /// <summary>
         /// The target type of this effect. Defaults to <see cref="TargetType.Self"/> for effects
         /// that have no explicit target (buffs, deck manipulation, etc.).
