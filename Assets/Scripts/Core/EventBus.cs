@@ -16,6 +16,13 @@ namespace Crookedile.Core
             new Dictionary<Type, List<Delegate>>();
 
         /// <summary>
+        /// Raised once for every <see cref="Publish{T}"/>, before typed handlers run. Carries no
+        /// payload: it exists so a listener can mark itself dirty and re-read game state, without
+        /// enumerating which event types it cares about. Unsubscribe in <c>OnDisable</c>.
+        /// </summary>
+        public static event Action AnyEventPublished;
+
+        /// <summary>
         /// Registers a handler to receive events of type <typeparamref name="T"/>.
         /// Call this in <c>OnEnable()</c> (MonoBehaviour) or at construction time.
         /// Always pair with a matching <see cref="Unsubscribe{T}"/> call to prevent memory leaks.
@@ -82,6 +89,11 @@ namespace Crookedile.Core
             if (!typeof(T).IsValueType && gameEvent == null)
                 return;
 
+            // Payload-free so struct events are never boxed just to raise it. Subscribers that
+            // re-read state wholesale (whole-screen renderers) use this instead of subscribing
+            // to a list of event types that can silently drift out of date.
+            AnyEventPublished?.Invoke();
+
             var eventType = typeof(T);
 
             if (!subscribers.ContainsKey(eventType))
@@ -134,6 +146,7 @@ namespace Crookedile.Core
         public static void Clear()
         {
             subscribers.Clear();
+            AnyEventPublished = null;
         }
 
         /// <summary>

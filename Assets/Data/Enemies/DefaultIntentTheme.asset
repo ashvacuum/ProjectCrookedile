@@ -42,4 +42,4 @@ MonoBehaviour:
     Color: {r: 1, g: 1, b: 1, a: 1}
   - Type: 8
     Icon: {fileID: 21300000, guid: b91d5dc03638cfc40be98ba129da20e3, type: 3}
-    Color: {r: 0, g: 0, b: 0, a: 0}
+    Color: {r: 1, g: 1, b: 1, a: 0}

@@ -160,6 +160,9 @@ namespace Crookedile.Gameplay.Battle
         public int CurrentSupport => _opinion?.CurrentSupport ?? 0;
         public int CurrentDenial => _opinion?.CurrentDenial ?? 0;
 
+        /// <summary>True while every enemy is receptive — gains are halved and the meter decays.</summary>
+        public bool IsEchoChamber => _crowd != null && _crowd.IsEchoChamber();
+
         #endregion
 
         #region Initialization

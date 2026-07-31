@@ -290,10 +290,16 @@ namespace Crookedile.UI.Campaign
             );
 
             _scroll = GUILayout.BeginScrollView(_scroll);
-            if (_openEvent != null)
+
+            // A card pick owed to the player takes priority over everything: it was raised by an
+            // outcome that has already applied, so the map/event underneath is mid-resolution.
+            if (state.PendingCardChoice != null)
+                DrawCardChoice(state.PendingCardChoice);
+            else if (_openEvent != null)
                 DrawEvent();
             else
                 DrawMap(state);
+
             GUILayout.EndScrollView();
 
             GUILayout.EndArea();
@@ -399,6 +405,42 @@ namespace Crookedile.UI.Campaign
                 if (loc is BattleEncounterData battle && battle.IsBoss)
                     return loc;
             return null;
+        }
+
+        /// <summary>
+        /// Draws the deck picker an outcome raised (upgrade/remove a chosen card). No cancel
+        /// button by design: <see cref="RunState.RequestCardChoice"/> refuses to open on an empty
+        /// candidate list, so every picker shown has an answer, and choices are consequences of a
+        /// pick the player already made.
+        /// </summary>
+        private void DrawCardChoice(RunState.CardChoice choice)
+        {
+            GUILayout.Label(choice.Prompt, GUI.skin.box);
+            GUILayout.Space(8f);
+
+            for (int i = 0; i < choice.Candidates.Count; i++)
+            {
+                var card = choice.Candidates[i];
+                if (card == null)
+                    continue;
+
+                if (
+                    GUILayout.Button(
+                        $"{card.CardName}   ({card.CardType})",
+                        GUILayout.Height(30f)
+                    )
+                )
+                {
+                    RunState.Current.ResolveCardChoice(card);
+                    GameLogger.LogInfo("Campaign", $"Card choice: '{card.CardName}'.", this);
+                    return; // the list is gone now — stop drawing against it
+                }
+
+                if (!string.IsNullOrEmpty(card.Description))
+                    GUILayout.Label($"    {card.Description}");
+
+                GUILayout.Space(2f);
+            }
         }
 
         private void DrawEvent()
