@@ -369,6 +369,28 @@ namespace Crookedile.EditorTools
                 return;
             }
 
+            // Two encounters sharing an id would collide in every id-keyed dictionary below.
+            // Report it and carry on with one of each: an exception per repaint tells the
+            // designer nothing about which assets are at fault.
+            var duplicates = entries
+                .GroupBy(e => e.Id)
+                .Where(g => g.Count() > 1)
+                .ToList();
+            if (duplicates.Count > 0)
+            {
+                EditorGUILayout.HelpBox(
+                    "Encounters sharing an ID — duplicated assets. Re-save each to reassign:\n"
+                        + string.Join(
+                            "\n",
+                            duplicates.Select(g =>
+                                $"  {g.Key}: {string.Join(", ", g.Select(e => e.Encounter.name))}"
+                            )
+                        ),
+                    MessageType.Error
+                );
+                entries = entries.GroupBy(e => e.Id).Select(g => g.First()).ToList();
+            }
+
             // Depth = longest hard-requirement chain leading here. Gives left-to-right reading
             // order for free: day-one content on the left, things it unlocks to the right.
             var depth = ComputeDepths(entries);
