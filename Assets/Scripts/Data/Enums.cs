@@ -58,33 +58,6 @@ namespace Crookedile.Data
         Influence, // Political influence/power, win condition
     }
 
-    /// <summary>
-    /// Campaign/Overworld effect types for post-battle rewards and events.
-    /// These affect the player's campaign state, not battle state.
-    /// </summary>
-    public enum CampaignEffectType
-    {
-        // Resource Gains/Losses (3 core resources only)
-        GainFunds, // Gain ₱
-        LoseFunds, // Lose ₱
-        GainHeat, // Increase Heat (scandal)
-        LoseHeat, // Decrease Heat
-        GainInfluence, // Gain Influence (political power)
-        LoseInfluence, // Lose Influence
-
-        // Card Collection
-        AddCardToDeck, // Permanently add card to deck
-        RemoveCardFromDeck, // Permanently remove card from deck
-        UpgradeCard, // Upgrade a card to + version
-        TransformCard, // Transform one card into another
-
-        // Progression
-        UnlockLocation, // Unlock new map location
-        UnlockCard, // Unlock card for future acquisition
-        TriggerEvent, // Trigger a specific event
-        AdvanceDay, // Skip to next day
-    }
-
     public enum TargetType
     {
         Self,
