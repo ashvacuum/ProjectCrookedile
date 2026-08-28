@@ -14,15 +14,6 @@ namespace Crookedile.Managers
     [Debuggable("Cheats", LogLevel.Info)]
     public class CheatsManager : Singleton<CheatsManager>
     {
-        [Header("Cheat Settings")]
-        [Tooltip("Show cheat panel in game UI")]
-        [SerializeField]
-        private bool _showCheatPanel = false;
-
-        [Tooltip("Enable hotkeys for common cheats")]
-        [SerializeField]
-        private bool _hotkeysEnabled = true;
-
         [Header("Current State")]
         [ReadOnly]
         [SerializeField]
@@ -47,57 +38,6 @@ namespace Crookedile.Managers
 #else
             GameLogger.LogWarning("Cheats", "Cheats disabled - CHEATS_ENABLED flag not set");
 #endif
-        }
-
-        private void Update()
-        {
-#if !CHEATS_ENABLED
-            return;
-#endif
-            if (!_hotkeysEnabled)
-                return;
-
-            // Hotkey: F1 - Toggle Cheat Panel
-            if (Input.GetKeyDown(KeyCode.F1))
-            {
-                ToggleCheatPanel();
-            }
-
-            // Hotkey: F2 - Toggle God Mode
-            if (Input.GetKeyDown(KeyCode.F2))
-            {
-                ToggleGodMode();
-            }
-
-            // Hotkey: F3 - Toggle Unlimited Resources
-            if (Input.GetKeyDown(KeyCode.F3))
-            {
-                ToggleUnlimitedResources();
-            }
-
-            // Hotkey: F4 - Give All Resources
-            if (Input.GetKeyDown(KeyCode.F4))
-            {
-                GiveResources(1000, 10, 10, -10, 5000);
-            }
-
-            // Hotkey: + - Speed up time
-            if (Input.GetKeyDown(KeyCode.KeypadPlus) || Input.GetKeyDown(KeyCode.Equals))
-            {
-                AdjustTimeScale(2f);
-            }
-
-            // Hotkey: - - Slow down time
-            if (Input.GetKeyDown(KeyCode.KeypadMinus) || Input.GetKeyDown(KeyCode.Minus))
-            {
-                AdjustTimeScale(0.5f);
-            }
-
-            // Hotkey: 0 - Reset time scale
-            if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0))
-            {
-                SetTimeScale(1f);
-            }
         }
 
         #region Cheat Commands
@@ -128,18 +68,6 @@ namespace Crookedile.Managers
 
             EventBus.Publish(
                 new UnlimitedResourcesToggleEvent { Enabled = _unlimitedResourcesActive }
-            );
-        }
-
-        [FoldoutGroup("General Cheats")]
-        [Button("Toggle Cheat Panel", ButtonSizes.Medium)]
-        [CheatCommand("console", "Toggle developer console", Category = "General")]
-        public void ToggleCheatPanel()
-        {
-            _showCheatPanel = !_showCheatPanel;
-            GameLogger.LogInfo(
-                "Cheats",
-                $"Cheat Panel: {(_showCheatPanel ? "VISIBLE" : "HIDDEN")}"
             );
         }
 
