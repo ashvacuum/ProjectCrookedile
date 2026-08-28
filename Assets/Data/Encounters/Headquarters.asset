@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: Headquarters
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _id: bf32b8b1-50b6-41cd-8e89-7c1331367051
+  _displayName: 
+  _blurb: 
+  _hourCost: 0
+  _dropWeight: 0
+  _body: 
+  _options:
+  - _label: Ad Spend Against Scandals
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 1430662042425753695
+    - rid: 1430662042425753697
+  - _label: Focus on your speech
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 1430662065862475776
+    - rid: 1430662065862475777
+  references:
+    version: 2
+    RefIds:
+    - rid: 1430662042425753695
+      type: {class: AdjustCredibilityPercentOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _percent: 15
+    - rid: 1430662042425753697
+      type: {class: AdvanceDayOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data: 
+    - rid: 1430662065862475776
+      type: {class: UpgradeChosenCardOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _restrictType: 0
+        _type: 0
+        _prompt: Choose a card to upgrade
+    - rid: 1430662065862475777
+      type: {class: AdvanceDayOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data: 
