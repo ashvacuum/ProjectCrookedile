@@ -55,13 +55,27 @@ namespace Crookedile.Data.Campaign
         // pool entry. See docs/campaign-encounters.md.
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// Keeps <see cref="_id"/> equal to the asset's own file GUID.
+        ///
+        /// It used to fill the id only when blank, which meant duplicating an asset (Ctrl+D)
+        /// carried the original's id into the copy — two encounters answering to one id, so
+        /// visiting either marked both visited and the dependency graph threw on the collision.
+        /// Unity already guarantees a unique, rename- and move-stable id per asset file; minting
+        /// a second one by hand was the whole bug.
+        /// </summary>
         protected virtual void OnValidate()
         {
-            if (string.IsNullOrEmpty(_id))
-            {
-                _id = System.Guid.NewGuid().ToString();
-                UnityEditor.EditorUtility.SetDirty(this);
-            }
+            string path = UnityEditor.AssetDatabase.GetAssetPath(this);
+            if (string.IsNullOrEmpty(path))
+                return; // in-memory instance (tests, runtime) — keep whatever it has
+
+            string assetGuid = UnityEditor.AssetDatabase.AssetPathToGUID(path);
+            if (string.IsNullOrEmpty(assetGuid) || _id == assetGuid)
+                return;
+
+            _id = assetGuid;
+            UnityEditor.EditorUtility.SetDirty(this);
         }
 
         protected virtual void Reset()
