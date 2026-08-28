@@ -12,10 +12,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a81ccd303ceaa05428cd43a86a1834b2, type: 3}
   m_Name: Game Encounter Pool
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EncounterPoolData
-  _days: 30
+  _days: 7
   _entries:
-  - _encounter: {fileID: 11400000, guid: dfa745ac40384fa4585ee7b774c176fb, type: 2}
-    _firstDay: 1
-    _lastDay: 3
-    _weight: 3
+  - _encounter: {fileID: 11400000, guid: e2ec5572cd3174348a0c1b5697be2b9c, type: 2}
+    _firstDay: 2
+    _lastDay: 5
+    _weight: 1
     _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 349b59413fc6ee946a98291743c7083a, type: 2}
+    _firstDay: 2
+    _lastDay: 4
+    _weight: 2
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: fe6947311c60928499dfb7c1fd5f6ee5, type: 2}
+    _firstDay: 1
+    _lastDay: 2
+    _weight: 2
+    _oncePerRun: 0
+    _guaranteed: 0
+    _requirements: []
+    _boostIf:
+    - rid: 1430662042425753601
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: b915841570507184986b6fefb82dd3ee, type: 2}
+    _firstDay: 1
+    _lastDay: 0
+    _weight: 1
+    _oncePerRun: 0
+    _guaranteed: 1
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  references:
+    version: 2
+    RefIds:
+    - rid: 1430662042425753601
+      type: {class: CredibilityAtLeast, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 1
+        _amount: 50

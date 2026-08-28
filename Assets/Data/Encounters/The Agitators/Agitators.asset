@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1335bd23a43efbe4c9bbe6efff3281e1, type: 3}
+  m_Name: Agitators
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.BattleEncounterData
+  _id: 299548b5-3048-44fa-9250-188f5b395f4e
+  _displayName: The Agitators
+  _blurb: 
+  _hourCost: 1
+  _dropWeight: 1
+  _session: {fileID: 11400000, guid: d463a37faa1beb7498620cd0c836d4da, type: 2}
+  _isBoss: 0
+  _rewardOverride: {fileID: 0}

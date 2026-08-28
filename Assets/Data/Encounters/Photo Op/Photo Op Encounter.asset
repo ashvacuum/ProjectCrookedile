@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: Photo Op Encounter
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _id: fe22359d-5e42-4a5c-bde5-38c2a3ac1221
+  _displayName: Photo Op
+  _blurb: 
+  _hourCost: 1
+  _dropWeight: 1
+  _body: 
+  _options:
+  - _label: Give a real answer
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 1430661995083595776
+  - _label: Dodge with a Soundbite
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 1430661995083595777
+  - _label: Walk Away
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 1430661995083595871
+  references:
+    version: 2
+    RefIds:
+    - rid: 1430661995083595776
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 5
+    - rid: 1430661995083595777
+      type: {class: GainRandomCardOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _restrictRarity: 1
+        _rarity: 0
+    - rid: 1430661995083595871
+      type: {class: SetFlagOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _flag: walk_away
+        _clear: 0
