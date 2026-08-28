@@ -43,6 +43,9 @@
         "@$value == null ? \"(no effect chosen)\" : $value.EditorSafeDescription()",
         InfoMessageType.None
     )]
+    // Every concrete effect inherits this, so they all log under one "Effects" category
+    // instead of one category per effect class.
+    [Debuggable("Effects", LogLevel.Info)]
     public abstract class BattleEffect
     {
         /// <summary>

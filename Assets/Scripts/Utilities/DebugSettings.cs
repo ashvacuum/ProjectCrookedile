@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Utilities
@@ -22,8 +23,15 @@ namespace Crookedile.Utilities
         public bool showTimestamp = true;
 
         [Header("Category Settings")]
+        [TableList]
         public List<CategoryDebugInfo> categories = new List<CategoryDebugInfo>();
 
+        /// <summary>
+        /// Pushes these settings into <see cref="GameLogger"/> now. Applied automatically before
+        /// the first scene loads; the button is for retuning mid-play.
+        /// </summary>
+        [Button("Apply Now", ButtonSizes.Medium)]
+        [DisableInEditorMode]
         public void ApplySettings()
         {
             GameLogger.Configure(this);
@@ -40,6 +48,11 @@ namespace Crookedile.Utilities
             return category;
         }
 
+        /// <summary>
+        /// Rebuilds the category list from every <c>[Debuggable]</c> type in the project. Safe to
+        /// re-run: existing enabled/level choices survive, only the script lists are rebuilt.
+        /// </summary>
+        [Button("Refresh Categories", ButtonSizes.Medium)]
         public void RefreshCategories()
         {
             // Clear script lists

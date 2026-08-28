@@ -70,6 +70,11 @@ namespace Crookedile.Utilities
         // others one by one. Toggle via SoloCategory / ClearSolo (or the "logsolo" console cmd).
         private static string _soloCategory;
 
+        // Every category configured or seen logging, so the console can list them.
+        private static readonly HashSet<string> _seenCategories = new HashSet<string>(
+            StringComparer.Ordinal
+        );
+
         #endregion
 
         #region Log Buffer
@@ -97,6 +102,18 @@ namespace Crookedile.Utilities
                 SetCategory(cat.categoryName, cat.enabled, cat.logLevel);
         }
 
+        /// <summary>
+        /// Applies <c>Resources/DebugSettings</c> before the first scene loads.
+        ///
+        /// Without this the asset was inert — nothing called <see cref="Configure"/> outside an
+        /// editor button, so every authored category level was ignored at runtime. The console's
+        /// 'log' command can retune anything live; this exists for the startup logs that are
+        /// already written by the time you could type.
+        /// </summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void ApplyAuthoredSettings() =>
+            Configure(Resources.Load<DebugSettings>("DebugSettings"));
+
         public static void SetCategory(
             string category,
             bool enabled,
@@ -105,6 +122,7 @@ namespace Crookedile.Utilities
         {
             _categoryEnabled[category] = enabled;
             _categoryLevels[category] = level;
+            _seenCategories.Add(category);
         }
 
         public static void SetGlobalLevel(LogLevel level) => _globalLevel = level;
@@ -125,6 +143,18 @@ namespace Crookedile.Utilities
         /// <summary>The category currently soloed, or null when focus mode is off.</summary>
         public static string CurrentSolo => _soloCategory;
 
+        /// <summary>Categories configured or seen logging at least once.</summary>
+        public static IEnumerable<string> KnownCategories => _seenCategories;
+
+        public static LogLevel GlobalLevel => _globalLevel;
+
+        /// <summary>Current filter state of a category, falling back to the global level.</summary>
+        public static (bool Enabled, LogLevel Level) GetCategory(string category) =>
+            (
+                !_categoryEnabled.TryGetValue(category, out bool e) || e,
+                _categoryLevels.TryGetValue(category, out LogLevel l) ? l : _globalLevel
+            );
+
         #endregion
 
         #region Console commands
@@ -143,18 +173,37 @@ namespace Crookedile.Utilities
             return "Log focus cleared — all categories log per their levels.";
         }
 
-        #region Logging API — generic (type name as category)
+        #region Logging API — generic ([Debuggable] category, else type name)
         public static void LogError<T>(string message, UnityEngine.Object context = null) =>
-            Write(typeof(T).Name, message, LogLevel.Error, context);
+            Write(CategoryOf(typeof(T)), message, LogLevel.Error, context);
 
         public static void LogWarning<T>(string message, UnityEngine.Object context = null) =>
-            Write(typeof(T).Name, message, LogLevel.Warning, context);
+            Write(CategoryOf(typeof(T)), message, LogLevel.Warning, context);
 
         public static void LogInfo<T>(string message, UnityEngine.Object context = null) =>
-            Write(typeof(T).Name, message, LogLevel.Info, context);
+            Write(CategoryOf(typeof(T)), message, LogLevel.Info, context);
 
         public static void LogVerbose<T>(string message, UnityEngine.Object context = null) =>
-            Write(typeof(T).Name, message, LogLevel.Verbose, context);
+            Write(CategoryOf(typeof(T)), message, LogLevel.Verbose, context);
+
+        /// <summary>
+        /// A type's log category: its [Debuggable] category (inherited from a base class if the
+        /// type has none of its own), falling back to the type name.
+        /// </summary>
+        private static string CategoryOf(Type type)
+        {
+            if (_typeCategories.TryGetValue(type, out string cached))
+                return cached;
+
+            var attr = (DebuggableAttribute)
+                Attribute.GetCustomAttribute(type, typeof(DebuggableAttribute));
+            string category = attr?.Category ?? type.Name;
+            _typeCategories[type] = category;
+            return category;
+        }
+
+        private static readonly Dictionary<Type, string> _typeCategories =
+            new Dictionary<Type, string>();
 
         #endregion
 
@@ -193,6 +242,8 @@ namespace Crookedile.Utilities
             UnityEngine.Object context
         )
         {
+            _seenCategories.Add(category);
+
             if (!_globalEnabled)
                 return;
 
