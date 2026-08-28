@@ -12,22 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
   m_Name: Firebrand
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _id: 615c59ca-7d04-40ed-ad43-b48bc2182208
   _enemyName: Firebrand
   _portrait: {fileID: 21300000, guid: 5c87b4bbe104e964599ffb6b3c7926df, type: 3}
   _startingHostility: 2
-  _maxHostility: 6
-  _minHostility: -1
-  _demographicClass: 1
-  _demographicValues: 1
+  _maxHostility: 15
+  _minHostility: -8
+  _neutralZone: 0
   _startingEffects: []
+  _passives: []
   _movePattern: 2
   _aggressiveMoves:
   - {fileID: 11400000, guid: 6a362680b3f39a04cad295c48304438e, type: 2}
   - {fileID: 11400000, guid: 1c0ea83bb8d41404a835bc186a818258, type: 2}
+  - {fileID: 11400000, guid: 38d4dd7478aa105439004ccb19aa8437, type: 2}
   _neutralMoves:
+  - {fileID: 11400000, guid: 023361b2ee8133449a4ae52dbc216241, type: 2}
   - {fileID: 11400000, guid: fe89012c048450e4c8baac0dc101087a, type: 2}
   _receptiveMoves:
   - {fileID: 11400000, guid: 4741ed55f621e9941aa20805626bbe03, type: 2}
+  - {fileID: 11400000, guid: c252ab26ab8736544aaec0afa9c45208, type: 2}
   references:
     version: 2
     RefIds: []
