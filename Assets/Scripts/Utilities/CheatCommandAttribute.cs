@@ -32,11 +32,6 @@ namespace Crookedile.Utilities
         public string Category { get; set; }
 
         /// <summary>
-        /// Whether this command is only available in dev builds
-        /// </summary>
-        public bool DevOnly { get; set; }
-
-        /// <summary>
         /// Creates a cheat command attribute.
         /// </summary>
         /// <param name="command">Command keyword (e.g., "add_money")</param>
@@ -45,23 +40,6 @@ namespace Crookedile.Utilities
         {
             Command = command;
             Description = description;
-        }
-    }
-
-    /// <summary>
-    /// Attribute to provide autocomplete suggestions for string parameters.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class AutoCompleteAttribute : Attribute
-    {
-        /// <summary>
-        /// Array of possible values for autocomplete
-        /// </summary>
-        public string[] Suggestions { get; private set; }
-
-        public AutoCompleteAttribute(params string[] suggestions)
-        {
-            Suggestions = suggestions;
         }
     }
 }
