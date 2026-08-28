@@ -85,6 +85,24 @@ namespace Crookedile.Data.Campaign
             : e.DisplayName;
     }
 
+    /// <summary>
+    /// True once <see cref="SetFlagOutcome"/> has set <see cref="_flag"/> this run. The
+    /// choice-level counterpart to <see cref="HasVisitedEncounter"/>: that one knows you were
+    /// there, this one knows what you did.
+    /// </summary>
+    [Serializable]
+    public class HasFlag : RunRequirement
+    {
+        [Tooltip("Must match the flag name on the SetFlagOutcome exactly (case-sensitive).")]
+        [SerializeField]
+        private string _flag;
+
+        protected override bool Check(RunState state) => state.HasFlag(_flag);
+
+        protected override string Describe() =>
+            string.IsNullOrWhiteSpace(_flag) ? "flag (NONE SET)" : $"flag \"{_flag}\"";
+    }
+
     /// <summary>True when the run holds at least <see cref="_amount"/> Funds.</summary>
     [Serializable]
     public class FundsAtLeast : RunRequirement

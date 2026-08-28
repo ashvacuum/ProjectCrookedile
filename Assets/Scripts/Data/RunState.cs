@@ -104,6 +104,30 @@ namespace Crookedile.Data
         public HashSet<string> VisitedLocationIds { get; private set; }
 
         /// <summary>
+        /// Narrative flags set by event choices — "took the bribe", "met the Fixer's sister".
+        /// The one thing <see cref="VisitedLocationIds"/> can't express: which *option* was
+        /// picked, not merely which encounter was resolved.
+        ///
+        /// Free-form strings on purpose. An enum would need a code change per story beat, which
+        /// is exactly the wrong friction for content authored over months.
+        /// </summary>
+        public HashSet<string> Flags { get; private set; }
+
+        /// <summary>Sets a narrative flag. Idempotent; blank names ignored.</summary>
+        public void SetFlag(string flag)
+        {
+            if (!string.IsNullOrWhiteSpace(flag))
+                Flags.Add(flag.Trim());
+        }
+
+        /// <summary>Clears a narrative flag. No-op when unset.</summary>
+        public void ClearFlag(string flag) => Flags.Remove(flag?.Trim());
+
+        /// <summary>True when <paramref name="flag"/> has been set this run.</summary>
+        public bool HasFlag(string flag) =>
+            !string.IsNullOrWhiteSpace(flag) && Flags.Contains(flag.Trim());
+
+        /// <summary>
         /// The locations currently on offer, and the day they were drawn for.
         ///
         /// Lives here rather than on the map screen because it has to survive a scene load: a
@@ -332,6 +356,7 @@ namespace Crookedile.Data
                 MaxHours = hours,
                 Hours = hours,
                 VisitedLocationIds = new HashSet<string>(),
+                Flags = new HashSet<string>(),
             };
             return Current;
         }

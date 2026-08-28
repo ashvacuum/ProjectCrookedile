@@ -157,8 +157,13 @@ namespace Crookedile.UI.Campaign
         }
 
         /// <summary>
-        /// Commits to an encounter: spends Hours, marks it visited, and dispatches on its type.
+        /// Commits to an encounter: marks it visited, spends Hours, and dispatches on its type.
         /// Battles leave the scene; events open a panel over the map.
+        ///
+        /// <paramref name="chargeHours"/> only governs the time cost. "It happened" is a separate
+        /// question from "it cost time": a chained encounter is free but still visited, or
+        /// OncePerRun entries reached by a chain get redrawn on a later day and
+        /// HasVisitedEncounter requirements gated on them never fire.
         /// </summary>
         private void Enter(EncounterData encounter, bool chargeHours = true)
         {
@@ -166,12 +171,11 @@ namespace Crookedile.UI.Campaign
             if (state == null || encounter == null)
                 return;
 
+            state.MarkVisited(encounter.ID);
+            state.RemoveTodaysLocation(encounter);
+
             if (chargeHours)
-            {
                 state.SpendHours(encounter.HourCost);
-                state.MarkVisited(encounter.ID);
-                state.RemoveTodaysLocation(encounter);
-            }
 
             switch (encounter)
             {
