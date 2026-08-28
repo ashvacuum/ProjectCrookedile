@@ -25,7 +25,6 @@ MonoBehaviour:
     enabled: 1
     logLevel: 3
     scripts:
-    - Example_CardDebug
     - CardButton
     - CardFlyAnimator
     - EnemySlotUI
@@ -33,7 +32,7 @@ MonoBehaviour:
     enabled: 0
     logLevel: 3
     scripts:
-    - DeveloperConsole
+    - DevConsole
   - categoryName: Audio
     enabled: 0
     logLevel: 2
