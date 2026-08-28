@@ -21,7 +21,7 @@ MonoBehaviour:
   _neutralZone: 5
   _startingEffects: []
   _passives: []
-  _movePattern: 2
+  _movePattern: 0
   _aggressiveMoves:
   - {fileID: 11400000, guid: 7166da6120f286d489521eb57e951328, type: 2}
   - {fileID: 11400000, guid: 0a5b34cfda1589c42bf66d489c2c55bc, type: 2}
