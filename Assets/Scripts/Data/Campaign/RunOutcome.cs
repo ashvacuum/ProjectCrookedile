@@ -103,6 +103,50 @@ namespace Crookedile.Data.Campaign
     }
 
     /// <summary>
+    /// Adjusts Credibility by a percentage of the origin's <em>starting</em> Credibility, so
+    /// "restore a quarter of your standing" means the same thing to every archetype without
+    /// authoring a per-origin number.
+    ///
+    /// The baseline is the origin's start rather than current Credibility on purpose: a percent
+    /// of current does nothing at zero and snowballs when high, which is growth, not healing.
+    /// </summary>
+    [Serializable]
+    public class AdjustCredibilityPercentOutcome : RunOutcome
+    {
+        [Tooltip(
+            "Signed percent of the origin's STARTING Credibility. 25 restores a quarter of the "
+                + "baseline; -25 costs that much. Rounds away from zero, so a non-zero percent "
+                + "always moves at least 1."
+        )]
+        [SerializeField]
+        private float _percent = 25f;
+
+        /// <summary>
+        /// The origin's starting Credibility — the baseline percentages are taken from. Read
+        /// live from <see cref="OriginDatabase"/> rather than cached on the run, so retuning
+        /// an origin retunes every percent outcome with it.
+        /// </summary>
+        private static int Baseline(RunState state) =>
+            OriginDatabase.Shared?.GetCampaignStart(state.Origin).credibility ?? 0;
+
+        public override void Apply(RunState state)
+        {
+            int baseline = Baseline(state);
+            if (baseline <= 0 || Mathf.Approximately(_percent, 0f))
+                return;
+
+            // Ceil the magnitude: a 10% heal off a baseline of 5 should be 1, not rounded to 0.
+            int delta = Mathf.CeilToInt(Mathf.Abs(baseline * _percent * 0.01f));
+            state.AdjustCredibility(_percent >= 0f ? delta : -delta);
+        }
+
+        public override string GetDescription() =>
+            _percent >= 0f
+                ? $"Gain {_percent:0.##}% of starting Credibility"
+                : $"Lose {-_percent:0.##}% of starting Credibility";
+    }
+
+    /// <summary>
     /// Adds a specific card to the deck. The workhorse for consequences that stick: this is how
     /// an event hands you a curse, or a boon you'll draw for the rest of the run.
     /// </summary>
@@ -190,6 +234,65 @@ namespace Crookedile.Data.Campaign
 
         public override string GetDescription() =>
             _card != null ? $"Remove {_card.CardName}" : "Remove card: (NONE SET)";
+    }
+
+    /// <summary>
+    /// Removes one random card from the deck — the cost side of a bargain, where
+    /// <see cref="RemoveChosenCardOutcome"/> is a reward. Restrict by type to aim it: only a
+    /// Scandal is a boon, only a Pressure is a real loss.
+    /// </summary>
+    [Serializable]
+    public class RemoveRandomCardOutcome : RunOutcome
+    {
+        [Tooltip("Restrict the roll to one card type. Untick to remove any card in the deck.")]
+        [SerializeField]
+        private bool _restrictType;
+
+        [ShowIf(nameof(_restrictType))]
+        [SerializeField]
+        private CardType _type = CardType.Scandal;
+
+        [Tooltip("How many cards to remove. Each is rolled separately from what's left.")]
+        [Min(1)]
+        [SerializeField]
+        private int _count = 1;
+
+        public override void Apply(RunState state)
+        {
+            for (int i = 0; i < _count; i++)
+            {
+                var candidates = new System.Collections.Generic.List<CardData>();
+                for (int j = 0; j < state.Deck.Count; j++)
+                {
+                    CardData card = state.Deck[j];
+                    if (card == null)
+                        continue;
+                    if (_restrictType && card.CardType != _type)
+                        continue;
+
+                    candidates.Add(card);
+                }
+
+                if (candidates.Count == 0)
+                {
+                    // Not silent: an event that promised to burn a Scandal and found none reads
+                    // as broken, and a restricted deck legitimately runs out.
+                    Debug.LogWarning(
+                        "[RemoveRandomCardOutcome] Nothing matching left in the deck — no-op."
+                    );
+                    return;
+                }
+
+                // The run's stream, so a replayed seed removes the same card.
+                state.RemoveCardFromDeck(candidates[state.Rng.Next(candidates.Count)]);
+            }
+        }
+
+        public override string GetDescription()
+        {
+            string what = _restrictType ? $"random {_type} card" : "random card";
+            return _count > 1 ? $"Remove {_count} {what}s" : $"Remove a {what}";
+        }
     }
 
     /// <summary>
@@ -331,6 +434,39 @@ namespace Crookedile.Data.Campaign
         }
     }
 
+    /// <summary>
+    /// Records a narrative flag on the run — the memory of *this choice*, not merely of having
+    /// visited the encounter. Pair with <c>HasFlag</c> on a later pool entry's Requirements
+    /// (hard unlock) or BoostIf (raised chance), or on a later event option.
+    /// </summary>
+    [Serializable]
+    public class SetFlagOutcome : RunOutcome
+    {
+        [Tooltip(
+            "Flag name, e.g. \"took_bribe\". Free-form and case-sensitive — keep a convention "
+                + "and check the spelling against wherever you test it; nothing validates it."
+        )]
+        [SerializeField]
+        private string _flag;
+
+        [Tooltip("Clear the flag instead of setting it.")]
+        [SerializeField]
+        private bool _clear;
+
+        public override void Apply(RunState state)
+        {
+            if (_clear)
+                state.ClearFlag(_flag);
+            else
+                state.SetFlag(_flag);
+        }
+
+        public override string GetDescription() =>
+            string.IsNullOrWhiteSpace(_flag) ? "Set flag: (NONE SET)"
+            : _clear ? $"Clear flag \"{_flag}\""
+            : $"Set flag \"{_flag}\"";
+    }
+
     /// <summary>Grants a relic. Duplicates are ignored by <see cref="RunState.AddRelic"/>.</summary>
     [Serializable]
     public class GrantRelicOutcome : RunOutcome
@@ -344,5 +480,22 @@ namespace Crookedile.Data.Campaign
         // makes that visible while authoring, since there is no health-check consumer up here yet.
         public override string GetDescription() =>
             _relic != null ? $"Gain relic: {_relic.RelicName}" : "Gain relic: (NONE SET)";
+    }
+
+    /// <summary>
+    /// Ends the day: advances the day counter and refills Hours, exactly as returning to HQ
+    /// does. This is the cost for an event that eats the rest of your evening.
+    ///
+    /// The map redraws on its own — closing the event refreshes locations, and the new day
+    /// makes that refresh a real re-draw rather than a no-op. Pairs badly with
+    /// <see cref="GoToEncounterOutcome"/> on the same option: the chain runs first and the new
+    /// day's map only appears once it resolves.
+    /// </summary>
+    [Serializable]
+    public class AdvanceDayOutcome : RunOutcome
+    {
+        public override void Apply(RunState state) => state.AdvanceDay();
+
+        public override string GetDescription() => "End the day";
     }
 }
