@@ -204,13 +204,28 @@ namespace Crookedile.Data.Enemy
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// Keeps <see cref="_id"/> equal to the asset's own file GUID — the key
+        /// <see cref="EnemyDatabase"/> looks enemies up by.
+        ///
+        /// Filling it only when blank left two holes: assets predating the field never got one
+        /// unless a backfill tool was run (so they were missing from the database entirely), and
+        /// duplicating an asset carried the original's id into the copy, where the later one
+        /// silently displaced the first in the lookup. Unity's per-file GUID is already unique
+        /// and survives renames and moves.
+        /// </summary>
         private void OnValidate()
         {
-            if (string.IsNullOrEmpty(_id))
-            {
-                _id = System.Guid.NewGuid().ToString();
-                UnityEditor.EditorUtility.SetDirty(this);
-            }
+            string path = UnityEditor.AssetDatabase.GetAssetPath(this);
+            if (string.IsNullOrEmpty(path))
+                return; // in-memory instance (tests, runtime) — keep whatever it has
+
+            string assetGuid = UnityEditor.AssetDatabase.AssetPathToGUID(path);
+            if (string.IsNullOrEmpty(assetGuid) || _id == assetGuid)
+                return;
+
+            _id = assetGuid;
+            UnityEditor.EditorUtility.SetDirty(this);
         }
 
         private void Reset()
