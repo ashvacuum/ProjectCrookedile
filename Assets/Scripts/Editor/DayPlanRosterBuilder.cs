@@ -14,10 +14,9 @@ namespace Crookedile.EditorTools
     /// generator that outlives its content becomes a second source of truth for numbers that
     /// have since been tuned by hand.
     ///
-    /// Damage moves are authored. Moves that need systems which do not exist yet — the echo
-    /// chamber's board-wide decay, Swing Voter's self-triggered flip, Pundit's board-majority
-    /// scan — are created with the right name, type and intent but NO effects, so they read as
-    /// unfinished rather than as working content that quietly does nothing.
+    /// Damage moves are authored, including the ones that scale with how much of the board
+    /// shares a mood — Per X Source of Hostile/ReceptiveEnemyCount does that without new code.
+    /// Defensive and shield moves carry no effects yet; their intent text says what to author.
     ///
     /// Menu: Crookedile → Generate → Day 1-7 Enemy Roster.
     /// </summary>
@@ -36,13 +35,27 @@ namespace Crookedile.EditorTools
             /// <summary>Opinion damage to the player. 0 means "needs authoring by hand".</summary>
             public readonly int Damage;
 
-            public Move(Stance stance, string name, EnemyMoveType type, string intent, int damage)
+            /// <summary>
+            /// Scales <see cref="Damage"/> by a board count — the mechanism behind every "scales
+            /// with how many allies share my mood" move in the plan.
+            /// </summary>
+            public readonly EffectContextValue PerX;
+
+            public Move(
+                Stance stance,
+                string name,
+                EnemyMoveType type,
+                string intent,
+                int damage,
+                EffectContextValue perX = EffectContextValue.None
+            )
             {
                 Stance = stance;
                 Name = name;
                 Type = type;
                 Intent = intent;
                 Damage = damage;
+                PerX = perX;
             }
         }
 
@@ -118,10 +131,10 @@ namespace Crookedile.EditorTools
                             "Smears you and digs in against persuasion", 2),
                         new Move(Stance.Neutral, "Sway", EnemyMoveType.Debuff,
                             "Works the room against you", 1),
-                        // Echo-chamber bait: healing the shared meter needs the board-wide system
-                        // that does not exist yet.
+                        // Echo-chamber bait: the more of them agree, the faster the meter slips.
                         new Move(Stance.Receptive, "Testimonial", EnemyMoveType.DefendOpinion,
-                            "NEEDS AUTHORING — heals the shared Opinion meter", 0),
+                            "Vouches for you, and the room believes itself", 2,
+                            EffectContextValue.ReceptiveEnemyCount),
                     }
                 ),
                 new Enemy(
@@ -161,13 +174,14 @@ namespace Crookedile.EditorTools
                     -4,
                     new[]
                     {
-                        // Both scaling moves need the board-majority scan that does not exist.
                         new Move(Stance.Aggressive, "Amplify", EnemyMoveType.RileOthers,
-                            "NEEDS AUTHORING — buffs all Hostile allies, scales with their count", 0),
+                            "Whips up the room — scales with how many are already angry", 2,
+                            EffectContextValue.HostileEnemyCount),
                         new Move(Stance.Neutral, "Poll", EnemyMoveType.Idle,
                             "Takes the temperature of the room", 0),
                         new Move(Stance.Receptive, "Echo", EnemyMoveType.DefendOpinion,
-                            "NEEDS AUTHORING — accelerates echo-chamber decay", 0),
+                            "Amplifies the chorus — scales with how many agree", 2,
+                            EffectContextValue.ReceptiveEnemyCount),
                     }
                 ),
                 new Enemy(
@@ -183,7 +197,8 @@ namespace Crookedile.EditorTools
                             "Defends your honour, loudly", 3),
                         // Scales with the Receptive count on the board — same missing scan.
                         new Move(Stance.Receptive, "Outrage", EnemyMoveType.Attack,
-                            "NEEDS AUTHORING — heavy multi-hit, scales with Receptive allies", 0),
+                            "Furious on your behalf — worse the more of them agree with you", 2,
+                            EffectContextValue.ReceptiveEnemyCount),
                     }
                 ),
                 new Enemy(
@@ -200,7 +215,7 @@ namespace Crookedile.EditorTools
                         new Move(Stance.Aggressive, "Call In a Favor", EnemyMoveType.SummonMinion,
                             "Phase 2 — makes a call. Assign Loyalist as the minion.", 0),
                         new Move(Stance.Neutral, "Approval Rating", EnemyMoveType.RileOthers,
-                            "NEEDS AUTHORING — forces a state flip in his favour", 0),
+                            "Bends the room toward him — author with ShiftHostilityEffect on All Allies", 0),
                         new Move(Stance.Receptive, "Concede the Point", EnemyMoveType.Idle,
                             "Lets one land, and smiles", 0),
                     }
@@ -243,8 +258,8 @@ namespace Crookedile.EditorTools
             Debug.Log(
                 $"[Day 1-7 roster] Created {created.Count}: {string.Join(", ", created)}\n"
                     + (skipped.Count > 0 ? $"Left alone (already exist): {string.Join(", ", skipped)}\n" : "")
-                    + "Moves marked NEEDS AUTHORING have no effects — they need systems that do "
-                    + "not exist yet. Delete this script once the roster is tuned."
+                    + "Moves with no damage value carry no effects yet — see their intent text. "
+                    + "Delete this script once the roster is tuned."
             );
         }
 
@@ -307,10 +322,13 @@ namespace Crookedile.EditorTools
                 so.ApplyModifiedPropertiesWithoutUndo();
 
                 so = new SerializedObject(asset);
-                so.FindProperty("_effects")
-                    .GetArrayElementAtIndex(0)
-                    .FindPropertyRelative("_amount")
-                    .intValue = move.Damage;
+                var effect = so.FindProperty("_effects").GetArrayElementAtIndex(0);
+                effect.FindPropertyRelative("_amount").intValue = move.Damage;
+
+                // Per X Source turns the amount into "this much per matching enemy", which is
+                // how every "scales with how many share my mood" move in the plan is expressed.
+                if (move.PerX != EffectContextValue.None)
+                    effect.FindPropertyRelative("_perXSource").enumValueIndex = (int)move.PerX;
             }
 
             so.ApplyModifiedPropertiesWithoutUndo();
