@@ -1,4 +1,5 @@
 using Crookedile.Data.Cards;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Data.Campaign
@@ -13,6 +14,12 @@ namespace Crookedile.Data.Campaign
     [CreateAssetMenu(menuName = "Crookedile/Campaign/Battle Encounter", fileName = "New Battle Encounter")]
     public class BattleEncounterData : EncounterData
     {
+        [Tooltip(
+            "The fight this location leads to. Normally a session of exactly one round — see "
+                + "BattleSession's own notes on why sequences belong to event choices instead."
+        )]
+        [InlineEditor(Expanded = true)]
+        [InlineButton(nameof(CreateSession), "New")]
         [SerializeField]
         private BattleSession _session;
 
@@ -27,5 +34,28 @@ namespace Crookedile.Data.Campaign
         public BattleSession Session => _session;
         public bool IsBoss => _isBoss;
         public RewardConfig RewardOverride => _rewardOverride;
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// Creates this encounter's session as a child of the encounter asset itself, rather
+        /// than a loose file you have to name, place and then find again. One fight belongs to
+        /// one location, so the session travels with it — copy or delete the encounter and the
+        /// session follows.
+        /// </summary>
+        private void CreateSession()
+        {
+            if (_session != null)
+            {
+                UnityEditor.EditorGUIUtility.PingObject(_session);
+                return;
+            }
+
+            _session = CreateInstance<BattleSession>();
+            _session.name = $"{name} Session";
+            UnityEditor.AssetDatabase.AddObjectToAsset(_session, this);
+            UnityEditor.EditorUtility.SetDirty(this);
+            UnityEditor.AssetDatabase.SaveAssets();
+        }
+#endif
     }
 }

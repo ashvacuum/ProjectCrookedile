@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Data.Campaign
@@ -10,6 +11,9 @@ namespace Crookedile.Data.Campaign
     /// silent stat change.
     /// </summary>
     [Serializable]
+    // Draws in place rather than behind a foldout: an option is its label plus what it does,
+    // and hiding the second half behind a click is how outcomes get forgotten.
+    [InlineProperty]
     public class EventOption
     {
         [Tooltip("Button text, e.g. \"Take the envelope\".")]
@@ -111,6 +115,7 @@ namespace Crookedile.Data.Campaign
         private string _body;
 
         [Tooltip("Choices offered. At least one, or the player can't leave the panel.")]
+        [ListDrawerSettings(ShowFoldout = true, ListElementLabelName = nameof(EventOption.Label))]
         [SerializeField]
         private List<EventOption> _options = new List<EventOption>();
 
