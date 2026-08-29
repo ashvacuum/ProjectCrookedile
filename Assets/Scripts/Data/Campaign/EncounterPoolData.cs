@@ -76,6 +76,12 @@ namespace Crookedile.Data.Campaign
         private float _boostMultiplier = 2f;
 
         public EncounterData Encounter => _encounter;
+
+#if UNITY_EDITOR
+        /// <summary>Editor-only wiring for the pool's "New Event/Battle" buttons.</summary>
+        internal void EditorSetEncounter(EncounterData encounter) => _encounter = encounter;
+#endif
+
         public int FirstDay => _firstDay;
         public int LastDay => _lastDay;
         public bool OncePerRun => _oncePerRun;
@@ -197,6 +203,49 @@ namespace Crookedile.Data.Campaign
 
         public int Days => _days;
         public IReadOnlyList<EncounterPoolEntry> Entries => _entries;
+
+#if UNITY_EDITOR
+        #region Authoring
+        // Creating an encounter used to be: right-click Create in the right folder, name it,
+        // come back here, add a row, drag it in. Four steps and a trip through the Project
+        // window to add one encounter to a week. These do all of it in one click, and leave the
+        // new asset selected so it can be renamed and filled in immediately.
+
+        [ButtonGroup("New")]
+        [Button("New Event", ButtonSizes.Medium)]
+        private void CreateEventEncounter() => CreateEncounter<EventEncounterData>("New Event");
+
+        [ButtonGroup("New")]
+        [Button("New Battle", ButtonSizes.Medium)]
+        private void CreateBattleEncounter() => CreateEncounter<BattleEncounterData>("New Battle");
+
+        private void CreateEncounter<T>(string baseName)
+            where T : EncounterData
+        {
+            // Beside the pool, so a pool and its content stay together without asking where.
+            string folder = System.IO.Path.GetDirectoryName(
+                UnityEditor.AssetDatabase.GetAssetPath(this)
+            );
+            if (string.IsNullOrEmpty(folder))
+                folder = "Assets";
+
+            var encounter = CreateInstance<T>();
+            string path = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(
+                $"{folder}/{baseName}.asset"
+            );
+            UnityEditor.AssetDatabase.CreateAsset(encounter, path);
+
+            var entry = new EncounterPoolEntry();
+            entry.EditorSetEncounter(encounter);
+            _entries.Add(entry);
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            UnityEditor.AssetDatabase.SaveAssets();
+            UnityEditor.Selection.activeObject = encounter;
+        }
+
+        #endregion
+#endif
 
         #region Queries
         /// <summary>
