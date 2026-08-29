@@ -171,6 +171,10 @@ namespace Crookedile.EditorTools
             )
                 _rolled = null;
 
+            GUILayout.Space(12f);
+            if (GUILayout.Button("Import CSV", EditorStyles.toolbarButton, GUILayout.Width(80f)))
+                EncounterCsvImporter.ImportInto(_pool);
+
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
         }
