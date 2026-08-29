@@ -379,27 +379,47 @@ namespace Crookedile.EditorTools
                 return;
             }
 
-            // Two encounters sharing an id would collide in every id-keyed dictionary below.
-            // Report it and carry on with one of each: an exception per repaint tells the
-            // designer nothing about which assets are at fault.
-            var duplicates = entries
-                .GroupBy(e => e.Id)
-                .Where(g => g.Count() > 1)
+            // Everything below is keyed by encounter id, so repeated ids need collapsing. Two
+            // very different things produce them, and calling both "duplicated assets" sent at
+            // least one designer hunting for a bug they didn't have:
+            //
+            //   • one encounter listed in several rows — deliberate, and how you give the same
+            //     location a different weight or gate in a different week. Runtime handles it.
+            //   • two distinct assets carrying the same id — a real collision that makes one of
+            //     them unreachable through any id lookup.
+            var shared = entries.GroupBy(e => e.Id).Where(g => g.Count() > 1).ToList();
+
+            var collisions = shared
+                .Where(g => g.Select(e => e.Encounter).Distinct().Count() > 1)
                 .ToList();
-            if (duplicates.Count > 0)
-            {
+            if (collisions.Count > 0)
                 EditorGUILayout.HelpBox(
-                    "Encounters sharing an ID — duplicated assets. Re-save each to reassign:\n"
+                    "Different encounters sharing an ID — one of them is unreachable by lookup. "
+                        + "Re-save each asset to reassign:\n"
                         + string.Join(
                             "\n",
-                            duplicates.Select(g =>
-                                $"  {g.Key}: {string.Join(", ", g.Select(e => e.Encounter.name))}"
+                            collisions.Select(g =>
+                                $"  {g.Key}: {string.Join(", ", g.Select(e => e.Encounter.name).Distinct())}"
                             )
                         ),
                     MessageType.Error
                 );
+
+            var repeated = shared.Except(collisions).ToList();
+            if (repeated.Count > 0)
+                EditorGUILayout.HelpBox(
+                    "Listed in more than one row — drawn at most once per day, and Once Per Run "
+                        + "applies to the encounter, not the row, so visiting it retires every "
+                        + "row at once. The graph shows one node:\n"
+                        + string.Join(
+                            "\n",
+                            repeated.Select(g => $"  {g.First().Encounter.name} × {g.Count()} rows")
+                        ),
+                    MessageType.Info
+                );
+
+            if (shared.Count > 0)
                 entries = entries.GroupBy(e => e.Id).Select(g => g.First()).ToList();
-            }
 
             // Depth = longest hard-requirement chain leading here. Gives left-to-right reading
             // order for free: day-one content on the left, things it unlocks to the right.
