@@ -849,7 +849,7 @@ namespace Crookedile.EditorTools
                 {
                     yield return new Row(
                         "(none)",
-                        "no relics authored yet — run Crookedile → Generate → Relic Set",
+                        "no relics authored yet — create them via Assets → Create → Crookedile",
                         null,
                         new List<AuditIssue>()
                     );
