@@ -1,0 +1,15 @@
+Asset Name,Display Name,Type,"Blurb (one line, shown under the button)",Hour Cost,First Day,Last Day (0=open),Drop Weight,Pool Weight (-1=inherit),Once Per Run,Guaranteed,Is Boss,Enemies / Session,Requirements (hard gate),Boost If,Boost x,Notes
+Headquarters,Headquarters,Event,End the day and take stock.,0,1,0,1,1,FALSE,TRUE,FALSE,,,,2,Always available at no Hours cost.
+Agitators,First Impressions,Battle,They started before you got to the microphone.,1,1,1,1,1,TRUE,TRUE,FALSE,1x Agitator; 2x Attacker,,,2,EXISTING ASSET — session already wired. Teaches convert-early-or-bleed.
+Photo Op Encounter,The Photo-Op,Event,A barangay event wants you to say a few words.,1,1,1,1,1,TRUE,TRUE,FALSE,,,,2,EXISTING ASSET — options already authored.
+Enc_Heckler,Heckler,Battle,Someone in the third row has decided this is their night.,1,2,2,1,1,TRUE,TRUE,FALSE,1x Heckler; 1x Attacker,,,2,Teaches hand/resource pressure; full conversion is not always worth it.
+Leaked Group Chat Encounter,Leaked Group Chat,Event,An aide hands you screenshots you were never meant to see.,1,2,2,1,1,TRUE,TRUE,FALSE,,,,2,EXISTING ASSET — Leak it chains to an ambush battle.
+Enc_ReceptiveTrap,The Receptive Trap,Battle,They are nodding along. That is the problem.,1,3,3,1,1,TRUE,TRUE,FALSE,1x Converter; 1x Bodyguard,,,2,Teaches restraint — full conversion springs the echo chamber right when it looks won.
+Enc_EndorsementOffer,Endorsement Offer,Event,He wants to stand next to you on a stage. Publicly.,1,3,3,1,1,TRUE,TRUE,FALSE,,,,2,Accept grants an ally but raises next fight's starting Hostility.
+Enc_DeadAir,Dead Air,Battle,Three people who want different things and none of them is listening.,1,4,4,1,1,TRUE,TRUE,FALSE,1x Swing Voter; 1x Loyalist; 1x Heckler,,,2,Teaches turn-by-turn triage — no clean read on the board.
+Enc_AmbushInterview,Ambush Interview,Event,She was waiting by the car with the camera already rolling.,1,4,4,1,1,TRUE,TRUE,FALSE,,,,2,Improvise is a coin flip; Turn it into a stunt chains to a battle.
+Enc_FocusGroup,Focus Group,Battle,Twelve strangers and a man with a clipboard deciding who you are.,1,5,5,1,1,TRUE,TRUE,FALSE,1x Pundit; 2x Swing Voter,,,2,Mini-elite. Teaches prioritising enablers over face damage.
+Enc_FocusGroupInvite,Focus Group Invite,Event,A pollster wants to test the message before it matters.,1,5,5,1,1,TRUE,TRUE,FALSE,,,,2,Participate honestly scouts the next fight's composition — info as a reward.
+Enc_ArdentFan,Ardent Fan,Battle,He has your slogan on a shirt he made himself.,1,6,6,1,1,TRUE,TRUE,FALSE,1x Ardent Fan; 1x Loyalist; 1x Attacker,,,2,Elite. Punishes the convert-everything instinct the first five days taught.
+Enc_OldFriendNewAsk,"Old Friend, New Ask",Event,He is not asking for money. He is asking for something worse.,1,6,6,1,1,TRUE,TRUE,FALSE,,,,2,Negotiate-hard middle path still needs a balance pass.
+Enc_TheIncumbent,The Incumbent,Battle,He has held this seat for eleven years and has never once looked worried.,2,7,7,1,1,TRUE,TRUE,TRUE,1x The Incumbent,,,2,BOSS. Three phases gated on Opinion. No event on day 7.
