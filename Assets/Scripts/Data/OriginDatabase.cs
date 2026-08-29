@@ -30,34 +30,63 @@ namespace Crookedile.Data
         [Serializable]
         public struct Entry
         {
-            public OriginType Type;
-            public string DisplayName;
-
-            [TextArea(2, 4)]
-            public string Description;
-
-            public Color Color;
-
-            [Tooltip("Small UI icon (menus, labels).")]
-            public Sprite Icon;
-
+            // Art on the left, everything else beside it: an origin is judged as a whole, and
+            // scrolling between its portrait and its numbers made that harder than it needed to be.
+            [HorizontalGroup("Origin", 76)]
+            [VerticalGroup("Origin/Art")]
+            [PreviewField(72, ObjectFieldAlignment.Left)]
+            [HideLabel]
             [Tooltip("Character portrait shown in the player slot during battle.")]
             public Sprite Portrait;
 
+            [VerticalGroup("Origin/Art")]
+            [PreviewField(72, ObjectFieldAlignment.Left)]
+            [HideLabel]
+            [Tooltip("Small UI icon (menus, labels).")]
+            public Sprite Icon;
+
+            [BoxGroup("Origin/Right/Identity", LabelText = "Identity")]
+            [HorizontalGroup("Origin/Right", LabelWidth = 90)]
+            [EnumToggleButtons]
+            public OriginType Type;
+
+            [BoxGroup("Origin/Right/Identity")]
+            public string DisplayName;
+
+            [BoxGroup("Origin/Right/Identity")]
+            [TextArea(2, 4)]
+            public string Description;
+
+            [BoxGroup("Origin/Right/Identity")]
+            public Color Color;
+
+            [BoxGroup("Origin/Right/Battle", LabelText = "Battle")]
+            [EnumToggleButtons]
             public ArchetypeResource Resource;
 
+            [BoxGroup("Origin/Right/Battle")]
+            [Required("Without a passive this origin plays as a plain deck with no identity.")]
             [Tooltip("The origin's starter passive asset.")]
             public OriginPassive Passive;
 
+            [BoxGroup("Origin/Right/Battle")]
             [Tooltip(
                 "Tag used to collect this origin's starter cards (CardDatabase.GetStarterDeck)."
             )]
+            [ValidateInput(
+                "@!string.IsNullOrWhiteSpace(StarterTag)",
+                "No starter tag — GetStarterDeck returns nothing and this origin begins with an "
+                    + "empty deck.",
+                InfoMessageType.Error
+            )]
             public string StarterTag;
 
+            [BoxGroup("Origin/Right/Battle")]
+            [PropertyRange(1, 10)]
             [Tooltip("Max Action Points per turn.")]
             public int MaxActionPoints;
 
-            [Header("Campaign start")]
+            [BoxGroup("Origin/Right/Campaign", LabelText = "Campaign start")]
             [Tooltip(
                 "Funds this origin starts a run with. A real design lever, not flavour — "
                     + "Nepo Baby starting rich and Faith Leader starting broke changes which "
@@ -70,6 +99,7 @@ namespace Crookedile.Data
             )]
             public int StartingFunds;
 
+            [BoxGroup("Origin/Right/Campaign")]
             [Tooltip("Credibility this origin starts a run with.")]
             [ValidateInput(
                 "@StartingCredibility > 0",
@@ -79,7 +109,8 @@ namespace Crookedile.Data
             )]
             public int StartingCredibility;
 
-            [Tooltip("Hours per campaign day. 0 falls back to the run's default.")]
+            [BoxGroup("Origin/Right/Campaign")]
+            [Tooltip("Hours per campaign day. 0 falls back to the run’s default.")]
             [LabelText("@MaxHours == 0 ? \"Hours/day (default 3)\" : \"Hours/day\"")]
             public int MaxHours;
 
@@ -89,9 +120,52 @@ namespace Crookedile.Data
                 + $"  —  {StartingFunds}F / {StartingCredibility}C / {(MaxHours == 0 ? 3 : MaxHours)}h";
         }
 
+        // BuildMap assigns by Type, so a second row for the same origin silently replaces the
+        // first — everything looks authored and half of it is never read.
+        [InfoBox(
+            "@DuplicateTypeWarning()",
+            InfoMessageType.Error,
+            VisibleIf = "@!string.IsNullOrEmpty(DuplicateTypeWarning())"
+        )]
+        [InfoBox(
+            "@MissingTypeWarning()",
+            InfoMessageType.Warning,
+            VisibleIf = "@!string.IsNullOrEmpty(MissingTypeWarning())"
+        )]
         [ListDrawerSettings(ListElementLabelName = "Summary", ShowFoldout = true)]
         [SerializeField]
         private Entry[] _entries = Array.Empty<Entry>();
+
+        /// <summary>Origins listed more than once — the later row silently wins.</summary>
+        private string DuplicateTypeWarning()
+        {
+            if (_entries == null)
+                return "";
+            var seen = new HashSet<OriginType>();
+            var dupes = new List<OriginType>();
+            foreach (var e in _entries)
+                if (!seen.Add(e.Type) && !dupes.Contains(e.Type))
+                    dupes.Add(e.Type);
+
+            return dupes.Count == 0
+                ? ""
+                : $"Listed twice: {string.Join(", ", dupes)}. The last row wins and the earlier "
+                    + "one is never read — delete the duplicate.";
+        }
+
+        /// <summary>Origins the enum defines but this database has no row for.</summary>
+        private string MissingTypeWarning()
+        {
+            var missing = new List<OriginType>();
+            foreach (OriginType type in Enum.GetValues(typeof(OriginType)))
+                if (_entries == null || Array.FindIndex(_entries, e => e.Type == type) < 0)
+                    missing.Add(type);
+
+            return missing.Count == 0
+                ? ""
+                : $"No row for {string.Join(", ", missing)} — a run started as one of those gets "
+                    + "zero Funds, zero Credibility and no passive.";
+        }
 
         public IReadOnlyList<Entry> Entries => _entries;
 
