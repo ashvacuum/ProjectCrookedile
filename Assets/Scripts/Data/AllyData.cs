@@ -6,17 +6,12 @@ using UnityEngine;
 namespace Crookedile.Data
 {
     /// <summary>
-    /// Someone recruited into the campaign, who stays with the run and changes how battles play.
-    /// Mechanically an accumulated persistent passive — the StS relic slot — but framed as a
-    /// person, because that is what the player is collecting.
+    /// Someone recruited into the campaign, who stays with the run and changes how battles play
+    /// — the StS relic slot, framed as a person. Reuses <see cref="BattlePassive"/> the same way
+    /// <c>OriginPassive</c> does, so behaviour is data-authored.
     ///
-    /// Reuses the polymorphic <see cref="BattlePassive"/> system (trigger + conditions + effects)
-    /// the same way <c>OriginPassive</c> does, so ally behaviour is fully data-authored.
-    ///
-    /// The runtime path works end to end: an event choice recruits via
-    /// <c>RecruitAllyOutcome</c>, <c>RunState.Allies</c> carries them, and <c>BattleManager</c>
-    /// registers their passives with the PassiveResolver at the start of every battle. What is
-    /// missing is content — no ally assets exist yet.
+    /// Wired end to end: <c>RecruitAllyOutcome</c> → <c>RunState.Allies</c> → <c>BattleManager</c>
+    /// registers the passives each battle. Only content is missing.
     ///
     /// Create via: Assets → Create → Crookedile → Ally Data
     /// </summary>
@@ -71,11 +66,7 @@ namespace Crookedile.Data
         public IReadOnlyList<BattlePassive> Passives => _passives;
 
 #if UNITY_EDITOR
-        /// <summary>
-        /// Keeps <see cref="_id"/> equal to the asset's own file GUID, matching EncounterData and
-        /// EnemyData. Filling it only when blank meant a duplicated asset carried the original's
-        /// id into the copy — the bug that bit both of those before allies had any content.
-        /// </summary>
+        /// <summary>Keeps <see cref="_id"/> equal to the asset's file GUID, as EncounterData does.</summary>
         private void OnValidate()
         {
             string path = UnityEditor.AssetDatabase.GetAssetPath(this);

@@ -37,10 +37,8 @@ namespace Crookedile.Data.Campaign
 
 #if UNITY_EDITOR
         /// <summary>
-        /// Creates this encounter's session as a child of the encounter asset itself, rather
-        /// than a loose file you have to name, place and then find again. One fight belongs to
-        /// one location, so the session travels with it — copy or delete the encounter and the
-        /// session follows.
+        /// Creates the session as a child of this asset, so it travels with the encounter when
+        /// copied or deleted.
         /// </summary>
         private void CreateSession()
         {

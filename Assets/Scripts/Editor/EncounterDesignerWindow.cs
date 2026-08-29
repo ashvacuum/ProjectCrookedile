@@ -379,14 +379,8 @@ namespace Crookedile.EditorTools
                 return;
             }
 
-            // Everything below is keyed by encounter id, so repeated ids need collapsing. Two
-            // very different things produce them, and calling both "duplicated assets" sent at
-            // least one designer hunting for a bug they didn't have:
-            //
-            //   • one encounter listed in several rows — deliberate, and how you give the same
-            //     location a different weight or gate in a different week. Runtime handles it.
-            //   • two distinct assets carrying the same id — a real collision that makes one of
-            //     them unreachable through any id lookup.
+            // Everything below is keyed by encounter id, so repeats need collapsing. One
+            // encounter in several rows is deliberate; two assets sharing an id is a real fault.
             var shared = entries.GroupBy(e => e.Id).Where(g => g.Count() > 1).ToList();
 
             var collisions = shared
