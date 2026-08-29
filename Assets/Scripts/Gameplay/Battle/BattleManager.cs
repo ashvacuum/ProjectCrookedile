@@ -266,23 +266,23 @@ namespace Crookedile.Gameplay.Battle
                         p => p != null && p.Origin == _playerOrigin
                     )
                     : null;
-            // Relic passives — run-level, pulled from the active run (null when battles are
+            // Ally passives — run-level, pulled from the active run (null when battles are
             // started standalone, e.g. BattleTestStarter without a run).
-            List<BattlePassive> relicPassives = null;
-            var runRelics = RunState.Current?.Relics;
-            if (runRelics != null && runRelics.Count > 0)
+            List<BattlePassive> allyPassives = null;
+            var runAllies = RunState.Current?.Allies;
+            if (runAllies != null && runAllies.Count > 0)
             {
-                relicPassives = new List<BattlePassive>();
-                foreach (var relic in runRelics)
+                allyPassives = new List<BattlePassive>();
+                foreach (var ally in runAllies)
                 {
-                    if (relic?.Passives == null)
+                    if (ally?.Passives == null)
                         continue;
-                    foreach (var bp in relic.Passives)
+                    foreach (var bp in ally.Passives)
                         if (bp != null)
-                            relicPassives.Add(bp);
+                            allyPassives.Add(bp);
                 }
                 GameLogger.LogInfo<BattleManager>(
-                    $"Registering {relicPassives.Count} relic passive(s) from {runRelics.Count} relic(s)."
+                    $"Registering {allyPassives.Count} ally passive(s) from {runAllies.Count} allies."
                 );
             }
 
@@ -299,7 +299,7 @@ namespace Crookedile.Gameplay.Battle
                 _effectResolver.PlayerStatusEffects,
                 () => OpinionPercentage,
                 this,
-                relicPassives
+                allyPassives
             );
             // Event subscriptions are managed internally by PassiveResolver via EventBus
 

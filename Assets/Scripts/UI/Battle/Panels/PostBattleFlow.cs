@@ -123,7 +123,7 @@ namespace Crookedile.UI.Battle
         /// <param name="runEnded">
         /// True only when the run is genuinely over (defeat). A campaign run that merely
         /// *finished an encounter* must keep its RunState — clearing it would wipe the deck,
-        /// Funds, Credibility, relics, and the day counter, dropping the player onto the map
+        /// Funds, Credibility, allies, and the day counter, dropping the player onto the map
         /// with a brand new run. Non-campaign (test) runs clear either way, unchanged.
         /// </param>
         private void ReturnToCampaignOrRestart(bool runEnded)

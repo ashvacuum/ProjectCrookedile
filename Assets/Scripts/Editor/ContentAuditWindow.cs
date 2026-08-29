@@ -20,7 +20,7 @@ namespace Crookedile.EditorTools
 {
     /// <summary>
     /// Content Hub — one Odin window that browses ALL game content (cards, statuses, effects,
-    /// enemies, intents, origins, audio/VFX, relics, reward config) and audits completeness. A
+    /// enemies, intents, origins, audio/VFX, allies, reward config) and audits completeness. A
     /// searchable sidebar lists a Summary plus every category (with a warning/error icon); the
     /// editor pane draws each entry as a box with its issues as message boxes and click-to-select.
     /// Read-only. Add an <see cref="IContentProvider"/> to <see cref="BuildProviders"/> and it shows
@@ -116,7 +116,7 @@ namespace Crookedile.EditorTools
                 new AudioVfxProvider(),
                 new AudioVfxEventsProvider(),
                 new LocalizationProvider(),
-                new RelicsProvider(),
+                new AlliesProvider(),
                 new RewardProvider(),
                 new UIRefsAuditProvider(),
             };
@@ -646,7 +646,7 @@ namespace Crookedile.EditorTools
 
         /// <summary>
         /// Cross-content art duplication: collects every art reference across the project
-        /// (card artwork, enemy portraits, status icons, intent icons, relic icons) and flags any
+        /// (card artwork, enemy portraits, status icons, intent icons, ally icons) and flags any
         /// sprite asset used by more than one item. Sharing art is sometimes intentional (a
         /// placeholder, or a deliberately reused icon) and sometimes a copy-paste mistake — this tab
         /// surfaces every case so you can decide. All-green means every flagged item has unique art.
@@ -684,12 +684,12 @@ namespace Crookedile.EditorTools
                             enemy
                         );
 
-                foreach (var relic in LoadAll<RelicData>())
-                    if (relic.Icon != null)
+                foreach (var ally in LoadAll<AllyData>())
+                    if (ally.Icon != null)
                         yield return new ArtRef(
-                            relic.Icon,
-                            $"Relic: {relic.RelicName ?? relic.name}",
-                            relic
+                            ally.Icon,
+                            $"Ally: {ally.AllyName ?? ally.name}",
+                            ally
                         );
 
                 var iconMap = LoadFirst<StatusEffectIconMapSO>();
@@ -838,54 +838,54 @@ namespace Crookedile.EditorTools
             }
         }
 
-        private sealed class RelicsProvider : IContentProvider
+        private sealed class AlliesProvider : IContentProvider
         {
-            public string Category => "Relics";
+            public string Category => "Allies";
 
             public IEnumerable<Row> Rows()
             {
-                var relics = LoadAll<RelicData>();
-                if (relics.Count == 0)
+                var allies = LoadAll<AllyData>();
+                if (allies.Count == 0)
                 {
                     yield return new Row(
                         "(none)",
-                        "no relics authored yet — create them via Assets → Create → Crookedile",
+                        "no allies authored yet — create them via Assets → Create → Crookedile",
                         null,
                         new List<AuditIssue>()
                     );
                     yield break;
                 }
 
-                var databases = LoadAll<RelicDatabase>();
+                var databases = LoadAll<AllyDatabase>();
                 var seenIds = new Dictionary<string, string>();
-                foreach (var relic in relics.OrderBy(r => r.name))
+                foreach (var ally in allies.OrderBy(r => r.name))
                 {
                     var issues = new List<AuditIssue>();
-                    if (string.IsNullOrWhiteSpace(relic.RelicName))
+                    if (string.IsNullOrWhiteSpace(ally.AllyName))
                         issues.Add(new AuditIssue(Severity.Warning, "No display name."));
-                    if (relic.Icon == null)
+                    if (ally.Icon == null)
                         issues.Add(new AuditIssue(Severity.Info, "No icon."));
 
-                    // Id must be unique — RelicDatabase indexes by it (last one wins silently).
-                    if (string.IsNullOrEmpty(relic.Id))
+                    // Id must be unique — AllyDatabase indexes by it (last one wins silently).
+                    if (string.IsNullOrEmpty(ally.Id))
                         issues.Add(new AuditIssue(Severity.Error, "Empty id."));
-                    else if (seenIds.TryGetValue(relic.Id, out var other))
+                    else if (seenIds.TryGetValue(ally.Id, out var other))
                         issues.Add(
                             new AuditIssue(Severity.Error, $"Duplicate id (also on {other}).")
                         );
                     else
-                        seenIds[relic.Id] = relic.name;
+                        seenIds[ally.Id] = ally.name;
 
-                    // Unregistered relics are invisible to acquisition (boss/event offers).
-                    if (!databases.Any(db => db.Relics != null && db.Relics.Contains(relic)))
+                    // Unregistered allies are invisible to acquisition (boss/event offers).
+                    if (!databases.Any(db => db.Allies != null && db.Allies.Contains(ally)))
                         issues.Add(
                             new AuditIssue(
                                 Severity.Warning,
-                                "Not in any RelicDatabase — acquisition can't offer it."
+                                "Not in any AllyDatabase — acquisition can't offer it."
                             )
                         );
 
-                    if (relic.Passives == null || relic.Passives.Count == 0)
+                    if (ally.Passives == null || ally.Passives.Count == 0)
                     {
                         issues.Add(new AuditIssue(Severity.Warning, "No passives (does nothing)."));
                     }
@@ -893,7 +893,7 @@ namespace Crookedile.EditorTools
                     {
                         // A passive without a trigger is never bucketed by PassiveResolver;
                         // without effects it fires into nothing. Both are silent at runtime.
-                        foreach (var bp in relic.Passives)
+                        foreach (var bp in ally.Passives)
                         {
                             if (bp == null)
                                 continue;
@@ -915,11 +915,11 @@ namespace Crookedile.EditorTools
                     }
 
                     yield return new Row(
-                        relic.RelicName ?? relic.name,
-                        relic.Rarity.ToString(),
-                        relic,
+                        ally.AllyName ?? ally.name,
+                        ally.Rarity.ToString(),
+                        ally,
                         issues,
-                        relic.Icon
+                        ally.Icon
                     );
                 }
             }

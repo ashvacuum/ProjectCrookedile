@@ -127,18 +127,18 @@ namespace Crookedile.Data.Campaign
         protected override string Describe() => $"Credibility ≥ {_amount}";
     }
 
-    /// <summary>True when the run has acquired <see cref="_relic"/>.</summary>
+    /// <summary>True when the run has acquired <see cref="_ally"/>.</summary>
     [Serializable]
-    public class HasRelic : RunRequirement
+    public class HasAlly : RunRequirement
     {
         [SerializeField]
-        private RelicData _relic;
+        private AllyData _ally;
 
         protected override bool Check(RunState state) =>
-            _relic != null && state.Relics.Contains(_relic);
+            _ally != null && state.Allies.Contains(_ally);
 
         protected override string Describe() =>
-            _relic != null ? $"has {_relic.RelicName}" : "has relic (NONE SET)";
+            _ally != null ? $"has {_ally.AllyName}" : "has ally (NONE SET)";
     }
 
     /// <summary>
