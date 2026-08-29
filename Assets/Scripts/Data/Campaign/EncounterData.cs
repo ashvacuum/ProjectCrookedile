@@ -11,11 +11,16 @@ namespace Crookedile.Data.Campaign
     /// </summary>
     public abstract class EncounterData : ScriptableObject
     {
+        // Bottom of the inspector, not the top: it's derived from the asset GUID and never
+        // typed, so it was pure noise above the fields you actually author.
         [ReadOnly]
-        [Tooltip("Unique identifier for this encounter. Auto-generated GUID.")]
+        [PropertyOrder(100)]
+        [FoldoutGroup("Identity", Expanded = false)]
+        [Tooltip("Unique identifier — the asset's own file GUID. Never edit by hand.")]
         [SerializeField]
         private string _id;
 
+        [Tooltip("Name shown on the map button. Falls back to the asset name while blank.")]
         [SerializeField]
         private string _displayName;
 
@@ -23,8 +28,10 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private string _blurb;
 
-        [Tooltip("Hours spent choosing this location.")]
+        [Tooltip("Hours spent choosing this location. 0 means it never competes for the day.")]
         [Min(0)]
+        [HorizontalGroup("Cost", LabelWidth = 80)]
+        [LabelText("Hours")]
         [SerializeField]
         private int _hourCost = 1;
 
@@ -34,6 +41,13 @@ namespace Crookedile.Data.Campaign
                 + "override it per pool, and falls back to this when its own weight is left unset."
         )]
         [Min(0f)]
+        [HorizontalGroup("Cost", LabelWidth = 80)]
+        [LabelText("Weight")]
+        [ValidateInput(
+            "@_dropWeight > 0f",
+            "Weight 0 — every pool row inheriting this can never draw it.",
+            InfoMessageType.Warning
+        )]
         [SerializeField]
         private float _dropWeight = 1f;
 
