@@ -48,9 +48,10 @@ namespace Crookedile.EditorTools
         {
             Timeline,
             Dependencies,
+            Simulate,
         }
 
-        private static readonly string[] TabNames = { "Timeline", "Dependencies" };
+        private static readonly string[] TabNames = { "Timeline", "Dependencies", "Simulate" };
 
         private EncounterPoolData _pool;
         private Tab _tab;
@@ -93,6 +94,11 @@ namespace Crookedile.EditorTools
             if (_tab == Tab.Dependencies)
             {
                 DrawDependencyTab();
+                return;
+            }
+            if (_tab == Tab.Simulate)
+            {
+                DrawSimulateTab();
                 return;
             }
 
@@ -611,6 +617,254 @@ namespace Crookedile.EditorTools
 
         private static readonly Color EdgeHard = new Color(0.85f, 0.8f, 0.4f);
         private static readonly Color EdgeBoost = new Color(0.45f, 0.75f, 0.95f);
+
+        #endregion
+
+        #region Simulate
+        // A single Roll answers "what does seed 12345 give me". These answer the questions a
+        // week of hand-playing can't: is any day starved, is any encounter never seen, and how
+        // much of the pool one player actually gets through.
+        private int _runs = 500;
+        private int _hoursPerDay = 3;
+        private SimResult _sim;
+
+        private sealed class SimResult
+        {
+            public int Runs;
+            public int PerDay;
+            public int Hours;
+            public int PoolSize;
+            public float[] OfferedByDay; // mean encounters offered, day-1 indexed
+            public float[] AffordableByDay; // mean of those the hour budget allows
+            public float[] ThinShareByDay; // share of runs offering fewer than PerDay
+            public readonly Dictionary<string, int> RunsSeenIn = new Dictionary<string, int>();
+            public float MeanUniquePerRun;
+            public float MeanOverlap; // Jaccard between consecutive seeds
+        }
+
+        private void DrawSimulateTab()
+        {
+            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            GUILayout.Label("Runs", EditorStyles.miniLabel, GUILayout.Width(34f));
+            _runs = Mathf.Clamp(
+                EditorGUILayout.IntField(_runs, EditorStyles.toolbarTextField, GUILayout.Width(56f)),
+                1,
+                20000
+            );
+            GUILayout.Label("Hours/day", EditorStyles.miniLabel, GUILayout.Width(62f));
+            _hoursPerDay = Mathf.Max(
+                0,
+                EditorGUILayout.IntField(
+                    _hoursPerDay,
+                    EditorStyles.toolbarTextField,
+                    GUILayout.Width(36f)
+                )
+            );
+            if (GUILayout.Button("Simulate", EditorStyles.toolbarButton, GUILayout.Width(70f)))
+                _sim = Simulate();
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.HelpBox(
+                "Draws are made with no RunState, so hard requirements pass and weight boosts "
+                    + "never fire — gated content shows up here as if it were always available. "
+                    + "Treat this as the ceiling on variety, not the lived run.",
+                MessageType.Info
+            );
+
+            if (_sim == null)
+            {
+                EditorGUILayout.LabelField(
+                    "Press Simulate to run the real draw across many seeds.",
+                    EditorStyles.miniLabel
+                );
+                return;
+            }
+
+            _scroll = EditorGUILayout.BeginScrollView(_scroll);
+            DrawSimPerDay();
+            EditorGUILayout.Space(8f);
+            DrawSimCoverage();
+            EditorGUILayout.EndScrollView();
+        }
+
+        /// <summary>
+        /// Plays <see cref="_runs"/> whole campaigns through the real
+        /// <see cref="EncounterPoolData.DrawForDay"/>, carrying once-per-run exclusions forward
+        /// exactly as <see cref="Roll"/> does for a single seed.
+        /// </summary>
+        private SimResult Simulate()
+        {
+            var entries = _pool.Entries.Where(e => e?.Encounter != null).ToList();
+            int days = _pool.Days;
+
+            var result = new SimResult
+            {
+                Runs = _runs,
+                PerDay = _perDay,
+                Hours = _hoursPerDay,
+                PoolSize = entries.Select(e => e.Id).Distinct().Count(),
+                OfferedByDay = new float[days],
+                AffordableByDay = new float[days],
+                ThinShareByDay = new float[days],
+            };
+
+            long uniqueTotal = 0;
+            double overlapTotal = 0;
+            HashSet<string> previousSeen = null;
+
+            for (int run = 0; run < _runs; run++)
+            {
+                var consumed = new HashSet<string>();
+                var seen = new HashSet<string>();
+                int seed = unchecked(_seed + run * 7919); // stride by a prime to decorrelate runs
+
+                for (int day = 1; day <= days; day++)
+                {
+                    var picks = _pool.DrawForDay(day, _perDay, seed, consumed);
+
+                    result.OfferedByDay[day - 1] += picks.Count;
+                    result.AffordableByDay[day - 1] += Affordable(picks, _hoursPerDay);
+                    if (picks.Count < _perDay)
+                        result.ThinShareByDay[day - 1] += 1f;
+
+                    foreach (var pick in picks)
+                    {
+                        if (pick == null)
+                            continue;
+                        consumed.Add(pick.ID);
+                        seen.Add(pick.ID);
+                    }
+                }
+
+                uniqueTotal += seen.Count;
+                foreach (string id in seen)
+                    result.RunsSeenIn[id] = result.RunsSeenIn.TryGetValue(id, out int n) ? n + 1 : 1;
+
+                if (previousSeen != null)
+                {
+                    int union = previousSeen.Union(seen).Count();
+                    overlapTotal += union == 0 ? 0 : previousSeen.Intersect(seen).Count() / (double)union;
+                }
+                previousSeen = seen;
+            }
+
+            for (int d = 0; d < days; d++)
+            {
+                result.OfferedByDay[d] /= _runs;
+                result.AffordableByDay[d] /= _runs;
+                result.ThinShareByDay[d] /= _runs;
+            }
+            result.MeanUniquePerRun = uniqueTotal / (float)_runs;
+            result.MeanOverlap = _runs < 2 ? 0f : (float)(overlapTotal / (_runs - 1));
+            return result;
+        }
+
+        /// <summary>
+        /// How many of a day's offering the hour budget actually allows, cheapest first — the
+        /// most generous reading, so a shortfall here is a real one.
+        /// </summary>
+        private static int Affordable(List<EncounterData> picks, int hours)
+        {
+            int spent = 0;
+            int taken = 0;
+            foreach (var pick in picks.Where(p => p != null).OrderBy(p => p.HourCost))
+            {
+                if (spent + pick.HourCost > hours)
+                    break;
+                spent += pick.HourCost;
+                taken++;
+            }
+            return taken;
+        }
+
+        private void DrawSimPerDay()
+        {
+            EditorGUILayout.LabelField(
+                $"{_sim.Runs} runs — offered vs. what {_sim.Hours} hours buys",
+                EditorStyles.boldLabel
+            );
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("", GUILayout.Width(70f));
+            for (int day = 1; day <= _pool.Days; day++)
+                GUILayout.Label($"D{day}", EditorStyles.miniBoldLabel, GUILayout.Width(52f));
+            EditorGUILayout.EndHorizontal();
+
+            DrawSimRow("offered", _sim.OfferedByDay, v => v < _sim.PerDay - 0.01f);
+            DrawSimRow("affordable", _sim.AffordableByDay, v => v < 2f);
+            DrawSimRow("thin runs", _sim.ThinShareByDay, v => v > 0.05f, percent: true);
+
+            float squeeze = _sim.OfferedByDay.Sum() - _sim.AffordableByDay.Sum();
+            EditorGUILayout.LabelField(
+                squeeze < 0.5f
+                    ? "No time pressure: the hour budget covers everything offered, so the player never chooses."
+                    : $"Time pressure: {squeeze:0.#} encounters per run are offered but unaffordable — that is the choice.",
+                EditorStyles.miniLabel
+            );
+        }
+
+        private void DrawSimRow(
+            string label,
+            float[] values,
+            System.Func<float, bool> warn,
+            bool percent = false
+        )
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label(label, EditorStyles.miniLabel, GUILayout.Width(70f));
+            foreach (float v in values)
+            {
+                var style = new GUIStyle(EditorStyles.miniLabel);
+                if (warn(v))
+                    style.normal.textColor = new Color(1f, 0.55f, 0.35f);
+                GUILayout.Label(
+                    percent ? $"{v * 100f:0}%" : $"{v:0.0}",
+                    style,
+                    GUILayout.Width(52f)
+                );
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void DrawSimCoverage()
+        {
+            float burn = _sim.PoolSize == 0 ? 0f : _sim.MeanUniquePerRun / _sim.PoolSize;
+            EditorGUILayout.LabelField(
+                $"A run sees {_sim.MeanUniquePerRun:0.0} of {_sim.PoolSize} encounters ({burn * 100f:0}% of the pool). "
+                    + $"Two runs share {_sim.MeanOverlap * 100f:0}% of their content.",
+                EditorStyles.boldLabel
+            );
+
+            var byId = _pool
+                .Entries.Where(e => e?.Encounter != null)
+                .GroupBy(e => e.Id)
+                .ToDictionary(g => g.Key, g => g.First().Encounter);
+
+            var never = byId.Where(kv => !_sim.RunsSeenIn.ContainsKey(kv.Key)).ToList();
+            if (never.Count > 0)
+                EditorGUILayout.HelpBox(
+                    "Never drawn in any run — unreachable content:\n  "
+                        + string.Join(", ", never.Select(kv => kv.Value.name)),
+                    MessageType.Error
+                );
+
+            var always = _sim
+                .RunsSeenIn.Where(kv => kv.Value >= _sim.Runs * 0.8f && byId.ContainsKey(kv.Key))
+                .OrderByDescending(kv => kv.Value)
+                .ToList();
+            if (always.Count > 0)
+                EditorGUILayout.HelpBox(
+                    "In 80%+ of runs — these define the campaign's texture, so they had better be good:\n  "
+                        + string.Join(
+                            ", ",
+                            always.Select(kv =>
+                                $"{byId[kv.Key].name} {kv.Value * 100f / _sim.Runs:0}%"
+                            )
+                        ),
+                    MessageType.Info
+                );
+        }
 
         #endregion
 
