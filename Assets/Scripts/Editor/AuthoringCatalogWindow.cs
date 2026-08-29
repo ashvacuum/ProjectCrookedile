@@ -288,11 +288,11 @@ namespace Crookedile.EditorTools
             typeof(Crookedile.Data.Enemy.EnemyMoveData),
             typeof(Crookedile.Data.Enemy.EnemyData),
             typeof(Crookedile.Data.OriginPassive),
-            typeof(Crookedile.Data.RelicData),
+            typeof(Crookedile.Data.AllyData),
         };
 
         /// <summary>
-        /// Scans every content asset (cards, enemy moves, enemies, origin passives, relics) and
+        /// Scans every content asset (cards, enemy moves, enemies, origin passives, allies) and
         /// records which concrete effect/trigger/condition/status types each one contains,
         /// including nested references (a StatusBehavior inside an ApplyStatusBehaviorEffect
         /// inside a passive). Nested asset references are NOT followed — an EnemyData that uses
@@ -549,7 +549,7 @@ namespace Crookedile.EditorTools
                 if (Usages == null || Usages.Count == 0)
                 {
                     EditorGUILayout.LabelField(
-                        "UNUSED — no card, enemy move, enemy, origin passive, or relic references this.",
+                        "UNUSED — no card, enemy move, enemy, origin passive, or ally references this.",
                         EditorStyles.wordWrappedMiniLabel
                     );
                 }

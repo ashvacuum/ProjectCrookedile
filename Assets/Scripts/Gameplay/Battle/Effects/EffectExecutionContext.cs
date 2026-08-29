@@ -114,7 +114,7 @@ namespace Crookedile.Gameplay.Battle
         /// (set by EffectResolver), or the passive's owning card during card-sourced passive
         /// dispatches (set by PassiveResolver). Lets effects act on their own card
         /// (CardSelectionMode.ThisCard, <see cref="MoveOwnerCardEffect"/>). Null for enemy
-        /// moves and origin/relic passives.
+        /// moves and origin/ally passives.
         /// </summary>
         public CardData OwnerCard { get; set; }
 

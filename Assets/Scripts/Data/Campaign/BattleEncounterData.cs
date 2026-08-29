@@ -23,7 +23,7 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private BattleSession _session;
 
-        [Tooltip("Boss victory grants a pick-1-of-3 relic (M3). Unused until then.")]
+        [Tooltip("Boss victory grants a pick-1-of-3 ally (M3). Unused until then.")]
         [SerializeField]
         private bool _isBoss;
 

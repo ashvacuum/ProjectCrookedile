@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Crookedile.Data
 {
     /// <summary>
-    /// Defines one or more passive abilities for an origin (like Slay the Spire relics).
+    /// Defines one or more passive abilities for an origin (like Slay the Spire allies).
     /// Each passive is a polymorphic <see cref="BattlePassive"/> with its own trigger,
     /// conditions, and effects — all configured in the Inspector.
     ///

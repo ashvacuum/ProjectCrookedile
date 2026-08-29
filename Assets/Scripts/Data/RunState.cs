@@ -11,7 +11,7 @@ namespace Crookedile.Data
     /// Holds the state of the current run (origin, accumulated deck, HP, and battle queue).
     ///
     /// Intentionally minimal — a full <c>RunManager</c> system can layer on top of this
-    /// once the map and relic systems are built. Until then, everything that needs to
+    /// once the map and ally systems are built. Until then, everything that needs to
     /// persist between battles can read from <see cref="Current"/>.
     ///
     /// Not a MonoBehaviour: no scene dependency, no serialization overhead.
@@ -36,10 +36,10 @@ namespace Crookedile.Data
         public List<CardData> Deck { get; private set; }
 
         /// <summary>
-        /// Relics acquired this run. Their passives are registered with every battle's
+        /// Allies acquired this run. Their passives are registered with every battle's
         /// PassiveResolver, so they behave exactly like origin passives in battle.
         /// </summary>
-        public List<RelicData> Relics { get; private set; }
+        public List<AllyData> Allies { get; private set; }
 
         #endregion
 
@@ -349,7 +349,7 @@ namespace Crookedile.Data
                 Credibility = start.credibility,
                 Origin = origin,
                 Deck = starterDeck != null ? new List<CardData>(starterDeck) : new List<CardData>(),
-                Relics = new List<RelicData>(),
+                Allies = new List<AllyData>(),
                 CurrentBattleIndex = 0,
                 BattleQueue = battleQueue,
                 IsCampaignRun = isCampaignRun,
@@ -430,13 +430,13 @@ namespace Crookedile.Data
         }
 
         /// <summary>
-        /// Adds <paramref name="relic"/> to the run. Duplicates and <c>null</c> are ignored
-        /// (relics are unique per run, StS-style).
+        /// Adds <paramref name="ally"/> to the run. Duplicates and <c>null</c> are ignored
+        /// (allies are unique per run, StS-style).
         /// </summary>
-        public void AddRelic(RelicData relic)
+        public void AddAlly(AllyData ally)
         {
-            if (relic != null && !Relics.Contains(relic))
-                Relics.Add(relic);
+            if (ally != null && !Allies.Contains(ally))
+                Allies.Add(ally);
         }
 
         /// <summary>Records that the current battle was won (advances meta state).</summary>

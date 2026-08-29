@@ -467,19 +467,19 @@ namespace Crookedile.Data.Campaign
             : $"Set flag \"{_flag}\"";
     }
 
-    /// <summary>Grants a relic. Duplicates are ignored by <see cref="RunState.AddRelic"/>.</summary>
+    /// <summary>Grants an ally. Duplicates are ignored by <see cref="RunState.AddAlly"/>.</summary>
     [Serializable]
-    public class GrantRelicOutcome : RunOutcome
+    public class RecruitAllyOutcome : RunOutcome
     {
         [SerializeField]
-        private RelicData _relic;
+        private AllyData _ally;
 
-        public override void Apply(RunState state) => state.AddRelic(_relic);
+        public override void Apply(RunState state) => state.AddAlly(_ally);
 
-        // An unset relic silently no-ops at runtime; surfacing it in the description is what
+        // An unset ally silently no-ops at runtime; surfacing it in the description is what
         // makes that visible while authoring, since there is no health-check consumer up here yet.
         public override string GetDescription() =>
-            _relic != null ? $"Gain relic: {_relic.RelicName}" : "Gain relic: (NONE SET)";
+            _ally != null ? $"Gain ally: {_ally.AllyName}" : "Gain ally: (NONE SET)";
     }
 
     /// <summary>

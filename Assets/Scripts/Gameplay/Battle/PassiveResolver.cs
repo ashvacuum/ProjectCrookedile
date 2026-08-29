@@ -40,7 +40,7 @@ namespace Crookedile.Gameplay.Battle
             new Dictionary<Type, List<BattlePassive>>();
 
         // Owning card per card-sourced passive (default AND activated) — lets passive effects
-        // act on the card itself (MoveOwnerCardEffect). Origin/relic passives have no owner.
+        // act on the card itself (MoveOwnerCardEffect). Origin/ally passives have no owner.
         private readonly Dictionary<BattlePassive, CardData> _ownerByPassive =
             new Dictionary<BattlePassive, CardData>();
 
@@ -182,7 +182,7 @@ namespace Crookedile.Gameplay.Battle
                         _allPassives.Add(bp);
             }
 
-            // Run-level passives (relics) — persist across battles on RunState, re-registered
+            // Run-level passives (allies) — persist across battles on RunState, re-registered
             // fresh each battle so their one-shot/fire-count state resets like any other passive.
             if (_runPassives != null)
             {
@@ -447,7 +447,7 @@ namespace Crookedile.Gameplay.Battle
                 // AmountSource (e.g. LastDamageDealt for lifesteal-style passives).
                 var execCtx = _effectResolver.CreateContext(isPlayerCard: true);
                 EnrichContextFromEvent(evtCtx, execCtx);
-                // Card-sourced passives know their owning card (null for origin/relic passives).
+                // Card-sourced passives know their owning card (null for origin/ally passives).
                 _ownerByPassive.TryGetValue(passive, out var ownerCard);
                 execCtx.OwnerCard = ownerCard;
                 // The enemy the event happened to — resolved by TargetType.TriggeringEnemy.

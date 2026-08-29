@@ -289,7 +289,7 @@ namespace Crookedile.UI.Campaign
             GUILayout.Label(
                 $"Day {state.Day}   Hours {state.Hours}/{state.MaxHours}   "
                     + $"Funds {state.Funds}   Credibility {state.Credibility}   "
-                    + $"Deck {state.Deck.Count}   Relics {state.Relics.Count}   Seed {state.Seed}",
+                    + $"Deck {state.Deck.Count}   Allies {state.Allies.Count}   Seed {state.Seed}",
                 GUI.skin.box
             );
 
@@ -324,7 +324,7 @@ namespace Crookedile.UI.Campaign
                 GUILayout.Label(
                     $"Campaign complete — survived all {_pool.Days} days.\n"
                         + $"Funds {state.Funds}   Credibility {state.Credibility}   "
-                        + $"Deck {state.Deck.Count}   Relics {state.Relics.Count}",
+                        + $"Deck {state.Deck.Count}   Allies {state.Allies.Count}",
                     GUI.skin.box
                 );
                 if (GUILayout.Button("Start a new run", GUILayout.Height(30f)))

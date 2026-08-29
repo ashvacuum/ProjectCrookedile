@@ -12,7 +12,7 @@ namespace Crookedile.Gameplay.Battle
     /// of the draw pile").
     ///
     /// Only meaningful inside a card's passive effect list — played-card effects and
-    /// origin/relic passives have no owner card and no-op with a log.
+    /// origin/ally passives have no owner card and no-op with a log.
     /// Cards currently in hand or exhausted stay put (see DeckManager.RepositionCard).
     /// </summary>
     [Serializable]
