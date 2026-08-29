@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Data
@@ -22,7 +23,6 @@ namespace Crookedile.Data
     /// replaced the old OriginStats asset. The Content Audit validates it.
     ///
     /// Create via: Assets → Create → Crookedile → Origin Database
-    /// (or generate a seeded one: Crookedile → Generate → Origin Database).
     /// </summary>
     [CreateAssetMenu(menuName = "Crookedile/Origin Database", fileName = "OriginDatabase")]
     public class OriginDatabase : ScriptableObject
@@ -63,15 +63,33 @@ namespace Crookedile.Data
                     + "Nepo Baby starting rich and Faith Leader starting broke changes which "
                     + "event options are even reachable on day one."
             )]
+            [ValidateInput(
+                "@StartingFunds > 0",
+                "0 Funds — every FundsAtLeast gate fails all run, so those options are dead.",
+                InfoMessageType.Warning
+            )]
             public int StartingFunds;
 
             [Tooltip("Credibility this origin starts a run with.")]
+            [ValidateInput(
+                "@StartingCredibility > 0",
+                "0 Credibility — CredibilityAtLeast gates can never pass, and percentage-based "
+                    + "Credibility outcomes scale off this, so they do nothing.",
+                InfoMessageType.Warning
+            )]
             public int StartingCredibility;
 
             [Tooltip("Hours per campaign day. 0 falls back to the run's default.")]
+            [LabelText("@MaxHours == 0 ? \"Hours/day (default 3)\" : \"Hours/day\"")]
             public int MaxHours;
+
+            /// <summary>Row label for the entries list, so origins read without expanding.</summary>
+            private string Summary =>
+                $"{(string.IsNullOrEmpty(DisplayName) ? Type.ToString() : DisplayName)}"
+                + $"  —  {StartingFunds}F / {StartingCredibility}C / {(MaxHours == 0 ? 3 : MaxHours)}h";
         }
 
+        [ListDrawerSettings(ListElementLabelName = "Summary", ShowFoldout = true)]
         [SerializeField]
         private Entry[] _entries = Array.Empty<Entry>();
 
