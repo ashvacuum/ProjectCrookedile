@@ -12,16 +12,21 @@ namespace Crookedile.Data.Campaign
     [Serializable]
     public class EncounterPoolEntry
     {
+        [Required("Blank rows can never be drawn — pick an encounter or delete the row.")]
+        [AssetsOnly]
+        [TableColumnWidth(190)]
         [SerializeField]
         private EncounterData _encounter;
 
         [Tooltip("First day this can appear, inclusive.")]
         [Min(1)]
+        [TableColumnWidth(70, Resizable = false)]
         [SerializeField]
         private int _firstDay = 1;
 
         [Tooltip("Last day this can appear, inclusive. 0 means no end — available forever.")]
         [Min(0)]
+        [TableColumnWidth(70, Resizable = false)]
         [SerializeField]
         private int _lastDay;
 
@@ -31,6 +36,12 @@ namespace Crookedile.Data.Campaign
                 + "value only when this encounter should be rarer or commoner in THIS pool "
                 + "than it is by default. 0 disables it here without removing the row."
         )]
+        [ValidateInput(
+            "@_weight != 0f || _guaranteed",
+            "Weight 0 and not guaranteed — this row can never be drawn.",
+            InfoMessageType.Warning
+        )]
+        [TableColumnWidth(80, Resizable = false)]
         [SerializeField]
         private float _weight = InheritWeight;
 
@@ -52,6 +63,7 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private bool _guaranteed;
 
+        [TableColumnWidth(200)]
         [Header("Dependencies")]
         [Tooltip(
             "Hard gate: ALL must hold or this encounter can't appear at all.\n"
@@ -190,10 +202,18 @@ namespace Crookedile.Data.Campaign
         menuName = "Crookedile/Campaign/Encounter Pool",
         fileName = "New Encounter Pool"
     )]
+    // Coverage is the failure this asset is prone to and the one you cannot see by reading the
+    // rows: a day with nothing eligible hands the player an empty map. Surfaced here rather
+    // than only in Content Hub, because here is where the windows get typed.
+    [InfoBox(
+        "@CoverageWarning()",
+        InfoMessageType.Error,
+        VisibleIf = "@!string.IsNullOrEmpty(CoverageWarning())"
+    )]
     public class EncounterPoolData : ScriptableObject
     {
         [Tooltip("How many days the campaign runs. Drives the Gantt view's column count.")]
-        [Min(1)]
+        [PropertyRange(1, 30)]
         [SerializeField]
         private int _days = 7;
 
@@ -203,6 +223,34 @@ namespace Crookedile.Data.Campaign
 
         public int Days => _days;
         public IReadOnlyList<EncounterPoolEntry> Entries => _entries;
+
+        /// <summary>
+        /// Days with nothing eligible, as an inspector warning. Empty string when the week is
+        /// covered. Requirements are skipped (no run to test against), so this is the optimistic
+        /// reading — a day named here is empty even before gates narrow it.
+        /// </summary>
+        private string CoverageWarning()
+        {
+            var empty = new List<int>();
+            for (int day = 1; day <= _days; day++)
+            {
+                bool any = false;
+                foreach (var entry in _entries)
+                    if (entry != null && entry.IsEligibleOn(day))
+                    {
+                        any = true;
+                        break;
+                    }
+                if (!any)
+                    empty.Add(day);
+            }
+
+            return empty.Count == 0
+                ? ""
+                : $"Nothing is eligible on day{(empty.Count > 1 ? "s" : "")} "
+                    + $"{string.Join(", ", empty)} — the player gets an empty map. Widen a "
+                    + "Last Day, or add an entry with no end day.";
+        }
 
 #if UNITY_EDITOR
         #region Authoring
