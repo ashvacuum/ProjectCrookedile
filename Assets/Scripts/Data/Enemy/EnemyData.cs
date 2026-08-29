@@ -205,14 +205,8 @@ namespace Crookedile.Data.Enemy
 
 #if UNITY_EDITOR
         /// <summary>
-        /// Keeps <see cref="_id"/> equal to the asset's own file GUID — the key
-        /// <see cref="EnemyDatabase"/> looks enemies up by.
-        ///
-        /// Filling it only when blank left two holes: assets predating the field never got one
-        /// unless a backfill tool was run (so they were missing from the database entirely), and
-        /// duplicating an asset carried the original's id into the copy, where the later one
-        /// silently displaced the first in the lookup. Unity's per-file GUID is already unique
-        /// and survives renames and moves.
+        /// Keeps <see cref="_id"/> equal to the asset's file GUID — the key
+        /// <see cref="EnemyDatabase"/> looks enemies up by, so it must exist and must be unique.
         /// </summary>
         private void OnValidate()
         {

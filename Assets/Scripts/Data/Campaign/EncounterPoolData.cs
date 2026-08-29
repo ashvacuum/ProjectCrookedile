@@ -254,10 +254,8 @@ namespace Crookedile.Data.Campaign
 
 #if UNITY_EDITOR
         #region Authoring
-        // Creating an encounter used to be: right-click Create in the right folder, name it,
-        // come back here, add a row, drag it in. Four steps and a trip through the Project
-        // window to add one encounter to a week. These do all of it in one click, and leave the
-        // new asset selected so it can be renamed and filled in immediately.
+        // Creates the asset, adds its pool row, and selects it — one click instead of a trip
+        // through the Project window.
 
         [ButtonGroup("New")]
         [Button("New Event", ButtonSizes.Medium)]

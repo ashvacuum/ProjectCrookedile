@@ -8,19 +8,13 @@ using UnityEngine;
 namespace Crookedile.EditorTools
 {
     /// <summary>
-    /// Keeps every <see cref="GameDatabase{T}"/> asset in step with the assets it collects.
+    /// Keeps every <see cref="GameDatabase{T}"/> in step with the assets it collects, so a card
+    /// can't exist yet be invisible to <c>GetByID</c> because nobody pressed Refresh.
     ///
-    /// The databases populated from a manual "Refresh Database" button, which meant a card could
-    /// exist, look correct in its inspector, and still be invisible to <c>GetByID</c> because
-    /// nobody pressed it. Silent, and indistinguishable from the card being broken. This closes
-    /// that by refreshing on import instead of on discipline.
+    /// Only the database whose item type changed is touched. Deletions can't be type-checked, so
+    /// a delete refreshes any database left holding a null.
     ///
-    /// Only the database whose item type actually changed is touched: adding a card does not
-    /// rescan enemies. Deletions can't be type-checked — the asset is already gone — so a delete
-    /// refreshes any database left holding a null, which is exactly the set that lost something.
-    ///
-    /// Refreshed databases are left dirty rather than saved here: writing assets from inside an
-    /// import callback invites reentrancy, and Unity saves them with the next project save.
+    /// Left dirty rather than saved: writing assets inside an import callback invites reentrancy.
     /// </summary>
     public class DatabaseAutoRefresh : AssetPostprocessor
     {

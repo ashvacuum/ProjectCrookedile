@@ -70,13 +70,8 @@ namespace Crookedile.Data.Campaign
 
 #if UNITY_EDITOR
         /// <summary>
-        /// Keeps <see cref="_id"/> equal to the asset's own file GUID.
-        ///
-        /// It used to fill the id only when blank, which meant duplicating an asset (Ctrl+D)
-        /// carried the original's id into the copy — two encounters answering to one id, so
-        /// visiting either marked both visited and the dependency graph threw on the collision.
-        /// Unity already guarantees a unique, rename- and move-stable id per asset file; minting
-        /// a second one by hand was the whole bug.
+        /// Keeps <see cref="_id"/> equal to the asset's file GUID, so a duplicated asset can't
+        /// inherit the original's id.
         /// </summary>
         protected virtual void OnValidate()
         {
