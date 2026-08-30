@@ -1,4 +1,5 @@
-﻿using Crookedile.Managers;
+﻿using Sirenix.OdinInspector;
+using Crookedile.Managers;
 using UnityEngine;
 
 namespace Crookedile.Data.Audio
@@ -34,12 +35,14 @@ namespace Crookedile.Data.Audio
         [Header("Pitch (SFX only)")]
         [Tooltip("Base pitch multiplier (1 = normal speed). Ignored when _isMusic is true.")]
         [SerializeField]
+        [HideIf(nameof(_isMusic))]
         private float _pitch = 1f;
 
         [Tooltip(
             "Random ± variance added to pitch each play, for natural variation. 0 = no variance."
         )]
         [SerializeField, Range(0f, 0.5f)]
+        [HideIf(nameof(_isMusic))]
         private float _pitchVariance = 0f;
 
         [Header("Music")]
@@ -54,6 +57,7 @@ namespace Crookedile.Data.Audio
             "Crossfade duration in seconds when switching BGM. 0 = instant swap. Only used when _isMusic is true."
         )]
         [SerializeField]
+        [ShowIf(nameof(_isMusic))]
         private float _musicFadeDuration = 0f;
 
         #region Public API

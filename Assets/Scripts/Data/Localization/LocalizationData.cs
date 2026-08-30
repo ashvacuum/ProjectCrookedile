@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Data.Localization
@@ -38,6 +39,7 @@ namespace Crookedile.Data.Localization
     public class LocalizationData : ScriptableObject
     {
         [SerializeField]
+        [TableList]
         private List<LocalizedString> _strings = new List<LocalizedString>();
 
         private Dictionary<string, LocalizedString> _stringDictionary;

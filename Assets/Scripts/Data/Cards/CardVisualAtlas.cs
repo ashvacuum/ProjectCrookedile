@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Data.Cards
@@ -13,14 +14,17 @@ namespace Crookedile.Data.Cards
         [Header("Atlas Settings")]
         [Tooltip("The texture atlas containing all card art")]
         [SerializeField]
+        [PreviewField(90, ObjectFieldAlignment.Left)]
         private Texture2D atlasTexture;
 
         [Tooltip("Number of cards horizontally in the atlas")]
         [SerializeField]
+        [HorizontalGroup("Grid"), PropertyRange(1, 32)]
         private int columns = 6;
 
         [Tooltip("Number of cards vertically in the atlas")]
         [SerializeField]
+        [HorizontalGroup("Grid"), PropertyRange(1, 32)]
         private int rows = 7;
 
         [Header("Card Mappings")]
@@ -28,6 +32,7 @@ namespace Crookedile.Data.Cards
             "Maps card IDs to their atlas index (0 = top-left, incrementing left-to-right, top-to-bottom)"
         )]
         [SerializeField]
+        [TableList]
         private List<CardAtlasEntry> cardMappings = new List<CardAtlasEntry>();
 
         private Dictionary<string, Rect> uvCache;
