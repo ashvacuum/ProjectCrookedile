@@ -1,4 +1,5 @@
 using Crookedile.Data;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Data.Cards
@@ -13,6 +14,14 @@ namespace Crookedile.Data.Cards
     /// Create via: Assets → Create → Crookedile → Reward Config
     /// </summary>
     [CreateAssetMenu(menuName = "Crookedile/Reward Config", fileName = "RewardConfig")]
+    // Weights are relative, so the authored numbers say nothing on their own — 70/25/5 and
+    // 700/250/50 are the same config. The share line below is what you actually tune against.
+    [InfoBox("@ShareSummary()", InfoMessageType.None, VisibleIf = nameof(IsValid))]
+    [InfoBox(
+        "Every weight is 0 — no card can be offered at all.",
+        InfoMessageType.Error,
+        VisibleIf = "@!IsValid"
+    )]
     public class RewardConfig : ScriptableObject
     {
         [Header("Rarity weights (relative)")]
@@ -52,5 +61,16 @@ namespace Crookedile.Data.Cards
         /// <summary>True if the weights can produce a draw and the offer count is sane.</summary>
         public bool IsValid =>
             (_basicWeight + _enhancedWeight + _rareWeight) > 0f && _defaultOfferCount >= 1;
+
+        /// <summary>The weights as the percentages they actually resolve to.</summary>
+        private string ShareSummary()
+        {
+            float total = _basicWeight + _enhancedWeight + _rareWeight;
+            if (total <= 0f)
+                return "";
+            return $"Basic {_basicWeight / total:P0}   "
+                + $"Enhanced {_enhancedWeight / total:P0}   "
+                + $"Rare {_rareWeight / total:P0}";
+        }
     }
 }

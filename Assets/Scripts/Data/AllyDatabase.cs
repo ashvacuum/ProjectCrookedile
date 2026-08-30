@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Data
@@ -12,10 +13,46 @@ namespace Crookedile.Data
     [CreateAssetMenu(menuName = "Crookedile/Ally Database", fileName = "AllyDatabase")]
     public class AllyDatabase : ScriptableObject
     {
+        // BuildIndex assigns by id, so a duplicate silently replaces the earlier entry.
+        [InfoBox(
+            "@DuplicateWarning()",
+            InfoMessageType.Error,
+            VisibleIf = "@!string.IsNullOrEmpty(DuplicateWarning())"
+        )]
+        [ListDrawerSettings(ListElementLabelName = "AllyName")]
         [SerializeField]
         private List<AllyData> _allies = new List<AllyData>();
 
         public IReadOnlyList<AllyData> Allies => _allies;
+
+        /// <summary>Allies listed twice, or blank rows — both make the index lie.</summary>
+        private string DuplicateWarning()
+        {
+            if (_allies == null)
+                return "";
+
+            var seen = new HashSet<string>();
+            var dupes = new List<string>();
+            int blanks = 0;
+
+            foreach (var ally in _allies)
+            {
+                if (ally == null)
+                {
+                    blanks++;
+                    continue;
+                }
+                if (!seen.Add(ally.Id) && !dupes.Contains(ally.AllyName))
+                    dupes.Add(ally.AllyName);
+            }
+
+            var parts = new List<string>();
+            if (dupes.Count > 0)
+                parts.Add($"listed twice: {string.Join(", ", dupes)} — the later row wins");
+            if (blanks > 0)
+                parts.Add($"{blanks} empty row(s)");
+            return string.Join("; ", parts);
+        }
 
         private Dictionary<string, AllyData> _byId;
 
