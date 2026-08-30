@@ -22,9 +22,9 @@ namespace Crookedile.Data
     /// The single source of truth for per-origin battle data (AP, portrait, passive, resource);
     /// replaced the old OriginStats asset. The Content Audit validates it.
     ///
-    /// Create via: Assets → Create → Crookedile → Origin Database
+    /// Create via: Assets → Create → Crookedile → Database → Origin Database
     /// </summary>
-    [CreateAssetMenu(menuName = "Crookedile/Origin Database", fileName = "OriginDatabase")]
+    [CreateAssetMenu(menuName = "Crookedile/Database/Origin Database", fileName = "OriginDatabase")]
     public class OriginDatabase : ScriptableObject
     {
         [Serializable]

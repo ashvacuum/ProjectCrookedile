@@ -18,9 +18,9 @@ namespace Crookedile.Data
     /// <see cref="Campaign.BattleEncounterData"/> should normally wrap a session of exactly one
     /// round.</para>
     ///
-    /// Create via: Right-click → Crookedile / Battle Session
+    /// Create via: Assets → Create → Crookedile → Battle → Battle Session
     /// </summary>
-    [CreateAssetMenu(fileName = "BattleSession", menuName = "Crookedile/Battle Session")]
+    [CreateAssetMenu(fileName = "BattleSession", menuName = "Crookedile/Battle/Battle Session")]
     public class BattleSession : ScriptableObject
     {
         /// <summary>

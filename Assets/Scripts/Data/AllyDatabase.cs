@@ -8,9 +8,9 @@ namespace Crookedile.Data
     /// Registry of all <see cref="AllyData"/> in the game — the ally pool the run draws from.
     /// Look up by id. DATA SCAFFOLD: ally acquisition/persistence/registration is the future layer.
     ///
-    /// Create via: Assets → Create → Crookedile → Ally Database
+    /// Create via: Assets → Create → Crookedile → Database → Ally Database
     /// </summary>
-    [CreateAssetMenu(menuName = "Crookedile/Ally Database", fileName = "AllyDatabase")]
+    [CreateAssetMenu(menuName = "Crookedile/Database/Ally Database", fileName = "AllyDatabase")]
     public class AllyDatabase : ScriptableObject
     {
         // BuildIndex assigns by id, so a duplicate silently replaces the earlier entry.
@@ -74,5 +74,32 @@ namespace Crookedile.Data
                 BuildIndex();
             return id != null && _byId.TryGetValue(id, out var r) ? r : null;
         }
+
+#if UNITY_EDITOR
+        // Creates the ally beside the database, registers it, and selects it — the same one-click
+        // authoring the encounter pool has, for the same reason.
+        [Button("New Ally", ButtonSizes.Medium)]
+        private void CreateAlly()
+        {
+            string folder = System.IO.Path.GetDirectoryName(
+                UnityEditor.AssetDatabase.GetAssetPath(this)
+            );
+            if (string.IsNullOrEmpty(folder))
+                folder = "Assets";
+
+            var ally = CreateInstance<AllyData>();
+            UnityEditor.AssetDatabase.CreateAsset(
+                ally,
+                UnityEditor.AssetDatabase.GenerateUniqueAssetPath($"{folder}/New Ally.asset")
+            );
+
+            _allies.Add(ally);
+            _byId = null; // rebuilt on next lookup, now that the roster changed
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            UnityEditor.AssetDatabase.SaveAssets();
+            UnityEditor.Selection.activeObject = ally;
+        }
+#endif
     }
 }
