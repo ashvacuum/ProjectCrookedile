@@ -202,16 +202,16 @@ namespace Crookedile.Data.Campaign
         menuName = "Crookedile/Campaign/Encounter Pool",
         fileName = "New Encounter Pool"
     )]
-    // Coverage is the failure this asset is prone to and the one you cannot see by reading the
-    // rows: a day with nothing eligible hands the player an empty map. Surfaced here rather
-    // than only in Content Hub, because here is where the windows get typed.
-    [InfoBox(
-        "@CoverageWarning()",
-        InfoMessageType.Error,
-        VisibleIf = "@!string.IsNullOrEmpty(CoverageWarning())"
-    )]
     public class EncounterPoolData : ScriptableObject
     {
+        // Coverage is the failure this asset is prone to and the one you cannot see by reading
+        // the rows: a day with nothing eligible hands the player an empty map. On the field
+        // rather than the class — Odin resolves @Method() against the declaring instance here.
+        [InfoBox(
+            "@CoverageWarning()",
+            InfoMessageType.Error,
+            VisibleIf = "@!string.IsNullOrEmpty(CoverageWarning())"
+        )]
         [Tooltip("How many days the campaign runs. Drives the Gantt view's column count.")]
         [PropertyRange(1, 30)]
         [SerializeField]

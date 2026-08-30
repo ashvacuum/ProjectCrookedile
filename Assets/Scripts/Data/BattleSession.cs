@@ -35,7 +35,7 @@ namespace Crookedile.Data
             [Tooltip("Enemies present in this fight (1–5). Order = display order.")]
             [ListDrawerSettings(ShowFoldout = false, DraggableItems = true)]
             [ValidateInput(
-                "@enemies != null && enemies.Count > 0 && enemies.TrueForAll(e => e != null)",
+                "@enemies != null && enemies.Count > 0 && !enemies.Contains(null)",
                 "A round with no enemies (or an empty slot) starts a fight against nobody.",
                 InfoMessageType.Error
             )]

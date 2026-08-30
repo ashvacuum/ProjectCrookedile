@@ -14,16 +14,17 @@ namespace Crookedile.Data.Cards
     /// Create via: Assets → Create → Crookedile → Cards → Reward Config
     /// </summary>
     [CreateAssetMenu(menuName = "Crookedile/Cards/Reward Config", fileName = "RewardConfig")]
-    // Weights are relative, so the authored numbers say nothing on their own — 70/25/5 and
-    // 700/250/50 are the same config. The share line below is what you actually tune against.
-    [InfoBox("@ShareSummary()", InfoMessageType.None, VisibleIf = nameof(IsValid))]
-    [InfoBox(
-        "Every weight is 0 — no card can be offered at all.",
-        InfoMessageType.Error,
-        VisibleIf = "@!IsValid"
-    )]
     public class RewardConfig : ScriptableObject
     {
+        // Weights are relative, so the authored numbers say nothing on their own — 70/25/5 and
+        // 700/250/50 are the same config. The share line is what you actually tune against.
+        // On the field rather than the class: Odin resolves @Method() against the instance here.
+        [InfoBox("@ShareSummary()", InfoMessageType.None, VisibleIf = nameof(IsValid))]
+        [InfoBox(
+            "Every weight is 0 — no card can be offered at all.",
+            InfoMessageType.Error,
+            VisibleIf = "@!IsValid"
+        )]
         [Header("Rarity weights (relative)")]
         [Min(0f)]
         [SerializeField]
