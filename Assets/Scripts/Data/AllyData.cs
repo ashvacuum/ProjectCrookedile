@@ -13,9 +13,9 @@ namespace Crookedile.Data
     /// Wired end to end: <c>RecruitAllyOutcome</c> → <c>RunState.Allies</c> → <c>BattleManager</c>
     /// registers the passives each battle. Only content is missing.
     ///
-    /// Create via: Assets → Create → Crookedile → Ally Data
+    /// Create via: Assets → Create → Crookedile → Campaign → Ally
     /// </summary>
-    [CreateAssetMenu(menuName = "Crookedile/Ally Data", fileName = "New Ally")]
+    [CreateAssetMenu(menuName = "Crookedile/Campaign/Ally", fileName = "New Ally")]
     public class AllyData : ScriptableObject
     {
         [ReadOnly]

@@ -11,9 +11,9 @@ namespace Crookedile.Data.Cards
     /// (replace the static RewardWeights lookup with <see cref="WeightFor"/>). The Content Audit
     /// validates the weights are usable.
     ///
-    /// Create via: Assets → Create → Crookedile → Reward Config
+    /// Create via: Assets → Create → Crookedile → Cards → Reward Config
     /// </summary>
-    [CreateAssetMenu(menuName = "Crookedile/Reward Config", fileName = "RewardConfig")]
+    [CreateAssetMenu(menuName = "Crookedile/Cards/Reward Config", fileName = "RewardConfig")]
     // Weights are relative, so the authored numbers say nothing on their own — 70/25/5 and
     // 700/250/50 are the same config. The share line below is what you actually tune against.
     [InfoBox("@ShareSummary()", InfoMessageType.None, VisibleIf = nameof(IsValid))]
