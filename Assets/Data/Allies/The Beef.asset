@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
+  m_Name: The Beef
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
+  _id: dd706fe13c32d174789a094450ec1af5
+  _icon: {fileID: 0}
+  _allyName: The Beef
+  _description: 
+  _rarity: 0
+  _passives:
+  - rid: 1430662125049610336
+  references:
+    version: 2
+    RefIds:
+    - rid: 1430662125049610336
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 1430662125049610337
+        _conditions:
+        - rid: 1430662125049610338
+        _oneShot: 0
+        _effects:
+        - rid: 1430662125049610340
+    - rid: 1430662125049610337
+      type: {class: HostilityChangedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _direction: 1
+    - rid: 1430662125049610338
+      type: {class: NthEventCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _n: 3
+    - rid: 1430662125049610340
+      type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 3
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1

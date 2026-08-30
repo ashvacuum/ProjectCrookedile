@@ -18,7 +18,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: a416833577c45704b94db78550671b37, type: 2}
     - {fileID: 11400000, guid: a416833577c45704b94db78550671b37, type: 2}
     - {fileID: 11400000, guid: a416833577c45704b94db78550671b37, type: 2}
-    - {fileID: 11400000, guid: 2fa6b2b1bc5267e4f8052005db94e5a9, type: 2}
+    - {fileID: 11400000, guid: a416833577c45704b94db78550671b37, type: 2}
     maxTurns: 10
     maxOpinion: 100
     startingOpinion: 50

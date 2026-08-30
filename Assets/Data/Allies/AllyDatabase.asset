@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 619092d448548dc4f9f96906194e3d40, type: 3}
+  m_Name: AllyDatabase
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyDatabase
+  _allies:
+  - {fileID: 11400000, guid: dd706fe13c32d174789a094450ec1af5, type: 2}
+  - {fileID: 11400000, guid: 64b070a5ceb86e24d875114d417dbdb7, type: 2}

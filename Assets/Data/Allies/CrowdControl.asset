@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
+  m_Name: CrowdControl
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
+  _id: 64b070a5ceb86e24d875114d417dbdb7
+  _icon: {fileID: 0}
+  _allyName: Crowd Control
+  _description: 
+  _rarity: 0
+  _passives:
+  - rid: 1430662125049610342
+  references:
+    version: 2
+    RefIds:
+    - rid: 1430662125049610342
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 1430662125049610343
+        _conditions:
+        - rid: 1430662125049610347
+        _oneShot: 0
+        _effects:
+        - rid: 1430662125049610346
+    - rid: 1430662125049610343
+      type: {class: EnemyBecameReceptiveTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 1430662125049610346
+      type: {class: ChangeOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 2
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _bypassSupport: 0
+    - rid: 1430662125049610347
+      type: {class: TurnNumberCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _comparison: 0
+        _turnNumber: 3

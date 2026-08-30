@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1335bd23a43efbe4c9bbe6efff3281e1, type: 3}
-  m_Name: Agitators
+  m_Name: Agitators 2
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.BattleEncounterData
   _id: cd25619a66eeff449aec753c40e8249a
   _displayName: The Agitators 2
