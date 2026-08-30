@@ -1,4 +1,5 @@
 ﻿using System;
+using Sirenix.OdinInspector;
 using System.Collections.Generic;
 using Crookedile.Data.VFX;
 using UnityEngine;
@@ -80,6 +81,7 @@ namespace Crookedile.Data.Audio
 
         #region Inspector Fields
         [Tooltip("One entry per battle trigger. Triggers without an entry are silently ignored.")]
+        [TableList(ShowIndexLabels = false, DefaultExpandedState = true)]
         [SerializeField]
         private Entry[] _entries;
 
