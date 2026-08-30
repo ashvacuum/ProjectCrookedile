@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Crookedile.Data;
 using Crookedile.Data.Enemy;
 using Crookedile.Gameplay.Battle;
 using UnityEditor;
