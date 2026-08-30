@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Data.Cards
@@ -15,54 +16,66 @@ namespace Crookedile.Data.Cards
         [Header("Card Backs")]
         [Tooltip("Default card back used for all cards")]
         [SerializeField]
+        [PreviewField(56, ObjectFieldAlignment.Left)]
         private Sprite _defaultCardBack;
 
         [Tooltip("Card back for Faith Leader origin cards")]
         [SerializeField]
+        [PreviewField(56, ObjectFieldAlignment.Left)]
         private Sprite _faithLeaderCardBack;
 
         [Tooltip("Card back for Nepo Baby origin cards")]
         [SerializeField]
+        [PreviewField(56, ObjectFieldAlignment.Left)]
         private Sprite _nepoBabyCardBack;
 
         [Tooltip("Card back for Actor origin cards")]
         [SerializeField]
+        [PreviewField(56, ObjectFieldAlignment.Left)]
         private Sprite _actorCardBack;
 
         [Header("Card Frames by Type")]
         [Tooltip("Frame for Pressure cards (Green - persuasion, de-escalation)")]
         [SerializeField]
+        [PreviewField(56, ObjectFieldAlignment.Left)]
         private Sprite _pressureFrame;
 
         [Tooltip("Frame for Rhetoric cards (Red - aggressive framing, pressure tactics)")]
         [SerializeField]
+        [PreviewField(56, ObjectFieldAlignment.Left)]
         private Sprite _rhetoricFrame;
 
         [Tooltip("Frame for Policy cards (Blue - policy positions)")]
         [SerializeField]
+        [PreviewField(56, ObjectFieldAlignment.Left)]
         private Sprite _policyFrame;
 
         [Tooltip("Frame for Status cards (Purple - temporary effect cards)")]
         [SerializeField]
+        [PreviewField(56, ObjectFieldAlignment.Left)]
         private Sprite _statusFrame;
 
         [Tooltip(
             "Frame for Scandal cards (Dark crimson - manufactured controversy, unplayable, clogs the hand)"
         )]
         [SerializeField]
+        [PreviewField(56, ObjectFieldAlignment.Left)]
         private Sprite _curseFrame;
 
         [Header("Card Frames by Rarity")]
         [Tooltip("Frame overlay for Basic rarity cards")]
         [SerializeField]
+        [PreviewField(56, ObjectFieldAlignment.Left)]
         private Sprite _basicFrame;
 
         [Tooltip("Frame overlay for Enhanced rarity cards")]
         [SerializeField]
+        [PreviewField(56, ObjectFieldAlignment.Left)]
         private Sprite _enhancedFrame;
 
         [Tooltip("Frame overlay for Rare rarity cards")]
         [SerializeField]
+        [PreviewField(56, ObjectFieldAlignment.Left)]
         private Sprite _rareFrame;
 
         [Header("Upgrade Visuals")]
