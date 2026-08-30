@@ -39,6 +39,10 @@ namespace Crookedile.Data
         private string _allyName;
 
         [VerticalGroup("Ally/Details")]
+        [Tooltip(
+            "Flavour text shown to the player. Leave blank to fall back to the description "
+                + "generated from the passives below, which is always accurate and never drifts."
+        )]
         [TextArea(2, 4)]
         [SerializeField]
         private string _description;
@@ -54,16 +58,63 @@ namespace Crookedile.Data
             "No passives — recruiting this ally would change nothing about the run.",
             InfoMessageType.Warning
         )]
+        // Reads back what the passives below actually do, so a hand-written description can be
+        // checked against the mechanics instead of being taken on trust.
+        [InfoBox("@EditorSafeAutoDescription()", InfoMessageType.None)]
         [SerializeReference]
         [SerializeField]
         private List<BattlePassive> _passives = new List<BattlePassive>();
 
         public string Id => _id;
         public string AllyName => _allyName;
-        public string Description => _description;
         public Sprite Icon => _icon;
         public CardRarity Rarity => _rarity;
         public IReadOnlyList<BattlePassive> Passives => _passives;
+
+        /// <summary>
+        /// What this ally does, assembled from its passives. Generated rather than typed, so it
+        /// cannot drift from the mechanics the way a hand-written line does the moment a passive
+        /// is retuned.
+        /// </summary>
+        public string AutoDescription
+        {
+            get
+            {
+                if (_passives == null || _passives.Count == 0)
+                    return "Does nothing yet.";
+
+                var parts = new List<string>();
+                foreach (var passive in _passives)
+                    if (passive != null)
+                        parts.Add(passive.GetDescription());
+                return parts.Count == 0 ? "Does nothing yet." : string.Join("\n", parts);
+            }
+        }
+
+        /// <summary>
+        /// Shown to the player: the authored flavour when there is any, the generated mechanical
+        /// description otherwise — so an ally is never described as nothing at all.
+        /// </summary>
+        public string Description =>
+            string.IsNullOrWhiteSpace(_description) ? AutoDescription : _description;
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// Guarded wrapper for the inspector InfoBox — one half-authored passive must not break
+        /// the whole asset's inspector. Same affordance as RunOutcome's.
+        /// </summary>
+        private string EditorSafeAutoDescription()
+        {
+            try
+            {
+                return AutoDescription;
+            }
+            catch (System.Exception e)
+            {
+                return $"(description error: {e.GetType().Name})";
+            }
+        }
+#endif
 
 #if UNITY_EDITOR
         /// <summary>Keeps <see cref="_id"/> equal to the asset's file GUID, as EncounterData does.</summary>
