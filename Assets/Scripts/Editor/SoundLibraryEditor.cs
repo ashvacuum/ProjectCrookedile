@@ -44,7 +44,7 @@ namespace Crookedile.Editor
         {
             if (database == null)
                 return;
-            DrawHeader();
+            DrawLibraryHeader();
             DrawViewModeSelector();
             EditorGUILayout.Space(10);
 
@@ -63,7 +63,7 @@ namespace Crookedile.Editor
         }
 
         #region Header
-        private void DrawHeader()
+        private void DrawLibraryHeader()
         {
             SirenixEditorGUI.BeginBox();
             SirenixEditorGUI.BeginBoxHeader();
