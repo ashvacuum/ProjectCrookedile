@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
   m_Name: Firebrand
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
-  _id: 615c59ca-7d04-40ed-ad43-b48bc2182208
+  _id: a416833577c45704b94db78550671b37
   _enemyName: Firebrand
   _portrait: {fileID: 21300000, guid: 5c87b4bbe104e964599ffb6b3c7926df, type: 3}
   _startingHostility: 2

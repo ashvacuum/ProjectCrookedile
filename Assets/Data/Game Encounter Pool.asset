@@ -51,6 +51,16 @@ MonoBehaviour:
     _requirements: []
     _boostIf: []
     _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: fe6947311c60928499dfb7c1fd5f6ee5, type: 2}
+    _firstDay: 3
+    _lastDay: 7
+    _weight: 1
+    _oncePerRun: 0
+    _guaranteed: 0
+    _requirements:
+    - rid: 1430662088476328028
+    _boostIf: []
+    _boostMultiplier: 2
   references:
     version: 2
     RefIds:
@@ -59,3 +69,8 @@ MonoBehaviour:
       data:
         _negate: 1
         _amount: 50
+    - rid: 1430662088476328028
+      type: {class: HasFlag, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 0
+        _flag: 
