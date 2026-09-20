@@ -1,13 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
+using Crookedile.Data;
 using Crookedile.Data.Campaign;
+using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using UnityEngine;
 
 namespace Crookedile.EditorTools
 {
     /// <summary>
-    /// Encounter Designer — two views over one <see cref="EncounterPoolData"/>.
+    /// Encounter Designer — several views over one <see cref="EncounterPoolData"/>.
     ///
     /// <para><b>Timeline</b> — a day-by-day Gantt. Each entry is a bar spanning the days it can
     /// appear on, so gaps and pile-ups are visible at a glance instead of inferred from a list of
@@ -17,12 +19,18 @@ namespace Crookedile.EditorTools
     /// same call the campaign makes at runtime).</para>
     ///
     /// <para><b>Dependencies</b> — the unlock graph. Nodes are encounters, laid out left to right
-    /// by how deep they sit in a chain; a solid arrow is a hard gate, a dotted one a weight
-    /// boost. The Timeline can't express this: a gated entry's bar shows when it *could* appear,
-    /// not whether it will, which is why those rows are tagged <c>[dep]</c> there.</para>
+    /// by how deep they sit in a chain; a solid arrow is a hard gate, a dotted one a nudge. Edges
+    /// are derived, never drawn by hand: visited-gates, weight boosts, <c>GoToEncounter</c>
+    /// chains, and flag writes matched to flag reads by name. The Timeline can't express this: a
+    /// gated entry's bar shows when it *could* appear, not whether it will, which is why those
+    /// rows are tagged <c>[dep]</c> there.</para>
     ///
-    /// Both views are read-only. Authoring stays in the pool asset's inspector, where Odin's
-    /// type-picker already handles the polymorphic requirement lists.
+    /// <para><b>Flags</b> — the same string-matching, listed instead of drawn, because a flag
+    /// only half-exists: a misspelt name on either side is a gate that never opens and nothing
+    /// anywhere complains. Every writer and reader of every flag in the project, with the
+    /// unpaired ones called out.</para>
+    ///
+    /// The Authoring tab embeds Odin inspectors; the Table tab also supports bulk scheduling edits.
     ///
     /// Menu: Crookedile → Encounter Designer.
     /// </summary>
@@ -47,11 +55,24 @@ namespace Crookedile.EditorTools
         private enum Tab
         {
             Timeline,
+            Table,
             Dependencies,
+            Flags,
             Simulate,
+            Travel,
+            Authoring,
         }
 
-        private static readonly string[] TabNames = { "Timeline", "Dependencies", "Simulate" };
+        private static readonly string[] TabNames =
+        {
+            "Timeline",
+            "Table",
+            "Dependencies",
+            "Flags",
+            "Simulate",
+            "Travel",
+            "Authoring",
+        };
 
         private EncounterPoolData _pool;
         private Tab _tab;
@@ -79,26 +100,54 @@ namespace Crookedile.EditorTools
                 );
                 return;
             }
+            var previousTab = _tab;
+            _tab = (Tab)GUILayout.Toolbar((int)_tab, TabNames, GUILayout.Height(22f));
+            if (previousTab == Tab.Authoring && _tab != previousTab)
+            {
+                InvalidatePreviews();
+            }
+
+            EditorGUILayout.Space(4f);
+
+            if (_tab == Tab.Authoring)
+            {
+                DrawAuthoringTab();
+                return;
+            }
+
             if (_pool.Entries.Count == 0)
             {
                 EditorGUILayout.HelpBox(
-                    "This pool has no entries. Add them in the pool asset's inspector.",
+                    "This pool has no entries. Use Authoring to create events or battles.",
                     MessageType.Warning
                 );
                 return;
             }
 
-            _tab = (Tab)GUILayout.Toolbar((int)_tab, TabNames, GUILayout.Height(22f));
-            EditorGUILayout.Space(4f);
-
+            if (_tab == Tab.Table)
+            {
+                DrawTableTab();
+                return;
+            }
             if (_tab == Tab.Dependencies)
             {
                 DrawDependencyTab();
                 return;
             }
+            if (_tab == Tab.Flags)
+            {
+                DrawFlagsTab();
+                return;
+            }
             if (_tab == Tab.Simulate)
             {
                 DrawSimulateTab();
+                return;
+            }
+
+            if (_tab == Tab.Travel)
+            {
+                DrawTravelTab();
                 return;
             }
 
@@ -126,10 +175,118 @@ namespace Crookedile.EditorTools
             EditorGUILayout.EndScrollView();
         }
 
+        #region Odin authoring
+        private UnityEngine.Object _authoringTarget;
+        private UnityEditor.Editor _authoringEditor;
+        private Vector2 _authoringScroll;
+
+        private void OnEnable()
+        {
+            Undo.undoRedoPerformed += InvalidatePreviews;
+        }
+
+        private void OnDisable()
+        {
+            Undo.undoRedoPerformed -= InvalidatePreviews;
+            if (_authoringEditor != null)
+            {
+                DestroyImmediate(_authoringEditor);
+            }
+        }
+
+        private void InvalidatePreviews()
+        {
+            _rolled = null;
+            _sim = null;
+            _flagUses = null;
+            Repaint();
+        }
+
+        private void EditAsset(UnityEngine.Object asset)
+        {
+            if (asset == null)
+            {
+                return;
+            }
+
+            _authoringTarget = asset;
+            _authoringScroll = Vector2.zero;
+            _tab = Tab.Authoring;
+            Repaint();
+        }
+
+        private void DrawAuthoringTab()
+        {
+            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            if (GUILayout.Button("Pool", EditorStyles.toolbarButton))
+            {
+                EditAsset(_pool);
+            }
+
+            using (new EditorGUI.DisabledScope(_pool.Travel == null))
+            {
+                if (GUILayout.Button("Travel network", EditorStyles.toolbarButton))
+                {
+                    EditAsset(_pool.Travel);
+                }
+            }
+
+            if (GUILayout.Button("New district", EditorStyles.toolbarButton))
+            {
+                var district = Crookedile.Utilities.AuthoringAssets.CreateBeside<DistrictData>(_pool, "New District");
+                Undo.RegisterCreatedObjectUndo(district, "Create district");
+                EditAsset(district);
+            }
+
+            if (GUILayout.Button("New ally", EditorStyles.toolbarButton))
+            {
+                var ally = Crookedile.Utilities.AuthoringAssets.CreateBeside<AllyData>(_pool, "New Ally");
+                Undo.RegisterCreatedObjectUndo(ally, "Create ally");
+                EditAsset(ally);
+            }
+
+            if (GUILayout.Button("Save assets", EditorStyles.toolbarButton))
+            {
+                AssetDatabase.SaveAssets();
+            }
+
+            EditorGUILayout.EndHorizontal();
+            if (_authoringTarget == null)
+            {
+                _authoringTarget = _pool;
+            }
+
+            var selected = EditorGUILayout.ObjectField("Editing asset", _authoringTarget, typeof(ScriptableObject), false);
+            if (selected != null && selected != _authoringTarget)
+            {
+                EditAsset(selected);
+            }
+
+            EditorGUILayout.HelpBox("Edit the original asset here with Odin. Expand district and network references to edit them inline. "
+                + "Choose an encounter from Table, Timeline, or Travel to open it here.", MessageType.Info);
+            UnityEditor.Editor.CreateCachedEditor(_authoringTarget, typeof(OdinEditor), ref _authoringEditor);
+            _authoringScroll = EditorGUILayout.BeginScrollView(_authoringScroll);
+            var previousSelection = Selection.activeObject;
+            EditorGUI.BeginChangeCheck();
+            _authoringEditor.OnInspectorGUI();
+            if (EditorGUI.EndChangeCheck())
+            {
+                InvalidatePreviews();
+            }
+
+            EditorGUILayout.EndScrollView();
+            if (Selection.activeObject != previousSelection && Selection.activeObject is EncounterData encounter)
+            {
+                EditAsset(encounter);
+            }
+        }
+        #endregion
+
         #region Toolbar
         private void DrawToolbar()
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            var previousPool = _pool;
             _pool = (EncounterPoolData)
                 EditorGUILayout.ObjectField(
                     _pool,
@@ -137,6 +294,11 @@ namespace Crookedile.EditorTools
                     false,
                     GUILayout.Width(220f)
                 );
+            if (_pool != previousPool)
+            {
+                _authoringTarget = _pool;
+                InvalidatePreviews();
+            }
 
             GUILayout.Space(12f);
             GUILayout.Label("Seed", EditorStyles.miniLabel, GUILayout.Width(32f));
@@ -239,10 +401,10 @@ namespace Crookedile.EditorTools
                     continue;
                 }
 
-                // Click the label to ping the asset — the usual reason you're looking at this
+                // Click the label to edit the asset — the usual reason you're looking at this
                 // row is to go edit the thing it names.
                 if (GUI.Button(labelRect, entry.Encounter.name, EditorStyles.label))
-                    EditorGUIUtility.PingObject(entry.Encounter);
+                    EditAsset(entry.Encounter);
 
                 int last = entry.LastDay <= 0 ? _pool.Days : Mathf.Min(entry.LastDay, _pool.Days);
                 if (entry.FirstDay > last)
@@ -417,7 +579,8 @@ namespace Crookedile.EditorTools
 
             // Depth = longest hard-requirement chain leading here. Gives left-to-right reading
             // order for free: day-one content on the left, things it unlocks to the right.
-            var depth = ComputeDepths(entries);
+            var edges = BuildEdges(entries);
+            var depth = ComputeDepths(entries, edges);
             var positions = LayoutNodes(entries, depth);
 
             int columns = depth.Values.DefaultIfEmpty(0).Max() + 1;
@@ -427,43 +590,47 @@ namespace Crookedile.EditorTools
             _graphScroll = EditorGUILayout.BeginScrollView(_graphScroll);
             Rect canvas = GUILayoutUtility.GetRect(canvasW, canvasH);
 
-            DrawEdges(entries, positions, canvas);
+            DrawEdges(edges, positions, canvas);
             DrawNodes(entries, positions, canvas);
             HandleNodeDrag(entries, positions, canvas);
 
             EditorGUILayout.EndScrollView();
             EditorGUILayout.LabelField(
-                "Solid arrow = hard gate (target can't appear until source is visited)    "
-                    + "Dotted = weight boost    Drag nodes to untangle (not saved)",
+                "Yellow = visited gate    Blue = weight boost    Green = leads-to chain    "
+                    + "Pink = flag, named on the curve",
+                EditorStyles.miniLabel
+            );
+            EditorGUILayout.LabelField(
+                "Solid = hard gate    Dotted = a nudge, a negated check, or a branch inside one "
+                    + "option    Drag nodes to untangle (not saved)",
                 EditorStyles.miniLabel
             );
         }
 
         /// <summary>
-        /// Longest chain of <c>HasVisitedEncounter</c> requirements ending at each entry.
-        /// Iterative relaxation rather than recursion so a cyclic authoring mistake settles
-        /// instead of blowing the stack.
+        /// Longest chain of hard edges ending at each entry. Iterative relaxation rather than
+        /// recursion so a cyclic authoring mistake settles instead of blowing the stack.
         /// </summary>
-        private Dictionary<string, int> ComputeDepths(List<EncounterPoolEntry> entries)
+        private Dictionary<string, int> ComputeDepths(
+            List<EncounterPoolEntry> entries,
+            List<Edge> edges
+        )
         {
             var depth = entries.ToDictionary(e => e.Id, _ => 0);
-            var byId = entries.ToDictionary(e => e.Id, e => e);
+            var hard = edges.Where(e => e.Solid).ToList();
 
             for (int pass = 0; pass < entries.Count; pass++)
             {
                 bool changed = false;
-                foreach (var entry in entries)
+                foreach (var edge in hard)
                 {
-                    foreach (string sourceId in HardSources(entry))
+                    if (!depth.ContainsKey(edge.From) || !depth.ContainsKey(edge.To))
+                        continue;
+                    int candidate = depth[edge.From] + 1;
+                    if (candidate > depth[edge.To])
                     {
-                        if (!byId.ContainsKey(sourceId))
-                            continue;
-                        int candidate = depth[sourceId] + 1;
-                        if (candidate > depth[entry.Id])
-                        {
-                            depth[entry.Id] = candidate;
-                            changed = true;
-                        }
+                        depth[edge.To] = candidate;
+                        changed = true;
                     }
                 }
                 if (!changed)
@@ -494,34 +661,14 @@ namespace Crookedile.EditorTools
             return positions;
         }
 
-        private void DrawEdges(
-            List<EncounterPoolEntry> entries,
-            Dictionary<string, Rect> positions,
-            Rect canvas
-        )
+        private void DrawEdges(List<Edge> edges, Dictionary<string, Rect> positions, Rect canvas)
         {
-            foreach (var entry in entries)
+            foreach (var edge in edges)
             {
-                DrawEdgeSet(entry, HardSources(entry), positions, canvas, EdgeHard, solid: true);
-                DrawEdgeSet(entry, BoostSources(entry), positions, canvas, EdgeBoost, solid: false);
-            }
-        }
-
-        private void DrawEdgeSet(
-            EncounterPoolEntry target,
-            IEnumerable<string> sourceIds,
-            Dictionary<string, Rect> positions,
-            Rect canvas,
-            Color color,
-            bool solid
-        )
-        {
-            if (!positions.TryGetValue(target.Id, out var toRect))
-                return;
-
-            foreach (string sourceId in sourceIds)
-            {
-                if (!positions.TryGetValue(sourceId, out var fromRect))
+                if (
+                    !positions.TryGetValue(edge.From, out var fromRect)
+                    || !positions.TryGetValue(edge.To, out var toRect)
+                )
                     continue;
 
                 Vector3 from = new Vector3(canvas.x + fromRect.xMax, canvas.y + fromRect.center.y);
@@ -533,17 +680,40 @@ namespace Crookedile.EditorTools
                     to,
                     from + Vector3.right * tangent,
                     to + Vector3.left * tangent,
-                    color,
+                    edge.Color,
                     // Texture then width — a null texture draws the default solid line, and
-                    // the dotted variant is what distinguishes a boost edge from a hard gate.
-                    solid ? null : EditorGUIUtility.whiteTexture,
-                    solid ? 2.5f : 1.5f
+                    // the dotted variant is what distinguishes a soft nudge from a hard gate.
+                    edge.Solid ? null : EditorGUIUtility.whiteTexture,
+                    edge.Solid ? 2.5f : 1.5f
                 );
 
                 // Arrowhead, so direction reads without tracing the curve back.
-                Handles.color = color;
+                Handles.color = edge.Color;
                 Handles.DrawSolidDisc(to, Vector3.forward, 3.5f);
+
+                if (string.IsNullOrEmpty(edge.Label))
+                    continue;
+
+                // Flag names are the whole point of the edge — without the name on the curve
+                // you can see that two encounters are linked but not by what.
+                Vector3 mid = (from + to) * 0.5f + Vector3.up * -8f;
+                var labelRect = new Rect(mid.x - 55f, mid.y - 8f, 110f, 16f);
+                EditorGUI.DrawRect(labelRect, new Color(0.15f, 0.15f, 0.15f, 0.85f));
+                GUI.Label(labelRect, edge.Label, EdgeLabelStyle(edge.Color));
             }
+        }
+
+        private static GUIStyle _edgeLabel;
+
+        private static GUIStyle EdgeLabelStyle(Color color)
+        {
+            _edgeLabel ??= new GUIStyle(EditorStyles.miniLabel)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                clipping = TextClipping.Clip,
+            };
+            _edgeLabel.normal.textColor = color;
+            return _edgeLabel;
         }
 
         private void DrawNodes(
@@ -578,7 +748,7 @@ namespace Crookedile.EditorTools
                 );
 
                 if (GUI.Button(rect, GUIContent.none, GUIStyle.none))
-                    EditorGUIUtility.PingObject(entry.Encounter);
+                    EditAsset(entry.Encounter);
             }
         }
 
@@ -618,23 +788,438 @@ namespace Crookedile.EditorTools
             }
         }
 
-        /// <summary>Encounter ids this entry is hard-gated behind.</summary>
-        private static IEnumerable<string> HardSources(EncounterPoolEntry entry) =>
-            VisitedIds(entry.Requirements);
-
-        /// <summary>Encounter ids that boost this entry's weight.</summary>
-        private static IEnumerable<string> BoostSources(EncounterPoolEntry entry) =>
-            VisitedIds(entry.BoostIf);
-
-        private static IEnumerable<string> VisitedIds(IReadOnlyList<RunRequirement> reqs)
+        /// <summary>One arrow: <c>From</c> has to happen for <c>To</c> to be reachable, or likelier.</summary>
+        private readonly struct Edge
         {
-            foreach (var req in reqs)
-                if (req is HasVisitedEncounter v && v.Encounter != null)
-                    yield return v.Encounter.ID;
+            public readonly string From;
+            public readonly string To;
+            public readonly Color Color;
+
+            /// <summary>Solid = hard gate. Dotted = a nudge, or a branch inside one option.</summary>
+            public readonly bool Solid;
+
+            /// <summary>Drawn at the curve's midpoint. Empty for edges the legend already explains.</summary>
+            public readonly string Label;
+
+            public Edge(string from, string to, Color color, bool solid, string label = "")
+            {
+                From = from;
+                To = to;
+                Color = color;
+                Solid = solid;
+                Label = label;
+            }
+        }
+
+        /// <summary>
+        /// Every ordering constraint the pool encodes, in one pass: visited-gates, weight
+        /// boosts, <c>GoToEncounter</c> chains, and — the invisible ones — flag writes paired
+        /// to flag reads by name. A flag edge is a guess by string match, which is exactly what
+        /// the runtime does too; the Flags tab is where the unmatched names get named.
+        /// </summary>
+        private List<Edge> BuildEdges(List<EncounterPoolEntry> entries)
+        {
+            var edges = new List<Edge>();
+            var known = entries.Select(e => e.Id).ToHashSet();
+
+            // Flag name → ids of pool entries whose options set it. Cleared flags are writes
+            // too, but a clear can't unlock anything, so they don't produce edges.
+            var writers = new Dictionary<string, List<string>>();
+            foreach (var entry in entries)
+                foreach (var outcome in OptionOutcomes(entry))
+                    if (outcome is SetFlagOutcome s && !s.Clears && !string.IsNullOrWhiteSpace(s.Flag))
+                    {
+                        if (!writers.TryGetValue(s.Flag.Trim(), out var list))
+                            writers[s.Flag.Trim()] = list = new List<string>();
+                        list.Add(entry.Id);
+                    }
+
+            foreach (var entry in entries)
+            {
+                AddRequirementEdges(entry.Requirements, entry.Id, solid: true, "");
+                AddRequirementEdges(entry.BoostIf, entry.Id, solid: false, "");
+
+                if (!(entry.Encounter is EventEncounterData ev))
+                    continue;
+
+                foreach (var option in ev.Options)
+                {
+                    if (option == null)
+                        continue;
+
+                    // An option's own requirements gate that branch, not the encounter's
+                    // appearance — dotted, so it never reads as a hard unlock.
+                    AddRequirementEdges(option.Requirements, entry.Id, solid: false, "opt");
+
+                    foreach (var outcome in option.Outcomes)
+                        if (
+                            outcome is GoToEncounterOutcome go
+                            && go.Target != null
+                            && known.Contains(go.Target.ID)
+                        )
+                            edges.Add(new Edge(entry.Id, go.Target.ID, EdgeChain, solid: true));
+                }
+            }
+
+            return edges;
+
+            void AddRequirementEdges(
+                IReadOnlyList<RunRequirement> reqs,
+                string targetId,
+                bool solid,
+                string prefix
+            )
+            {
+                foreach (var req in reqs)
+                {
+                    if (req is HasVisitedEncounter v && v.Encounter != null)
+                    {
+                        if (known.Contains(v.Encounter.ID))
+                            edges.Add(
+                                new Edge(
+                                    v.Encounter.ID,
+                                    targetId,
+                                    solid ? EdgeHard : EdgeBoost,
+                                    solid && !req.Negated,
+                                    Join(prefix, req.Negated ? "not visited" : "")
+                                )
+                            );
+                    }
+                    else if (req is HasFlag f && !string.IsNullOrWhiteSpace(f.Flag))
+                    {
+                        if (!writers.TryGetValue(f.Flag.Trim(), out var sources))
+                            continue;
+                        foreach (string sourceId in sources)
+                        {
+                            if (sourceId == targetId)
+                                continue;
+                            edges.Add(
+                                new Edge(
+                                    sourceId,
+                                    targetId,
+                                    EdgeFlag,
+                                    solid && !req.Negated,
+                                    Join(prefix, (req.Negated ? "not " : "") + f.Flag.Trim())
+                                )
+                            );
+                        }
+                    }
+                }
+            }
+
+            static string Join(string prefix, string label) =>
+                string.IsNullOrEmpty(prefix) ? label
+                : string.IsNullOrEmpty(label) ? prefix
+                : $"{prefix}: {label}";
+        }
+
+        private static IEnumerable<RunOutcome> OptionOutcomes(EncounterPoolEntry entry)
+        {
+            if (!(entry.Encounter is EventEncounterData ev))
+                yield break;
+            foreach (var option in ev.Options)
+            {
+                if (option == null)
+                    continue;
+                foreach (var outcome in option.Outcomes)
+                    yield return outcome;
+            }
         }
 
         private static readonly Color EdgeHard = new Color(0.85f, 0.8f, 0.4f);
         private static readonly Color EdgeBoost = new Color(0.45f, 0.75f, 0.95f);
+        private static readonly Color EdgeChain = new Color(0.45f, 0.85f, 0.5f);
+        private static readonly Color EdgeFlag = new Color(0.9f, 0.5f, 0.9f);
+
+        #endregion
+
+        #region Table
+        // Column widths, left to right. One array so the header and the rows can't drift apart —
+        // they did, twice, while this was two sets of literals.
+        private const float ColName = 168f;
+        private const float ColType = 52f;
+        private const float ColDay = 40f;
+        private const float ColWeight = 52f;
+        private const float ColResolved = 44f;
+        private const float ColFlag = 30f;
+        private const float ColDelete = 22f;
+        private const float CellGap = 4f;
+
+        private Vector2 _tableScroll;
+
+        /// <summary>Live view of <see cref="_pool"/>. Rebuilt when the assigned pool changes.</summary>
+        private SerializedObject _poolSo;
+        private EncounterPoolData _soTarget;
+
+        /// <summary>
+        /// The pool as an editable grid — the numbers a designer retunes in bulk (day window,
+        /// weight, guaranteed) on one line each, instead of one expanded inspector row at a time.
+        ///
+        /// Edits go through <see cref="SerializedObject"/> rather than the entry's own fields,
+        /// which is what buys Undo, the dirty flag and multi-object semantics for free. The
+        /// requirement lists deliberately aren't editable here: they're polymorphic
+        /// <c>[SerializeReference]</c> lists that need Odin's type picker, so this shows the
+        /// count and opens the asset in the embedded Odin Authoring tab.
+        /// </summary>
+        private void DrawTableTab()
+        {
+            if (_poolSo == null || _soTarget != _pool)
+            {
+                _poolSo = new SerializedObject(_pool);
+                _soTarget = _pool;
+            }
+            _poolSo.Update();
+
+            var entries = _poolSo.FindProperty("_entries");
+            if (entries == null)
+            {
+                EditorGUILayout.HelpBox(
+                    "Couldn't find the pool's _entries field — the field was renamed.",
+                    MessageType.Error
+                );
+                return;
+            }
+
+            DrawTableHeader();
+
+            _tableScroll = EditorGUILayout.BeginScrollView(_tableScroll);
+            int deleteAt = -1;
+            for (int i = 0; i < entries.arraySize; i++)
+                if (DrawTableRow(entries.GetArrayElementAtIndex(i), i))
+                    deleteAt = i;
+            EditorGUILayout.EndScrollView();
+
+            // Deferred: mutating the array mid-loop invalidates every property handle after it.
+            if (deleteAt >= 0)
+                entries.DeleteArrayElementAtIndex(deleteAt);
+
+            if (_poolSo.ApplyModifiedProperties())
+            {
+                InvalidatePreviews();
+            }
+
+            EditorGUILayout.Space(4f);
+            EditorGUILayout.LabelField(
+                "Last 0 = no end day    Weight -1 = inherit the encounter's DropWeight (grey "
+                    + "number is what it resolves to)    G = guaranteed    1× = once per run",
+                EditorStyles.miniLabel
+            );
+        }
+
+        private void DrawTableHeader()
+        {
+            Rect r = EditorGUILayout.GetControlRect(GUILayout.Height(18f));
+            EditorGUI.DrawRect(r, new Color(0.16f, 0.16f, 0.16f, 0.6f));
+
+            float x = r.x + 5f;
+            Header(ref x, ColName, "Encounter");
+            Header(ref x, ColType, "Type");
+            Header(ref x, ColDay, "First");
+            Header(ref x, ColDay, "Last");
+            Header(ref x, ColWeight, "Weight");
+            Header(ref x, ColResolved, "= w");
+            Header(ref x, ColFlag, "G");
+            Header(ref x, ColFlag, "1×");
+            Header(ref x, 120f, "Dependencies");
+
+            void Header(ref float cursor, float width, string label)
+            {
+                GUI.Label(new Rect(cursor, r.y, width, 16f), label, EditorStyles.miniBoldLabel);
+                cursor += width + CellGap;
+            }
+        }
+
+        /// <summary>Draws one row. Returns true when its delete button was pressed.</summary>
+        private bool DrawTableRow(SerializedProperty entry, int index)
+        {
+            var encounter = entry.FindPropertyRelative("_encounter");
+            var firstDay = entry.FindPropertyRelative("_firstDay");
+            var lastDay = entry.FindPropertyRelative("_lastDay");
+            var weight = entry.FindPropertyRelative("_weight");
+            var guaranteed = entry.FindPropertyRelative("_guaranteed");
+            var oncePerRun = entry.FindPropertyRelative("_oncePerRun");
+
+            Rect row = EditorGUILayout.GetControlRect(GUILayout.Height(22f));
+            if (Event.current.type == EventType.Repaint)
+                EditorGUI.DrawRect(
+                    row,
+                    index % 2 == 1
+                        ? new Color(0.25f, 0.25f, 0.25f, 0.3f)
+                        : new Color(0.2f, 0.2f, 0.2f, 0.2f)
+                );
+
+            var asset = encounter.objectReferenceValue as EncounterData;
+            float x = row.x + 5f;
+            float y = row.y + 2f;
+
+            // Name doubles as the way in: the fields this table can't edit live on that asset.
+            var nameRect = new Rect(x, y, ColName, 18f);
+            if (asset == null)
+            {
+                EditorGUI.PropertyField(nameRect, encounter, GUIContent.none);
+            }
+            else if (GUI.Button(nameRect, HasVisitedEncounter.Label(asset), BarLabel))
+            {
+                EditAsset(asset);
+            }
+            x += ColName + CellGap;
+
+            DrawBadge(
+                new Rect(x, y, ColType, 18f),
+                asset is BattleEncounterData ? "Battle"
+                    : asset is EventEncounterData ? "Event"
+                    : "—",
+                BarColor(asset)
+            );
+            x += ColType + CellGap;
+
+            EditorGUI.PropertyField(new Rect(x, y, ColDay, 18f), firstDay, GUIContent.none);
+            x += ColDay + CellGap;
+            EditorGUI.PropertyField(new Rect(x, y, ColDay, 18f), lastDay, GUIContent.none);
+            x += ColDay + CellGap;
+
+            EditorGUI.PropertyField(new Rect(x, y, ColWeight, 18f), weight, GUIContent.none);
+            x += ColWeight + CellGap;
+
+            // What the row actually draws at, since -1 means "ask the encounter". Without this
+            // the weight column reads as -1 and tells you nothing about the odds.
+            float resolved =
+                asset == null ? 0f
+                : weight.floatValue < 0f ? asset.DropWeight
+                : weight.floatValue;
+            GUI.Label(
+                new Rect(x, y, ColResolved, 18f),
+                resolved <= 0f ? "—" : $"{resolved:0.##}",
+                EditorStyles.miniLabel
+            );
+            x += ColResolved + CellGap;
+
+            EditorGUI.PropertyField(new Rect(x, y, ColFlag, 18f), guaranteed, GUIContent.none);
+            x += ColFlag + CellGap;
+            EditorGUI.PropertyField(new Rect(x, y, ColFlag, 18f), oncePerRun, GUIContent.none);
+            x += ColFlag + CellGap;
+
+            // Read-only on purpose — see the tab summary.
+            var poolEntry = index < _pool.Entries.Count ? _pool.Entries[index] : null;
+            string deps =
+                poolEntry == null || !poolEntry.HasDependencies
+                    ? ""
+                    : poolEntry.DescribeDependencies();
+            GUI.Label(
+                new Rect(x, y, row.xMax - x - ColDelete - CellGap - 5f, 18f),
+                deps,
+                EditorStyles.miniLabel
+            );
+
+            var deleteRect = new Rect(row.xMax - ColDelete - 5f, y, ColDelete, 18f);
+            return GUI.Button(deleteRect, "−", EditorStyles.miniButton);
+        }
+
+        private static void DrawBadge(Rect rect, string label, Color color)
+        {
+            if (Event.current.type == EventType.Repaint)
+                EditorGUI.DrawRect(rect, color);
+            GUI.Label(rect, label, BadgeLabel);
+        }
+
+        private static GUIStyle _badgeLabel;
+        private static GUIStyle BadgeLabel =>
+            _badgeLabel ??= new GUIStyle(EditorStyles.miniLabel)
+            {
+                normal = { textColor = Color.white },
+                alignment = TextAnchor.MiddleCenter,
+                clipping = TextClipping.Clip,
+            };
+
+        #endregion
+
+        #region Flags
+        // The index walks every encounter asset, so it is built once and refreshed by hand
+        // rather than on each repaint. Rescan after editing an option's outcomes.
+        private List<FlagUse> _flagUses;
+        private Vector2 _flagScroll;
+
+        /// <summary>
+        /// A flag has no asset of its own — it exists only as matching strings in two lists,
+        /// and a mismatch silently makes content unreachable for the whole run. This pairs the
+        /// writers and readers by name and calls out the halves that found no partner.
+        /// </summary>
+        private void DrawFlagsTab()
+        {
+            _flagUses ??= FlagIndex.Build(_pool);
+
+            EditorGUILayout.BeginHorizontal();
+            var groups = _flagUses.GroupBy(u => u.Flag).OrderBy(g => g.Key).ToList();
+            EditorGUILayout.LabelField(
+                $"{groups.Count} flag{(groups.Count == 1 ? "" : "s")} across every encounter asset",
+                EditorStyles.boldLabel
+            );
+            if (GUILayout.Button("Rescan", EditorStyles.miniButton, GUILayout.Width(70f)))
+                _flagUses = FlagIndex.Build(_pool);
+            EditorGUILayout.EndHorizontal();
+
+            if (groups.Count == 0)
+            {
+                EditorGUILayout.HelpBox(
+                    "No flags authored yet. A SetFlagOutcome on an event option writes one; a "
+                        + "HasFlag requirement on a later option or pool row reads it.",
+                    MessageType.Info
+                );
+                return;
+            }
+
+            var setNames = groups
+                .Where(g => g.Any(u => u.Kind == FlagUseKind.Set))
+                .Select(g => g.Key)
+                .ToList();
+
+            _flagScroll = EditorGUILayout.BeginScrollView(_flagScroll);
+            foreach (var group in groups)
+            {
+                bool isSet = group.Any(u => u.Kind == FlagUseKind.Set);
+                bool isRead = group.Any(u => !u.IsWrite);
+
+                EditorGUILayout.Space(6f);
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(group.Key, EditorStyles.boldLabel, GUILayout.Width(220f));
+
+                if (group.Key == FlagIndex.Blank)
+                    EditorGUILayout.LabelField("blank name — does nothing at runtime", ErrorLabel);
+                else if (!isSet)
+                {
+                    string near = FlagIndex.ClosestMatch(group.Key, setNames);
+                    EditorGUILayout.LabelField(
+                        near == null
+                            ? "read but never set — this gate can never open"
+                            : $"read but never set — did you mean \"{near}\"?",
+                        ErrorLabel
+                    );
+                }
+                else if (!isRead)
+                    EditorGUILayout.LabelField("set but never read — nothing gates on it yet");
+                EditorGUILayout.EndHorizontal();
+
+                foreach (var use in group.OrderBy(u => u.IsWrite ? 0 : 1))
+                {
+                    string verb = use.Kind switch
+                    {
+                        FlagUseKind.Set => "SET",
+                        FlagUseKind.Clear => "CLEAR",
+                        FlagUseKind.ReadNot => "READ NOT",
+                        _ => "READ",
+                    };
+                    string owner = use.Owner == null ? "(missing)" : use.Owner.name;
+                    if (
+                        GUILayout.Button(
+                            $"    {verb,-9}{owner} — {use.Where}",
+                            EditorStyles.miniLabel
+                        )
+                    )
+                        EditAsset(use.Owner);
+                }
+            }
+            EditorGUILayout.EndScrollView();
+        }
 
         #endregion
 
@@ -662,6 +1247,7 @@ namespace Crookedile.EditorTools
 
         private void DrawSimulateTab()
         {
+            DrawPreviewAllies();
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
             GUILayout.Label("Runs", EditorStyles.miniLabel, GUILayout.Width(34f));
             _runs = Mathf.Clamp(
@@ -686,7 +1272,8 @@ namespace Crookedile.EditorTools
             EditorGUILayout.HelpBox(
                 "Draws are made with no RunState, so hard requirements pass and weight boosts "
                     + "never fire — gated content shows up here as if it were always available. "
-                    + "Treat this as the ceiling on variety, not the lived run.",
+                    + "Affordability visits the earliest-finishing reachable event next, including travel and waiting. "
+                    + "It does not apply event outcomes or the mandatory boss fallback.",
                 MessageType.Info
             );
 
@@ -742,7 +1329,7 @@ namespace Crookedile.EditorTools
                     var picks = _pool.DrawForDay(day, _perDay, seed, consumed);
 
                     result.OfferedByDay[day - 1] += picks.Count;
-                    result.AffordableByDay[day - 1] += Affordable(picks, _hoursPerDay);
+                    result.AffordableByDay[day - 1] += Affordable(picks, _hoursPerDay, consumed);
                     if (picks.Count < _perDay)
                         result.ThinShareByDay[day - 1] += 1f;
 
@@ -750,7 +1337,6 @@ namespace Crookedile.EditorTools
                     {
                         if (pick == null)
                             continue;
-                        consumed.Add(pick.ID);
                         seen.Add(pick.ID);
                     }
                 }
@@ -778,23 +1364,157 @@ namespace Crookedile.EditorTools
             return result;
         }
 
-        /// <summary>
-        /// How many of a day's offering the hour budget actually allows, cheapest first — the
-        /// most generous reading, so a shortfall here is a real one.
-        /// </summary>
-        private static int Affordable(List<EncounterData> picks, int hours)
+        /// <summary>Greedily visits the earliest-finishing reachable encounter using the runtime travel calculation.</summary>
+        private int Affordable(List<EncounterData> picks, int hours, HashSet<string> consumed)
         {
-            int spent = 0;
+            var remaining = new List<EncounterData>(picks);
+            var network = _pool.Travel;
+            var district = network != null ? network.Headquarters : null;
+            int clock = network != null ? network.DayStartMinute : CampaignTravelData.DEFAULT_START_MINUTE;
+            int end = Mathf.Min(clock + hours * 60, CampaignTravelData.MINUTES_PER_DAY);
             int taken = 0;
-            foreach (var pick in picks.Where(p => p != null).OrderBy(p => p.HourCost))
+            while (remaining.Count > 0)
             {
-                if (spent + pick.HourCost > hours)
+                EncounterData next = null;
+                int finish = int.MaxValue;
+                foreach (var pick in remaining)
+                {
+                    var plan = CampaignVisitPlan.Calculate(pick, network, district, clock, end - clock, _previewAllies);
+                    if (plan.CanEnter && plan.FinishMinute < finish)
+                    {
+                        next = pick;
+                        finish = plan.FinishMinute;
+                    }
+                }
+
+                if (next == null)
+                {
                     break;
-                spent += pick.HourCost;
+                }
+
+                clock = finish;
+                if (next.District != null)
+                {
+                    district = next.District;
+                }
+
+                consumed.Add(next.ID);
+                remaining.Remove(next);
                 taken++;
             }
+
             return taken;
         }
+
+        #region Travel preview
+        private DistrictData _previewDistrict;
+        private int _previewMinute = CampaignTravelData.DEFAULT_START_MINUTE;
+        private int _previewBudget = 180;
+        private readonly List<AllyData> _previewAllies = new List<AllyData>();
+
+        private void DrawPreviewAllies()
+        {
+            EditorGUILayout.LabelField("Recruited allies for Travel and Simulate", EditorStyles.boldLabel);
+            for (int i = 0; i < _previewAllies.Count; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUI.BeginChangeCheck();
+                _previewAllies[i] = (AllyData)EditorGUILayout.ObjectField(_previewAllies[i], typeof(AllyData), false);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    InvalidatePreviews();
+                }
+
+                using (new EditorGUI.DisabledScope(_previewAllies[i] == null))
+                {
+                    if (GUILayout.Button("Edit ally", GUILayout.Width(65f)))
+                    {
+                        EditAsset(_previewAllies[i]);
+                    }
+                }
+
+                bool remove = GUILayout.Button("Remove", GUILayout.Width(65f));
+                EditorGUILayout.EndHorizontal();
+                if (remove)
+                {
+                    _previewAllies.RemoveAt(i);
+                    InvalidatePreviews();
+                    break;
+                }
+            }
+
+            if (GUILayout.Button("Add preview ally"))
+            {
+                _previewAllies.Add(null);
+            }
+        }
+
+        private void DrawTravelTab()
+        {
+            DrawPreviewAllies();
+            var network = _pool.Travel;
+            if (GUILayout.Button(network != null ? $"Edit travel network: {network.name}" : "Author travel network on pool"))
+            {
+                EditAsset(network != null ? (UnityEngine.Object)network : _pool);
+            }
+            if (network == null)
+            {
+                EditorGUILayout.HelpBox("Create a Campaign/Travel Network asset and assign it on the pool. "
+                    + "Use Authoring to create districts and edit roads inline with Odin.",
+                    MessageType.Info);
+            }
+            else if (network.Headquarters == null)
+            {
+                EditorGUILayout.HelpBox("Assign the network's Headquarters district so the first trip has a starting point.", MessageType.Error);
+            }
+
+            _previewDistrict = (DistrictData)EditorGUILayout.ObjectField("From (blank = HQ)",
+                _previewDistrict, typeof(DistrictData), false);
+            _previewMinute = EditorGUILayout.IntSlider("Departure minute", _previewMinute, 0, 1439);
+            _previewBudget = EditorGUILayout.IntSlider("Minutes remaining", _previewBudget, 0, 1440);
+            var from = _previewDistrict != null ? _previewDistrict : network != null ? network.Headquarters : null;
+            EditorGUILayout.LabelField($"Depart {CampaignTravelData.FormatTime(_previewMinute)} from "
+                + $"{(from != null ? from.DisplayName : "Local")}");
+            EditorGUILayout.HelpBox("Preview uses the runtime route and time-window calculation. "
+                + "Entry is allowed at opening and blocked at closing; an event may finish after closing. "
+                + "Click an encounter or the network button to edit it here in Authoring.", MessageType.Info);
+
+            _scroll = EditorGUILayout.BeginScrollView(_scroll);
+            foreach (var entry in _pool.Entries)
+            {
+                var encounter = entry?.Encounter;
+                if (encounter == null)
+                {
+                    continue;
+                }
+
+                if (GUILayout.Button($"Edit {HasVisitedEncounter.Label(encounter)}", EditorStyles.miniButton))
+                {
+                    EditAsset(encounter);
+                }
+                var plan = CampaignVisitPlan.Calculate(encounter, network, from, _previewMinute, _previewBudget, _previewAllies);
+                string destination = encounter.District != null ? encounter.District.DisplayName : "Local";
+                EditorGUILayout.LabelField($"{destination} | Entry {CampaignTravelData.FormatTime(encounter.OpeningMinute)} - "
+                    + $"{CampaignTravelData.FormatTime(encounter.ClosingMinute)} | Base duration {encounter.DurationMinutes}m");
+                if (plan.CanEnter)
+                {
+                    EditorGUILayout.LabelField($"Travel {plan.TravelMinutes}m ({plan.TrafficMultiplier:0.##}x traffic), "
+                        + $"wait {plan.WaitMinutes}m | Arrive {CampaignTravelData.FormatTime(plan.ArrivalMinute)}, "
+                        + $"finish {CampaignTravelData.FormatTime(plan.FinishMinute)}");
+                    EditorGUILayout.LabelField($"Encounter {plan.EncounterMinutes}m | Allies save "
+                        + $"{plan.TravelMinutesSaved}m travel + {plan.EncounterMinutesSaved}m encounter time; waiting is not discounted.");
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox(plan.BlockedReason, MessageType.Warning);
+                }
+
+                EditorGUILayout.Space(6f);
+            }
+
+            EditorGUILayout.EndScrollView();
+        }
+        #endregion
 
         private void DrawSimPerDay()
         {

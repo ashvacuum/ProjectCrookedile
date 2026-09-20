@@ -28,12 +28,60 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private string _blurb;
 
-        [Tooltip("Hours spent choosing this location. 0 means it never competes for the day.")]
+        [Tooltip("Encounter duration in hours, excluding travel and waiting.")]
         [Min(0)]
         [HorizontalGroup("Cost", LabelWidth = 80)]
         [LabelText("Hours")]
         [SerializeField]
         private int _hourCost = 1;
+
+        [FoldoutGroup("Travel and time")]
+        [Tooltip("District where this encounter happens. Blank means local: no travel or change of district.")]
+        [InlineEditor]
+#if UNITY_EDITOR
+        [InlineButton(nameof(CreateDistrict), "New")]
+#endif
+        [SerializeField]
+        private DistrictData _district;
+
+        [FoldoutGroup("Travel and time")]
+        [Tooltip("Extra duration minutes added to Hours. Use Hours 0 and Minutes 30 for a half-hour event.")]
+        [Range(0, 59)]
+        [SerializeField]
+        private int _extraMinutes;
+
+        [FoldoutGroup("Travel and time")]
+        [Tooltip("Opening clock minute, inclusive: 480 = 08:00. Early arrivals wait until opening.")]
+        [Range(0, 1439)]
+        [SerializeField]
+        private int _openingMinute;
+
+        [FoldoutGroup("Travel and time")]
+        [Tooltip("Latest entry minute, exclusive: 1020 = 17:00. 0 means midnight. Finishing later is allowed.")]
+        [Range(0, 1440)]
+        [ValidateInput("@_closingMinute == 0 || _closingMinute > _openingMinute", "Closing time must be after opening.")]
+        [SerializeField]
+        private int _closingMinute;
+
+        public DistrictData District
+        {
+            get { return _district; }
+        }
+
+        public int DurationMinutes
+        {
+            get { return Mathf.Clamp(_hourCost, 0, 24) * 60 + Mathf.Clamp(_extraMinutes, 0, 59); }
+        }
+
+        public int OpeningMinute
+        {
+            get { return Mathf.Clamp(_openingMinute, 0, 1439); }
+        }
+
+        public int ClosingMinute
+        {
+            get { return _closingMinute == 0 ? 1440 : Mathf.Clamp(_closingMinute, 0, 1440); }
+        }
 
         [Tooltip(
             "How likely this is to be drawn, relative to everything else eligible the same "
@@ -69,6 +117,20 @@ namespace Crookedile.Data.Campaign
         // pool entry. See docs/campaign-encounters.md.
 
 #if UNITY_EDITOR
+        private void CreateDistrict()
+        {
+            if (_district != null)
+            {
+                return;
+            }
+
+            UnityEditor.Undo.RecordObject(this, "Assign new district");
+            _district = Crookedile.Utilities.AuthoringAssets.CreateBeside<DistrictData>(this, "New District");
+            UnityEditor.Undo.RegisterCreatedObjectUndo(_district, "Create district");
+            UnityEditor.EditorUtility.SetDirty(this);
+            UnityEditor.AssetDatabase.SaveAssets();
+        }
+
         /// <summary>
         /// Keeps <see cref="_id"/> equal to the asset's file GUID, so a duplicated asset can't
         /// inherit the original's id.

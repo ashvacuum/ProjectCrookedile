@@ -15,7 +15,8 @@ Companion docs: [`metagame-campaign.md`](metagame-campaign.md) is the canonical 
 ## The type tree
 
 ```
-EncounterData (abstract SO)          ID, DisplayName, Blurb, HourCost, DropWeight
+EncounterData (abstract SO)          ID, DisplayName, Blurb, HourCost, DropWeight,
+                                    District, DurationMinutes, OpeningMinute, ClosingMinute
 ├── BattleEncounterData              wraps a BattleSession, IsBoss, RewardOverride
 └── EventEncounterData               Body text + EventOption[]
 ```
@@ -144,6 +145,102 @@ events without any UI.
 ---
 
 ## Scheduling — `EncounterPoolData`
+
+### Time of day and district travel (2026-09-21)
+
+Day selection remains on pool rows; the encounter asset owns its daily entry window and
+district. The pool's **Travel** field references a `CampaignTravelData` road network.
+Create assets through **Assets → Create → Crookedile → Campaign → District / Travel Network**.
+Assign HQ on the network, add roads, and assign districts on encounters. Odin exposes road
+endpoints, direction, clear travel minutes, and traffic windows directly in the inspector.
+
+Under an encounter's **Travel and time** foldout:
+
+- **District:** blank = local, no travel and no relocation.
+- **Extra Minutes:** 0–59, added to the existing Hours field. Hours 0 + Extra Minutes 30 = 30 minutes.
+- **Opening Minute:** inclusive minute since midnight; 480 = 08:00.
+- **Closing Minute:** exclusive latest-entry minute; 1020 = 17:00. 0 means midnight.
+  A valid window has closing after opening. Entry before closing can finish afterwards.
+
+Road traffic windows are also inclusive at start and exclusive at end. Split overnight
+windows into two rows. The largest active multiplier wins if windows overlap. Fastest-route
+search samples all roads at trip departure; previews and commits use the same result.
+
+An 08:00 departure with 30-minute travel to a 09:00 event includes 30 minutes of waiting.
+A 30-minute event then finishes at 09:30, spending 90 minutes from the daily Hours budget.
+The player can also wait 15 minutes on the map to change departure time. No path, arrival at
+or after closing, invalid windows, insufficient total time, and crossing midnight block entry.
+The clock and last district survive battle returns. Advancing the day resets both time and HQ.
+
+Daily offerings remain cached across time changes and scene loads. Future/expired entries
+remain visible; they are not rerolled. Direct narrative chains retain their existing free,
+same-visit semantics and do not relocate the player. The mandatory boss finale bypasses time
+and travel restrictions so the run cannot be stranded; its separate button states this exception.
+
+**Encounter Designer → Travel** previews every pool entry from a chosen district, departure
+minute, and remaining budget. Click **Edit** on an encounter or the network button to open
+its full Odin inspector in the Designer's **Authoring** tab.
+
+**Authoring** edits the original assets directly with Odin's validation, polymorphic type
+pickers, and Undo. Use **Pool** to edit scheduling requirements and boosts or create an event
+or battle. The pool's **Travel → New** button creates and assigns a network. **New district**
+creates a district beside the pool; the **New** button on an encounter's District field also
+assigns it immediately. Expand district references on encounters and road endpoints to edit
+them inline. The network itself expands inline on the pool. **Save assets** persists pending
+asset edits. These are shared assets: editing a district updates every reference to it.
+**Simulate** greedily visits the reachable encounter finishing earliest, including travel,
+waiting, and duration, and only consumes encounters visited. Requirements still pass in this
+editor simulation and event outcomes are not applied; it is not a complete playthrough model.
+
+Run **Crookedile → Campaign → Run Travel Checks** for route, traffic, clock, window, and
+visit-state regression checks. This uses temporary in-memory assets and does not replace the
+active run. Existing content needs no migration: unset fields mean local all-day encounters.
+
+### Ally overworld passives
+
+On the **Ally ScriptableObject (`AllyData`)**, add entries under **Overworld passives** using
+Odin's `[SerializeReference]` type picker. Each entry owns its settings and description,
+separately from the ally's existing battle passive list. The first two authorable types are:
+
+- **Reduce Travel Time Passive:** reduces the selected route's duration after traffic.
+- **Reduce Encounter Duration Passive:** reduces the duration of both event and battle visits.
+  It does not speed up combat animations or reduce waiting for an event to open.
+
+Each has a **Reduction Percent** field (25% on a newly added entry). An empty list grants
+no overworld benefits. Recruited allies' passive percentages add together independently for each
+category, capped at 100%. Fractional minutes round up, and a positive duration stays at least
+one minute. Already-free travel/encounters remain free. An ally may grant either bonus,
+both, battle passives, or any combination; the generated description and Content Hub audit
+recognize campaign-only allies.
+
+These are plain serializable classes, not separate ScriptableObject assets. They are saved
+inside the ally asset and remain editable inline from Encounter Designer. Both are listed
+in **Crookedile → Authoring Catalog → Overworld passives**, including their fields and usages.
+
+To add another visit modifier, create a `[Serializable]` subclass of `OverworldPassive`,
+implement `ModifyVisit(EncounterData, ref VisitModifiers)` and `GetDescription()`, and give
+its private serialized fields tooltips. Odin discovers the type automatically; no switch,
+registry, or change to `AllyData` is needed. `ModifyVisit` is a pure preview hook: only change
+the provided modifiers, never mutate the run, encounter, or passive instance. New kinds of
+overworld triggers beyond visit-cost calculation will need their own runtime hook.
+
+For example, 25% travel reduction changes a 30-minute traffic-adjusted trip to 23 minutes.
+50% encounter reduction changes a 30-minute encounter to 15 minutes. If faster travel gets
+you there before opening, the extra waiting still costs time. Traffic severity continues to
+describe road conditions; the preview lists the ally's saved minutes separately.
+
+In **Encounter Designer → Authoring**, use **New ally** or select an existing ally in
+**Editing asset**. In an event's `RecruitAllyOutcome`, expand the **Ally** reference to edit
+that same asset inline with Odin. Recruitment activates bonuses for subsequent visits; it
+does not refund the visit already in progress. In **Travel** or **Simulate**, use **Add preview
+ally** to choose a hypothetical recruited roster and **Edit ally** to tune it in Authoring.
+The roster is shared between these two previews; it does not recruit anyone in the live run.
+
+The runtime, Travel preview, and simulation all use the same cost calculation. Duplicate ally
+references count once. Timing checks also cover stacking, rounding, opening/closing windows,
+and charging exactly the previewed cost after recruitment.
+
+### Daily offering
 
 The set an encounter can be drawn from, with a per-entry day window.
 
@@ -296,14 +393,18 @@ events land in one lookup rather than a database per type.
 
 ## Editor tool — Encounter Designer
 
-**Crookedile → Encounter Designer.** Two tabs over one pool. Editing stays in the pool asset's
-own inspector (Odin `TableList` + type-pickers); both tabs are read-only views.
+**Crookedile → Encounter Designer.** Timeline, Table, Dependencies, Flags, Simulate, Travel,
+and Authoring views over one pool. Authoring embeds the original asset's Odin inspector;
+Table provides compact bulk scheduling edits. Click encounters in Timeline, Table,
+Dependencies, or Travel (or a flag owner in Flags) to edit them in Authoring without leaving
+the window. Undo/Redo and authoring edits invalidate cached previews; rerun simulations to
+see updated results.
 
 **Timeline** — the Gantt, plus a seed simulator.
 
 - A bar per entry spanning its day window, coloured by encounter type. `w2` = weight overridden
-  on that row, `w2*` = inherited from the encounter's `DropWeight`. Click a row label to ping
-  the asset.
+  on that row, `w2*` = inherited from the encounter's `DropWeight`. Click a row label to edit
+  the asset in Authoring.
 - **Coverage strip** — eligible count and total weight per day, red when a day has nothing
   eligible. That day would hand the player an empty map, and it's the one authoring mistake in
   this asset that fails silently.

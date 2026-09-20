@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Crookedile.Data.Campaign;
 using Crookedile.Gameplay.Battle;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -52,10 +53,11 @@ namespace Crookedile.Data
         [SerializeField]
         private CardRarity _rarity = CardRarity.Basic;
 
-        [Tooltip("The persistent passive(s) this ally grants. Same hierarchy as card/origin passives.")]
+        [LabelText("Battle Passives")]
+        [Tooltip("Battle abilities this ally grants. Same hierarchy as card/origin passives; overworld abilities are authored separately below.")]
         [ValidateInput(
-            "@_passives != null && _passives.Count > 0",
-            "No passives — recruiting this ally would change nothing about the run.",
+            "@HasOverworldPassives || (_passives != null && _passives.Count > 0)",
+            "No battle or overworld passives — recruiting this ally would change nothing.",
             InfoMessageType.Warning
         )]
         // Reads back what the passives below actually do, so a hand-written description can be
@@ -64,6 +66,36 @@ namespace Crookedile.Data
         [SerializeReference]
         [SerializeField]
         private List<BattlePassive> _passives = new List<BattlePassive>();
+
+        [Title("Overworld passives")]
+        [Tooltip("Persistent overworld abilities while this ally is recruited. Add a passive type with Odin's picker and edit its settings inline.")]
+        [SerializeReference]
+        [SerializeField]
+        private List<OverworldPassive> _overworldPassives = new List<OverworldPassive>();
+
+        public IReadOnlyList<OverworldPassive> OverworldPassives
+        {
+            get { return _overworldPassives; }
+        }
+
+        public bool HasOverworldPassives
+        {
+            get
+            {
+                if (_overworldPassives != null)
+                {
+                    foreach (var passive in _overworldPassives)
+                    {
+                        if (passive != null)
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
+        }
 
         public string Id => _id;
         public string AllyName => _allyName;
@@ -80,13 +112,29 @@ namespace Crookedile.Data
         {
             get
             {
-                if (_passives == null || _passives.Count == 0)
-                    return "Does nothing yet.";
-
                 var parts = new List<string>();
-                foreach (var passive in _passives)
-                    if (passive != null)
-                        parts.Add(passive.GetDescription());
+                if (_passives != null)
+                {
+                    foreach (var passive in _passives)
+                    {
+                        if (passive != null)
+                        {
+                            parts.Add(passive.GetDescription());
+                        }
+                    }
+                }
+
+                if (_overworldPassives != null)
+                {
+                    foreach (var passive in _overworldPassives)
+                    {
+                        if (passive != null)
+                        {
+                            parts.Add(passive.GetDescription());
+                        }
+                    }
+                }
+
                 return parts.Count == 0 ? "Does nothing yet." : string.Join("\n", parts);
             }
         }

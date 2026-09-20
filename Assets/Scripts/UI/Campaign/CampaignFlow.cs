@@ -7,21 +7,7 @@ using UnityEngine;
 
 namespace Crookedile.UI.Campaign
 {
-    /// <summary>
-    /// Owns <c>campaign.unity</c> — the overworld counterpart to <c>BattleManager</c>.
-    /// Draws the day's locations, spends Hours, dispatches into battles and events, and honours
-    /// encounter chaining on the way back.
-    ///
-    /// <para><b>The view is IMGUI on purpose.</b> Whether the map is an abstract StS node chain
-    /// or a navigable Potionomics-style town is still an open design question (core-design.md
-    /// §10), and a uGUI screen would commit to an answer. This renders the loop so it can be
-    /// played and judged without deciding the look. All state lives in <see cref="RunState"/>
-    /// and the methods below; replacing <see cref="OnGUI"/> with a real screen touches nothing
-    /// else.</para>
-    ///
-    /// Setup: Crookedile → Campaign → Create Campaign Scene builds the scene and wires this up.
-    /// Assign an <see cref="EncounterPoolData"/> in the inspector and press Play.
-    /// </summary>
+    /// <summary>Drives campaign visits and encounter chains; RunState preserves the clock and district across scene loads.</summary>
     [Debuggable("Campaign", LogLevel.Info)]
     public class CampaignFlow : MonoBehaviour
     {
@@ -66,6 +52,7 @@ namespace Crookedile.UI.Campaign
         private void Start()
         {
             EnsureRunState();
+            RunState.Current.ConfigureTravel(_pool != null ? _pool.Travel : null);
             ResolveChainOrRefresh();
         }
 
@@ -96,6 +83,7 @@ namespace Crookedile.UI.Campaign
                 maxHours: _maxHours,
                 seed: _debugSeed
             );
+            RunState.Current.ConfigureTravel(_pool != null ? _pool.Travel : null);
             GameLogger.LogInfo(
                 "Campaign",
                 $"Debug campaign run created — origin {_debugOrigin}, seed {RunState.Current.Seed}, {deck.Count} cards.",
@@ -171,11 +159,31 @@ namespace Crookedile.UI.Campaign
             if (state == null || encounter == null)
                 return;
 
-            state.MarkVisited(encounter.ID);
-            state.RemoveTodaysLocation(encounter);
+            if (!(encounter is EventEncounterData) && !(encounter is BattleEncounterData))
+            {
+                GameLogger.LogWarning("Campaign", $"Unsupported encounter '{encounter.name}'.", this);
+                return;
+            }
+
+            if (encounter is BattleEncounterData invalidBattle && invalidBattle.Session == null)
+            {
+                GameLogger.LogWarning("Campaign", $"'{encounter.name}' has no battle session.", this);
+                return;
+            }
 
             if (chargeHours)
-                state.SpendHours(encounter.HourCost);
+            {
+                if (!state.TryVisit(encounter))
+                {
+                    GameLogger.LogWarning("Campaign", $"Cannot enter '{encounter.name}': {state.PlanVisit(encounter).BlockedReason}", this);
+                    return;
+                }
+            }
+            else
+            {
+                state.MarkVisited(encounter.ID);
+                state.RemoveTodaysLocation(encounter);
+            }
 
             switch (encounter)
             {
@@ -266,9 +274,7 @@ namespace Crookedile.UI.Campaign
         #endregion
 
         #region Debug view
-        // ponytail: IMGUI, not uGUI. This is a harness for judging the loop, not the shipping
-        // screen — see the class summary. Replace this region wholesale when the map's form is
-        // decided; nothing above depends on it.
+        // ponytail: IMGUI playtest view; replace with isometric map hotspots when the production UI is ready.
         private void OnGUI()
         {
             var state = RunState.Current;
@@ -287,7 +293,9 @@ namespace Crookedile.UI.Campaign
             }
 
             GUILayout.Label(
-                $"Day {state.Day}   Hours {state.Hours}/{state.MaxHours}   "
+                $"Day {state.Day}   {CampaignTravelData.FormatTime(state.ClockMinute)}   "
+                    + $"Time left {state.MinutesRemaining / 60}h {state.MinutesRemaining % 60}m   "
+                    + $"District: {(state.CurrentDistrict != null ? state.CurrentDistrict.DisplayName : "Local")}   "
                     + $"Funds {state.Funds}   Credibility {state.Credibility}   "
                     + $"Deck {state.Deck.Count}   Allies {state.Allies.Count}   Seed {state.Seed}",
                 GUI.skin.box
@@ -349,19 +357,18 @@ namespace Crookedile.UI.Campaign
                 if (loc == null)
                     continue;
 
-                // Insufficient Hours disables rather than hides: a location vanishing reads as
-                // a bug, a greyed one reads as a cost you can't meet yet.
-                bool affordable = state.Hours >= loc.HourCost;
-                GUI.enabled = affordable;
+                var plan = state.PlanVisit(loc);
+                GUI.enabled = plan.CanEnter;
 
                 string label = string.IsNullOrEmpty(loc.DisplayName) ? loc.name : loc.DisplayName;
                 string kind = loc is BattleEncounterData ? "Battle" : "Event";
-                string cost = affordable
-                    ? $"{loc.HourCost}h"
-                    : $"{loc.HourCost}h — you have {state.Hours}";
+                string district = loc.District != null ? loc.District.DisplayName : "Local";
+                string cost = plan.CanEnter
+                    ? $"Travel {plan.TravelMinutes}m + wait {plan.WaitMinutes}m + event {plan.EncounterMinutes}m"
+                    : plan.BlockedReason;
 
                 bool clicked = GUILayout.Button(
-                    $"[{kind}] {label}   ({cost})",
+                    $"[{kind}] {label} / {district}   ({cost})",
                     GUILayout.Height(34f)
                 );
 
@@ -369,6 +376,25 @@ namespace Crookedile.UI.Campaign
                     GUILayout.Label($"    {loc.Blurb}");
 
                 GUI.enabled = true;
+                GUILayout.Label($"    Opens {CampaignTravelData.FormatTime(loc.OpeningMinute)} | "
+                    + $"Enter before {CampaignTravelData.FormatTime(loc.ClosingMinute)}");
+                if (plan.ArrivalMinute > 0)
+                {
+                    string traffic = plan.TrafficMultiplier >= 2f ? "Heavy"
+                        : plan.TrafficMultiplier > 1f ? "Moderate" : "Clear";
+                    GUILayout.Label($"    Traffic: {traffic} ({plan.TrafficMultiplier:0.##}x) | "
+                        + $"Arrive {CampaignTravelData.FormatTime(plan.ArrivalMinute)} | "
+                        + $"Start {CampaignTravelData.FormatTime(plan.StartMinute)} | "
+                        + $"Finish {CampaignTravelData.FormatTime(plan.FinishMinute)}");
+                    Rect meter = GUILayoutUtility.GetRect(120f, 6f, GUILayout.Width(120f));
+                    GUI.Box(meter, GUIContent.none);
+                    meter.width *= Mathf.Clamp01((plan.TrafficMultiplier - 1f) / 4f);
+                    GUI.DrawTexture(meter, Texture2D.whiteTexture);
+                    if (plan.TravelMinutesSaved > 0 || plan.EncounterMinutesSaved > 0)
+                    {
+                        GUILayout.Label($"    Allies save {plan.TravelMinutesSaved}m travel and {plan.EncounterMinutesSaved}m encounter time.");
+                    }
+                }
                 GUILayout.Space(4f);
 
                 if (clicked)
@@ -380,6 +406,13 @@ namespace Crookedile.UI.Campaign
 
             GUILayout.Space(12f);
 
+            GUI.enabled = state.MinutesRemaining >= 15;
+            if (GUILayout.Button("Wait 15 minutes", GUILayout.Height(30f)))
+            {
+                state.TrySpendMinutes(15);
+            }
+            GUI.enabled = true;
+
             // On a boss day there is no ending the day — ending it IS facing the boss. Without
             // this the finale is skippable: End Day rolls you to the next day and, on the last
             // one, straight to "campaign complete" without the fight ever happening.
@@ -390,8 +423,8 @@ namespace Crookedile.UI.Campaign
                     ? boss.name
                     : boss.DisplayName;
                 // Always enabled, like HQ was: running out of Hours must not strand the run.
-                if (GUILayout.Button($"Face {bossName}", GUILayout.Height(30f)))
-                    Enter(boss);
+                if (GUILayout.Button($"Face {bossName} (mandatory finale, no travel or time cost)", GUILayout.Height(30f)))
+                    Enter(boss, chargeHours: false);
                 return;
             }
 
