@@ -885,9 +885,23 @@ namespace Crookedile.EditorTools
                             )
                         );
 
+                    if (ally.OverworldPassives != null)
+                    {
+                        foreach (var passive in ally.OverworldPassives)
+                        {
+                            if (passive == null)
+                            {
+                                issues.Add(new AuditIssue(Severity.Warning, "Overworld passive has no type selected."));
+                            }
+                        }
+                    }
+
                     if (ally.Passives == null || ally.Passives.Count == 0)
                     {
-                        issues.Add(new AuditIssue(Severity.Warning, "No passives (does nothing)."));
+                        if (!ally.HasOverworldPassives)
+                        {
+                            issues.Add(new AuditIssue(Severity.Warning, "No battle or overworld passives (does nothing)."));
+                        }
                     }
                     else
                     {

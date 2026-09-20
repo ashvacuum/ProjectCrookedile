@@ -419,6 +419,8 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private EncounterData _encounter;
 
+        public EncounterData Target => _encounter;
+
         public override void Apply(RunState state) => state.SetNextEncounter(_encounter);
 
         public override string GetDescription()
@@ -453,6 +455,9 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private bool _clear;
 
+        public string Flag => _flag;
+        public bool Clears => _clear;
+
         public override void Apply(RunState state)
         {
             if (_clear)
@@ -471,6 +476,8 @@ namespace Crookedile.Data.Campaign
     [Serializable]
     public class RecruitAllyOutcome : RunOutcome
     {
+        [Tooltip("Ally recruited by this choice. Expand to edit battle and overworld passives here.")]
+        [InlineEditor]
         [SerializeField]
         private AllyData _ally;
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Crookedile.Data.Campaign;
 using Crookedile.Gameplay.Battle;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities.Editor;
@@ -37,6 +38,7 @@ namespace Crookedile.EditorTools
 
             var usage = BuildUsageIndex();
 
+            AddGroup<OverworldPassive>(tree, "Overworld passives", DescribeOverworldPassive, usage);
             AddGroup<BattleEffect>(tree, "Effects", e => Safe(() => e.GetDescription()), usage);
             AddGroup<PassiveTriggerBase>(tree, "Triggers", t => Safe(() => t.TriggerLabel), usage);
             AddGroup<PassiveConditionBase>(
@@ -84,6 +86,11 @@ namespace Crookedile.EditorTools
             return tree;
         }
 
+        private static string DescribeOverworldPassive(OverworldPassive passive)
+        {
+            return passive.EditorSafeDescription();
+        }
+
         #region CSV export
 
         /// <summary>
@@ -96,6 +103,7 @@ namespace Crookedile.EditorTools
             var rows = new List<string[]>();
             var usage = BuildUsageIndex();
 
+            CollectGroup<OverworldPassive>(rows, "Overworld passive", DescribeOverworldPassive, usage);
             CollectGroup<BattleEffect>(rows, "Effect", e => Safe(() => e.GetDescription()), usage);
             CollectGroup<PassiveTriggerBase>(
                 rows,
@@ -341,6 +349,7 @@ namespace Crookedile.EditorTools
 
             if (
                 node is BattleEffect
+                || node is OverworldPassive
                 || node is StatusBehavior
                 || node is PassiveTriggerBase
                 || node is PassiveConditionBase

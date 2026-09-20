@@ -19,13 +19,13 @@ namespace Crookedile.Data.Campaign
         private EncounterData _encounter;
 
         [Tooltip("First day this can appear, inclusive.")]
-        [Min(1)]
+        [MinValue(1)]
         [TableColumnWidth(70, Resizable = false)]
         [SerializeField]
         private int _firstDay = 1;
 
         [Tooltip("Last day this can appear, inclusive. 0 means no end — available forever.")]
-        [Min(0)]
+        [MinValue(0)]
         [TableColumnWidth(70, Resizable = false)]
         [SerializeField]
         private int _lastDay;
@@ -52,6 +52,7 @@ namespace Crookedile.Data.Campaign
         public const float InheritWeight = -1f;
 
         [Tooltip("Once drawn, never offered again this run.")]
+        [TableColumnWidth(60, Resizable = false)]
         [SerializeField]
         private bool _oncePerRun = true;
 
@@ -60,11 +61,15 @@ namespace Crookedile.Data.Campaign
                 + "This is how a day-7 boss or a day-1 opener is made certain — a weight alone "
                 + "only makes it likely, and 'likely' is not a structure you can design around."
         )]
+        [TableColumnWidth(60, Resizable = false)]
         [SerializeField]
         private bool _guaranteed;
 
-        [TableColumnWidth(200)]
-        [Header("Dependencies")]
+        // Two [SerializeReference] lists in a table row make every row as tall as its longest
+        // requirement list, and most rows have none. Folded into one collapsed column, whose
+        // header reads the dependencies back so a shut row still says whether it has any.
+        [FoldoutGroup("$DependencyLabel", Expanded = false)]
+        [TableColumnWidth(230)]
         [Tooltip(
             "Hard gate: ALL must hold or this encounter can't appear at all.\n"
                 + "Use for \"B only exists once you've done A\"."
@@ -73,6 +78,7 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private List<RunRequirement> _requirements = new List<RunRequirement>();
 
+        [FoldoutGroup("$DependencyLabel")]
         [Tooltip(
             "Soft nudge: when ALL of these hold, the draw weight is multiplied by Boost "
                 + "Multiplier. The encounter stays available either way.\n"
@@ -82,10 +88,29 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private List<RunRequirement> _boostIf = new List<RunRequirement>();
 
+        [FoldoutGroup("$DependencyLabel")]
         [Tooltip("Weight multiplier applied when every Boost If condition holds.")]
         [Min(0f)]
         [SerializeField]
         private float _boostMultiplier = 2f;
+
+        /// <summary>
+        /// Header for the collapsed dependency group. Naming the count is the whole point — a
+        /// folded row must still admit it is gated, or closing the group hides the one field
+        /// that decides whether the encounter can appear at all.
+        /// </summary>
+        private string DependencyLabel
+        {
+            get
+            {
+                int gates = _requirements?.Count ?? 0;
+                int boosts = _boostIf?.Count ?? 0;
+                if (gates == 0 && boosts == 0)
+                    return "Dependencies — none";
+                return $"Dependencies — {gates} gate{(gates == 1 ? "" : "s")}, "
+                    + $"{boosts} boost{(boosts == 1 ? "" : "s")}";
+            }
+        }
 
         public EncounterData Encounter => _encounter;
 
@@ -207,6 +232,7 @@ namespace Crookedile.Data.Campaign
         // Coverage is the failure this asset is prone to and the one you cannot see by reading
         // the rows: a day with nothing eligible hands the player an empty map. On the field
         // rather than the class — Odin resolves @Method() against the declaring instance here.
+        [Title("Pool", "$PoolSummary", TitleAlignments.Split)]
         [InfoBox(
             "@CoverageWarning()",
             InfoMessageType.Error,
@@ -214,12 +240,72 @@ namespace Crookedile.Data.Campaign
         )]
         [Tooltip("How many days the campaign runs. Drives the Gantt view's column count.")]
         [PropertyRange(1, 30)]
+        [LabelWidth(120)]
+        [PropertyOrder(0)]
         [SerializeField]
         private int _days = 7;
 
-        [TableList]
+        /// <summary>
+        /// The shape of the pool in one line, beside the title: what a designer opening this
+        /// asset wants to know before reading any row. Counts entries rather than rows drawn,
+        /// so a paged table doesn't hide the total.
+        /// </summary>
+        private string PoolSummary
+        {
+            get
+            {
+                int rows = _entries?.Count ?? 0;
+                if (rows == 0)
+                    return $"{_days} days · empty";
+
+                int guaranteed = 0;
+                int gated = 0;
+                int blank = 0;
+                foreach (var entry in _entries)
+                {
+                    if (entry == null || entry.Encounter == null)
+                    {
+                        blank++;
+                        continue;
+                    }
+                    if (entry.Guaranteed)
+                        guaranteed++;
+                    if (entry.HasDependencies)
+                        gated++;
+                }
+
+                string summary = $"{_days} days · {rows} entries · {guaranteed} guaranteed · {gated} gated";
+                return blank == 0 ? summary : $"{summary} · ⚑ {blank} blank";
+            }
+        }
+
+        // A pool outgrows one screen fast. Paging keeps the table a fixed height instead of a
+        // page you scroll the whole inspector to get past, and the scroll view caps a page that
+        // still runs long once a few rows open their dependency groups.
+        [Title("Entries", "Day window, weight, and what gates it", TitleAlignments.Split)]
+        [PropertyOrder(20)]
+        [TableList(
+            ShowPaging = true,
+            NumberOfItemsPerPage = 12,
+            DrawScrollView = true,
+            MaxScrollViewHeight = 460,
+            AlwaysExpanded = false
+        )]
         [SerializeField]
         private List<EncounterPoolEntry> _entries = new List<EncounterPoolEntry>();
+
+        [Tooltip("District road network and start-of-day clock. Blank keeps encounters local at 08:00.")]
+        [InlineEditor]
+#if UNITY_EDITOR
+        [InlineButton(nameof(CreateTravelNetwork), "New")]
+#endif
+        [SerializeField]
+        private CampaignTravelData _travel;
+
+        public CampaignTravelData Travel
+        {
+            get { return _travel; }
+        }
 
         public int Days => _days;
         public IReadOnlyList<EncounterPoolEntry> Entries => _entries;
@@ -254,32 +340,45 @@ namespace Crookedile.Data.Campaign
 
 #if UNITY_EDITOR
         #region Authoring
+        private void CreateTravelNetwork()
+        {
+            if (_travel != null)
+            {
+                return;
+            }
+
+            UnityEditor.Undo.RecordObject(this, "Assign travel network");
+            _travel = Crookedile.Utilities.AuthoringAssets.CreateBeside<CampaignTravelData>(this, "Campaign Travel");
+            UnityEditor.Undo.RegisterCreatedObjectUndo(_travel, "Create travel network");
+            UnityEditor.EditorUtility.SetDirty(this);
+            UnityEditor.AssetDatabase.SaveAssets();
+        }
+
         // Creates the asset, adds its pool row, and selects it — one click instead of a trip
         // through the Project window.
 
+        [PropertyOrder(10)]
         [ButtonGroup("New")]
         [Button("New Event", ButtonSizes.Medium)]
         private void CreateEventEncounter() => CreateEncounter<EventEncounterData>("New Event");
 
+        [PropertyOrder(10)]
         [ButtonGroup("New")]
         [Button("New Battle", ButtonSizes.Medium)]
         private void CreateBattleEncounter() => CreateEncounter<BattleEncounterData>("New Battle");
 
+        // Via the menu path, not a direct call: the Editor assembly references the runtime one,
+        // never the reverse, so the window type isn't visible from here even under UNITY_EDITOR.
+        [PropertyOrder(10)]
+        [ButtonGroup("New")]
+        [Button("Open Designer", ButtonSizes.Medium)]
+        private void OpenDesigner() =>
+            UnityEditor.EditorApplication.ExecuteMenuItem("Crookedile/Encounter Designer");
+
         private void CreateEncounter<T>(string baseName)
             where T : EncounterData
         {
-            // Beside the pool, so a pool and its content stay together without asking where.
-            string folder = System.IO.Path.GetDirectoryName(
-                UnityEditor.AssetDatabase.GetAssetPath(this)
-            );
-            if (string.IsNullOrEmpty(folder))
-                folder = "Assets";
-
-            var encounter = CreateInstance<T>();
-            string path = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(
-                $"{folder}/{baseName}.asset"
-            );
-            UnityEditor.AssetDatabase.CreateAsset(encounter, path);
+            var encounter = Crookedile.Utilities.AuthoringAssets.CreateBeside<T>(this, baseName);
 
             var entry = new EncounterPoolEntry();
             entry.EditorSetEncounter(encounter);

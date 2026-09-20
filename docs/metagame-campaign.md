@@ -27,6 +27,50 @@ The campaign is a **map you roam, paced by a time budget** — not a corridor of
 Deferred wholesale (unchanged from `needs-detailing.md` §9): viral moments / News Cycle,
 production overworld art. The campaign layer v1 is *functional*, debug-grade presentation.
 
+## 1.5 District travel and time of day (agreed 2026-09-21)
+
+Campaign travel is now a gameplay mechanic, separate from city scenery generation.
+Authored `DistrictData` assets are nodes; `CampaignTravelData` holds roads between them,
+HQ, and the start-of-day clock (08:00 by default). Roads can be one-way or bidirectional,
+with base minutes and daily traffic windows. No tile traversal or vehicle simulation is required.
+
+- Each encounter has a district and an entry window. Opening is inclusive and closing is
+  exclusive; the encounter may finish after closing, but must fit in the remaining day.
+  Time windows do not cross midnight. Blank district means a local encounter that does not
+  move the player. Existing encounters default to all-day entry and retain their hour duration.
+- Hours is still the daily budget, configured by origin or the campaign fallback. It is spent
+  in minutes: travel + waiting until opening + encounter duration. A three-hour day starting
+  at 08:00 ends at 11:00; author longer budgets for afternoon/evening content. Midnight caps the day.
+- Roads use predictable traffic windows, with the highest active multiplier on overlapping
+  windows. The quickest route uses traffic sampled at trip departure for every road in that
+  trip. This keeps previews deterministic; traffic changes during travel are not simulated.
+- The map previews travel, traffic severity/multiplier, arrival, wait, and finish before the
+  player commits. Unreachable, expired, and unaffordable encounters remain visible with a reason.
+  Early arrival includes explicit waiting in the visit cost. A separate 15-minute wait action
+  lets the player depart later, including after rush hour.
+- Daily draws stay cached. The same encounters open and expire as the clock advances; time
+  passing does not reroll them or reevaluate daily draw dependencies. Intraday replenishment
+  of the pool is not part of this change.
+- `RunState` owns elapsed minutes and current district across battle scene loads. Days begin
+  at HQ; the overnight return is free. Immediate narrative chains remain free and happen at
+  the current location, regardless of the chained asset's district/window.
+- The mandatory boss action remains available when normal visiting is impossible. It resolves
+  as a free finale at the current location, bypassing travel, budget, and time windows; the
+  ordinary boss visit still charges its previewed cost. This prevents a timing softlock.
+
+Author the network on the encounter pool and encounter windows/districts on the encounter
+assets. Encounter Designer's **Travel** tab previews the same calculation used by gameplay.
+Ally assets have separate battle and overworld passive lists. The Odin `[SerializeReference]`
+overworld list starts with `ReduceTravelTimePassive` and `ReduceEncounterDurationPassive`;
+each owns its percentage and description. Recruited allies stack additively, capped at 100%, with rounding up and a one-minute
+floor for positive costs. Waiting is never discounted. These bonuses apply to future visits
+and are included in both the gameplay preview and its committed cost. Encounter Designer's
+Travel and Simulate tabs accept a hypothetical ally roster for tuning; see
+`campaign-encounters.md` for the authoring workflow.
+Its **Simulate** tab uses earliest-finish visits including travel and waiting, without applying
+event outcomes or mandatory-finale exceptions. District assets are referenced directly; no
+new independent IDs or encounter registry is needed.
+
 ## 2. Naming guard
 
 The overworld resource must NOT be called "Action Points" — battle already owns that term

@@ -25,6 +25,8 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private bool _negate;
 
+        public bool Negated => _negate;
+
         /// <summary>
         /// True when this condition holds for <paramref name="state"/>, honouring
         /// <c>_negate</c>. A null state means "no run to test against" and is treated as met,
@@ -96,6 +98,8 @@ namespace Crookedile.Data.Campaign
         [Tooltip("Must match the flag name on the SetFlagOutcome exactly (case-sensitive).")]
         [SerializeField]
         private string _flag;
+
+        public string Flag => _flag;
 
         protected override bool Check(RunState state) => state.HasFlag(_flag);
 
