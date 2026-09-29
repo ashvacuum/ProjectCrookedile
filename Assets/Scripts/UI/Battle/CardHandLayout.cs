@@ -139,21 +139,10 @@ namespace Crookedile.UI.Battle
             }
 
             // Compute target transforms for every card.
+            var slots = ComputeSlots(count);
             var targets = new List<(CardButton btn, Vector3 pos, float angle)>(count);
-            if (count == 1)
-            {
-                targets.Add((cards[0], Vector3.zero, 0f));
-            }
-            else
-            {
-                float effectiveStep = ComputeEffectiveStep(count);
-                float startAngle = -(count - 1) * effectiveStep * 0.5f;
-                for (int i = 0; i < count; i++)
-                {
-                    float angleDeg = startAngle + effectiveStep * i;
-                    targets.Add((cards[i], ComputeLocalPosition(angleDeg), angleDeg));
-                }
-            }
+            for (int i = 0; i < count; i++)
+                targets.Add((cards[i], slots[i].pos, slots[i].angle));
 
             // Sibling order is always applied immediately — it's render-only, not positional.
             SetSiblingOrder(cards);
@@ -163,6 +152,29 @@ namespace Crookedile.UI.Battle
             else
                 foreach (var (btn, pos, angle) in targets)
                     ApplyToCard(btn, pos, angle);
+        }
+
+        /// <summary>
+        /// Resting local position and tilt of each slot in a hand of <paramref name="count"/>
+        /// cards, left to right, without touching any card. Lets an animator fly cards toward
+        /// the slots <see cref="ArrangeCards"/> will later snap them into exactly.
+        /// </summary>
+        public List<(Vector3 pos, float angle)> ComputeSlots(int count)
+        {
+            var slots = new List<(Vector3 pos, float angle)>(count);
+            if (count == 1)
+            {
+                slots.Add((Vector3.zero, 0f));
+                return slots;
+            }
+            float step = ComputeEffectiveStep(count);
+            float startAngle = -(count - 1) * step * 0.5f;
+            for (int i = 0; i < count; i++)
+            {
+                float angleDeg = startAngle + step * i;
+                slots.Add((ComputeLocalPosition(angleDeg), angleDeg));
+            }
+            return slots;
         }
 
         #endregion

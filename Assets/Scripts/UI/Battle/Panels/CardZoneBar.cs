@@ -55,6 +55,12 @@ namespace Crookedile.UI.Battle
 
         private BattleManager _bm;
 
+        /// <summary>
+        /// Cards the model has drawn that haven't left the deck on screen yet. The deck counter
+        /// shows them as still in the pile, so it ticks down as each card flies out.
+        /// </summary>
+        private int _drawsAwaitingLaunch;
+
         /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
         private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
 
@@ -70,10 +76,20 @@ namespace Crookedile.UI.Battle
             deckZoneButton?.onClick.AddListener(ShowDeckZone);
         }
 
+        private void Start()
+        {
+            // Start, not Awake: every singleton has registered by now.
+            if (CardFlyAnimator.Instance != null && deckZoneButton != null)
+                CardFlyAnimator.Instance.DeckTransform = deckZoneButton.transform;
+        }
+
         private void OnEnable()
         {
             Sub<CardGrantedEvent>(OnCardGranted);
             Sub<CardExhaustedEvent>(OnCardExhausted);
+            Sub<CardDrawnEvent>(OnCardDrawn);
+            Sub<DrawnCardLaunchedEvent>(OnDrawnCardLaunched);
+            Sub<DeckReshuffledEvent>(OnDeckReshuffled);
         }
 
         private void OnDisable()
@@ -110,6 +126,39 @@ namespace Crookedile.UI.Battle
             RefreshCounts();
         }
 
+        private void OnCardDrawn(CardDrawnEvent evt)
+        {
+            if (evt.IsPlayer)
+                _drawsAwaitingLaunch++;
+        }
+
+        private void OnDrawnCardLaunched(DrawnCardLaunchedEvent evt)
+        {
+            _drawsAwaitingLaunch = Mathf.Max(0, _drawsAwaitingLaunch - 1);
+            RefreshCounts();
+            PunchCountText(deckCountText);
+        }
+
+        private void OnDeckReshuffled(DeckReshuffledEvent evt)
+        {
+            if (!evt.IsPlayer || _bm == null)
+                return;
+            RefreshCounts();
+            PunchCountText(discardCountText);
+            if (CardFlyAnimator.Instance == null)
+            {
+                PunchCountText(deckCountText);
+                return;
+            }
+            CardFlyAnimator.Instance.AnimateReshuffle(
+                discardZoneButton != null ? discardZoneButton.transform : null,
+                deckZoneButton != null ? deckZoneButton.transform : null,
+                evt.Count,
+                _bm.PlayerOrigin,
+                () => PunchCountText(deckCountText)
+            );
+        }
+
         #endregion
 
         #region Public API
@@ -127,8 +176,15 @@ namespace Crookedile.UI.Battle
                 discardCountText.text = deck.DiscardCount.ToString();
             if (exhaustCountText != null)
                 exhaustCountText.text = deck.ExhaustCount.ToString();
+
+            // ponytail: self-heals rather than tracking every exit path. Off-turn the hand is
+            // discarded or cleared, so nothing is waiting to launch; and you can never wait on more
+            // cards than are in hand. Exact per-card bookkeeping only if the counter visibly drifts.
+            if (!_bm.IsPlayerTurn)
+                _drawsAwaitingLaunch = 0;
+            _drawsAwaitingLaunch = Mathf.Min(_drawsAwaitingLaunch, deck.HandCount);
             if (deckCountText != null)
-                deckCountText.text = deck.DeckCount.ToString();
+                deckCountText.text = (deck.DeckCount + _drawsAwaitingLaunch).ToString();
         }
 
         #endregion

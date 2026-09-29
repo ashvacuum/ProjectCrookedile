@@ -75,6 +75,8 @@ namespace Crookedile.UI.Battle
 
             // Pull the played card from hand and hold it; the gap closes now, the card flies
             // to discard in OnCardPlayResolved so order is: VFX → discard → new draws appear.
+            // A deal still in progress lands first so its loop can't fight the close-up.
+            CardFlyAnimator.Instance?.FinishDraw();
             _pendingDiscardButton = ExtractCard(evt.Card);
             ArrangeCards(animated: true);
         }
@@ -167,11 +169,19 @@ namespace Crookedile.UI.Battle
 
             ValidateLayoutContainerOnce();
 
-            // Remember which cards were already shown so only genuinely new ones animate in.
-            var previous = new HashSet<CardData>();
+            // Remember where each on-screen card is, one entry per copy, so rebuilt buttons pick
+            // up exactly where the old ones were and glide on from there. Only cards not in this
+            // snapshot animate in as draws. A card still waiting in the deck mid-draw is inactive,
+            // so it isn't recorded and deals in again.
+            var previous = new Dictionary<CardData, Queue<(Vector3 pos, Quaternion rot)>>();
             foreach (var b in _activeButtons)
-                if (b?.CardData != null)
-                    previous.Add(b.CardData);
+            {
+                if (b?.CardData == null || !b.gameObject.activeSelf)
+                    continue;
+                if (!previous.TryGetValue(b.CardData, out var copies))
+                    previous[b.CardData] = copies = new Queue<(Vector3, Quaternion)>();
+                copies.Enqueue((b.transform.localPosition, b.transform.localRotation));
+            }
 
             ClearHand();
 
@@ -199,25 +209,33 @@ namespace Crookedile.UI.Battle
                     () => _onCardClicked(captured, idx)
                 );
                 _activeButtons.Add(btn);
-                if (!previous.Contains(card)) // set-diff; duplicate CardData refs collapse, acceptable
+                if (previous.TryGetValue(card, out var copies) && copies.Count > 0)
+                {
+                    var (pos, rot) = copies.Dequeue();
+                    btn.transform.localPosition = pos;
+                    btn.transform.localRotation = rot;
+                }
+                else
+                {
+                    btn.SetCardBackForOrigin(_bm.PlayerOrigin);
                     newButtons.Add(btn);
+                }
             }
-
-            // Existing (already-shown) cards are visible at scale 1 right away; only the
-            // genuinely new cards get the staggered pop-in.
-            foreach (var btn in _activeButtons)
-                if (!newButtons.Contains(btn))
-                    EnsureVisible(btn);
 
             if (CardFlyAnimator.Instance != null && newButtons.Count > 0)
             {
-                CardFlyAnimator.Instance.AnimateDrawIn(_activeButtons, newButtons, cardButtonContainer);
+                CardFlyAnimator.Instance.AnimateDrawIn(
+                    _activeButtons,
+                    newButtons,
+                    cardButtonContainer.GetComponent<CardHandLayout>()
+                );
             }
             else
             {
-                foreach (var btn in newButtons)
-                    EnsureVisible(btn);
-                ArrangeCards(animated: false);
+                // No deal to animate: the deck counter still needs to hear these cards left it.
+                foreach (var _ in newButtons)
+                    EventBus.Publish(new DrawnCardLaunchedEvent());
+                ArrangeCards(animated: newButtons.Count == 0);
             }
         }
 
@@ -234,6 +252,7 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
+            CardFlyAnimator.Instance.CancelDraw();
             foreach (var btn in _activeButtons)
             {
                 if (btn == null)
@@ -281,15 +300,6 @@ namespace Crookedile.UI.Battle
             cardButtonContainer
                 .GetComponent<CardHandLayout>()
                 ?.ArrangeCards(_activeButtons, animated);
-        }
-
-        private static void EnsureVisible(CardButton btn)
-        {
-            if (btn == null)
-                return;
-            btn.transform.DOKill();
-            btn.gameObject.SetActive(true);
-            btn.transform.localScale = Vector3.one;
         }
 
         // Cards are positioned by CardHandLayout (arc fan). The container must have it, and any UI
