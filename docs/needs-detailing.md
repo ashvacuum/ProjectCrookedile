@@ -1,6 +1,6 @@
 # Needs Detailing — design questions awaiting a decision
 
-*As of 2026-06-10. These are NOT build tasks — each needs a design call (and usually a playtest) before code. Execution tasks live in `work-now.md`. Ordered by how much they block.*
+*As of 2026-09-11. These are NOT build tasks — each needs a design call (and usually a playtest) before code. Ordered by how much they block.*
 
 ---
 
@@ -38,6 +38,7 @@ Code uses `EnemyMoveType` (Attack/Defend/DefendOpinion/RileOthers/...); the desi
 
 Each of Attention / Scandal / Drama King needs enough cards to be *committable* (~8–12 each, per the "coherent mini-archetypes, not oatmeal" rule). Specific opens:
 - **Scandal:** severity-when-drawn; on-draw vs in-play triggers (pool can have both — ratio?); removal beyond the spin/cash-out.
+- **Scandal is currently built as its own opposite.** The design wants an anti-Curse you *want* — clogs the hand but powers your other cards per-Scandal. The authored Scandal cards are plain StS punishment curses, and they are tagged faithleader/universal rather than Celebrity. No card rewards carrying one. Decide whether the reward-per-Scandal line is real before authoring the pool; if it is, the existing curses are mis-tagged, not just unfinished.
 - **Attention:** the "held too long → you become the target" penalty — auto rule or card-text-only? Currently deferred to tuning.
 - **Drama King:** keep disarm framing distinct from FL debuffs (protect-while-attacking vs debuff-to-convert).
 
@@ -47,18 +48,70 @@ Tag-driven starter collection gives 1 of each card; the doc wants repeats (e.g. 
 
 ## 7. Status DB scope (blocks: nothing — decide during the re-key)
 
-When re-keying `StatusEffectIconMapSO` by Id (work-now §1): does it grow into the full "generic effects/statuses database" (SFX/VFX/category per status), or stay icon/color/text with audio-visual mapped elsewhere (BattleSoundMap pattern)? Decide once, during the re-key, to avoid touching the asset twice.
+When re-keying `StatusEffectIconMapSO` by Id (the `StatusEffectIconMapSO` re-key): does it grow into the full "generic effects/statuses database" (SFX/VFX/category per status), or stay icon/color/text with audio-visual mapped elsewhere (BattleSoundMap pattern)? Decide once, during the re-key, to avoid touching the asset twice.
 
 ## 8. Nepo Baby leash (blocks: Nepo roster/deck depth)
 
 "Summoned allies are the *most* corruptible" is the signature fear, but nothing detailed: are summons extra-vulnerable to Sway? Higher Turncoat damage? Do Plants (hostile summons) count as your villain for echo-chamber purposes (they should — confirm)? The Hardened-breaking "daddy knows people" card — core or reward pool?
 
-## 9. Deferred wholesale (don't detail yet)
+## 9. Meta-progression: achievements and unlocks (blocks: nothing yet — wanted eventually)
+
+**Want:** persistent milestones across runs that unlock content — cards, allies, encounters.
+
+**Already in the repo, all of it disconnected:**
+- `CardData.IsUnlockable` + `CardDatabase.GetUnlockableCards()` + `CardSearchQuery.UnlockableCardsOnly` — a flag nothing reads at acquisition time.
+- `SaveData.unlockedCardIDs` / `unlockedLocationIDs` — written on new-save and cleared on reset, read by nothing. `unlockedLocationIDs` predates the encounter model; probably delete rather than repurpose.
+- `CheatsManager.UnlockAllCards()` publishes `CheatUnlockAllCardsEvent`, which has no subscriber.
+
+So the shape exists as three dead stubs, and the decision is what to make them mean.
+
+**Proposed shape — three pieces, in build order:**
+
+1. **A counter store, not an achievement engine.** Nearly every achievement is "count something that already fires on `EventBus`". A `Dictionary<string, int>` on `SaveData` plus one listener that increments named counters (`enemies_converted`, `runs_won_as_faithleader`, `day7_reached`) is the whole tracking layer. Achievements and unlocks both read it, so neither needs to know about the other.
+
+   **Split the counting from the answering.** They look like one "UnlockManager" and aren't:
+   - *Counting* needs a lifetime and `EventBus` subscriptions — a real object, `Singleton<T>` per convention, disposed the way `PassiveResolver` unsubscribes at battle end.
+   - *Answering "is this unlocked?"* is a pure function over `SaveData` — a static helper with no lifetime, callable from `GetAcquirable()` **and from editor tooling with no game running**, which is what lets the Content Hub audit unlock reachability offline. Fuse the two and every query needs a live singleton.
+
+2. **Three `UnlockCondition` subclasses, not a lot of them.** `[SerializeReference]` polymorphic, deliberately mirroring `RunRequirement`. "Convert 50 enemies", "win 3 runs as Faith Leader", "reach day 7", "beat the Incumbent" are *not* four conditions — they are one `StatAtLeast(key, n)` with four strings. Add `WonRunAs(origin)` because origin isn't a counter, and `HasUnlocked(otherId)` for chains, and the set is closed. A fifth subclass usually means a counter nobody incremented.
+
+   So **the counter keys are the design surface, not the condition classes** — and that is the flag problem again: a string on one side, an `EventBus` listener spelling it on the other, nothing checking they match. Unlike encounter flags, designers don't invent counters (code does), so `const string` fields on the tracker beat a free-form key with an editor index.
+
+3. **No fourth database.** Put an `UnlockCondition` field on the content asset itself — `CardData` (beside the existing `IsUnlockable`), `AllyData`, `EncounterData` — and gate at the acquisition chokepoints: `CardDatabase.GetAcquirable()` for cards, `EncounterPoolData.DrawForDay` for encounters. Cards funnel through one method, so that half is a two-line change once the condition type exists.
+
+**Keep achievements and unlocks separate.** An achievement is a *named, displayed* milestone; an unlock condition is a *gate*. Most unlocks want no achievement card attached, and some achievements unlock nothing. Coupling them means every gate needs display copy. Both read the same counters.
+
+**Decide before building:**
+- **Does an unlock apply mid-run or from the next run?** Next-run-only is far simpler — resolve unlocks once at run start into `RunState` and nothing has to re-check mid-battle. Mid-run means every acquisition site re-reads the save.
+- **Are encounters actually unlockable, or only cards and allies?** Locking encounters makes the pool a different shape per save file — the Encounter Designer's day-coverage strip and the schedule simulation both currently assume one fixed pool, and would need an "as unlocked by" toggle to stay honest.
+- **What counts as a "run" for the counters** — any run started, or only ones played to a conclusion? Abandoned-run farming is the usual exploit.
+
+## 10. EncourageSides — no agreed meaning
+
+Specced as a move ("encourage others to switch sides") and never defined: does it defect an ally
+toward the player, flip hostility, or pull the meter directly? No `EnemyMoveType` value, no
+effect, no asset — deliberately. Decide the rule before anything is built; each reading needs a
+different effect.
+
+## 11. CardType colour taxonomy carries no meaning as authored
+
+Pressure (green, persuade) vs Rhetoric (red, aggressive) is applied at random: draw-only cards
+sit in Rhetoric, and pressure is split across both. The colours are load-bearing for the player
+read and for `Silenced` (= "no Rhetoric"), so they need a consistent rule — or the split needs to
+stop pretending to be one.
+
+## 12. Deferred wholesale (don't detail yet)
 
 **(2026-07-02) Partially un-deferred:** the campaign metagame + relic runtime are now planned
 in `metagame-campaign.md` (Potionomics-style free-roam map, campaign HQ, hour budget, event
 nodes; relics from bosses + events; reward-quality scaling in v1). Its ⚑ open questions live
-there. Still deferred:
+there.
+
+**(2026-09-18) Map form decided:** the overworld is a **2:1 isometric sprite city**
+(`metagame-campaign.md` §1.5, asset spec + generation prompt in `art-bible.md` §9).
+Production overworld art is still deferred — greybox tiles are fine for playtests — but the
+*shape* is no longer an open question, so don't re-litigate it here. Still deferred:
 - Viral moments / News Cycle track.
 - Production resource HUD (debug overlay suffices for playtesting).
 - `EnemyConvertedEvent` bespoke flourish/animation.
+- Overworld building art beyond greybox (the ≈20–40 sprites §1.5 calls for).

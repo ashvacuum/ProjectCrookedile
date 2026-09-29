@@ -26,7 +26,7 @@ MonoBehaviour:
     MaxActionPoints: 3
     StartingFunds: 150
     StartingCredibility: 90
-    MaxHours: 24
+    MaxHours: 8
   - Type: 1
     DisplayName: Nepo Baby
     Description: The schemer. Sacrifice cards to bank Patronage, then summon bodies
@@ -40,7 +40,7 @@ MonoBehaviour:
     MaxActionPoints: 3
     StartingFunds: 600
     StartingCredibility: 65
-    MaxHours: 24
+    MaxHours: 8
   - Type: 2
     DisplayName: Celebrity
     Description: The open canvas. Drafts into Attention, Scandal or Drama King; first
@@ -54,4 +54,4 @@ MonoBehaviour:
     MaxActionPoints: 3
     StartingFunds: 250
     StartingCredibility: 79
-    MaxHours: 24
+    MaxHours: 8

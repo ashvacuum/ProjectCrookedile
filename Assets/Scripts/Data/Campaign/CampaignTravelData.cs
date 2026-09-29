@@ -31,6 +31,11 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private List<Road> _roads = new List<Road>();
 
+        public IReadOnlyList<Road> Roads
+        {
+            get { return _roads; }
+        }
+
         public DistrictData Headquarters
         {
             get { return _headquarters; }
@@ -71,7 +76,20 @@ namespace Crookedile.Data.Campaign
             [SerializeField]
             private List<TrafficWindow> _traffic = new List<TrafficWindow>();
 
-            internal DistrictData DestinationFrom(DistrictData district)
+            public DistrictData From
+            {
+                get { return _from; }
+            }
+            public DistrictData To
+            {
+                get { return _to; }
+            }
+            public bool Bidirectional
+            {
+                get { return _bidirectional; }
+            }
+
+            public DistrictData DestinationFrom(DistrictData district)
             {
                 if (district == _from)
                 {
@@ -81,12 +99,12 @@ namespace Crookedile.Data.Campaign
                 return _bidirectional && district == _to ? _from : null;
             }
 
-            internal int BaseMinutes
+            public int BaseMinutes
             {
                 get { return Mathf.Clamp(_baseMinutes, 1, MINUTES_PER_DAY); }
             }
 
-            internal int MinutesAt(int departureMinute)
+            public int MinutesAt(int departureMinute)
             {
                 float multiplier = 1f;
                 foreach (var window in _traffic)
@@ -145,11 +163,13 @@ namespace Crookedile.Data.Campaign
             DistrictData to,
             int departureMinute,
             out int travelMinutes,
-            out int clearMinutes
+            out int clearMinutes,
+            List<Road> route = null
         )
         {
             travelMinutes = 0;
             clearMinutes = 0;
+            route?.Clear();
             if (from == null || to == null)
             {
                 return false;
@@ -158,6 +178,7 @@ namespace Crookedile.Data.Campaign
             var distances = new Dictionary<DistrictData, int> { { from, 0 } };
             var clearDistances = new Dictionary<DistrictData, int> { { from, 0 } };
             var visited = new HashSet<DistrictData>();
+            var predecessors = route != null ? new Dictionary<DistrictData, Road>() : null;
 
             // ponytail: district-scale Dijkstra with a departure-time traffic snapshot; use indexed adjacency for large networks.
             while (true)
@@ -182,6 +203,19 @@ namespace Crookedile.Data.Campaign
                 {
                     travelMinutes = shortest;
                     clearMinutes = clearDistances[nearest];
+                    if (route != null)
+                    {
+                        var cursor = to;
+                        while (cursor != from)
+                        {
+                            var road = predecessors[cursor];
+                            route.Add(road);
+                            cursor = road.To == cursor ? road.From : road.To;
+                        }
+
+                        route.Reverse();
+                    }
+
                     return true;
                 }
 
@@ -204,6 +238,10 @@ namespace Crookedile.Data.Campaign
                     {
                         distances[next] = candidate;
                         clearDistances[next] = clearDistances[nearest] + road.BaseMinutes;
+                        if (predecessors != null)
+                        {
+                            predecessors[next] = road;
+                        }
                     }
                 }
             }

@@ -2,11 +2,18 @@
 
 # Deprecated Docs
 
-*Nothing in this folder is current. Moved here 2026-07-28.*
+*Nothing in this folder is current. First batch moved 2026-07-28; a second batch 2026-09-11.*
 
-These predate the combat + class redesign — the shift from an HP/damage prototype to the
+**The 2026-07-28 batch** predates the combat + class redesign — the shift from an HP/damage prototype to the
 shared **Opinion Meter** model, and from the original three "origins" to the current three
 archetypes. Their specifics no longer match the code or the design.
+
+**The 2026-09-11 batch** is the opposite case: `roadmap.md`, `campaign-build-checklist.md` and
+`opinion-meter-passes.md` were *executed* — they are plans and specs whose work shipped.
+`card-audit.md` (+ `.csv`) and `faith-leader-identity.md` audit a card library that was rebuilt
+at a different path. Each carries a banner saying what shipped and where the live version
+lives. Design questions that survived them were lifted into [`needs-detailing.md`](../needs-detailing.md)
+rather than left here.
 
 **They are kept, not deleted, because several contain ideas that were never wrong — only
 unbuilt.** See [Still worth mining](#still-worth-mining) below. If you pull an idea from

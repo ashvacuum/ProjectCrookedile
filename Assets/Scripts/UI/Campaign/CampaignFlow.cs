@@ -29,7 +29,7 @@ namespace Crookedile.UI.Campaign
         [Tooltip("Hours available each day.")]
         [Min(1)]
         [SerializeField]
-        private int _maxHours = 3;
+        private int _maxHours = RunState.DEFAULT_MAX_HOURS;
 
         [Tooltip("Campaign seed. 0 = random each run.")]
         [SerializeField]
@@ -161,13 +161,21 @@ namespace Crookedile.UI.Campaign
 
             if (!(encounter is EventEncounterData) && !(encounter is BattleEncounterData))
             {
-                GameLogger.LogWarning("Campaign", $"Unsupported encounter '{encounter.name}'.", this);
+                GameLogger.LogWarning(
+                    "Campaign",
+                    $"Unsupported encounter '{encounter.name}'.",
+                    this
+                );
                 return;
             }
 
             if (encounter is BattleEncounterData invalidBattle && invalidBattle.Session == null)
             {
-                GameLogger.LogWarning("Campaign", $"'{encounter.name}' has no battle session.", this);
+                GameLogger.LogWarning(
+                    "Campaign",
+                    $"'{encounter.name}' has no battle session.",
+                    this
+                );
                 return;
             }
 
@@ -175,7 +183,11 @@ namespace Crookedile.UI.Campaign
             {
                 if (!state.TryVisit(encounter))
                 {
-                    GameLogger.LogWarning("Campaign", $"Cannot enter '{encounter.name}': {state.PlanVisit(encounter).BlockedReason}", this);
+                    GameLogger.LogWarning(
+                        "Campaign",
+                        $"Cannot enter '{encounter.name}': {state.PlanVisit(encounter).BlockedReason}",
+                        this
+                    );
                     return;
                 }
             }
@@ -376,23 +388,31 @@ namespace Crookedile.UI.Campaign
                     GUILayout.Label($"    {loc.Blurb}");
 
                 GUI.enabled = true;
-                GUILayout.Label($"    Opens {CampaignTravelData.FormatTime(loc.OpeningMinute)} | "
-                    + $"Enter before {CampaignTravelData.FormatTime(loc.ClosingMinute)}");
+                GUILayout.Label(
+                    $"    Opens {CampaignTravelData.FormatTime(loc.OpeningMinute)} | "
+                        + $"Enter before {CampaignTravelData.FormatTime(loc.ClosingMinute)}"
+                );
                 if (plan.ArrivalMinute > 0)
                 {
-                    string traffic = plan.TrafficMultiplier >= 2f ? "Heavy"
-                        : plan.TrafficMultiplier > 1f ? "Moderate" : "Clear";
-                    GUILayout.Label($"    Traffic: {traffic} ({plan.TrafficMultiplier:0.##}x) | "
-                        + $"Arrive {CampaignTravelData.FormatTime(plan.ArrivalMinute)} | "
-                        + $"Start {CampaignTravelData.FormatTime(plan.StartMinute)} | "
-                        + $"Finish {CampaignTravelData.FormatTime(plan.FinishMinute)}");
+                    string traffic =
+                        plan.TrafficMultiplier >= 2f ? "Heavy"
+                        : plan.TrafficMultiplier > 1f ? "Moderate"
+                        : "Clear";
+                    GUILayout.Label(
+                        $"    Traffic: {traffic} ({plan.TrafficMultiplier:0.##}x) | "
+                            + $"Arrive {CampaignTravelData.FormatTime(plan.ArrivalMinute)} | "
+                            + $"Start {CampaignTravelData.FormatTime(plan.StartMinute)} | "
+                            + $"Finish {CampaignTravelData.FormatTime(plan.FinishMinute)}"
+                    );
                     Rect meter = GUILayoutUtility.GetRect(120f, 6f, GUILayout.Width(120f));
                     GUI.Box(meter, GUIContent.none);
                     meter.width *= Mathf.Clamp01((plan.TrafficMultiplier - 1f) / 4f);
                     GUI.DrawTexture(meter, Texture2D.whiteTexture);
                     if (plan.TravelMinutesSaved > 0 || plan.EncounterMinutesSaved > 0)
                     {
-                        GUILayout.Label($"    Allies save {plan.TravelMinutesSaved}m travel and {plan.EncounterMinutesSaved}m encounter time.");
+                        GUILayout.Label(
+                            $"    Allies save {plan.TravelMinutesSaved}m travel and {plan.EncounterMinutesSaved}m encounter time."
+                        );
                     }
                 }
                 GUILayout.Space(4f);
@@ -423,7 +443,12 @@ namespace Crookedile.UI.Campaign
                     ? boss.name
                     : boss.DisplayName;
                 // Always enabled, like HQ was: running out of Hours must not strand the run.
-                if (GUILayout.Button($"Face {bossName} (mandatory finale, no travel or time cost)", GUILayout.Height(30f)))
+                if (
+                    GUILayout.Button(
+                        $"Face {bossName} (mandatory finale, no travel or time cost)",
+                        GUILayout.Height(30f)
+                    )
+                )
                     Enter(boss, chargeHours: false);
                 return;
             }
@@ -461,12 +486,7 @@ namespace Crookedile.UI.Campaign
                 if (card == null)
                     continue;
 
-                if (
-                    GUILayout.Button(
-                        $"{card.CardName}   ({card.CardType})",
-                        GUILayout.Height(30f)
-                    )
-                )
+                if (GUILayout.Button($"{card.CardName}   ({card.CardType})", GUILayout.Height(30f)))
                 {
                     RunState.Current.ResolveCardChoice(card);
                     GameLogger.LogInfo("Campaign", $"Card choice: '{card.CardName}'.", this);

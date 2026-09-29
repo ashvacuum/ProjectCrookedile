@@ -15,3 +15,7 @@ MonoBehaviour:
   _allies:
   - {fileID: 11400000, guid: dd706fe13c32d174789a094450ec1af5, type: 2}
   - {fileID: 11400000, guid: 64b070a5ceb86e24d875114d417dbdb7, type: 2}
+  - {fileID: 11400000, guid: c678e0b47c7e462488685d3e8d6b7e3f, type: 2}
+  - {fileID: 11400000, guid: 8f3dc5edfdef2994795dd9e9b856e3d7, type: 2}
+  - {fileID: 11400000, guid: 0603c994bbfc364499047207623d4227, type: 2}
+  - {fileID: 11400000, guid: f28e361d3e063f04087c685a08fd538b, type: 2}

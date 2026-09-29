@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: Ambush Interview
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _closingMinute: 840
+  _openingMinute: 540
+  _extraMinutes: 45
+  _district: {fileID: 11400000, guid: 0fc98ecb448e466193b74300314db188, type: 2}
+  _id: 0804a843b416f4f408c84fd3f814b036
+  _displayName: Ambush Interview
+  _blurb: A reporter corners you off-script.
+  _hourCost: 0
+  _dropWeight: 2
+  _body: 
+  _options:
+  - _label: Improvise
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 4020939437640777828
+  - _label: No Comment
+    _resultText: 
+    _requirements: []
+    _outcomes: []
+  - _label: Turn it into a Stunt
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 4020939437640777829
+  references:
+    version: 2
+    RefIds:
+    - rid: 4020939437640777828
+      type: {class: GainRandomCardOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _scope: 0
+        _restrictType: 0
+        _type: 1
+        _restrictRarity: 1
+        _rarity: 0
+        _count: 1
+    - rid: 4020939437640777829
+      type: {class: GoToEncounterOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _encounter: {fileID: 0}

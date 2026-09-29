@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: The Incumbent
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _id: db87f831eb2314243ad00dbd3ac46f28
+  _enemyName: The Incumbent
+  _portrait: {fileID: 0}
+  _startingHostility: 15
+  _maxHostility: 60
+  _minHostility: 10
+  _neutralZone: 0
+  _startingEffects: []
+  _passives:
+  - rid: 4020939437640777821
+  _movePattern: 0
+  _aggressiveMoves: []
+  _neutralMoves: []
+  _receptiveMoves: []
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4020939437640777821
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: -2
+        _conditions:
+        - rid: 4020939437640777824
+        _oneShot: 0
+        _effects: []
+    - rid: 4020939437640777824
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

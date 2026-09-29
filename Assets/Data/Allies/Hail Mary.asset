@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
+  m_Name: Hail Mary
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
+  _id: 8f3dc5edfdef2994795dd9e9b856e3d7
+  _icon: {fileID: 0}
+  _allyName: Hail Mary
+  _description: 
+  _rarity: 2
+  _passives:
+  - rid: 4020939570431393890
+  references:
+    version: 2
+    RefIds:
+    - rid: 4020939570431393890
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 4020939570431393892
+        _conditions:
+        - rid: 4020939570431393894
+        _oneShot: 1
+        _effects:
+        - rid: 4020939570431393895
+    - rid: 4020939570431393892
+      type: {class: OpinionRaisedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 4020939570431393894
+      type: {class: OpinionBelowCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _percentThreshold: 1
+    - rid: 4020939570431393895
+      type: {class: RaiseOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 10
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1

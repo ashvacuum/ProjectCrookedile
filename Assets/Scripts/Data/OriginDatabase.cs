@@ -111,13 +111,13 @@ namespace Crookedile.Data
 
             [BoxGroup("Origin/Right/Campaign")]
             [Tooltip("Hours per campaign day. 0 falls back to the run’s default.")]
-            [LabelText("@MaxHours == 0 ? \"Hours/day (default 3)\" : \"Hours/day\"")]
+            [LabelText("@MaxHours == 0 ? \"Hours/day (default 8)\" : \"Hours/day\"")]
             public int MaxHours;
 
             /// <summary>Row label for the entries list, so origins read without expanding.</summary>
             private string Summary =>
                 $"{(string.IsNullOrEmpty(DisplayName) ? Type.ToString() : DisplayName)}"
-                + $"  —  {StartingFunds}F / {StartingCredibility}C / {(MaxHours == 0 ? 3 : MaxHours)}h";
+                + $"  —  {StartingFunds}F / {StartingCredibility}C / {(MaxHours == 0 ? RunState.DEFAULT_MAX_HOURS : MaxHours)}h";
         }
 
         // BuildMap assigns by Type, so a second row for the same origin silently replaces the

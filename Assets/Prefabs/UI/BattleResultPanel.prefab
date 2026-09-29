@@ -60,6 +60,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9334ad51963336e40a45b90e0dd99f0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.BattleResultPanel
+  _router: {fileID: 0}
   victoryPanel: {fileID: 1075946489351592803}
   defeatPanel: {fileID: 7710685349699896262}
   _continueButton: {fileID: 8134867300847214213}
@@ -170,6 +171,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ee4d2f5b0e9e4a479fa040003176100, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Crookedile.UI::Crookedile.UI.Battle.CardPickerPanel
+  _router: {fileID: 0}
   titleText: {fileID: 6909243712011937326}
   cardContainer: {fileID: 6370508265779853686}
   confirmButton: {fileID: 1720091136736859754}
@@ -242,8 +244,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Victory
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 5e48c6b5155ab684092ac6890f8f3af4, type: 2}
-  m_sharedMaterial: {fileID: 1562895403856678892, guid: 5e48c6b5155ab684092ac6890f8f3af4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2edaeefba9e4a41409207ba32bc3dc26, type: 2}
+  m_sharedMaterial: {fileID: -7347246411779152372, guid: 2edaeefba9e4a41409207ba32bc3dc26, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -379,8 +381,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Defeat
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 4eccd51250cfa3948a3ac1e21d15fe34, type: 2}
-  m_sharedMaterial: {fileID: 7304186015023537574, guid: 4eccd51250cfa3948a3ac1e21d15fe34, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2edaeefba9e4a41409207ba32bc3dc26, type: 2}
+  m_sharedMaterial: {fileID: -7347246411779152372, guid: 2edaeefba9e4a41409207ba32bc3dc26, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -518,8 +520,8 @@ MonoBehaviour:
 
 '
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 5e48c6b5155ab684092ac6890f8f3af4, type: 2}
-  m_sharedMaterial: {fileID: 1562895403856678892, guid: 5e48c6b5155ab684092ac6890f8f3af4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2edaeefba9e4a41409207ba32bc3dc26, type: 2}
+  m_sharedMaterial: {fileID: -7347246411779152372, guid: 2edaeefba9e4a41409207ba32bc3dc26, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -717,8 +719,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Continue
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 4eccd51250cfa3948a3ac1e21d15fe34, type: 2}
-  m_sharedMaterial: {fileID: 7304186015023537574, guid: 4eccd51250cfa3948a3ac1e21d15fe34, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2edaeefba9e4a41409207ba32bc3dc26, type: 2}
+  m_sharedMaterial: {fileID: -7347246411779152372, guid: 2edaeefba9e4a41409207ba32bc3dc26, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -997,6 +999,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9334ad51963336e40a45b90e0dd99f0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.BattleResultPanel
+  _router: {fileID: 0}
   victoryPanel: {fileID: 0}
   defeatPanel: {fileID: 0}
   _continueButton: {fileID: 0}

@@ -2,6 +2,7 @@
 using System.Linq;
 using Crookedile.Data;
 using Crookedile.Gameplay.Battle;
+using Crookedile.Utilities;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -132,6 +133,10 @@ namespace Crookedile.Data.Enemy
             "Moves used while the enemy is Aggressive (Hostility > Neutral Zone). "
                 + "For Sequential pattern, moves play in order 0 → 1 → 2 → 0 …"
         )]
+#if UNITY_EDITOR
+        [ListDrawerSettings(CustomAddFunction = nameof(CreateAggressiveMove))]
+#endif
+        [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         [SerializeField]
         private List<EnemyMoveData> _aggressiveMoves = new List<EnemyMoveData>();
 
@@ -139,6 +144,10 @@ namespace Crookedile.Data.Enemy
             "Moves used while the enemy is Neutral (Hostility within ± Neutral Zone of 0). "
                 + "For Sequential pattern, moves play in order 0 → 1 → 2 → 0 …"
         )]
+#if UNITY_EDITOR
+        [ListDrawerSettings(CustomAddFunction = nameof(CreateNeutralMove))]
+#endif
+        [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         [SerializeField]
         private List<EnemyMoveData> _neutralMoves = new List<EnemyMoveData>();
 
@@ -146,6 +155,10 @@ namespace Crookedile.Data.Enemy
             "Moves used while the enemy is Receptive (Hostility < -Neutral Zone). "
                 + "For Sequential pattern, moves play in order 0 → 1 → 2 → 0 …"
         )]
+#if UNITY_EDITOR
+        [ListDrawerSettings(CustomAddFunction = nameof(CreateReceptiveMove))]
+#endif
+        [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         [SerializeField]
         private List<EnemyMoveData> _receptiveMoves = new List<EnemyMoveData>();
 
@@ -226,6 +239,17 @@ namespace Crookedile.Data.Enemy
         {
             _id = System.Guid.NewGuid().ToString();
         }
+
+        // The "+" on each move list makes the asset instead of leaving a blank slot to fill
+        // from the Project window. Beside the enemy, so two enemies can share a move.
+        private EnemyMoveData CreateAggressiveMove() => CreateMove("Aggressive");
+
+        private EnemyMoveData CreateNeutralMove() => CreateMove("Neutral");
+
+        private EnemyMoveData CreateReceptiveMove() => CreateMove("Receptive");
+
+        private EnemyMoveData CreateMove(string stance) =>
+            AuthoringAssets.CreateBeside<EnemyMoveData>(this, $"{name} {stance} Move");
 #endif
     }
 

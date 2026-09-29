@@ -150,6 +150,7 @@ namespace Crookedile.Gameplay.Battle
             Subscribe<EnemyNeutralizedEvent>();
             Subscribe<EnemyMaxedHostilityEvent>();
             Subscribe<EnemyMaxedReceptiveEvent>();
+            Subscribe<EnemyConvertedEvent>();
         }
 
         /// <summary>Unsubscribes all EventBus listeners. Call when the battle ends.</summary>

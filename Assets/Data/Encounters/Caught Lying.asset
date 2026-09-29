@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: Caught Lying
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _closingMinute: 900
+  _openingMinute: 600
+  _extraMinutes: 0
+  _district: {fileID: 11400000, guid: 0fc98ecb448e466193b74300314db188, type: 2}
+  _id: 84907794a47532047aaa98f3163b0438
+  _displayName: Caught Lying
+  _blurb: "Answer the accusation in front of the civic center press corps."
+  _hourCost: 1
+  _dropWeight: 1
+  _body: 
+  _options:
+  - _label: Come Clean
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 4020939597778780160
+  - _label: Double Down
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 4020939597778780161
+  - _label: Spin It
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 4020939597778780162
+  references:
+    version: 2
+    RefIds:
+    - rid: 4020939597778780160
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: -15
+    - rid: 4020939597778780161
+      type: {class: RemoveRandomCardOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _restrictType: 0
+        _type: 4
+        _count: 1
+    - rid: 4020939597778780162
+      type: {class: AdjustFundsOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: -20
