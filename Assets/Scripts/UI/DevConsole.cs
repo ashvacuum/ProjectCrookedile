@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Crookedile.UI
@@ -122,6 +123,12 @@ namespace Crookedile.UI
 
             BuildUI();
             DiscoverCommands();
+
+            // The console's own fallback EventSystem persists across loads (BuildUI); a scene
+            // that ships its own (main.unity) then ends up with two. Prune on every scene load
+            // rather than only at console startup, since the duplicate only appears once a
+            // scene with its own EventSystem loads after this one exists.
+            SceneManager.sceneLoaded += (_, __) => PruneDuplicateEventSystems();
 
             foreach (var e in GameLogger.Entries)
                 _entries.Add(e);
@@ -493,6 +500,15 @@ namespace Crookedile.UI
         #endregion
 
         #region UI construction
+        /// <summary>Keeps exactly one EventSystem alive — a scene with its own (main.unity)
+        /// plus this console's persistent fallback otherwise leaves two.</summary>
+        private static void PruneDuplicateEventSystems()
+        {
+            var systems = FindObjectsByType<EventSystem>(FindObjectsSortMode.None);
+            for (int i = 1; i < systems.Length; i++)
+                Destroy(systems[i].gameObject);
+        }
+
         private void BuildUI()
         {
             if (EventSystem.current == null)
