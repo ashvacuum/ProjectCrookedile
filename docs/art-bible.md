@@ -6,20 +6,30 @@
 
 ---
 
-## 0.1 Style reference (WORKING DIRECTION — not locked)
+## 0.1 Style reference (LOCKED — confirmed 2026-09-06)
 
-> **Rendering direction: the anime _Odd Taxi_** — flat, muted, sophisticated, deadpan; grounded anthropomorphic cast played with dry restraint. Full generation prompt: `docs/reference/style-mock-prompt.md` (v4).
+> **Rendering direction: the anime _Odd Taxi_, played livelier** — flat, muted, sophisticated, deadpan; grounded anthropomorphic cast with dry restraint. *Lively* is the one deliberate departure: Odd Taxi's stillness is the wrong read for a room you are actively working, so keep its flatness and its palette but not its inertia — more colour saturation in the accents, more posture and gesture in the cast, faces that are reacting rather than observing. Full generation prompt: `docs/reference/style-mock-prompt.md` (v4).
 >
 > **Reference of record: `docs/design/crookedile-style-v4-oddtaxi.png`** (approved 2026-07-03 — the flat muted committee-hall mock). This is the look to match: flat cel shading, dusty warm palette (mustard/teal/brick/cream/olive), thin clean lines, deadpan grounded animal-people, even soft lighting. The earlier dark-painterly mock is superseded.
+>
+> ⚑ **That file is not in the repo.** `docs/design/` holds two PNGs under GUID filenames — rename whichever is the approved v4 mock to the path above, and delete or clearly label the other, or this pointer stays dead for anyone the file is handed to.
+>
+> **The campaign map wears this same look, in 2:1 isometric.** Same palette, same flat cel shading, same thin lines — only the projection differs. Spec: §9. Prompt: `docs/reference/iso-tile-prompt.md`.
 
-**Rendering style:** dark painterly realism (digital-oil), low-key lighting, one warm key light on the speaker/subject, crowd falls into near-black vignette. No cel-shading, no flat vector. Grain/texture over gradient banding.
+**Rendering style:** flat cel shading, even soft lighting, thin clean line work. Dusty warm palette over grey neutrals. No digital-oil rendering, no low-key vignette, no grain — flatness is the point, and the liveliness comes from colour and posture, not from lighting drama.
 
-**Composition (battle scene):** over-the-shoulder podium view — the player is IN the shot, back to camera, facing a raised row of opponent bust-portraits behind desks (committee-hearing framing). The crowd is a dark backdrop, not individuals. This is the "work the room" fantasy rendered literally.
+**Composition (battle scene):** over-the-shoulder podium view — the player is IN the shot, back to camera, facing a raised row of opponent bust-portraits behind desks (committee-hearing framing). The crowd reads as a flat mass of shapes rather than rendered individuals. This is the "work the room" fantasy rendered literally.
 
 **Palette anchors:**
+
+> ⚑ **These values are still the superseded dark-painterly palette** — a near-black base is the
+> opposite of the dusty mustard/teal/brick/cream/olive the locked direction calls for. The accent
+> hues below (green/red/gold) survive the change in role; the base and chrome rows do not.
+> Pull real values off the approved mock rather than guessing them here.
+
 | Role | Color |
 |---|---|
-| Base / panels | near-black charcoal & dark walnut `#141210` / `#2A2018` |
+| Base / panels | ⚑ near-black charcoal & dark walnut `#141210` / `#2A2018` — **stale, needs the flat warm base** |
 | Parchment accents (tips, notes) | cream `#E8D9B0`, torn-paper edges, tape |
 | Approval/positive | toxic green `#7FBF3F` |
 | Hostile/danger | ember red-orange `#C43B2A` |
@@ -226,6 +236,89 @@ Small icons rendered next to the cost number. Author white/tintable.
 4. **10 intent icons** — needed to read the enemy turn.
 5. **7 prototype enemy portraits.**
 6. **Per-card illustrations** — Faith Leader 15 first (briefs in §3), others as their lists lock.
+7. **Campaign-map iso set** (§9) — starts when the campaign layer needs to look like anything; the HQ anchor first, then ground/road tiles, then buildings. Greybox is acceptable until then, so this stays last.
+
+---
+
+## 9. Campaign map — 2:1 isometric tiles & buildings *(LOCKED 2026-09-18)*
+
+The campaign overworld is a 2D sprite city on a 2:1 isometric grid (`metagame-campaign.md`
+§1.5 for why; this section is the authoring spec). Generation prompt + acceptance check:
+`docs/reference/iso-tile-prompt.md`.
+
+### Projection — one angle, no exceptions
+**True 2:1 dimetric:** plan rotated 45°, camera elevation **26.565°** (`atan(0.5)`),
+**orthographic**. A square ground footprint therefore draws as a diamond exactly twice as wide
+as tall. Every tile, road and building uses this same projection and the **same key-light
+direction (upper left)**. Mixed angles or mixed light are the one defect that cannot be fixed
+by re-arranging the city — it has to be redrawn. Check both before import.
+
+### Sizes (4K-ready, per §0.5 — author at the top of the range)
+One grid cell = **256 × 128 px** at **PPU 256**, so one cell is one Unity world unit and a 4K
+screen reads ~15 cells across. Building width is fixed by footprint; height is a ceiling, not
+a target — draw only as tall as the building is.
+
+**Footprints are W×L, not square.** A market row is 3×1, a covered court 2×3, a bridge longer
+still. Both axes contribute half a cell to each dimension, so a W×L footprint's **base** is
+`(W+L)·128` wide by `(W+L)·64` tall. Sprite height is that base plus however tall the building
+stands — a ceiling, not a target.
+
+| Asset | Base size | Notes |
+|---|---|---|
+| Ground / road tile (1×1) | **256 × 128** | the bare diamond, nothing above ground level |
+| Building 1×1 | **256 × 128** base, ≤512 tall | the filler bulk of the set |
+| Building 2×1 / 1×2 | **384 × 192** base | row houses, stalls |
+| Building 2×2 | **512 × 256** base, ≤1024 tall | character buildings |
+| Building 3×1 | **512 × 256** base | market stall rows |
+| Building 3×3 | **768 × 384** base, ≤1280 tall | landmarks |
+| Building 4×4 | **1024 × 512** base, ≤1536 tall | hero (Campaign HQ, city hall) |
+| Zone prop (tree, pole, jeepney, tarpaulin) | ≤ **256 × 384** | scatter, sits inside one cell |
+
+Note a square footprint draws as a diamond and a rectangular one as a **parallelogram** — 3×1
+and 2×2 share a 512×256 base but are different shapes. The `IsoFootprintGizmo` draws the real
+one; don't eyeball it from the numbers.
+
+All PNG + alpha, transparent background, no baked cast shadow (a soft contact ellipse inside
+the footprint is fine — long shadows break when the placer re-arranges the block).
+
+### Pivot — the setting everyone gets wrong
+The pivot sits at the **centre of the base diamond**, not the centre of the image. For an
+N×N footprint the base diamond is `256N × 128N`, so its centre is **64N px up from the bottom
+edge**: set a Custom pivot of `x = 0.5`, `y = 64N / spriteHeight`. A 1×1 building drawn
+256×512 gets `y = 64/512 = 0.125`. Get this wrong and buildings float or sink by half a cell.
+
+### Unity import & scene settings
+- **Import:** PPU **256**, Filter Bilinear, Compression as §0.5, **mipmaps ON** (the map
+  scales across the Deck→4K range), Max Size 2048.
+- **Grid:** Cell Layout **Isometric Z as Y**, Cell Size `(1, 0.5, 1)`.
+- **Sorting:** project-wide **Transparency Sort Mode = Custom Axis (0, 1, 0)**. Without it
+  buildings render through each other — this is the classic iso failure, and it is a graphics
+  setting, not an art problem.
+- **Tilemap Renderer Mode:** `Chunk` for flat ground/roads (faster), `Individual` for anything
+  with height, or tall sprites sort wrong against each other.
+- Roads use **`RuleTile`**, ground variation uses **`RandomTile`** (both from
+  `com.unity.2d.tilemap.extras`, already in the project).
+
+### Checking a sprite
+Two tools, same geometry:
+- **In an image editor:** `docs/reference/iso-grid-guide-256x128.png` — a 2:1 lattice with 1×1 /
+  2×2 / 4×4 markers. Drop it in as a top layer. In Krita you can instead use Grid and Guides →
+  Type: Isometric with **both angles set to 26.57** (its default is 30°, which is a *different*
+  projection and will quietly put every asset slightly wrong).
+- **In the scene view:** the `IsoFootprintGizmo` component. Drop it on a candidate sprite and
+  cycle the footprint until the diamond matches the base — that number goes in the zone list. It
+  draws at the transform position, so a diamond that does not sit under the building's base means
+  the **pivot** is wrong, which matters more than the art being a few percent off (pivots decide
+  sort order; geometry does not).
+
+### Naming
+`iso_ground_<surface>`, `iso_road_<variant>`, `iso_bldg_<name>_<N>x<N>`, `iso_prop_<name>`.
+One concept per file, per §0 delivery standards.
+
+### Scope
+≈**20–40 distinct buildings** before a generated city stops reading as four assets
+copy-pasted. That count, not the tooling, is the campaign map's schedule. Generate the
+Campaign HQ first and treat it as the style anchor every other asset is referenced against.
 
 ---
 
@@ -243,5 +336,8 @@ Sizes are **4K-ready** (author at the top of the Steam-Deck→4K range; see §0.
 | Intent icon | 128 × 128 | PNG + alpha, white/tintable |
 | Enemy portrait | 1024 × 1024 | PNG, square bust |
 | Resource/cost icon | 128 × 128 | PNG + alpha, white/tintable |
+| Iso ground / road tile | 256 × 128 | PNG + alpha, PPU 256, mipmaps on (§9) |
+| Iso building (1×1 … 4×4) | 256×≤512 … 1024×≤1536 | PNG + alpha, pivot at base-diamond centre (§9) |
+| Iso zone prop | ≤ 256 × 384 | PNG + alpha (§9) |
 
 *(Note: the existing placeholder frames/backs are 1000×1432. New art should be authored at 1500×2148 — same 1:1.43 ratio, just 4K-capable. The current per-card `Character_` placeholders are 2048² source, already plenty.)*

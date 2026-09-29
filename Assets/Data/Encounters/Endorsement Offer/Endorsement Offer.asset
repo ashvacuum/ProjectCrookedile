@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: Endorsement Offer
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _closingMinute: 840
+  _openingMinute: 600
+  _extraMinutes: 15
+  _district: {fileID: 11400000, guid: 953c76c063bd23d4f852ccff3d65ef38, type: 2}
+  _id: d7db8fec09e8369438228f0e0d6a3508
+  _displayName: Endorsement Offer
+  _blurb: A controversial figure offers a public endorsement.
+  _hourCost: 1
+  _dropWeight: 1
+  _body: 
+  _options:
+  - _label: Accept
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 4020939437640777825
+  - _label: Reject
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 4020939437640777827
+  - _label: Accept Silently but Loudly Deny
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 4020939437640777830
+    - rid: 4020939437640777831
+  references:
+    version: 2
+    RefIds:
+    - rid: 4020939437640777825
+      type: {class: RecruitAllyOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _ally: {fileID: 11400000, guid: dd706fe13c32d174789a094450ec1af5, type: 2}
+    - rid: 4020939437640777827
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 15
+    - rid: 4020939437640777830
+      type: {class: RecruitAllyOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _ally: {fileID: 11400000, guid: 64b070a5ceb86e24d875114d417dbdb7, type: 2}
+    - rid: 4020939437640777831
+      type: {class: SetFlagOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _flag: plausible_deniability
+        _clear: 0

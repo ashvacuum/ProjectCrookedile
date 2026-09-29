@@ -12,11 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
   m_Name: Headquarters
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
-  _id: bf32b8b1-50b6-41cd-8e89-7c1331367051
-  _displayName: 
-  _blurb: 
+  _closingMinute: 960
+  _openingMinute: 480
+  _extraMinutes: 0
+  _district: {fileID: 11400000, guid: f92e8d6aa6b14629b92da64d357b2512, type: 2}
+  _id: b915841570507184986b6fefb82dd3ee
+  _displayName: Campaign Headquarters
+  _blurb: "The campaign office: regroup, plan, and prepare the next stop."
   _hourCost: 0
-  _dropWeight: 0
+  _dropWeight: 1
   _body: 
   _options:
   - _label: Ad Spend Against Scandals

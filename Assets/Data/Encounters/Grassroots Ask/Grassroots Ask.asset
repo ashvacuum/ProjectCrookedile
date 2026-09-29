@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: Grassroots Ask
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _closingMinute: 810
+  _openingMinute: 540
+  _extraMinutes: 0
+  _district: {fileID: 11400000, guid: a54aa622f1ef40a1935aeae6f25c28e9, type: 2}
+  _id: dd652f8abe0221141a0309a988dcbf41
+  _displayName: Grassroots Ask
+  _blurb: "Spend time with residents in the riverside community."
+  _hourCost: 2
+  _dropWeight: 1
+  _body: 
+  _options:
+  - _label: Help for Real
+    _resultText: 
+    _requirements: []
+    _outcomes:
+    - rid: 4020939437640777833
+    - rid: 4020939437640777834
+  - _label: Promise Vaguely
+    _resultText: 
+    _requirements: []
+    _outcomes: []
+  - _label: Don't promise anything
+    _resultText: 
+    _requirements: []
+    _outcomes: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 4020939437640777833
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 10
+    - rid: 4020939437640777834
+      type: {class: AdjustFundsOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: -5

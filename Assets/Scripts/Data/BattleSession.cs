@@ -39,6 +39,7 @@ namespace Crookedile.Data
                 "A round with no enemies (or an empty slot) starts a fight against nobody.",
                 InfoMessageType.Error
             )]
+            [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
             public List<EnemyData> enemies = new List<EnemyData>();
 
             [Space]

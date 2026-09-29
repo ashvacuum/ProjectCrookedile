@@ -216,7 +216,9 @@ Two layers, like StS: **starter passives** = simple innate per-battle ability de
 
 ## 10. Metagame (early thoughts — not yet solid)
 
-The game is a card game wrapped in an overworld metagame (StS map structure, not a full campaign RPG). The card battles ARE the game; the overworld is connective tissue.
+The game is a card game wrapped in an overworld metagame, not a full campaign RPG. The card battles ARE the game; the overworld is connective tissue.
+
+> **Superseded — see `metagame-campaign.md`.** The old "StS map structure" line here was wrong on both counts: the map is Potionomics-style free roam paced by Hours (not a branching node chain), and it is drawn as a **2:1 isometric sprite city** (locked 2026-09-18, `metagame-campaign.md` §1.5). That doc is canonical for the campaign layer; this section keeps only the two ideas below, which it inherits.
 
 - **Viral moments** — exceptional good/bad encounters get "remembered" and ripple beyond the battle. To feel meaningful they should spawn **concrete things** (a new ally approaches, a hostile journalist hunts you, a door opens/closes) — not just hidden stat modifiers. A visible "News Cycle" track logging the last few moments could make aftereffects tangible. Compounding moments could build toward momentum bonuses or crisis encounters.
 - **Reward scaling** — winning isn't binary; you want to *win well*. Reward quality scales with how many you converted, how many you left hostile, and enemy hostility levels going in. A sloppy win where the meter barely held = scraps.

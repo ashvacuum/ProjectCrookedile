@@ -19,6 +19,8 @@ namespace Crookedile.Data
     /// </summary>
     public class RunState
     {
+        public const int DEFAULT_MAX_HOURS = 8;
+
         #region Static accessor
         /// <summary>The active run, or <c>null</c> if no run has been created yet.</summary>
         public static RunState Current { get; private set; }
@@ -68,7 +70,10 @@ namespace Crookedile.Data
         {
             get
             {
-                int start = Travel != null ? Travel.DayStartMinute : CampaignTravelData.DEFAULT_START_MINUTE;
+                int start =
+                    Travel != null
+                        ? Travel.DayStartMinute
+                        : CampaignTravelData.DEFAULT_START_MINUTE;
                 return start + ElapsedMinutes;
             }
         }
@@ -83,13 +88,22 @@ namespace Crookedile.Data
             Travel = travel;
             CurrentDistrict = travel != null ? travel.Headquarters : null;
             _travelConfigured = true;
-            MinutesRemaining = Mathf.Min(MaxHours * CampaignTravelData.MINUTES_PER_HOUR - ElapsedMinutes,
-                CampaignTravelData.MINUTES_PER_DAY - ClockMinute);
+            MinutesRemaining = Mathf.Min(
+                MaxHours * CampaignTravelData.MINUTES_PER_HOUR - ElapsedMinutes,
+                CampaignTravelData.MINUTES_PER_DAY - ClockMinute
+            );
         }
 
         public CampaignVisitPlan PlanVisit(EncounterData encounter)
         {
-            return CampaignVisitPlan.Calculate(encounter, Travel, CurrentDistrict, ClockMinute, MinutesRemaining, Allies);
+            return CampaignVisitPlan.Calculate(
+                encounter,
+                Travel,
+                CurrentDistrict,
+                ClockMinute,
+                MinutesRemaining,
+                Allies
+            );
         }
 
         public bool TryVisit(EncounterData encounter)
@@ -117,8 +131,11 @@ namespace Crookedile.Data
 
         public bool TrySpendMinutes(int amount)
         {
-            if (amount < 0 || amount > MinutesRemaining
-                || amount > CampaignTravelData.MINUTES_PER_DAY - ClockMinute)
+            if (
+                amount < 0
+                || amount > MinutesRemaining
+                || amount > CampaignTravelData.MINUTES_PER_DAY - ClockMinute
+            )
             {
                 return false;
             }
@@ -251,8 +268,10 @@ namespace Crookedile.Data
         {
             Day++;
             ElapsedMinutes = 0;
-            MinutesRemaining = Mathf.Min(MaxHours * CampaignTravelData.MINUTES_PER_HOUR,
-                CampaignTravelData.MINUTES_PER_DAY - ClockMinute);
+            MinutesRemaining = Mathf.Min(
+                MaxHours * CampaignTravelData.MINUTES_PER_HOUR,
+                CampaignTravelData.MINUTES_PER_DAY - ClockMinute
+            );
             CurrentDistrict = Travel != null ? Travel.Headquarters : null;
         }
 
@@ -409,7 +428,7 @@ namespace Crookedile.Data
             List<CardData> starterDeck,
             List<List<EnemyData>> battleQueue = null,
             bool isCampaignRun = false,
-            int maxHours = 3,
+            int maxHours = DEFAULT_MAX_HOURS,
             int seed = 0
         )
         {
@@ -434,8 +453,10 @@ namespace Crookedile.Data
                 BattleQueue = battleQueue,
                 IsCampaignRun = isCampaignRun,
                 MaxHours = hours,
-                MinutesRemaining = Mathf.Min(hours * CampaignTravelData.MINUTES_PER_HOUR,
-                    CampaignTravelData.MINUTES_PER_DAY - CampaignTravelData.DEFAULT_START_MINUTE),
+                MinutesRemaining = Mathf.Min(
+                    hours * CampaignTravelData.MINUTES_PER_HOUR,
+                    CampaignTravelData.MINUTES_PER_DAY - CampaignTravelData.DEFAULT_START_MINUTE
+                ),
                 VisitedLocationIds = new HashSet<string>(),
                 Flags = new HashSet<string>(),
             };

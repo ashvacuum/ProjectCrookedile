@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Crookedile.Data.Cards;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -174,12 +175,43 @@ namespace Crookedile.Data.Campaign
     }
 
     /// <summary>
-    /// Adds a random card to the deck, drawn from <see cref="CardDatabase"/>. Leave the rarity
-    /// unset to roll on the database's own reward weights (Basic 70 / Enhanced 25 / Rare 5).
+    /// Which slice of the card pool a random draw is allowed to reach into.
+    /// (Ordinals are serialized on encounter assets — do not reorder.)
+    /// </summary>
+    public enum CardDrawScope
+    {
+        AnyCard = 0,
+        PlayerOrigin = 1,
+        Colorless = 2,
+    }
+
+    /// <summary>
+    /// Adds random cards to the deck, drawn from <see cref="CardDatabase"/>. With nothing
+    /// restricted it rolls on the database's own reward weights (Basic 70 / Enhanced 25 /
+    /// Rare 5). Restrict by type to aim it — "the seminary hands you a Rhetoric" — by rarity to
+    /// set how good the handout is, and by scope to keep it on-class.
     /// </summary>
     [Serializable]
     public class GainRandomCardOutcome : RunOutcome
     {
+        [Tooltip(
+            "Any Card — the whole pool.\n"
+                + "Player Origin — only what this run's archetype can draft (its tag, "
+                + "\"universal\", or untagged).\n"
+                + "Colorless — only cards tagged \"universal\", so the handout fits any run."
+        )]
+        [EnumToggleButtons]
+        [SerializeField]
+        private CardDrawScope _scope = CardDrawScope.AnyCard;
+
+        [Tooltip("Restrict the draw to one card type. Untick to draw from every type.")]
+        [SerializeField]
+        private bool _restrictType;
+
+        [ShowIf(nameof(_restrictType))]
+        [SerializeField]
+        private CardType _type = CardType.Rhetoric;
+
         [Tooltip("Restrict the draw to one rarity. Untick to roll on the standard reward weights.")]
         [SerializeField]
         private bool _restrictRarity;
@@ -188,35 +220,136 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private CardRarity _rarity = CardRarity.Basic;
 
+        [Tooltip("How many cards to add. Each is rolled separately, so duplicates are possible.")]
+        [Min(1)]
+        [SerializeField]
+        private int _count = 1;
+
         public override void Apply(RunState state)
         {
             var db = CardDatabaseLookup.Get();
             if (db == null)
                 return;
 
-            CardData card;
-            if (_restrictRarity)
+            CardType? type = _restrictType ? _type : (CardType?)null;
+            CardRarity? rarity = _restrictRarity ? _rarity : (CardRarity?)null;
+
+            for (int i = 0; i < _count; i++)
             {
-                var pool = db.GetByRarity(_rarity);
-                if (pool.Count == 0)
+                // Every branch draws from the run's stream, so a replayed seed offers the same
+                // cards. ponytail: only the wide-open draw honours the reward weights — the rest
+                // are uniform over what survives the filter. If a filtered draw ever needs its
+                // own curve, weight inside the filtered pool rather than adding a knob here.
+                CardData card = _scope switch
                 {
+                    CardDrawScope.PlayerOrigin => db.GetRandomForOrigin(
+                        state.Origin,
+                        type,
+                        rarity,
+                        state.Rng
+                    ),
+                    CardDrawScope.Colorless => db.GetRandomColorless(type, rarity, state.Rng),
+                    _ when type == null && rarity == null => db.GetRandomByRarityWeight(state.Rng),
+                    _ => db.GetRandomByTypeAndRarity(type, rarity, state.Rng),
+                };
+
+                if (card == null)
+                {
+                    // Not silent: an event that promised a card and delivered none reads as
+                    // broken, and a narrow filter legitimately matches nothing.
                     Debug.LogWarning(
-                        $"[GainRandomCardOutcome] No {_rarity} cards in the database."
+                        $"[GainRandomCardOutcome] Nothing matches \"{GetDescription()}\" — no-op."
                     );
                     return;
                 }
-                // Draw from the run's stream so the same seed offers the same card here too.
-                card = pool[state.Rng.Next(pool.Count)];
+                state.AddCardToDeck(card);
             }
-            else
-            {
-                card = db.GetRandomByRarityWeight(state.Rng);
-            }
-            state.AddCardToDeck(card);
         }
 
-        public override string GetDescription() =>
-            _restrictRarity ? $"Gain a random {_rarity} card" : "Gain a random card";
+        public override string GetDescription()
+        {
+            string filter = Filter();
+            string what = string.IsNullOrEmpty(filter) ? "card" : $"{filter} card";
+            string where = _scope == CardDrawScope.PlayerOrigin ? " from your origin's pool" : "";
+            return _count > 1
+                ? $"Gain {_count} random {what}s{where}"
+                : $"Gain a random {what}{where}";
+        }
+
+        /// <summary>The active restrictions as words, empty when the draw is wide open.</summary>
+        private string Filter()
+        {
+            string filter = _scope == CardDrawScope.Colorless ? "colorless" : "";
+            if (_restrictRarity)
+                filter = string.IsNullOrEmpty(filter) ? _rarity.ToString() : $"{filter} {_rarity}";
+            if (_restrictType)
+                filter = string.IsNullOrEmpty(filter) ? _type.ToString() : $"{filter} {_type}";
+            return filter;
+        }
+    }
+
+    /// <summary>
+    /// Adds a card picked at random from a hand-authored shortlist, rather than from the whole
+    /// database. The difference matters: <see cref="GainRandomCardOutcome"/> is "you get
+    /// something", this is "you get one of *these*" — a named event handing out its own themed
+    /// spread, where a database filter would be either too wide or a tag invented for one event.
+    /// </summary>
+    [Serializable]
+    public class GainCardFromPoolOutcome : RunOutcome
+    {
+        [Tooltip("The candidates. One is drawn at random per card granted.")]
+        [SerializeField]
+        private List<CardData> _pool = new List<CardData>();
+
+        [Tooltip("How many cards to add. Each is rolled separately, so duplicates are possible.")]
+        [Min(1)]
+        [SerializeField]
+        private int _count = 1;
+
+        public override void Apply(RunState state)
+        {
+            // Half-authored rows are null until a card is picked, and a pool of nothing but
+            // those would otherwise hand out null cards all run.
+            var candidates = new List<CardData>();
+            foreach (var card in _pool)
+                if (card != null)
+                    candidates.Add(card);
+
+            if (candidates.Count == 0)
+            {
+                Debug.LogWarning("[GainCardFromPoolOutcome] Empty pool — no-op.");
+                return;
+            }
+
+            for (int i = 0; i < _count; i++)
+                // The run's stream, so a replayed seed offers the same card.
+                state.AddCardToDeck(candidates[state.Rng.Next(candidates.Count)]);
+        }
+
+        public override string GetDescription()
+        {
+            int authored = 0;
+            foreach (var card in _pool)
+                if (card != null)
+                    authored++;
+
+            if (authored == 0)
+                return "Gain a card from pool: (EMPTY)";
+            // Naming the whole spread is what makes the choice legible while authoring; past a
+            // handful the count reads better than the list.
+            if (authored <= 3)
+            {
+                var names = new List<string>();
+                foreach (var card in _pool)
+                    if (card != null)
+                        names.Add(card.CardName);
+                string oneOf = string.Join(" / ", names);
+                return _count > 1 ? $"Gain {_count} of: {oneOf}" : $"Gain one of: {oneOf}";
+            }
+            return _count > 1
+                ? $"Gain {_count} cards from a pool of {authored}"
+                : $"Gain a card from a pool of {authored}";
+        }
     }
 
     /// <summary>
@@ -419,6 +552,7 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private EncounterData _encounter;
 
+        /// <summary>Exposed for the Encounter Designer chain edges.</summary>
         public EncounterData Target => _encounter;
 
         public override void Apply(RunState state) => state.SetNextEncounter(_encounter);
@@ -455,7 +589,10 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private bool _clear;
 
+        /// <summary>Exposed so the Encounter Designer can index who writes this flag.</summary>
         public string Flag => _flag;
+
+        /// <summary>True when this outcome clears the flag rather than setting it.</summary>
         public bool Clears => _clear;
 
         public override void Apply(RunState state)
@@ -476,7 +613,9 @@ namespace Crookedile.Data.Campaign
     [Serializable]
     public class RecruitAllyOutcome : RunOutcome
     {
-        [Tooltip("Ally recruited by this choice. Expand to edit battle and overworld passives here.")]
+        [Tooltip(
+            "Ally recruited by this choice. Expand to edit battle and overworld passives here."
+        )]
         [InlineEditor]
         [SerializeField]
         private AllyData _ally;

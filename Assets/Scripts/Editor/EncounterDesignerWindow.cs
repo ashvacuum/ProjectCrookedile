@@ -115,6 +115,12 @@ namespace Crookedile.EditorTools
                 return;
             }
 
+            if (_tab == Tab.Travel)
+            {
+                DrawTravelTab();
+                return;
+            }
+
             if (_pool.Entries.Count == 0)
             {
                 EditorGUILayout.HelpBox(
@@ -142,12 +148,6 @@ namespace Crookedile.EditorTools
             if (_tab == Tab.Simulate)
             {
                 DrawSimulateTab();
-                return;
-            }
-
-            if (_tab == Tab.Travel)
-            {
-                DrawTravelTab();
                 return;
             }
 
@@ -233,14 +233,20 @@ namespace Crookedile.EditorTools
 
             if (GUILayout.Button("New district", EditorStyles.toolbarButton))
             {
-                var district = Crookedile.Utilities.AuthoringAssets.CreateBeside<DistrictData>(_pool, "New District");
+                var district = Crookedile.Utilities.AuthoringAssets.CreateBeside<DistrictData>(
+                    _pool,
+                    "New District"
+                );
                 Undo.RegisterCreatedObjectUndo(district, "Create district");
                 EditAsset(district);
             }
 
             if (GUILayout.Button("New ally", EditorStyles.toolbarButton))
             {
-                var ally = Crookedile.Utilities.AuthoringAssets.CreateBeside<AllyData>(_pool, "New Ally");
+                var ally = Crookedile.Utilities.AuthoringAssets.CreateBeside<AllyData>(
+                    _pool,
+                    "New Ally"
+                );
                 Undo.RegisterCreatedObjectUndo(ally, "Create ally");
                 EditAsset(ally);
             }
@@ -256,15 +262,27 @@ namespace Crookedile.EditorTools
                 _authoringTarget = _pool;
             }
 
-            var selected = EditorGUILayout.ObjectField("Editing asset", _authoringTarget, typeof(ScriptableObject), false);
+            var selected = EditorGUILayout.ObjectField(
+                "Editing asset",
+                _authoringTarget,
+                typeof(ScriptableObject),
+                false
+            );
             if (selected != null && selected != _authoringTarget)
             {
                 EditAsset(selected);
             }
 
-            EditorGUILayout.HelpBox("Edit the original asset here with Odin. Expand district and network references to edit them inline. "
-                + "Choose an encounter from Table, Timeline, or Travel to open it here.", MessageType.Info);
-            UnityEditor.Editor.CreateCachedEditor(_authoringTarget, typeof(OdinEditor), ref _authoringEditor);
+            EditorGUILayout.HelpBox(
+                "Edit the original asset here with Odin. Expand district and network references to edit them inline. "
+                    + "Choose an encounter from Table, Timeline, or Travel to open it here.",
+                MessageType.Info
+            );
+            UnityEditor.Editor.CreateCachedEditor(
+                _authoringTarget,
+                typeof(OdinEditor),
+                ref _authoringEditor
+            );
             _authoringScroll = EditorGUILayout.BeginScrollView(_authoringScroll);
             var previousSelection = Selection.activeObject;
             EditorGUI.BeginChangeCheck();
@@ -275,7 +293,10 @@ namespace Crookedile.EditorTools
             }
 
             EditorGUILayout.EndScrollView();
-            if (Selection.activeObject != previousSelection && Selection.activeObject is EncounterData encounter)
+            if (
+                Selection.activeObject != previousSelection
+                && Selection.activeObject is EncounterData encounter
+            )
             {
                 EditAsset(encounter);
             }
@@ -683,7 +704,9 @@ namespace Crookedile.EditorTools
                     edge.Color,
                     // Texture then width — a null texture draws the default solid line, and
                     // the dotted variant is what distinguishes a soft nudge from a hard gate.
-                    edge.Solid ? null : EditorGUIUtility.whiteTexture,
+                    edge.Solid
+                        ? null
+                        : EditorGUIUtility.whiteTexture,
                     edge.Solid ? 2.5f : 1.5f
                 );
 
@@ -826,13 +849,13 @@ namespace Crookedile.EditorTools
             // too, but a clear can't unlock anything, so they don't produce edges.
             var writers = new Dictionary<string, List<string>>();
             foreach (var entry in entries)
-                foreach (var outcome in OptionOutcomes(entry))
-                    if (outcome is SetFlagOutcome s && !s.Clears && !string.IsNullOrWhiteSpace(s.Flag))
-                    {
-                        if (!writers.TryGetValue(s.Flag.Trim(), out var list))
-                            writers[s.Flag.Trim()] = list = new List<string>();
-                        list.Add(entry.Id);
-                    }
+            foreach (var outcome in OptionOutcomes(entry))
+                if (outcome is SetFlagOutcome s && !s.Clears && !string.IsNullOrWhiteSpace(s.Flag))
+                {
+                    if (!writers.TryGetValue(s.Flag.Trim(), out var list))
+                        writers[s.Flag.Trim()] = list = new List<string>();
+                    list.Add(entry.Id);
+                }
 
             foreach (var entry in entries)
             {
@@ -1181,7 +1204,11 @@ namespace Crookedile.EditorTools
 
                 EditorGUILayout.Space(6f);
                 EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField(group.Key, EditorStyles.boldLabel, GUILayout.Width(220f));
+                EditorGUILayout.LabelField(
+                    group.Key,
+                    EditorStyles.boldLabel,
+                    GUILayout.Width(220f)
+                );
 
                 if (group.Key == FlagIndex.Blank)
                     EditorGUILayout.LabelField("blank name — does nothing at runtime", ErrorLabel);
@@ -1211,7 +1238,7 @@ namespace Crookedile.EditorTools
                     string owner = use.Owner == null ? "(missing)" : use.Owner.name;
                     if (
                         GUILayout.Button(
-                            $"    {verb,-9}{owner} — {use.Where}",
+                            $"    {verb, -9}{owner} — {use.Where}",
                             EditorStyles.miniLabel
                         )
                     )
@@ -1228,7 +1255,7 @@ namespace Crookedile.EditorTools
         // week of hand-playing can't: is any day starved, is any encounter never seen, and how
         // much of the pool one player actually gets through.
         private int _runs = 500;
-        private int _hoursPerDay = 3;
+        private int _hoursPerDay = RunState.DEFAULT_MAX_HOURS;
         private SimResult _sim;
 
         private sealed class SimResult
@@ -1251,7 +1278,11 @@ namespace Crookedile.EditorTools
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
             GUILayout.Label("Runs", EditorStyles.miniLabel, GUILayout.Width(34f));
             _runs = Mathf.Clamp(
-                EditorGUILayout.IntField(_runs, EditorStyles.toolbarTextField, GUILayout.Width(56f)),
+                EditorGUILayout.IntField(
+                    _runs,
+                    EditorStyles.toolbarTextField,
+                    GUILayout.Width(56f)
+                ),
                 1,
                 20000
             );
@@ -1343,12 +1374,15 @@ namespace Crookedile.EditorTools
 
                 uniqueTotal += seen.Count;
                 foreach (string id in seen)
-                    result.RunsSeenIn[id] = result.RunsSeenIn.TryGetValue(id, out int n) ? n + 1 : 1;
+                    result.RunsSeenIn[id] = result.RunsSeenIn.TryGetValue(id, out int n)
+                        ? n + 1
+                        : 1;
 
                 if (previousSeen != null)
                 {
                     int union = previousSeen.Union(seen).Count();
-                    overlapTotal += union == 0 ? 0 : previousSeen.Intersect(seen).Count() / (double)union;
+                    overlapTotal +=
+                        union == 0 ? 0 : previousSeen.Intersect(seen).Count() / (double)union;
                 }
                 previousSeen = seen;
             }
@@ -1370,7 +1404,8 @@ namespace Crookedile.EditorTools
             var remaining = new List<EncounterData>(picks);
             var network = _pool.Travel;
             var district = network != null ? network.Headquarters : null;
-            int clock = network != null ? network.DayStartMinute : CampaignTravelData.DEFAULT_START_MINUTE;
+            int clock =
+                network != null ? network.DayStartMinute : CampaignTravelData.DEFAULT_START_MINUTE;
             int end = Mathf.Min(clock + hours * 60, CampaignTravelData.MINUTES_PER_DAY);
             int taken = 0;
             while (remaining.Count > 0)
@@ -1379,7 +1414,14 @@ namespace Crookedile.EditorTools
                 int finish = int.MaxValue;
                 foreach (var pick in remaining)
                 {
-                    var plan = CampaignVisitPlan.Calculate(pick, network, district, clock, end - clock, _previewAllies);
+                    var plan = CampaignVisitPlan.Calculate(
+                        pick,
+                        network,
+                        district,
+                        clock,
+                        end - clock,
+                        _previewAllies
+                    );
                     if (plan.CanEnter && plan.FinishMinute < finish)
                     {
                         next = pick;
@@ -1408,18 +1450,26 @@ namespace Crookedile.EditorTools
 
         #region Travel preview
         private DistrictData _previewDistrict;
+        private readonly CampaignTravelGraph _travelGraph = new CampaignTravelGraph();
+        private EncounterData _routeEncounter;
+        private EncounterPoolData _travelPreviewPool;
         private int _previewMinute = CampaignTravelData.DEFAULT_START_MINUTE;
-        private int _previewBudget = 180;
+        private int _previewBudget =
+            RunState.DEFAULT_MAX_HOURS * CampaignTravelData.MINUTES_PER_HOUR;
         private readonly List<AllyData> _previewAllies = new List<AllyData>();
 
         private void DrawPreviewAllies()
         {
-            EditorGUILayout.LabelField("Recruited allies for Travel and Simulate", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField(
+                "Recruited allies for Travel and Simulate",
+                EditorStyles.boldLabel
+            );
             for (int i = 0; i < _previewAllies.Count; i++)
             {
                 EditorGUILayout.BeginHorizontal();
                 EditorGUI.BeginChangeCheck();
-                _previewAllies[i] = (AllyData)EditorGUILayout.ObjectField(_previewAllies[i], typeof(AllyData), false);
+                _previewAllies[i] = (AllyData)
+                    EditorGUILayout.ObjectField(_previewAllies[i], typeof(AllyData), false);
                 if (EditorGUI.EndChangeCheck())
                 {
                     InvalidatePreviews();
@@ -1451,35 +1501,102 @@ namespace Crookedile.EditorTools
 
         private void DrawTravelTab()
         {
+            if (_travelPreviewPool != _pool)
+            {
+                _travelPreviewPool = _pool;
+                _routeEncounter = null;
+                _previewDistrict = null;
+            }
+
+            _scroll = EditorGUILayout.BeginScrollView(_scroll);
             DrawPreviewAllies();
             var network = _pool.Travel;
-            if (GUILayout.Button(network != null ? $"Edit travel network: {network.name}" : "Author travel network on pool"))
+            if (
+                GUILayout.Button(
+                    network != null
+                        ? $"Edit travel network: {network.name}"
+                        : "Author travel network on pool"
+                )
+            )
             {
                 EditAsset(network != null ? (UnityEngine.Object)network : _pool);
             }
             if (network == null)
             {
-                EditorGUILayout.HelpBox("Create a Campaign/Travel Network asset and assign it on the pool. "
-                    + "Use Authoring to create districts and edit roads inline with Odin.",
-                    MessageType.Info);
+                EditorGUILayout.HelpBox(
+                    "Create a Campaign/Travel Network asset and assign it on the pool. "
+                        + "Use Authoring to create districts and edit roads inline with Odin.",
+                    MessageType.Info
+                );
             }
             else if (network.Headquarters == null)
             {
-                EditorGUILayout.HelpBox("Assign the network's Headquarters district so the first trip has a starting point.", MessageType.Error);
+                EditorGUILayout.HelpBox(
+                    "Assign the network's Headquarters district so the first trip has a starting point.",
+                    MessageType.Error
+                );
             }
 
-            _previewDistrict = (DistrictData)EditorGUILayout.ObjectField("From (blank = HQ)",
-                _previewDistrict, typeof(DistrictData), false);
+            _previewDistrict = (DistrictData)
+                EditorGUILayout.ObjectField(
+                    "From (blank = HQ)",
+                    _previewDistrict,
+                    typeof(DistrictData),
+                    false
+                );
             _previewMinute = EditorGUILayout.IntSlider("Departure minute", _previewMinute, 0, 1439);
-            _previewBudget = EditorGUILayout.IntSlider("Minutes remaining", _previewBudget, 0, 1440);
-            var from = _previewDistrict != null ? _previewDistrict : network != null ? network.Headquarters : null;
-            EditorGUILayout.LabelField($"Depart {CampaignTravelData.FormatTime(_previewMinute)} from "
-                + $"{(from != null ? from.DisplayName : "Local")}");
-            EditorGUILayout.HelpBox("Preview uses the runtime route and time-window calculation. "
-                + "Entry is allowed at opening and blocked at closing; an event may finish after closing. "
-                + "Click an encounter or the network button to edit it here in Authoring.", MessageType.Info);
+            _previewBudget = EditorGUILayout.IntSlider(
+                "Minutes remaining",
+                _previewBudget,
+                0,
+                1440
+            );
+            var from =
+                _previewDistrict != null ? _previewDistrict
+                : network != null ? network.Headquarters
+                : null;
+            EditorGUILayout.LabelField(
+                $"Depart {CampaignTravelData.FormatTime(_previewMinute)} from "
+                    + $"{(from != null ? from.DisplayName : "Local")}"
+            );
+            EditorGUILayout.HelpBox(
+                "Preview uses the runtime route and time-window calculation. "
+                    + "Entry is allowed at opening and blocked at closing; an event may finish after closing. "
+                    + "Click an encounter or the network button to edit it here in Authoring.",
+                MessageType.Info
+            );
 
-            _scroll = EditorGUILayout.BeginScrollView(_scroll);
+            var previousDistrict = _travelGraph.Selected;
+            var edit = _travelGraph.Draw(_pool, from, _previewMinute, _routeEncounter);
+            if (GUI.changed)
+            {
+                Repaint();
+            }
+            if (previousDistrict != _travelGraph.Selected)
+            {
+                _routeEncounter = null;
+                Repaint();
+            }
+
+            if (edit != null)
+            {
+                EditAsset(edit);
+            }
+
+            EditorGUILayout.LabelField(
+                _travelGraph.Selected != null
+                    ? "Encounters in " + _travelGraph.Selected.DisplayName
+                    : "All pool encounters",
+                EditorStyles.boldLabel
+            );
+            EditorGUILayout.LabelField(
+                "Top: green = entry window • Bottom: blue = travel, amber = wait, purple = event, gray = budget",
+                EditorStyles.wordWrappedMiniLabel
+            );
+            EditorGUILayout.LabelField(
+                "Timing preview of pool entries; daily draws and requirements are shown in Timeline / Simulate.",
+                EditorStyles.wordWrappedMiniLabel
+            );
             foreach (var entry in _pool.Entries)
             {
                 var encounter = entry?.Encounter;
@@ -1488,21 +1605,59 @@ namespace Crookedile.EditorTools
                     continue;
                 }
 
-                if (GUILayout.Button($"Edit {HasVisitedEncounter.Label(encounter)}", EditorStyles.miniButton))
+                if (_travelGraph.Selected != null && encounter.District != _travelGraph.Selected)
+                {
+                    continue;
+                }
+
+                EditorGUILayout.BeginHorizontal();
+                if (
+                    GUILayout.Button(
+                        $"Edit {HasVisitedEncounter.Label(encounter)}",
+                        EditorStyles.miniButton
+                    )
+                )
                 {
                     EditAsset(encounter);
                 }
-                var plan = CampaignVisitPlan.Calculate(encounter, network, from, _previewMinute, _previewBudget, _previewAllies);
-                string destination = encounter.District != null ? encounter.District.DisplayName : "Local";
-                EditorGUILayout.LabelField($"{destination} | Entry {CampaignTravelData.FormatTime(encounter.OpeningMinute)} - "
-                    + $"{CampaignTravelData.FormatTime(encounter.ClosingMinute)} | Base duration {encounter.DurationMinutes}m");
+                if (
+                    GUILayout.Button(
+                        _routeEncounter == encounter ? "Route selected" : "Show route",
+                        EditorStyles.miniButton,
+                        GUILayout.Width(100f)
+                    )
+                )
+                {
+                    _routeEncounter = encounter;
+                    Repaint();
+                }
+                EditorGUILayout.EndHorizontal();
+                var plan = CampaignVisitPlan.Calculate(
+                    encounter,
+                    network,
+                    from,
+                    _previewMinute,
+                    _previewBudget,
+                    _previewAllies
+                );
+                CampaignTravelGraph.DrawTimeline(encounter, plan, _previewMinute, _previewBudget);
+                string destination =
+                    encounter.District != null ? encounter.District.DisplayName : "Local";
+                EditorGUILayout.LabelField(
+                    $"{destination} | Entry {CampaignTravelData.FormatTime(encounter.OpeningMinute)} - "
+                        + $"{CampaignTravelData.FormatTime(encounter.ClosingMinute)} | Base duration {encounter.DurationMinutes}m"
+                );
                 if (plan.CanEnter)
                 {
-                    EditorGUILayout.LabelField($"Travel {plan.TravelMinutes}m ({plan.TrafficMultiplier:0.##}x traffic), "
-                        + $"wait {plan.WaitMinutes}m | Arrive {CampaignTravelData.FormatTime(plan.ArrivalMinute)}, "
-                        + $"finish {CampaignTravelData.FormatTime(plan.FinishMinute)}");
-                    EditorGUILayout.LabelField($"Encounter {plan.EncounterMinutes}m | Allies save "
-                        + $"{plan.TravelMinutesSaved}m travel + {plan.EncounterMinutesSaved}m encounter time; waiting is not discounted.");
+                    EditorGUILayout.LabelField(
+                        $"Travel {plan.TravelMinutes}m ({plan.TrafficMultiplier:0.##}x traffic), "
+                            + $"wait {plan.WaitMinutes}m | Arrive {CampaignTravelData.FormatTime(plan.ArrivalMinute)}, "
+                            + $"finish {CampaignTravelData.FormatTime(plan.FinishMinute)}"
+                    );
+                    EditorGUILayout.LabelField(
+                        $"Encounter {plan.EncounterMinutes}m | Allies save "
+                            + $"{plan.TravelMinutesSaved}m travel + {plan.EncounterMinutesSaved}m encounter time; waiting is not discounted."
+                    );
                 }
                 else
                 {

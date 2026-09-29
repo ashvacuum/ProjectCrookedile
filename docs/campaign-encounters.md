@@ -162,6 +162,17 @@ Under an encounter's **Travel and time** foldout:
 - **Closing Minute:** exclusive latest-entry minute; 1020 = 17:00. 0 means midnight.
   A valid window has closing after opening. Entry before closing can finish afterwards.
 
+The current routing assets live in `Assets/Data/Campaign Routing`. HQ, the residential
+barangay, market/plaza, civic center, business district, and riverside form six connected
+districts. The civic-to-business bridge carries directional commuter traffic; the market-to-riverside
+bridge provides a quieter southern detour. Rush windows are 07:30–09:30 and 15:00–17:00.
+Use Encounter Designer's travel graph and inline Odin inspectors to edit these assets.
+
+The daily budget is eight hours (08:00–16:00), including travel and waiting. Brgy Fiesta
+is a five-hour commitment with entry from 09:00 until 11:00 exclusive. Other paid visits
+take 45–120 minutes; HQ remains free. Morning market visits, office meetings, and afternoon
+civic events have different entry windows. These are entry deadlines, not forced finish times.
+
 Road traffic windows are also inclusive at start and exclusive at end. Split overnight
 windows into two rows. The largest active multiplier wins if windows overlap. Fastest-route
 search samples all roads at trip departure; previews and commits use the same result.
@@ -180,6 +191,26 @@ and travel restrictions so the run cannot be stranded; its separate button state
 **Encounter Designer → Travel** previews every pool entry from a chosen district, departure
 minute, and remaining budget. Click **Edit** on an encounter or the network button to open
 its full Odin inspector in the Designer's **Authoring** tab.
+
+The Travel tab's **District connections** diagram shows HQ, road endpoints, and every
+district referenced by the pool (including disconnected districts). Drag nodes to arrange
+them; positions live on the shared district assets and support Undo. Select a district to
+filter its encounters, or **Show all encounters** to include local encounters too.
+**Show route** on an encounter highlights the same quickest route used by gameplay.
+Scrubbing departure time updates road durations and route selection: blue marks the
+selected route, orange marks delayed roads, and arrows show allowed directions. Road
+labels show minutes and traffic multiplier before ally discounts; visit previews include allies.
+
+**New district** creates HQ when none exists; otherwise it connects the new district to
+the selected district (or HQ) with a 15-minute two-way road. **Add road** connects the
+selected district to an existing district, then opens the network inspector. Click a road
+label to edit road direction, base duration, and traffic windows through Odin. Save assets
+from Authoring to persist edits to disk.
+
+Each encounter has a 00:00–24:00 timeline: green is the entry window; below it, blue is
+travel, amber is waiting, purple is encounter duration, and gray is the remaining budget.
+The vertical marker is departure. Blocked visits retain their reason. This previews pool
+entries, not a day's generated offer: use Timeline and Simulate for daily draws and gating.
 
 **Authoring** edits the original assets directly with Odin's validation, polymorphic type
 pickers, and Undo. Use **Pool** to edit scheduling requirements and boosts or create an event

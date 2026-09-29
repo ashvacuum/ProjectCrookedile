@@ -23,8 +23,7 @@ namespace Crookedile.EditorTools
     /// enemies, intents, origins, audio/VFX, allies, reward config) and audits completeness. A
     /// searchable sidebar lists a Summary plus every category (with a warning/error icon); the
     /// editor pane draws each entry as a box with its issues as message boxes and click-to-select.
-    /// Read-only. Add an <see cref="IContentProvider"/> to <see cref="BuildProviders"/> and it shows
-    /// up as a new sidebar entry automatically.
+    /// Asset Names offers explicit filename fixes. Providers added to BuildProviders appear in the sidebar.
     ///
     /// Menu: Crookedile → Content Hub.
     /// </summary>
@@ -100,6 +99,7 @@ namespace Crookedile.EditorTools
             new List<IContentProvider>
             {
                 new ReadinessProvider(),
+                new ContentAssetNaming(),
                 new CardsProvider(),
                 new StatusesProvider(),
                 new EffectsProvider(),
@@ -290,6 +290,18 @@ namespace Crookedile.EditorTools
                 );
 
                 int shown = 0;
+                if (
+                    _category == ContentAssetNaming.CATEGORY
+                    && GUILayout.Button("Rename valid assets")
+                )
+                {
+                    string result = ContentAssetNaming.RenameValidAssets();
+                    _owner.Refresh();
+                    _owner.ForceMenuTreeRebuild();
+                    EditorUtility.DisplayDialog("Asset Names", result, "OK");
+                    GUIUtility.ExitGUI();
+                }
+
                 foreach (var row in _rows)
                 {
                     if (_owner._problemsOnly && row.Worst == Severity.Ok)
@@ -305,7 +317,7 @@ namespace Crookedile.EditorTools
                     );
             }
 
-            private static void DrawRow(Row row)
+            private void DrawRow(Row row)
             {
                 SirenixEditorGUI.BeginBox();
 
@@ -320,8 +332,25 @@ namespace Crookedile.EditorTools
                 GUI.color = prev;
 
                 GUILayout.FlexibleSpace();
-                if (!string.IsNullOrEmpty(row.Detail))
+                if (_category != ContentAssetNaming.CATEGORY && !string.IsNullOrEmpty(row.Detail))
                     GUILayout.Label(row.Detail, EditorStyles.miniLabel);
+                if (
+                    _category == ContentAssetNaming.CATEGORY
+                    && row.Worst == Severity.Warning
+                    && GUILayout.Button("Rename", EditorStyles.miniButton, GUILayout.Width(64))
+                )
+                {
+                    string error = ContentAssetNaming.Rename(row.Context);
+                    _owner.Refresh();
+                    _owner.ForceMenuTreeRebuild();
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        EditorUtility.DisplayDialog("Could not rename asset", error, "OK");
+                    }
+
+                    GUIUtility.ExitGUI();
+                }
+
                 if (
                     row.Context != null
                     && GUILayout.Button("Select", EditorStyles.miniButton, GUILayout.Width(56))
@@ -332,6 +361,11 @@ namespace Crookedile.EditorTools
                 }
                 EditorGUILayout.EndHorizontal();
                 SirenixEditorGUI.EndBoxHeader();
+
+                if (_category == ContentAssetNaming.CATEGORY)
+                {
+                    EditorGUILayout.HelpBox(row.Detail, MessageType.None);
+                }
 
                 foreach (var issue in row.Issues)
                     SirenixEditorGUI.MessageBox(issue.Message, MessageTypeFor(issue.Severity));
@@ -891,7 +925,12 @@ namespace Crookedile.EditorTools
                         {
                             if (passive == null)
                             {
-                                issues.Add(new AuditIssue(Severity.Warning, "Overworld passive has no type selected."));
+                                issues.Add(
+                                    new AuditIssue(
+                                        Severity.Warning,
+                                        "Overworld passive has no type selected."
+                                    )
+                                );
                             }
                         }
                     }
@@ -900,7 +939,12 @@ namespace Crookedile.EditorTools
                     {
                         if (!ally.HasOverworldPassives)
                         {
-                            issues.Add(new AuditIssue(Severity.Warning, "No battle or overworld passives (does nothing)."));
+                            issues.Add(
+                                new AuditIssue(
+                                    Severity.Warning,
+                                    "No battle or overworld passives (does nothing)."
+                                )
+                            );
                         }
                     }
                     else

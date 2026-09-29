@@ -25,8 +25,6 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private bool _negate;
 
-        public bool Negated => _negate;
-
         /// <summary>
         /// True when this condition holds for <paramref name="state"/>, honouring
         /// <c>_negate</c>. A null state means "no run to test against" and is treated as met,
@@ -42,6 +40,9 @@ namespace Crookedile.Data.Campaign
 
         /// <summary>Human-readable summary including negation.</summary>
         public string GetDescription() => _negate ? $"NOT ({Describe()})" : Describe();
+
+        /// <summary>Exposed so the Encounter Designer can label an inverted edge.</summary>
+        public bool Negated => _negate;
 
         /// <summary>Guarded wrapper for the inspector InfoBox — see <c>RunOutcome</c>.</summary>
         public string EditorSafeDescription()
@@ -99,6 +100,7 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private string _flag;
 
+        /// <summary>Exposed so the Encounter Designer can index who reads this flag.</summary>
         public string Flag => _flag;
 
         protected override bool Check(RunState state) => state.HasFlag(_flag);
@@ -143,6 +145,25 @@ namespace Crookedile.Data.Campaign
 
         protected override string Describe() =>
             _ally != null ? $"has {_ally.AllyName}" : "has ally (NONE SET)";
+    }
+
+    /// <summary>
+    /// True when the run is being played as <see cref="_origin"/>. The gate for class-specific
+    /// content: an ally that only makes sense to a converter (a Faith Leader recruiting a
+    /// sacristan) is offered by an encounter option carrying this, so the other two archetypes
+    /// never see a reward built around statuses they don't apply.
+    /// </summary>
+    [Serializable]
+    public class OriginIs : RunRequirement
+    {
+        [Tooltip("The archetype this content is for.")]
+        [EnumToggleButtons]
+        [SerializeField]
+        private OriginType _origin = OriginType.FaithLeader;
+
+        protected override bool Check(RunState state) => state.Origin == _origin;
+
+        protected override string Describe() => $"playing as {_origin}";
     }
 
     /// <summary>

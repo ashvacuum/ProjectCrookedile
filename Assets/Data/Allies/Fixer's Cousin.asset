@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
+  m_Name: Fixer's Cousin
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
+  _id: 0603c994bbfc364499047207623d4227
+  _icon: {fileID: 0}
+  _allyName: Fixer's Cousin
+  _description: 
+  _rarity: 1
+  _passives:
+  - rid: 4020939570431393896
+  references:
+    version: 2
+    RefIds:
+    - rid: 4020939570431393896
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 4020939570431393897
+        _conditions:
+        - rid: 4020939570431393898
+        _oneShot: 0
+        _effects:
+        - rid: 4020939570431393899
+    - rid: 4020939570431393897
+      type: {class: CardPlayedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _filterByType: 0
+        _filterType: 0
+    - rid: 4020939570431393898
+      type: {class: NthEventCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _n: 5
+    - rid: 4020939570431393899
+      type: {class: MakeCardFreeEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _selectionMode: 2
+        _filterType: 0

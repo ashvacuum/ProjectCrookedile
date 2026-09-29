@@ -50,14 +50,12 @@ MonoBehaviour:
     - rid: 5004226271355076642
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _condition: 10
         _effects:
         - rid: 5004226271355076643
     - rid: 5004226271355076643
       type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 10
         _amountSource: 0
         _perXSource: 7
@@ -66,14 +64,12 @@ MonoBehaviour:
     - rid: 5004226271355076644
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _condition: 10
         _effects:
         - rid: 5004226271355076645
     - rid: 5004226271355076645
       type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 15
         _amountSource: 0
         _perXSource: 7

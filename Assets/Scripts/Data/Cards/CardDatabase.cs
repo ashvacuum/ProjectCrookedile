@@ -220,7 +220,7 @@ namespace Crookedile.Data.Cards
         #region Random Selection
 
         /// <summary>
-        /// Gets a random card weighted by rarity.
+        /// Gets a random acquirable card weighted by rarity.
         /// Basic: 70% chance, Enhanced: 25%, Rare: 5%
         /// </summary>
         /// <returns>Randomly selected card based on rarity weights</returns>
@@ -230,7 +230,7 @@ namespace Crookedile.Data.Cards
         /// </param>
         public CardData GetRandomByRarityWeight(System.Random rng = null)
         {
-            List<CardData> allCards = GetAll();
+            List<CardData> allCards = GetAcquirable();
             List<float> weights = new List<float>();
 
             float total = 0f;
@@ -257,6 +257,84 @@ namespace Crookedile.Data.Cards
             }
             return allCards[allCards.Count - 1]; // float drift guard
         }
+
+        /// <summary>
+        /// Cards a run can actually be handed. Collects <see cref="GenerateRewardOffer"/>'s
+        /// exclusions in one place so a random-gain outcome can't slip the player a starter
+        /// card, an upgraded duplicate, an artless work-in-progress, or a battle-only token.
+        /// </summary>
+        public static bool IsAcquirable(CardData card) =>
+            card != null
+            && !card.IsStarterCard
+            && !card.IsUpgraded
+            && !card.IsInDevelopment
+            && !card.IsGeneratedOnly;
+
+        /// <summary>Every acquirable card, optionally narrowed by type and/or rarity.</summary>
+        public List<CardData> GetAcquirable(CardType? type = null, CardRarity? rarity = null)
+        {
+            var results = new List<CardData>();
+            foreach (CardData card in GetAll())
+            {
+                if (!IsAcquirable(card))
+                    continue;
+                if (type.HasValue && card.CardType != type.Value)
+                    continue;
+                if (rarity.HasValue && card.Rarity != rarity.Value)
+                    continue;
+                results.Add(card);
+            }
+            return results;
+        }
+
+        /// <summary>
+        /// One random acquirable card matching both filters; null when nothing does. Pass null
+        /// for either filter to leave it open.
+        ///
+        /// Uniform over the survivors — narrowing to a rarity already picks the tier, and
+        /// weighting a type-filtered pool would silently re-skew it. For the reward curve use
+        /// <see cref="GetRandomByRarityWeight"/> or <see cref="GenerateRewardOffer"/>.
+        /// </summary>
+        public CardData GetRandomByTypeAndRarity(
+            CardType? type,
+            CardRarity? rarity,
+            System.Random rng = null
+        ) => PickOne(GetAcquirable(type, rarity), rng);
+
+        /// <summary>
+        /// One random card this origin is allowed to draft — carrying its tag, the universal
+        /// tag, or no tags at all. The untagged-belongs-to-everyone rule matches
+        /// <see cref="GetStarterDeck"/>; note <see cref="GenerateRewardOffer"/> is stricter,
+        /// treating Policy as universal by type and demanding a tag on Pressure/Rhetoric.
+        /// </summary>
+        public CardData GetRandomForOrigin(
+            OriginType origin,
+            CardType? type = null,
+            CardRarity? rarity = null,
+            System.Random rng = null
+        )
+        {
+            string originTag = origin.ToString().ToLower();
+            var pool = GetAcquirable(type, rarity)
+                .Where(c => c.Tags.Count == 0 || c.HasTag(originTag) || c.HasTag(UniversalTag))
+                .ToList();
+            return PickOne(pool, rng);
+        }
+
+        /// <summary>
+        /// One random colourless card — explicitly tagged <see cref="UniversalTag"/>, so it
+        /// belongs in any run. Stricter than <see cref="GetRandomForOrigin"/>, which also
+        /// accepts untagged cards: a card nobody has classified yet is not the same promise as
+        /// one authored to fit everyone.
+        /// </summary>
+        public CardData GetRandomColorless(
+            CardType? type = null,
+            CardRarity? rarity = null,
+            System.Random rng = null
+        ) => PickOne(GetAcquirable(type, rarity).Where(c => c.HasTag(UniversalTag)).ToList(), rng);
+
+        private static CardData PickOne(List<CardData> pool, System.Random rng) =>
+            pool.Count == 0 ? null : pool[NextIndex(rng, pool.Count)];
 
         #endregion
 

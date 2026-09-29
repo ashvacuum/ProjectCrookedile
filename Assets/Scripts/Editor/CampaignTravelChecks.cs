@@ -50,6 +50,32 @@ namespace Crookedile.EditorTools
                     network.TryGetTravel(hq, market, 540, out minutes, out clear) && minutes == 10,
                     "Traffic ends at the exclusive boundary."
                 );
+                var route = new List<CampaignTravelData.Road>();
+                Require(
+                    network.TryGetTravel(hq, market, 480, out minutes, out clear, route)
+                        && route.Count == 2
+                        && route[0].From == hq
+                        && route[0].To == park
+                        && route[1].To == market,
+                    "The diagram must receive the ordered quickest route during rush hour."
+                );
+                Require(
+                    network.TryGetTravel(market, hq, 540, out minutes, out clear, route)
+                        && route.Count == 1
+                        && route[0] == direct,
+                    "The diagram must switch to the direct road after rush hour, including reverse travel."
+                );
+                Require(
+                    !network.TryGetTravel(hq, island, 480, out minutes, out clear, route)
+                        && route.Count == 0,
+                    "An unreachable destination must clear the previous highlighted route."
+                );
+                route.Add(direct);
+                Require(
+                    network.TryGetTravel(hq, hq, 480, out minutes, out clear, route)
+                        && route.Count == 0,
+                    "A local trip must clear the highlighted route."
+                );
                 Require(
                     network.TryGetTravel(market, hq, 540, out minutes, out clear) && minutes == 10,
                     "Bidirectional roads must work in reverse."

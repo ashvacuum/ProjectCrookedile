@@ -14,7 +14,7 @@
 | Doc | What it settles |
 |---|---|
 | [`docs/core-design.md`](docs/core-design.md) | Core fantasy, the **Opinion Meter**, hostility, the **Echo Chamber** rule, voice intents, turn structure, the three archetypes |
-| [`docs/roadmap.md`](docs/roadmap.md) | The 3-month demo scope call — what ships, what's explicitly cut, phase gates |
+| [`docs/needs-detailing.md`](docs/needs-detailing.md) | The open design calls, ordered by how much they block — read before authoring content |
 | [`docs/naming-glossary.md`](docs/naming-glossary.md) | Combat vocabulary → "working a crowd" vocabulary. Read before naming anything |
 
 ## What the game is
@@ -32,27 +32,25 @@
 - [`core-design.md`](docs/core-design.md) — the combat model and the three archetypes.
 - [`crookedile-starter-decks.md`](docs/crookedile-starter-decks.md) — per-class starter decks and the reward-pool "potential" layer.
 - [`enemy-design-bible.md`](docs/enemy-design-bible.md) — v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete.
-- [`metagame-campaign.md`](docs/metagame-campaign.md) — the campaign map. Potionomics-style free roam, superseding the StS node-chain sketch in `core-design.md` §10.
-- [`faith-leader-identity.md`](docs/faith-leader-identity.md) — FL identity lock + a 20-card list authorable with existing effects.
+- [`metagame-campaign.md`](docs/metagame-campaign.md) — the campaign map. Potionomics-style free roam drawn as a 2:1 isometric sprite city (§1.5–1.6), superseding the StS node-chain sketch in `core-design.md` §10.
 
 ### Systems — code reference
 - [`campaign-encounters.md`](docs/campaign-encounters.md) — encounter types, event choices and outcomes, drop-chance resolution, seeded pools, the encounter database, and the Gantt tool.
+- [`encounter-authoring-reference.md`](docs/encounter-authoring-reference.md) — every `[SerializeReference]` building block for encounters: outcomes, requirements, option wiring, flags.
 - [`ui-vfx.md`](docs/ui-vfx.md) — canvas-space VFX: flipbooks, card shine, fly trails, and when UIParticle is actually warranted.
-- [`opinion-meter-passes.md`](docs/opinion-meter-passes.md) — implementation spec for the opinion-meter redesign (passes 2–4).
 
 ### Planning & tracking
-- [`roadmap.md`](docs/roadmap.md) — demo scope, phases, gates.
-- [`campaign-build-checklist.md`](docs/campaign-build-checklist.md) — execution tracker for the campaign layer (M1–M2), with the hardening decisions behind each call.
 - [`needs-detailing.md`](docs/needs-detailing.md) — design questions still awaiting a call, ordered by how much they block.
-- [`card-audit.md`](docs/card-audit.md) — every authored card against the fantasies in `core-design.md`.
+- [`doc-audit.md`](docs/doc-audit.md) — standing audit of the docs against the code: what is stale and in what order to fix it.
 
 ### Art & audio
 - [`art-bible.md`](docs/art-bible.md) — canonical art direction + resolution spec for artists. The Content Hub tabs are the live blank-slot checker.
 - [`reference/style-mock-prompt.md`](docs/reference/style-mock-prompt.md) — style-mock generation prompt.
+- [`reference/iso-tile-prompt.md`](docs/reference/iso-tile-prompt.md) — campaign-map generation prompt: 2:1 dimetric tiles and buildings, plus the acceptance check every sprite has to pass.
 - [`reference/music-prompt.md`](docs/reference/music-prompt.md) — BGM prompts.
 
 ### Deprecated
-- [`deprecated/README.md`](docs/deprecated/README.md) — 23 superseded docs, each banner-marked with what superseded it, plus a short list of ideas still worth mining.
+- [`deprecated/README.md`](docs/deprecated/README.md) — 29 superseded docs, each banner-marked with what superseded it, plus a short list of ideas still worth mining.
 
 ---
 

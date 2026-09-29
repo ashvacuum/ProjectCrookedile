@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
+  m_Name: False Accusations
+  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
+  _id: 5d8896ee-6d17-4acb-b900-8f63e1b62c3e
+  _cardName: False Accusations
+  _cardType: 4
+  _rarity: 0
+  _artwork: {fileID: 21300000, guid: c5f5ad4febf9ac44abe1b9c3ce632779, type: 3}
+  _description: 'Chaos enters your hand when this does. Discard a random card on
+    draw. (Configure OnDraw passive: DiscardRandom 1 via Inspector.)'
+  _flavorText: 
+  _costs:
+  - _costType: 0
+    _baseAmount: 0
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _costReductionPerX: 7
+  _effects: []
+  _passives:
+  - rid: 4738608601116966912
+  _isUpgraded: 0
+  _upgradedCosts: []
+  _upgradedEffects: []
+  _upgradedPassives: []
+  _upgradedInnateRetain: 0
+  _tags: []
+  _isStarterCard: 0
+  _isUnlockable: 0
+  _isGeneratedOnly: 0
+  _isUnplayable: 1
+  _innateRetain: 0
+  _cardVFX: {fileID: 0}
+  _configurationNotes: 
+  references:
+    version: 2
+    RefIds:
+    - rid: 4738608601116966912
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 4738608601116966913
+        _conditions: []
+        _oneShot: 1
+        _effects:
+        - rid: 4738608601116966914
+    - rid: 4738608601116966913
+      type: {class: CardDrawnTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 4738608601116966914
+      type: {class: DiscardCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _name: 
+        _amount: 1
