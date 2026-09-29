@@ -552,7 +552,7 @@ namespace Crookedile.EditorTools
                         issues.Add(
                             new AuditIssue(Severity.Warning, "Has leftover configuration notes.")
                         );
-                    if (card.Costs == null || card.Costs.Count == 0)
+                    if (!junk && (card.Costs == null || card.Costs.Count == 0))
                         issues.Add(new AuditIssue(Severity.Info, "No cost entry."));
                     yield return new Row(
                         card.name,
