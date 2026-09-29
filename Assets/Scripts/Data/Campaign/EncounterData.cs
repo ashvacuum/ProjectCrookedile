@@ -28,6 +28,10 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private string _blurb;
 
+        [Tooltip("Shown at the top of the encounter panel when this location is entered.")]
+        [SerializeField]
+        private Sprite _image;
+
         [Tooltip("Encounter duration in hours, excluding travel and waiting.")]
         [Min(0)]
         [HorizontalGroup("Cost", LabelWidth = 80)]
@@ -103,6 +107,7 @@ namespace Crookedile.Data.Campaign
         public string ID => _id;
         public string DisplayName => _displayName;
         public string Blurb => _blurb;
+        public Sprite Image => _image;
         public int HourCost => _hourCost;
 
         /// <summary>

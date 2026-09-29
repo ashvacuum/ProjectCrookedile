@@ -4,6 +4,7 @@ using Crookedile.Data.Campaign;
 using Crookedile.Data.Cards;
 using Crookedile.Utilities;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Crookedile.UI.Campaign
 {
@@ -44,16 +45,47 @@ namespace Crookedile.UI.Campaign
         /// <summary>Result text of the option just chosen, shown before returning to the map.</summary>
         private string _pendingResultText;
 
-        private Vector2 _scroll;
+        // ponytail: runtime-built UIDocument/PanelSettings — no scene/asset wiring needed, temporary
+        // playtest UI. Replace with an authored PanelSettings + UXML when the production UI lands.
+        private UIDocument _uiDocument;
+        private VisualElement _root;
+        private StyleSheet _styleSheet;
 
         #endregion
 
         #region Lifecycle
+        private void Awake()
+        {
+            _uiDocument = GetComponent<UIDocument>();
+            if (_uiDocument == null)
+                _uiDocument = gameObject.AddComponent<UIDocument>();
+            if (_uiDocument.panelSettings == null)
+                _uiDocument.panelSettings = CreateRuntimePanelSettings();
+            _styleSheet = Resources.Load<StyleSheet>("UI/CampaignMap");
+            if (_styleSheet == null)
+                GameLogger.LogWarning(
+                    "Campaign",
+                    "Resources/UI/CampaignMap.uss failed to load — panel will render unstyled.",
+                    this
+                );
+        }
+
         private void Start()
         {
             EnsureRunState();
             RunState.Current.ConfigureTravel(_pool != null ? _pool.Travel : null);
             ResolveChainOrRefresh();
+            RefreshView();
+        }
+
+        private static PanelSettings CreateRuntimePanelSettings()
+        {
+            var settings = ScriptableObject.CreateInstance<PanelSettings>();
+            settings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
+            settings.referenceResolution = new Vector2Int(1920, 1080);
+            settings.match = 0.5f;
+            settings.themeStyleSheet = Resources.Load<ThemeStyleSheet>("UI/DefaultRuntimeTheme");
+            return settings;
         }
 
         /// <summary>
@@ -285,153 +317,187 @@ namespace Crookedile.UI.Campaign
 
         #endregion
 
-        #region Debug view
-        // ponytail: IMGUI playtest view; replace with isometric map hotspots when the production UI is ready.
+        #region Debug HUD (IMGUI)
+        // ponytail: thin IMGUI strip for at-a-glance run stats; the interactive view below is UI Toolkit.
         private void OnGUI()
         {
             var state = RunState.Current;
-            GUILayout.BeginArea(new Rect(20f, 20f, Screen.width - 40f, Screen.height - 40f));
-
-            if (state == null)
-            {
-                GUILayout.Label("Run ended.", GUI.skin.box);
-                if (GUILayout.Button("Start a new run", GUILayout.Height(30f)))
-                {
-                    EnsureRunState();
-                    RefreshLocations();
-                }
-                GUILayout.EndArea();
-                return;
-            }
-
+            GUILayout.BeginArea(new Rect(20f, 4f, Screen.width - 40f, 24f));
             GUILayout.Label(
-                $"Day {state.Day}   {CampaignTravelData.FormatTime(state.ClockMinute)}   "
-                    + $"Time left {state.MinutesRemaining / 60}h {state.MinutesRemaining % 60}m   "
-                    + $"District: {(state.CurrentDistrict != null ? state.CurrentDistrict.DisplayName : "Local")}   "
-                    + $"Funds {state.Funds}   Credibility {state.Credibility}   "
-                    + $"Deck {state.Deck.Count}   Allies {state.Allies.Count}   Seed {state.Seed}",
+                state == null
+                    ? "Run ended."
+                    : $"Day {state.Day}   {CampaignTravelData.FormatTime(state.ClockMinute)}   "
+                        + $"Time left {state.MinutesRemaining / 60}h {state.MinutesRemaining % 60}m   "
+                        + $"District: {(state.CurrentDistrict != null ? state.CurrentDistrict.DisplayName : "Local")}   "
+                        + $"Funds {state.Funds}   Credibility {state.Credibility}   "
+                        + $"Deck {state.Deck.Count}   Allies {state.Allies.Count}   Seed {state.Seed}",
                 GUI.skin.box
             );
-
-            _scroll = GUILayout.BeginScrollView(_scroll);
-
-            // A card pick owed to the player takes priority over everything: it was raised by an
-            // outcome that has already applied, so the map/event underneath is mid-resolution.
-            if (state.PendingCardChoice != null)
-                DrawCardChoice(state.PendingCardChoice);
-            else if (_openEvent != null)
-                DrawEvent();
-            else
-                DrawMap(state);
-
-            GUILayout.EndScrollView();
-
             GUILayout.EndArea();
         }
 
-        private void DrawMap(RunState state)
+        #endregion
+
+        #region Interactive view (UI Toolkit)
+        // ponytail: temporary playtest UI. Replace with isometric map hotspots when the production UI is ready.
+        private VisualElement _content;
+        private VisualElement _tooltip;
+        private Label _tooltipLabel;
+
+        private void EnsureUIRoot()
         {
+            if (_root != null)
+                return;
+
+            _root = _uiDocument.rootVisualElement;
+            if (_styleSheet != null)
+                _root.styleSheets.Add(_styleSheet);
+
+            _content = new VisualElement();
+            _content.AddToClassList("campaign-root");
+            _root.Add(_content);
+
+            _tooltipLabel = new Label();
+            _tooltip = new VisualElement();
+            _tooltip.AddToClassList("tooltip");
+            _tooltip.style.display = DisplayStyle.None;
+            _tooltip.pickingMode = PickingMode.Ignore;
+            _tooltip.Add(_tooltipLabel);
+            _root.Add(_tooltip);
+        }
+
+        private void ShowTooltip(VisualElement target, string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return;
+            _tooltipLabel.text = text;
+            _tooltip.style.display = DisplayStyle.Flex;
+            Rect bound = target.worldBound;
+            _tooltip.style.left = bound.xMax + 8f;
+            _tooltip.style.top = bound.yMin;
+        }
+
+        private void HideTooltip()
+        {
+            _tooltip.style.display = DisplayStyle.None;
+        }
+
+        /// <summary>Shows <paramref name="text"/> next to <paramref name="target"/> on hover.</summary>
+        private void AttachTooltip(VisualElement target, string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return;
+            target.RegisterCallback<PointerEnterEvent>(_ => ShowTooltip(target, text));
+            target.RegisterCallback<PointerLeaveEvent>(_ => HideTooltip());
+        }
+
+        private void RefreshView()
+        {
+            EnsureUIRoot();
+            _content.Clear();
+            HideTooltip();
+
+            var state = RunState.Current;
+            if (state == null)
+            {
+                _content.Add(BuildRunEndedPanel());
+                return;
+            }
+
+            if (state.PendingCardChoice != null)
+                _content.Add(BuildCardChoicePanel(state.PendingCardChoice));
+            else if (_openEvent != null)
+                _content.Add(BuildEventPanel());
+            else
+                _content.Add(BuildMapPanel(state));
+        }
+
+        private VisualElement BuildRunEndedPanel()
+        {
+            var panel = new VisualElement();
+            panel.AddToClassList("panel");
+            panel.Add(new Label("Run ended.") { });
+            var button = new Button(() =>
+            {
+                EnsureRunState();
+                RefreshLocations();
+                RefreshView();
+            })
+            {
+                text = "Start a new run",
+            };
+            button.AddToClassList("action-button");
+            panel.Add(button);
+            return panel;
+        }
+
+        private VisualElement BuildMapPanel(RunState state)
+        {
+            var panel = new VisualElement();
+            panel.AddToClassList("panel");
+
             if (_pool == null)
             {
-                GUILayout.Label("No EncounterPool assigned on CampaignFlow.");
-                return;
+                panel.Add(new Label("No EncounterPool assigned on CampaignFlow."));
+                return panel;
             }
 
             // The campaign runs to the pool's last day; past it the run is over. Without this
             // the player rolls into day 8 with nothing eligible and loops forever.
             if (state.Day > _pool.Days)
             {
-                GUILayout.Label(
-                    $"Campaign complete — survived all {_pool.Days} days.\n"
-                        + $"Funds {state.Funds}   Credibility {state.Credibility}   "
-                        + $"Deck {state.Deck.Count}   Allies {state.Allies.Count}",
-                    GUI.skin.box
+                panel.Add(
+                    new Label($"Campaign complete — survived all {_pool.Days} days.")
+                    {
+                        }
                 );
-                if (GUILayout.Button("Start a new run", GUILayout.Height(30f)))
+                var summary = new Label(
+                    $"Funds {state.Funds}   Credibility {state.Credibility}   "
+                        + $"Deck {state.Deck.Count}   Allies {state.Allies.Count}"
+                );
+                summary.AddToClassList("meta-line");
+                panel.Add(summary);
+
+                var restartButton = new Button(() =>
                 {
                     RunState.Clear();
                     EnsureRunState();
                     RefreshLocations();
-                }
-                return;
+                    RefreshView();
+                })
+                {
+                    text = "Start a new run",
+                };
+                restartButton.AddToClassList("action-button");
+                panel.Add(restartButton);
+                return panel;
             }
 
-            GUILayout.Space(8f);
-            if (state.TodaysLocations.Count == 0)
-                GUILayout.Label("Nothing on offer today — end the day to move on.");
+            var scroll = new ScrollView();
+            scroll.AddToClassList("scroll-view");
+            panel.Add(scroll);
 
-            // Indexed, not foreach: Enter() removes the chosen location from this very list, and
-            // a foreach would throw on the next MoveNext. The early return also stops drawing a
-            // list that no longer matches what just happened.
-            for (int i = 0; i < state.TodaysLocations.Count; i++)
+            if (state.TodaysLocations.Count == 0)
+                scroll.Add(new Label("Nothing on offer today — end the day to move on."));
+
+            foreach (var loc in state.TodaysLocations)
             {
-                var loc = state.TodaysLocations[i];
                 if (loc == null)
                     continue;
-
-                var plan = state.PlanVisit(loc);
-                GUI.enabled = plan.CanEnter;
-
-                string label = string.IsNullOrEmpty(loc.DisplayName) ? loc.name : loc.DisplayName;
-                string kind = loc is BattleEncounterData ? "Battle" : "Event";
-                string district = loc.District != null ? loc.District.DisplayName : "Local";
-                string cost = plan.CanEnter
-                    ? $"Travel {plan.TravelMinutes}m + wait {plan.WaitMinutes}m + event {plan.EncounterMinutes}m"
-                    : plan.BlockedReason;
-
-                bool clicked = GUILayout.Button(
-                    $"[{kind}] {label} / {district}   ({cost})",
-                    GUILayout.Height(34f)
-                );
-
-                if (!string.IsNullOrEmpty(loc.Blurb))
-                    GUILayout.Label($"    {loc.Blurb}");
-
-                GUI.enabled = true;
-                GUILayout.Label(
-                    $"    Opens {CampaignTravelData.FormatTime(loc.OpeningMinute)} | "
-                        + $"Enter before {CampaignTravelData.FormatTime(loc.ClosingMinute)}"
-                );
-                if (plan.ArrivalMinute > 0)
-                {
-                    string traffic =
-                        plan.TrafficMultiplier >= 2f ? "Heavy"
-                        : plan.TrafficMultiplier > 1f ? "Moderate"
-                        : "Clear";
-                    GUILayout.Label(
-                        $"    Traffic: {traffic} ({plan.TrafficMultiplier:0.##}x) | "
-                            + $"Arrive {CampaignTravelData.FormatTime(plan.ArrivalMinute)} | "
-                            + $"Start {CampaignTravelData.FormatTime(plan.StartMinute)} | "
-                            + $"Finish {CampaignTravelData.FormatTime(plan.FinishMinute)}"
-                    );
-                    Rect meter = GUILayoutUtility.GetRect(120f, 6f, GUILayout.Width(120f));
-                    GUI.Box(meter, GUIContent.none);
-                    meter.width *= Mathf.Clamp01((plan.TrafficMultiplier - 1f) / 4f);
-                    GUI.DrawTexture(meter, Texture2D.whiteTexture);
-                    if (plan.TravelMinutesSaved > 0 || plan.EncounterMinutesSaved > 0)
-                    {
-                        GUILayout.Label(
-                            $"    Allies save {plan.TravelMinutesSaved}m travel and {plan.EncounterMinutesSaved}m encounter time."
-                        );
-                    }
-                }
-                GUILayout.Space(4f);
-
-                if (clicked)
-                {
-                    Enter(loc);
-                    return;
-                }
+                scroll.Add(BuildLocationListItem(state, loc));
             }
 
-            GUILayout.Space(12f);
-
-            GUI.enabled = state.MinutesRemaining >= 15;
-            if (GUILayout.Button("Wait 15 minutes", GUILayout.Height(30f)))
+            var waitButton = new Button(() =>
             {
                 state.TrySpendMinutes(15);
-            }
-            GUI.enabled = true;
+                RefreshView();
+            })
+            {
+                text = "Wait 15 minutes",
+            };
+            waitButton.AddToClassList("secondary-button");
+            waitButton.SetEnabled(state.MinutesRemaining >= 15);
+            panel.Add(waitButton);
 
             // On a boss day there is no ending the day — ending it IS facing the boss. Without
             // this the finale is skippable: End Day rolls you to the next day and, on the last
@@ -439,23 +505,102 @@ namespace Crookedile.UI.Campaign
             var boss = UnresolvedBoss(state);
             if (boss != null)
             {
-                string bossName = string.IsNullOrEmpty(boss.DisplayName)
-                    ? boss.name
-                    : boss.DisplayName;
-                // Always enabled, like HQ was: running out of Hours must not strand the run.
-                if (
-                    GUILayout.Button(
-                        $"Face {bossName} (mandatory finale, no travel or time cost)",
-                        GUILayout.Height(30f)
-                    )
-                )
+                string bossName = string.IsNullOrEmpty(boss.DisplayName) ? boss.name : boss.DisplayName;
+                var bossButton = new Button(() =>
+                {
                     Enter(boss, chargeHours: false);
-                return;
+                    RefreshView();
+                })
+                {
+                    text = $"Face {bossName} (mandatory finale, no travel or time cost)",
+                };
+                bossButton.AddToClassList("action-button");
+                panel.Add(bossButton);
+                return panel;
             }
 
             // HQ is always enabled at 0 cost so the day can be ended even at 0 Hours.
-            if (GUILayout.Button("End the day (HQ)", GUILayout.Height(30f)))
+            var endDayButton = new Button(() =>
+            {
                 EndDay();
+                RefreshView();
+            })
+            {
+                text = "End the day (HQ)",
+            };
+            endDayButton.AddToClassList("action-button");
+            panel.Add(endDayButton);
+
+            return panel;
+        }
+
+        /// <summary>
+        /// One row: name, kind, and Hours cost only. The travel/wait/traffic breakdown that used
+        /// to sit inline now lives in a hover tooltip (see <see cref="BuildLocationTooltip"/>) so
+        /// the list itself stays scannable.
+        /// </summary>
+        private VisualElement BuildLocationListItem(RunState state, EncounterData loc)
+        {
+            var plan = state.PlanVisit(loc);
+            string label = string.IsNullOrEmpty(loc.DisplayName) ? loc.name : loc.DisplayName;
+            string kind = loc is BattleEncounterData ? "Battle" : "Event";
+
+            var button = new Button(() =>
+            {
+                Enter(loc);
+                RefreshView();
+            })
+            {
+                text = $"[{kind}] {label}   ({loc.HourCost}h)",
+            };
+            button.AddToClassList("action-button");
+            button.SetEnabled(plan.CanEnter);
+            AttachTooltip(button, BuildLocationTooltip(loc, plan));
+
+            return button;
+        }
+
+        private static string BuildLocationTooltip(EncounterData loc, CampaignVisitPlan plan)
+        {
+            var lines = new List<string>();
+            if (!string.IsNullOrEmpty(loc.Blurb))
+                lines.Add(loc.Blurb);
+
+            lines.Add(
+                $"Opens {CampaignTravelData.FormatTime(loc.OpeningMinute)} | "
+                    + $"Enter before {CampaignTravelData.FormatTime(loc.ClosingMinute)}"
+            );
+
+            if (!plan.CanEnter)
+            {
+                lines.Add(plan.BlockedReason);
+                return string.Join("\n", lines);
+            }
+
+            lines.Add(
+                $"Travel {plan.TravelMinutes}m + wait {plan.WaitMinutes}m + event {plan.EncounterMinutes}m"
+            );
+
+            if (plan.ArrivalMinute > 0)
+            {
+                string traffic =
+                    plan.TrafficMultiplier >= 2f ? "Heavy"
+                    : plan.TrafficMultiplier > 1f ? "Moderate"
+                    : "Clear";
+                lines.Add(
+                    $"Traffic: {traffic} ({plan.TrafficMultiplier:0.##}x) | "
+                        + $"Arrive {CampaignTravelData.FormatTime(plan.ArrivalMinute)} | "
+                        + $"Start {CampaignTravelData.FormatTime(plan.StartMinute)} | "
+                        + $"Finish {CampaignTravelData.FormatTime(plan.FinishMinute)}"
+                );
+
+                if (plan.TravelMinutesSaved > 0 || plan.EncounterMinutesSaved > 0)
+                    lines.Add(
+                        $"Allies save {plan.TravelMinutesSaved}m travel and {plan.EncounterMinutesSaved}m encounter time."
+                    );
+            }
+
+            return string.Join("\n", lines);
         }
 
         /// <summary>
@@ -475,53 +620,97 @@ namespace Crookedile.UI.Campaign
         /// candidate list, so every picker shown has an answer, and choices are consequences of a
         /// pick the player already made.
         /// </summary>
-        private void DrawCardChoice(RunState.CardChoice choice)
+        private VisualElement BuildCardChoicePanel(RunState.CardChoice choice)
         {
-            GUILayout.Label(choice.Prompt, GUI.skin.box);
-            GUILayout.Space(8f);
+            var panel = new VisualElement();
+            panel.AddToClassList("panel");
 
-            for (int i = 0; i < choice.Candidates.Count; i++)
+            var title = new Label(choice.Prompt);
+            title.AddToClassList("title");
+            panel.Add(title);
+
+            foreach (var card in choice.Candidates)
             {
-                var card = choice.Candidates[i];
                 if (card == null)
                     continue;
 
-                if (GUILayout.Button($"{card.CardName}   ({card.CardType})", GUILayout.Height(30f)))
+                var button = new Button(() =>
                 {
                     RunState.Current.ResolveCardChoice(card);
                     GameLogger.LogInfo("Campaign", $"Card choice: '{card.CardName}'.", this);
-                    return; // the list is gone now — stop drawing against it
-                }
+                    RefreshView();
+                })
+                {
+                    text = $"{card.CardName}   ({card.CardType})",
+                };
+                button.AddToClassList("action-button");
+                panel.Add(button);
 
                 if (!string.IsNullOrEmpty(card.Description))
-                    GUILayout.Label($"    {card.Description}");
-
-                GUILayout.Space(2f);
+                {
+                    var desc = new Label(card.Description);
+                    desc.AddToClassList("blurb");
+                    panel.Add(desc);
+                }
             }
+
+            return panel;
         }
 
-        private void DrawEvent()
+        private VisualElement BuildEventPanel()
         {
-            GUILayout.Label(_openEvent.DisplayName ?? _openEvent.name, GUI.skin.box);
-            GUILayout.Space(6f);
-            GUILayout.Label(_openEvent.Body);
-            GUILayout.Space(12f);
+            var panel = new VisualElement();
+            panel.AddToClassList("panel");
+
+            if (_openEvent.Image != null)
+            {
+                var image = new VisualElement();
+                image.AddToClassList("event-image");
+                image.style.backgroundImage = new StyleBackground(_openEvent.Image);
+                panel.Add(image);
+            }
+
+            var title = new Label(_openEvent.DisplayName ?? _openEvent.name);
+            title.AddToClassList("title");
+            panel.Add(title);
+
+            var body = new Label(_openEvent.Body);
+            body.AddToClassList("blurb");
+            panel.Add(body);
 
             if (_pendingResultText != null)
             {
-                GUILayout.Label(_pendingResultText, GUI.skin.box);
-                GUILayout.Space(8f);
-                if (GUILayout.Button("Continue", GUILayout.Height(30f)))
+                var result = new Label(_pendingResultText);
+                result.AddToClassList("meta-line");
+                panel.Add(result);
+
+                var continueButton = new Button(() =>
+                {
                     CloseEvent();
-                return;
+                    RefreshView();
+                })
+                {
+                    text = "Continue",
+                };
+                continueButton.AddToClassList("action-button");
+                panel.Add(continueButton);
+                return panel;
             }
 
             if (_openEvent.Options.Count == 0)
             {
-                GUILayout.Label("(no options authored)");
-                if (GUILayout.Button("Leave", GUILayout.Height(30f)))
+                panel.Add(new Label("(no options authored)"));
+                var leaveButton = new Button(() =>
+                {
                     CloseEvent();
-                return;
+                    RefreshView();
+                })
+                {
+                    text = "Leave",
+                };
+                leaveButton.AddToClassList("action-button");
+                panel.Add(leaveButton);
+                return panel;
             }
 
             var state = RunState.Current;
@@ -530,27 +719,29 @@ namespace Crookedile.UI.Campaign
                 if (option == null)
                     continue;
 
-                // Locked options stay visible and disabled, with the reason attached. Hiding
-                // them would make a gated event read as a shorter event.
+                // Locked options stay visible and disabled, with the reason in the tooltip.
+                // Hiding them would make a gated event read as a shorter event.
                 bool available = option.IsAvailable(state);
                 string outcomes = option.DescribeOutcomes();
 
-                string label = option.Label;
-                if (!available)
-                    label += $"   [needs {option.DescribeRequirements()}]";
-                else if (!string.IsNullOrEmpty(outcomes))
-                    label += $"   —   {outcomes}";
-
-                GUI.enabled = available;
-                bool clicked = GUILayout.Button(label, GUILayout.Height(34f));
-                GUI.enabled = true;
-
-                if (clicked)
+                var optionButton = new Button(() =>
                 {
                     ChooseOption(option);
-                    return; // stop iterating: the option list is about to be replaced by result text
-                }
+                    RefreshView();
+                })
+                {
+                    text = option.Label,
+                };
+                optionButton.AddToClassList("action-button");
+                optionButton.SetEnabled(available);
+                AttachTooltip(
+                    optionButton,
+                    available ? outcomes : $"Needs {option.DescribeRequirements()}"
+                );
+                panel.Add(optionButton);
             }
+
+            return panel;
         }
 
         #endregion
