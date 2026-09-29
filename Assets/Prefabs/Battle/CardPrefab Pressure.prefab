@@ -181,7 +181,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -271,6 +271,7 @@ MonoBehaviour:
   hoverEdgePadding: 6
   dragUpThreshold: 100
   _selectionOutline: {fileID: 0}
+  _cardBack: {fileID: 4808324961712822252}
   previewCard: {fileID: 0}
 --- !u!225 &7146289679869686022
 CanvasGroup:

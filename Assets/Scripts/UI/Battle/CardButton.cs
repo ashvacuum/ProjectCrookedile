@@ -144,6 +144,17 @@ namespace Crookedile.UI.Battle
 
         #endregion
 
+        #region Card Back
+        [Header("Card Back")]
+        [Tooltip(
+            "Overlay covering the card face, shown while a drawn card is still face-down in "
+                + "flight. Its sprite is swapped to the player's origin back at draw time."
+        )]
+        [SerializeField]
+        private Image _cardBack;
+
+        #endregion
+
         #region Editor Preview
         [Header("Editor Preview")]
         [Tooltip("Assign a card to showcase it on this prefab in the editor, without entering Play mode.")]
@@ -315,8 +326,26 @@ namespace Crookedile.UI.Battle
             baseRotation = transform.localRotation;
             _basePositionSet = false;
             _pickerMode = false; // default to hand behavior; pickers re-enable after Initialize
+            SetFaceDown(false);
 
             UpdateDisplay();
+        }
+
+        /// <summary>Shows the card back over the face (true) or reveals the face (false).</summary>
+        public void SetFaceDown(bool faceDown)
+        {
+            if (_cardBack != null)
+                _cardBack.gameObject.SetActive(faceDown);
+        }
+
+        /// <summary>Uses <paramref name="origin"/>'s card back from <see cref="CardVisualSettings"/>.</summary>
+        public void SetCardBackForOrigin(OriginType origin)
+        {
+            if (_cardBack == null || visualSettings == null)
+                return;
+            Sprite back = visualSettings.GetCardBackForOrigin(origin);
+            if (back != null)
+                _cardBack.sprite = back;
         }
 
         /// <summary>

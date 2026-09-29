@@ -939,8 +939,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.CardFlyAnimator
   _rootCanvas: {fileID: 1961816019}
   _discardTransform: {fileID: 1277963380}
-  _drawStaggerDelay: 0.3
-  _drawPopDuration: 0.18
+  _drawStaggerDelay: 0.08
+  _drawSmoothTime: 0.09
+  _drawStartScale: 0.35
+  _drawFlipDuration: 0.22
+  _visualSettings: {fileID: 11400000, guid: 414d4ac5ada461d4fa61cbf2f7bae212, type: 2}
+  _reshuffleMaxGhosts: 5
+  _reshuffleGhostDuration: 0.35
+  _reshuffleGhostStagger: 0.05
+  _reshuffleGhostSize: {x: 66, y: 99}
+  _reshuffleArcHeight: 80
   _discardDuration: 0.28
   _grantScaleInDuration: 0.15
   _grantHoldDuration: 0.7
