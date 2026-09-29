@@ -606,6 +606,7 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<DeckManager>(
                 $"{_ownerName} shuffled {count} cards from discard into deck"
             );
+            EventBus.Publish(new DeckReshuffledEvent { Count = count, IsPlayer = _isPlayer });
         }
 
         /// <summary>Where <see cref="RepositionCard"/> sends a card.</summary>

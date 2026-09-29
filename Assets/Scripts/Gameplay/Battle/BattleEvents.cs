@@ -202,6 +202,19 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
+    /// Published when the discard pile is shuffled back into an empty draw pile. Fires inside
+    /// the draw that triggered it, before that card's <see cref="CardDrawnEvent"/>.
+    /// </summary>
+    public struct DeckReshuffledEvent : IGameEvent
+    {
+        /// <summary>Cards moved from discard into the draw pile.</summary>
+        public int Count;
+
+        /// <summary>True = the player's deck; false = an enemy's.</summary>
+        public bool IsPlayer;
+    }
+
+    /// <summary>
     /// Published by <c>BattleManager.PlayCard()</c> after a card is removed from hand and its effects begin resolving.
     /// </summary>
     public struct CardPlayedEvent : IGameEvent
