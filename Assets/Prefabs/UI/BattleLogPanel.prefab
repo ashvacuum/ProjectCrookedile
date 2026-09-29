@@ -666,7 +666,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.BattleLogPanel
   battleLogText: {fileID: 2939441807200771981}
   battleLogScrollRect: {fileID: 7769403296414910830}
-  maxLogLines: 20
+  maxLogLines: 150
 --- !u!1 &7940146391722849991
 GameObject:
   m_ObjectHideFlags: 0
