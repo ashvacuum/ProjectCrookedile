@@ -50,6 +50,48 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private float _tweenDuration = 0.25f;
 
+        [Header("Juice")]
+        [Tooltip(
+            "Optional 'chip' bar drawn BEHIND the fill, outside the layout group: same parent and "
+                + "left edge as the bar container, pivot x = 0. On a drop it holds the old width, "
+                + "then drains; on a gain it jumps ahead and the fill catches up."
+        )]
+        [SerializeField]
+        private Image _ghostFill;
+
+        [Tooltip("Ghost tint while draining after a drop.")]
+        [SerializeField]
+        private Color _ghostLossColor = new Color(1f, 0.85f, 0.3f);
+
+        [Tooltip("Ghost tint while leading a gain.")]
+        [SerializeField]
+        private Color _ghostGainColor = new Color(0.75f, 1f, 0.75f);
+
+        [Tooltip("Seconds the ghost lingers at the old width before draining.")]
+        [SerializeField]
+        private float _ghostDelay = 0.35f;
+
+        [Tooltip("Seconds the ghost takes to drain, and the value label to count to its new number.")]
+        [SerializeField]
+        private float _ghostDuration = 0.45f;
+
+        [Tooltip("Shift (as a fraction of max Opinion) at which shake/punch reach full strength.")]
+        [Range(0.01f, 1f)]
+        [SerializeField]
+        private float _fullJuiceShift = 0.15f;
+
+        [Tooltip("Pixels the meter shakes on a full-strength drop.")]
+        [SerializeField]
+        private float _shakeStrength = 18f;
+
+        [Tooltip("Scale punch on a full-strength gain.")]
+        [SerializeField]
+        private float _punchScale = 0.12f;
+
+        [Tooltip("Color the fill flashes to on any shift before settling back.")]
+        [SerializeField]
+        private Color _flashColor = Color.white;
+
         [Header("Overlays")]
         [Tooltip("RectTransform pinned at 50% of bar width — marks the Judgment win threshold.")]
         [SerializeField]
@@ -81,6 +123,12 @@ namespace Crookedile.UI.Battle
         // True after the first successful Refresh — the first paint snaps instead of
         // tweening from whatever stale widths the scene serialized.
         private bool _hasPainted;
+
+        private float _lastFillWidth;
+
+        // Number the value label currently reads; counts toward the real value.
+        private int _displayedOpinion;
+        private int _countTarget = -1;
 
         private void Awake()
         {
@@ -149,24 +197,145 @@ namespace Crookedile.UI.Battle
                     )
                     : 0f;
 
-            if (_barFill != null)
+            if (_barFill != null && !Mathf.Approximately(barFillWidth, _lastFillWidth))
+            {
+                AnimateGhost(_lastFillWidth, barFillWidth);
                 AnimateWidth(_barFill.rectTransform, barFillWidth);
+                _lastFillWidth = barFillWidth;
+            }
             AnimateWidth(_playerSupportBar, playerSupportWidth);
             AnimateWidth(_enemyDenialBar, enemyDenialWidth);
+
+            // Kick() owns the color while its flash is running.
+            if (_barFill != null && !DOTween.IsTweening(_barFill))
+                _barFill.color = BarColor(pct);
+
+            CountValueText(currentOpinion, maxOpinion);
             _hasPainted = true;
 
+            RefreshTurnCountdown(turnsElapsed, maxTurns);
+        }
+
+        /// <summary>
+        /// One-shot impact for an Opinion shift: shake on a drop, punch on a gain, fill flash,
+        /// value-label punch. Strength scales with the shift relative to max Opinion. The bar
+        /// widths themselves move through <see cref="Refresh"/>.
+        /// </summary>
+        public void Kick(int oldValue, int newValue, int maxValue)
+        {
+            int delta = newValue - oldValue;
+            if (delta == 0 || maxValue <= 0)
+                return;
+            float strength = Mathf.Clamp01(Mathf.Abs(delta) / (maxValue * _fullJuiceShift));
+            strength = Mathf.Lerp(0.3f, 1f, strength); // small shifts still register
+
+            var root = (RectTransform)transform;
+            root.DOComplete();
+            if (delta < 0)
+                root.DOShakeAnchorPos(0.35f, _shakeStrength * strength, vibrato: 20)
+                    .SetLink(gameObject);
+            else
+                root.DOPunchScale(Vector3.one * _punchScale * strength, 0.35f, vibrato: 8)
+                    .SetLink(gameObject);
+
             if (_barFill != null)
-                _barFill.color = pct < 0.30f ? _dangerBarColor : _normalBarColor;
+            {
+                DOTween.Kill(_barFill);
+                _barFill.color = _flashColor;
+                _barFill
+                    .DOColor(BarColor((float)newValue / maxValue), 0.3f)
+                    .SetTarget(_barFill)
+                    .SetLink(gameObject);
+            }
 
             if (_valueText != null)
-                _valueText.text = $"Opinion: {currentOpinion} / {maxOpinion}";
+            {
+                _valueText.transform.DOComplete();
+                _valueText.transform.DOPunchScale(Vector3.one * 0.25f * strength, 0.3f)
+                    .SetLink(gameObject);
+            }
+        }
 
-            RefreshTurnCountdown(turnsElapsed, maxTurns);
+        /// <summary>World position of the fill's leading edge at <paramref name="value"/> — where
+        /// an Opinion shift visibly lands, for VFX that should spark there.</summary>
+        public Vector3 EdgeWorldPosition(int value, int maxValue)
+        {
+            var c = new Vector3[4];
+            (_barContainer != null ? _barContainer : (RectTransform)transform).GetWorldCorners(c);
+            float pct = maxValue > 0 ? Mathf.Clamp01((float)value / maxValue) : 0f;
+            // Corners: 0 bottom-left, 1 top-left, 2 top-right, 3 bottom-right.
+            return Vector3.Lerp((c[0] + c[1]) * 0.5f, (c[3] + c[2]) * 0.5f, pct);
         }
 
         #endregion
 
         #region Private
+
+        private Color BarColor(float pct) => pct < 0.30f ? _dangerBarColor : _normalBarColor;
+
+        /// <summary>
+        /// Drop: ghost holds the old width, then drains to the new one. Gain: ghost jumps to the
+        /// new width and the (slower) fill catches up to it.
+        /// </summary>
+        private void AnimateGhost(float from, float to)
+        {
+            if (_ghostFill == null)
+                return;
+            var rt = _ghostFill.rectTransform;
+            DOTween.Kill(rt);
+
+            if (!_hasPainted || to >= from)
+            {
+                _ghostFill.color = _ghostGainColor;
+                rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, to);
+                return;
+            }
+
+            _ghostFill.color = _ghostLossColor;
+            // A drop landing mid-drain keeps draining from wherever the ghost is now.
+            float start = Mathf.Max(rt.rect.width, from);
+            rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, start);
+            DOTween
+                .To(
+                    () => rt.rect.width,
+                    w => rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w),
+                    to,
+                    _ghostDuration
+                )
+                .SetDelay(_ghostDelay)
+                .SetEase(Ease.InQuad)
+                .SetTarget(rt)
+                .SetLink(gameObject);
+        }
+
+        /// <summary>Rolls the value label toward <paramref name="value"/> instead of snapping.</summary>
+        private void CountValueText(int value, int maxValue)
+        {
+            if (_valueText == null || value == _countTarget)
+                return;
+            _countTarget = value;
+            DOTween.Kill(_valueText);
+            if (!_hasPainted || _ghostDuration <= 0f)
+            {
+                _displayedOpinion = value;
+                _valueText.text = $"Opinion: {value} / {maxValue}";
+                return;
+            }
+            DOTween
+                .To(
+                    () => _displayedOpinion,
+                    v =>
+                    {
+                        _displayedOpinion = v;
+                        _valueText.text = $"Opinion: {v} / {maxValue}";
+                    },
+                    value,
+                    _ghostDuration
+                )
+                .SetEase(Ease.OutCubic)
+                .SetTarget(_valueText)
+                .SetLink(gameObject);
+        }
 
         /// <summary>
         /// Tweens a segment to <paramref name="width"/>, re-flowing the layout group each

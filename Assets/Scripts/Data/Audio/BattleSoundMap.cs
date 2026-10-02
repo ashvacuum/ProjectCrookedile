@@ -45,6 +45,17 @@ namespace Crookedile.Data.Audio
         SupportLost,
         APSpent,
         APGained,
+
+        // Appended — entries are serialized by int, so new triggers only ever go at the end.
+        // Opinion VFX spawn at the meter fill's leading edge.
+        OpinionRaised,
+        OpinionLowered,
+
+        // Stance flips (EnemyHostilityChanged covers in-stance nudges).
+        EnemyBecameHostile,
+        EnemyBecameReceptive,
+        EnemyBecameNeutral,
+        EnemyTurncoat,
     }
 
     #endregion
