@@ -41,14 +41,18 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private BattleManager _battleManager;
 
-        [Header("Floating Numbers")]
-        [Tooltip("Color of damage number text spawned by FloatingTextManager.")]
+        [Header("Floating Text")]
+        [Tooltip("Hostility rising / an enemy turning Hostile or Turncoat.")]
         [SerializeField]
-        private Color _damageColor = new Color(0.9f, 0.2f, 0.2f);
+        private Color _hostileColor = new Color(0.95f, 0.3f, 0.2f);
 
-        [Tooltip("Color of heal number text spawned by FloatingTextManager.")]
+        [Tooltip("Hostility falling / an enemy turning Receptive.")]
         [SerializeField]
-        private Color _healColor = new Color(0.2f, 0.9f, 0.2f);
+        private Color _receptiveColor = new Color(0.3f, 0.85f, 0.45f);
+
+        [Tooltip("An enemy settling back into Neutral.")]
+        [SerializeField]
+        private Color _neutralColor = new Color(0.8f, 0.8f, 0.85f);
 
         [Tooltip("Color of the 'Blocked' text when Support/Denial fully absorbs a hit.")]
         [SerializeField]
@@ -100,6 +104,7 @@ namespace Crookedile.UI.Battle
             Sub<SupportChangedEvent>(OnSupportChanged);
             Sub<DenialChangedEvent>(OnDenialChanged);
             Sub<HostilityChangedEvent>(OnHostilityChanged);
+            Sub<OpinionChangedEvent>(OnOpinionChanged);
             Sub<ActionPointsChangedEvent>(OnAPChanged);
         }
 
@@ -161,23 +166,36 @@ namespace Crookedile.UI.Battle
                 : _battleUI?.PlayerSlotTransform;
             Play(trigger, vfxSource);
 
-            // The Opinion Meter is the only resource pressure actually moves — enemies are who
-            // you're addressing, not damage sponges. So the number lands on the meter (what
-            // changed), and a player-targeted enemy just gets a light reaction tell, not a hit.
-            var dmgTarget = evt.IsToPlayer
-                ? _battleUI?.PlayerSlotTransform
-                : _battleUI?.MeterTransform;
-
+            // No damage number: nothing has HP. The meter's own motion (OnOpinionChanged) is the
+            // readout; a player-targeted enemy just gets a light "you addressed me" tell.
             if (!evt.IsToPlayer)
                 ReactOnEnemy(evt.TargetEnemyIndex);
 
-            // Show what actually happened, not the raw shift: the applied delta when the
-            // meter moved, "Blocked" when Support/Denial ate the whole hit, nothing when the hit
-            // evaporated without a shield (echo-halved to 0 / meter already clamped).
-            if (evt.Applied > 0)
-                FloatingTextManager.Instance?.Show(evt.Applied.ToString(), dmgTarget, _damageColor);
-            else if (evt.Absorbed > 0)
-                FloatingTextManager.Instance?.Show("Blocked", dmgTarget, _blockedColor);
+            // The one case the meter can't show: Support/Denial ate the whole shift.
+            if (evt.Applied == 0 && evt.Absorbed > 0)
+                FloatingTextManager.Instance?.Show(
+                    "Blocked",
+                    _battleUI?.MeterTransform,
+                    _blockedColor
+                );
+        }
+
+        /// <summary>
+        /// Every Opinion move, whatever caused it (cards, enemy moves, echo decay, conversion
+        /// bursts): meter impact plus the OpinionRaised/Lowered cue sparking at the fill's edge.
+        /// </summary>
+        private void OnOpinionChanged(OpinionChangedEvent evt)
+        {
+            var meter = _battleUI?.OpinionMeter;
+            if (meter == null || evt.NewValue == evt.OldValue)
+                return;
+            meter.Kick(evt.OldValue, evt.NewValue, evt.MaxValue);
+            PlayAtWorld(
+                evt.NewValue > evt.OldValue
+                    ? BattleAudioTrigger.OpinionRaised
+                    : BattleAudioTrigger.OpinionLowered,
+                meter.EdgeWorldPosition(evt.NewValue, evt.MaxValue)
+            );
         }
 
         /// <summary>
@@ -198,8 +216,6 @@ namespace Crookedile.UI.Battle
         {
             var target = evt.IsToPlayer ? _battleUI?.PlayerSlotTransform : null;
             Play(BattleAudioTrigger.HealApplied, target);
-            if (evt.IsToPlayer)
-                FloatingTextManager.Instance?.Show($"+{evt.Amount}", target, _healColor);
         }
 
         private void OnStatusApplied(StatusEffectAppliedEvent evt)
@@ -216,10 +232,43 @@ namespace Crookedile.UI.Battle
 
         private void OnEnemyActing(EnemyActingEvent evt)
         {
-            // Play the move's VFX on the player slot if one is configured.
-            // Non-blocking: damage resolves simultaneously on the same frame.
-            if (evt.Move?.MoveVFX != null)
-                VFXManager.Instance?.Play(evt.Move.MoveVFX, _battleUI?.PlayerSlotTransform);
+            // Non-blocking: the move resolves on the same frame.
+            var vfx = evt.Move?.MoveVFX;
+            if (vfx == null)
+                return;
+            foreach (var anchor in AnchorsFor(vfx, _battleUI?.PlayerSlotTransform))
+                VFXManager.Instance?.Play(vfx, anchor);
+        }
+
+        /// <summary>
+        /// Resolves a card/move VFX's <see cref="VFXAnchor"/> to the spots it plays at.
+        /// A null entry plays at the VFX canvas root (screen center).
+        /// </summary>
+        private List<RectTransform> AnchorsFor(VFXEvent vfx, RectTransform target)
+        {
+            switch (vfx.Anchor)
+            {
+                case VFXAnchor.OpinionMeter:
+                    return new List<RectTransform> { _battleUI?.MeterTransform };
+                case VFXAnchor.Player:
+                    return new List<RectTransform> { _battleUI?.PlayerSlotTransform };
+                case VFXAnchor.ScreenCenter:
+                    return new List<RectTransform> { null };
+                case VFXAnchor.EveryEnemy:
+                    var slots = new List<RectTransform>();
+                    var enemies = _battleManager?.Enemies;
+                    for (int i = 0; enemies != null && i < enemies.Count; i++)
+                    {
+                        var slot = enemies[i].IsDefeated
+                            ? null
+                            : _battleUI?.GetEnemySlotTransform(i);
+                        if (slot != null)
+                            slots.Add(slot);
+                    }
+                    return slots.Count > 0 ? slots : new List<RectTransform> { target };
+                default:
+                    return new List<RectTransform> { target };
+            }
         }
 
         /// <summary>
@@ -234,13 +283,17 @@ namespace Crookedile.UI.Battle
             System.Action onApplyEffects
         )
         {
-            // Resolve VFX spawn target: prefer the last-targeted enemy slot, fall back to the card's origin rect.
-            var vfxTarget = EnemySlotUI.LastTargetedRect ?? CardButton.LastPlayedRect;
+            // Target anchor = the last-targeted enemy slot, else the card's origin rect.
+            var anchors = AnchorsFor(
+                card.CardVFX,
+                EnemySlotUI.LastTargetedRect ?? CardButton.LastPlayedRect
+            );
 
+            // The first copy owns hit timing; any others (EveryEnemy) are cosmetic.
             var completion = new Cysharp.Threading.Tasks.UniTaskCompletionSource();
             var vfx = VFXManager.Instance?.PlayAndSetInstance(
                 card.CardVFX,
-                vfxTarget,
+                anchors[0],
                 new BattleVFXContext
                 {
                     OnApplyEffects = onApplyEffects,
@@ -253,6 +306,9 @@ namespace Crookedile.UI.Battle
                 onApplyEffects?.Invoke();
                 completion.TrySetResult();
             }
+            else
+                for (int i = 1; i < anchors.Count; i++)
+                    VFXManager.Instance.Play(card.CardVFX, anchors[i]);
 
             return completion.Task;
         }
@@ -296,12 +352,59 @@ namespace Crookedile.UI.Battle
         private void OnHostilityChanged(HostilityChangedEvent evt)
         {
             // Player hostility (index -1) has no enemy slot to anchor the cue to.
-            if (evt.EnemyIndex < 0)
+            int delta = evt.NewValue - evt.OldValue;
+            var enemies = _battleManager?.Enemies;
+            if (evt.EnemyIndex < 0 || delta == 0 || enemies == null || evt.EnemyIndex >= enemies.Count)
                 return;
-            Play(
-                BattleAudioTrigger.EnemyHostilityChanged,
-                _battleUI?.GetEnemySlotTransform(evt.EnemyIndex)
-            );
+
+            var slot = _battleUI?.GetEnemySlotTransform(evt.EnemyIndex);
+            int zone = enemies[evt.EnemyIndex].Stats.NeutralZone;
+            int was = Stance(evt.OldValue, zone);
+            int now = Stance(evt.NewValue, zone);
+            string amount = delta.ToString("+0;-0");
+
+            if (was == now)
+            {
+                Play(BattleAudioTrigger.EnemyHostilityChanged, slot);
+                FloatingTextManager.Instance?.Show(
+                    amount,
+                    slot,
+                    delta > 0 ? _hostileColor : _receptiveColor
+                );
+                return;
+            }
+
+            // Stance flip — the moment the room changes. One label (word + amount) so a
+            // Turncoat doesn't stack a second "Hostile!" on top of itself.
+            var (trigger, word, color) =
+                now > 0
+                    ? was < 0
+                        ? (BattleAudioTrigger.EnemyTurncoat, "Turncoat!", _hostileColor)
+                        : (BattleAudioTrigger.EnemyBecameHostile, "Hostile!", _hostileColor)
+                : now < 0 ? (BattleAudioTrigger.EnemyBecameReceptive, "Receptive!", _receptiveColor)
+                : (BattleAudioTrigger.EnemyBecameNeutral, "Neutral", _neutralColor);
+            Play(trigger, slot);
+            FloatingTextManager.Instance?.Show($"{word} {amount}", slot, color);
+            ShakeEnemy(slot, trigger == BattleAudioTrigger.EnemyTurncoat ? 1f : 0.6f);
+        }
+
+        /// <summary>Same rule as <c>BattleStats.IsHostile/IsReceptive</c>: 1 / -1 / 0 (neutral).</summary>
+        private static int Stance(int hostility, int neutralZone) =>
+            hostility > neutralZone ? 1
+            : hostility < -neutralZone ? -1
+            : 0;
+
+        /// <summary>Rotation shake + scale punch — rotation/scale, because the enemy row's
+        /// layout group owns slot positions.</summary>
+        private static void ShakeEnemy(RectTransform slot, float strength)
+        {
+            if (slot == null)
+                return;
+            slot.DOComplete();
+            slot.DOShakeRotation(0.45f, new Vector3(0f, 0f, 14f * strength), vibrato: 14)
+                .SetLink(slot.gameObject);
+            slot.DOPunchScale(Vector3.one * 0.18f * strength, 0.45f, vibrato: 8)
+                .SetLink(slot.gameObject);
         }
 
         private void OnAPChanged(ActionPointsChangedEvent evt)
@@ -339,6 +442,16 @@ namespace Crookedile.UI.Battle
                 else
                     VFXManager.Instance?.Play(entry.Visual, (RectTransform)null);
             }
+        }
+
+        /// <summary><see cref="Play"/> at a world point instead of a UI element.</summary>
+        private void PlayAtWorld(BattleAudioTrigger trigger, Vector3 worldPos)
+        {
+            if (_soundMap == null || !_soundMap.TryGet(trigger, out var entry))
+                return;
+            entry.Sound?.Play();
+            if (entry.Visual != null)
+                VFXManager.Instance?.PlayAtWorld(entry.Visual, worldPos);
         }
 
         #endregion

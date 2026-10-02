@@ -2,6 +2,15 @@
 
 namespace Crookedile.Data.VFX
 {
+    public enum VFXAnchor
+    {
+        Target,
+        OpinionMeter,
+        Player,
+        EveryEnemy,
+        ScreenCenter,
+    }
+
     /// <summary>
     /// Scriptable Event — describes an animation state to play on the shared VFX prefab.
     ///
@@ -23,6 +32,16 @@ namespace Crookedile.Data.VFX
         [SerializeField]
         private VFXAnimationState _animationState;
 
+        [Tooltip(
+            "Where a card / enemy move plays this effect.\n"
+                + "Target: the targeted enemy (card) or the player (enemy move).\n"
+                + "OpinionMeter / Player / ScreenCenter: always there.\n"
+                + "EveryEnemy: one copy on each enemy in the row; the first copy drives hit timing.\n"
+                + "Ignored by Battle Sound Map entries, which anchor to their own moment."
+        )]
+        [SerializeField]
+        private VFXAnchor _anchor = VFXAnchor.Target;
+
         [Tooltip("Canvas-space offset (in pixels) added to the target position after placement.")]
         [SerializeField]
         private Vector2 _offset = Vector2.zero;
@@ -42,6 +61,9 @@ namespace Crookedile.Data.VFX
         /// Returns <see cref="string.Empty"/> when <see cref="VFXAnimationState.None"/> is selected.
         /// </summary>
         public string AnimationStateName => _animationState.ToStateName();
+
+        /// <summary>Where a card or enemy move plays this effect.</summary>
+        public VFXAnchor Anchor => _anchor;
 
         /// <summary>Canvas-space pixel offset applied when positioning the animated image at the target.</summary>
         public Vector2 Offset => _offset;

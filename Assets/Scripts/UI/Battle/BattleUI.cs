@@ -84,6 +84,8 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private OpinionMeterUI _opinionMeterUI;
 
+        public OpinionMeterUI OpinionMeter => _opinionMeterUI;
+
         /// <summary>Anchor for feedback that targets the Opinion Meter (the real damage sink).</summary>
         public RectTransform MeterTransform =>
             _opinionMeterUI != null ? _opinionMeterUI.AnchorTransform : null;
