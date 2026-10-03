@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Audio.AudioClipData
   _id: 324ebec8-498e-4fe4-88ad-baee0627d4ba
   _clipName: Shatter
-  _clip: {fileID: 8300000, guid: b134d6c286ef04c36a28a929b9f614c5, type: 3}
+  _clip: {fileID: 8300000, guid: c232d2fcdb9426645bb453234360c3da, type: 3}
   _volume: 1
   _pitch: 1
   _category: 
