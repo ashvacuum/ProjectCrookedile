@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: The World Is Against Us
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 7cd870e8-7cfd-4c2c-8a90-f98d14cf0f9b
+  _id: 35d4328cac1ff084caa8372ec30ce787
   _cardName: The World Is Against Us
   _cardType: 1
   _rarity: 2

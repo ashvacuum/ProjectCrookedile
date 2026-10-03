@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Blessed are the Persecuted
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 6457a56c-fdaf-4785-af62-532be7ac07b1
+  _id: 0eccb3558eaaec1429fd4cb77c44c9de
   _cardName: Blessed are the Persecuted
   _cardType: 0
   _rarity: 1

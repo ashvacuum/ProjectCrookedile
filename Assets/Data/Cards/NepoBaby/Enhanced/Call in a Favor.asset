@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Call in a Favor
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 54d5b7a9-3906-4ef3-98a2-66b700d524bf
+  _id: 54d5b7a939064ef398a266b700d524bf
   _cardName: Call in a Favor
   _cardType: 2
   _rarity: 1

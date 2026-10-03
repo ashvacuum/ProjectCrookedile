@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Trust Fund
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: e04b1775-fcd4-485d-89f9-31f27977e275
+  _id: e04b1775fcd4485d89f931f27977e275
   _cardName: Trust Fund
   _cardType: 2
   _rarity: 2
@@ -40,6 +40,8 @@ MonoBehaviour:
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 1
+  _unlockCondition:
+    rid: 7000000000000000001
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -52,27 +54,31 @@ MonoBehaviour:
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _trigger:
-          rid: 7000000000000000001
+          rid: 7000000000000000002
         _conditions: []
         _oneShot: 0
         _oncePerTurn: 0
         _effects:
-        - rid: 7000000000000000002
         - rid: 7000000000000000003
+        - rid: 7000000000000000004
     - rid: 7000000000000000001
+      type: {class: WonRunAs, ns: Crookedile.Data.Unlocks, asm: Crookedile.Runtime}
+      data:
+        _origin: 1
+    - rid: 7000000000000000002
       type: {class: CardReplayedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _filterByType: 1
         _filterType: 1
         _replayNumber: 0
-    - rid: 7000000000000000002
+    - rid: 7000000000000000003
       type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _amount: 1
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
-    - rid: 7000000000000000003
+    - rid: 7000000000000000004
       type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _amount: 1

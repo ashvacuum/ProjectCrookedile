@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Overdraft
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 3c7d1fe7-b0f2-447c-a1a7-5ef0f1d568f8
+  _id: 0ba007c05683c0a4f81a940d90048837
   _cardName: Overdraft
   _cardType: 2
   _rarity: 0

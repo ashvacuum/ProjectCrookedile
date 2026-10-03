@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Stacked Deck
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: c462ee0a-e696-4d74-96df-ff3b51e6c09d
+  _id: c462ee0ae6964d7496dfff3b51e6c09d
   _cardName: Stacked Deck
   _cardType: 1
   _rarity: 0

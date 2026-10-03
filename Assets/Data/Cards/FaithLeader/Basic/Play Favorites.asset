@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Play Favorites
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 39b53de5-6d8b-43af-b1d1-5edddf054700
+  _id: 99c7cd1f6270fd25fa8b3e54016c4176
   _cardName: Play Favorites
   _cardType: 0
   _rarity: 0

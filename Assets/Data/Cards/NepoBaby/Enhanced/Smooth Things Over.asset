@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Smooth Things Over
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 710d2bb2-49a2-4ef7-bc8b-d519abd6cc07
+  _id: 710d2bb249a24ef7bc8bd519abd6cc07
   _cardName: Smooth Things Over
   _cardType: 1
   _rarity: 1

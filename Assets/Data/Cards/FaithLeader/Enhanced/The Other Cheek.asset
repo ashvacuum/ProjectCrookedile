@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: The Other Cheek
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 20d6f5ab-ad82-4792-8cd1-6d259548a630
+  _id: 224c3b4d4d6f28c408f43d2597aff1f8
   _cardName: The Other Cheek
   _cardType: 0
   _rarity: 1

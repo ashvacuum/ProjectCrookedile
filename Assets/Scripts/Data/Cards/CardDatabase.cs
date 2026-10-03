@@ -270,7 +270,7 @@ namespace Crookedile.Data.Cards
             && !card.IsUpgraded
             && !card.IsInDevelopment
             && !card.IsGeneratedOnly
-            && !card.IsUnlockable;
+            && Unlocks.UnlockRules.IsAvailableThisRun(card);
 
         /// <summary>
         /// True if <paramref name="card"/> carries the tag of an origin other than
@@ -436,8 +436,8 @@ namespace Crookedile.Data.Cards
                     continue; // no artwork — not ready for play
                 if (card.IsGeneratedOnly)
                     continue; // battle-generated token — never in acquisition pools
-                if (card.IsUnlockable)
-                    continue; // locked until a progression unlock exists
+                if (!Unlocks.UnlockRules.IsAvailableThisRun(card))
+                    continue; // locked: not unlocked when this run started
 
                 switch (card.CardType)
                 {

@@ -19,7 +19,7 @@ namespace Crookedile.Data.Cards
         [HorizontalGroup("ID")]
         [ReadOnly]
         [HideLabel]
-        [Tooltip("Unique identifier for this card. Auto-generated GUID.")]
+        [Tooltip("Unique identifier — the asset's own file GUID. Never edit by hand.")]
         [SerializeField]
         private string _id;
 
@@ -218,11 +218,19 @@ namespace Crookedile.Data.Cards
         private bool _isStarterCard = false;
 
         [Tooltip(
-            "Locked behind a progression unlock. Reward offers and random card gains skip locked "
-                + "cards; until an unlock system exists, a locked card is never acquired."
+            "Locked until the profile unlocks it. Reward offers and random card gains skip it in "
+                + "runs started before it was unlocked."
         )]
         [SerializeField]
         private bool _isUnlockable = false;
+
+        [ShowIf("_isUnlockable")]
+        [Tooltip(
+            "How the profile unlocks this card. Empty: only an explicit grant from a campaign "
+                + "event (UnlockContentOutcome) unlocks it."
+        )]
+        [SerializeReference]
+        private Unlocks.UnlockCondition _unlockCondition;
 
         [Tooltip(
             "Generated in-game only (by effects, summons, events). Never offered by the reward "
@@ -357,6 +365,9 @@ namespace Crookedile.Data.Cards
         /// <summary>Whether this card must be unlocked.</summary>
         public bool IsUnlockable => _isUnlockable;
 
+        /// <summary>How the profile unlocks this card; null means only an explicit grant does.</summary>
+        public Unlocks.UnlockCondition UnlockCondition => _unlockCondition;
+
         /// <summary>
         /// True if this card always stays in hand at end of turn (never discarded until played).
         /// Checked by <c>DeckManager.DiscardHand</c> alongside per-turn granted retains.
@@ -446,7 +457,7 @@ namespace Crookedile.Data.Cards
             );
 
             CardData duplicate = Instantiate(this);
-            duplicate._id = System.Guid.NewGuid().ToString();
+            duplicate._id = null; // takes the new asset's GUID once created, below
             duplicate._cardName = $"{_cardName} Copy";
             duplicate._isUpgraded = false;
             duplicate._upgradedCosts = new List<CardCost>();
@@ -454,6 +465,8 @@ namespace Crookedile.Data.Cards
             duplicate._upgradedPassives = new List<BattlePassive>();
 
             UnityEditor.AssetDatabase.CreateAsset(duplicate, newPath);
+            duplicate._id = UnityEditor.AssetDatabase.AssetPathToGUID(newPath);
+            UnityEditor.EditorUtility.SetDirty(duplicate);
             UnityEditor.AssetDatabase.SaveAssets();
 
             Debug.Log($"Duplicated card to: {newPath}");
@@ -616,18 +629,22 @@ namespace Crookedile.Data.Cards
         #endregion
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// Keeps <see cref="_id"/> equal to the asset's file GUID, as EncounterData and AllyData
+        /// do, so a duplicated asset can't inherit the original's id. Saves store cards by it.
+        /// </summary>
         private void OnValidate()
         {
-            if (string.IsNullOrEmpty(_id))
-            {
-                _id = System.Guid.NewGuid().ToString();
-                UnityEditor.EditorUtility.SetDirty(this);
-            }
-        }
+            string path = UnityEditor.AssetDatabase.GetAssetPath(this);
+            if (string.IsNullOrEmpty(path))
+                return; // in-memory instance (upgraded copies, tests) — keep whatever it has
 
-        private void Reset()
-        {
-            _id = System.Guid.NewGuid().ToString();
+            string assetGuid = UnityEditor.AssetDatabase.AssetPathToGUID(path);
+            if (string.IsNullOrEmpty(assetGuid) || _id == assetGuid)
+                return;
+
+            _id = assetGuid;
+            UnityEditor.EditorUtility.SetDirty(this);
         }
 #endif
         #endregion

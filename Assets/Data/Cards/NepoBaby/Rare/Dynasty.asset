@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Dynasty
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 3670be45-729e-44fc-b995-cf398a854f61
+  _id: 3670be45729e44fcb995cf398a854f61
   _cardName: Dynasty
   _cardType: 2
   _rarity: 2

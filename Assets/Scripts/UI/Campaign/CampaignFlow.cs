@@ -1,7 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Crookedile.Data;
 using Crookedile.Data.Campaign;
-using Crookedile.Data.Cards;
+using Crookedile.Data.Save;
 using Crookedile.Utilities;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -18,7 +18,7 @@ namespace Crookedile.UI.Campaign
         [SerializeField]
         private EncounterPoolData _pool;
 
-        [Header("Debug run (used only when entering this scene with no active run)")]
+        [Header("New run (used when entering this scene with no run in memory or on disk)")]
         [SerializeField]
         private OriginType _debugOrigin = OriginType.FaithLeader;
 
@@ -74,6 +74,14 @@ namespace Crookedile.UI.Campaign
         {
             EnsureRunState();
             RunState.Current.ConfigureTravel(_pool != null ? _pool.Travel : null);
+
+            // Resumed from a save taken on the way into a battle: that battle restarts.
+            if (RunState.Current.PendingBattle != null)
+            {
+                StartBattle(RunState.Current.PendingBattle);
+                return;
+            }
+
             ResolveChainOrRefresh();
             RefreshView();
         }
@@ -89,38 +97,23 @@ namespace Crookedile.UI.Campaign
         }
 
         /// <summary>
-        /// Creates a debug run when the scene is entered directly (pressing Play here), mirroring
-        /// <c>BattleTestStarter</c>. A run arriving from a battle already has one and is left alone.
+        /// Makes sure there is a run: the one in memory (arriving from a battle), else the active
+        /// profile's saved run, else a new run with the inspector's origin and seed.
         /// </summary>
         private void EnsureRunState()
         {
             if (RunState.Current != null)
                 return;
 
-            var db = Resources.Load<CardDatabase>("Databases/CardDatabase");
-            List<CardData> deck =
-                db != null ? db.GetStarterDeck(_debugOrigin) : new List<CardData>();
-            if (deck.Count == 0)
-                GameLogger.LogWarning(
-                    "Campaign",
-                    "Starter deck came back empty — check CardDatabase is populated (Refresh Database).",
-                    this
-                );
+            if (SaveSystem.HasRunInProgress && SaveSystem.ContinueRun(_pool, out var openEvent) != null)
+            {
+                _openEvent = openEvent;
+                _pendingResultText = null;
+            }
+            else
+                SaveSystem.StartNewRun(_debugOrigin, _debugSeed, _maxHours);
 
-            RunState.Create(
-                _debugOrigin,
-                deck,
-                battleQueue: null,
-                isCampaignRun: true,
-                maxHours: _maxHours,
-                seed: _debugSeed
-            );
             RunState.Current.ConfigureTravel(_pool != null ? _pool.Travel : null);
-            GameLogger.LogInfo(
-                "Campaign",
-                $"Debug campaign run created — origin {_debugOrigin}, seed {RunState.Current.Seed}, {deck.Count} cards.",
-                this
-            );
         }
 
         #endregion
@@ -266,6 +259,7 @@ namespace Crookedile.UI.Campaign
 
             state.StartEncounter(battle.Session.BuildBattleQueue());
             state.SetPendingBattle(battle);
+            SaveSystem.Checkpoint(); // quitting mid-battle resumes into this battle, restarted
             GameLogger.LogInfo("Campaign", $"Entering battle '{battle.name}'.", this);
             SceneLoader.Instance?.LoadScene("main");
         }
@@ -393,6 +387,13 @@ namespace Crookedile.UI.Campaign
 
         private void RefreshView()
         {
+            // Every rebuild follows a settled change, so it's the checkpoint. An event that's
+            // open but unanswered is saved to reopen; once answered it isn't, or a resume could
+            // choose again.
+            SaveSystem.Checkpoint(
+                _openEvent != null && _pendingResultText == null ? _openEvent.ID : null
+            );
+
             EnsureUIRoot();
             _content.Clear();
             HideTooltip();
@@ -446,6 +447,10 @@ namespace Crookedile.UI.Campaign
             // the player rolls into day 8 with nothing eligible and loops forever.
             if (state.Day > _pool.Days)
             {
+                // Surviving every day wins the run.
+                if (RunState.Current == state)
+                    SaveSystem.EndRun(victory: true);
+
                 panel.Add(
                     new Label($"Campaign complete — survived all {_pool.Days} days.")
                     {

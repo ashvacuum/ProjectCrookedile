@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Impenetrable Belief
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 20d6f5ab-ad82-4792-8cd1-6d259548a630
+  _id: 04b9d09131d1a0443a52c6025239707d
   _cardName: Impenetrable Belief
   _cardType: 0
   _rarity: 0

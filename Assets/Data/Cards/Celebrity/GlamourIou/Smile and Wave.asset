@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Smile and Wave
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 1e8291d4-d59a-4652-b4b3-e91c522ef3e2
+  _id: 89129eb2829f4cc4499575ec23a70215
   _cardName: Smile and Wave
   _cardType: 1
   _rarity: 0

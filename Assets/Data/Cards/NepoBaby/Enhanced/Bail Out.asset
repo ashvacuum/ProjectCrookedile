@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Bail Out
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 8299bea3-c183-4e86-b08b-b65e074a4d19
+  _id: 8299bea3c1834e86b08bb65e074a4d19
   _cardName: Bail Out
   _cardType: 0
   _rarity: 1

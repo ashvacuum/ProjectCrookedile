@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Legacy Admission
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 75fe59f8-56d2-47e5-bfa3-4bc4bd572275
+  _id: 75fe59f856d247e5bfa34bc4bd572275
   _cardName: Legacy Admission
   _cardType: 2
   _rarity: 1

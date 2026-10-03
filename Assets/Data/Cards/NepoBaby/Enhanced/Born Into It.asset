@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Born Into It
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: e3ec791b-45fe-48a1-b790-62c0694e525e
+  _id: e3ec791b45fe48a1b79062c0694e525e
   _cardName: Born Into It
   _cardType: 0
   _rarity: 1

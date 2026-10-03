@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Crookedile.Data.Cards;
 using Sirenix.OdinInspector;
@@ -172,6 +172,29 @@ namespace Crookedile.Data.Campaign
             _card == null ? "Gain card: (NONE SET)"
             : _count > 1 ? $"Gain {_count}× {_card.CardName}"
             : $"Gain {_card.CardName}";
+    }
+
+    /// <summary>
+    /// Unlocks a card for the profile, for every future run — a campaign event's lasting
+    /// reward ("the Fixer remembers you"). Doesn't touch this run: unlocks apply from the next
+    /// run. Pair with a card whose unlock condition is <c>GrantedByEvent</c> to make the event
+    /// the only way in.
+    /// </summary>
+    [Serializable]
+    public class UnlockContentOutcome : RunOutcome
+    {
+        [Tooltip("The card to unlock. It should be marked Is Unlockable.")]
+        [SerializeField]
+        private CardData _card;
+
+        public override void Apply(RunState state)
+        {
+            if (_card != null)
+                Save.SaveSystem.GrantUnlock(_card.ID);
+        }
+
+        public override string GetDescription() =>
+            _card == null ? "Unlock: (NONE SET)" : $"Unlock {_card.CardName} for future runs";
     }
 
     /// <summary>
@@ -668,6 +691,12 @@ namespace Crookedile.Data.Campaign
         [Tooltip("Applied, in order, when the roll fails. Leave empty for 'nothing happens'.")]
         [SerializeReference]
         private List<RunOutcome> _onFailure = new();
+
+        /// <summary>Outcomes applied on success.</summary>
+        public IReadOnlyList<RunOutcome> OnSuccess => _onSuccess;
+
+        /// <summary>Outcomes applied on failure.</summary>
+        public IReadOnlyList<RunOutcome> OnFailure => _onFailure;
 
         public override void Apply(RunState state)
         {

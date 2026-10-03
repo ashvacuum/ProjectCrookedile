@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Quiet the Haters
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 58223d34-242a-4ed7-aee1-3dca47d2a196
+  _id: d6b17b066cb700a41a011cd44c1e3b20
   _cardName: Quiet the Haters
   _cardType: 0
   _rarity: 1

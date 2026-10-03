@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Spin Doctor
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 415d3113-db58-4468-af06-c6c871c23863
+  _id: 415d3113db584468af06c6c871c23863
   _cardName: Spin Doctor
   _cardType: 1
   _rarity: 0

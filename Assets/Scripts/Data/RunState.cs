@@ -17,7 +17,7 @@ namespace Crookedile.Data
     /// Not a MonoBehaviour: no scene dependency, no serialization overhead.
     /// Created once at run-start via <see cref="Create"/> and replaced on new run.
     /// </summary>
-    public class RunState
+    public partial class RunState
     {
         public const int DEFAULT_MAX_HOURS = 8;
 
@@ -82,6 +82,17 @@ namespace Crookedile.Data
         {
             if (_travelConfigured)
             {
+                return;
+            }
+
+            // A restored run keeps its saved clock; only the district needs the road network.
+            if (_isRestored)
+            {
+                Travel = travel;
+                CurrentDistrict =
+                    Save.SaveContent.District(travel, _restoredDistrictName)
+                    ?? (travel != null ? travel.Headquarters : null);
+                _travelConfigured = true;
                 return;
             }
 
@@ -171,7 +182,27 @@ namespace Crookedile.Data
         /// Note the seed fixes the *map*; the stream still diverges if the player makes
         /// different choices, which is correct — identical play gives identical results.
         /// </summary>
-        public System.Random Rng { get; private set; }
+        public Save.RunRng Rng { get; private set; }
+
+        /// <summary>
+        /// Content IDs unlocked for this run, taken from the profile when the run started.
+        /// Reward pools read only this, so unlocks earned mid-run apply from the next run and a
+        /// seeded run stays reproducible. Empty for test runs.
+        /// </summary>
+        public HashSet<string> UnlockedContent { get; private set; } = new HashSet<string>();
+
+        /// <summary>This run's counters (battles won, …), folded into the profile when it ends.</summary>
+        public Dictionary<string, int> RunCounters { get; private set; } =
+            new Dictionary<string, int>();
+
+        /// <summary>Adds to one of this run's counters.</summary>
+        public void AddToRunCounter(string key, int amount = 1)
+        {
+            if (string.IsNullOrEmpty(key))
+                return;
+            RunCounters.TryGetValue(key, out int current);
+            RunCounters[key] = current + amount;
+        }
 
         /// <summary>Meta currency accumulated this run (placeholder name — see metagame-campaign.md).</summary>
         public int Funds { get; private set; }
@@ -460,7 +491,7 @@ namespace Crookedile.Data
                 Seed = resolvedSeed,
                 // Offset so the reward stream doesn't mirror the encounter draws, which derive
                 // from the same seed in EncounterPoolData.
-                Rng = new System.Random(unchecked(resolvedSeed * 31 + 17)),
+                Rng = new Save.RunRng(unchecked(resolvedSeed * 31 + 17)),
                 Funds = start.funds,
                 Credibility = start.credibility,
                 Origin = origin,
@@ -559,8 +590,7 @@ namespace Crookedile.Data
         }
 
         /// <summary>Records that the current battle was won (advances meta state).</summary>
-        public void RecordBattleVictory() { /* meta popularity update deferred */
-        }
+        public void RecordBattleVictory() => AddToRunCounter(Save.ProfileCounters.BattlesWon);
 
         /// <summary>
         /// Advances to the next battle in <see cref="BattleQueue"/>.

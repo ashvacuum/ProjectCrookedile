@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Old Boys' Club
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: c076e5f7-bdf6-4808-98d9-7acd727108c2
+  _id: c076e5f7bdf6480898d97acd727108c2
   _cardName: Old Boys' Club
   _cardType: 2
   _rarity: 1

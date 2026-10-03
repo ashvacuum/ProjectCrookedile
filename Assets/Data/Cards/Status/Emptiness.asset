@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Emptiness
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: 272060e5-38a8-4f31-8347-d2e89bba9fa9
+  _id: 6716e755935891f4c8013365fa2cc954
   _cardName: Emptiness
   _cardType: 3
   _rarity: 1

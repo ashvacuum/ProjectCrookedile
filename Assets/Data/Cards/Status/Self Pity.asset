@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Self Pity
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: 3abec8ff-b814-4dbd-b72b-84599119c174
+  _id: 16d903f22cd0aad45b20e562957a3e3d
   _cardName: Self Pity
   _cardType: 3
   _rarity: 0

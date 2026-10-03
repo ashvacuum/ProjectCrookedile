@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: False Accusations
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: 5d8896ee-6d17-4acb-b900-8f63e1b62c3e
+  _id: 9012f34d8335905438b9639b7c43f4ae
   _cardName: False Accusations
   _cardType: 4
   _rarity: 0

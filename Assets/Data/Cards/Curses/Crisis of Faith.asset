@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Crisis of Faith
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: bdfd2936-8cc8-4f87-a4e9-3100ded02d1c
+  _id: 6c06b9b7d844cca4f9b9e71d8ead07da
   _cardName: Crisis of Faith
   _cardType: 4
   _rarity: 0

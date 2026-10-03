@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Fine Print
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: aee33f23-1dfb-40e1-ac89-0784fd641d5c
+  _id: f091af22c2b341244841b40f1ebca5bb
   _cardName: Fine Print
   _cardType: 2
   _rarity: 0

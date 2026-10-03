@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Hand-Me-Downs
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: dc6f5149-ac54-4f2d-a85a-c876038280c3
+  _id: dc6f5149ac544f2da85ac876038280c3
   _cardName: Hand-Me-Downs
   _cardType: 2
   _rarity: 1

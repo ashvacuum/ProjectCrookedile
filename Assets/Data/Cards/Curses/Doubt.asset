@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Doubt
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: 82c97304-91ef-4a72-8ac8-d129da8f0683
+  _id: 9922d9a26f6b5744abac468223d3fb92
   _cardName: Doubt
   _cardType: 4
   _rarity: 0

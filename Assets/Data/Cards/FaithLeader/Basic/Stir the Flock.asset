@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Stir the Flock
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: e2fd5ebf-838d-4613-a252-368114105d6a
+  _id: 2e62e4f4d045d6f42af19422587d5440
   _cardName: Stir the Flock
   _cardType: 1
   _rarity: 0
