@@ -39,7 +39,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) | Built | 2026-10-03 | The Celebrity class: Glamour and IOU poles with Soundbite tokens between them, all its cards and rules. Numbers are placeholders. | this doc; built in [`Data/Cards/Celebrity/GlamourIou/`](Assets/Data/Cards/Celebrity/GlamourIou) and [`GlamourIou.cs`](Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs) |
+| [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) | Built | 2026-10-03 | The Celebrity class: two poles, Glamour (dazzle the crowd) and IOU (empty promises, exposed next round). Built rules and cards, plus the v0.2 redesign proposal. Numbers are placeholders. | this doc; built in [`Data/Cards/Celebrity/GlamourIou/`](Assets/Data/Cards/Celebrity/GlamourIou) and [`GlamourIou.cs`](Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs) |
 | [`core-design.md`](docs/core-design.md) | Canonical | 2026-10-03 | The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions. | this doc |
 | [`enemy-design-bible.md`](docs/enemy-design-bible.md) | Canonical | 2026-10-03 | The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete. | this doc |
 | [`metagame-campaign.md`](docs/metagame-campaign.md) | Partly built | 2026-10-03 | The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases. | this doc |
