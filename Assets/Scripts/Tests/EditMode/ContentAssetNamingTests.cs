@@ -1,17 +1,73 @@
-using System;
 using Crookedile.Data.Campaign;
-using Crookedile.Utilities;
+using Crookedile.EditorTools;
+using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace Crookedile.EditorTools
+namespace Crookedile.Tests
 {
-    public static class ContentAssetNamingChecks
+    /// <summary>
+    /// <see cref="ContentAssetNaming"/>: which display names are valid filenames, and renaming an
+    /// asset to its authored name (GUID and references kept, collisions blocked). The rename
+    /// test writes real assets under a temporary folder and deletes it.
+    /// </summary>
+    public class ContentAssetNamingTests
     {
-        [MenuItem("Crookedile/Run Asset Naming Checks")]
-        public static void Run()
+        [Test]
+        public void ValidateName_AcceptsAndRejectsTheRightNames()
         {
-            CheckNames();
+            foreach (
+                string invalid in new[]
+                {
+                    null,
+                    "",
+                    " \t",
+                    "Unknown Enemy",
+                    "New Zone",
+                    "New Ally",
+                    " leading",
+                    "trailing ",
+                    "dot.",
+                    "bad/name",
+                    "bad\\name",
+                    "bad:name",
+                    "bad?name",
+                    "bad\nname",
+                    "CON",
+                    "con.txt",
+                    "LPT1",
+                    "COM9.notes",
+                    "COM¹",
+                }
+            )
+            {
+                Require(
+                    !string.IsNullOrEmpty(ContentAssetNaming.ValidateName(invalid)),
+                    $"Invalid name accepted: {invalid}"
+                );
+            }
+
+            foreach (
+                string valid in new[]
+                {
+                    "People's Choice",
+                    "Debate +",
+                    "Brgy. Fiesta",
+                    "Ñame",
+                    "COM10",
+                }
+            )
+            {
+                Require(
+                    ContentAssetNaming.ValidateName(valid) == null,
+                    $"Valid name rejected: {valid}"
+                );
+            }
+        }
+
+        [Test]
+        public void Rename_MatchesTheAuthoredName_AndKeepsReferences()
+        {
             string folder = AssetDatabase.GenerateUniqueAssetPath(
                 "Assets/ContentAssetNamingChecks"
             );
@@ -89,62 +145,10 @@ namespace Crookedile.EditorTools
                     AssetDatabase.GetAssetPath(other) == folder + "/Other.asset",
                     "Collision handling must not overwrite another asset."
                 );
-                GameLogger.LogInfo("Content", "Asset naming checks passed.");
             }
             finally
             {
                 AssetDatabase.DeleteAsset(folder);
-            }
-        }
-
-        public static void CheckNames()
-        {
-            foreach (
-                string invalid in new[]
-                {
-                    null,
-                    "",
-                    " \t",
-                    "Unknown Enemy",
-                    "New Zone",
-                    "New Ally",
-                    " leading",
-                    "trailing ",
-                    "dot.",
-                    "bad/name",
-                    "bad\\name",
-                    "bad:name",
-                    "bad?name",
-                    "bad\nname",
-                    "CON",
-                    "con.txt",
-                    "LPT1",
-                    "COM9.notes",
-                    "COM¹",
-                }
-            )
-            {
-                Require(
-                    !string.IsNullOrEmpty(ContentAssetNaming.ValidateName(invalid)),
-                    $"Invalid name accepted: {invalid}"
-                );
-            }
-
-            foreach (
-                string valid in new[]
-                {
-                    "People's Choice",
-                    "Debate +",
-                    "Brgy. Fiesta",
-                    "Ñame",
-                    "COM10",
-                }
-            )
-            {
-                Require(
-                    ContentAssetNaming.ValidateName(valid) == null,
-                    $"Valid name rejected: {valid}"
-                );
             }
         }
 
@@ -155,12 +159,6 @@ namespace Crookedile.EditorTools
             serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void Require(bool condition, string message)
-        {
-            if (!condition)
-            {
-                throw new InvalidOperationException(message);
-            }
-        }
+        private static void Require(bool condition, string message) => Assert.IsTrue(condition, message);
     }
 }

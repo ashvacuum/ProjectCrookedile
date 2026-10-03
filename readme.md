@@ -137,7 +137,6 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 - **Encounter Designer** — Timeline, Table, Dependencies, Flags, Simulate, Travel and Authoring views over an encounter pool.
 - **Save Debugger** — profiles, counters, unlocks, readable run saves, snapshots and corruption tests.
 - **Battle Inspector**, **Battle Session Builder**, **Playtest Bot** — battle debugging and automated playtests.
-- **Campaign** — `Create Campaign Scene`, `Fix Build Settings Scenes`, `Run Travel Checks`.
 
 The in-game dev console (backquote) runs `[CheatCommand]` methods, including `addcard` and the `save*` commands; cheats need the `CHEATS_ENABLED` define.
 

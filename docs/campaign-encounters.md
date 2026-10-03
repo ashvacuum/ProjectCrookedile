@@ -445,9 +445,8 @@ asset edits. These are shared assets: editing a district updates every reference
 waiting, and duration, and only consumes encounters visited. Requirements still pass in this
 editor simulation and event outcomes are not applied; it is not a complete playthrough model.
 
-Run **Crookedile → Campaign → Run Travel Checks** for route, traffic, clock, window, and
-visit-state regression checks. This uses temporary in-memory assets and does not replace the
-active run. Existing content needs no migration: unset fields mean local all-day encounters.
+`Tests/EditMode/CampaignTravelTests` (Test Runner → Edit Mode) covers routes, traffic, the clock,
+entry windows, visit state and ally bonuses, using temporary in-memory assets. Existing content needs no migration: unset fields mean local all-day encounters.
 
 ### 6.1 Ally overworld passives
 
