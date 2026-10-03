@@ -138,7 +138,7 @@ everything".
 - **Hand-Me-Downs** (Policy, persistent): once per turn, a card with printed cost 2+ that would go to discard returns to
   hand instead; raise Hostility on all enemies by 1.
 - **Stacked Deck** (Rhetoric, 1): put up to 2 cards from hand on top of the draw pile.
-- **Hand Me Down** (Pressure, 1): deal Sway per card discarded this turn.
+- **Last Season** (Pressure, 1): deal Sway per card discarded this turn.
 
 ### Calm lane (low damage, slow burn)
 - **Apology Tour** (Rhetoric, 1): lower target Hostility by 2, not below Neutral.
@@ -158,7 +158,7 @@ everything".
 - **Not My Problem** (1, once per turn): move up to 2 Hostility from one enemy to another.
 - **I Know You Are But What Am I** (1): this turn, the first time Opinion damage gets through Composure, gain Sway equal
   to that damage.
-- **Hush Fund** (1, exhaust): gain 3 Composure per card in your exhaust pile, capped (config).
+- **Burn the Receipts** (1, exhaust): gain 3 Composure per card in your exhaust pile, capped (config).
 - **Damage Control** (2, exhaust): set all Hostile enemies to Neutral; add a Heckle to your discard pile.
 
 Spread valves across card types. Do not make them mostly Rhetoric (it would make Old Boys' Club trigger trivially).
@@ -203,7 +203,7 @@ Hostility) live on its card asset, where the Content Hub audits them. Asset: `As
 
 `ClassModifiers` is a shared struct, so another class can get modifiers by adding its own config.
 
-Per-card values from the original draft (Pull Rank's Sway, the seed's numbers, Born Into It's cap, Hush Fund, Bail Out,
+Per-card values from the original draft (Pull Rank's Sway, the seed's numbers, Born Into It's cap, Burn the Receipts, Bail Out,
 Trust Fund, Skip the Line, Do-Over) are on the card assets. Open question 8.2 is the "I'm Just Like You" card type,
 set on that asset (Rhetoric).
 
@@ -333,3 +333,6 @@ count as plays and add no single-target Hostility. Policies never replay. Nested
 reference assemblies, and every card asset was checked so each reference resolves and each field exists on its class.
 Tools for the playtest: `addcard <name>` puts any card in hand mid-battle (no Nepo card has art, so reward offers skip
 them), and `savesnap` / `saveload` keep a run at a chosen point so a combo can be retried.
+
+**Renames:** "Hand Me Down" is now **Last Season** and "Hush Fund" is now **Burn the Receipts**, so neither reads
+as Hand-Me-Downs or Hush Money. Card IDs are asset GUIDs, so saves and unlocks are unaffected.
