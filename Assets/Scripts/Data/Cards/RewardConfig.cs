@@ -8,7 +8,7 @@ namespace Crookedile.Data.Cards
     /// Central, tunable configuration for post-battle card rewards: the rarity weights and default
     /// offer count currently hardcoded in <c>CardDatabase.GenerateRewardOffer</c> (Basic 70 / Enhanced
     /// 25 / Rare 5). Additive for now — wire <c>CardDatabase</c> to read weights from here later
-    /// (replace the static RewardWeights lookup with <see cref="WeightFor"/>). The Content Audit
+    /// (replace the static RewardWeights lookup with <see cref="WeightFor"/>). The Database window's Checks tab
     /// validates the weights are usable.
     ///
     /// Create via: Assets → Create → Crookedile → Cards → Reward Config

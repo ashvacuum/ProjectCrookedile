@@ -20,7 +20,7 @@ namespace Crookedile.Data
     /// scattered across passive assets, tag conventions and code: display name, description, color,
     /// icon, unique resource, starter-deck tag, and the origin's <see cref="OriginPassive"/>.
     /// The single source of truth for per-origin battle data (AP, portrait, passive, resource);
-    /// replaced the old OriginStats asset. The Content Audit validates it.
+    /// replaced the old OriginStats asset. The Database window's Origins tab validates it.
     ///
     /// Create via: Assets → Create → Crookedile → Database → Origin Database
     /// </summary>

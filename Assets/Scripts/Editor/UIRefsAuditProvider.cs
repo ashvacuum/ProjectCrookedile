@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 namespace Crookedile.EditorTools
 {
     /// <summary>
-    /// Content Hub provider that audits serialized UnityEngine.Object references on
+    /// Checks-tab provider that audits serialized UnityEngine.Object references on
     /// Crookedile components — null [SerializeField] refs surface here BEFORE they become
     /// runtime NullReferences. Scans every prefab under Assets/ plus all currently open
     /// scenes, and reports one row per component instance that has missing references.
@@ -18,13 +18,13 @@ namespace Crookedile.EditorTools
     /// "when ... absent" reports as Info; everything else as Warning. UI work rule of
     /// thumb: refresh this tab after moving serialized fields between components.
     /// </summary>
-    public class UIRefsAuditProvider : ContentAuditWindow.IContentProvider
+    public class UIRefsAuditProvider : ContentChecks.IContentProvider
     {
         public string Category => "UI refs";
 
-        public IEnumerable<ContentAuditWindow.Row> Rows()
+        public IEnumerable<ContentChecks.Row> Rows()
         {
-            var rows = new List<ContentAuditWindow.Row>();
+            var rows = new List<ContentChecks.Row>();
 
             // --- Prefabs (project-wide, Assets/ only — Packages are not ours to audit).
             foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { "Assets" }))
@@ -48,7 +48,7 @@ namespace Crookedile.EditorTools
 
             if (rows.Count == 0)
                 rows.Add(
-                    new ContentAuditWindow.Row(
+                    new ContentChecks.Row(
                         "All serialized references assigned",
                         "No Crookedile component with a missing [SerializeField] reference was found.",
                         null,
@@ -62,7 +62,7 @@ namespace Crookedile.EditorTools
         private static void AuditHierarchy(
             Transform root,
             string source,
-            List<ContentAuditWindow.Row> rows
+            List<ContentChecks.Row> rows
         )
         {
             foreach (var mb in root.GetComponentsInChildren<MonoBehaviour>(true))
@@ -78,7 +78,7 @@ namespace Crookedile.EditorTools
                     continue;
 
                 rows.Add(
-                    new ContentAuditWindow.Row(
+                    new ContentChecks.Row(
                         $"{type.Name} on '{mb.gameObject.name}'",
                         source,
                         mb,
@@ -88,12 +88,12 @@ namespace Crookedile.EditorTools
             }
         }
 
-        private static List<ContentAuditWindow.AuditIssue> AuditComponent(
+        private static List<ContentChecks.AuditIssue> AuditComponent(
             MonoBehaviour mb,
             Type type
         )
         {
-            var issues = new List<ContentAuditWindow.AuditIssue>();
+            var issues = new List<ContentChecks.AuditIssue>();
 
             for (Type t = type; t != null && t != typeof(MonoBehaviour); t = t.BaseType)
             {
@@ -121,10 +121,10 @@ namespace Crookedile.EditorTools
                         || tooltip.IndexOf("absent", StringComparison.OrdinalIgnoreCase) >= 0;
 
                     issues.Add(
-                        new ContentAuditWindow.AuditIssue(
+                        new ContentChecks.AuditIssue(
                             optional
-                                ? ContentAuditWindow.Severity.Info
-                                : ContentAuditWindow.Severity.Warning,
+                                ? ContentChecks.Severity.Info
+                                : ContentChecks.Severity.Warning,
                             $"{NiceFieldName(field.Name)} is not assigned"
                                 + (optional ? " (tooltip marks it optional)" : "")
                         )

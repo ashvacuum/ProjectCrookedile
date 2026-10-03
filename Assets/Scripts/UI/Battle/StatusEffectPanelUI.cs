@@ -85,7 +85,7 @@ namespace Crookedile.UI.Battle
                             Debug.LogWarning(
                                 $"[StatusEffectPanelUI] Active status '{effect.Id}' has no entry in "
                                     + $"'{_iconMap.name}' — its icon will not be shown. "
-                                    + "Run Crookedile → Generate → Seed Status Icon Map, then assign a sprite.",
+                                    + "Use Crookedile → Database → Statuses → Seed missing icon-map entries, then assign a sprite.",
                                 _iconMap
                             );
                         continue;

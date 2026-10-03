@@ -16,11 +16,10 @@ namespace Crookedile.EditorTools
     /// description from the behavior. Existing entries (icons/colors you've set) are preserved;
     /// only missing statuses are added.
     ///
-    /// Menu: Crookedile → Generate → Seed Status Icon Map. Then fill in icons/colors.
+    /// Run from the Database window's Statuses tab (Seed missing icon-map entries). Then fill in icons/colors.
     /// </summary>
     public static class StatusIconMapSeeder
     {
-        [MenuItem("Crookedile/Generate/Seed Status Icon Map")]
         public static void Seed()
         {
             string[] guids = AssetDatabase.FindAssets("t:StatusEffectIconMapSO");

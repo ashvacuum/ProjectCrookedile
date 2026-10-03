@@ -10,24 +10,18 @@ using Crookedile.Data.Enemy;
 using Crookedile.Data.Localization;
 using Crookedile.Data.VFX;
 using Crookedile.Gameplay.Battle;
-using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor;
-using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
 
 namespace Crookedile.EditorTools
 {
     /// <summary>
-    /// Content Hub — one Odin window that browses ALL game content (cards, statuses, effects,
-    /// enemies, intents, origins, audio/VFX, allies, reward config) and audits completeness. A
-    /// searchable sidebar lists a Summary plus every category (with a warning/error icon); the
-    /// editor pane draws each entry as a box with its issues as message boxes and click-to-select.
-    /// Asset Names offers explicit filename fixes. Providers added to BuildProviders appear in the sidebar.
-    ///
-    /// Menu: Crookedile → Content Hub.
+    /// Project audits, one provider per kind of content. Each provider returns rows of item, detail
+    /// and issues; the Database window shows them, either inside a type's own tab (its audit comes
+    /// from the matching provider) or in the Checks tab. To add a check: an <see cref="IContentProvider"/>
+    /// listed in <see cref="CheckProviders"/>.
     /// </summary>
-    public class ContentAuditWindow : OdinMenuEditorWindow
+    public static class ContentChecks
     {
         public enum Severity
         {
@@ -84,328 +78,26 @@ namespace Crookedile.EditorTools
             IEnumerable<Row> Rows();
         }
 
-        private List<(string category, List<Row> rows)> _data;
-        private bool _problemsOnly;
-
-        [MenuItem("Crookedile/Content Hub")]
-        public static void ShowWindow()
-        {
-            var win = GetWindow<ContentAuditWindow>("Content Hub");
-            win.minSize = new Vector2(720, 480);
-            win.Show();
-        }
-
-        private static List<IContentProvider> BuildProviders() =>
+        /// <summary>The providers shown in the Checks tab: audits with no tab of their own.</summary>
+        public static List<IContentProvider> CheckProviders() =>
             new List<IContentProvider>
             {
                 new ReadinessProvider(),
                 new ContentAssetNaming(),
-                new CardsProvider(),
-                new StatusesProvider(),
-                new EffectsProvider(),
-                new EnemiesProvider(),
                 new EnemyMovesProvider(),
-                new EncountersProvider(),
-                new CampaignEncountersProvider(),
                 new EncounterPoolsProvider(),
+                new OriginPassivesProvider(),
                 new SharedArtProvider(),
                 new CardVisualsProvider(),
                 new IntentsProvider(),
-                new OriginsProvider(),
-                new OriginPassivesProvider(),
                 new AudioVfxProvider(),
                 new AudioVfxEventsProvider(),
                 new LocalizationProvider(),
-                new AlliesProvider(),
                 new RewardProvider(),
                 new UIRefsAuditProvider(),
             };
 
-        /// <summary>Re-scans every provider into <see cref="_data"/>. Cheap; safe to call on demand.</summary>
-        private void Refresh()
-        {
-            _data = new List<(string, List<Row>)>();
-            foreach (var p in BuildProviders())
-            {
-                List<Row> rows;
-                try
-                {
-                    rows = p.Rows().ToList();
-                }
-                catch (Exception e)
-                {
-                    rows = new List<Row>
-                    {
-                        new Row(
-                            "(provider error)",
-                            e.Message,
-                            null,
-                            new List<AuditIssue> { new AuditIssue(Severity.Error, e.Message) }
-                        ),
-                    };
-                }
-                _data.Add((p.Category, rows));
-            }
-        }
-
-        protected override OdinMenuTree BuildMenuTree()
-        {
-            if (_data == null)
-                Refresh();
-
-            var tree = new OdinMenuTree(false);
-            tree.Config.DrawSearchToolbar = true;
-            tree.DefaultMenuStyle.IconSize = 18f;
-
-            tree.Add("Summary", new SummaryView(this));
-
-            foreach (var (category, rows) in _data)
-            {
-                int errors = rows.Count(r => r.Worst == Severity.Error);
-                int warns = rows.Count(r => r.Worst == Severity.Warning);
-                foreach (var item in tree.Add(category, new CategoryView(this, category, rows)))
-                {
-                    item.Icon =
-                        errors > 0 ? EditorIcons.UnityErrorIcon
-                        : warns > 0 ? EditorIcons.UnityWarningIcon
-                        : null;
-                }
-            }
-            return tree;
-        }
-
-        /// <summary>Top toolbar over the editor pane: Refresh + the "problems only" filter.</summary>
-        protected override void OnBeginDrawEditors()
-        {
-            float toolbarHeight = MenuTree?.Config.SearchToolbarHeight ?? 22f;
-            SirenixEditorGUI.BeginHorizontalToolbar(toolbarHeight);
-            if (SirenixEditorGUI.ToolbarButton("Refresh"))
-            {
-                Refresh();
-                ForceMenuTreeRebuild();
-            }
-            GUILayout.FlexibleSpace();
-            _problemsOnly = SirenixEditorGUI.ToolbarToggle(_problemsOnly, "Problems only");
-            SirenixEditorGUI.EndHorizontalToolbar();
-        }
-
-        private static readonly Color Red = new Color(1f, 0.5f, 0.5f);
-        private static readonly Color Amber = new Color(1f, 0.82f, 0.45f);
-        private static readonly Color Green = new Color(0.55f, 0.85f, 0.55f);
-
-        private static Color ColorFor(Severity s) =>
-            s switch
-            {
-                Severity.Error => Red,
-                Severity.Warning => Amber,
-                _ => Color.white,
-            };
-
-        private static MessageType MessageTypeFor(Severity s) =>
-            s switch
-            {
-                Severity.Error => MessageType.Error,
-                Severity.Warning => MessageType.Warning,
-                Severity.Info => MessageType.Info,
-                _ => MessageType.None,
-            };
-
-        // -----------------------------------------------------------------
-        // Menu views — one drawable per sidebar entry. [OnInspectorGUI] lets Odin render
-        // custom IMGUI inside its themed editor pane.
-        // -----------------------------------------------------------------
-
-        /// <summary>Landing page: per-category health, click a row to jump to that category.</summary>
-        private sealed class SummaryView
-        {
-            private readonly ContentAuditWindow _owner;
-
-            public SummaryView(ContentAuditWindow owner) => _owner = owner;
-
-            [OnInspectorGUI]
-            private void Draw()
-            {
-                SirenixEditorGUI.Title(
-                    "Content Hub",
-                    "Per-category health — click a row to open it",
-                    TextAlignment.Left,
-                    true
-                );
-
-                foreach (var (category, rows) in _owner._data)
-                {
-                    int errors = rows.Count(r => r.Worst == Severity.Error);
-                    int warns = rows.Count(r => r.Worst == Severity.Warning);
-
-                    SirenixEditorGUI.BeginBox();
-                    EditorGUILayout.BeginHorizontal();
-                    if (GUILayout.Button(category, EditorStyles.label, GUILayout.Width(170)))
-                        _owner
-                            .MenuTree.EnumerateTree()
-                            .FirstOrDefault(i => i.Name == category)
-                            ?.Select();
-                    GUILayout.Label($"{rows.Count} entries", EditorStyles.miniLabel);
-                    GUILayout.FlexibleSpace();
-
-                    var prev = GUI.color;
-                    if (errors == 0 && warns == 0)
-                    {
-                        GUI.color = Green;
-                        GUILayout.Label("OK", EditorStyles.boldLabel);
-                    }
-                    else
-                    {
-                        GUI.color = errors > 0 ? Red : Amber;
-                        GUILayout.Label($"{errors} err   {warns} warn", EditorStyles.boldLabel);
-                    }
-                    GUI.color = prev;
-                    EditorGUILayout.EndHorizontal();
-                    SirenixEditorGUI.EndBox();
-                }
-            }
-        }
-
-        /// <summary>One category's rows, each an Odin box with its issues as message boxes.</summary>
-        private sealed class CategoryView
-        {
-            private readonly ContentAuditWindow _owner;
-            private readonly string _category;
-            private readonly List<Row> _rows;
-
-            public CategoryView(ContentAuditWindow owner, string category, List<Row> rows)
-            {
-                _owner = owner;
-                _category = category;
-                _rows = rows;
-            }
-
-            [OnInspectorGUI]
-            private void Draw()
-            {
-                SirenixEditorGUI.Title(
-                    _category,
-                    $"{_rows.Count} entries",
-                    TextAlignment.Left,
-                    true
-                );
-
-                int shown = 0;
-                if (
-                    _category == ContentAssetNaming.CATEGORY
-                    && GUILayout.Button("Rename valid assets")
-                )
-                {
-                    string result = ContentAssetNaming.RenameValidAssets();
-                    _owner.Refresh();
-                    _owner.ForceMenuTreeRebuild();
-                    EditorUtility.DisplayDialog("Asset Names", result, "OK");
-                    GUIUtility.ExitGUI();
-                }
-
-                foreach (var row in _rows)
-                {
-                    if (_owner._problemsOnly && row.Worst == Severity.Ok)
-                        continue;
-                    shown++;
-                    DrawRow(row);
-                }
-
-                if (shown == 0)
-                    SirenixEditorGUI.MessageBox(
-                        _owner._problemsOnly ? "No problems in this category." : "Nothing to show.",
-                        MessageType.Info
-                    );
-            }
-
-            private void DrawRow(Row row)
-            {
-                SirenixEditorGUI.BeginBox();
-
-                SirenixEditorGUI.BeginBoxHeader();
-                EditorGUILayout.BeginHorizontal();
-                if (row.Thumbnail != null)
-                    DrawSpriteThumb(row.Thumbnail, 28f);
-
-                var prev = GUI.color;
-                GUI.color = ColorFor(row.Worst);
-                GUILayout.Label(row.Label, EditorStyles.boldLabel);
-                GUI.color = prev;
-
-                GUILayout.FlexibleSpace();
-                if (_category != ContentAssetNaming.CATEGORY && !string.IsNullOrEmpty(row.Detail))
-                    GUILayout.Label(row.Detail, EditorStyles.miniLabel);
-                if (
-                    _category == ContentAssetNaming.CATEGORY
-                    && row.Worst == Severity.Warning
-                    && GUILayout.Button("Rename", EditorStyles.miniButton, GUILayout.Width(64))
-                )
-                {
-                    string error = ContentAssetNaming.Rename(row.Context);
-                    _owner.Refresh();
-                    _owner.ForceMenuTreeRebuild();
-                    if (!string.IsNullOrEmpty(error))
-                    {
-                        EditorUtility.DisplayDialog("Could not rename asset", error, "OK");
-                    }
-
-                    GUIUtility.ExitGUI();
-                }
-
-                if (
-                    row.Context != null
-                    && GUILayout.Button("Select", EditorStyles.miniButton, GUILayout.Width(56))
-                )
-                {
-                    Selection.activeObject = row.Context;
-                    EditorGUIUtility.PingObject(row.Context);
-                }
-                EditorGUILayout.EndHorizontal();
-                SirenixEditorGUI.EndBoxHeader();
-
-                if (_category == ContentAssetNaming.CATEGORY)
-                {
-                    EditorGUILayout.HelpBox(row.Detail, MessageType.None);
-                }
-
-                foreach (var issue in row.Issues)
-                    SirenixEditorGUI.MessageBox(issue.Message, MessageTypeFor(issue.Severity));
-
-                SirenixEditorGUI.EndBox();
-            }
-        }
-
-        /// <summary>
-        /// Draws a sprite at a fixed square size, honoring its atlas/sliced sub-rect so packed or
-        /// sheet-sliced sprites show the right region (not the whole texture).
-        /// </summary>
-        private static void DrawSpriteThumb(Sprite sprite, float size)
-        {
-            var rect = GUILayoutUtility.GetRect(
-                size,
-                size,
-                GUILayout.Width(size),
-                GUILayout.Height(size)
-            );
-            if (Event.current.type != EventType.Repaint || sprite == null)
-                return;
-            var tex = sprite.texture;
-            if (tex == null)
-                return;
-            var r = sprite.textureRect;
-            var coords = new Rect(
-                r.x / tex.width,
-                r.y / tex.height,
-                r.width / tex.width,
-                r.height / tex.height
-            );
-            GUI.DrawTextureWithTexCoords(rect, tex, coords);
-        }
-
-        // -----------------------------------------------------------------
-        // Helpers
-        // -----------------------------------------------------------------
-
-        private static List<T> LoadAll<T>()
+        internal static List<T> LoadAll<T>()
             where T : UnityEngine.Object
         {
             return AssetDatabase
@@ -415,7 +107,7 @@ namespace Crookedile.EditorTools
                 .ToList();
         }
 
-        private static T LoadFirst<T>()
+        internal static T LoadFirst<T>()
             where T : UnityEngine.Object => LoadAll<T>().FirstOrDefault();
 
         // -----------------------------------------------------------------
@@ -428,7 +120,8 @@ namespace Crookedile.EditorTools
         /// BattleManager's passive array / intent theme / overlay text slots / BattleTestStarter
         /// session — can't be asset-scanned; verify those in the scene.)
         /// </summary>
-        private sealed class ReadinessProvider : IContentProvider
+
+        internal sealed class ReadinessProvider : IContentProvider
         {
             public string Category => "Readiness";
 
@@ -439,22 +132,15 @@ namespace Crookedile.EditorTools
 
                 foreach (OriginType origin in Enum.GetValues(typeof(OriginType)))
                 {
-                    string tag = origin.ToString().ToLowerInvariant();
-                    int deck = cards.Count(c =>
-                        c.IsStarterCard
-                        && (
-                            c.Tags == null
-                            || c.Tags.Count == 0
-                            || c.HasTag(tag)
-                            || c.HasTag("universal")
-                        )
-                    );
+                    // The deck a run actually starts with: OriginDatabase's authored deck, or
+                    // tagged starter cards when the origin has none.
+                    int deck = CardDatabase.Shared?.GetStarterDeck(origin)?.Count ?? 0;
                     var deckIssues = new List<AuditIssue>();
                     if (deck == 0)
                         deckIssues.Add(
                             new AuditIssue(
                                 Severity.Error,
-                                "No starter cards (run the deck generator / tag cards)."
+                                "No starter deck (author one on OriginDatabase)."
                             )
                         );
                     else if (deck < 5)
@@ -529,133 +215,7 @@ namespace Crookedile.EditorTools
             }
         }
 
-        private sealed class CardsProvider : IContentProvider
-        {
-            public string Category => "Cards";
-
-            public IEnumerable<Row> Rows()
-            {
-                foreach (var card in LoadAll<CardData>().OrderBy(c => c.name))
-                {
-                    var issues = new List<AuditIssue>();
-                    bool junk =
-                        card.CardType == CardType.Heckle || card.CardType == CardType.Scandal;
-                    bool hasEffects = card.Effects != null && card.Effects.Count > 0;
-                    bool hasPassives = card.Passives != null && card.Passives.Count > 0;
-                    if (!junk && !hasEffects && !hasPassives)
-                        issues.Add(new AuditIssue(Severity.Error, "No effects or passives."));
-                    if (card.IsInDevelopment)
-                        issues.Add(
-                            new AuditIssue(Severity.Warning, "No artwork (in development).")
-                        );
-                    if (card.NeedsConfiguration)
-                        issues.Add(
-                            new AuditIssue(Severity.Warning, "Has leftover configuration notes.")
-                        );
-                    if (!junk && (card.Costs == null || card.Costs.Count == 0))
-                        issues.Add(new AuditIssue(Severity.Info, "No cost entry."));
-                    yield return new Row(
-                        card.name,
-                        $"{card.CardType} / {card.Rarity}",
-                        card,
-                        issues,
-                        card.Artwork
-                    );
-                }
-            }
-        }
-
-        private sealed class StatusesProvider : IContentProvider
-        {
-            public string Category => "Statuses";
-
-            public IEnumerable<Row> Rows()
-            {
-                var map = LoadFirst<StatusEffectIconMapSO>();
-                foreach (StatusBehavior behavior in StatusRegistry.All.OrderBy(b => b.Id))
-                {
-                    var issues = new List<AuditIssue>();
-                    if (string.IsNullOrWhiteSpace(behavior.Describe(1)))
-                        issues.Add(new AuditIssue(Severity.Error, "Empty Describe()."));
-                    string detail = "no icon map";
-                    if (map == null)
-                        issues.Add(
-                            new AuditIssue(
-                                Severity.Warning,
-                                "No StatusEffectIconMap asset (run the seeder)."
-                            )
-                        );
-                    else if (!map.TryGet(behavior.Id, out var icon, out _, out var name, out _))
-                        issues.Add(
-                            new AuditIssue(Severity.Warning, "No icon-map entry (run the seeder).")
-                        );
-                    else
-                    {
-                        detail = string.IsNullOrEmpty(name) ? "(no name)" : name;
-                        if (icon == null)
-                            issues.Add(new AuditIssue(Severity.Warning, "No icon."));
-                        if (string.IsNullOrEmpty(name))
-                            issues.Add(new AuditIssue(Severity.Info, "No display name."));
-                    }
-                    yield return new Row(behavior.DisplayName, detail, map, issues);
-                }
-            }
-        }
-
-        private sealed class EffectsProvider : IContentProvider
-        {
-            public string Category => "Effects";
-
-            public IEnumerable<Row> Rows()
-            {
-                foreach (var info in BattleEffectCatalog.All())
-                {
-                    var issues = new List<AuditIssue>();
-                    if (!info.Serializable)
-                        issues.Add(
-                            new AuditIssue(
-                                Severity.Warning,
-                                "Not [Serializable] — hidden from the picker."
-                            )
-                        );
-                    else if (string.IsNullOrWhiteSpace(info.Description))
-                        issues.Add(new AuditIssue(Severity.Info, "Empty GetDescription."));
-                    yield return new Row(info.DisplayName, info.Type.Name, null, issues);
-                }
-            }
-        }
-
-        private sealed class EnemiesProvider : IContentProvider
-        {
-            public string Category => "Enemies";
-
-            public IEnumerable<Row> Rows()
-            {
-                foreach (var enemy in LoadAll<EnemyData>().OrderBy(e => e.name))
-                {
-                    var issues = new List<AuditIssue>();
-                    if (
-                        string.IsNullOrWhiteSpace(enemy.EnemyName)
-                        || enemy.EnemyName == "Unknown Enemy"
-                    )
-                        issues.Add(new AuditIssue(Severity.Warning, "No display name."));
-                    if (enemy.Portrait == null)
-                        issues.Add(new AuditIssue(Severity.Warning, "No portrait."));
-                    int moves = enemy.Moves?.Count ?? 0;
-                    if (moves == 0)
-                        issues.Add(new AuditIssue(Severity.Error, "No moves."));
-                    yield return new Row(
-                        enemy.EnemyName ?? enemy.name,
-                        $"{moves} move(s)",
-                        enemy,
-                        issues,
-                        enemy.Portrait
-                    );
-                }
-            }
-        }
-
-        private sealed class EnemyMovesProvider : IContentProvider
+        internal sealed class EnemyMovesProvider : IContentProvider
         {
             public string Category => "Enemy moves";
 
@@ -685,7 +245,7 @@ namespace Crookedile.EditorTools
         /// placeholder, or a deliberately reused icon) and sometimes a copy-paste mistake — this tab
         /// surfaces every case so you can decide. All-green means every flagged item has unique art.
         /// </summary>
-        private sealed class SharedArtProvider : IContentProvider
+        internal sealed class SharedArtProvider : IContentProvider
         {
             public string Category => "Shared art";
 
@@ -791,7 +351,7 @@ namespace Crookedile.EditorTools
             }
         }
 
-        private sealed class IntentsProvider : IContentProvider
+        internal sealed class IntentsProvider : IContentProvider
         {
             public string Category => "Intents";
 
@@ -810,42 +370,7 @@ namespace Crookedile.EditorTools
             }
         }
 
-        private sealed class OriginsProvider : IContentProvider
-        {
-            public string Category => "Origins";
-
-            public IEnumerable<Row> Rows()
-            {
-                var db = LoadFirst<OriginDatabase>();
-                foreach (OriginType origin in Enum.GetValues(typeof(OriginType)))
-                {
-                    var issues = new List<AuditIssue>();
-                    string detail = "no DB";
-                    if (db == null)
-                        issues.Add(
-                            new AuditIssue(
-                                Severity.Warning,
-                                "No OriginDatabase asset (run the generator)."
-                            )
-                        );
-                    else if (!db.TryGet(origin, out var e))
-                        issues.Add(new AuditIssue(Severity.Error, "No database entry."));
-                    else
-                    {
-                        detail = $"{e.DisplayName} / {e.Resource}";
-                        if (string.IsNullOrWhiteSpace(e.DisplayName))
-                            issues.Add(new AuditIssue(Severity.Warning, "No display name."));
-                        if (e.Passive == null)
-                            issues.Add(
-                                new AuditIssue(Severity.Warning, "No starter passive linked.")
-                            );
-                    }
-                    yield return new Row(origin.ToString(), detail, db, issues);
-                }
-            }
-        }
-
-        private sealed class AudioVfxProvider : IContentProvider
+        internal sealed class AudioVfxProvider : IContentProvider
         {
             public string Category => "Audio / VFX";
 
@@ -872,7 +397,7 @@ namespace Crookedile.EditorTools
             }
         }
 
-        private sealed class AlliesProvider : IContentProvider
+        internal sealed class AlliesProvider : IContentProvider
         {
             public string Category => "Allies";
 
@@ -983,7 +508,7 @@ namespace Crookedile.EditorTools
             }
         }
 
-        private sealed class RewardProvider : IContentProvider
+        internal sealed class RewardProvider : IContentProvider
         {
             public string Category => "Reward config";
 
@@ -1028,7 +553,7 @@ namespace Crookedile.EditorTools
         /// Named "Battle sessions", not "Encounters": a session is a test-harness gauntlet.
         /// Campaign encounters are audited by <see cref="CampaignEncountersProvider"/>.
         /// </summary>
-        private sealed class EncountersProvider : IContentProvider
+        internal sealed class EncountersProvider : IContentProvider
         {
             public string Category => "Battle sessions";
 
@@ -1089,7 +614,7 @@ namespace Crookedile.EditorTools
         /// (unleavable), an option that does nothing and says nothing, a battle encounter with
         /// no session (refuses to start), and half-picked <c>[SerializeReference]</c> rows.
         /// </summary>
-        private sealed class CampaignEncountersProvider : IContentProvider
+        internal sealed class CampaignEncountersProvider : IContentProvider
         {
             public string Category => "Campaign encounters";
 
@@ -1214,7 +739,7 @@ namespace Crookedile.EditorTools
         /// with nothing eligible hands the player an empty map, and it's invisible from the
         /// asset inspector.
         /// </summary>
-        private sealed class EncounterPoolsProvider : IContentProvider
+        internal sealed class EncounterPoolsProvider : IContentProvider
         {
             public string Category => "Encounter pools";
 
@@ -1350,7 +875,7 @@ namespace Crookedile.EditorTools
         /// Card visuals: the shared CardVisualSettings (every back/frame slot filled) and each
         /// CardVisualAtlas (texture set, mapping entries complete).
         /// </summary>
-        private sealed class CardVisualsProvider : IContentProvider
+        internal sealed class CardVisualsProvider : IContentProvider
         {
             public string Category => "Card visuals";
 
@@ -1454,7 +979,7 @@ namespace Crookedile.EditorTools
         /// Origin passives: validates each OriginPassive asset is wired (has passives, each with a
         /// trigger and at least one effect), and surfaces the known Faith Leader timing caveat.
         /// </summary>
-        private sealed class OriginPassivesProvider : IContentProvider
+        internal sealed class OriginPassivesProvider : IContentProvider
         {
             public string Category => "Origin passives";
 
@@ -1538,7 +1063,7 @@ namespace Crookedile.EditorTools
         /// Audio/VFX event assets (distinct from the trigger-coverage check): AudioEvent and
         /// AudioClipData with no clip, and VFXEvent set to None (a no-op).
         /// </summary>
-        private sealed class AudioVfxEventsProvider : IContentProvider
+        internal sealed class AudioVfxEventsProvider : IContentProvider
         {
             public string Category => "Audio / VFX events";
 
@@ -1586,7 +1111,7 @@ namespace Crookedile.EditorTools
         /// Localization: every entry in the LocalizationData table — flags blank keys, duplicate
         /// keys, and missing English / Tagalog text.
         /// </summary>
-        private sealed class LocalizationProvider : IContentProvider
+        internal sealed class LocalizationProvider : IContentProvider
         {
             public string Category => "Localization";
 

@@ -55,15 +55,15 @@ docs win; say so rather than quietly following the code.
 
 ## Authoring tools (menu: Crookedile)
 
-- **Database** — one window with a tab per content type (Cards, Enemies so far): search, filters, sortable columns,
-  audit badges, a preview and the inline inspector. Shared browser in `Editor/Database/ContentTab.cs`; to add a type,
-  write one `ContentTab<T>` subclass (columns, filters, audit, preview) and list it in `DatabaseWindow`. Don't build
+- **Database** — the one content window, a tab per type: Cards, Enemies, Statuses, Allies, Origins, Encounters,
+  Battle sessions, Building blocks (every `[SerializeReference]` effect, trigger, condition, outcome and
+  requirement, with its fields and users) and Checks (project-wide audits). Search, filters, sortable columns,
+  audit badges, a preview and the inline inspector. Check here before assuming data is fine. Shared browser in
+  `Editor/Database/ContentTab.cs`; to add a type, write one `ContentTab<T>` subclass (columns, filters, audit,
+  preview) and list it in `DatabaseWindow`; a new project-wide audit is a provider in `ContentChecks`. Don't build
   new standalone browser windows.
-- **Content Hub** — audits all content for completeness. Check here before assuming data is fine.
 - **Encounter Designer** — day-window timeline, dependency graph, multi-seed schedule simulation,
   and CSV import from `docs/campaign-ideation.xlsx`.
-- **Authoring Catalog** — every `[SerializeReference]` building block with its fields, from
-  reflection.
 - **Save Debugger** — profiles, counters, unlocks (toggle grants), the run save as readable text,
   named snapshots of the whole save folder, and corruption tests for the backup fallback. The dev
   console has the same tools as `save*` commands (`saveinfo`, `savesnap`, `saveload`, `savewipe`, …).

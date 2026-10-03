@@ -194,7 +194,7 @@ unlock never offer it. No new rarity tier, no unique flag.
 ## 9. Config (ScriptableObject)
 
 Ruling (2026-10-03): the config holds the class rules and the class modifiers; each card's own numbers (Sway, cost, caps,
-Hostility) live on its card asset, where the Content Hub audits them. Asset: `Assets/Resources/NepoBabyConfig.asset`
+Hostility) live on its card asset, where the Database window audits them. Asset: `Assets/Resources/NepoBabyConfig.asset`
 (`NepoBabyConfig`, menu Crookedile > Class Config > Nepo Baby). Without the asset the defaults below apply.
 
 | Group | Field | Default | Notes |
@@ -311,7 +311,7 @@ Audited 2026-10-03. Items marked **Resolved** are settled; the rest are still op
 ## 13. Build notes (2026-10-03)
 
 Cards: `Assets/Data/Cards/NepoBaby/{Basic,Enhanced,Rare}` (42 cards, tag `nepobaby`), generated from one table.
-Effects and triggers are `[SerializeReference]` building blocks, so they show up in the Authoring Catalog.
+Effects and triggers are `[SerializeReference]` building blocks, so they show up in the Database window's Building blocks tab.
 
 **Building blocks added:** `BurnEffect`, `BurnAndPlayEffect`, `PullFromDrawPileEffect`, `ScryEffect`,
 `ReturnToHandEffect`, `PutHandCardsOnTopEffect`, `RedrawHandEffect`, `ReplayCardEffect`, `TurnPriceBreakEffect`,
