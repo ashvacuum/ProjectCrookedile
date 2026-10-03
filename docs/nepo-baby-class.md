@@ -89,7 +89,8 @@ everything".
 | 3 | I'm Just Like You | Hostility-reducer | 1 | Reduce target Hostility by a flat amount. If it converts the target to Receptive, draw a card, otherwise reduce a random card in hand's cost by 1 (floor 1) |
 | 1 | **Blow the Allowance** (seed) | Rhetoric | 1 | Burn a non-Policy card from hand. Play it for free, and deal Sway equal to its printed energy cost. Enhanced: cost 0 and damage doubled |
 
-- **Passive:** once per battle, a full-hand Mulligan (discard hand, redraw fresh).
+- **Passive (Nepotism):** once per battle, a full-hand Mulligan (discard hand, redraw fresh), offered on the opening
+  hand.
 - Seed rulings: printed cost, not current cost. The seed goes to discard normally so it recurs. A burned card played
   this way is a play for triggers (Old Boys' Club) but does NOT add Hostility by itself. A card with no valid play (some
   junk) cannot be targeted (open question 8.1).
@@ -186,44 +187,29 @@ card asset carries a locked-until-unlocked flag so the reward pool skips locked 
 
 ## 9. Config (ScriptableObject)
 
-The tunable config is a ScriptableObject asset, editable in the Inspector with no code change. Follow the project's
-conventions when building it (`_camelCase` private `[SerializeField]` fields with `[Tooltip]`, read-only properties,
-`Crookedile/...` menu path). All values are placeholders.
+Ruling (2026-10-03): the config holds the class rules and the class modifiers; each card's own numbers (Sway, cost, caps,
+Hostility) live on its card asset, where the Content Hub audits them. Asset: `Assets/Resources/NepoBabyConfig.asset`
+(`NepoBabyConfig`, menu Crookedile > Class Config > Nepo Baby). Without the asset the defaults below apply.
 
-| Group | Field | Default |
-|---|---|---|
-| Glass-cannon asymmetry (vs Faith Leader baseline) | pressureSwayMult | 1.15 |
-| | shieldComposureMult | 0.8 |
-| Starter | pullRankSway | 4 |
-| | pullRankHostilityGain | 1 |
-| | seedBasicCost | 1 |
-| | seedEnhancedCost | 0 |
-| | seedSwayPerPrintedCost | 1 |
-| | seedEnhancedDamageMult | 2 |
-| | seedCanTargetJunk | false (8.1) |
-| | imJustLikeYouIsRhetoric | true (8.2) |
-| Rules | policiesBurnable | false (decided) |
-| | replaysRaiseHostilityByDefault | false (8.4) |
-| | junkInjectionScalesWithHostility | false (8.5) |
-| | scandalsStickInDeck | true |
-| Old Boys' Club | oldBoysClubRefund | 1 |
-| | refundCappedAtEnergyPaid | true |
-| Burn / payoffs | bornIntoItSwayPerExhausted | 3 |
-| | bornIntoItSwayCap | 24 |
-| | hushFundComposurePerExhausted | 3 |
-| | hushFundComposureCap | 15 |
-| | bailOutEnergyPerCostlyCard | 2 |
-| | bailOutMinPrintedCost | 2 |
-| | bailOutMaxCards | 3 |
-| Trust Fund (Rare, unlock-gated) | trustFundEnergyPerReplay | 1 |
-| | trustFundHostilityPerTrigger | 1 |
-| Return lane | returnInTurnCostIncrease | 1 |
-| | maxReturnShareOfPool | 0.15 |
-| Valves | skipTheLineScry | 3 |
-| | skipTheLineHostilityGain | 1 |
-| | doOverHostilityGain | 1 |
+| Group | Field | Default | Notes |
+|---|---|---|---|
+| Class modifiers | Sway multiplier | 1.15 | Every Sway Nepo Baby's cards push |
+| | Composure multiplier | 0.8 | Every Composure (Support) Nepo Baby's cards grant |
+| Burn | Policies burnable | false | Decided. Checked by `NepoBabyRules.CanBurn`, the one Burn check |
+| | Seed can target junk | false | Open question 8.1 |
+| Replays | Replays raise Hostility by default | false | Open question 8.4 |
+| Energy refunds | Refund capped at energy paid | true | Old Boys' Club |
+| Return lane | Return in-turn cost increase | 1 | Applied by every Return-lane effect; stacks per return |
 
-Card definitions are data-driven and read these values (see 12.B1 on how that fits the card-asset model).
+`ClassModifiers` is a shared struct, so another class can get modifiers by adding its own config.
+
+Per-card values from the original draft (Pull Rank's Sway, the seed's numbers, Born Into It's cap, Hush Fund, Bail Out,
+Trust Fund, Skip the Line, Do-Over) are on the card assets. Open question 8.2 is the "I'm Just Like You" card type,
+set on that asset (Rhetoric).
+
+Not wired, so not in the config: `junkInjectionScalesWithHostility` (8.5, default off, so nothing to do yet),
+`scandalsStickInDeck` (current behaviour already matches `true`) and `maxReturnShareOfPool` (an authoring target:
+4 Return cards of 42, about 10%).
 
 ## 10. Testing
 
@@ -256,8 +242,7 @@ the other classes (hardest class by design).
 
 ## 12. Conflicts with existing docs and code
 
-Audited 2026-10-03. Section A items marked **Resolved** are settled in the docs; everything else needs a ruling before
-implementation touches it. No code has changed yet.
+Audited 2026-10-03. Items marked **Resolved** are settled; the rest are still open.
 
 ### A. Design docs (docs win over code, so these need a decision first)
 
@@ -291,51 +276,60 @@ implementation touches it. No code has changed yet.
 
 ### B. Code
 
-1. **Config ScriptableObject vs card-asset numbers.** Card numbers live on each `CardData` asset, inside its
-   `[SerializeReference]` `BattleEffect` list (e.g. `ApplyOpinionEffect` amount). Neither existing class has a
-   per-class tuning asset: Faith Leader is pure card assets plus `PacifyConversionEngine`; Celebrity's shared rules are
-   static constants in `CelebrityRules`. Having cards read a config asset means either effects that look values up by
-   key, or an editor step that writes config values into the card assets. Proposal: the config holds the class rules
-   and multipliers (flags, caps, `policiesBurnable`, `returnInTurnCostIncrease`), and per-card numbers stay on the card
-   assets where the Content Hub and Authoring Catalog already see them.
-2. **Field naming.** The section 9 snippet uses public camelCase fields. Project convention is private `_camelCase`
-   `[SerializeField]` with `[Tooltip]` and read-only properties. The table above keeps the names; the class should
-   follow convention.
-3. **Patronage is already built.** `CostType.Patronage`, `ArchetypeResource.Patronage`, `BankedResource`,
-   `GeneratePatronageEffect` ("sacrifice cards from hand"), `SummonBodyEffect`, and Patronage display in
-   `CardButton`, `BattleStatsOverlay`, `BattleLogPanel`, `BattleScreen`, `BattleInspectorWindow`, `PlaytestRunner` and
-   `KeywordGlossary`. No Nepo card assets use them (`Assets/Data/Cards` has no Nepo folder). Ruling needed: delete,
-   or keep for enemies (`SummonBodyEffect` may serve enemy-side summoning).
-4. **Unlock flag already exists.** `CardData._isUnlockable` ("Must this card be unlocked through progression?") plus
-   `CardDatabase.GetUnlockableCards()` and `CardSearchQuery.UnlockableCardsOnly`. Nothing reads it at reward time
-   (`needs-detailing.md` section 9). Proposal: reuse `_isUnlockable` and add it to the exclusions in
-   `CardDatabase.IsAcquirable` and `GenerateRewardOffer` instead of adding a second `lockedUntilUnlocked` bool. That
-   filter applies to every class: no card is flagged today, so nothing currently offered disappears.
-5. **Every Policy already exhausts on play.** Policies are activated passives (`CardData.IsActivatedPassive`;
-   `CardPlayController` exhausts them after their effects resolve). "Persistent" vs "one-shot" is then whether the card
-   has passives or only effects. That matches the spec. Whether a Policy can be burned from hand is new: no
-   burn-from-hand cost exists yet.
-6. **Burn already exists in one place.** `GeneratePatronageEffect` exhausts cards from hand with player choice and
-   already special-cases Heckle/Scandal. The new Burn cost generalises this, adding the Policy exclusion and printed
-   cost readout.
-7. **Scandals are unplayable.** `CardData.IsUnplayable` is true for every Scandal, and `DeckManager` reacts to Scandal
-   draws (Celebrity). That matches "heavy, sticks in the deck", and it means "play it for free" (Blow the Allowance)
-   has no valid target in a Scandal, which supports default 8.1 = no.
-8. **Mulligan.** `MulliganEffect` exists. The once-per-battle limit fits `FirstTimeCondition` on an origin passive, as
-   `Nepotism` already uses.
-9. **Calm caps at Neutral.** `ReduceHostilityEffect` and `ShiftHostilityEffect` have no floor at the NeutralZone
-   (`BattleStats.IsReceptive` is hostility < -NeutralZone). Apology Tour and Smooth Things Over need an
-   "not below Neutral" option.
-10. **Missing effects.** Not in `Effects/`: scry, pull from draw pile, replay / play-twice, return-to-hand after
-    resolution (only choose-from-discard), put chosen cards from hand on top of the draw pile (`MoveOwnerCardEffect`
-    only moves the card a passive lives on),
-    in-turn cost increase, move Hostility between enemies, remove an enemy buff, "per card exhausted this combat" and
-    "per card discarded this turn" context values. All are new `[SerializeReference]` effects or `EffectContextValue`
-    entries; no existing behavior changes.
-11. **Starter deck slot.** `OriginDatabase` builds starters from each entry's `StarterDeck`, falling back to cards
-    tagged as starters. `OriginType.NepoBaby`'s entry is where the 10 cards and the new passive go. Its
-    `StartingFunds` / `StartingCredibility` / `MaxHours` are unset like every other origin (CLAUDE.md, known soft
-    spots).
-12. **Cards without art are never offered.** `CardData.IsInDevelopment` is true while `_artwork` is null, and both
-    `IsAcquirable` and `GenerateRewardOffer` skip those cards. The new Nepo cards need placeholder art, or a dev
-    override, before section 10's reward-pool tests can see them.
+1. **Config vs card-asset numbers.** **Resolved:** the config holds class rules and class modifiers; per-card numbers
+   stay on the card assets (section 9).
+2. **Field naming.** **Resolved:** `NepoBabyConfig` follows project convention.
+3. **Patronage.** **Resolved:** removed (cost type, banked pool, event, `GeneratePatronageEffect`, UI readouts).
+   Serialized enum ordinals were kept stable. `SummonBodyEffect` stays for future summon content.
+4. **Unlock flag.** **Resolved:** reuses `CardData._isUnlockable`; `CardDatabase.IsAcquirable` and
+   `GenerateRewardOffer` skip flagged cards. The Faith Leader's 28 flagged cards were unflagged so its pool is
+   unchanged. Only Trust Fund starts locked.
+5. **Policies exhaust on play.** No change needed. "Persistent" Policies carry passives, "one-shot" ones only effects.
+6. **Burn.** **Resolved:** `BurnEffect` / `BurnAndPlayEffect`, with the Policy rule in `NepoBabyRules.CanBurn`.
+7. **Scandals are unplayable.** Blow the Allowance skips unplayable cards by default (8.1).
+8. **Mulligan.** **Resolved:** `Nepotism.asset` (the passive the Nepo Baby origin points at) is now an opt-in
+   full-hand redraw. Still open: `Daddy's Gifts.asset`, tagged as Nepo Baby's, is wired to the **Celebrity** origin
+   and gives Celebrity a battle-start mulligan. Left as is pending a ruling.
+9. **Calm caps at Neutral.** **Resolved:** `ReduceHostilityEffect` has a stop-at-Neutral option.
+10. **Missing effects.** **Resolved:** see section 13.
+11. **Starter deck slot.** **Resolved:** the Nepo Baby origin entry lists the 10-card starter.
+12. **Cards without art are never offered.** Still open: no Nepo card has art, so none appears in reward offers.
+    Starter cards are unaffected. Use the `addcard` dev-console command to test pool cards.
+13. **Policies leaked across classes.** **Resolved:** `GenerateRewardOffer` offered every Policy to every class.
+    A Policy tagged with another origin is now kept out of that class's offers; untagged Policies stay universal.
+14. **Upgraded costs were ignored.** **Resolved:** card play read the base cost list even on upgraded cards. It now
+    reads the upgraded list. This affects every upgraded card with an authored upgraded cost.
+15. **Simultaneous card choices.** **Resolved:** `BattleUI` held one pending choice, so a second prompt (say the
+    mulligan and Inside Information at turn start) dropped the first. Choices now queue.
+
+## 13. Build notes (2026-10-03)
+
+Cards: `Assets/Data/Cards/NepoBaby/{Basic,Enhanced,Rare}` (42 cards, tag `nepobaby`), generated from one table.
+Effects and triggers are `[SerializeReference]` building blocks, so they show up in the Authoring Catalog.
+
+**Building blocks added:** `BurnEffect`, `BurnAndPlayEffect`, `PullFromDrawPileEffect`, `ScryEffect`,
+`ReturnToHandEffect`, `PutHandCardsOnTopEffect`, `RedrawHandEffect`, `ReplayCardEffect`, `TurnPriceBreakEffect`,
+`IfContextValueEffect`, `EscalatingHostilityEffect`, `RefundEnergyEffect`, `MoveHostilityEffect`; the
+`CardResolvedTrigger`, `CardReplayedTrigger` and `DamageGotThroughTrigger` triggers; the `HandHasNoJunkCondition` and
+`TriggeringCardCostCondition` conditions; once-per-turn gating on `BattlePassive`; the `onceperturn` card tag.
+
+**Replays** resolve the card's effects again and publish `CardReplayedEvent`, never `CardPlayedEvent`, so replays never
+count as plays and add no single-target Hostility. Policies never replay. Nested replays are capped at 3.
+
+**Deliberate readings of the spec:**
+- Pull Rank's "+1 Hostility on the target" is the existing core rule that every single-target Sway raises the target's
+  Hostility by 1. Name Drop and the other single-target attacks do the same.
+- The class modifiers apply to every Sway and Composure Nepo Baby's cards produce, not only the starter basics.
+- Executive Privilege offers its burn at the start of each turn; the next non-Policy card played that turn replays.
+- Hand-Me-Downs returns a card once it finishes resolving. Its Hostility is charged only if the card actually returns.
+- I Know You Are But What Am I lasts until your next turn, so it sees the enemy pushes.
+- Not My Problem moves Hostility onto a random other enemy (the choice panel picks cards, not enemies).
+- Scry and Background Check keep the unpicked cards in their order (the choice panel can't reorder).
+- Damage Control adds Deflated as its Heckle.
+- Upgrades are authored for the starter cards and the two Enhanced versions the spec names (Blow the Allowance,
+  I Know a Guy). Pool cards have no upgrade yet.
+
+**Testing (section 10):** not run. This environment has no Unity editor. The runtime code type-checks against Unity
+reference assemblies; the small UI and editor edits were reviewed but not compiled. Every card asset was checked so
+each reference resolves and each field exists on its class. The
+section 10 checks still need a human playtest; nothing above replaces them.

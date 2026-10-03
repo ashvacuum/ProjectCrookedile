@@ -46,7 +46,17 @@ MonoBehaviour:
     Resource: 0
     Passive: {fileID: 11400000, guid: 355a1499f47d2924ea3661bf9cef3c7e, type: 2}
     StarterTag: nepobaby
-    StarterDeck: []
+    StarterDeck:
+    - Card: {fileID: 11400000, guid: 1b08a2f516c44143933625ad08fea39e, type: 2}
+      Count: 2
+    - Card: {fileID: 11400000, guid: 49784682c95e4483ac2825bc5be60c86, type: 2}
+      Count: 1
+    - Card: {fileID: 11400000, guid: 99bbba68e10d4674b7410e6e2768cf81, type: 2}
+      Count: 3
+    - Card: {fileID: 11400000, guid: e139dde62e7b4c8f91dbacf397823ab5, type: 2}
+      Count: 3
+    - Card: {fileID: 11400000, guid: 18ebcae896624b8192c2cc5893039290, type: 2}
+      Count: 1
     MaxActionPoints: 3
     StartingFunds: 600
     StartingCredibility: 65

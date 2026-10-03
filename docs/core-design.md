@@ -221,7 +221,7 @@ Design rule: starters teach the **core verb** in its simplest form, mostly via r
 
 Two layers, like StS: **starter passives** = simple innate per-battle ability defining the baseline; **relics** = accumulated persistent passives that warp strategy (the real depth layer — TBD). Starter passives should be humble and reinforce the fantasy via their **trigger timing** (before / during / after).
 
-- **Nepo Baby (now)** — *once per battle, any time on your turn:* full-hand Mulligan (discard your hand, draw a fresh one). Privilege: he never has to live with a bad hand. Do-Over is the paid, weaker version in the pool.
+- **Nepo Baby (now)** — *once per battle, on the opening hand:* full-hand Mulligan (discard your hand, draw a fresh one). Privilege: he never has to live with a bad hand. Do-Over is the paid, weaker version in the pool.
 - **Celebrity (start of battle)** — *the first card you play each battle is played upgraded.* "Mastering his craft" — his opening move is always the polished, rehearsed best-take. Uses the existing upgrade system (nothing new to build); adds a small *which card do I open with?* decision. Note: colorless/generic benefit — Celebrity's identity comes from the card pool, not this passive. *(Playtest watch: don't let any single card's upgraded version be a blowout, since this guarantees it turn one.)*
 - **Faith Leader (after)** — *(candidate, unresolved)* leaning toward something that protects the patient setup or engages hostility:
   - Option A: first opinion shield each battle gets a bonus (shelters the setup) — risk: a bit generic.
