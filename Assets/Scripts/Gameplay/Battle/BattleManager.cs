@@ -587,29 +587,6 @@ namespace Crookedile.Gameplay.Battle
 
         #endregion
 
-        #region Archetype Resources (banked pools — Attention)
-
-        // Banked battle pool — persists across turns, reset at battle start (InitializeState).
-        // Attention (Celebrity): courted/provoked, then spent as a big opinion-meter hit.
-        // Shared mechanics live in BankedResource.
-        private readonly BankedResource _attention = new BankedResource(
-            (oldValue, newValue) =>
-                EventBus.Publish(
-                    new AttentionChangedEvent { OldValue = oldValue, NewValue = newValue }
-                )
-        );
-
-        /// <summary>Current banked Attention (Celebrity's build-and-spend spotlight resource).</summary>
-        public int CurrentAttention => _attention.Current;
-
-        /// <summary>Banks Attention. No-op for non-positive amounts.</summary>
-        public void GainAttention(int amount) => _attention.Gain(amount);
-
-        /// <summary>Spends Attention if affordable. Returns false (and spends nothing) if short.</summary>
-        public bool SpendAttention(int amount) => _attention.Spend(amount);
-
-        #endregion
-
         #region Celebrity — Glamour / Debt
 
         /// <summary>Celebrity's per-battle Debt and Debt-policy state.</summary>
@@ -947,10 +924,9 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Pause between individual enemy actions (OpponentTurnState).</summary>
         internal float PerEnemyAttackDelay => _perEnemyAttackDelay;
 
-        /// <summary>Resets per-battle session state: banked pools and the card-play pipeline (InitializeState).</summary>
+        /// <summary>Resets per-battle session state: class state and the card-play pipeline (InitializeState).</summary>
         internal void ResetBattleSessionState()
         {
-            _attention.Reset();
             Celebrity.ResetBattle();
             _cards.ResetForBattle();
             NepoBaby.Reset();
