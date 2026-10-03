@@ -136,6 +136,40 @@ unreachable unlocks is not built yet.)
 
 Conditions only read counters, which only grow, so once something is unlocked it stays unlocked.
 
+### Beyond cards: campaigns, events and allies *(proposal, 2026-10-03)*
+
+Only cards are unlockable today. The campaign needs three more kinds of content to unlock: **campaigns** (a whole run
+to pick), **events** (encounters that can only show up once unlocked) and **allies** (the game's items: there is no
+separate item system). All three reuse the card machinery; nothing new is stored in the profile.
+
+| Content | Asset | What "locked" means | Where it is filtered |
+|---|---|---|---|
+| Card | `CardData` | Never offered as a reward or random card | `CardDatabase.IsAcquirable`, `GenerateRewardOffer` *(built)* |
+| Ally | `AllyData` | A recruit option for it is shown disabled with how-to-unlock; random ally rewards skip it | `RecruitAllyOutcome`, any ally reward pool |
+| Event / battle | `EncounterData` | Never drawn for the day map | `EncounterPoolData.DrawForDay` (and `EligibleOn`) |
+| Campaign | `EncounterPoolData` | Shown on the run-start screen, not selectable, with how-to-unlock | Run-start screen (not built) |
+
+How it fits together:
+
+1. **Same pair on each asset.** `_isUnlockable` + `[SerializeReference] UnlockCondition`, exactly as on `CardData`.
+   An `IUnlockable` interface (ID, IsUnlockable, Condition, display name) lets `UnlockRules`, the grants and the
+   Save Debugger treat all four kinds alike.
+2. **IDs are asset GUIDs**, which every one of these already has (`EncounterData`, `AllyData`; the pool gets one).
+   `ProfileData.GrantedUnlocks` and `RunState.UnlockedContent` already hold plain ID strings, so neither changes.
+3. **Next-run rule still holds:** the run's snapshot decides. An event unlocked mid-run appears from the next run.
+4. **Grants from events:** `UnlockContentOutcome` and `HasUnlocked` take any `IUnlockable`, not only a card ("the
+   Fixer remembers you" can unlock an ally, an event or a whole campaign).
+5. **New condition: `CompletedCampaign(pool)`**, backed by a per-campaign win counter (`campaign_won:<id>`), so one
+   campaign can open the next. `WonRunAs(origin)` and `CounterAtLeast` work unchanged.
+6. **A chain is authored intent.** `GoToEncounterOutcome` into a locked encounter still runs it; locks only apply to
+   the daily draw.
+7. **The run records its campaign.** `RunSaveData` gains the pool's ID (schema bump), so Continue loads the right
+   campaign instead of being handed one.
+8. **Reveal:** `EndRun` returns everything newly unlocked, of every kind, and `GetUnlocks()` lists all four.
+9. **Tools:** the Encounter Designer's coverage strip and seed roller get an *as unlocked* toggle (everything / nothing
+   unlockable / a chosen profile), so a day that only fills with unlocked events is visible. The Content Hub flags
+   unlockable content whose condition can never be met.
+
 ### Explicit grants from the campaign
 
 `UnlockContentOutcome : RunOutcome` writes a card's ID into `ProfileData.GrantedUnlocks` ("the Fixer remembers
@@ -245,12 +279,13 @@ unlock snapshot and run counters.
 2. **Unlocks — done**, except the Content Hub reachability audit. `UnlockCondition` on cards, `UnlockRules`,
    unlock-aware acquisition, `UnlockContentOutcome`, `HasUnlocked`, `unlockall`/`lockall`.
 3. **Run lifecycle — done** in `SaveSystem`, except `RunEndedEvent` and the run-end reveal screen.
-4. **Achievements — next.** `StatsTracker` and more counters, `AchievementData` + database, `HasAchievement`, an
+4. **Unlocks beyond cards — next.** Campaigns, events and allies (section 4, "Beyond cards").
+5. **Achievements.** `StatsTracker` and more counters, `AchievementData` + database, `HasAchievement`, an
    achievements screen.
-5. **Run save/resume — done**, except a title screen with "Continue run" (the campaign scene continues
+6. **Run save/resume — done**, except a title screen with "Continue run" (the campaign scene continues
    automatically for now).
-6. **Steam — not started.** Achievement mirror and resync, Cloud, real AppID.
-7. **Save debugging — done.** `SaveDebug`, the Save Debugger window, `save*` console commands.
+7. **Steam — not started.** Achievement mirror and resync, Cloud, real AppID.
+8. **Save debugging — done.** `SaveDebug`, the Save Debugger window, `save*` console commands.
 
 ## 9. Open decisions (recommended default first)
 
@@ -262,6 +297,5 @@ unlock snapshot and run counters.
 5. **Unlock sources.** *Counters, achievements and campaign events only* · add a meta-currency shop later (a
    separate design).
 6. **Settings.** *Global (audio, video, input) with per-profile gameplay options only* · fully per profile.
-7. **Are encounters unlockable?** *Cards and allies first; encounters later.* Locking encounters makes the pool
-   differ per save, so the Encounter Designer's coverage strip and schedule simulation would need an "as unlocked"
-   toggle (raised in `needs-detailing.md`). Only cards are unlockable today.
+7. **What else is unlockable?** *Decided 2026-10-03: campaigns, events and allies too* (section 4, "Beyond cards").
+   Not built yet; only cards are unlockable today.

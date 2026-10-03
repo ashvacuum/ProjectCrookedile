@@ -6,45 +6,37 @@
 >
 > **Source of truth:** this doc · **Related:** [`core-design.md`](core-design.md)
 
-*As of 2026-10-03. These are NOT build tasks — each needs a design call (and usually a playtest) before code. Ordered by how much they block.*
+*As of 2026-10-03. These are NOT build tasks — each needs a design call (and usually a playtest) before code. Ordered
+by how much they block. Calls already made are listed at the bottom.*
 
 ---
 
-## 1. Receptive enemy bonus (blocks: nothing structural)
+## 1. Fanatic followers — numbers and command cards (blocks: FL deck authoring)
 
-**Ruled 2026-09-29** (`core-design.md` §3): receptive enemies pay in Support — **+2 Support the moment an enemy turns
-receptive, +1 per receptive enemy at the start of your turn** (both on `BattleManager`). The concern below still
-stands and is worth a playtest before more is built on it.
+**Ruled 2026-10-03** (`core-design.md` §7, "Fanatics follow your lead"): a Fanatic is your loyal follower. When you
+attack it attacks, when you defend it adds to your defence, and when you do neither it Silences enemies if you
+converted enough that turn. Command cards can force any of the three.
 
-**Before the ruling:** +1 Support per receptive enemy at player turn start. **Problem:** passive, invisible during play, and it rewards stacking receptives with the same defensive currency the Echo Chamber then punishes — the reward and the trap pull on the same axis, muddying the "controlled tension" read.
+Still to detail, all with a placeholder in the ruling:
+- **Follow amounts:** +2 Opinion / +2 Support per Fanatic per matching card. Too strong with three Fanatics and a
+  cheap-attack hand? A cap per turn, or per-card instead of per-play?
+- **Silence threshold:** 2 conversions this turn. Count conversions, or Fanatics present?
+- **Duration:** until the end of your next turn. Long enough to feel like a follower, short enough to keep the
+  stack → convert loop going?
+- **Command card list** for the reward pool (attack now / defend now / silence now, plus Sermon-style harvest).
+- **What counts as an attack or a defend** for cards that do something else too (draw, apply a status).
 
-Directions from the core doc (§3) worth detailing:
-- **Reduced card cost** while ≥N receptives present ("reading the room") — active, felt every hand.
-- **Amplified meter swings** — receptives as a megaphone; pairs dangerously (interestingly?) with echo-chamber halving.
-- Per-archetype flavors instead of one global rule.
+**Code gap:** `PacifyConversionEngine` still pays an instant burst on conversion (`BurstPerStack` × consumed), and
+`FanaticStatus` is only a hostility flag. The follower behaviour is not built.
 
-Decide: global vs per-archetype; turn-start vs continuous; and whether the bonus should *deliberately* taper as the room approaches all-receptive (telegraphing the chamber).
-
-## 2. Fanatic burst — what does a Fanatic actually DO? (blocks: FL deck authoring)
-
-**Locked intent:** FL cards apply statuses and deal little/no direct pressure; the *Fanatics deal the pressure*. The converted enemy is the damage dealer for 1 turn, then reverts.
-
-**Current code:** conversion pays an instant `RaiseDirect` burst (consumedStacks × 3) at the moment of conversion. That's "conversion deals the damage," not "the Fanatic deals it." To match intent, detail:
-- Does the Fanatic get a **turn** — an intent that fires during the enemy phase, pumping the meter (visible, on-fantasy, but delayed and disruptable)?
-- Or keep the instant burst and treat "Fanatic for 1 turn" as flavor + the Fanatic hostility-flag window?
-- If the Fanatic acts in the enemy phase: can enemies interfere (silence/stun your own convert)? Does Guilt-on-the-convert weaken its push *for* you?
-- Burst math: with cards applying 1–2 statuses each, conversion costs ~2–3 plays. Define the target payoff vs. a plain pressure card per energy, and how over-stacking scales.
-- Sermon/harvest cards scaling off `ConversionsThisTurn` — pool sketches.
-
-## 3. Echo-chamber escape valve (blocks: starter deck finalization)
-
-Every starter must include a default hostility card. Open: is it **un-removable** so deck-thinning can't re-create the trap? Decide before reward/removal systems are built, since removal UI needs to know.
-
-## 4. Intent vocabulary (blocks: enemy roster authoring)
+## 2. Intent vocabulary (blocks: enemy roster authoring)
 
 Code uses `EnemyMoveType` (Attack/Defend/DefendOpinion/RileOthers/...); the design doc uses Rally/Rebuke/Sway/Condemn/Murmur. Pick one vocabulary before authoring 6–8 enemies, or every enemy asset gets touched twice. Also detail Sway (convert receptive→hostile) and Murmur (low-impact presence) — both specified, neither has a concrete effect list.
 
-## 5. Celebrity sub-archetype card pools (blocks: Celebrity playtests, not FL/Nepo)
+## 3. Celebrity sub-archetype card pools (blocks: Celebrity playtests, not FL/Nepo)
+
+**Possibly obsolete:** Celebrity was redone as the Glamour / IOU build (`celebrity-glamour-iou.md`). If that is now
+the Celebrity, this item closes and `core-design.md` §7 is rewritten to match. Until that call, the old opens:
 
 Each of Attention / Scandal / Drama King needs enough cards to be *committable* (~8–12 each, per the "coherent mini-archetypes, not oatmeal" rule). Specific opens:
 - **Scandal:** severity-when-drawn; on-draw vs in-play triggers (pool can have both — ratio?); removal beyond the spin/cash-out.
@@ -52,55 +44,49 @@ Each of Attention / Scandal / Drama King needs enough cards to be *committable* 
 - **Attention:** the "held too long → you become the target" penalty — auto rule or card-text-only? Currently deferred to tuning.
 - **Drama King:** keep disarm framing distinct from FL debuffs (protect-while-attacking vs debuff-to-convert).
 
-A separate **Glamour / IOU** build exists as a playable variant (`celebrity-glamour-iou.md`, 25 card assets), to test an
-alternative against these three directions rather than to replace them.
-
-## 6. Starter deck quantities — resolved
-
-`OriginDatabase` holds an authored starter deck per origin (card + count), and `CardDatabase.GetStarterDeck` uses it
-before falling back to tag collection. Faith Leader and Nepo Baby use authored decks; Celebrity's entry is still empty,
-so it falls back to tagged starters (one of each).
-
-## 7. Status DB scope (blocks: nothing — decide during the re-key)
-
-When re-keying `StatusEffectIconMapSO` by Id (the `StatusEffectIconMapSO` re-key): does it grow into the full "generic effects/statuses database" (SFX/VFX/category per status), or stay icon/color/text with audio-visual mapped elsewhere (BattleSoundMap pattern)? Decide once, during the re-key, to avoid touching the asset twice.
-
-## 8. Nepo Baby open questions (blocks: Nepo build)
+## 4. Nepo Baby open questions (blocks: Nepo build)
 
 The class was redesigned (2026-10-03, `nepo-baby-class.md`): no Patronage, no summons. Open questions with their defaults are in that doc's section 8 (seed vs junk, "I'm Just Like You" type, whether replays raise Hostility, Hostility-scaled junk injection, Friends in High Places). Section 12 lists the conflicts with the old code and how each was resolved; Patronage is removed, and the summon effect stays for enemy content.
 
-## 9. Meta-progression: achievements and unlocks
+## 5. Meta-progression: unlocking campaigns, events and allies (blocks: campaign unlock content)
 
-Folded into **`meta-progression.md`** (profiles, saves, unlocks, achievements, campaign hooks, Steam). The shape
-proposed here (counters split from answering, unlock conditions on the content asset, achievements separate from
-unlocks, next-run unlocks) carried over.
+Only cards unlock today. The campaign needs campaigns (whole runs), events and allies (the game's items) to unlock as
+well. The proposal is in `meta-progression.md` section 4, "Beyond cards": the same unlock condition on each asset,
+grants from events, a `CompletedCampaign` condition to chain campaigns, and the run recording which campaign it is.
+Open: whether a locked ally's recruit option is shown disabled (proposed) or hidden, and the run-start screen that
+lists campaigns.
 
-## 10. EncourageSides — no agreed meaning
+## 6. EncourageSides — no agreed meaning
 
-Specced as a move ("encourage others to switch sides") and never defined: does it defect an ally
-toward the player, flip hostility, or pull the meter directly? No `EnemyMoveType` value, no
-effect, no asset — deliberately. Decide the rule before anything is built; each reading needs a
-different effect.
+An enemy move from an early pass on enemy behaviours ("encourage others to switch sides"), never defined: it could
+turn your converts back, push receptive enemies hostile, or pull the meter. No `EnemyMoveType` value, no effect, no
+asset — deliberately. Two readings fit the current design:
+- **The enemy's answer to Fanatics:** ends one Fanatic early (it reverts and gains Jaded). Gives Faith Leader a real
+  threat to read in the intents.
+- **Fold it into Sway** (item 2), which is already specified as "convert a receptive enemy to hostile" and has no
+  effect list either. Then EncourageSides stops existing as its own move.
 
-## 11. CardType colour taxonomy carries no meaning as authored
+## 7. CardType colour taxonomy carries no meaning as authored
 
 Pressure (green, persuade) vs Rhetoric (red, aggressive) is applied at random: draw-only cards
 sit in Rhetoric, and pressure is split across both. The colours are load-bearing for the player
 read and for `Silenced` (= "no Rhetoric"), so they need a consistent rule — or the split needs to
 stop pretending to be one.
 
-## 12. Deferred wholesale (don't detail yet)
+---
 
-**(2026-07-02) Partially un-deferred:** the campaign metagame + relic runtime are now planned
-in `metagame-campaign.md` (Potionomics-style free-roam map, campaign HQ, hour budget, event
-nodes; relics from bosses + events; reward-quality scaling in v1). Its ⚑ open questions live
-there.
+## Resolved
 
-**(2026-09-18) Map form decided:** the overworld is a **2:1 isometric sprite city**
-(`metagame-campaign.md` §1.5, asset spec + generation prompt in `art-bible.md` §9).
-Production overworld art is still deferred — greybox tiles are fine for playtests — but the
-*shape* is no longer an open question, so don't re-litigate it here. Still deferred:
-- Viral moments / News Cycle track.
-- Production resource HUD (debug overlay suffices for playtesting).
-- `EnemyConvertedEvent` bespoke flourish/animation.
-- Overworld building art beyond greybox (the ≈20–40 sprites §1.5 calls for).
+- **Receptive enemy bonus** (2026-10-03): **+2 Support when an enemy turns receptive, +1 per receptive enemy at the
+  start of your turn** (`core-design.md` §3). No taper toward the Echo Chamber.
+- **Echo-chamber escape valve** (2026-10-03): the hostility card is an ordinary, removable card. The bot playtests show
+  no Echo Chamber problem; revisit only if they start to.
+- **Starter deck quantities:** `OriginDatabase` holds an authored deck per origin (card + count). Faith Leader and Nepo
+  Baby have one; Celebrity's is empty, so it falls back to one of each starter-tagged card.
+- **Status database scope** (2026-10-03): `StatusEffectIconMapSO` stays icon / colour / text; sound and VFX map
+  elsewhere. The concern is the statuses cards apply, which need an audit (a Content Hub build task, not a design call).
+- **Meta-progression shape:** in `meta-progression.md` (profiles, saves, card unlocks, achievements, Steam).
+- **Campaign form** (2026-09-18, built since): a free-roam 2:1 isometric city over seven days, an hour budget, districts
+  and travel (`metagame-campaign.md` §1.5, `campaign-encounters.md` §6). Still deferred, so don't detail yet: viral
+  moments / News Cycle, the production resource HUD, the `EnemyConvertedEvent` flourish, and overworld art beyond
+  greybox.
