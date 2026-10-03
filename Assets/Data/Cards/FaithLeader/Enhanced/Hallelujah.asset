@@ -46,7 +46,7 @@ MonoBehaviour:
   - faithleader
   _fantasies: 5
   _isStarterCard: 0
-  _isUnlockable: 1
+  _isUnlockable: 0
   _unlockCondition:
     rid: -2
   _isGeneratedOnly: 0
