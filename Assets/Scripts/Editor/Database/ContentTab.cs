@@ -242,6 +242,10 @@ namespace Crookedile.Editor.Database
             Rect body = GUILayoutUtility.GetRect(0, 100000, 0, 100000);
             if (Event.current.type != EventType.Layout)
                 _body = body;
+            else if (_body.width < 1)
+                // First frame of this tab: no real rect yet, so estimate one from the area
+                // rather than laying the panes out at zero size.
+                _body = new Rect(0, 64, area.width, Mathf.Max(0, area.height - 64));
             body = _body;
             var listRect = new Rect(body.x, body.y, body.width * _split, body.height);
             var detailRect = new Rect(listRect.xMax + 4, body.y, body.width - listRect.width - 4, body.height);
