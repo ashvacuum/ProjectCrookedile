@@ -127,8 +127,12 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 **The data-shape rule:** ScriptableObject for the noun you reference, name, and count (`CardData`, `EnemyData`, `EncounterData`). `[SerializeReference]` for the polymorphic verb inside it (`BattleEffect`, `BattlePassive`, `RunOutcome`). Reasoning in [`campaign-encounters.md`](docs/campaign-encounters.md#why-scriptableobject-and-not-serializereference).
 
 ### Editor tools (`Crookedile` menu)
+- **Database** — one window, one tab per content type (Cards, Enemies so far): search, filters, sortable columns, an
+  audit badge per asset, a preview of how it looks, and its inspector inline for editing. Shared code in
+  `Editor/Database/ContentTab.cs`; a new type is one tab class. Replacing the Card Database and Enemy Database windows,
+  and the Content Hub categories one by one.
 - **Content Hub** — audits all content for completeness; check here before assuming data is fine.
-- **Card Database** / **Enemy Database** — dashboards with health views over authored content.
+- **Card Database** / **Enemy Database** — older dashboards, kept until the Database window's tabs are confirmed.
 - **Authoring Catalog** — reflection-built reference of every `[SerializeReference]` building block the inspector offers (effects, triggers, conditions, status behaviors).
 - **Encounter Designer** — Timeline, Table, Dependencies, Flags, Simulate, Travel and Authoring views over an encounter pool.
 - **Save Debugger** — profiles, counters, unlocks, readable run saves, snapshots and corruption tests.

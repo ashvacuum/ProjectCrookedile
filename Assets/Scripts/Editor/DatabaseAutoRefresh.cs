@@ -62,7 +62,7 @@ namespace Crookedile.EditorTools
         }
 
         [MenuItem("Crookedile/Refresh All Databases")]
-        private static void RefreshAll()
+        internal static void RefreshAll()
         {
             foreach (var database in LoadAllDatabases())
                 Refresh(database);
