@@ -23,6 +23,15 @@ MonoBehaviour:
     Resource: 0
     Passive: {fileID: 11400000, guid: 1c444f8d41faab941946d3b7ac62f5f8, type: 2}
     StarterTag: faithleader
+    StarterDeck:
+    - Card: {fileID: 11400000, guid: 8d011eaa428c7c24ba579274d7adcccc, type: 2}
+      Count: 5
+    - Card: {fileID: 11400000, guid: 4f1c7d9c3f8b1d842987a847763a9385, type: 2}
+      Count: 5
+    - Card: {fileID: 11400000, guid: 178a016c59202b84aba8415c5543b39c, type: 2}
+      Count: 1
+    - Card: {fileID: 11400000, guid: 65730053af59ade4daeaf7bd7f883822, type: 2}
+      Count: 1
     MaxActionPoints: 3
     StartingFunds: 150
     StartingCredibility: 90
@@ -37,6 +46,7 @@ MonoBehaviour:
     Resource: 1
     Passive: {fileID: 11400000, guid: 355a1499f47d2924ea3661bf9cef3c7e, type: 2}
     StarterTag: nepobaby
+    StarterDeck: []
     MaxActionPoints: 3
     StartingFunds: 600
     StartingCredibility: 65
@@ -51,6 +61,7 @@ MonoBehaviour:
     Resource: 2
     Passive: {fileID: 11400000, guid: 9fe225578fe293c4ba31c366dd76670b, type: 2}
     StarterTag: actor
+    StarterDeck: []
     MaxActionPoints: 3
     StartingFunds: 250
     StartingCredibility: 79

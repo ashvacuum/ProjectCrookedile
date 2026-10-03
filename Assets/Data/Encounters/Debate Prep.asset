@@ -12,47 +12,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
   m_Name: Debate Prep
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
-  _closingMinute: 840
-  _openingMinute: 480
+  _id: 4a6dcc66ed3747441bc1d3ec6e301606
+  _displayName: Pop Quiz Debate Prep
+  _blurb: "A staffer drills you on policy before the next appearance."
+  _image: {fileID: 0}
+  _hourCost: 1
   _extraMinutes: 30
   _district: {fileID: 11400000, guid: f92e8d6aa6b14629b92da64d357b2512, type: 2}
-  _id: 4a6dcc66ed3747441bc1d3ec6e301606
-  _displayName: Debate Prep
-  _blurb: A staffer drills you on policy before the next appearance.
-  _hourCost: 1
+  _openingMinute: 480
+  _closingMinute: 840
   _dropWeight: 1
-  _body: 
+  _body: "Your policy staffer has turned the conference room into a debate stage: a podium made of banker's boxes and a list of forty questions your opponent might ask."
   _options:
-  - _label: Study Hard
-    _resultText: 
+  - _label: "Study hard"
+    _resultText: "Three hours on the housing plan until you can recite it backwards. One of your policy lines gets noticeably sharper."
     _requirements: []
     _outcomes:
-    - rid: 4020939437640777836
-  - _label: Wing it
-    _resultText: 
+    - rid: 1
+  - _label: "Wing it"
+    _resultText: "You skim the list, decide you know this stuff and go to lunch. Probably fine."
     _requirements: []
     _outcomes: []
-  - _label: Pay a ghostwriter
-    _resultText: 
+  - _label: "Pay a ghostwriter"
+    _resultText: "A former senator's speechwriter sends over a page by morning. It is better than anything you have written."
     _requirements: []
     _outcomes:
-    - rid: 4020939437640777837
-    - rid: 4020939437640777838
+    - rid: 2
+    - rid: 3
   references:
     version: 2
     RefIds:
-    - rid: 4020939437640777836
+    - rid: 1
       type: {class: UpgradeRandomCardOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
       data:
         _restrictType: 1
         _type: 2
-    - rid: 4020939437640777837
+    - rid: 2
       type: {class: AdjustFundsOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
       data:
         _amount: -10
-    - rid: 4020939437640777838
-      type: {class: UpgradeChosenCardOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+    - rid: 3
+      type: {class: GainRandomCardOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
       data:
+        _scope: 1
         _restrictType: 0
-        _type: 0
-        _prompt: Choose a card to upgrade
+        _type: 1
+        _restrictRarity: 1
+        _rarity: 1
+        _count: 1

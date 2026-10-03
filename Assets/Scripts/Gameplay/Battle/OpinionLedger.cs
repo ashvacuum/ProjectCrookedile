@@ -50,6 +50,12 @@ namespace Crookedile.Gameplay.Battle
         public int CurrentSupport => _support;
         public int CurrentDenial => _denial;
 
+        /// <summary>
+        /// Called with the leaked amount whenever a hit on the player gets past Support (Celebrity
+        /// Scrutiny). Never fired for non-hit shifts such as unpaid Debt.
+        /// </summary>
+        public Action<int> OnPlayerLeak { get; set; }
+
         #endregion
 
         #region Opinion pipeline (command)
@@ -64,7 +70,8 @@ namespace Crookedile.Gameplay.Battle
             bool toPlayer,
             string attackerName,
             int sourceEnemyIndex,
-            int targetEnemyIndex
+            int targetEnemyIndex,
+            bool isHit = true
         )
         {
             if (amount <= 0)
@@ -87,6 +94,9 @@ namespace Crookedile.Gameplay.Battle
                     TargetEnemyIndex = targetEnemyIndex,
                 }
             );
+
+            if (toPlayer && isHit && remaining > 0)
+                OnPlayerLeak?.Invoke(remaining);
         }
 
         /// <summary>

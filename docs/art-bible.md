@@ -16,6 +16,8 @@
 >
 > **The campaign map wears this same look, in 2:1 isometric.** Same palette, same flat cel shading, same thin lines — only the projection differs. Spec: §9. Prompt: `docs/reference/iso-tile-prompt.md`.
 
+> **Card illustration is the exception (2026-10-02).** Card art is read at hand size, where Odd Taxi detail turns to clutter. Cards use the **icon style** in §3: one object, bold silhouette, flat colour blocks, one accent colour, plain background. Portraits, battle scene, map and UI keep the Odd Taxi direction above. `docs/reference/style-mock-prompt.md` still governs those; it no longer governs cards. Prompts live in `docs/crookedile-card-art-prompts.xlsx`.
+
 **Rendering style:** flat cel shading, even soft lighting, thin clean line work. Dusty warm palette over grey neutrals. No digital-oil rendering, no low-key vignette, no grain — flatness is the point, and the liveliness comes from colour and posture, not from lighting drama.
 
 **Composition (battle scene):** over-the-shoulder podium view — the player is IN the shot, back to camera, facing a raised row of opponent bust-portraits behind desks (committee-hearing framing). The crowd reads as a flat mass of shapes rather than rendered individuals. This is the "work the room" fantasy rendered literally.
@@ -147,28 +149,64 @@ Per origin, shown face-down. `_defaultCardBack`, `_faithLeaderCardBack` (religio
 
 The `Character_NN` sprites are **placeholders** (random assignment). Real per-card art is authored **full-bleed 1000×1432, portrait**, subject framed in the **art-window safe zone**: roughly `x: 70–930, y: 110–800` (upper-center). Keep critical detail out of the bottom ~45% (textbox) and the top ~8% (nameplate). Confirm the exact window against the frame PSD before final crops.
 
-### Art briefs — Faith Leader (the 15 built cards)
-One-line direction each; satire = Filipino megachurch-politician. Tie the image to the mechanic.
+### Card art style: icon, not scene
 
-| Card | Rarity | Brief |
-|---|---|---|
-| Rebuke | Basic | Preacher jabbing a finger mid-sermon — a sharp verbal correction. |
-| Pray | Basic | Hands clasped, eyes closed, a faint halo — calm gathering of strength. |
-| Call Out Sin | Basic | Finger leveled at one face in the crowd; the accused recoils (seeding a villain). |
-| Guilt Trip | Basic | A parishioner head bowed, shoulders sagging under an unseen weight. |
-| Name and Shame | Basic | Public square pillory vibe — someone hiding their face from pointed phones/cameras. |
-| Sow Doubt | Basic | A whispered word; a question-mark thought curling over a wavering listener. |
-| Sermon | Basic | Pulpit wide-shot, rapt crowd, light from above — the payoff moment. |
-| Moral High Ground | Basic | The leader literally elevated on a marble step, serenely looking down. |
-| Preach | Basic | Megaphone fused with a lectern; words as a physical force pushing the crowd. |
-| Excommunicate | Enhanced | A heavy church door slamming on a cast-out figure; banishment. |
-| Congregation | Enhanced | A swelling flock filing in, candlelight — an engine that builds each turn. |
-| Gospel | Enhanced | An open holy book radiating light, pages turning on their own. |
-| Absolution | Rare | Mass absolution — arms raised over a whole kneeling crowd; scales/judgment overtone. |
-| Martyrdom | Rare | A figure arms outstretched, sacrificial glow, the crowd around them inflamed (riled). |
-| Revelation | Rare | A single shaft of light splitting clouds — sudden clarity/vision. |
+The art carries the card's meaning so the description text can stay small. Reference point: Deadlock's ability icons.
 
-*(Nepo Baby & Celebrity briefs are deferred — those card lists aren't locked yet; speccing art for cards that may be cut is premature. Same template applies once their 20-lists are nailed.)*
+- **One object + one verb.** One focal object whose shape or motion shows the effect. Two elements maximum, nothing behind them.
+- **Silhouette first.** It must read as a solid shape at hand size. If it needs detail to be understood, simplify it.
+- **Flat colour blocks** with a clean thick inked outline. No texture, gradients, glows or soft shadows.
+- **Palette:** three base colours plus **one saturated accent** per card (gold for Faith Leader, hot pink for Celebrity). Frame colour already encodes type; the art does not repeat it.
+- **Plain solid background**, centred subject.
+- **Effect to shape:** damage = the object moving toward a target (thrust, motion arcs); defense = an enclosing or blocking shape (shield, ring, closed hand); draw = a fan of cards or one card sliding out; status = the object that stands for it; Flock / group = repeated identical silhouettes (3 or more); delayed = a still, waiting object.
+- **Avoid:** scenes, crowds of distinct people, faces carrying the meaning, fine detail that vanishes at card size.
+
+### Art briefs — Faith Leader (all 38 built cards)
+
+One brief per card, from `Assets/Data/Cards/FaithLeader`. The mechanic summary comes from each card's effect list; the Midjourney-ready version of each brief is in `docs/crookedile-card-art-prompts.xlsx`.
+
+| Card | Rarity | Type | Brief |
+|---|---|---|---|
+| Sermon | Basic | Pressure | a single raised open palm thrust forward with three motion arcs, one gold accent |
+| Pressure | Basic | Pressure | one clenched fist pressing down onto a flat slab, one gold accent |
+| Guilt | Basic | Pressure | one heavy weight hanging from a thin chain, one gold accent |
+| Sow Discord | Basic | Pressure | one pointing finger above a single question mark, one gold accent |
+| Drown out the Haters | Basic | Pressure | one megaphone with thick sound arcs pushing outward, one gold accent |
+| Holier Than Thou | Basic | Pressure | one raised chin and pointing nose above a halo ring, one gold accent |
+| Impenetrable Belief | Basic | Pressure | one thick round shield with a cross cut into its face, one gold accent |
+| Quiet Reflection | Basic | Rhetoric | one closed eye above a still ripple ring, one gold accent |
+| Shepherd's Joy | Basic | Rhetoric | one shepherd's crook with a single smiling sheep, one gold accent |
+| Silent Majority | Basic | Rhetoric | one closed mouth with a finger pressed to its lips, one gold accent |
+| Stir the Flock | Basic | Rhetoric | one wooden spoon stirring a swirl of identical sheep, one gold accent |
+| Support | Basic | Rhetoric | one open hand holding up a single gold star |
+| Traitor to the Cause | Basic | Rhetoric | one broken chain link with a dagger through it, one gold accent |
+| Absolve Sins | Enhanced | Pressure | one hand releasing a chain of broken links upward, one gold accent |
+| Blessed are the Persecuted | Enhanced | Pressure | one thorn crown glowing with a halo, one gold accent |
+| I am speaking | Enhanced | Pressure | one raised palm in front of a crossed-out mouth, one gold accent |
+| Name and Shame | Enhanced | Pressure | one pointing finger with a single speech bubble cracked in half, one gold accent |
+| Preach | Enhanced | Pressure | one lectern with a megaphone fused on top, one gold accent |
+| Quiet the Haters | Enhanced | Pressure | one hand over a row of three silenced mouths, one gold accent |
+| Retribution | Enhanced | Pressure | one gavel striking down with impact lines, one gold accent |
+| Sacrificial Lamb | Enhanced | Pressure | one lamb on an altar, one gold glow |
+| The Other Cheek | Enhanced | Pressure | one cheek turned toward a stopped slapping hand, one gold accent |
+| United Faith | Enhanced | Pressure | three identical hands clasped in a ring, one gold accent |
+| Word is Law | Enhanced | Pressure | one open book stamped by a single gavel, one gold accent |
+| Call out the Wicked | Enhanced | Rhetoric | one pointing finger aimed at a single dark silhouette, one gold accent |
+| Congregation | Enhanced | Rhetoric | five identical silhouettes filing toward one gold doorway |
+| Faith | Enhanced | Rhetoric | one steady flame inside a lantern, one gold accent |
+| God's Chosen | Enhanced | Rhetoric | one gold crown floating above a single raised hand |
+| Hallelujah | Enhanced | Rhetoric | two arms thrown up with gold light above |
+| Insinuate | Enhanced | Rhetoric | one raised eyebrow above a sideways glance, one gold accent |
+| Persecution Complex | Enhanced | Rhetoric | one pointing finger turned back at its own chest, one gold accent |
+| Praise | Enhanced | Rhetoric | two hands clapping with a gold spark between them |
+| Fruits of Conversion | Enhanced | Policy | one fruit branch with a single gold fruit |
+| Gospel | Enhanced | Policy | one open book radiating a single beam of light, one gold accent |
+| Have you no Shame? | Enhanced | Policy | one pointing finger above a bowed head, one gold accent |
+| The World Is Against Us | Rare | Rhetoric | one small circle of figures facing out, shielded by a thick ring, one gold accent |
+| Us vs Them | Rare | Policy | one thick vertical line dividing two identical silhouettes, one gold accent |
+| Zealotry | Rare | Policy | one burning torch held aloft, one gold accent |
+
+*(Nepo Baby & Celebrity briefs are deferred — those card lists aren't locked yet. Same template applies once they are.)*
 
 ---
 

@@ -14,21 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EncounterPoolData
   _days: 7
   _entries:
-  - _encounter: {fileID: 11400000, guid: e2ec5572cd3174348a0c1b5697be2b9c, type: 2}
-    _firstDay: 2
-    _lastDay: 5
+  - _encounter: {fileID: 11400000, guid: b915841570507184986b6fefb82dd3ee, type: 2}
+    _firstDay: 1
+    _lastDay: 0
     _weight: 1
-    _oncePerRun: 1
-    _guaranteed: 0
-    _requirements: []
-    _boostIf: []
-    _boostMultiplier: 2
-  - _encounter: {fileID: 11400000, guid: 349b59413fc6ee946a98291743c7083a, type: 2}
-    _firstDay: 2
-    _lastDay: 4
-    _weight: 2
-    _oncePerRun: 1
-    _guaranteed: 0
+    _oncePerRun: 0
+    _guaranteed: 1
     _requirements: []
     _boostIf: []
     _boostMultiplier: 2
@@ -41,15 +32,6 @@ MonoBehaviour:
     _requirements: []
     _boostIf:
     - rid: 1430662042425753601
-    _boostMultiplier: 2
-  - _encounter: {fileID: 11400000, guid: b915841570507184986b6fefb82dd3ee, type: 2}
-    _firstDay: 1
-    _lastDay: 0
-    _weight: 1
-    _oncePerRun: 0
-    _guaranteed: 1
-    _requirements: []
-    _boostIf: []
     _boostMultiplier: 2
   - _encounter: {fileID: 11400000, guid: cd25619a66eeff449aec753c40e8249a, type: 2}
     _firstDay: 3
@@ -70,16 +52,16 @@ MonoBehaviour:
     _requirements: []
     _boostIf: []
     _boostMultiplier: 2
-  - _encounter: {fileID: 11400000, guid: 0804a843b416f4f408c84fd3f814b036, type: 2}
-    _firstDay: 4
-    _lastDay: 7
+  - _encounter: {fileID: 11400000, guid: e2ec5572cd3174348a0c1b5697be2b9c, type: 2}
+    _firstDay: 1
+    _lastDay: 2
     _weight: 1
-    _oncePerRun: 0
+    _oncePerRun: 1
     _guaranteed: 0
     _requirements: []
     _boostIf: []
     _boostMultiplier: 2
-  - _encounter: {fileID: 11400000, guid: d7db8fec09e8369438228f0e0d6a3508, type: 2}
+  - _encounter: {fileID: 11400000, guid: 349b59413fc6ee946a98291743c7083a, type: 2}
     _firstDay: 1
     _lastDay: 3
     _weight: 1
@@ -88,10 +70,89 @@ MonoBehaviour:
     _requirements: []
     _boostIf: []
     _boostMultiplier: 2
-  - _encounter: {fileID: 11400000, guid: dd652f8abe0221141a0309a988dcbf41, type: 2}
+  - _encounter: {fileID: 11400000, guid: d7db8fec09e8369438228f0e0d6a3508, type: 2}
+    _firstDay: 2
+    _lastDay: 4
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 0804a843b416f4f408c84fd3f814b036, type: 2}
+    _firstDay: 3
+    _lastDay: 5
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 593f92f49e5b03e67738146f270db4c8, type: 2}
+    _firstDay: 4
+    _lastDay: 6
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 3dec6bffa9ec4ea376a12ce0d7d11ae1, type: 2}
+    _firstDay: 5
+    _lastDay: 7
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements:
+    - rid: 20
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 84907794a47532047aaa98f3163b0438, type: 2}
+    _firstDay: 4
+    _lastDay: 7
+    _weight: 2
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements:
+    - rid: 21
+    - rid: 22
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 9ee34a885ade1d0ebb7459e77cebf22c, type: 2}
+    _firstDay: 3
+    _lastDay: 6
+    _weight: 2
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements:
+    - rid: 23
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: a2b89f763fd10626f524a88400f60705, type: 2}
+    _firstDay: 2
+    _lastDay: 5
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements:
+    - rid: 24
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 5e285ed3e595b7a644e31e73bb4ba54c, type: 2}
+    _firstDay: 6
+    _lastDay: 7
+    _weight: 2
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements:
+    - rid: 25
+    - rid: 26
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: c92beca63416c57459334fc844354a97, type: 2}
     _firstDay: 1
     _lastDay: 3
-    _weight: 1
+    _weight: 2
     _oncePerRun: 1
     _guaranteed: 0
     _requirements: []
@@ -106,23 +167,199 @@ MonoBehaviour:
     _requirements: []
     _boostIf: []
     _boostMultiplier: 2
-  - _encounter: {fileID: 11400000, guid: c92beca63416c57459334fc844354a97, type: 2}
-    _firstDay: 3
-    _lastDay: 6
-    _weight: 2
+  - _encounter: {fileID: 11400000, guid: 48f44f51a4b890bd1ff70e38ef03cea3, type: 2}
+    _firstDay: 2
+    _lastDay: 5
+    _weight: 1
     _oncePerRun: 1
     _guaranteed: 0
     _requirements: []
     _boostIf: []
     _boostMultiplier: 2
-  - _encounter: {fileID: 11400000, guid: 84907794a47532047aaa98f3163b0438, type: 2}
+  - _encounter: {fileID: 11400000, guid: b73e53372d692f1925438ee0d2fc805d, type: 2}
+    _firstDay: 5
+    _lastDay: 7
+    _weight: 2
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements:
+    - rid: 27
+    - rid: 28
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 39c307243918a9cfe8f70f449a8954dc, type: 2}
+    _firstDay: 3
+    _lastDay: 6
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 88f0e5a6fa8d179249e66084321425e0, type: 2}
+    _firstDay: 1
+    _lastDay: 4
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: f416547b42f86c366d5eabfabe6eb4fd, type: 2}
     _firstDay: 4
     _lastDay: 7
     _weight: 1
     _oncePerRun: 1
     _guaranteed: 0
     _requirements:
-    - rid: 4020939597778780163
+    - rid: 29
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 1cc879473b7d054ac3d98c71e8e04597, type: 2}
+    _firstDay: 5
+    _lastDay: 7
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 71ec4ccf789c3ab40c3238a3301be794, type: 2}
+    _firstDay: 6
+    _lastDay: 7
+    _weight: 2
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements:
+    - rid: 30
+    - rid: 31
+    _boostIf:
+    - rid: 32
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: dd652f8abe0221141a0309a988dcbf41, type: 2}
+    _firstDay: 1
+    _lastDay: 3
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: e7344c19f0adfa5edf7add0fea12f04d, type: 2}
+    _firstDay: 1
+    _lastDay: 3
+    _weight: 2
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: f3c8318a8b8df482394872d08fbcf3b0, type: 2}
+    _firstDay: 1
+    _lastDay: 3
+    _weight: 2
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 93f4a7cc4dc9cd7932864d7b5b73bdcb, type: 2}
+    _firstDay: 1
+    _lastDay: 4
+    _weight: 2
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: eb9a4d1aac2ae8d272da0e023acbfe2e, type: 2}
+    _firstDay: 2
+    _lastDay: 4
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 14bd162991f353656d01b7fbeafc0293, type: 2}
+    _firstDay: 2
+    _lastDay: 5
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: f19f75fc9ab287f1818f590d21bd7de2, type: 2}
+    _firstDay: 3
+    _lastDay: 5
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 6da0ae4243f6165515465f14ac1fa4bc, type: 2}
+    _firstDay: 3
+    _lastDay: 6
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 6919ce0f8343378875096fe1899b4719, type: 2}
+    _firstDay: 3
+    _lastDay: 6
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 6a21bd001c1cb983953cab9ba4352784, type: 2}
+    _firstDay: 2
+    _lastDay: 5
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 29c370e844b4f6982a01dedabf589da5, type: 2}
+    _firstDay: 2
+    _lastDay: 5
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: bac532d19a7268101b942dcd91ece0be, type: 2}
+    _firstDay: 4
+    _lastDay: 6
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 5f19ed82fef8245676f5718686ae07c5, type: 2}
+    _firstDay: 4
+    _lastDay: 6
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
+    _boostIf: []
+    _boostMultiplier: 2
+  - _encounter: {fileID: 11400000, guid: 7a0736b56bb31e8b823b2fcdd3f73ea7, type: 2}
+    _firstDay: 3
+    _lastDay: 6
+    _weight: 1
+    _oncePerRun: 1
+    _guaranteed: 0
+    _requirements: []
     _boostIf: []
     _boostMultiplier: 2
   _travel: {fileID: 11400000, guid: 0ea0814c66e14af2bcfcbffeda4460b8, type: 2}
@@ -139,8 +376,68 @@ MonoBehaviour:
       data:
         _negate: 0
         _flag: walk_away
-    - rid: 4020939597778780163
+    - rid: 20
+      type: {class: HasAlly, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 1
+        _ally: {fileID: 11400000, guid: 7f262914f74c5c9864832e9d445e40a2, type: 2}
+    - rid: 21
       type: {class: HasFlag, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
       data:
         _negate: 0
         _flag: plausible_deniability
+    - rid: 22
+      type: {class: HasVisitedEncounter, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 1
+        _encounter: {fileID: 11400000, guid: 5e285ed3e595b7a644e31e73bb4ba54c, type: 2}
+    - rid: 23
+      type: {class: FundsAtLeast, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 0
+        _amount: 80
+    - rid: 24
+      type: {class: HasFlag, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 1
+        _flag: sat_on_leak
+    - rid: 25
+      type: {class: HasFlag, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 0
+        _flag: plausible_deniability
+    - rid: 26
+      type: {class: HasVisitedEncounter, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 1
+        _encounter: {fileID: 11400000, guid: 84907794a47532047aaa98f3163b0438, type: 2}
+    - rid: 27
+      type: {class: HasFlag, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 0
+        _flag: took_envelope
+    - rid: 28
+      type: {class: HasVisitedEncounter, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 1
+        _encounter: {fileID: 11400000, guid: 71ec4ccf789c3ab40c3238a3301be794, type: 2}
+    - rid: 29
+      type: {class: HasFlag, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 1
+        _flag: leaked_chat
+    - rid: 30
+      type: {class: HasFlag, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 0
+        _flag: took_envelope
+    - rid: 31
+      type: {class: HasVisitedEncounter, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 1
+        _encounter: {fileID: 11400000, guid: b73e53372d692f1925438ee0d2fc805d, type: 2}
+    - rid: 32
+      type: {class: HasFlag, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 0
+        _flag: leaked_chat

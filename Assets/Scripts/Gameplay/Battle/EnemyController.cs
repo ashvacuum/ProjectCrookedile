@@ -32,6 +32,10 @@ namespace Crookedile.Gameplay.Battle
             [EnemyMoveCondition.EveryNTurns] = new EveryNTurnsEvaluator(),
             [EnemyMoveCondition.OpinionAtOrAbove] = new OpinionAtOrAboveEvaluator(),
             [EnemyMoveCondition.OpinionAtOrBelow] = new OpinionAtOrBelowEvaluator(),
+            [EnemyMoveCondition.AnyAllyReceptive] = new AnyAllyReceptiveEvaluator(),
+            [EnemyMoveCondition.AllAlliesReceptive] = new AllAlliesReceptiveEvaluator(),
+            [EnemyMoveCondition.AnyAllyHostile] = new AnyAllyHostileEvaluator(),
+            [EnemyMoveCondition.AlliesAtLeast] = new AlliesAtLeastEvaluator(),
         };
 
         #endregion
@@ -77,7 +81,9 @@ namespace Crookedile.Gameplay.Battle
         #endregion
 
         /// <summary>
-        /// Current battle turn number, read from the provider passed at construction.
+        /// The round number — the player's turn count (1 on the first player turn), which is when
+        /// intents are chosen — read from the provider passed at construction. Not the raw turn
+        /// counter, which counts both sides and would make "every 2 turns" never line up.
         /// 0 when no provider was wired (e.g. test harnesses) — turn-gated move
         /// conditions treat that as "always eligible".
         /// </summary>

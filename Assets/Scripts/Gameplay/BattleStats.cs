@@ -88,12 +88,6 @@ namespace Crookedile.Gameplay
         /// <summary>True when the enemy has been pushed past the neutral zone into receptive territory.</summary>
         public bool IsReceptive => _currentHostility < -_neutralZone;
 
-        /// <summary>
-        /// Hostility pressure multiplier for attacks on the opinion meter.
-        /// Formula: max(0.1, 1.0 + Hostility × 0.5)
-        /// </summary>
-        public float HostilityDamageMultiplier => Mathf.Max(0.1f, 1.0f + _currentHostility * 0.5f);
-
         #endregion
 
         #region Constructors
@@ -301,8 +295,7 @@ namespace Crookedile.Gameplay
         #region Utility
 
         public string GetStatusString() =>
-            $"Hostility: {_currentHostility} ({HostilityDamageMultiplier:F2}x) | "
-            + $"AP: {_currentActionPoints}/{_maxActionPoints}";
+            $"Hostility: {_currentHostility} | " + $"AP: {_currentActionPoints}/{_maxActionPoints}";
 
         #endregion
     }

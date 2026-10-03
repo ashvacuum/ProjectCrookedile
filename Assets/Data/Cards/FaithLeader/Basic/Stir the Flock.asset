@@ -44,6 +44,7 @@ MonoBehaviour:
   _upgradedInnateRetain: 0
   _tags:
   - faithleader
+  _fantasies: 2
   _isStarterCard: 1
   _isUnlockable: 0
   _isGeneratedOnly: 0

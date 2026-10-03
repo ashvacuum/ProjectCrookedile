@@ -206,6 +206,13 @@ namespace Crookedile.Data.Cards
         [SerializeField]
         private List<string> _tags = new List<string>();
 
+        [Tooltip(
+            "Build fantasies this card supports (Convert / Agreeable / Underdog). Informational only: "
+                + "never restricts drafting or play, and a card may serve several or none."
+        )]
+        [SerializeField]
+        private CardFantasy _fantasies = CardFantasy.None;
+
         [Tooltip("Is this card included in starter decks?")]
         [SerializeField]
         private bool _isStarterCard = false;
@@ -331,6 +338,9 @@ namespace Crookedile.Data.Cards
 
         /// <summary>Tags for searching and filtering.</summary>
         public List<string> Tags => _tags;
+
+        /// <summary>Build fantasies this card supports. Informational; restricts nothing.</summary>
+        public CardFantasy Fantasies => _fantasies;
 
         /// <summary>Whether this card appears in starter decks.</summary>
         public bool IsStarterCard => _isStarterCard;

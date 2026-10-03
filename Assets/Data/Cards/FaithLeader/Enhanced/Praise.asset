@@ -38,6 +38,7 @@ MonoBehaviour:
   _upgradedInnateRetain: 0
   _tags:
   - faithleader
+  _fantasies: 2
   _isStarterCard: 0
   _isUnlockable: 1
   _isGeneratedOnly: 0
@@ -63,7 +64,7 @@ MonoBehaviour:
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
-        _target: 10
+        _target: 6
     - rid: 5004226220983844866
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
@@ -79,4 +80,4 @@ MonoBehaviour:
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
-        _target: 10
+        _target: 6

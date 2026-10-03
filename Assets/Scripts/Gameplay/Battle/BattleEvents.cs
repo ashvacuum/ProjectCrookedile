@@ -437,7 +437,8 @@ namespace Crookedile.Gameplay.Battle
     /// <summary>
     /// Published by <c>BattleStats</c> whenever an <em>enemy's</em> Hostility number changes.
     /// Hostility is an enemy-only stat — negative = receptive, zero = neutral, positive = hostile.
-    /// Hostility multiplies incoming opinion-meter pressure; the player does not have a Hostility value.
+    /// Hostility decides an enemy's stance (which move list it uses) — it never scales damage.
+    /// The player does not have a Hostility value.
     /// </summary>
     public struct HostilityChangedEvent : IGameEvent
     {

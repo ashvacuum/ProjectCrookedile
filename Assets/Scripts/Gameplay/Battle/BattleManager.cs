@@ -51,16 +51,29 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private int _supportPerReceptiveEnemy = 1;
 
+        [Tooltip(
+            "Support gained the moment an enemy turns receptive — the mirror to an enemy turning "
+                + "hostile granting a draw. 0 disables."
+        )]
+        [SerializeField]
+        private int _supportOnBecomingReceptive = 2;
+
         [Header("Turncoat (receptive → hostile betrayal)")]
-        [Tooltip("Turncoat stacks applied to a betrayer. Each stack adds bonus Opinion shift and fades 1/turn.")]
+        [Tooltip(
+            "Turncoat stacks applied to a betrayer. Each stack adds bonus Opinion shift and fades 1/turn."
+        )]
         [SerializeField]
         private int _turncoatStacks = 2;
 
-        [Tooltip("Opinion lost when an enemy turns coat (the crowd notices the betrayal). 0 disables.")]
+        [Tooltip(
+            "Opinion lost when an enemy turns coat (the crowd notices the betrayal). 0 disables."
+        )]
         [SerializeField]
         private int _turncoatOpinionHit = 3;
 
-        [Tooltip("Hostility added to each immediate neighbour when an enemy turns coat. 0 disables contagion.")]
+        [Tooltip(
+            "Hostility added to each immediate neighbour when an enemy turns coat. 0 disables contagion."
+        )]
         [SerializeField]
         private int _turncoatAdjacentNudge = 1;
 
@@ -227,13 +240,28 @@ namespace Crookedile.Gameplay.Battle
             {
                 if (enemyData != null)
                     _enemies.Add(
-                        new EnemyController(enemyData, () => CurrentTurn, () => OpinionPercentage)
+                        new EnemyController(
+                            enemyData,
+                            () => _playerTurnNumber,
+                            () => OpinionPercentage
+                        )
                     );
             }
             // Register each enemy's roster index so its BattleStats can stamp hostility events.
             for (int i = 0; i < _enemies.Count; i++)
                 _enemies[i].Stats.SetOwnerEnemyIndex(i);
             _focusedEnemyIndex = 0;
+
+            // Campaign choices can send the room in angrier (NextBattleHostilityOutcome).
+            int bankedHostility = RunState.Current?.ConsumeNextBattleHostility() ?? 0;
+            if (bankedHostility != 0)
+            {
+                foreach (var enemy in _enemies)
+                    enemy.Stats.SetHostility(enemy.Stats.CurrentHostility + bankedHostility);
+                GameLogger.LogInfo<BattleManager>(
+                    $"Campaign choice: every enemy starts {bankedHostility:+#;-#} hostility."
+                );
+            }
 
             if (_enemies.Count == 0)
             {
@@ -303,6 +331,9 @@ namespace Crookedile.Gameplay.Battle
             );
             // Event subscriptions are managed internally by PassiveResolver via EventBus
 
+            if (_instantResolution)
+                _effectResolver.EffectStepDelay = 0f;
+
             // Reset counters
             _currentTurn = 0;
             _playerTurnNumber = 0;
@@ -320,7 +351,8 @@ namespace Crookedile.Gameplay.Battle
                 _echoChamberDecayPerTurn,
                 _turncoatStacks,
                 _turncoatOpinionHit,
-                _turncoatAdjacentNudge
+                _turncoatAdjacentNudge,
+                _supportOnBecomingReceptive
             );
 
             // Opinion Meter + session shields
@@ -334,6 +366,10 @@ namespace Crookedile.Gameplay.Battle
                 onOpinionZeroed: () => CheckAndEndBattleIfOver()
             );
             _crowd.AttachLedger(_opinion);
+            _opinion.OnPlayerLeak = _ =>
+                PlayerStatusEffects?.RemoveStacks<GlamourStatus>(
+                    CelebrityRules.ScrutinyStripPerHit
+                );
 
             // Faith Leader conversion engine — needs the ledger for the convert burst.
             _pacify = new PacifyConversionEngine(_opinion, _playerStats);
@@ -412,7 +448,7 @@ namespace Crookedile.Gameplay.Battle
             {
                 var controller = new EnemyController(
                     data,
-                    () => CurrentTurn,
+                    () => _playerTurnNumber,
                     () => OpinionPercentage
                 );
                 int newIndex = _enemies.Count;
@@ -446,6 +482,43 @@ namespace Crookedile.Gameplay.Battle
         /// Ends the player's turn. Called directly by the UI's End Turn button.
         /// Ignored while a card play is still resolving or outside the player turn.
         /// </summary>
+        /// <summary>
+        /// Headless setup for tools that play battles without a scene (the playtest bot): every
+        /// pacing delay goes to zero and the origin passives normally wired in the scene are
+        /// supplied directly. Call before <see cref="StartBattle"/>.
+        /// </summary>
+        public void ConfigureForSimulation(OriginPassive[] originPassives)
+        {
+            _originPassives = originPassives;
+            _opponentTurnDelay = 0f;
+            _perEnemyAttackDelay = 0f;
+            _instantResolution = true;
+        }
+
+        private bool _instantResolution;
+
+        /// <summary>True while a played card is still resolving; input is ignored until it clears.</summary>
+        public bool IsCardResolving => _cards != null && _cards.IsResolving;
+
+        /// <summary>
+        /// Whether the player could play <paramref name="card"/> right now: costs and
+        /// unplayability from the rules, plus Silenced blocking Rhetoric.
+        /// </summary>
+        // ponytail: Silenced is enforced here and in HandPanel, not in CardPlayController, so
+        // RequestPlayCard still accepts a silenced Rhetoric card. Move the check into
+        // CardPlayController.CanPlayCard if anything but the UI and the bot ever plays cards.
+        public bool CanPlayCard(CardData card)
+        {
+            if (card == null || _cards == null || _playerStats == null)
+                return false;
+            if (
+                card.CardType == CardType.Rhetoric
+                && (PlayerStatusEffects?.HasStatus<SilencedStatus>() ?? false)
+            )
+                return false;
+            return _cards.CanPlayCard(card, _playerStats);
+        }
+
         public void RequestEndTurn()
         {
             if (_cards == null || _cards.IsResolving)
@@ -539,6 +612,25 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>Spends Attention if affordable. Returns false (and spends nothing) if short.</summary>
         public bool SpendAttention(int amount) => _attention.Spend(amount);
+
+        #endregion
+
+        #region Celebrity — Glamour / Debt
+
+        /// <summary>Celebrity's per-battle Debt and Debt-policy state.</summary>
+        public CelebrityState Celebrity { get; } = new CelebrityState();
+
+        public int CurrentGlamour => PlayerStatusEffects?.GetStacks<GlamourStatus>() ?? 0;
+
+        /// <summary>After the enemy turn: Glamour pushes Opinion up by its stacks, then decays.</summary>
+        private void TickGlamour()
+        {
+            int glamour = CurrentGlamour;
+            if (glamour <= 0)
+                return;
+            _opinion.RaiseDirect(glamour);
+            PlayerStatusEffects.RemoveStacks<GlamourStatus>(CelebrityRules.GlamourDecayPerTick);
+        }
 
         #endregion
 
@@ -718,6 +810,14 @@ namespace Crookedile.Gameplay.Battle
                 _playerStats.StartTurn();
                 _effectResolver.PlayerStatusEffects.OnTurnStart(_playerStats);
 
+                // Debt comes due after energy refreshes, before the player sees the turn.
+                Celebrity.ResetTurn();
+                Celebrity.Settle(
+                    _opinion,
+                    _playerStats,
+                    (c, n) => _playerDeck.AddCardsToHand(c, n)
+                );
+
                 // Ritual grants Support each turn.
                 int ritual = _effectResolver.PlayerStatusEffects.GetStacks<RitualStatus>();
                 if (ritual > 0)
@@ -783,6 +883,7 @@ namespace Crookedile.Gameplay.Battle
             }
             else
             {
+                TickGlamour();
                 foreach (var enemy in LivingEnemies)
                 {
                     enemy.Stats.EndTurn();
@@ -850,6 +951,7 @@ namespace Crookedile.Gameplay.Battle
         {
             _patronage.Reset();
             _attention.Reset();
+            Celebrity.ResetBattle();
             _cards.ResetForBattle();
             _delayedEffects.Clear();
         }
@@ -871,11 +973,7 @@ namespace Crookedile.Gameplay.Battle
         public void QueueDelayedEffects(List<BattleEffect> effects, int turnsDelay)
         {
             _delayedEffects.Add(
-                new DelayedEntry
-                {
-                    TurnsRemaining = Mathf.Max(1, turnsDelay),
-                    Effects = effects,
-                }
+                new DelayedEntry { TurnsRemaining = Mathf.Max(1, turnsDelay), Effects = effects }
             );
             GameLogger.LogInfo<BattleManager>(
                 $"Queued {effects.Count} delayed effect(s), due in {turnsDelay} turn(s)"

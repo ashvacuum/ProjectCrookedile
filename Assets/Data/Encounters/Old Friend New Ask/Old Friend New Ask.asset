@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: Old Friend New Ask
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _id: 3dec6bffa9ec4ea376a12ce0d7d11ae1
+  _displayName: Old Friend, New Ask
+  _blurb: "A former ally asks for a favor with strings attached."
+  _image: {fileID: 0}
+  _hourCost: 1
+  _extraMinutes: 0
+  _district: {fileID: 11400000, guid: a54aa622f1ef40a1935aeae6f25c28e9, type: 2}
+  _openingMinute: 600
+  _closingMinute: 900
+  _dropWeight: 1
+  _body: "Nonoy carried your posters in your first campaign, back when nobody else would. Now he runs a trucking company and needs a permit signed before the election, not after."
+  _options:
+  - _label: "Help him"
+    _resultText: "The permit goes through. Nonoy's cousin starts turning up at your events, and somehow things just get easier."
+    _requirements: []
+    _outcomes:
+    - rid: 1
+  - _label: "Refuse"
+    _resultText: "You tell him no to his face. He calls you a hypocrite on the way out. It stings, and it is the right call."
+    _requirements: []
+    _outcomes:
+    - rid: 2
+  - _label: "Help, but negotiate hard"
+    _resultText: "You sign on conditions: public bidding, no rush. He gets less than he wanted; you owe less than he hoped."
+    _requirements: []
+    _outcomes:
+    - rid: 3
+    - rid: 4
+  references:
+    version: 2
+    RefIds:
+    - rid: 1
+      type: {class: RecruitAllyOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _ally: {fileID: 11400000, guid: 0603c994bbfc364499047207623d4227, type: 2}
+    - rid: 2
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 10
+    - rid: 3
+      type: {class: RecruitAllyOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _ally: {fileID: 11400000, guid: 8f3dc5edfdef2994795dd9e9b856e3d7, type: 2}
+    - rid: 4
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 5

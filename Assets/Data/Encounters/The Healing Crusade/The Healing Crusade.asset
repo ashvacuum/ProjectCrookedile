@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: The Healing Crusade
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _id: bac532d19a7268101b942dcd91ece0be
+  _displayName: The Healing Crusade
+  _blurb: "Bro. Milagroso offers you five minutes at his pulpit."
+  _image: {fileID: 0}
+  _hourCost: 0
+  _extraMinutes: 30
+  _district: {fileID: 11400000, guid: 0fc98ecb448e466193b74300314db188, type: 2}
+  _openingMinute: 600
+  _closingMinute: 960
+  _dropWeight: 1
+  _body: "Bro. Milagroso's healing crusade fills the civic center every Friday. He has offered you five minutes at the pulpit, in front of a flock that has already agreed with everything he is about to say."
+  _options:
+  - _label: "Take the pulpit"
+    _resultText: "The flock turns to you as one. They are already nodding, and that is exactly the problem."
+    _requirements: []
+    _outcomes:
+    - rid: 1
+  - _label: "Denounce him from the steps"
+    _resultText: "You call it a racket in front of the cameras outside. The clip plays well; his people will remember it."
+    _requirements: []
+    _outcomes:
+    - rid: 2
+    - rid: 3
+  - _label: "Stay away"
+    _resultText: "You let the crusade go on without you. Nobody mentions it, which is its own kind of answer."
+    _requirements: []
+    _outcomes: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 1
+      type: {class: GoToEncounterOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _encounter: {fileID: 11400000, guid: 02cba32383c675d8815b758c93d78fb2, type: 2}
+    - rid: 2
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 10
+    - rid: 3
+      type: {class: NextBattleHostilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 1

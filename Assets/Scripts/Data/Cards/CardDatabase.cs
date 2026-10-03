@@ -342,12 +342,19 @@ namespace Crookedile.Data.Cards
 
         /// <summary>
         /// Gets the starter deck for a specific origin.
-        /// Filters starter cards by tags matching the origin.
+        /// The origin's authored starter deck from OriginDatabase, or — when it has none — one
+        /// copy of every starter card tagged for the origin.
         /// </summary>
         /// <param name="origin">Origin type to build starter deck for</param>
         /// <returns>List of cards for the starter deck</returns>
         public List<CardData> GetStarterDeck(OriginType origin)
         {
+            // The origin's authored deck (with copies) wins; tag-collected starters are the
+            // fallback for origins that don't have one yet.
+            var authored = OriginDatabase.Shared?.BuildStarterDeck(origin);
+            if (authored != null && authored.Count > 0)
+                return authored;
+
             // Get all starter cards tagged with the origin name
             string originTag = origin.ToString().ToLower();
             return FindAll(card =>

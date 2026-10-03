@@ -12,46 +12,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
   m_Name: Caught Lying
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
-  _closingMinute: 900
-  _openingMinute: 600
-  _extraMinutes: 0
-  _district: {fileID: 11400000, guid: 0fc98ecb448e466193b74300314db188, type: 2}
   _id: 84907794a47532047aaa98f3163b0438
   _displayName: Caught Lying
   _blurb: "Answer the accusation in front of the civic center press corps."
+  _image: {fileID: 0}
   _hourCost: 1
+  _extraMinutes: 0
+  _district: {fileID: 11400000, guid: 0fc98ecb448e466193b74300314db188, type: 2}
+  _openingMinute: 600
+  _closingMinute: 900
   _dropWeight: 1
-  _body: 
+  _body: "A photographer has pictures of you at Dela Paz's birthday party, the one your spokesperson swore you never attended. The story runs tomorrow unless you say something today."
   _options:
-  - _label: Come Clean
-    _resultText: 
+  - _label: "Come clean"
+    _resultText: "You admit you went and apologise for the denial. It costs you, but it is a one-day story."
     _requirements: []
     _outcomes:
-    - rid: 4020939597778780160
-  - _label: Double Down
-    _resultText: 
+    - rid: 1
+  - _label: "Double down"
+    _resultText: "You call the photos doctored. By evening a crowd of his opponents and yours is waiting outside your office."
     _requirements: []
     _outcomes:
-    - rid: 4020939597778780161
-  - _label: Spin It
-    _resultText: 
+    - rid: 2
+    - rid: 3
+  - _label: "Spin it"
+    _resultText: "A consultant you cannot afford reframes it as reaching across the aisle. The invoice arrives before the headline fades."
     _requirements: []
     _outcomes:
-    - rid: 4020939597778780162
+    - rid: 4
   references:
     version: 2
     RefIds:
-    - rid: 4020939597778780160
+    - rid: 1
       type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
       data:
-        _amount: -15
-    - rid: 4020939597778780161
-      type: {class: RemoveRandomCardOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+        _amount: -10
+    - rid: 2
+      type: {class: NextBattleHostilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
       data:
-        _restrictType: 0
-        _type: 4
-        _count: 1
-    - rid: 4020939597778780162
+        _amount: 1
+    - rid: 3
+      type: {class: GoToEncounterOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _encounter: {fileID: 11400000, guid: 3fc116611e8056fbd08bc28c19e9544c, type: 2}
+    - rid: 4
       type: {class: AdjustFundsOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
       data:
         _amount: -20

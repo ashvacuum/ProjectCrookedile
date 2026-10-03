@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Tandang
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _id: ea1fd02b94a30a3197ca28e01af8ca7f
+  _enemyName: Tandang
+  _portrait: {fileID: 0}
+  _startingHostility: 2
+  _maxHostility: 6
+  _minHostility: -5
+  _neutralZone: 0
+  _demographicClass: 0
+  _demographicValues: 0
+  _startingEffects:
+  - _behavior:
+      rid: 900
+    _stacks: 1
+    _duration: 2
+  _passives: []
+  _movePattern: 0
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: 4cebf2e369230c29730b2c57fab9f61c, type: 2}
+  - {fileID: 11400000, guid: 4cebf2e369230c29730b2c57fab9f61c, type: 2}
+  - {fileID: 11400000, guid: d3acb69f193899f858356483fd250275, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: f1cf4a2798126c139e0d3199d0f4e2c9, type: 2}
+  - {fileID: 11400000, guid: d3acb69f193899f858356483fd250275, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: 542a89e2e4deea1cbc2e33567561b45d, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 900
+      type: {class: RitualStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

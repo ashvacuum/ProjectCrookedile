@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Dona Agila
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _id: 6bdc66e38c85adec40d6e9447d9f7331
+  _enemyName: Dona Agila
+  _portrait: {fileID: 0}
+  _startingHostility: 3
+  _maxHostility: 7
+  _minHostility: -6
+  _neutralZone: 0
+  _demographicClass: 0
+  _demographicValues: 0
+  _startingEffects:
+  - _behavior:
+      rid: 900
+    _stacks: 1
+    _duration: 2
+  _passives: []
+  _movePattern: 1
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: 5de25d35c799c8c89057facba73654c8, type: 2}
+  - {fileID: 11400000, guid: 143e7032c639647b7f6cf9bcf8d4498b, type: 2}
+  - {fileID: 11400000, guid: 783b37ba24849a557c9e7ee5f0f59bd6, type: 2}
+  - {fileID: 11400000, guid: 47e13239c46ee0efaaf9b05df5140836, type: 2}
+  - {fileID: 11400000, guid: 1d445a8ca5c15c93776357216fafad2c, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: 5de25d35c799c8c89057facba73654c8, type: 2}
+  - {fileID: 11400000, guid: 143e7032c639647b7f6cf9bcf8d4498b, type: 2}
+  - {fileID: 11400000, guid: 1d445a8ca5c15c93776357216fafad2c, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: 143e7032c639647b7f6cf9bcf8d4498b, type: 2}
+  - {fileID: 11400000, guid: 45b1fa018fbf042b3344b400a784f46d, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 900
+      type: {class: HardenedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

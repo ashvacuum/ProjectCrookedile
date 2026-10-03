@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Bayawak
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _id: f4a14ab4987ca051e2f0e3e4330a453f
+  _enemyName: Bayawak
+  _portrait: {fileID: 0}
+  _startingHostility: 2
+  _maxHostility: 7
+  _minHostility: -5
+  _neutralZone: 0
+  _demographicClass: 0
+  _demographicValues: 0
+  _startingEffects: []
+  _passives: []
+  _movePattern: 0
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: aa5918b5e21c289eaf9afe42cdef01e4, type: 2}
+  - {fileID: 11400000, guid: 73f03dc678e8355c91ddc0e19a4b841f, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: 05413f16a7b1c2acde28be998fc938b8, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: 2a2a6f28ce548778844325aba48fb96a, type: 2}
+  references:
+    version: 2
+    RefIds: []

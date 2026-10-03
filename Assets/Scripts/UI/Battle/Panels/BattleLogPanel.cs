@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Crookedile.Core;
 using Crookedile.Data.Cards;
 using Crookedile.Gameplay.Battle;
+using Crookedile.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -293,6 +294,32 @@ namespace Crookedile.UI.Battle
             EndGroup();
             if (battleLogText != null)
                 battleLogText.text = string.Empty;
+        }
+
+        #endregion
+
+        #region Debug overlay (IMGUI)
+        // ponytail: reuses the same _lines buffer the uGUI panel already builds; no separate
+        // event subscription. Toggle from the dev console: `battlelog`.
+        private bool _showDebugOverlay;
+        private Vector2 _debugScroll;
+
+        [CheatCommand("battlelog", "Toggle the IMGUI battle log overlay", Category = "Debug")]
+        private void ToggleDebugOverlay() => _showDebugOverlay = !_showDebugOverlay;
+
+        private void OnGUI()
+        {
+            if (!_showDebugOverlay)
+                return;
+
+            var rect = new Rect(20f, Screen.height - 320f, 520f, 300f);
+            GUILayout.BeginArea(rect, GUI.skin.box);
+            GUILayout.Label("Battle Log", GUI.skin.box);
+            _debugScroll = GUILayout.BeginScrollView(_debugScroll);
+            for (int i = 0; i < _lines.Count; i++)
+                GUILayout.Label(_lines[i]);
+            GUILayout.EndScrollView();
+            GUILayout.EndArea();
         }
 
         #endregion

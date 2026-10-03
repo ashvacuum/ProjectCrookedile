@@ -28,6 +28,8 @@ namespace Crookedile.Editor
         private CardRarity? filterByRarity = null;
         private OriginType? filterByOrigin = null;
         private bool filterStarterOnly = false;
+        private HostilityKind? filterByHostility = null;
+        private CardFantasy? filterByFantasy = null; // None = cards with no fantasy assigned
 
         // View mode
         private ViewMode viewMode = ViewMode.Statistics;
@@ -494,6 +496,8 @@ namespace Crookedile.Editor
                 filterByRarity = null;
                 filterByOrigin = null;
                 filterStarterOnly = false;
+                filterByHostility = null;
+                filterByFantasy = null;
                 RefreshFilteredCards();
                 GUI.FocusControl(null);
             }
@@ -608,6 +612,55 @@ namespace Crookedile.Editor
             {
                 filterStarterOnly = newStarterOnly;
                 RefreshFilteredCards();
+            }
+            GUILayout.EndHorizontal();
+
+            // Hostility filter: does the card rile enemies up (Aggravates) or calm them (Pacifies)?
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Hostility:", GUILayout.Width(60));
+            if (GUILayout.Toggle(filterByHostility == null, "All", SirenixGUIStyles.MiniButton))
+            {
+                if (filterByHostility != null)
+                {
+                    filterByHostility = null;
+                    RefreshFilteredCards();
+                }
+            }
+            foreach (HostilityKind kind in System.Enum.GetValues(typeof(HostilityKind)))
+            {
+                if (GUILayout.Toggle(filterByHostility == kind, kind.ToString(), SirenixGUIStyles.MiniButton))
+                {
+                    if (filterByHostility != kind)
+                    {
+                        filterByHostility = kind;
+                        RefreshFilteredCards();
+                    }
+                }
+            }
+            GUILayout.EndHorizontal();
+
+            // Fantasy filter: which build fantasy a card supports (informational, restricts nothing).
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Fantasy:", GUILayout.Width(60));
+            if (GUILayout.Toggle(filterByFantasy == null, "All", SirenixGUIStyles.MiniButton))
+            {
+                if (filterByFantasy != null)
+                {
+                    filterByFantasy = null;
+                    RefreshFilteredCards();
+                }
+            }
+            foreach (CardFantasy fantasy in System.Enum.GetValues(typeof(CardFantasy)))
+            {
+                string label = fantasy == CardFantasy.None ? "Unassigned" : fantasy.ToString();
+                if (GUILayout.Toggle(filterByFantasy == fantasy, label, SirenixGUIStyles.MiniButton))
+                {
+                    if (filterByFantasy != fantasy)
+                    {
+                        filterByFantasy = fantasy;
+                        RefreshFilteredCards();
+                    }
+                }
             }
             GUILayout.EndHorizontal();
 
@@ -784,6 +837,37 @@ namespace Crookedile.Editor
                 supportText,
                 SirenixGUIStyles.RightAlignedGreyMiniLabel
             );
+            xOffset += 75;
+
+            // Hostility: red = aggravates enemies, green = pacifies, amber = both.
+            var hostility = CardHostility.Of(card);
+            if (hostility.Kind != HostilityKind.None)
+                DrawBadgeAtPosition(
+                    new Rect(xOffset, contentRect.y, 120, 18),
+                    hostility.Label(),
+                    hostility.Kind switch
+                    {
+                        HostilityKind.Aggravates => new Color(0.65f, 0.2f, 0.15f),
+                        HostilityKind.Pacifies => new Color(0.2f, 0.55f, 0.3f),
+                        _ => new Color(0.7f, 0.5f, 0.1f),
+                    }
+                );
+            xOffset += 125;
+
+            // Fantasy initials: C onvert, A greeable, U nderdog.
+            if (card.Fantasies != CardFantasy.None)
+                GUI.Label(
+                    new Rect(xOffset, contentRect.y, 60, 18),
+                    string.Join(
+                        " ",
+                        System.Enum
+                            .GetValues(typeof(CardFantasy))
+                            .Cast<CardFantasy>()
+                            .Where(f => f != CardFantasy.None && card.Fantasies.HasFlag(f))
+                            .Select(f => f.ToString()[0])
+                    ),
+                    SirenixGUIStyles.CenteredGreyMiniLabel
+                );
         }
 
         private void DrawBadgeAtPosition(Rect rect, string label, Color color)
@@ -839,6 +923,21 @@ namespace Crookedile.Editor
             if (filterStarterOnly)
             {
                 filteredCards = filteredCards.Where(c => c.IsStarterCard).ToList();
+            }
+
+            if (filterByHostility.HasValue)
+            {
+                filteredCards = filteredCards
+                    .Where(c => CardHostility.Of(c).Kind == filterByHostility.Value)
+                    .ToList();
+            }
+
+            if (filterByFantasy.HasValue)
+            {
+                var wanted = filterByFantasy.Value;
+                filteredCards = filteredCards
+                    .Where(c => wanted == CardFantasy.None ? c.Fantasies == CardFantasy.None : c.Fantasies.HasFlag(wanted))
+                    .ToList();
             }
 
             // Apply sorting

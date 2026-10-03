@@ -42,6 +42,7 @@ MonoBehaviour:
   _upgradedPassives: []
   _tags:
   - faithleader
+  _fantasies: 5
   _isStarterCard: 0
   _isUnlockable: 0
   _isGeneratedOnly: 0

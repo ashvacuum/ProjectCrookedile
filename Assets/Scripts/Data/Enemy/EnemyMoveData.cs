@@ -43,6 +43,10 @@ namespace Crookedile.Data.Enemy
         EveryNTurns, // Eligible only on turns divisible by ConditionTurn (periodic moves)
         OpinionAtOrAbove, // Eligible while the opinion meter is at/above ConditionPercent (desperation moves, boss phases)
         OpinionAtOrBelow, // Eligible while the opinion meter is at/below ConditionPercent (finisher moves, boss phases)
+        AnyAllyReceptive, // Eligible while another living enemy is Receptive (converters: "drag one back")
+        AllAlliesReceptive, // Eligible while every other living enemy is Receptive (cornered moves, punish windows)
+        AnyAllyHostile, // Eligible while another living enemy is Hostile (re-anoint, re-pacify)
+        AlliesAtLeast, // Eligible while at least ConditionCount other enemies are alive (summoner payoffs)
     }
 
     /// <summary>
@@ -134,7 +138,9 @@ namespace Crookedile.Data.Enemy
                 + "None: always eligible.\n"
                 + "OnlyIfNoMinionsAlive: only selected when no living enemy matches MinionToSummon "
                 + "(boss re-summons minions only after they have all been killed).\n"
-                + "OnTurnOrAfter / BeforeTurn / EveryNTurns: turn-gated — see Condition Turn below."
+                + "OnTurnOrAfter / BeforeTurn / EveryNTurns: turn-gated — see Condition Turn below.\n"
+                + "AnyAllyReceptive / AllAlliesReceptive / AnyAllyHostile: read the other enemies' stances.\n"
+                + "AlliesAtLeast: needs Condition Count other living enemies."
         )]
         [SerializeField]
         private EnemyMoveCondition _condition = EnemyMoveCondition.None;
@@ -167,6 +173,12 @@ namespace Crookedile.Data.Enemy
         [SerializeField]
         private int _conditionPercent = 50;
 
+        [ShowIf("@_condition == EnemyMoveCondition.AlliesAtLeast")]
+        [MinValue(1)]
+        [Tooltip("AlliesAtLeast: how many OTHER living enemies must be present.")]
+        [SerializeField]
+        private int _conditionCount = 1;
+
         #endregion
 
         #region Properties
@@ -198,6 +210,7 @@ namespace Crookedile.Data.Enemy
         public int MinionCount => _minionCount;
         public EnemyMoveCondition Condition => _condition;
         public int ConditionTurn => _conditionTurn;
+        public int ConditionCount => _conditionCount;
         public int ConditionPercent => _conditionPercent;
         public CardType CounterCardType => _counterCardType;
         #endregion

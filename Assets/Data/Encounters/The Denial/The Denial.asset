@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: The Denial
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _id: 5e285ed3e595b7a644e31e73bb4ba54c
+  _displayName: The Denial
+  _blurb: "A reporter asks you point-blank about the endorsement."
+  _image: {fileID: 0}
+  _hourCost: 0
+  _extraMinutes: 45
+  _district: {fileID: 11400000, guid: 0fc98ecb448e466193b74300314db188, type: 2}
+  _openingMinute: 540
+  _closingMinute: 900
+  _dropWeight: 1
+  _body: "Two days from the vote, a reporter catches you on the steps of city hall. Did you or did you not accept the Congressman's help? The cameras are rolling and the steps are very public."
+  _options:
+  - _label: "Come clean"
+    _resultText: "You say yes, you accepted, and you regret hiding it. The reporter looks disappointed; there is no story in an honest answer."
+    _requirements: []
+    _outcomes: []
+  - _label: "Deflect"
+    _resultText: "You pivot to the flood relief budget and keep talking until she runs out of tape. The only question is whether the edit is kind."
+    _requirements: []
+    _outcomes:
+    - rid: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 1
+      type: {class: CoinFlipOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _successChance: 0.5
+        _onSuccess:
+        - rid: 2
+        _onFailure:
+        - rid: 3
+    - rid: 2
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 10
+    - rid: 3
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: -10

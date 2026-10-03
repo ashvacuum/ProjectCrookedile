@@ -42,6 +42,7 @@ MonoBehaviour:
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags: []
+  _fantasies: 1
   _isStarterCard: 0
   _isUnlockable: 1
   _isGeneratedOnly: 0

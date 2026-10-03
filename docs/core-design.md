@@ -34,7 +34,9 @@ Hostility is the heart of the game. It exists as both:
 1. **An enemy stance** — enemies start outwardly hostile, neutral, or meek/receptive.
 2. **A card element** — cards can seed, manage, redirect, or amplify hostility deliberately.
 
-Hostile enemies are **not purely a problem** — they are a resource. You want them present (see Echo Chamber). Turning an enemy hostile grants a card draw. Receptive enemies should also offer something (TBD — e.g. reduced card cost or amplified meter swings for "reading the room").
+**Hostility sets behaviour, never numbers (ruling 2026-09-29).** An enemy's hostility decides its stance, and the stance decides which of its authored move lists it draws from (hostile / neutral / receptive). A hostile enemy hits harder only because its hostile moves are authored harder — hostility is never a damage multiplier. (An earlier `1 + 0.5 × hostility` multiplier on enemy pushes was removed: it turned every riling card into a compounding damage spiral.)
+
+Hostile enemies are **not purely a problem** — they are a resource. You want them present (see Echo Chamber). Turning an enemy hostile grants a card draw. **Receptive enemies pay in Support (2026-09-29):** +2 Support the moment an enemy turns receptive, and +1 Support per receptive enemy at the start of each of your turns. Hostile = more cards; receptive = more cushion — and an all-receptive room still triggers the echo chamber.
 
 ### Locked-state statuses
 - **Hardened** — cannot be turned receptive. The permanent villain.

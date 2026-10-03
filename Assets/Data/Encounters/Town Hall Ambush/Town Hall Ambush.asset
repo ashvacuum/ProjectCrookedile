@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: Town Hall Ambush
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _id: 1cc879473b7d054ac3d98c71e8e04597
+  _displayName: Town Hall Ambush
+  _blurb: "A hostile crowd shows up uninvited."
+  _image: {fileID: 0}
+  _hourCost: 1
+  _extraMinutes: 0
+  _district: {fileID: 11400000, guid: 0fc98ecb448e466193b74300314db188, type: 2}
+  _openingMinute: 780
+  _closingMinute: 960
+  _dropWeight: 1
+  _body: "Your town hall at the municipal gym was meant to be friendly. Then two busloads of your opponent's supporters arrived with printed signs and a man with a megaphone."
+  _options:
+  - _label: "Face them"
+    _resultText: "You walk out to the podium anyway. The megaphone goes quiet for exactly one second."
+    _requirements: []
+    _outcomes:
+    - rid: 1
+  - _label: "Cancel the event"
+    _resultText: "You call it off for security reasons. The footage of the empty gym is all anyone shares."
+    _requirements: []
+    _outcomes:
+    - rid: 2
+  - _label: "Send a surrogate"
+    _resultText: "You pay a popular radio host to take the stage for you. He is good. He is also expensive."
+    _requirements: []
+    _outcomes:
+    - rid: 3
+  references:
+    version: 2
+    RefIds:
+    - rid: 1
+      type: {class: GoToEncounterOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _encounter: {fileID: 11400000, guid: bba9bb0b3f7bf345426189bb49635281, type: 2}
+    - rid: 2
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: -10
+    - rid: 3
+      type: {class: AdjustFundsOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: -15

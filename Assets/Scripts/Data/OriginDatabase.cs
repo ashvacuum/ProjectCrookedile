@@ -27,6 +27,34 @@ namespace Crookedile.Data
     [CreateAssetMenu(menuName = "Crookedile/Database/Origin Database", fileName = "OriginDatabase")]
     public class OriginDatabase : ScriptableObject
     {
+        /// <summary>One line of a starter deck: a card and how many copies.</summary>
+        [Serializable]
+        public class StarterCard
+        {
+            [Tooltip("The card.")]
+            public Cards.CardData Card;
+
+            [Tooltip("Copies in the starting deck.")]
+            [MinValue(1)]
+            public int Count = 1;
+        }
+
+        /// <summary>
+        /// The authored starter deck for <paramref name="origin"/>, copies expanded, or an empty
+        /// list when none is authored (callers fall back to tag-collected starters).
+        /// </summary>
+        public List<Cards.CardData> BuildStarterDeck(OriginType origin)
+        {
+            var deck = new List<Cards.CardData>();
+            if (!TryGet(origin, out var entry) || entry.StarterDeck == null)
+                return deck;
+            foreach (var line in entry.StarterDeck)
+                if (line?.Card != null)
+                    for (int i = 0; i < Math.Max(1, line.Count); i++)
+                        deck.Add(line.Card);
+            return deck;
+        }
+
         [Serializable]
         public struct Entry
         {
@@ -80,6 +108,15 @@ namespace Crookedile.Data
                 InfoMessageType.Error
             )]
             public string StarterTag;
+
+            [BoxGroup("Origin/Right/Battle")]
+            [Tooltip(
+                "The deck this origin starts every run with, card by card with copies. The one "
+                    + "source for the campaign and the battle test starter. Empty falls back to "
+                    + "one copy of each card tagged with the Starter Tag."
+            )]
+            [TableList(AlwaysExpanded = true)]
+            public List<StarterCard> StarterDeck;
 
             [BoxGroup("Origin/Right/Battle")]
             [PropertyRange(1, 10)]

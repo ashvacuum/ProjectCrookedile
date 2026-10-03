@@ -206,10 +206,8 @@
                     thornsReflected: out thornsReflected
                 );
 
-            // Hostile enemies amplify their Opinion shift.
-            // HostilityDamageMultiplier already floors at 0.1, so no extra clamp needed.
-            if (!ctx.IsPlayerCard && attacker.CurrentHostility > 0)
-                mod = Mathf.RoundToInt(mod * attacker.HostilityDamageMultiplier);
+            // Hostility never scales the number: it picks which moves an enemy uses (its stance's
+            // move list), and a hostile enemy hits harder only through a harder authored move.
 
             // Thorns reflects back at the attacker's side first (preserving prior ordering).
             if (thornsReflected > 0)
