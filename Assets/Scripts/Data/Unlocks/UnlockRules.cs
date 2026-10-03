@@ -10,6 +10,14 @@ namespace Crookedile.Data.Unlocks
     public static class UnlockRules
     {
         /// <summary>
+        /// When false, every piece of content counts as unlocked, whatever its condition. Off
+        /// while the unlock content is unauthored (docs/unlocks.md); conditions, grants and
+        /// counters keep recording either way, so turning it on loses nothing.
+        /// ponytail: a static switch. Move it to a settings asset if designers need to flip it.
+        /// </summary>
+        public static bool LocksEnabled { get; set; }
+
+        /// <summary>
         /// True when <paramref name="card"/> is unlocked for <paramref name="profile"/>: it isn't
         /// locked at all, the dev override is on, it was granted, or its condition is met. A
         /// locked card with no condition only unlocks through a grant.
@@ -18,7 +26,7 @@ namespace Crookedile.Data.Unlocks
         {
             if (card == null)
                 return false;
-            if (!card.IsUnlockable)
+            if (!card.IsUnlockable || !LocksEnabled)
                 return true;
             if (profile == null)
                 return false;
@@ -36,7 +44,7 @@ namespace Crookedile.Data.Unlocks
         {
             if (card == null)
                 return false;
-            if (!card.IsUnlockable)
+            if (!card.IsUnlockable || !LocksEnabled)
                 return true;
             var run = RunState.Current;
             return run != null && run.UnlockedContent.Contains(card.ID);

@@ -6,7 +6,8 @@
 >
 > **Source of truth:** [`Data/Save/`](../Assets/Scripts/Data/Save/), [`Data/Unlocks/`](../Assets/Scripts/Data/Unlocks/) · **Related:** [`metagame-campaign.md`](metagame-campaign.md) · [`nepo-baby-class.md`](nepo-baby-class.md)
 
-Save system and unlocks are built (2026-10-03); achievements, Steam and UI are not. Replaces the
+Save system and unlocks are built (2026-10-03); achievements, Steam and UI are not. **Locks are off for now**:
+`UnlockRules.LocksEnabled` is false, so everything counts as unlocked (`locks true` in the dev console turns them on). Replaces the
 "Meta-progression" stub in `needs-detailing.md` section 9. Open decisions are in section 9 with a recommended default.
 
 ## 0. Built so far
@@ -49,7 +50,7 @@ scene continues a saved run or starts a new one on entry, and the dev console li
 | Unlock conditions | `CounterAtLeast`, `WonRunAs`, `GrantedByEvent` | Built |
 | Counter keys | `ProfileCounters` constants | Built (small set) |
 | Debug tools | `SaveDebug`, Save Debugger window, `save*` console commands | Built |
-| Stats tracker, achievements, `HasAchievement` condition | — | Not built |
+| Stats tracker; achievements as a view over unlocks | — | Not built |
 | Steam mirror, Cloud | — | Not built |
 | Profile settings, title / run-end / unlock screens | — | Not built |
 
@@ -124,7 +125,6 @@ unlockable). `AllyData` and `EncounterData` get the same pair when they need it.
 | `CounterAtLeast(key, n)` | A lifetime counter reached n ("win 3 runs", later "burn 100 cards") | Built |
 | `WonRunAs(origin)` | Won a run as that origin | Built — Trust Fund uses it (Nepo Baby) |
 | `GrantedByEvent` | Unlocked only by an explicit grant from a campaign event (below) | Built |
-| `HasAchievement(achievement)` | That achievement is earned — how achievements will unlock content | Not built |
 | Chained unlock | Unlocked once another piece of content is | Not built |
 
 An unlockable card with **no** condition unlocks only through a grant. A grant unlocks any card, whatever its
@@ -135,6 +135,18 @@ and no lifetime, so reward pools, the save system and editor tools all ask the s
 unreachable unlocks is not built yet.)
 
 Conditions only read counters, which only grow, so once something is unlocked it stays unlocked.
+
+### Beyond cards: campaigns, events and allies *(not built)*
+
+The design is in [`unlocks.md`](unlocks.md). The code reuses what cards have, with nothing new in the profile:
+
+- `AllyData`, `EncounterData` and `EncounterPoolData` get the same `_isUnlockable` + `UnlockCondition` pair, and
+  `UnlockRules` answers for any of them. IDs are asset GUIDs and grants are ID strings already.
+- Filters: the daily draw skips locked encounters; a recruit option for a locked ally shows disabled with how to unlock
+  it; the run-start screen lists locked campaigns. A `GoToEncounterOutcome` chain still runs a locked encounter.
+- `UnlockContentOutcome` and `HasUnlocked` take any of the four kinds. New condition: won a given campaign.
+- `RunSaveData` records the run's campaign (schema bump), so Continue loads the right pool.
+- The Encounter Designer's coverage strip and seed roller get an "as unlocked" toggle.
 
 ### Explicit grants from the campaign
 
@@ -162,21 +174,13 @@ Console: `unlockall`, `lockall`, `unlocks`, plus the `save*` commands (`savegran
 
 ## 5. Achievements
 
-**Status: not built.** Designed below.
-
-**Kept separate from unlocks** (per `needs-detailing.md`): an achievement is a named, displayed milestone; an unlock
-condition is a gate. Most unlocks need no achievement card, and some achievements unlock nothing. They meet through
-`HasAchievement`, and both read the same counters.
-
-### Data
-
-`AchievementData : ScriptableObject` (ID from asset GUID, in an `AchievementDatabase`): title, description, icon,
-hidden flag, Steam API name (empty = local only), and one `[SerializeReference] AchievementCondition` from the same
-small set as unlocks (`CounterAtLeast`, `WonRunAs`, plus `RunCounterAtLeast` and `AllOf`/`AnyOf`).
+**Achievements are unlocks** (decided 2026-10-03, `unlocks.md` rule 7). There is no separate achievement asset or
+database: an achievement is an unlock condition on a piece of content, shown with that content's name, and the Steam
+achievements mirror them. Not built beyond what cards already have.
 
 ### Counters are the design surface
 
-Achievements and unlocks never subscribe to battle internals. One `StatsTracker` (a `Singleton<T>`, disposed the way
+Unlocks never subscribe to battle internals. One `StatsTracker` (a `Singleton<T>`, disposed the way
 `PassiveResolver` unsubscribes) will listen on the `EventBus` and bump named counters in `ProfileData`. Today the
 counters are bumped by `SaveSystem` at run start and end and by `RunState.RecordBattleVictory`.
 
@@ -185,18 +189,9 @@ counters are bumped by `SaveSystem` at run start and end and by `RunState.Record
   ordinals would shift.
 - **Run-scoped counters** ("burn 30 cards in one run") live on the run and are folded into best-ever values at run end.
 - Built so far: runs started, won, lost, won per origin, battles won, highest day. Still to add with the tracker:
-  elites and bosses beaten, cards burned, replays, cards pulled, enemies converted.
+  elites and bosses beaten, cards burned, replays, cards pulled, enemies converted, Glamour peak, Debt settled.
 
 **Checked at checkpoints:** end of battle, end of run, and when a counter changes (a compare, so cheap).
-
-### Examples
-
-| Achievement | Condition | Unlocks (via `HasAchievement` on the content) |
-|---|---|---|
-| Born on Third Base | Win a run as Nepo Baby | **Trust Fund** |
-| Old Money | Burn 100 cards (lifetime) | a Burn-lane card |
-| Encore! Encore! | Replay 3 cards in one turn | nothing |
-| Full Conversion | Convert 50 enemies as Faith Leader | a Faith Leader Rare |
 
 ## 6. Campaign and run lifecycle
 
@@ -245,12 +240,12 @@ unlock snapshot and run counters.
 2. **Unlocks — done**, except the Content Hub reachability audit. `UnlockCondition` on cards, `UnlockRules`,
    unlock-aware acquisition, `UnlockContentOutcome`, `HasUnlocked`, `unlockall`/`lockall`.
 3. **Run lifecycle — done** in `SaveSystem`, except `RunEndedEvent` and the run-end reveal screen.
-4. **Achievements — next.** `StatsTracker` and more counters, `AchievementData` + database, `HasAchievement`, an
-   achievements screen.
-5. **Run save/resume — done**, except a title screen with "Continue run" (the campaign scene continues
+4. **Unlocks beyond cards — when locks go on** (everything is unlocked for now). Classes, campaigns, events and allies.
+5. **Achievements.** `StatsTracker` and more counters, then an achievements view over the unlocks (no separate data).
+6. **Run save/resume — done**, except a title screen with "Continue run" (the campaign scene continues
    automatically for now).
-6. **Steam — not started.** Achievement mirror and resync, Cloud, real AppID.
-7. **Save debugging — done.** `SaveDebug`, the Save Debugger window, `save*` console commands.
+7. **Steam — not started.** Achievement mirror and resync, Cloud, real AppID.
+8. **Save debugging — done.** `SaveDebug`, the Save Debugger window, `save*` console commands.
 
 ## 9. Open decisions (recommended default first)
 
@@ -259,9 +254,8 @@ unlock snapshot and run counters.
    every status, pile and pending choice serialized; large and fragile).
 3. **When unlocks apply.** *Built as: next run* · immediately, mid-run.
 4. **Profile count.** *Built as: 3 slots* · unlimited.
-5. **Unlock sources.** *Counters, achievements and campaign events only* · add a meta-currency shop later (a
-   separate design).
+5. **Unlock sources.** *Counters and campaign events only; achievements are the same thing* · a meta-currency shop
+   (not planned).
 6. **Settings.** *Global (audio, video, input) with per-profile gameplay options only* · fully per profile.
-7. **Are encounters unlockable?** *Cards and allies first; encounters later.* Locking encounters makes the pool
-   differ per save, so the Encounter Designer's coverage strip and schedule simulation would need an "as unlocked"
-   toggle (raised in `needs-detailing.md`). Only cards are unlockable today.
+7. **What else is unlockable?** *Decided 2026-10-03: classes, campaigns, events and allies too.* Design in
+   `unlocks.md`; not built yet, only cards are unlockable today.

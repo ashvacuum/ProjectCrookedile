@@ -229,6 +229,14 @@ namespace Crookedile.Managers
         }
 
         [FoldoutGroup("Card Cheats")]
+        [CheatCommand("locks", "Turn unlock locks on (locks true) or off (locks false) for this session; off by default, so everything is unlocked", Category = "Cards")]
+        public void SetLocksEnabled(bool enabled)
+        {
+            Data.Unlocks.UnlockRules.LocksEnabled = enabled;
+            GameLogger.LogInfo("Cheats", $"Unlock locks {(enabled ? "on" : "off")}, from the next run");
+        }
+
+        [FoldoutGroup("Card Cheats")]
         [Button("List Unlocks", ButtonSizes.Medium)]
         [CheatCommand("unlocks", "List every unlockable card and whether this profile has it", Category = "Cards")]
         public void ListUnlocks()
