@@ -20,6 +20,7 @@ MonoBehaviour:
   _description: When drawn removes 1 action point.
   _flavorText: 
   _costs: []
+  _costReductionPerX: 7
   _effects: []
   _passives:
   - rid: 4738608375284105321
@@ -27,26 +28,32 @@ MonoBehaviour:
   _upgradedCosts: []
   _upgradedEffects: []
   _upgradedPassives: []
+  _upgradedInnateRetain: 0
   _tags: []
+  _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
+  _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
-  _policyLean: 3
   _cardVFX: {fileID: 0}
   _configurationNotes: 
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 4738608375284105321
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: New Passive
         _trigger:
           rid: 4738608375284105322
         _conditions:
         - rid: 4738608375284105323
         _oneShot: 0
+        _oncePerTurn: 0
         _effects:
         - rid: 4823698825199485059
     - rid: 4738608375284105322
@@ -58,5 +65,4 @@ MonoBehaviour:
     - rid: 4823698825199485059
       type: {class: LoseActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 1

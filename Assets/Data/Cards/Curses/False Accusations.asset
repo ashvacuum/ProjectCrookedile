@@ -37,8 +37,11 @@ MonoBehaviour:
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags: []
+  _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 1
   _innateRetain: 0
@@ -47,6 +50,8 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 4738608601116966912
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
@@ -54,6 +59,7 @@ MonoBehaviour:
           rid: 4738608601116966913
         _conditions: []
         _oneShot: 1
+        _oncePerTurn: 0
         _effects:
         - rid: 4738608601116966914
     - rid: 4738608601116966913
@@ -62,5 +68,4 @@ MonoBehaviour:
     - rid: 4738608601116966914
       type: {class: DiscardCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 1

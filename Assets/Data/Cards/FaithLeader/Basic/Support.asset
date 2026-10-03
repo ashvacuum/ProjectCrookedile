@@ -38,8 +38,11 @@ MonoBehaviour:
   _upgradedInnateRetain: 0
   _tags:
   - faithleader
+  _fantasies: 0
   _isStarterCard: 1
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -48,19 +51,21 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 5004226203391361026
       type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 4
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
+        _maxAmount: 0
     - rid: 5004226203391361027
       type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 6
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
+        _maxAmount: 0

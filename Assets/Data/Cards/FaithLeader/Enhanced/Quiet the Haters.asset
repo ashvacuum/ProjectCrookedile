@@ -44,7 +44,9 @@ MonoBehaviour:
   _tags: []
   _fantasies: 1
   _isStarterCard: 0
-  _isUnlockable: 0
+  _isUnlockable: 1
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -53,10 +55,11 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 5004226315283595394
       type: {class: ForEachEnemyWithStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _filterStatus:
           rid: 5004226315283595395
         _effects:
@@ -67,7 +70,6 @@ MonoBehaviour:
     - rid: 5004226315283595396
       type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _target: 12
         _behavior:
           rid: 5004226315283595397
