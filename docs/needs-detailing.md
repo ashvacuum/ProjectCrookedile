@@ -1,12 +1,16 @@
 # Needs Detailing — design questions awaiting a decision
 
-*As of 2026-09-11. These are NOT build tasks — each needs a design call (and usually a playtest) before code. Ordered by how much they block.*
+*As of 2026-10-03. These are NOT build tasks — each needs a design call (and usually a playtest) before code. Ordered by how much they block.*
 
 ---
 
-## 1. Receptive enemy bonus (blocks: nothing structural, but current one is wrong)
+## 1. Receptive enemy bonus (blocks: nothing structural)
 
-**Current:** +1 Support per receptive enemy at player turn start. **Problem:** passive, invisible during play, and it rewards stacking receptives with the same defensive currency the Echo Chamber then punishes — the reward and the trap pull on the same axis, muddying the "controlled tension" read.
+**Ruled 2026-09-29** (`core-design.md` §3): receptive enemies pay in Support — **+2 Support the moment an enemy turns
+receptive, +1 per receptive enemy at the start of your turn** (both on `BattleManager`). The concern below still
+stands and is worth a playtest before more is built on it.
+
+**Before the ruling:** +1 Support per receptive enemy at player turn start. **Problem:** passive, invisible during play, and it rewards stacking receptives with the same defensive currency the Echo Chamber then punishes — the reward and the trap pull on the same axis, muddying the "controlled tension" read.
 
 Directions from the core doc (§3) worth detailing:
 - **Reduced card cost** while ≥N receptives present ("reading the room") — active, felt every hand.
@@ -42,9 +46,14 @@ Each of Attention / Scandal / Drama King needs enough cards to be *committable* 
 - **Attention:** the "held too long → you become the target" penalty — auto rule or card-text-only? Currently deferred to tuning.
 - **Drama King:** keep disarm framing distinct from FL debuffs (protect-while-attacking vs debuff-to-convert).
 
-## 6. Starter deck quantities (blocks: matching the starter-decks doc)
+A separate **Glamour / IOU** build exists as a playable variant (`celebrity-glamour-iou.md`, 25 card assets), to test an
+alternative against these three directions rather than to replace them.
 
-Tag-driven starter collection gives 1 of each card; the doc wants repeats (e.g. 3× Rebuke). Detail the mechanism: quantity field on CardData? A starter-deck manifest asset per origin (probably cleaner — also solves the stale-IsStarterCard pollution)?
+## 6. Starter deck quantities — resolved
+
+`OriginDatabase` holds an authored starter deck per origin (card + count), and `CardDatabase.GetStarterDeck` uses it
+before falling back to tag collection. Faith Leader and Nepo Baby use authored decks; Celebrity's entry is still empty,
+so it falls back to tagged starters (one of each).
 
 ## 7. Status DB scope (blocks: nothing — decide during the re-key)
 
@@ -52,7 +61,7 @@ When re-keying `StatusEffectIconMapSO` by Id (the `StatusEffectIconMapSO` re-key
 
 ## 8. Nepo Baby open questions (blocks: Nepo build)
 
-The class was redesigned (2026-10-03, `nepo-baby-class.md`): no Patronage, no summons. Open questions with their defaults are in that doc's section 8 (seed vs junk, "I'm Just Like You" type, whether replays raise Hostility, Hostility-scaled junk injection, Friends in High Places). Section 12 lists conflicts with current code, including what to do with the unused Patronage / summon code.
+The class was redesigned (2026-10-03, `nepo-baby-class.md`): no Patronage, no summons. Open questions with their defaults are in that doc's section 8 (seed vs junk, "I'm Just Like You" type, whether replays raise Hostility, Hostility-scaled junk injection, Friends in High Places). Section 12 lists the conflicts with the old code and how each was resolved; Patronage is removed, and the summon effect stays for enemy content.
 
 ## 9. Meta-progression: achievements and unlocks
 

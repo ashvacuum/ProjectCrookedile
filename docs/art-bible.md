@@ -206,7 +206,7 @@ One brief per card, from `Assets/Data/Cards/FaithLeader`. The mechanic summary c
 | Us vs Them | Rare | Policy | one thick vertical line dividing two identical silhouettes, one gold accent |
 | Zealotry | Rare | Policy | one burning torch held aloft, one gold accent |
 
-*(Nepo Baby & Celebrity briefs are deferred — those card lists aren't locked yet. Same template applies once they are.)*
+*(Nepo Baby & Celebrity briefs are not written yet. Their card lists now exist — Nepo Baby's 42 cards in `nepo-baby-class.md` §5–6, Celebrity's Glamour/IOU set in `celebrity-glamour-iou.md` — so both are ready for the same template. Until art lands, Nepo cards can't appear in reward offers: cards without artwork are skipped.)*
 
 ---
 

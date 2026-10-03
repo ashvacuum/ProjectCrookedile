@@ -46,7 +46,7 @@ An encounter is **self-contained** — no built-in "and then". Sequencing is a p
 | Field | Type | Default | What it does |
 |---|---|---|---|
 | `Session` | `BattleSession` | none | The fight. **Should be exactly one round** — multi-round can only chain battle→battle |
-| `IsBoss` | bool | false | Reserved for pick-1-of-3 relic on victory (M3). **Currently read by nothing but the Content Audit** |
+| `IsBoss` | bool | false | The finale. On a day it's offered, the map shows only "Face <boss>" (no travel or time cost) and the day can't end without it. The ally reward on victory (M3) isn't built |
 | `RewardOverride` | `RewardConfig` | none | Per-encounter reward weights. **Authored but not yet consumed** — `PostBattleFlow` still calls `GenerateRewardOffer(count: 3)` with the database's built-in weights |
 
 ### 2.1 `BattleSession.BattleRound` — the tuning values for a fight
@@ -90,7 +90,7 @@ Defeat ends the run (`RunState.Clear`). Victory returns to the map with rewards.
 | `Outcomes` | `RunOutcome[]` | Applied **in order, all of them**, when picked |
 
 Both lists are `[SerializeReference]` — pick a concrete type from the Odin dropdown. A row with
-no type picked is skipped at runtime and flagged by the Content Audit.
+no type picked is skipped at runtime and flagged by the Content Hub.
 
 ### 3.2 Outcomes — everything a choice can do
 
@@ -98,9 +98,11 @@ no type picked is skipped at runtime and flagged by the Content Audit.
 |---|---|---|
 | `AdjustFundsOutcome` | `Amount` (signed, default 10) | Funds ± amount, **clamped at 0** |
 | `AdjustCredibilityOutcome` | `Amount` (signed, default 5) | Credibility ± amount, clamped at 0 |
-| `GrantRelicOutcome` | `Relic` | Adds a relic. Duplicates ignored (unique per run) |
+| `AdjustCredibilityPercentOutcome` | `Percent` (signed) | Credibility ± a percentage of the origin's *starting* Credibility, so one asset means the same to every archetype |
+| `RecruitAllyOutcome` | `Ally` | Adds an ally. Duplicates ignored (unique per run); its passives register into every battle |
 | `GainCardOutcome` | `Card`, `Count` (≥1) | Adds N copies to the deck. How an event hands you a curse |
-| `GainRandomCardOutcome` | `RestrictRarity` + `Rarity` | Random card. Unrestricted = rolls the reward weights (70/25/5) |
+| `GainRandomCardOutcome` | `Scope` (Any / PlayerOrigin / Colorless), `RestrictType` + `Type`, `RestrictRarity` + `Rarity`, `Count` | Random card(s) from the chosen slice of the pool. Unrestricted rarity = rolls the reward weights (70/25/5). Skips cards the run hasn't unlocked |
+| `GainCardFromPoolOutcome` | `Pool` (card list), `Count` | Random card from a hand-picked shortlist: "one of *these*", not "something" |
 | `RemoveCardOutcome` | `Card` | Removes one copy. No-op if not held |
 | `RemoveRandomCardOutcome` | `RestrictType` + `Type`, `Count` | Removes N random cards, each rolled from what's left. The cost side of a bargain |
 | `RemoveChosenCardOutcome` | `RestrictType` + `Type`, `Prompt` | Player picks a card to remove — opens a picker |
@@ -108,6 +110,11 @@ no type picked is skipped at runtime and flagged by the Content Audit.
 | `UpgradeChosenCardOutcome` | `RestrictType` + `Type`, `Prompt` | Player picks a card to upgrade |
 | `GoToEncounterOutcome` | `Encounter` | Chains straight into another encounter — **any type, including a battle**. Costs no Hours |
 | `SetFlagOutcome` | `Flag` (string), `Clear` | Records a narrative flag — the memory of *this choice*. See §3.4 |
+| `CoinFlipOutcome` | `SuccessChance`, `OnSuccess[]`, `OnFailure[]` | Rolls the run's seeded RNG and applies one outcome list. Only where the uncertainty is the point |
+| `NextBattleHostilityOutcome` | `Amount` (signed) | Every enemy in the next battle starts this much more hostile (negative = more receptive) |
+| `SpendTimeOutcome` | `Minutes` | Takes extra time off today's budget, on top of the encounter's duration |
+| `AdvanceDayOutcome` | — | Ends the day as HQ does: next day, time refilled |
+| `UnlockContentOutcome` | `Card` | Unlocks a card **for the profile**, from the next run on. Pair with a card whose unlock condition is `GrantedByEvent` to make the event the only way in. See `meta-progression.md` |
 
 Card outcomes resolve the database by path (`Resources/Databases/CardDatabase`), not an
 inspector field — outcomes are plain serialized classes with nowhere to hang a reference.
@@ -130,8 +137,10 @@ places: option gates, pool hard gates, pool weight boosts.
 | `HasVisitedEncounter` | `Encounter` | That encounter was resolved this run (knows you were there, not what you did) |
 | `FundsAtLeast` | `Amount` (default 50) | `Funds ≥ amount` |
 | `CredibilityAtLeast` | `Amount` (default 25) | `Credibility ≥ amount` |
-| `HasRelic` | `Relic` | Run holds that relic |
+| `HasAlly` | `Ally` | Run holds that ally |
+| `OriginIs` | `Origin` | The run's origin. The gate for class-specific options |
 | `DayAtLeast` | `Day` (≥1, default 3) | `Day ≥ n` |
+| `HasUnlocked` | `Card` | The run started with that card unlocked (reads the run's unlock snapshot) |
 
 Every one has a **`Negate`** toggle on the base class, so "hasn't visited X" (mutually
 exclusive branches) needs no extra type. A null `RunState` (edit-time preview) passes.
@@ -194,7 +203,7 @@ The cost is typos being silent — check the spelling against wherever you test 
 | `Guaranteed` | false | Always appears every day in its window, **ahead of the random picks and ignoring the per-day count**. This is how a day-7 boss or day-1 opener is made certain |
 | `Requirements` | empty | **Hard gate** — all must hold or it can't appear at all |
 | `BoostIf` | empty | **Soft nudge** — when all hold, weight × multiplier. Stays available either way |
-| `BoostMultiplier` | **2** | Applied when every BoostIf holds. **A 0 here erases the weight it's meant to favour** — the Content Audit flags it |
+| `BoostMultiplier` | **2** | Applied when every BoostIf holds. **A 0 here erases the weight it's meant to favour** — the Content Hub flags it |
 
 Effective weight = `ResolvedWeight × (BoostActive ? BoostMultiplier : 1)`.
 
@@ -288,24 +297,30 @@ count and a duration type.
 | Value | Start | Changed by | Notes |
 |---|---|---|---|
 | `Funds` | per origin | `AdjustFundsOutcome` | Clamped at 0, no ceiling |
-| `Credibility` | per origin | `AdjustCredibilityOutcome` | Clamped at 0, no ceiling. **Meta only — battle never reads it** |
-| `Hours` | `MaxHours` (3) | `HourCost` on visit | Refills on day end |
-| `Day` | 1 | End Day | Run ends past `pool.Days` |
+| `Credibility` | per origin | `AdjustCredibility(Percent)Outcome` | Clamped at 0, no ceiling. **Meta only — battle never reads it** |
+| Time (`MinutesRemaining`) | `MaxHours` × 60 | visits (travel + duration), `SpendTimeOutcome`, Wait | Refills on day end; the day also ends at midnight |
+| `Day` | 1 | End Day, `AdvanceDayOutcome` | Run ends past `pool.Days` |
 | `Deck` | starter deck | card outcomes + post-battle rewards | Holds SO refs; upgrades store clones |
-| `Relics` | empty | `GrantRelicOutcome` | Unique per run; passives register into every battle |
+| `Allies` | empty | `RecruitAllyOutcome` | Unique per run; passives register into every battle |
 | `VisitedLocationIds` | empty | every resolved encounter | Drives `OncePerRun` and `HasVisitedEncounter` |
-| `Flags` | empty | `SetFlagOutcome` | Narrative memory of *choices*. Read by `HasFlag`. Run-scoped, never saved |
-| `Seed` | random (or set) | — | Fixes the *map* and reward offers. Battle RNG is deliberately unseeded |
+| `Flags` | empty | `SetFlagOutcome` | Narrative memory of *choices*. Read by `HasFlag`. Run-scoped: saved with the run, gone when it ends |
+| `NextBattleHostility` | 0 | `NextBattleHostilityOutcome` | Spent by the next battle |
+| `UnlockedContent` | the profile's unlocks | — | Snapshot taken when the run starts; read by reward pools and `HasUnlocked` |
+| `Seed` / `Rng` | random (or set) | — | Fixes the *map* and reward offers. Battle RNG is deliberately unseeded |
+
+**The run is saved** (`SaveSystem`) on every map redraw and before each battle, so quitting and
+re-entering the campaign continues it. Quitting mid-battle restarts that battle. A new field that
+must survive this goes in `RunSaveData` and `RunState.Save.cs` too.
 
 **Origin starting values** (`OriginDatabase`, tunable in the inspector):
 
-| Origin | Funds | Credibility | Reads as |
+| Origin | Funds | Credibility | Max hours |
 |---|---|---|---|
-| Faith Leader | 20 | 40 | Broke but trusted |
-| Nepo Baby | 120 | 10 | Buys anything, believed by nobody |
-| Celebrity | 60 | 30 | Comfortable until the first scandal |
+| Faith Leader | 150 | 90 | 8 |
+| Nepo Baby | 600 | 65 | 8 |
+| Celebrity | 250 | 79 | 8 |
 
-`MaxHours` of 0 on an origin means "use the run default" (3).
+`MaxHours` of 0 on an origin means "use the run default" (8).
 
 ---
 
@@ -319,23 +334,24 @@ Post-battle, on victory → Continue:
 | Rarity weights | `CardDatabase.GenerateRewardOffer` / `RewardConfig` | Basic **70** / Enhanced **25** / Rare **5** |
 | RNG | `RunState.Rng` | Seeded per run |
 
-Rewards are a **pick-1-of-3 card, or skip**. Nothing else drops yet: no Funds, no relics, no
-boss reward. `BattleEncounterData.RewardOverride` and `IsBoss` are authored fields that
+Rewards are a **pick-1-of-3 card, or skip**. Nothing else drops yet: no Funds, no allies, no
+boss reward. The offer skips cards the run hasn't unlocked, and Policies tagged with another
+origin (class Policies stay in their class; untagged ones are universal). `BattleEncounterData.RewardOverride` and `IsBoss` are authored fields that
 nothing consumes — wiring `GenerateRewardOffer` to read `RewardConfig` is the open task.
 
 ---
 
 ## 9. Gaps worth knowing before you author around them
 
-- **`RewardOverride` and `IsBoss` are inert.** Set them for future-proofing, don't expect them to change a run today.
-- **Battle rewards are cards only.** An event outcome is currently the only way to hand out Funds, Credibility, or a relic.
+- **`RewardOverride` is inert.** Set it for future-proofing; it doesn't change a run today.
+- **Battle rewards are cards only.** An event outcome is currently the only way to hand out Funds, Credibility, or an ally.
 - **No per-day weight curve.** An encounter's odds vary only because the *eligible set* varies.
-- **The campaign screen is IMGUI.** `CampaignFlow.OnGUI` is a harness for judging the loop, not the shipping map.
-- **`campaign-encounters.md` §"Two StS staples that are blocked"** is stale — chosen-card upgrade and removal both ship now (`UpgradeChosenCardOutcome`, `RemoveChosenCardOutcome`), via `RunState.RequestCardChoice`.
+- **The campaign screen is a playtest UI.** `CampaignFlow` builds a UI Toolkit list at runtime plus an IMGUI stat strip; it is a harness for judging the loop, not the shipping map.
+- **A pending card pick isn't saved.** Quitting while a chosen-card upgrade/removal picker is open loses that pick on resume.
 
 ## 10. Validation
 
-**Crookedile → Content Audit** catches: events with no options, options with no label, options
+**Crookedile → Content Hub** catches: events with no options, options with no label, options
 that do nothing and say nothing, unpicked `[SerializeReference]` rows, battle encounters with
 no session, sessions with >1 round, uncovered days, unreachable windows, weight-0 rows,
 dangling dependencies, pools with no boss, and `BoostMultiplier = 0`.

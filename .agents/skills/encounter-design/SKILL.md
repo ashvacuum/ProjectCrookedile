@@ -94,5 +94,6 @@ snake_case and grep for the writer before adding a reader.
 - Overlapping windows on two rows for one encounter double its weight that day; it still appears
   at most once.
 - `HasVisitedEncounter` cannot tell two rows of the same encounter apart.
-- Credibility and Funds gates currently fail always — every origin starts at 0 in
-  `OriginDatabase`. Fix the origin before gating on either.
+- Funds and Credibility gates depend on the origin: starts range from 150 to 600 Funds and 65 to 90
+  Credibility (`OriginDatabase`, tabled in `docs/encounter-authoring-reference.md`). A gate above
+  every start needs earlier encounters to pay into it.

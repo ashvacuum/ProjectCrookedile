@@ -27,36 +27,42 @@ scene continues a saved run or starts a new one on entry, and the dev console li
   checkpoint now, and deliberate corruption (`savecorrupt run true`) to exercise the backup fallback. Snapshots
   live in `debug-snapshots/` under the save folder; wipe and restore only touch the save system's own files.
 - **Tests:** `Tests/EditMode` (Unity Test Runner, Edit Mode). `SaveCoreTests` covers the Unity-free core;
-  `SaveSystemTests` covers profiles, save/continue/end and unlocks against the real databases.
+  `SaveSystemTests` covers profiles, save/continue/end and unlocks against the real databases; `SaveDebugTests`
+  covers the debug tools.
 
-## 1. What exists today
+## 1. Design names → code
 
-| Piece | State |
-|---|---|
-| `RunState` | In memory only. Lost on quit. Created by `CampaignFlow`, cleared from four places (`PostBattleFlow` ×2, `CampaignFlow`, `BattleTestStarter`). No single "run ended" moment. |
-| `SaveManager` + `SaveData` | Referenced by nothing. `SaveData` describes the old design (Heat, Influence, a 45-day campaign). JSON through `JsonUtility`, "encrypted" with an AES key hardcoded in the source. |
-| `CardData._isUnlockable` | Read by reward offers since 2026-10-03: a flagged card is never offered. Nothing can unlock it yet. Only Trust Fund is flagged. |
-| `CheatsManager.UnlockAllCards` | Publishes `CheatUnlockAllCardsEvent`, which nothing handles. |
-| `SteamManager` | Initializes Steamworks.NET (test AppID 480). No achievements or stats calls. |
-| Content IDs | `AllyData`, `EnemyData` and `EncounterData` use their asset file GUID. **`CardData` mints a random `Guid.NewGuid()`**, against the project rule. |
-| `RunOutcome` / `RunRequirement` | `[SerializeReference]` building blocks for event choices. The natural hooks for unlocks inside the campaign. |
+| Concept | Code | Status |
+|---|---|---|
+| Profile progress | `ProfileData` (counters, granted/seen unlocks, unlock-all) | Built |
+| Profile list | `ProfileIndex` (`profiles.idx`) | Built |
+| Run save | `RunSaveData`, written by `RunState.ToSaveData`, read by `RunState.Restore` | Built |
+| Run lifecycle owner | `SaveSystem.StartNewRun` / `ContinueRun` / `Checkpoint` / `EndRun` / `AbandonRun` | Built |
+| Serializer | Hand-written binary in `SaveEnvelope` (`SaveBinary` helpers) | Built |
+| Unlock answer | `UnlockRules.IsUnlocked(card, profile)`, `UnlockRules.IsAvailableThisRun(card)` | Built |
+| Unlock conditions | `CounterAtLeast`, `WonRunAs`, `GrantedByEvent` | Built |
+| Counter keys | `ProfileCounters` constants | Built (small set) |
+| Debug tools | `SaveDebug`, Save Debugger window, `save*` console commands | Built |
+| Stats tracker, achievements, `HasAchievement` condition | — | Not built |
+| Steam mirror, Cloud | — | Not built |
+| Profile settings, title / run-end / unlock screens | — | Not built |
 
 ## 2. The model: three layers
 
 ```
 Profile (one per player slot, persists forever)
-├── ProfileProgress   unlocked content, achievement state, lifetime stats
-├── ProfileSettings   per-profile preferences (optional, see 9.6)
-└── RunSave?          the in-progress run, at most one per profile
+├── ProfileData       unlocked content, lifetime counters (achievement state later)
+├── settings          not built (see 9.6)
+└── RunSaveData?      the in-progress run, at most one per profile
 ```
 
-- **Profile** is the unit the player picks on the title screen ("New profile / Continue"). Up to 3 slots.
-- **ProfileProgress** is everything that outlives a run: what's unlocked, which achievements are done, counters
-  that achievements read.
-- **RunSave** is a snapshot of `RunState`, written at safe points and deleted when the run ends. Resuming rebuilds
-  `RunState` from it.
+- **Profile** is the unit the player will pick on a title screen. Up to 3 slots; one is created on first use.
+- **`ProfileData`** is everything that outlives a run: explicit unlock grants, unlocks already shown, and counters
+  that unlock conditions (and later achievements) read.
+- **`RunSaveData`** is a snapshot of `RunState`, written at checkpoints and deleted when the run ends. Continuing
+  rebuilds `RunState` from it.
 
-One rule holds it together: **the profile is the source of truth. Steam is a mirror** (section 7).
+One rule holds it together: **the profile is the source of truth. Steam will be a mirror** (section 7).
 
 ## 3. Storage and serialization
 
@@ -66,85 +72,91 @@ One rule holds it together: **the profile is the source of truth. Steam is a mir
 <persistentDataPath>/
   profiles.idx                 slot list + last-used profile (tiny)
   profiles/<profileId>/
-    profile.sav                ProfileProgress (+ settings)
+    profile.sav                ProfileData
     profile.sav.bak            previous good copy
-    run.sav                    RunSave, only while a run is in progress
+    run.sav                    RunSaveData, only while a run is in progress
     run.sav.bak
+  debug-snapshots/<name>/      Save Debugger snapshots (dev only)
 ```
 
 Every write goes to `*.tmp`, is read back and verified, then replaces the real file, keeping the previous one as
-`.bak` (the existing `SaveManager.SaveGameWithValidation` already does this; keep that part). On load, a file that
-fails its checksum falls back to `.bak`.
+`.bak` (`SaveFileStore`). On load, a file that fails its checksum falls back to `.bak`.
 
-### Format: save DTOs + a binary serializer behind an interface
+### Format: binary save classes in a versioned envelope
 
-- **Save DTOs are separate from runtime types.** `ProfileProgressDto`, `RunSaveDto`, etc. hold only primitives,
-  strings, lists and content IDs, never `ScriptableObject` references. `RunState` converts to and from a DTO. This
-  keeps the file format stable while runtime classes change, and is the main thing JSON-of-runtime-objects gets wrong.
-- **Envelope:** `magic "CRKS"`, `formatVersion`, `payloadKind`, `payloadLength`, `CRC32`, then the payload.
-  The version drives explicit migration steps (`Migrate_1_to_2`, …) run on load.
-- **Serializer (built):** hand-written `BinaryWriter` payloads, one `Write`/`Read` pair per save class, with the
-  schema version passed to `Read` for migrations. Chosen over Odin's binary format because it has no Unity or
-  reflection dependency (works under IL2CPP unchanged, and the core is testable outside Unity) and the save classes
-  are few. Adding a field means writing it at the end and bumping the schema version.
+- **Save classes are separate from runtime types.** `ProfileData`, `ProfileIndex` and `RunSaveData` hold only
+  primitives, strings, lists and content IDs, never `ScriptableObject` references. `RunState` converts to and from
+  `RunSaveData`. The file format stays stable while runtime classes change.
+- **Envelope:** `magic "CRKS"`, envelope version, kind (index / profile / run), the payload's schema version, length,
+  CRC-32, then the payload. A file of the wrong kind, truncated, or failing its CRC is rejected.
+- **Serializer:** hand-written `BinaryWriter` payloads, one `Write`/`Read` pair per save class, with the schema
+  version passed to `Read` for migrations. Chosen over Odin's binary format because it has no Unity or reflection
+  dependency (works under IL2CPP unchanged, and the core is testable outside Unity) and the save classes are few.
+  **Adding a field:** write it at the end, bump `SchemaVersion`, and read it only when the version says it's there.
 - **No encryption.** A key hardcoded in the binary only stops honest players editing their own single-player save.
-  The CRC catches corruption, which is the real risk. (Add obfuscation later if a leaderboard ever needs it.)
+  The CRC catches corruption, which is the real risk.
 
 ### Content IDs
 
-Saves store content by ID and resolve it through the databases (`CardDatabase`, `AllyDatabase`, …). A missing ID on
-load (a cut card) is dropped with a warning, never a crash. **`CardData._id` moves to the asset GUID** like the other
-content types; no player saves exist yet, so this costs nothing now and a lot later.
+Saves store content by ID and resolve it through `SaveContent`: cards, enemies and allies from the databases in
+`Resources/Databases`, encounters from the Game Encounter Pool plus every encounter its events chain to. A missing
+ID on load (a cut card) is dropped with a warning, never a crash. Every content type's ID is its asset GUID,
+`CardData` included.
 
 ## 4. Unlocks
 
-Builds on the shape already proposed in `needs-detailing.md` section 9: **counting and answering are separate**,
+Builds on the shape first proposed in `needs-detailing.md` section 9: **counting and answering are separate**,
 and **the unlock condition lives on the content asset**, with no separate unlock database.
 
 ### The gate lives on the content
 
-`CardData` gets an `[SerializeReference] UnlockCondition` beside `_isUnlockable`. `AllyData` and `EncounterData` get
-the same pair when they need it. Conditions follow the `RunRequirement` pattern, and the set is deliberately small:
+`CardData` carries an `[SerializeReference] UnlockCondition` beside `_isUnlockable` (shown only when the card is
+unlockable). `AllyData` and `EncounterData` get the same pair when they need it. The set is deliberately small:
 
-| Condition | Meaning |
-|---|---|
-| `StatAtLeast(key, n)` | A lifetime counter reached n. Covers "convert 50 enemies", "reach day 7", "burn 100 cards". |
-| `WonRunAs(origin)` | Won a run as that origin (origin isn't a counter). |
-| `HasAchievement(achievement)` | That achievement is earned. **This is how achievements unlock content.** |
-| `HasUnlocked(content)` | Chains: unlocked once something else is. |
-| `GrantedByEvent` | Unlocked only by an explicit grant from a campaign event (below). |
+| Condition | Meaning | Status |
+|---|---|---|
+| `CounterAtLeast(key, n)` | A lifetime counter reached n ("win 3 runs", later "burn 100 cards") | Built |
+| `WonRunAs(origin)` | Won a run as that origin | Built — Trust Fund uses it (Nepo Baby) |
+| `GrantedByEvent` | Unlocked only by an explicit grant from a campaign event (below) | Built |
+| `HasAchievement(achievement)` | That achievement is earned — how achievements will unlock content | Not built |
+| Chained unlock | Unlocked once another piece of content is | Not built |
 
-**Answering "is this unlocked?" is a pure static function** over `ProfileProgress`
-(`Unlocks.IsUnlocked(content, progress)`). No singleton and no lifetime, so `CardDatabase.GetAcquirable`, the reward
-screen *and* the Content Hub (offline, no game running) all call the same thing. The Content Hub can then audit
-reachability: a locked card whose condition reads a counter nothing increments is flagged.
+An unlockable card with **no** condition unlocks only through a grant. A grant unlocks any card, whatever its
+condition.
 
-Conditions are monotonic (counters only grow), so once something is unlocked it stays unlocked.
+**Answering "is this unlocked?" is a pure static function:** `UnlockRules.IsUnlocked(card, profile)`. No singleton
+and no lifetime, so reward pools, the save system and editor tools all ask the same thing. (A Content Hub audit of
+unreachable unlocks is not built yet.)
+
+Conditions only read counters, which only grow, so once something is unlocked it stays unlocked.
 
 ### Explicit grants from the campaign
 
-A new `UnlockContentOutcome : RunOutcome` writes the content's ID into `ProfileProgress.GrantedUnlocks` ("the fixer
-remembers you"). It's for content flagged `GrantedByEvent`, so an event can be the *only* way to unlock something.
-A new `HasUnlocked : RunRequirement` lets event options and map locations appear only once the profile has
-unlocked something.
+`UnlockContentOutcome : RunOutcome` writes a card's ID into `ProfileData.GrantedUnlocks` ("the Fixer remembers
+you"). `HasUnlocked : RunRequirement` lets event options and pool entries appear only in runs that started with
+that card unlocked.
 
 ### When it takes effect: the next run
 
-Recommended (9.3), and already the leaning in `needs-detailing.md`. `RunState.Create` resolves the unlocked set
-**once** into the run, and every acquisition site reads that snapshot. Nothing re-checks mid-battle, and a seeded
-run stays reproducible.
+`SaveSystem.StartNewRun` copies the profile's unlocked set into `RunState.UnlockedContent`, and every acquisition site
+(`CardDatabase.IsAcquirable`, `GenerateRewardOffer`, `HasUnlocked`) reads only that snapshot. Nothing re-checks
+mid-run, and a seeded run stays reproducible. Test runs made with `RunState.Create` directly have an empty snapshot,
+so locked cards never appear in them.
 
 ### Reveal
 
-At run end, `newly unlocked = unlocked now − unlocked at run start`. The run-end screen shows them, and
-`ProfileProgress.SeenUnlocks` keeps the reveal from repeating.
+`SaveSystem.EndRun` returns the cards that run unlocked (unlocked now minus unlocked before). `GetUnlocks()` lists
+every unlockable card with unlocked/seen/how-to-unlock, and `MarkUnlocksSeen` records a reveal so it happens once.
+The reveal screen itself is not built.
 
 ### Dev
 
-Wire the existing `unlockall` cheat (it sets an all-unlocked override on the profile); add `lockall` and
-`resetprofile`.
+Console: `unlockall`, `lockall`, `unlocks`, plus the `save*` commands (`savegrant`, `saverevoke`, `savecounter`,
+`savewipe`, …). The Save Debugger window has the same controls.
 
 ## 5. Achievements
+
+**Status: not built.** Designed below.
 
 **Kept separate from unlocks** (per `needs-detailing.md`): an achievement is a named, displayed milestone; an unlock
 condition is a gate. Most unlocks need no achievement card, and some achievements unlock nothing. They meet through
@@ -154,19 +166,20 @@ condition is a gate. Most unlocks need no achievement card, and some achievement
 
 `AchievementData : ScriptableObject` (ID from asset GUID, in an `AchievementDatabase`): title, description, icon,
 hidden flag, Steam API name (empty = local only), and one `[SerializeReference] AchievementCondition` from the same
-small set as unlocks (`StatAtLeast`, `WonRunAs`, plus `RunStatAtLeast` and `AllOf`/`AnyOf`).
+small set as unlocks (`CounterAtLeast`, `WonRunAs`, plus `RunCounterAtLeast` and `AllOf`/`AnyOf`).
 
 ### Counters are the design surface
 
 Achievements and unlocks never subscribe to battle internals. One `StatsTracker` (a `Singleton<T>`, disposed the way
-`PassiveResolver` unsubscribes) listens on the `EventBus` and bumps named counters in `ProfileProgress`.
+`PassiveResolver` unsubscribes) will listen on the `EventBus` and bump named counters in `ProfileData`. Today the
+counters are bumped by `SaveSystem` at run start and end and by `RunState.RecordBattleVictory`.
 
-- **Keys are `const string`s on the tracker**, offered to conditions through an Odin `[ValueDropdown]`. Designers pick
+- **Keys are `const string`s** (`ProfileCounters`), offered to conditions through an Odin `[ValueDropdown]`. Designers pick
   counters but don't invent them (code increments them), and strings stay stable in saves and assets where enum
   ordinals would shift.
 - **Run-scoped counters** ("burn 30 cards in one run") live on the run and are folded into best-ever values at run end.
-- First set: runs started/won per origin, battles won, elites and bosses beaten, highest day reached, cards burned,
-  replays, cards pulled, enemies converted.
+- Built so far: runs started, won, lost, won per origin, battles won, highest day. Still to add with the tracker:
+  elites and bosses beaten, cards burned, replays, cards pulled, enemies converted.
 
 **Checked at checkpoints:** end of battle, end of run, and when a counter changes (a compare, so cheap).
 
@@ -181,26 +194,32 @@ Achievements and unlocks never subscribe to battle internals. One `StatsTracker`
 
 ## 6. Campaign and run lifecycle
 
-The missing piece is **one owner for a run's lifetime**. Add `RunLifecycle` (or methods on `RunState`) with:
+**Built:** `SaveSystem` owns a run's lifetime.
 
-- `StartRun(origin, seed)`: copies the unlock set, creates `RunState`, writes `run.sav`.
-- `Checkpoint()`: writes `run.sav`. Called on the campaign map after every encounter, event choice and day change.
-- `EndRun(RunResult)`: publishes `RunEndedEvent { origin, victory, day, runStats }`, folds run stats into the
-  profile, evaluates achievements, saves the profile, deletes `run.sav`, then shows the run-end screen with any
-  unlocks earned.
+- `StartNewRun(origin, seed)`: the origin's starter deck, the profile's unlock snapshot, `runs_started`, first save.
+- `ContinueRun(pool, out openEvent)`: rebuilds `RunState` from `run.sav` (falling back to `.bak`).
+- `Checkpoint(openEventId)`: writes `run.sav` for campaign runs only. `CampaignFlow` calls it on every map redraw
+  and before each battle; an event that's open but unanswered is saved so a resume reopens it.
+- `EndRun(victory)`: folds the run's counters into the profile, updates won/lost/per-origin/highest-day, saves the
+  profile, deletes `run.sav`, clears `RunState`, and returns the cards that became unlocked. Called when the last day
+  is survived (victory) and when a campaign battle is lost.
+- `AbandonRun()`: drops the run without counting it.
 
-The four scattered `RunState.Clear()` calls become `EndRun` (real runs) or stay as plain clears (test harnesses).
+`CampaignFlow` continues the profile's saved run on entry, or starts a new one with its inspector origin and seed.
 
-**Resume granularity: the campaign map** (recommended, 9.2). Quitting mid-battle resumes at the map with the
-battle still pending, so the fight restarts from its start (Slay the Spire's rule). No battle state is ever saved.
+**Resume granularity: the campaign map.** Quitting mid-battle resumes into that battle, restarted from its first
+round (Slay the Spire's rule). No battle state is ever saved.
 
-**Deterministic resume:** `System.Random` can't be saved, so the run RNG becomes a small serializable PRNG
-(xorshift128, four `uint`s of state) stored in the `RunSave`. Same seed, same choices, same run, even across a
-save and reload.
+**Deterministic resume:** the run RNG is `RunRng`, a xorshift128 generator behind the `System.Random` API, whose
+four-`uint` state is saved. Same seed and same choices give the same run, across a save and reload.
 
-**What a `RunSave` holds:** origin, RNG state, deck (card ID + upgraded), allies, funds, credibility, hours/minutes,
-day, district, visited locations, flags, today's locations, pending battle/next encounter, next-battle Hostility,
-pending card choice, the run's unlock snapshot and run stats.
+**What a `RunSaveData` holds:** origin, seed, RNG state, deck (card ID + upgraded), allies, funds, credibility, time
+(minutes remaining and elapsed, max hours), day, district (by asset name), visited locations, flags, today's
+locations, pending battle, next encounter, open event, next-battle Hostility, battle queue and round, the run's
+unlock snapshot and run counters.
+
+**Not saved:** a "pick a card" prompt open when the player quits is lost on resume. **Not built:** a
+`RunEndedEvent`, achievement evaluation at run end, and the run-end screen.
 
 ## 7. Steam
 
@@ -215,18 +234,17 @@ pending card choice, the run's unlock snapshot and run stats.
 
 ## 8. Build order
 
-Each step is shippable on its own.
-
-1. **Foundations:** card IDs → asset GUIDs; save DTOs, envelope, `ISaveSerializer` (Odin binary), atomic writes;
-   `ProfileManager` (create/select/rename/delete, `profiles.idx`); delete `SaveManager`/`SaveData`. First real NUnit
-   EditMode tests: round-trip and corruption fallback.
-2. **Unlocks:** `UnlockCondition` on content, the static `Unlocks.IsUnlocked`, unlock-aware acquisition,
-   `UnlockContentOutcome`, `HasUnlocked`, a Content Hub reachability audit, wire `unlockall`.
-3. **Run lifecycle:** `RunLifecycle` with `EndRun`, `RunEndedEvent`, the run-end reveal screen.
-4. **Achievements:** `StatsTracker` and counters, `AchievementData` + database, `HasAchievement`, an achievements
-   screen. Trust Fund becomes earnable here.
-5. **Run save/resume:** serializable RNG, `RunSave` snapshot, checkpoints, "Continue run" on the title screen.
-6. **Steam:** achievement mirror and resync, Cloud, real AppID.
+1. **Foundations — done.** Card IDs → asset GUIDs; save classes, envelope, atomic writes; profiles; old
+   `SaveManager`/`SaveData` deleted; first NUnit Edit Mode tests.
+2. **Unlocks — done**, except the Content Hub reachability audit. `UnlockCondition` on cards, `UnlockRules`,
+   unlock-aware acquisition, `UnlockContentOutcome`, `HasUnlocked`, `unlockall`/`lockall`.
+3. **Run lifecycle — done** in `SaveSystem`, except `RunEndedEvent` and the run-end reveal screen.
+4. **Achievements — next.** `StatsTracker` and more counters, `AchievementData` + database, `HasAchievement`, an
+   achievements screen.
+5. **Run save/resume — done**, except a title screen with "Continue run" (the campaign scene continues
+   automatically for now).
+6. **Steam — not started.** Achievement mirror and resync, Cloud, real AppID.
+7. **Save debugging — done.** `SaveDebug`, the Save Debugger window, `save*` console commands.
 
 ## 9. Open decisions (recommended default first)
 
@@ -234,10 +252,10 @@ Each step is shippable on its own.
 2. **Resume granularity.** *Built as: campaign map only; mid-battle quits restart the battle* · full mid-battle saves (needs
    every status, pile and pending choice serialized; large and fragile).
 3. **When unlocks apply.** *Built as: next run* · immediately, mid-run.
-4. **Profile count.** *3 slots* · unlimited.
+4. **Profile count.** *Built as: 3 slots* · unlimited.
 5. **Unlock sources.** *Counters, achievements and campaign events only* · add a meta-currency shop later (a
    separate design).
+6. **Settings.** *Global (audio, video, input) with per-profile gameplay options only* · fully per profile.
 7. **Are encounters unlockable?** *Cards and allies first; encounters later.* Locking encounters makes the pool
    differ per save, so the Encounter Designer's coverage strip and schedule simulation would need an "as unlocked"
-   toggle (raised in `needs-detailing.md`).
-6. **Settings.** *Global (audio, video, input) with per-profile gameplay options only* · fully per profile.
+   toggle (raised in `needs-detailing.md`). Only cards are unlockable today.
