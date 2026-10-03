@@ -69,6 +69,7 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 | `Assets/Scripts/Data/Campaign/` | Encounter types, event outcomes, encounter pools — see [`campaign-encounters.md`](docs/campaign-encounters.md) |
 | `Assets/Scripts/Data/Save/`, `Data/Unlocks/` | Profiles, run save/continue, unlock conditions, save debugging — see [`meta-progression.md`](docs/meta-progression.md) |
 | `Assets/Scripts/Tests/EditMode/` | NUnit tests (Unity Test Runner → Edit Mode) |
+| `Assets/Scripts/Tests/PlayMode/` | Per-card smoke test: every card vs a receptive, neutral and hostile enemy (Test Runner → Play Mode) |
 | `Assets/Scripts/UI/Battle/` | Battle UI, decomposed into self-subscribing panel islands |
 | `Assets/Scripts/Editor/` | Authoring tools — see below |
 | `Assets/Data/` | Authored ScriptableObject assets — cards, enemies, passives, encounters, VFX events |
