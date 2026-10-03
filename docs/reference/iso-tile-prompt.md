@@ -1,5 +1,11 @@
 # Isometric map-asset generation prompt (2:1 dimetric)
 
+> **Kind:** Reference · **Status:** Canonical · **Updated:** 2026-10-03
+>
+> **Summary:** Campaign-map generation prompt: 2:1 dimetric tiles and buildings, plus the acceptance check every sprite has to pass.
+>
+> **Source of truth:** this doc; grid guide [`iso-grid-guide-256x128.png`](iso-grid-guide-256x128.png) · **Related:** [`metagame-campaign.md`](../metagame-campaign.md) · [`art-bible.md`](../art-bible.md) · [`style-mock-prompt.md`](style-mock-prompt.md)
+
 *Companion to `style-mock-prompt.md` (v4 Odd Taxi, the locked look). That prompt makes battle
 art; this one makes the campaign map's tiles and buildings — `metagame-campaign.md` §1.5,
 sizes and import settings in `art-bible.md` §9. Drop generated images beside this file.*

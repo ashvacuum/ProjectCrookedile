@@ -1,5 +1,11 @@
 # Campaign Encounters — System Reference
 
+> **Kind:** Systems · **Status:** Built · **Updated:** 2026-10-03
+>
+> **Summary:** Encounter types, event choices and outcomes, drop-chance resolution, seeded pools, the encounter database and the Encounter Designer.
+>
+> **Source of truth:** [`Data/Campaign/`](../Assets/Scripts/Data/Campaign/), [`EncounterDesignerWindow.cs`](../Assets/Scripts/Editor/EncounterDesignerWindow.cs) · **Related:** [`metagame-campaign.md`](metagame-campaign.md) · [`encounter-authoring-reference.md`](encounter-authoring-reference.md) · [`campaign-ideation.xlsx`](campaign-ideation.xlsx)
+
 *How encounters are typed, authored, scheduled, and drawn. Written 2026-07-28.*
 
 Companion docs: [`metagame-campaign.md`](metagame-campaign.md) is the canonical design (the

@@ -1,5 +1,11 @@
 # Crookedile — Art Bible & Handoff Spec
 
+> **Kind:** Art · **Status:** Canonical · **Updated:** 2026-10-03
+>
+> **Summary:** Art direction and resolution spec for artists. The Content Hub tabs are the live blank-slot checker.
+>
+> **Source of truth:** this doc · **Related:** [`art-prompt-database.md`](art-prompt-database.md) · [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx) · [`style-mock-prompt.md`](reference/style-mock-prompt.md)
+
 *Canonical art-direction + resolution spec for artists. Supersedes the thin `art-needed.md` checklist. All sizes are measured from the real assets/prefabs or set as authoring targets; the Content Hub (Statuses / Intents / Enemies tabs) is the live blank-slot checker.*
 
 **Theme:** Filipino political roguelite satire — you "work a crowd," you don't fight. Tone: glossy campaign-poster sheen over something rotten. Religious-political iconography for Faith Leader, dynastic luxury for Nepo Baby, tabloid-celebrity gloss for Celebrity.

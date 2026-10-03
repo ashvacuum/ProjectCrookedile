@@ -1,8 +1,14 @@
 # Nepo Baby: Burn / Return / Calm class spec (v0.1)
 
-**Status: canonical design, not built. Numbers are placeholders.** This is the Nepo Baby class. It replaced the
-Patronage / summon design (2026-10-03); `core-design.md`, `crookedile-starter-decks.md` and `enemy-design-bible.md`
-now summarise this doc. Section 12 lists where the code still disagrees.
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-03
+>
+> **Summary:** The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders.
+>
+> **Source of truth:** this doc; built in [`Data/Cards/NepoBaby/`](../Assets/Data/Cards/NepoBaby/) and [`NepoBabyConfig`](../Assets/Resources/NepoBabyConfig.asset) · **Related:** [`core-design.md`](core-design.md) · [`crookedile-starter-decks.md`](crookedile-starter-decks.md) · [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx)
+
+This is the Nepo Baby class. It replaced the Patronage / summon design (2026-10-03); `core-design.md`,
+`crookedile-starter-decks.md` and `enemy-design-bible.md` now summarise this doc. Section 12 lists the conflicts with
+the old code and how each was resolved; section 13 records what was built.
 
 Vocabulary: **Composure** = Support (the shield). **Sway** = a push on the Opinion meter. Statuses, not keywords.
 

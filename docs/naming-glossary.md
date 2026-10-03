@@ -1,5 +1,11 @@
 # Crookedile — Naming Glossary (combat → "working a crowd")
 
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-03
+>
+> **Summary:** Combat vocabulary mapped to "working a crowd" vocabulary. Read before naming anything.
+>
+> **Source of truth:** this doc · **Related:** [`core-design.md`](core-design.md)
+
 *The codebase grew out of an HP/combat prototype, so it was full of fight vocabulary
 (`damage`, `Resolve`, `attacker`, `Shield`, `heal`). The game is **"work a crowd, not win a
 fight"** — managing the **opinion meter** with **pressure**, **Support/Denial**, and **Voice intents**.*
