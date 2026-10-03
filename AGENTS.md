@@ -28,6 +28,9 @@ docs win; say so rather than quietly following the code.
   Never mint `Guid.NewGuid()` for a new id field: duplicating an asset copies the value and two
   assets answer to one id.
 - **`EventBus`** for cross-system notifications; `Singleton<T>` for managers.
+- **Saves go through `SaveSystem`** (`Data/Save`): binary save classes with a schema version, content stored by
+  asset-GUID ID. A new `RunState` field that must survive a reload also goes in `RunSaveData` and
+  `RunState.Save.cs`. See `docs/meta-progression.md`.
 - Databases (`GameDatabase<T>`) self-refresh on asset import via `DatabaseAutoRefresh`.
 
 ## Conventions
@@ -47,12 +50,14 @@ docs win; say so rather than quietly following the code.
   and CSV import from `docs/campaign-ideation.xlsx`.
 - **Authoring Catalog** — every `[SerializeReference]` building block with its fields, from
   reflection.
+- **Save Debugger** — profiles, counters, unlocks (toggle grants), the run save as readable text,
+  named snapshots of the whole save folder, and corruption tests for the backup fallback. The dev
+  console has the same tools as `save*` commands (`saveinfo`, `savesnap`, `saveload`, `savewipe`, …).
 - Backquote (`` ` ``) opens the in-game dev console: `[CheatCommand]` methods plus log control
   (`logs`, `log <category> <level>`, `filter`). Cheats need the `CHEATS_ENABLED` define
   (Ctrl+Shift+C).
 
 ## Known soft spots
 
-- `OriginDatabase` has `StartingFunds`/`StartingCredibility`/`MaxHours` unset for all origins, so
-  Credibility gates can never pass and percentage-Credibility outcomes no-op.
-- No real test suite. `Tests/EffectResolverTest.cs` is a manual MonoBehaviour harness, not NUnit.
+- Tests are thin. `Tests/EditMode` (NUnit, Unity Test Runner > Edit Mode) covers the save system only;
+  `Tests/EffectResolverTest.cs` is a manual MonoBehaviour harness, not NUnit.

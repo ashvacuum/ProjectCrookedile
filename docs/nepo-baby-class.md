@@ -165,9 +165,9 @@ Spread valves across card types. Do not make them mostly Rhetoric (it would make
 
 ## 7. Rare gating and unlocks
 
-Rarity ladder stays Basic / Enhanced / Rare. **Trust Fund** is a plain Rare. A future unlock system will gate it. The
-card asset carries a locked-until-unlocked flag so the reward pool skips locked cards (see 12.B4: `CardData` already has
-`_isUnlockable`). No new rarity tier, no unique flag.
+Rarity ladder stays Basic / Enhanced / Rare. **Trust Fund** is a plain Rare, locked until the profile **wins a run as
+Nepo Baby** (`_isUnlockable` + a `WonRunAs` unlock condition; see `meta-progression.md`). Runs started before the
+unlock never offer it. No new rarity tier, no unique flag.
 
 ## 8. Open questions (implement default, flag in config)
 
@@ -227,7 +227,7 @@ the other classes (hardest class by design).
 - **Valves:** cap how many are offered per reward screen. With three or four valves in the deck he stops being a glass
   cannon.
 - **Trust Fund:** test in a separate run with it forced into the pool, so the combo is measured without distorting the
-  baseline win rate.
+  baseline win rate. Force it with `savegrant trustfund` (next run) or `addcard trustfund` (this battle).
 
 ## 11. Deliverables
 
@@ -281,9 +281,9 @@ Audited 2026-10-03. Items marked **Resolved** are settled; the rest are still op
 2. **Field naming.** **Resolved:** `NepoBabyConfig` follows project convention.
 3. **Patronage.** **Resolved:** removed (cost type, banked pool, event, `GeneratePatronageEffect`, UI readouts).
    Serialized enum ordinals were kept stable. `SummonBodyEffect` stays for future summon content.
-4. **Unlock flag.** **Resolved:** reuses `CardData._isUnlockable`; `CardDatabase.IsAcquirable` and
-   `GenerateRewardOffer` skip flagged cards. The Faith Leader's 28 flagged cards were unflagged so its pool is
-   unchanged. Only Trust Fund starts locked.
+4. **Unlock flag.** **Resolved:** reuses `CardData._isUnlockable`, now backed by the unlock system: reward pools skip
+   cards the run didn't start with unlocked. The Faith Leader's 28 flagged cards were unflagged so its pool is
+   unchanged. Only Trust Fund starts locked; it unlocks by winning a run as Nepo Baby.
 5. **Policies exhaust on play.** No change needed. "Persistent" Policies carry passives, "one-shot" ones only effects.
 6. **Burn.** **Resolved:** `BurnEffect` / `BurnAndPlayEffect`, with the Policy rule in `NepoBabyRules.CanBurn`.
 7. **Scandals are unplayable.** Blow the Allowance skips unplayable cards by default (8.1).
@@ -329,7 +329,7 @@ count as plays and add no single-target Hostility. Policies never replay. Nested
 - Upgrades are authored for the starter cards and the two Enhanced versions the spec names (Blow the Allowance,
   I Know a Guy). Pool cards have no upgrade yet.
 
-**Testing (section 10):** not run. This environment has no Unity editor. The runtime code type-checks against Unity
-reference assemblies; the small UI and editor edits were reviewed but not compiled. Every card asset was checked so
-each reference resolves and each field exists on its class. The
-section 10 checks still need a human playtest; nothing above replaces them.
+**Testing (section 10):** not run. The section 10 checks need a human playtest. The code type-checks against Unity
+reference assemblies, and every card asset was checked so each reference resolves and each field exists on its class.
+Tools for the playtest: `addcard <name>` puts any card in hand mid-battle (no Nepo card has art, so reward offers skip
+them), and `savesnap` / `saveload` keep a run at a chosen point so a combo can be retried.

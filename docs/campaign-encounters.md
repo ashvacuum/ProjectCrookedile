@@ -3,12 +3,13 @@
 *How encounters are typed, authored, scheduled, and drawn. Written 2026-07-28.*
 
 Companion docs: [`metagame-campaign.md`](metagame-campaign.md) is the canonical design (the
-"why"); [`campaign-build-checklist.md`](campaign-build-checklist.md) is the execution tracker
-(what's done, what's next). **This doc is the reference for the code that exists.**
+"why"); [`encounter-authoring-reference.md`](encounter-authoring-reference.md) lists every
+building block field by field. **This doc is the reference for the code that exists.**
 
 > **Status:** playable end to end. `CampaignFlow` drives `campaign.unity`, draws each day from
-> a pool, dispatches battles and events, and honours chaining. Its view is IMGUI on purpose —
-> see [`campaign-build-checklist.md`](campaign-build-checklist.md) M1.
+> a pool, dispatches battles and events, and honours chaining. The run is saved and continued
+> through `SaveSystem` ([`meta-progression.md`](meta-progression.md)). Its view is a temporary
+> playtest UI (UI Toolkit built at runtime, plus an IMGUI stat strip).
 
 ---
 
@@ -30,9 +31,9 @@ so renaming or moving an asset never resets its run state.
 The rule this codebase follows, consistently:
 
 - **ScriptableObject = the noun you reference, name, and count.** `CardData`, `EnemyData`,
-  `RelicData`, `EncounterData`.
+  `AllyData`, `EncounterData`.
 - **`[SerializeReference]` = the polymorphic verb living inside it.** `BattleEffect` in
-  `CardData`, `BattlePassive` in `RelicData`, `RunOutcome` in `EventOption`.
+  `CardData`, `BattlePassive` in `AllyData`, `RunOutcome` in `EventOption`.
 
 Encounters are nouns. They need stable identity across a scene load (`RunState.PendingBattle`),
 they need to be enumerable (`t:EncounterData` is an asset query with no inline equivalent), and
@@ -89,7 +90,7 @@ EventOption          Label (button text)
                      RunOutcome[]      [SerializeReference]   what it does
 ```
 
-**Option gating** is how "you need the Bishop's Ring for this" works: put a `HasRelic` (or
+**Option gating** is how "you need the Bishop's Ring for this" works: put a `HasAlly` (or
 `FundsAtLeast`, or anything else) in the option's `Requirements`. Unmet options render
 **disabled with the reason attached**, never hidden — seeing the door you can't open is most of
 what makes a gate interesting, and a hidden option just makes the event look shorter.
@@ -110,10 +111,17 @@ the two methods. No other file changes.
 |---|---|
 | `AdjustFundsOutcome` | Signed change to `RunState.Funds`, clamped at 0 |
 | `AdjustCredibilityOutcome` | Signed change to `RunState.Credibility`, clamped at 0 |
-| `GrantRelicOutcome` | `RunState.AddRelic` — duplicates ignored, StS-style |
+| `AdjustCredibilityPercentOutcome` | Credibility ± a percentage of the origin's starting Credibility |
+| `RecruitAllyOutcome` | `RunState.AddAlly` — duplicates ignored, StS-style |
 | `GainCardOutcome` | Adds N copies of a specific card. How an event hands you a curse |
 | `GainRandomCardOutcome` | Draws from `CardDatabase` — one rarity, or the standard reward weights |
+| `GainCardFromPoolOutcome` | Random card from a hand-picked shortlist |
 | `RemoveCardOutcome` | Removes one copy of a specific card. For cleansing events |
+| `RemoveRandomCardOutcome` / `RemoveChosenCardOutcome` | Removes random cards, or one the player picks |
+| `UpgradeRandomCardOutcome` / `UpgradeChosenCardOutcome` | Upgrades a random card, or one the player picks |
+| `SetFlagOutcome` | Records a narrative flag (see `encounter-authoring-reference.md` §3.4) |
+| `AdvanceDayOutcome` | Ends the day, as HQ does |
+| `UnlockContentOutcome` | Unlocks a card for the profile, from the next run on (`meta-progression.md`) |
 | `GoToEncounterOutcome` | Sets `RunState.NextEncounter` — this choice leads into another encounter |
 | `CoinFlipOutcome` | Rolls `RunState.Rng`; applies an on-success or on-failure outcome list. For choices whose risk *is* the point ("improvise", "deny it") |
 | `NextBattleHostilityOutcome` | Banks hostility on the run; the next battle adds it to every enemy's start, then clears it |
@@ -135,19 +143,12 @@ decision in it — a choice needs to be able to cost something.
 generalised into `GoToEncounterOutcome` — it points at any encounter, not just a battle, which
 is the whole point.
 
-### Two StS staples that are blocked, and why
+### Chosen-card upgrade and removal
 
-**Upgrade a card.** `CardData` carries its upgrade in-place — an `_isUpgraded` bool plus
-`_upgradedCosts`/`_upgradedEffects`/`_upgradedPassives` on the same asset. `RunState.Deck` holds
-shared SO references, so flipping that flag would upgrade the card for every run and every
-class at once, permanently, in the project asset. A deck-level upgrade needs per-run card
-*instances* first. That's a real architectural change, not an outcome class.
-
-**Remove a card of the player's choice.** Needs a deck-view picker outside battle. The battle
-system has `CardChoiceRequestedEvent` and a `CardChoicePanel`, but they're wired to battle
-context; reusing them on the map is unproven and the event panel itself doesn't exist yet.
-`RemoveCardOutcome` handles the specific-card case ("lose a Doubt"), which covers cleansing
-events without any UI.
+Both ship: `UpgradeChosenCardOutcome` and `RemoveChosenCardOutcome` open a picker through
+`RunState.RequestCardChoice`, which the campaign screen draws over the map. Upgrades swap the deck
+entry for a runtime `Instantiate` clone (`CardData.CreateUpgradedInstance`), so the shared asset is
+never mutated. A pending pick is runtime-only: quitting while one is open loses it on resume.
 
 ---
 
@@ -306,8 +307,8 @@ the run. Same authoring shape as `RunOutcome`: type-picker dropdown, live `[Info
 | `Requirements` | **Hard gate.** All must hold or the encounter can't appear at all |
 | `BoostIf` + `BoostMultiplier` | **Soft nudge.** When all hold, weight is multiplied. Stays available either way |
 
-Shipped conditions: `HasVisitedEncounter`, `FundsAtLeast`, `CredibilityAtLeast`, `HasRelic`,
-`DayAtLeast`. Every one has a `Negate` toggle on the base, so "hasn't visited X" — mutually
+Shipped conditions: `HasVisitedEncounter`, `HasFlag`, `FundsAtLeast`, `CredibilityAtLeast`,
+`HasAlly`, `OriginIs`, `DayAtLeast`, `HasUnlocked`. Every one has a `Negate` toggle on the base, so "hasn't visited X" — mutually
 exclusive branches — costs no extra type.
 
 `HasVisitedEncounter` keys off `RunState.VisitedLocationIds`, which is why encounters needed a
@@ -378,12 +379,12 @@ player at zero by forgetting to pass them along.
 
 | Origin | Funds | Credibility | Reads as |
 |---|---|---|---|
-| Faith Leader | 20 | 40 | Broke but trusted — has to earn its way through events |
-| Nepo Baby | 120 | 10 | Can buy any option on the board, nobody believes a word |
-| Celebrity | 60 | 30 | Comfortable and well-liked, until the first scandal |
+| Faith Leader | 150 | 90 | Least money, most trusted — has to earn its way through events |
+| Nepo Baby | 600 | 65 | Can buy any option on the board, trusted least |
+| Celebrity | 250 | 79 | Comfortable and well-liked, until the first scandal |
 
-Those are seeded defaults from the Origin Database generator, not balance — tune them in the
-inspector. `MaxHours` of `0` means "use the run's default" (3), so day length only differs per
+Current values in `OriginDatabase` (all three have Max hours 8). They are placeholders, not
+balance — tune them in the inspector. `MaxHours` of `0` means "use the run's default" (8), so day length only differs per
 origin if you deliberately set it.
 
 This is a real design lever rather than flavour: starting Funds decides which event options are
@@ -394,9 +395,9 @@ the campaign layer without any new systems.
 > that was cut as over-engineered (Overload / exposure cliff / fabricated tags). The campaign
 > meta stat here is unrelated — battle never reads it.
 
-## Content Audit coverage
+## Content Hub coverage
 
-**Crookedile → Content Audit** has two campaign categories:
+**Crookedile → Content Hub** has two campaign categories:
 
 - **Campaign encounters** — events with no options (unleavable), options with no label, options
   that do nothing *and* say nothing, `[SerializeReference]` rows where no type was picked,
@@ -418,7 +419,9 @@ actually audits — a session is a test-harness gauntlet, not campaign content.
 ## `EncounterDatabase`
 
 `GameDatabase<EncounterData>`, same as `CardDatabase` and `EnemyDatabase`. Auto-populates via
-**Refresh Database** in the inspector, keyed by `EncounterData.ID`.
+**Refresh Database** in the inspector, keyed by `EncounterData.ID`. **No asset exists yet**: the
+save system resolves encounter IDs through the Game Encounter Pool and the encounters its events
+chain to (`SaveContent`).
 
 One database across all subtypes — `t:EncounterData` matches derived assets, so battles and
 events land in one lookup rather than a database per type.

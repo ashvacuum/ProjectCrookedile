@@ -222,17 +222,22 @@ exactly this).
 
 Rules: no additive scene loading, no persistent cross-scene managers beyond the existing
 `SceneLoader`/`RunState` — battle already tears down and rebuilds cleanly per load, keep it.
-Both scenes must stay independently playable (campaign scene creates a debug `RunState` if
-none exists, same spirit as `BattleTestStarter`). Campaign panels follow the established
+Both scenes must stay independently playable: the campaign scene continues the active profile's
+saved run, or starts a new one with its inspector origin and seed, when no `RunState` exists
+(same spirit as `BattleTestStarter`). Campaign panels follow the established
 self-subscribing prefab-island pattern from the BattleUI decomposition (panel owns its
 pixels, `Bind(flow)` for wiring, bus events = notifications only).
 
-`RunState` grows: `Relics` (done), `HoursRemaining`, `Day`, `Funds` (⚑ name), per-location
-visited flags. It already survives scene reloads (static `Current`); no save system in v1.
+`RunState` grows: allies (done, as `Allies`), time, `Day`, `Funds` (⚑ name), per-location
+visited flags. It survives scene reloads (static `Current`) and quitting: `SaveSystem` writes it at
+campaign checkpoints (`meta-progression.md`).
 
 ## 4. Build phases
 
 ### Phase R — relic runtime (independent of map shape; do first)
+> **Built as allies.** The code name is Ally (`AllyData`, `AllyDatabase`, `RunState.Allies`,
+> `RecruitAllyOutcome`, `HasAlly`); see `naming-glossary.md`. The steps below keep the design term.
+
 1. `RunState.Relics` + `AddRelic()`.
 2. `PassiveResolver` takes optional run-level passives, folded into `_allPassives`;
    `BattleManager` passes `RunState.Current` relic passives at construction. Relics then

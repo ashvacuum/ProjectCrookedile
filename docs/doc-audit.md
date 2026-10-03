@@ -192,3 +192,23 @@ is current. `readme.md`'s documentation map was rebuilt around the survivors, an
    left with its deprecation; `metagame-campaign.md` (14 mentions) is now the top one.
 4. The 3-vs-24 Hours question, then both origin tables (finding 3). Still a design call.
 5. `naming-glossary.md`'s empty Decision column (finding 5).
+
+---
+
+## Acted on 2026-10-03
+
+All five "still open" items above are closed:
+
+| Item | Resolution |
+|---|---|
+| 1. Authoring-reference type names | §3.2/§3.3 rebuilt from the code: every `RunOutcome` and `RunRequirement` subclass listed with its fields, including `GainRandomCardOutcome`'s full field set and the new `UnlockContentOutcome` / `HasUnlocked`. |
+| 2. `art-bible.md` rendering line | Already fixed before this pass: the Rendering style line now matches §0.1 (flat). |
+| 3. Relic → Ally | Code-reference docs (`encounter-authoring-reference.md`, `campaign-encounters.md`) use the real names. `metagame-campaign.md` keeps "relic" as the design term with a note pointing at the Ally code names; `naming-glossary.md` records the decision. |
+| 4. Hours and origin tables | The asset now uses `MaxHours: 8` for all origins. Both origin tables print the current `OriginDatabase` values (150/90, 600/65, 250/79) and the run default of 8. |
+| 5. Glossary Decision column | Already filled before this pass (status line dated 2026-09-06). |
+
+Also brought up to date in this pass: `readme.md` (docs map, Resources list, editor tools, save
+system, status line), `AGENTS.md` (re-synced with `CLAUDE.md`), `campaign-encounters.md` (dead
+checklist links, "blocked staples" section, encounter database note), and the save system in
+`metagame-campaign.md` and `meta-progression.md`.
+

@@ -31,12 +31,15 @@
 ### Design — canonical
 - [`core-design.md`](docs/core-design.md) — the combat model and the three archetypes.
 - [`crookedile-starter-decks.md`](docs/crookedile-starter-decks.md) — per-class starter decks and the reward-pool "potential" layer.
+- [`nepo-baby-class.md`](docs/nepo-baby-class.md) — the Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes.
+- [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) — the Celebrity's Glamour / IOU build, played as a variant against the canonical design.
 - [`enemy-design-bible.md`](docs/enemy-design-bible.md) — v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete.
 - [`metagame-campaign.md`](docs/metagame-campaign.md) — the campaign map. Potionomics-style free roam drawn as a 2:1 isometric sprite city (§1.5–1.6), superseding the StS node-chain sketch in `core-design.md` §10.
 
 ### Systems — code reference
 - [`campaign-encounters.md`](docs/campaign-encounters.md) — encounter types, event choices and outcomes, drop-chance resolution, seeded pools, the encounter database, and the Gantt tool.
 - [`encounter-authoring-reference.md`](docs/encounter-authoring-reference.md) — every `[SerializeReference]` building block for encounters: outcomes, requirements, option wiring, flags.
+- [`meta-progression.md`](docs/meta-progression.md) — profiles, the binary save format, run save/continue, unlocks, and the save debugging tools; achievements and Steam are designed, not built.
 - [`ui-vfx.md`](docs/ui-vfx.md) — canvas-space VFX: flipbooks, card shine, fly trails, and when UIParticle is actually warranted.
 
 ### Planning & tracking
@@ -45,6 +48,7 @@
 
 ### Art & audio
 - [`art-bible.md`](docs/art-bible.md) — canonical art direction + resolution spec for artists. The Content Hub tabs are the live blank-slot checker.
+- [`art-prompt-database.md`](docs/art-prompt-database.md) — per-asset image prompts.
 - [`reference/style-mock-prompt.md`](docs/reference/style-mock-prompt.md) — style-mock generation prompt.
 - [`reference/iso-tile-prompt.md`](docs/reference/iso-tile-prompt.md) — campaign-map generation prompt: 2:1 dimetric tiles and buildings, plus the acceptance check every sprite has to pass.
 - [`reference/music-prompt.md`](docs/reference/music-prompt.md) — BGM prompts.
@@ -56,13 +60,15 @@
 
 ## Codebase orientation
 
-Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask, UIParticle.
+Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask, UIParticle, TMPEffects, Steamworks.NET, Input System.
 
 | Path | What lives there |
 |---|---|
 | `Assets/Scripts/Gameplay/Battle/` | `BattleManager` (FSM/flow), `OpinionLedger` (opinion + shields), `CrowdReactions` (hostility/echo/turncoat), `PassiveResolver`, polymorphic `BattleEffect`s under `Effects/` |
-| `Assets/Scripts/Data/` | ScriptableObject data + `GameDatabase<T>` databases (cards, enemies, relics, origins, encounters) |
+| `Assets/Scripts/Data/` | ScriptableObject data + `GameDatabase<T>` databases (cards, enemies, allies, origins, encounters), `RunState` |
 | `Assets/Scripts/Data/Campaign/` | Encounter types, event outcomes, encounter pools — see [`campaign-encounters.md`](docs/campaign-encounters.md) |
+| `Assets/Scripts/Data/Save/`, `Data/Unlocks/` | Profiles, run save/continue, unlock conditions, save debugging — see [`meta-progression.md`](docs/meta-progression.md) |
+| `Assets/Scripts/Tests/EditMode/` | NUnit tests (Unity Test Runner → Edit Mode) |
 | `Assets/Scripts/UI/Battle/` | Battle UI, decomposed into self-subscribing panel islands |
 | `Assets/Scripts/Editor/` | Authoring tools — see below |
 | `Assets/Data/` | Authored ScriptableObject assets — cards, enemies, passives, encounters, VFX events |
@@ -70,11 +76,14 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 | `Assets/Resources/` | **Only** what's loaded by runtime path — see below |
 
 > [!IMPORTANT]
-> **`Assets/Resources/` is deliberately near-empty (5 assets).** Everything in a Resources folder ships in every build, uncompressed and unstrippable, and is scanned at startup — so only assets genuinely loaded by *path string* belong there:
+> **`Assets/Resources/` is deliberately small.** Everything in a Resources folder ships in every build, uncompressed and unstrippable, and is scanned at startup — so only assets genuinely loaded by *path string* belong there:
 > - `DOTweenSettings.asset` — pinned by DOTween's own loader
-> - `StatusEffectIconMap.asset` — `Resources.Load` by name, [AuthoringCatalogWindow.cs:50](Assets/Scripts/Editor/AuthoringCatalogWindow.cs:50)
-> - `Databases/CardDatabase.asset` — [BattleTestStarter.cs:346](Assets/Scripts/UI/Battle/BattleTestStarter.cs:346)
-> - `Databases/{EnemyDatabase,OriginDatabase}.asset` — kept alongside for symmetry
+> - `DebugSettings.asset` — log levels, loaded by `GameLogger` before the first scene
+> - `StatusEffectIconMap.asset` — `Resources.Load` by name, [AuthoringCatalogWindow.cs:52](Assets/Scripts/Editor/AuthoringCatalogWindow.cs:52)
+> - `Databases/CardDatabase.asset` — [BattleTestStarter.cs:355](Assets/Scripts/UI/Battle/BattleTestStarter.cs:355), card outcomes, the save system
+> - `Databases/{EnemyDatabase,AllyDatabase,OriginDatabase}.asset` — the save system resolves saved IDs through them; `OriginDatabase.Shared` reads starting values
+> - `NepoBabyConfig.asset` — Nepo Baby's class rules (`NepoBabyConfig.Current`)
+> - `UI/CampaignMap.uss`, `UI/DefaultRuntimeTheme.tss` — the campaign screen's runtime-built UI
 >
 > Authored content is referenced by direct GUID reference and belongs in `Assets/Data/`. **Do not add assets to `Resources/` unless something loads them by string path.**
 
@@ -83,10 +92,15 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 **The data-shape rule:** ScriptableObject for the noun you reference, name, and count (`CardData`, `EnemyData`, `EncounterData`). `[SerializeReference]` for the polymorphic verb inside it (`BattleEffect`, `BattlePassive`, `RunOutcome`). Reasoning in [`campaign-encounters.md`](docs/campaign-encounters.md#why-scriptableobject-and-not-serializereference).
 
 ### Editor tools (`Crookedile` menu)
+- **Content Hub** — audits all content for completeness; check here before assuming data is fine.
 - **Card Database** / **Enemy Database** — dashboards with health views over authored content.
 - **Authoring Catalog** — reflection-built reference of every `[SerializeReference]` building block the inspector offers (effects, triggers, conditions, status behaviors).
-- **Encounter Designer** — two tabs over an encounter pool: a **Timeline** Gantt with coverage warnings and a seed roller that runs the real draw, and a **Dependencies** node graph showing which encounters unlock or favour which.
-- **Campaign** — `Create Campaign Scene` (builds `campaign.unity` and fixes Build Settings) and `Create Sample Content` (a playable 7-day pool).
+- **Encounter Designer** — Timeline, Table, Dependencies, Flags, Simulate, Travel and Authoring views over an encounter pool.
+- **Save Debugger** — profiles, counters, unlocks, readable run saves, snapshots and corruption tests.
+- **Battle Inspector**, **Battle Session Builder**, **Playtest Bot** — battle debugging and automated playtests.
+- **Campaign** — `Create Campaign Scene`, `Fix Build Settings Scenes`, `Run Travel Checks`.
+
+The in-game dev console (backquote) runs `[CheatCommand]` methods, including `addcard` and the `save*` commands; cheats need the `CHEATS_ENABLED` define.
 
 ---
 
@@ -96,4 +110,4 @@ Satire of political violence, corruption, religious manipulation, class inequali
 
 ---
 
-*Status: active development. The single-encounter battle loop is the current focus; the campaign layer's data and tooling are built but not yet wired to a scene.*
+*Status: active development. Battles and the seven-day campaign are playable end to end in `main.unity` and `campaign.unity`, with runs saved and continued per profile. The campaign and save screens are playtest UI; production UI, achievements and Steam integration are still to come.*

@@ -18,7 +18,7 @@ He does not convert enemies. He wins by spectacle and borrowed momentum.
 
 Guardrails: nothing stacks on enemies and nothing moves Hostility toward Receptive (Faith Leader's lane); no fetch,
 tutor, search or choose-from-pile effects and no redirect or reflect (Nepo Baby's lane); no new keywords; no class
-passive designed yet. Persistent Policies declare the build, one-shot Policies are tactical.
+passive designed for this build. Persistent Policies declare the build, one-shot Policies are tactical.
 
 ## Rules
 **Glamour** (player status, stacking, never decays on its own)
@@ -73,7 +73,8 @@ Fine Print, Calling It In, Settle Up, Cash Advance) are my placeholders.
 2. Unpaid-Debt damage: unblockable (flip `UnpaidDebtBlockable`).
 3. Soundbite card type: Rhetoric.
 4. Photo Op: enhanced, cost 1.
-5. Class passive: none designed (the locked "first card upgraded" passive in `core-design.md` is untouched).
+5. Class passive: none designed for this build. The `Actor` origin currently points at `Daddy's Gifts.asset`, a
+   once-per-battle mulligan that duplicates Nepo Baby's — a placeholder to replace, not a design.
 
 ## Authoring and testing
 - `Crookedile > Celebrity > Build Glamour-IOU Cards` writes the assets to `Assets/Data/Cards/Celebrity/GlamourIou/`
