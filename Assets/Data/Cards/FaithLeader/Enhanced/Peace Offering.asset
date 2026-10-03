@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Peace Offering
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: ea5416568520278479318446053627c3, type: 3}
   _description: 
   _flavorText: 
   _costs:
