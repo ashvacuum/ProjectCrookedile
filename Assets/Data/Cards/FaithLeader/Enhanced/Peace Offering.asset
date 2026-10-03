@@ -42,7 +42,7 @@ MonoBehaviour:
   - faithleader
   _fantasies: 3
   _isStarterCard: 0
-  _isUnlockable: 1
+  _isUnlockable: 0
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0

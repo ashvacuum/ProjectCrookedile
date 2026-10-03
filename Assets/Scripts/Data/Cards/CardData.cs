@@ -217,7 +217,10 @@ namespace Crookedile.Data.Cards
         [SerializeField]
         private bool _isStarterCard = false;
 
-        [Tooltip("Must this card be unlocked through progression?")]
+        [Tooltip(
+            "Locked behind a progression unlock. Reward offers and random card gains skip locked "
+                + "cards; until an unlock system exists, a locked card is never acquired."
+        )]
         [SerializeField]
         private bool _isUnlockable = false;
 
