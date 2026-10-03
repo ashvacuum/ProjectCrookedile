@@ -1,5 +1,11 @@
 # Docs Audit — what's still true
 
+> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-10-03
+>
+> **Summary:** Standing audit of the docs against the code: what was stale and what was done about it.
+>
+> **Source of truth:** this doc · **Related:** [`needs-detailing.md`](needs-detailing.md)
+
 *Run 2026-09-06 against the code as it stands. Every claim below was checked against an asset or
 a source file, not against another doc. This file records **findings**, not decisions: where a
 doc and the code disagree about **intent**, the doc still wins (per `CLAUDE.md`) and the row says

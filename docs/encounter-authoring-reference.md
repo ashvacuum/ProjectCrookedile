@@ -1,5 +1,11 @@
 # Encounter Authoring Reference — every knob, every value
 
+> **Kind:** Systems · **Status:** Built · **Updated:** 2026-10-03
+>
+> **Summary:** Every building block for encounters: outcomes, requirements, option wiring, flags and origin starting values.
+>
+> **Source of truth:** [`Data/Campaign/`](../Assets/Scripts/Data/Campaign/) · **Related:** [`campaign-encounters.md`](campaign-encounters.md) · [`metagame-campaign.md`](metagame-campaign.md)
+
 *A designer/dev sheet: what an encounter is made of, every field you can set, its default,
 and what it does. Written 2026-08-23 against the code as it stands.*
 

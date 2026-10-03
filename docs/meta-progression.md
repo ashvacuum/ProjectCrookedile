@@ -1,6 +1,12 @@
 # Meta-progression: profiles, saves, unlocks, achievements (v0.2)
 
-**Status: save system and unlocks built (2026-10-03); achievements, Steam and UI not built.** Replaces the
+> **Kind:** Systems · **Status:** Partly built · **Updated:** 2026-10-03
+>
+> **Summary:** Profiles, the binary save format, run save/continue, unlocks and the save debugging tools. Achievements and Steam are designed, not built.
+>
+> **Source of truth:** [`Data/Save/`](../Assets/Scripts/Data/Save/), [`Data/Unlocks/`](../Assets/Scripts/Data/Unlocks/) · **Related:** [`metagame-campaign.md`](metagame-campaign.md) · [`nepo-baby-class.md`](nepo-baby-class.md)
+
+Save system and unlocks are built (2026-10-03); achievements, Steam and UI are not. Replaces the
 "Meta-progression" stub in `needs-detailing.md` section 9. Open decisions are in section 9 with a recommended default.
 
 ## 0. Built so far

@@ -1,5 +1,11 @@
 # Crookedile — Starter Decks (working draft)
 
+> **Kind:** Design · **Status:** Draft · **Updated:** 2026-10-03
+>
+> **Summary:** Per-class starter decks and the reward-pool "potential" layer.
+>
+> **Source of truth:** this doc; built decks in [`OriginDatabase`](../Assets/Resources/Databases/OriginDatabase.asset) · **Related:** [`core-design.md`](core-design.md) · [`nepo-baby-class.md`](nepo-baby-class.md) · [`celebrity-glamour-iou.md`](celebrity-glamour-iou.md)
+
 *Built on the StS model: each deck is mostly basic offense + basic defense (heavy repeats), one shared-role hostility card, and as many identity cards as the verb needs — in moderation, legibility over count. All numbers are placeholder; design the **relationships**, tune the magnitudes in play.*
 
 ## Shared basics (the "Strike / Defend" layer)
