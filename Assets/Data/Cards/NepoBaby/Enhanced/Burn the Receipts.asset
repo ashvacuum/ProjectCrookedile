@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Burn the Receipts
+  m_Name: Hush Fund
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: 4f98b7287016442985ff35a569726bd0
   _cardName: Burn the Receipts
   _cardType: 0
   _rarity: 1
   _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'Every secret has a line item.'
+  _description: 
+  _flavorText: Every secret has a line item.
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -41,14 +41,18 @@ MonoBehaviour:
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 7000000000000000000
       type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
