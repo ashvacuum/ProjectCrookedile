@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Crookedile.Data.Campaign;
 using Crookedile.Data.Cards;
@@ -50,6 +50,12 @@ namespace Crookedile.Data.Save
 
         /// <summary>The folder saves are written to.</summary>
         public static string Root => Store.Root;
+
+        /// <summary>
+        /// Forgets every cached profile and index so the next access re-reads the disk (after a
+        /// debug tool rewrote the files). Keeps the current folder.
+        /// </summary>
+        public static void Reload() => UseRoot(Store.Root);
 
         #endregion
 
@@ -161,13 +167,27 @@ namespace Crookedile.Data.Save
 
         private static void WriteIndex() => Store.Write(IndexFile, Index.ToBytes());
 
-        private static string ProfileFolder(string profileId) => System.IO.Path.Combine("profiles", profileId);
+        internal static string ProfileFolder(string profileId) => System.IO.Path.Combine("profiles", profileId);
 
-        private static string ProfilePath(string profileId) =>
+        internal static string ProfilePath(string profileId) =>
             System.IO.Path.Combine(ProfileFolder(profileId), ProfileFile);
 
-        private static string RunPath(string profileId) =>
+        internal static string RunPath(string profileId) =>
             System.IO.Path.Combine(ProfileFolder(profileId), RunFile);
+
+        internal static string IndexPath => IndexFile;
+
+        internal static SaveFileStore FileStore => Store;
+
+        /// <summary>
+        /// Reads a profile's run save without starting it. False when there is none or it is
+        /// unreadable (file and backup).
+        /// </summary>
+        public static bool TryReadRunSave(string profileId, out RunSaveData run, out bool usedBackup) =>
+            Store.TryRead(RunPath(profileId), RunSaveData.FromBytes, out run, out usedBackup);
+
+        /// <summary>Reads any profile on this machine without making it active. Null if unreadable.</summary>
+        public static ProfileData PeekProfile(string profileId) => LoadProfile(profileId);
 
         #endregion
 

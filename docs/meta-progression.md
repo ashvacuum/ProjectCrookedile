@@ -21,6 +21,11 @@ scene continues a saved run or starts a new one on entry, and the dev console li
   Trust Fund unlocks by winning a run as Nepo Baby.
 - **Lifecycle:** the campaign map checkpoints on every redraw and before battles. Quitting mid-battle restarts
   that battle. Winning the last day or losing a battle calls `EndRun`, which updates counters and reports unlocks.
+- **Debugging:** `SaveDebug` + the **Crookedile > Save Debugger** window + dev-console commands. Readable dumps
+  (IDs resolved to names, `savedump` writes `save-dump.txt`), named snapshots of every save file (`savesnap`,
+  `saveload`, `savesnaps`), counter and grant edits (`savecounter`, `savegrant`, `saverevoke`), wipe, abandon,
+  checkpoint now, and deliberate corruption (`savecorrupt run true`) to exercise the backup fallback. Snapshots
+  live in `debug-snapshots/` under the save folder; wipe and restore only touch the save system's own files.
 - **Tests:** `Tests/EditMode` (Unity Test Runner, Edit Mode). `SaveCoreTests` covers the Unity-free core;
   `SaveSystemTests` covers profiles, save/continue/end and unlocks against the real databases.
 

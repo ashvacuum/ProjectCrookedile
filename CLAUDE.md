@@ -50,6 +50,9 @@ docs win; say so rather than quietly following the code.
   and CSV import from `docs/campaign-ideation.xlsx`.
 - **Authoring Catalog** — every `[SerializeReference]` building block with its fields, from
   reflection.
+- **Save Debugger** — profiles, counters, unlocks (toggle grants), the run save as readable text,
+  named snapshots of the whole save folder, and corruption tests for the backup fallback. The dev
+  console has the same tools as `save*` commands (`saveinfo`, `savesnap`, `saveload`, `savewipe`, …).
 - Backquote (`` ` ``) opens the in-game dev console: `[CheatCommand]` methods plus log control
   (`logs`, `log <category> <level>`, `filter`). Cheats need the `CHEATS_ENABLED` define
   (Ctrl+Shift+C).

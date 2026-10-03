@@ -242,6 +242,102 @@ namespace Crookedile.Managers
 
         #endregion
 
+        #region Save Debug
+
+        [FoldoutGroup("Save Debug")]
+        [Button("Describe Saves", ButtonSizes.Medium)]
+        [CheatCommand("saveinfo", "Print every profile and run save, readable", Category = "Save")]
+        public void SaveInfo() => GameLogger.LogInfo("Cheats", Data.Save.SaveDebug.Describe());
+
+        [FoldoutGroup("Save Debug")]
+        [Button("Export Dump", ButtonSizes.Medium)]
+        [CheatCommand("savedump", "Write the readable save dump to save-dump.txt in the save folder", Category = "Save")]
+        public void SaveDump() => Data.Save.SaveDebug.ExportDump();
+
+        [FoldoutGroup("Save Debug")]
+        [CheatCommand("savepath", "Print the save folder", Category = "Save")]
+        public void SavePath() => GameLogger.LogInfo("Cheats", Data.Save.SaveSystem.Root);
+
+        [FoldoutGroup("Save Debug")]
+        [Button("Checkpoint Now", ButtonSizes.Medium)]
+        [CheatCommand("savenow", "Save the current run immediately", Category = "Save")]
+        public void SaveNow()
+        {
+            Data.Save.SaveSystem.Checkpoint();
+            GameLogger.LogInfo("Cheats", "Run checkpoint written");
+        }
+
+        [FoldoutGroup("Save Debug")]
+        [CheatCommand("savesnap", "Snapshot every save file under a name (savesnap beforeboss)", Category = "Save")]
+        public void SaveSnapshot(string name) => Data.Save.SaveDebug.SaveSnapshot(name);
+
+        [FoldoutGroup("Save Debug")]
+        [CheatCommand("saveload", "Restore a snapshot, then re-enter the campaign to continue it", Category = "Save")]
+        public void LoadSnapshot(string name) => Data.Save.SaveDebug.RestoreSnapshot(name);
+
+        [FoldoutGroup("Save Debug")]
+        [CheatCommand("savesnaps", "List save snapshots", Category = "Save")]
+        public void ListSnapshots()
+        {
+            var names = Data.Save.SaveDebug.ListSnapshots();
+            GameLogger.LogInfo("Cheats", names.Count == 0 ? "No snapshots" : string.Join(", ", names));
+        }
+
+        [FoldoutGroup("Save Debug")]
+        [CheatCommand("saveabandon", "Throw away the run in progress without counting it", Category = "Save")]
+        public void AbandonRun()
+        {
+            Data.Save.SaveSystem.AbandonRun();
+            GameLogger.LogInfo("Cheats", "Run abandoned");
+        }
+
+        [FoldoutGroup("Save Debug")]
+        [CheatCommand("savewipe", "Delete every profile and run (snapshots stay)", Category = "Save")]
+        public void WipeSaves() => Data.Save.SaveDebug.WipeAll();
+
+        [FoldoutGroup("Save Debug")]
+        [CheatCommand("savegrant", "Grant a card unlock to this profile by name (savegrant trustfund)", Category = "Save")]
+        public void GrantUnlock(string cardName)
+        {
+            var card = Data.Save.SaveDebug.FindCard(cardName, out string error);
+            if (card == null)
+            {
+                GameLogger.LogWarning("Cheats", error);
+                return;
+            }
+            Data.Save.SaveSystem.GrantUnlock(card.ID);
+            GameLogger.LogInfo("Cheats", $"Granted {card.CardName}, from the next run");
+        }
+
+        [FoldoutGroup("Save Debug")]
+        [CheatCommand("saverevoke", "Take back a granted card unlock by name", Category = "Save")]
+        public void RevokeUnlock(string cardName)
+        {
+            var card = Data.Save.SaveDebug.FindCard(cardName, out string error);
+            if (card == null)
+            {
+                GameLogger.LogWarning("Cheats", error);
+                return;
+            }
+            Data.Save.SaveDebug.RevokeUnlock(card.ID);
+            GameLogger.LogInfo("Cheats", $"Revoked the grant on {card.CardName}");
+        }
+
+        [FoldoutGroup("Save Debug")]
+        [CheatCommand("savecounter", "Set a profile counter (savecounter runs_won_nepobaby 1); 0 clears it", Category = "Save")]
+        public void SetCounter(string key, int value)
+        {
+            Data.Save.SaveDebug.SetCounter(key, value);
+            GameLogger.LogInfo("Cheats", $"{key} = {value}");
+        }
+
+        [FoldoutGroup("Save Debug")]
+        [CheatCommand("savecorrupt", "Corrupt a save file to test recovery: run, profile or profileindex; add true to kill its backup too", Category = "Save")]
+        public void CorruptSave(Data.Save.SaveDebug.SaveFile file, bool backupToo = false) =>
+            Data.Save.SaveDebug.Corrupt(file, backupToo);
+
+        #endregion
+
         #region Time Cheats
 
         [FoldoutGroup("Time Cheats")]
