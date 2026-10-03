@@ -62,7 +62,7 @@ stop pretending to be one.
 - **Starter deck quantities:** `OriginDatabase` holds an authored deck per origin (card + count). All three classes have
   one.
 - **Status database scope** (2026-10-03): `StatusEffectIconMapSO` stays icon / colour / text; sound and VFX map
-  elsewhere. The concern is the statuses cards apply, which need an audit (a Content Hub build task, not a design call).
+  elsewhere. The concern is the statuses cards apply, which need an audit (the Database window's Statuses tab shows which used statuses lack an icon).
 - **Celebrity** (2026-10-03): the Glamour / IOU build is the Celebrity (`celebrity-glamour-iou.md`); the Attention /
   Scandal / Drama King pools are dropped. Scandal cards stay as enemy-inflicted junk.
 - **EncourageSides** (2026-10-03): an enemy move that angers the other enemies (raises their Hostility). That is the

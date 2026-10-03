@@ -64,13 +64,15 @@ namespace Crookedile.Editor.Database
     }
 
     /// <summary>
-    /// The shared browser for one asset type: finding every asset, search, type-specific
-    /// filters, sortable columns, a per-asset audit, and a detail pane with the asset's own
-    /// inspector (Odin draws it when installed). A tab subclass only describes the type: its
+    /// The shared browser for one kind of content: finding every item, search, type-specific
+    /// filters, sortable columns, a per-item audit, and a detail pane with a preview plus the
+    /// backing asset's own inspector (Odin draws it when installed). Items are usually assets;
+    /// a tab over something else (a code type, a registry entry, an audit finding) overrides
+    /// <see cref="Find"/> and <see cref="AssetOf"/>. A tab subclass only describes its content:
     /// columns, filters, audit rules, preview and actions.
     /// </summary>
     public abstract class ContentTab<T> : ContentTab
-        where T : Object
+        where T : class
     {
         /// <summary>One column of the list. A null <see cref="SortKey"/> makes it unsortable.</summary>
         protected sealed class Column
@@ -133,7 +135,10 @@ namespace Crookedile.Editor.Database
         // ---- What a tab describes -------------------------------------------------------
 
         /// <summary>Name shown in the list and searched first.</summary>
-        protected virtual string DisplayName(T item) => item.name;
+        protected virtual string DisplayName(T item) => item is Object asset ? asset.name : item.ToString();
+
+        /// <summary>The asset behind an item, for the inspector and Ping / Duplicate / Delete. Null for none.</summary>
+        protected virtual Object AssetOf(T item) => item as Object;
 
         /// <summary>Extra text the search box matches (tags, descriptions).</summary>
         protected virtual string SearchText(T item) => "";
@@ -159,11 +164,18 @@ namespace Crookedile.Editor.Database
         /// <summary>Called after the assets are found and before they are audited.</summary>
         protected virtual void OnReloaded(IReadOnlyList<T> all) { }
 
-        /// <summary>Finds the assets. Default: every asset of type <typeparamref name="T"/>.</summary>
+        /// <summary>Finds the items. Default: every asset of type <typeparamref name="T"/>.</summary>
         protected virtual IEnumerable<T> Find() =>
+            typeof(Object).IsAssignableFrom(typeof(T))
+                ? FindAssets<T>()
+                : Enumerable.Empty<T>();
+
+        /// <summary>Every asset of type <typeparamref name="TAsset"/> in the project.</summary>
+        protected static IEnumerable<TAsset> FindAssets<TAsset>()
+            where TAsset : class =>
             AssetDatabase
-                .FindAssets("t:" + typeof(T).Name)
-                .Select(g => AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(g)))
+                .FindAssets("t:" + typeof(TAsset).Name)
+                .Select(g => AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(g), typeof(TAsset)) as TAsset)
                 .Where(a => a != null)
                 .Distinct();
 
@@ -213,6 +225,8 @@ namespace Crookedile.Editor.Database
 
         public override void OnGUI(Rect area)
         {
+            if (_columns == null)
+                return; // not loaded yet; the window reloads it on the next layout pass
             if (_hasPending && Event.current.type == EventType.Layout)
             {
                 _hasPending = false;
@@ -339,8 +353,8 @@ namespace Crookedile.Editor.Database
             if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
             {
                 SelectLater(item);
-                if (Event.current.clickCount == 2)
-                    EditorGUIUtility.PingObject(item);
+                if (Event.current.clickCount == 2 && AssetOf(item) != null)
+                    EditorGUIUtility.PingObject(AssetOf(item));
                 Event.current.Use();
             }
         }
@@ -356,16 +370,20 @@ namespace Crookedile.Editor.Database
             }
             else
             {
+                var asset = AssetOf(_selected);
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     EditorGUILayout.LabelField(DisplayName(_selected), EditorStyles.boldLabel);
-                    if (GUILayout.Button("Ping", EditorStyles.miniButtonLeft, GUILayout.Width(44)))
-                        EditorGUIUtility.PingObject(_selected);
-                    var current = _selected;
-                    if (GUILayout.Button("Duplicate", EditorStyles.miniButtonMid, GUILayout.Width(66)))
-                        Later(() => Duplicate(current));
-                    if (GUILayout.Button("Delete", EditorStyles.miniButtonRight, GUILayout.Width(50)))
-                        Later(() => Delete(current));
+                    if (asset != null && GUILayout.Button("Ping", EditorStyles.miniButtonLeft, GUILayout.Width(44)))
+                        EditorGUIUtility.PingObject(asset);
+                    // Duplicate and delete only make sense when the item IS the asset.
+                    if (_selected is Object own && AssetDatabase.Contains(own))
+                    {
+                        if (GUILayout.Button("Duplicate", EditorStyles.miniButtonMid, GUILayout.Width(66)))
+                            Later(() => Duplicate(own));
+                        if (GUILayout.Button("Delete", EditorStyles.miniButtonRight, GUILayout.Width(50)))
+                            Later(() => Delete(own));
+                    }
                     if (GUILayout.Button("×", EditorStyles.miniButton, GUILayout.Width(20)))
                         SelectLater(null);
                 }
@@ -380,11 +398,14 @@ namespace Crookedile.Editor.Database
                         });
                     DrawPreview(_selected);
                     EditorGUILayout.Space();
-                    UnityEditor.Editor.CreateCachedEditor(_selected, null, ref _inspector);
-                    EditorGUI.BeginChangeCheck();
-                    _inspector.OnInspectorGUI();
-                    if (EditorGUI.EndChangeCheck())
-                        _issues[_selected] = RunAudit(_selected);
+                    if (asset != null)
+                    {
+                        UnityEditor.Editor.CreateCachedEditor(asset, null, ref _inspector);
+                        EditorGUI.BeginChangeCheck();
+                        _inspector.OnInspectorGUI();
+                        if (EditorGUI.EndChangeCheck())
+                            _issues[_selected] = RunAudit(_selected);
+                    }
                 }
             }
             EditorGUILayout.EndScrollView();
@@ -412,18 +433,18 @@ namespace Crookedile.Editor.Database
             GUI.FocusControl(null);
         }
 
-        private void Duplicate(T item)
+        private void Duplicate(Object item)
         {
             string path = AssetDatabase.GetAssetPath(item);
             string copy = AssetDatabase.GenerateUniqueAssetPath(path);
             if (AssetDatabase.CopyAsset(path, copy))
             {
                 Reload();
-                Select(AssetDatabase.LoadAssetAtPath<T>(copy));
+                Select(AssetDatabase.LoadAssetAtPath(copy, item.GetType()) as T);
             }
         }
 
-        private void Delete(T item)
+        private void Delete(Object item)
         {
             string path = AssetDatabase.GetAssetPath(item);
             if (!EditorUtility.DisplayDialog("Delete asset", $"Move '{Path.GetFileName(path)}' to the trash?", "Delete", "Cancel"))
