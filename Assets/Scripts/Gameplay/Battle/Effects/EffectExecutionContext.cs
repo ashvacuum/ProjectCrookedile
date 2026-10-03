@@ -104,6 +104,24 @@ namespace Crookedile.Gameplay.Battle
         public int LastHostilityLost { get; set; }
 
         /// <summary>
+        /// For passive dispatches on an enemy push: the Opinion it took off the meter after
+        /// Support absorbed what it could. Set by PassiveResolver.
+        /// </summary>
+        public int LastDamageTaken { get; set; }
+
+        /// <summary>Cards this card's Burn effects exhausted from hand.</summary>
+        public int CardsBurned { get; set; }
+
+        /// <summary>Enemies this card's effects pushed from non-Receptive into Receptive.</summary>
+        public int TurnedReceptive { get; set; }
+
+        /// <summary>
+        /// For passive dispatches: the card the triggering event names (played, resolved or
+        /// replayed), or null when the event names no card. Set by PassiveResolver.
+        /// </summary>
+        public CardData TriggeringCard { get; set; }
+
+        /// <summary>
         /// Set by <see cref="ExhaustThisCardEffect"/> so <c>BattleManager</c>
         /// can move the card from the discard pile to the exhaust pile after all effects resolve.
         /// </summary>
@@ -430,6 +448,12 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.CurrentDebt => BattleManager?.Celebrity.Debt ?? 0,
                 EffectContextValue.DebtGainedThisTurn => BattleManager?.Celebrity.DebtGainedThisTurn
                     ?? 0,
+                EffectContextValue.CardsExhaustedThisBattle => Deck?.ExhaustCount ?? 0,
+                EffectContextValue.CardsPulledThisTurn => Deck?.CardsPulledThisTurn ?? 0,
+                EffectContextValue.CardsDiscardedThisTurn => Deck?.CardsDiscardedThisTurn ?? 0,
+                EffectContextValue.CardsBurnedByThisCard => CardsBurned,
+                EffectContextValue.TurnedReceptiveByThisCard => TurnedReceptive,
+                EffectContextValue.LastDamageTaken => LastDamageTaken,
                 _ => 0, // FixedAmount / None — use authored value
             };
 

@@ -30,6 +30,15 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private CardType _filterType = CardType.Pressure;
 
+        [MinValue(0)]
+        [Tooltip(
+            "The reduction never takes a card's printed cost below this (after earlier "
+                + "reductions this battle). 0 = no floor. With a floor, only cards that can still "
+                + "get cheaper are picked."
+        )]
+        [SerializeField]
+        private int _minimumCost = 0;
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             if (ctx.Deck == null)
@@ -40,19 +49,38 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
             int reduction = amountOverride ?? _costReduction;
+            var pool = new List<CardData>();
+            foreach (var card in ctx.Deck.Hand)
+                if (_minimumCost <= 0 || RoomAboveFloor(ctx.Deck, card) > 0)
+                    pool.Add(card);
             ResolveCardSelection(
-                ctx.Deck.Hand,
+                pool,
                 _selectionMode,
                 _filterType,
                 $"Choose a card — Reduce cost by {reduction}",
                 1,
                 chosen =>
                 {
-                    if (chosen.Count > 0)
-                        ctx.Deck.ApplyCostReduction(chosen[0], reduction);
+                    if (chosen.Count == 0)
+                        return;
+                    int applied =
+                        _minimumCost > 0
+                            ? Mathf.Min(reduction, RoomAboveFloor(ctx.Deck, chosen[0]))
+                            : reduction;
+                    if (applied > 0)
+                        ctx.Deck.ApplyCostReduction(chosen[0], applied);
                 },
                 thisCard: ctx.OwnerCard
             );
+        }
+
+        /// <summary>How far the card's printed cost, net of this battle's reductions, sits above the floor.</summary>
+        private int RoomAboveFloor(DeckManager deck, CardData card)
+        {
+            int reduced = deck.GetCardCostReduction(card);
+            if (reduced == int.MaxValue)
+                return 0; // already free
+            return card.PrintedCost - reduced - _minimumCost;
         }
 
         public override string GetDescription()
@@ -64,7 +92,8 @@ namespace Crookedile.Gameplay.Battle
                 CardSelectionMode.ThisCard => "this card",
                 _ => "a card",
             };
-            return $"Reduce {suffix}'s cost by {_costReduction} this battle";
+            string floor = _minimumCost > 0 ? $" (not below {_minimumCost})" : "";
+            return $"Reduce {suffix}'s cost by {_costReduction}{floor} this battle";
         }
     }
 }

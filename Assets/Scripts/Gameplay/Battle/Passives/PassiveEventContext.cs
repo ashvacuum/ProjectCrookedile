@@ -38,5 +38,34 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public T As<T>()
             where T : struct, IGameEvent => Is<T>() ? (T)_rawEvent : default;
+
+        /// <summary>
+        /// The card a card event names (played, resolved, replayed, drawn, discarded, exhausted,
+        /// retained, recovered), or null for any other event.
+        /// </summary>
+        public Crookedile.Data.Cards.CardData GetCard()
+        {
+            switch (_rawEvent)
+            {
+                case CardPlayedEvent e:
+                    return e.Card;
+                case CardPlayResolvedEvent e:
+                    return e.Card;
+                case CardReplayedEvent e:
+                    return e.Card;
+                case CardDrawnEvent e:
+                    return e.Card;
+                case CardDiscardedEvent e:
+                    return e.Card;
+                case CardExhaustedEvent e:
+                    return e.Card;
+                case CardRetainedEvent e:
+                    return e.Card;
+                case CardRecoveredEvent e:
+                    return e.Card;
+                default:
+                    return null;
+            }
+        }
     }
 }

@@ -143,6 +143,11 @@ namespace Crookedile.UI.Battle
         private BattleResult _lastBattleResult;
         private bool _cardChoiceActive;
         private CardChoiceRequestedEvent _pendingCardChoice;
+
+        // Choices requested while another is open (several start-of-turn prompts at once) wait
+        // here and open in request order.
+        private readonly Queue<CardChoiceRequestedEvent> _queuedCardChoices =
+            new Queue<CardChoiceRequestedEvent>();
         private Sequence _battleInfoFadeSeq;
 
         /// <summary>One-frame coalescing flag — see <see cref="RequestStatsRefresh"/>.</summary>
@@ -307,9 +312,20 @@ namespace Crookedile.UI.Battle
             // Kept only for resultPanel.Show on BattleState.BattleEnd; run progression
             // (RunState victory record, rewards, reload) lives in PostBattleFlow.
             _lastBattleResult = evt.Result;
+            _queuedCardChoices.Clear(); // a choice still waiting belongs to the finished battle
         }
 
         private void OnCardChoiceRequested(CardChoiceRequestedEvent evt)
+        {
+            if (_cardChoiceActive)
+            {
+                _queuedCardChoices.Enqueue(evt);
+                return;
+            }
+            OpenCardChoice(evt);
+        }
+
+        private void OpenCardChoice(CardChoiceRequestedEvent evt)
         {
             _pendingCardChoice = evt;
             _cardChoiceActive = true;
@@ -327,12 +343,16 @@ namespace Crookedile.UI.Battle
 
         private void OnCardChoiceConfirmed(List<CardData> selected)
         {
-            _pendingCardChoice?.OnConfirmed?.Invoke(selected);
+            var confirmed = _pendingCardChoice;
             _pendingCardChoice = null;
             _cardChoiceActive = false;
             cardChoicePanel?.Close();
             if (endTurnButton != null)
                 endTurnButton.interactable = true;
+            // Resolve after closing: the callback may itself request another choice.
+            confirmed?.OnConfirmed?.Invoke(selected);
+            if (!_cardChoiceActive && _queuedCardChoices.Count > 0)
+                OpenCardChoice(_queuedCardChoices.Dequeue());
         }
 
         private void OnSupportChanged(SupportChangedEvent evt) => RequestStatsRefresh();

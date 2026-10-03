@@ -196,6 +196,10 @@
             StatusEffectManager attackerMgr = ctx.GetStatusEffectManager(attacker);
             StatusEffectManager targetMgr = ctx.GetStatusEffectManager(target);
 
+            // The player's class modifier scales the Sway its cards push, before statuses.
+            if (ctx.IsPlayerCard && target != ctx.PlayerStats && ctx.BattleManager != null)
+                baseAmount = ctx.BattleManager.PlayerClassModifiers.ModifySway(baseAmount);
+
             int mod = attackerMgr?.ModifyDamageDealt(baseAmount) ?? baseAmount;
             int thornsReflected = 0;
             if (targetMgr != null)
@@ -287,6 +291,9 @@
         {
             if (ctx.BattleManager == null)
                 return;
+            // The player's class modifier scales the Composure its cards grant, before statuses.
+            if (ctx.IsPlayerCard)
+                amount = ctx.BattleManager.PlayerClassModifiers.ModifyComposure(amount);
             int modified = ctx.PlayerStatusEffects?.ModifySupportGained(amount) ?? amount;
             ctx.BattleManager.GainSupport(modified);
             ctx.LastSupportGained += modified;
@@ -303,6 +310,32 @@
             ctx.BattleManager.GainDenial(amount);
         }
 
+        #endregion
+
+        #region Nested effect lists
+        /// <summary>
+        /// Runs a nested effect list (follow-ups that must wait for a player choice, branches)
+        /// against the same context.
+        /// </summary>
+        protected static void ExecuteAll(IReadOnlyList<BattleEffect> effects, EffectExecutionContext ctx)
+        {
+            if (effects == null)
+                return;
+            foreach (var effect in effects)
+                effect?.Execute(ctx);
+        }
+
+        /// <summary>A nested effect list's descriptions joined into one sentence; empty for none.</summary>
+        protected static string DescribeAll(IReadOnlyList<BattleEffect> effects)
+        {
+            if (effects == null || effects.Count == 0)
+                return "";
+            var parts = new List<string>();
+            foreach (var effect in effects)
+                if (effect != null)
+                    parts.Add(effect.EditorSafeDescription());
+            return string.Join(", then ", parts);
+        }
         #endregion
 
         #region Shared card-selection helper

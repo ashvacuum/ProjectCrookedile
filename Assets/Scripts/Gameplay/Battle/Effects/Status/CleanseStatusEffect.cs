@@ -39,6 +39,11 @@ namespace Crookedile.Gameplay.Battle
         [SerializeReference]
         private StatusBehavior _behavior;
 
+        [Tooltip("The most statuses removed per target (a random pick among matches). 0 = all.")]
+        [Sirenix.OdinInspector.MinValue(0)]
+        [SerializeField]
+        private int _maxStatuses = 0;
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             if (_mode == CleanseMode.SpecificStatus && _behavior == null)
@@ -69,6 +74,8 @@ namespace Crookedile.Gameplay.Battle
                     if (matches)
                         toRemove.Add(effect);
                 }
+                while (_maxStatuses > 0 && toRemove.Count > _maxStatuses)
+                    toRemove.RemoveAt(RandomHelper.Range(0, toRemove.Count));
 
                 foreach (var effect in toRemove)
                     statusMgr.RemoveStatusNotify(effect.Behavior);
@@ -81,8 +88,14 @@ namespace Crookedile.Gameplay.Battle
             }
         }
 
-        public override string GetDescription() =>
-            _mode switch
+        public override string GetDescription()
+        {
+            string who = _target == TargetType.Opponent ? "the target" : _target.ToString();
+            if (_maxStatuses == 1 && _mode == CleanseMode.AllBuffs)
+                return $"Remove a buff from {who}";
+            if (_maxStatuses == 1 && _mode == CleanseMode.AllDebuffs)
+                return $"Remove a debuff from {who}";
+            return _mode switch
             {
                 CleanseMode.SpecificStatus =>
                     $"Remove {_behavior?.DisplayName ?? "(none)"} from {_target}",
@@ -90,5 +103,6 @@ namespace Crookedile.Gameplay.Battle
                 CleanseMode.AllBuffs => $"Remove all buffs from {_target}",
                 _ => $"Remove all statuses from {_target}",
             };
+        }
     }
 }

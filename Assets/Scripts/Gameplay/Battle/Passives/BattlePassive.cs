@@ -37,6 +37,13 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private bool _oneShot;
 
+        [Tooltip(
+            "If true, this passive fires at most once per player turn (the first time its trigger "
+                + "and conditions all pass that turn)."
+        )]
+        [SerializeField]
+        private bool _oncePerTurn;
+
         [Tooltip("Effects executed when the passive fires. Reuses the BattleEffect hierarchy.")]
         [SerializeReference]
         private List<BattleEffect> _effects = new List<BattleEffect>();
@@ -47,6 +54,9 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>Total trigger fires this battle for this passive (used by NthEventCondition).</summary>
         private int _fireCount;
+
+        /// <summary>Player turn this passive last fired on, for <see cref="_oncePerTurn"/>; -1 = never.</summary>
+        private int _lastFiredTurn = -1;
 
         #endregion
 
@@ -61,6 +71,7 @@ namespace Crookedile.Gameplay.Battle
         public PassiveTriggerBase Trigger => _trigger;
         public IReadOnlyList<PassiveConditionBase> Conditions => _conditions;
         public bool OneShot => _oneShot;
+        public bool OncePerTurn => _oncePerTurn;
         public IReadOnlyList<BattleEffect> Effects => _effects;
 
         #endregion
@@ -86,6 +97,8 @@ namespace Crookedile.Gameplay.Battle
                 return false;
             if (_oneShot && Spent)
                 return false;
+            if (_oncePerTurn && _lastFiredTurn == evalCtx.PlayerTurnNumber)
+                return false;
 
             // Update fire count and expose it to conditions (e.g. NthEvent)
             _fireCount++;
@@ -99,6 +112,7 @@ namespace Crookedile.Gameplay.Battle
             // Commit one-shot guard before running effects to prevent re-entry
             if (_oneShot)
                 Spent = true;
+            _lastFiredTurn = evalCtx.PlayerTurnNumber;
 
             foreach (var effect in _effects)
                 effect?.Execute(execCtx);
@@ -117,6 +131,7 @@ namespace Crookedile.Gameplay.Battle
         {
             Spent = false;
             _fireCount = 0;
+            _lastFiredTurn = -1;
         }
 
         /// <summary>Returns a human-readable description for UI display.</summary>
@@ -155,6 +170,8 @@ namespace Crookedile.Gameplay.Battle
 
             if (_oneShot)
                 sb.Append(" (once per battle)");
+            else if (_oncePerTurn)
+                sb.Append(" (once per turn)");
 
             return sb.ToString();
         }

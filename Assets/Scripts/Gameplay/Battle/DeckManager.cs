@@ -69,6 +69,19 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Number of Scandal cards drawn so far this turn (Celebrity on-draw payoffs).</summary>
         public int ScandalsDrawnThisTurn => _scandalsDrawnThisTurn;
 
+        // Per-turn tallies — reset each StartTurn/StartBattle.
+        private int _cardsPulledThisTurn;
+        private int _cardsDiscardedThisTurn;
+
+        /// <summary>Cards pulled from the draw pile into hand this turn (<see cref="PullFromDrawPile"/>).</summary>
+        public int CardsPulledThisTurn => _cardsPulledThisTurn;
+
+        /// <summary>
+        /// Cards discarded from hand this turn by effects (<see cref="DiscardCard"/>). Played cards
+        /// and the end-of-turn sweep don't count.
+        /// </summary>
+        public int CardsDiscardedThisTurn => _cardsDiscardedThisTurn;
+
         /// <summary>
         /// Number of cards in the discard pile.
         /// </summary>
@@ -278,6 +291,7 @@ namespace Crookedile.Gameplay.Battle
             _hand.RemoveAt(idx);
             _discard.Add(card);
             _retain.ConsumeMark(card); //forced discard consumes the copy's retain mark too
+            _cardsDiscardedThisTurn++;
 
             EventBus.Publish(new CardDiscardedEvent { Card = card, IsPlayer = _isPlayer });
             GameLogger.LogInfo<DeckManager>($"{_ownerName} discarded card: {card.CardName}");
@@ -433,6 +447,76 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
+        /// Moves one copy of <paramref name="card"/> from the draw pile into the hand (a Pull).
+        /// Counts toward <see cref="CardsPulledThisTurn"/>. Returns false if the card isn't in
+        /// the draw pile or the hand is full.
+        /// </summary>
+        public bool PullFromDrawPile(CardData card)
+        {
+            if (card == null || IsHandFull)
+                return false;
+            if (!_deck.Remove(card))
+                return false;
+            _hand.Add(card);
+            _cardsPulledThisTurn++;
+            GameLogger.LogInfo<DeckManager>($"{_ownerName}: pulled {card.CardName} into hand");
+            EventBus.Publish(new CardRecoveredEvent { Card = card, IsPlayer = _isPlayer });
+            return true;
+        }
+
+        /// <summary>
+        /// The top <paramref name="count"/> cards of the draw pile, top first, without moving
+        /// them. Never reshuffles the discard: a short draw pile shows fewer cards.
+        /// </summary>
+        public List<CardData> PeekTop(int count) =>
+            _deck.GetRange(0, Mathf.Clamp(count, 0, _deck.Count));
+
+        /// <summary>
+        /// Discards one copy of <paramref name="card"/> straight from the draw pile (Scry).
+        /// Not a discard from hand, so it doesn't count toward <see cref="CardsDiscardedThisTurn"/>.
+        /// </summary>
+        public bool DiscardFromDrawPile(CardData card)
+        {
+            if (card == null || !_deck.Remove(card))
+                return false;
+            _discard.Add(card);
+            EventBus.Publish(new CardDiscardedEvent { Card = card, IsPlayer = _isPlayer });
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: discarded {card.CardName} from the draw pile"
+            );
+            return true;
+        }
+
+        /// <summary>
+        /// Moves one copy of <paramref name="card"/> from the draw pile to its top (Scry reorder).
+        /// </summary>
+        public bool MoveToTopOfDrawPile(CardData card)
+        {
+            if (card == null || !_deck.Remove(card))
+                return false;
+            _deck.Insert(0, card); // index 0 = top (DrawCard reads _deck[0])
+            return true;
+        }
+
+        /// <summary>
+        /// Moves a card from the hand to the top of the draw pile (Stacked Deck). Consumes the
+        /// copy's retain mark, like any other way of leaving the hand.
+        /// </summary>
+        public bool MoveFromHandToTopOfDrawPile(CardData card)
+        {
+            int idx = _hand.IndexOf(card);
+            if (idx < 0)
+                return false;
+            _hand.RemoveAt(idx);
+            _retain.ConsumeMark(card);
+            _deck.Insert(0, card); // index 0 = top (DrawCard reads _deck[0])
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: put {card.CardName} from hand on top of the draw pile"
+            );
+            return true;
+        }
+
+        /// <summary>
         /// Swaps <paramref name="oldCard"/> for <paramref name="newCard"/> in hand in-place.
         /// Used for UpgradeCardThisBattle to swap in the upgraded version.
         /// Returns false if oldCard is not currently in hand.
@@ -537,6 +621,34 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public int GetCardCostReduction(CardData card) =>
             card == null ? 0 : _costOverrides.GetReduction(card);
+
+        /// <summary>Raises this card's AP cost until the turn ends (the Return-lane brake).</summary>
+        public void IncreaseCostThisTurn(CardData card, int increase)
+        {
+            if (card == null || increase <= 0)
+                return;
+            int total = _costOverrides.IncreaseThisTurn(card, increase);
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: {card.CardName} costs +{total} for the rest of the turn"
+            );
+        }
+
+        /// <summary>Makes this card cost 0 AP until the turn ends.</summary>
+        public void MakeCardFreeThisTurn(CardData card)
+        {
+            if (card == null)
+                return;
+            _costOverrides.MakeFreeThisTurn(card);
+            GameLogger.LogInfo<DeckManager>($"{_ownerName}: {card.CardName} is free this turn");
+        }
+
+        /// <summary>This card's turn-scoped AP increase (0 if none).</summary>
+        public int GetCostIncreaseThisTurn(CardData card) =>
+            card == null ? 0 : _costOverrides.GetIncreaseThisTurn(card);
+
+        /// <summary>True if this card was made free until the turn ends.</summary>
+        public bool IsFreeThisTurn(CardData card) =>
+            card != null && _costOverrides.IsFreeThisTurn(card);
 
         /// <summary>
         /// Captures a snapshot of all current cost reductions so they can be restored later.
@@ -720,6 +832,9 @@ namespace Crookedile.Gameplay.Battle
         public void StartBattle(int initialHandSize)
         {
             _scandalsDrawnThisTurn = 0;
+            _cardsPulledThisTurn = 0;
+            _cardsDiscardedThisTurn = 0;
+            _costOverrides.ClearTurnModifiers();
             int drawn = DrawCards(initialHandSize);
             GameLogger.LogInfo<DeckManager>(
                 $"{_ownerName} drew initial hand of {drawn} cards (requested {initialHandSize}, "
@@ -738,6 +853,9 @@ namespace Crookedile.Gameplay.Battle
         public void StartTurn(int cardsToDraw)
         {
             _scandalsDrawnThisTurn = 0;
+            _cardsPulledThisTurn = 0;
+            _cardsDiscardedThisTurn = 0;
+            _costOverrides.ClearTurnModifiers();
             DrawCards(cardsToDraw);
         }
 

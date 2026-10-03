@@ -124,6 +124,8 @@ namespace Crookedile.Gameplay.Battle
             Subscribe<BattleEndedEvent>();
 
             Subscribe<CardPlayedEvent>();
+            Subscribe<CardPlayResolvedEvent>();
+            Subscribe<CardReplayedEvent>();
             Subscribe<CardDrawnEvent>();
             Subscribe<CardDiscardedEvent>();
             Subscribe<CardExhaustedEvent>();
@@ -174,6 +176,7 @@ namespace Crookedile.Gameplay.Battle
             _ownerByPassive.Clear();
             _ownerEnemyByPassive.Clear();
             _temporaryPassives.Clear();
+            _untilNextTurnPassives.Clear();
 
             // Origin passive — new-system entries (when present)
             if (_passive?.Passives != null)
@@ -259,16 +262,25 @@ namespace Crookedile.Gameplay.Battle
         // Passives granted "this turn" by GrantTurnPassiveEffect — removed at player turn end.
         private readonly List<BattlePassive> _temporaryPassives = new List<BattlePassive>();
 
+        // Passives granted "until your next turn" — they also cover the enemy turn, and are
+        // removed at the start of the next player turn.
+        private readonly List<BattlePassive> _untilNextTurnPassives = new List<BattlePassive>();
+
         /// <summary>
         /// Registers a passive until the end of the current player turn ("Whenever X this
-        /// turn, do Y" cards). Playing the granting card again re-registers the same instance —
-        /// it then fires once per registration per event.
+        /// turn, do Y" cards), or with <paramref name="untilNextTurn"/> until the start of the
+        /// next player turn, so it also sees the enemy turn. Playing the granting card again
+        /// re-registers the same instance — it then fires once per registration per event.
         /// </summary>
-        public void ActivateTemporaryPassive(BattlePassive bp, CardData ownerCard = null)
+        public void ActivateTemporaryPassive(
+            BattlePassive bp,
+            CardData ownerCard = null,
+            bool untilNextTurn = false
+        )
         {
             if (bp == null)
                 return;
-            _temporaryPassives.Add(bp);
+            (untilNextTurn ? _untilNextTurnPassives : _temporaryPassives).Add(bp);
             _allPassives.Add(bp);
             if (ownerCard != null)
                 _ownerByPassive[bp] = ownerCard;
@@ -276,22 +288,26 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<PassiveResolver>($"Temporary passive active this turn: {bp.Name}");
         }
 
-        /// <summary>Removes all turn-scoped passives. Called at player turn end.</summary>
-        public void ClearTemporaryPassives()
+        /// <summary>Removes all this-turn passives. Called at player turn end.</summary>
+        public void ClearTemporaryPassives() => Unregister(_temporaryPassives, "turn-scoped");
+
+        /// <summary>Removes all until-your-next-turn passives. Called at player turn start.</summary>
+        public void ClearUntilNextTurnPassives() =>
+            Unregister(_untilNextTurnPassives, "until-next-turn");
+
+        private void Unregister(List<BattlePassive> passives, string scope)
         {
-            if (_temporaryPassives.Count == 0)
+            if (passives.Count == 0)
                 return;
-            foreach (var bp in _temporaryPassives)
+            foreach (var bp in passives)
             {
                 _allPassives.Remove(bp);
                 var eventType = bp.Trigger?.EventType;
                 if (eventType != null && _passivesByEvent.TryGetValue(eventType, out var bucket))
                     bucket.Remove(bp);
             }
-            GameLogger.LogInfo<PassiveResolver>(
-                $"Cleared {_temporaryPassives.Count} turn-scoped passive(s)"
-            );
-            _temporaryPassives.Clear();
+            GameLogger.LogInfo<PassiveResolver>($"Cleared {passives.Count} {scope} passive(s)");
+            passives.Clear();
         }
 
         /// <summary>Resets a passive for this battle and files it under its trigger's event type.</summary>
@@ -453,6 +469,8 @@ namespace Crookedile.Gameplay.Battle
                 execCtx.OwnerCard = ownerCard;
                 // The enemy the event happened to — resolved by TargetType.TriggeringEnemy.
                 execCtx.TriggeringEnemyIndex = eventEnemyIndex;
+                // The card the event names — the target of TriggeringCard effects.
+                execCtx.TriggeringCard = evtCtx.GetCard();
                 passive.TryFire(evtCtx, evalCtx, execCtx);
             }
         }
@@ -499,6 +517,8 @@ namespace Crookedile.Gameplay.Battle
                 var e = evtCtx.As<DamageDealtEvent>();
                 if (!e.IsToPlayer)
                     execCtx.LastDamageDealt = e.Amount;
+                else
+                    execCtx.LastDamageTaken = e.Applied;
             }
             else if (evtCtx.Is<HealingAppliedEvent>())
             {

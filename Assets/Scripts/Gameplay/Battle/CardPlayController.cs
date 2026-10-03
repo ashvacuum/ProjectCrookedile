@@ -38,7 +38,42 @@ namespace Crookedile.Gameplay.Battle
             new Dictionary<CardType, int>();
         private int _cardsPlayedThisTurn;
 
+        // Cards played from hand this turn — gates once-per-turn cards (OncePerTurnTag).
+        private readonly HashSet<CardData> _playedThisTurn = new HashSet<CardData>();
+
+        // Turn-scoped arming, cleared at player turn start. Replays: the next non-Policy card
+        // played from hand resolves this many extra times. Free plays: the next N cards cost 0.
+        // Discount: the next card costs this much less.
+        private int _pendingReplays;
+        private int _freePlays;
+        private int _nextCardDiscount;
+
+        // The card the latest play started with and how many times it has replayed since —
+        // CardReplayedEvent.ReplayNumber (1 = its second play, 2 = its third).
+        private CardData _chainCard;
+        private int _chainReplays;
+
+        // Replays resolving inside other replays right now. A replay whose effects replay again
+        // (Encore replaying an earlier Encore) would otherwise recurse forever.
+        private int _replayDepth;
+        private const int MaxReplayDepth = 3;
+
+        /// <summary>
+        /// Tag for cards that can be played at most once per turn ("Not My Problem"). A card
+        /// property expressed as a tag, like the Celebrity's Borrow tag.
+        /// </summary>
+        public const string OncePerTurnTag = "onceperturn";
+
         public CardPlayController(BattleManager manager) => _mgr = manager;
+
+        /// <summary>AP actually paid for the latest card play (0 for free plays and replays).</summary>
+        public int LastEnergyPaid { get; private set; }
+
+        /// <summary>The latest non-Policy card to finish resolving this battle (Encore's target).</summary>
+        public CardData LastNonPolicyPlayed { get; private set; }
+
+        /// <summary>The latest Rhetoric card to finish resolving this battle (I Know a Guy's target).</summary>
+        public CardData LastRhetoricPlayed { get; private set; }
 
         /// <summary>True while a card play (VFX) is still resolving — input should be blocked.</summary>
         public bool IsResolving => _vfxInFlight;
@@ -54,6 +89,20 @@ namespace Crookedile.Gameplay.Battle
             _confusedOverrides.Clear();
             _typeCountsThisTurn.Clear();
             _cardsPlayedThisTurn = 0;
+            ResetTurnArming();
+            _chainCard = null;
+            _chainReplays = 0;
+            LastEnergyPaid = 0;
+            LastNonPolicyPlayed = null;
+            LastRhetoricPlayed = null;
+        }
+
+        private void ResetTurnArming()
+        {
+            _playedThisTurn.Clear();
+            _pendingReplays = 0;
+            _freePlays = 0;
+            _nextCardDiscount = 0;
         }
 
         /// <summary>True if the player played at least one card of this type this turn.</summary>
@@ -75,6 +124,7 @@ namespace Crookedile.Gameplay.Battle
         {
             _typeCountsThisTurn.Clear();
             _cardsPlayedThisTurn = 0;
+            ResetTurnArming();
 
             if (_mgr.PlayerStatusEffects.HasStatus<ConfusedStatus>())
                 ApplyConfusedOverrides();
@@ -100,6 +150,9 @@ namespace Crookedile.Gameplay.Battle
             _typeCountsThisTurn.TryGetValue(card.CardType, out int played);
             _typeCountsThisTurn[card.CardType] = played + 1;
             _cardsPlayedThisTurn++;
+            _playedThisTurn.Add(card);
+            _chainCard = card;
+            _chainReplays = 0;
 
             // Celebrity passive ("mastering his craft"): the first card played each battle is played
             // as its upgraded version. Swap to the upgraded instance before paying costs so the
@@ -177,7 +230,19 @@ namespace Crookedile.Gameplay.Battle
         private void CompleteCardPlay(CardData card)
         {
             _vfxInFlight = false;
+            RecordResolved(card);
             EventBus.Publish(new CardPlayResolvedEvent { Card = card });
+        }
+
+        /// <summary>Updates the "last card played" trackers once a card has resolved.</summary>
+        private void RecordResolved(CardData card)
+        {
+            if (card == null)
+                return;
+            if (card.CardType != CardType.Policy)
+                LastNonPolicyPlayed = card;
+            if (card.CardType == CardType.Rhetoric)
+                LastRhetoricPlayed = card;
         }
 
         /// <summary>
@@ -222,6 +287,142 @@ namespace Crookedile.Gameplay.Battle
                 _mgr.CheckAndAdvanceFocusAfterCardPlay();
                 _mgr.CheckAndEndBattleIfOver();
             }
+
+            // Armed replays ("play your next card twice") — consumed by the next non-Policy card.
+            // Consumed before replaying so a replay can never re-arm itself.
+            if (_pendingReplays > 0 && card.CardType != CardType.Policy)
+            {
+                int replays = _pendingReplays;
+                _pendingReplays = 0;
+                for (int i = 0; i < replays; i++)
+                    if (!ReplayCard(card))
+                        break;
+            }
+        }
+
+        #endregion
+
+        #region Replays and extra plays
+
+        /// <summary>Arms a replay: the next non-Policy card played from hand this turn resolves once more.</summary>
+        public void ArmReplayOfNextCard(int count = 1)
+        {
+            if (count <= 0)
+                return;
+            _pendingReplays += count;
+            GameLogger.LogInfo<CardPlayController>(
+                $"Next card this turn plays {_pendingReplays + 1} times"
+            );
+        }
+
+        /// <summary>The next <paramref name="count"/> cards played this turn cost 0.</summary>
+        public void GrantFreePlays(int count)
+        {
+            if (count > 0)
+                _freePlays += count;
+        }
+
+        /// <summary>The next card played this turn costs <paramref name="amount"/> less (stacks).</summary>
+        public void DiscountNextCard(int amount)
+        {
+            if (amount > 0)
+                _nextCardDiscount += amount;
+        }
+
+        /// <summary>
+        /// Resolves <paramref name="card"/>'s effects again without it leaving its pile — a
+        /// replay. Not a play: it publishes <see cref="CardReplayedEvent"/>, never
+        /// <see cref="CardPlayedEvent"/>, so "first card each turn" effects ignore it, and it adds
+        /// no single-target Hostility. Policies never replay (their passives would re-activate).
+        /// Returns false when nothing replayed (no card, a Policy, or the battle ended).
+        /// </summary>
+        public bool ReplayCard(CardData card)
+        {
+            if (card == null || card.CardType == CardType.Policy || _mgr.CheckAndEndBattleIfOver())
+                return false;
+            if (_replayDepth >= MaxReplayDepth)
+            {
+                GameLogger.LogWarning<CardPlayController>(
+                    $"Replay of {card.CardName} refused: replays nested {_replayDepth} deep"
+                );
+                return false;
+            }
+
+            if (card == _chainCard)
+                _chainReplays++;
+            else
+            {
+                _chainCard = card;
+                _chainReplays = 1;
+            }
+            int replayNumber = _chainReplays;
+
+            GameLogger.LogInfo<CardPlayController>(
+                $"Replaying {card.CardName} (extra play #{replayNumber})"
+            );
+            _replayDepth++;
+            try
+            {
+                _mgr.Resolver.ResolveCardEffects(card, isPlayerCard: true);
+            }
+            finally
+            {
+                _replayDepth--;
+            }
+
+            if (
+                _mgr.PlayerOrigin == OriginType.NepoBaby
+                && NepoBabyConfig.Current.ReplaysRaiseHostilityByDefault
+            )
+                foreach (var enemy in _mgr.Enemies)
+                    if (!enemy.IsDefeated)
+                        enemy.Stats.GainHostility(1);
+
+            SettleAfterResolution();
+            EventBus.Publish(new CardReplayedEvent { Card = card, ReplayNumber = replayNumber });
+            return true;
+        }
+
+        /// <summary>
+        /// Plays a card that is no longer in hand (Blow the Allowance's burned card) for free. It
+        /// IS a play — counted, and published as <see cref="CardPlayedEvent"/> so play triggers
+        /// fire — but it adds no single-target Hostility and pays no energy. The card stays in
+        /// whatever pile it is in.
+        /// </summary>
+        public void PlayOutOfHand(CardData card)
+        {
+            if (card == null || _mgr.CheckAndEndBattleIfOver())
+                return;
+
+            _typeCountsThisTurn.TryGetValue(card.CardType, out int played);
+            _typeCountsThisTurn[card.CardType] = played + 1;
+            _cardsPlayedThisTurn++;
+            _chainCard = card;
+            _chainReplays = 0;
+            LastEnergyPaid = 0;
+
+            EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
+            GameLogger.LogInfo<CardPlayController>($"Played {card.CardName} out of hand, free");
+
+            _mgr.Resolver.ResolveCardEffects(card, isPlayerCard: true);
+            SettleAfterResolution();
+            TriggerMomentum();
+            _mgr.CheckAndEndBattleIfOver();
+            RecordResolved(card);
+        }
+
+        /// <summary>
+        /// The room settles after extra effects resolve: stance transitions, echo chamber,
+        /// focus. The single-target Hostility bump is deliberately absent (that belongs to
+        /// playing a card from hand).
+        /// </summary>
+        private void SettleAfterResolution()
+        {
+            foreach (var enemy in _mgr.Enemies)
+                enemy.CheckBecameHostile();
+            _mgr.Crowd.RefreshEchoChamberState();
+            _mgr.CheckAndAdvanceFocusAfterCardPlay();
+            _mgr.CheckAndEndBattleIfOver();
         }
 
         #endregion
@@ -234,7 +435,10 @@ namespace Crookedile.Gameplay.Battle
             if (card.IsUnplayable)
                 return false;
 
-            foreach (var cost in card.Costs)
+            if (card.HasTag(OncePerTurnTag) && _playedThisTurn.Contains(card))
+                return false;
+
+            foreach (var cost in card.GetCosts())
             {
                 if (cost.CostType == CostType.ActionPoints)
                 {
@@ -247,32 +451,44 @@ namespace Crookedile.Gameplay.Battle
 
         private void PayCardCosts(CardData card, BattleStats stats)
         {
-            foreach (var cost in card.Costs)
+            int paid = 0;
+            foreach (var cost in card.GetCosts())
             {
                 if (cost.CostType == CostType.ActionPoints)
                 {
                     int effective = GetEffectiveCardCost(card);
                     stats.SpendActionPoints(effective);
+                    paid += effective;
                     GameLogger.LogInfo<CardPlayController>(
                         $"Paid {effective} AP for {card.CardName}"
                     );
                 }
             }
+            LastEnergyPaid = paid;
+
+            // Turn-scoped price breaks apply to the next card played, whatever it costs.
+            if (_freePlays > 0)
+                _freePlays--;
+            else
+                _nextCardDiscount = 0;
         }
 
         /// <summary>
         /// Single source of truth for the effective AP cost of a card this battle.
         /// Applies (in order): status effect modifiers (Focus, Energized, Entangled),
-        /// then per-card battle overrides (ReduceCardCost / MakeCardFree effects).
-        /// Result is floored at 0.
+        /// per-card battle overrides (ReduceCardCost / MakeCardFree effects), the dynamic
+        /// printed discount, then this turn's changes (Return-lane increases, the next-card
+        /// discount; a free play or a made-free-this-turn card costs 0 outright).
+        /// Result is floored at 0. Reads the upgraded cost list on upgraded cards.
         /// </summary>
         public int GetEffectiveCardCost(CardData card)
         {
-            if (card?.Costs == null || card.Costs.Count == 0)
+            var costs = card?.GetCosts();
+            if (costs == null || costs.Count == 0)
                 return 0;
             // Find the AP cost wherever it sits in the list rather than assuming Costs[0].
             CardCost cost = null;
-            foreach (var c in card.Costs)
+            foreach (var c in costs)
                 if (c.CostType == CostType.ActionPoints)
                 {
                     cost = c;
@@ -299,7 +515,13 @@ namespace Crookedile.Gameplay.Battle
             // Dynamic printed discount ("costs 1 less per X") — live board read each query.
             int dynamic = GetDynamicCostReduction(card);
 
-            return Mathf.Max(0, baseCost - reduction - dynamic);
+            // This turn: a free play or a made-free card wins outright; otherwise the Return
+            // lane's increase and the next-card discount adjust the price.
+            if (_freePlays > 0 || (_mgr.PlayerDeck?.IsFreeThisTurn(card) ?? false))
+                return 0;
+            int increase = _mgr.PlayerDeck?.GetCostIncreaseThisTurn(card) ?? 0;
+
+            return Mathf.Max(0, baseCost - reduction - dynamic + increase - _nextCardDiscount);
         }
 
         /// <summary>

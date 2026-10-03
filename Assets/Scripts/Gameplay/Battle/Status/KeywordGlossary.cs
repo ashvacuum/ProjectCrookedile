@@ -31,6 +31,10 @@ namespace Crookedile.Gameplay.Battle
             ["Denial"] = "Absorbs incoming Opinion rises on the meter. Expires at the start of their next turn.",
             ["Hostility"] = "How aggressive an enemy is. Hostile enemies push harder; receptive ones hold back.",
             ["Attention"] = "Banked spotlight. Spend it for Opinion payoffs.",
+            ["Burn"] = "Exhaust a card from your hand as a cost. Policies can't be burned.",
+            ["Pull"] = "Take a chosen card from your draw pile into your hand.",
+            ["Scry"] = "Look at the top cards of your draw pile and discard any of them.",
+            ["Replay"] = "The card's effects happen again. A replay isn't a new play.",
         };
 
         private static Dictionary<string, (string title, string description)> _entries;

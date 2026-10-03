@@ -500,6 +500,27 @@ namespace Crookedile.Data.Cards
         }
 
         /// <summary>
+        /// The card's printed energy cost: the base AP amount of its active cost list, ignoring
+        /// every discount and status. 0 for cards with no AP cost.
+        /// </summary>
+        public int PrintedCost
+        {
+            get
+            {
+                var costs = GetCosts();
+                if (costs == null)
+                    return 0;
+                foreach (var cost in costs)
+                    if (cost != null && cost.CostType == CostType.ActionPoints)
+                        return cost.BaseAmount;
+                return 0;
+            }
+        }
+
+        /// <summary>True for enemy-inflicted junk: Heckles and Scandals.</summary>
+        public bool IsJunk => _cardType == CardType.Heckle || _cardType == CardType.Scandal;
+
+        /// <summary>
         /// Gets the polymorphic effects to use, respecting upgrade state.
         /// Returns <see cref="_upgradedEffects"/> when upgraded and the list is non-empty;
         /// falls back to base <see cref="_effects"/> otherwise.
