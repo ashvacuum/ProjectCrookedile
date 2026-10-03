@@ -30,7 +30,6 @@ namespace Crookedile.Gameplay.Battle
             ["Support"] = "Absorbs incoming Opinion drops on the meter. Expires at the start of your next turn.",
             ["Denial"] = "Absorbs incoming Opinion rises on the meter. Expires at the start of their next turn.",
             ["Hostility"] = "How aggressive an enemy is. Hostile enemies push harder; receptive ones hold back.",
-            ["Patronage"] = "Banked by sacrificing cards: their cost, +1 if Rare, +1 if Upgraded (junk and 0-cost give 1). Pays for Patronage-gated cards.",
             ["Attention"] = "Banked spotlight. Spend it for Opinion payoffs.",
         };
 

@@ -38,12 +38,12 @@ MonoBehaviour:
     MaxHours: 8
   - Type: 1
     DisplayName: Nepo Baby
-    Description: The schemer. Sacrifice cards to bank Patronage, then summon bodies
-      into the room.
+    Description: The glass cannon. Burns, pulls and replays his own deck; the room
+      pays the bill in Hostility.
     Color: {r: 1, g: 1, b: 1, a: 1}
     Icon: {fileID: 0}
     Portrait: {fileID: 0}
-    Resource: 1
+    Resource: 0
     Passive: {fileID: 11400000, guid: 355a1499f47d2924ea3661bf9cef3c7e, type: 2}
     StarterTag: nepobaby
     StarterDeck: []

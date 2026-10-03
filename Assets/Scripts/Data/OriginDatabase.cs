@@ -10,9 +10,9 @@ namespace Crookedile.Data
     /// </summary>
     public enum ArchetypeResource
     {
-        None, // Faith Leader — stack-to-convert, no banked resource
-        Patronage, // Nepo Baby — sacrifice cards to bank Patronage
-        Attention, // Celebrity (Actor) — court attention, spend as a meter hit
+        None, // Faith Leader and Nepo Baby — no banked resource (statuses / the deck itself)
+        // 1 is retired (was Patronage); never reuse it — ordinals are serialized.
+        Attention = 2, // Celebrity (Actor) — court attention, spend as a meter hit
     }
 
     /// <summary>

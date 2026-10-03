@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// A banked per-battle integer pool (Patronage, Attention): persists across turns,
+    /// A banked per-battle integer pool (Attention): persists across turns,
     /// reset at battle start, floored at 0. Change notification goes through the callback
     /// so each resource keeps its own typed event on the bus.
     /// </summary>
