@@ -2,11 +2,11 @@
 
 > **Kind:** Art · **Status:** Canonical · **Updated:** 2026-10-03
 >
-> **Summary:** Art direction and resolution spec for artists. The Content Hub tabs are the live blank-slot checker.
+> **Summary:** Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Content Hub tabs are the live blank-slot checker.
 >
-> **Source of truth:** this doc · **Related:** [`art-prompt-database.md`](art-prompt-database.md) · [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx) · [`style-mock-prompt.md`](reference/style-mock-prompt.md)
+> **Source of truth:** this doc · **Related:** [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx) · [`style-mock-prompt.md`](reference/style-mock-prompt.md)
 
-*Canonical art-direction + resolution spec for artists. Supersedes the thin `art-needed.md` checklist. All sizes are measured from the real assets/prefabs or set as authoring targets; the Content Hub (Statuses / Intents / Enemies tabs) is the live blank-slot checker.*
+*Canonical art-direction + resolution spec for artists. All sizes are measured from the real assets/prefabs or set as authoring targets; the Content Hub (Statuses / Intents / Enemies tabs) is the live blank-slot checker.*
 
 **Theme:** Filipino political roguelite satire — you "work a crowd," you don't fight. Tone: glossy campaign-poster sheen over something rotten. Religious-political iconography for Faith Leader, dynastic luxury for Nepo Baby, tabloid-celebrity gloss for Celebrity.
 
@@ -101,7 +101,7 @@
 A card is **4 stacked UI Images + text**, bottom to top. Understanding this tells the artist what must be transparent where.
 
 ```
-┌─────────────────────────┐  ← all layers are 1000 × 1432, same silhouette
+┌─────────────────────────┐  ← all layers are 1500 × 2148, same silhouette
 │  ① TYPE FRAME (chrome)  │     color-coded border + nameplate + cost orb + textbox,
 │   ┌─────────────────┐   │     with a TRANSPARENT ART WINDOW cut out of the middle
 │   │ ② CARD ART      │   │  ← per-card illustration shows through the window
@@ -114,7 +114,7 @@ A card is **4 stacked UI Images + text**, bottom to top. Understanding this tell
 ```
 
 - **Type frame** = the colored chrome. Same silhouette across all 5 types, recolored + light motif change. Has the transparent art window.
-- **Card art** sits *behind* the frame and shows through the window — so author it **full-bleed 1000×1432** with the subject in the art-window safe zone (upper-center, see §3).
+- **Card art** sits *behind* the frame and shows through the window — so author it **full-bleed 1500×2148** with the subject in the art-window safe zone (upper-center, see §3).
 - **Rarity overlay** sits *on top* of the frame — mostly transparent, just adds the rarity treatment (gem, foil sheen, corner filigree).
 - Text (name, description, cost number) is engine-rendered — **not** baked into art.
 
@@ -122,7 +122,7 @@ A card is **4 stacked UI Images + text**, bottom to top. Understanding this tell
 
 ## 2. Card frames, overlays & backs
 
-### 2a. Type frames — 5 — `1000 × 1432` — `CardVisualSettings._*Frame`
+### 2a. Type frames — 5 — `1500 × 2148` — `CardVisualSettings._*Frame`
 Same frame silhouette, color + motif per type. Transparent art window (~upper 55% of card), a nameplate strip near the top, a cost orb (top-left), and a lower description panel (semi-opaque so engine text reads on it).
 
 | Slot | Type | Color (intent) | Hex anchor | Motif |
@@ -135,7 +135,7 @@ Same frame silhouette, color + motif per type. Transparent art window (~upper 55
 
 \* tune in engine; these are direction, not law. **Current gap:** all 5 point at placeholder `CardFront_01–03`; only 3 distinct frames exist.
 
-### 2b. Rarity overlays — 3 — `1000 × 1432` (mostly transparent) — `CardVisualSettings._*Frame`
+### 2b. Rarity overlays — 3 — `1500 × 2148` (mostly transparent) — `CardVisualSettings._*Frame`
 Drawn over the type frame. Keep the art window + textbox clear.
 
 | Slot | Rarity | Treatment |
@@ -146,14 +146,14 @@ Drawn over the type frame. Keep the art window + textbox clear.
 
 **Current gap:** all 3 reuse the pressure-frame placeholder — no visual rarity difference exists yet. This is the highest-value frame work.
 
-### 2c. Card backs — 4 — `1000 × 1432` — `CardVisualSettings._*CardBack`
+### 2c. Card backs — 4 — `1500 × 2148` — `CardVisualSettings._*CardBack`
 Per origin, shown face-down. `_defaultCardBack`, `_faithLeaderCardBack` (religious seal), `_nepoBabyCardBack` (dynastic crest), `_actorCardBack` (celebrity monogram/star). These exist (`CardBack_01/02`) but only 2 distinct.
 
 ---
 
 ## 3. Per-card illustration (the art window)
 
-The `Character_NN` sprites are **placeholders** (random assignment). Real per-card art is authored **full-bleed 1000×1432, portrait**, subject framed in the **art-window safe zone**: roughly `x: 70–930, y: 110–800` (upper-center). Keep critical detail out of the bottom ~45% (textbox) and the top ~8% (nameplate). Confirm the exact window against the frame PSD before final crops.
+The `Character_NN` sprites are **placeholders** (random assignment). Real per-card art is authored **full-bleed 1500×2148, portrait**, subject framed in the **art-window safe zone**: roughly `x: 105–1395, y: 165–1200` (upper-center; the old 1000×1432 window scaled ×1.5). Keep critical detail out of the bottom ~45% (textbox) and the top ~8% (nameplate). Confirm the exact window against the frame PSD before final crops.
 
 ### Card art style: icon, not scene
 
@@ -162,7 +162,7 @@ The art carries the card's meaning so the description text can stay small. Refer
 - **One object + one verb.** One focal object whose shape or motion shows the effect. Two elements maximum, nothing behind them.
 - **Silhouette first.** It must read as a solid shape at hand size. If it needs detail to be understood, simplify it.
 - **Flat colour blocks** with a clean thick inked outline. No texture, gradients, glows or soft shadows.
-- **Palette:** three base colours plus **one saturated accent** per card (gold for Faith Leader, hot pink for Celebrity). Frame colour already encodes type; the art does not repeat it.
+- **Palette:** three base colours plus **one saturated accent** per card (gold for Faith Leader, hot pink for Celebrity, emerald green for Nepo Baby). Frame colour already encodes type; the art does not repeat it.
 - **Plain solid background**, centred subject.
 - **Effect to shape:** damage = the object moving toward a target (thrust, motion arcs); defense = an enclosing or blocking shape (shield, ring, closed hand); draw = a fan of cards or one card sliding out; status = the object that stands for it; Flock / group = repeated identical silhouettes (3 or more); delayed = a still, waiting object.
 - **Avoid:** scenes, crowds of distinct people, faces carrying the meaning, fine detail that vanishes at card size.
@@ -247,19 +247,23 @@ Author neutral **white**; the theme recolors per intent. One per `EnemyMoveType`
 
 ---
 
-## 6. Enemy portraits — `512 × 512` square bust — `EnemyData._portrait`
+## 6. Enemy portraits — `1024 × 1024` square bust — `EnemyData._portrait`
 
-**Updated to the current prototype roster** (`Resources/Enemies/Prototype/Enemies/`) — the old `art-needed.md` list is stale. Filipino-political-satire busts; the stance/role should read on the face.
+Square bust, head-and-shoulders, facing camera from slightly below (they sit at a raised committee panel). The role reads on the face. Animal casting is locked in style-mock v4 for the first seven; the prompt block is §10.1.
 
-| Enemy | Role / Stance | Portrait direction |
-|---|---|---|
-| Loyal Partisan | Aggressive / Hostile | Snarling diehard in a campaign shirt, fist up. The baseline heckler. |
-| Spin Doctor | Defensive / Neutral | Slick PR operative, phone + earpiece, unbothered smirk (raises Denial). |
-| Heckler | Disruptive / Neutral | Loudmouth mid-jeer, mouth wide (Silences you). |
-| Firebrand | Amplifier / Hostile | Charismatic agitator mid-shout, rallying the row. |
-| The Bishop | Protector / Hostile (**Hardened**) | Stone-faced prelate, gold vestments, immovable — absolves allies of your statuses. |
-| Swing Voter | Passive / **Receptive** | Uncertain ordinary citizen, hopeful but wary (will Turncoat if provoked). |
-| The Fixer | Summoner / Neutral | Shadowy operator on a phone, summoning muscle. |
+| Enemy | Stance | Behaviour | Subject line |
+|---|---|---|---|
+| Loyal Partisan | hostile (2, range −7…5) | The baseline attacker | A stocky bulldog *(tuta)* in a plain screen-printed campaign shirt, flat tired stare, one fist resting on the desk — loyal out of habit, not passion |
+| Spin Doctor | neutral | Shields the meter (Denial) | A lean snake *(ahas)* in an unremarkable grey suit, half-lidded eyes, earpiece, phone face-down, entirely unbothered |
+| Heckler | neutral | Silences you | A rooster mid-jeer, beak open, permanent smirk, leaning back with one arm hooked over the chair back |
+| Firebrand | hostile | Rallies the row | A wiry fighting cock *(sabungero)* in a sleeveless shirt, coiled forward but calm-faced, about to stand |
+| The Bishop | hostile, Hardened | Absolves allies of your statuses | A heavy-set carabao in modest vestments and a plain pectoral cross, serene, immovable, hands folded on the desk |
+| Swing Voter | receptive | Turncoats if provoked | A soft-spoken chameleon in an ordinary polo, eyes drifting to one side, hopeful and wary at once |
+| The Fixer | neutral | Summons muscle | A watchful monitor lizard *(bayawak)* holding a phone low under the desk, eyes up on you the whole time |
+| Curious Student ⚑ | — *(no casting yet)* | — | **Proposed:** a young maya (sparrow) in a university lanyard and plain shirt, notebook open, actually listening — the only face in the row that isn't performing |
+| The Incumbent ⚑ | hostile (15, range 10…60) · final boss | Rigged room; no moves authored | **Proposed:** an old, heavy crocodile in a perfectly tailored barong with a sash, three decades of campaign posters behind him; your own species thirty years further in — flat, patient, utterly unimpressed |
+
+`docs/enemy-design-bible.md` §4 specifies a **different, animal-named roster** (Askal, Maya, Carabao, Parrot, Rat, Cat Tita, Musang, Butiki, Bayawak, Ahas, Tandang, Peacock, Agila, Uwak, Gagamba) across 15 encounters. The nine assets above are the older generic set. Docs are canonical, so **do not commission the nine as final** until the roster question is settled — otherwise you pay for portraits the encounter tables never call. See §10.5.
 
 *(Elites — Televangelist, Dynast — come with the boss pass; not yet built.)*
 
@@ -362,6 +366,91 @@ One concept per file, per §0 delivery standards.
 ≈**20–40 distinct buildings** before a generated city stops reading as four assets
 copy-pasted. That count, not the tooling, is the campaign map's schedule. Generate the
 Campaign HQ first and treat it as the style anchor every other asset is referenced against.
+
+---
+
+## 10. Generation prompts
+
+Paste the style block first, then the subject line. Card illustrations are not here: their style block and every card's
+subject line are in [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx) (Settings tab + one tab per
+class), following the rules in §3.
+
+### 10.1 Portraits (Odd Taxi block)
+
+Paste this base block, then the portrait ending below it.
+
+```
+Flat 2D anime illustration in the style of the anime Odd Taxi: clean uniform thin linework,
+limited flat cel shading, almost no gradients, subtle paper-grain texture over flat color.
+Muted sophisticated palette — dusty mustard, muted teal, brick red, cream, faded olive, warm
+greys — low saturation but warm; never grey-grimdark, never candy-bright. Even soft lighting,
+no chiaroscuro, no black voids. Filipino political satire, deadpan and adult: the cast are
+grounded anthropomorphic animals — naturalistic simplified animal heads on ordinary human
+bodies in ordinary clothes (plain barongs, unremarkable suits, campaign shirts), calm restrained
+expressions, understated body language. People who happen to be animals — not cartoon mascots,
+not realistic beasts, not cute, not photoreal, not oil painting. The humor is in the restraint.
+Portrait composition, subject in the upper-centre two-thirds, lower 45% quiet and uncluttered
+(a textbox sits there). No text, no letters, no logos, no watermark, no UI frame.
+```
+
+*Midjourney tail:* `--ar 7:10 --style raw --s 150 --no text,letters,watermark,frame`
+*Gemini / ChatGPT tail:* `Render at 1500x2148 px, portrait, PNG.`
+
+Swap its last two sentences (composition + "No text...") for:
+
+```
+Square bust portrait, head-and-shoulders, facing camera from slightly below (they sit at a
+raised committee panel). Plain flat muted background, no scenery. The role reads on the face.
+```
+
+*Midjourney tail:* `--ar 1:1 --style raw --s 150` · *target 1024x1024.*
+
+### 10.2 Ally, status and intent icons
+
+```
+Flat single-colour silhouette icon, pure white on transparent, no outline weight variation,
+no gradient, no text. Must read clearly at 32 px. Centred with ~6% margin. Simple bold shape.
+SUBJECT: <paste subject line here>
+```
+
+*Target 128x128 (ally icons 256x256 — see §10.4).*
+
+### 10.3 Player origins and card backs
+
+All three are the same crocodile (*buwaya*) — the wardrobe is the satire. Composition: back to camera at a podium for scene art; three-quarter bust for portraits.
+
+| Origin | Subject line |
+|---|---|
+| Faith Leader | A composed crocodile politician in a plain white barong with a large wooden cross over it, sleeves pressed, a worn bible under one arm; calm, patient, unreadable |
+| Nepo Baby | A young crocodile in an expensive slim-cut barong with a heavy gold family signet ring and a watch too big for him, bored posture, phone face-down on the lectern |
+| Celebrity | A crocodile in designer sunglasses indoors, barong worn open over a tee, practised half-smile aimed slightly off-camera at where the photographers are |
+
+**Card backs** (`1500x2148`, 4 needed — default + one per origin): Faith Leader = an embossed religious seal; Nepo Baby = a dynastic family crest; Celebrity = a monogram-and-star; default = the crocodile silhouette. Flat, symmetrical, single motif, muted two-tone.
+
+### 10.4 Ally icons
+
+Allies are passive relics, not row bodies. Suggest **256×256**, flat single-colour silhouette (block §10.2), so they
+read in a relic tray at ~48 px.
+
+| Ally | Rarity | Mechanic | Subject line |
+|---|---|---|---|
+| The Beef | Basic | Every 3rd time an enemy's hostility rises, gain 3 Support | Two crossed forearms braced against each other, shoulders squared |
+| Crowd Control | Basic | When an enemy turns receptive (first 3 turns), meter +2 | A rope-barrier stanchion with the rope looped neatly, a crowd shape behind it |
+| Devil's Advocate | Enhanced | When the room tips receptive, re-radicalise a random hostile by 10 | A single raised hand in a room of lowered ones |
+| Fixer's Cousin | Enhanced | Every 5th card played, one card becomes free | A folded envelope of cash passed under a table edge |
+| Hail Mary | Rare | Once per battle, while the meter is critically low, meter +10 | A thrown basketball frozen at the top of its arc, the hoop far off at the edge of frame |
+| Anonymous Tip | — | see the asset | *not written yet* |
+| Burner Phone | — | see the asset | *not written yet* |
+| Opposition File | — | see the asset | *not written yet* |
+| The Driver | — | see the asset | *not written yet* |
+
+### 10.5 Settle before commissioning
+
+1. **The enemy roster is two different sets** (§6). It decides whether you commission 9 portraits or ~15.
+2. **Three "Enhanced" cards are authored as Basic rarity**: Holier Than Thou, Impenetrable Belief and Sermon sit in
+   `Cards/FaithLeader/Enhanced/` with `_rarity: 0`, so they'd get the plain overlay.
+3. **The Incumbent** (final boss) has no portrait, no moves and no casting; it needs a design pass first.
+4. **The reference of record** `docs/design/crookedile-style-v4-oddtaxi.png` is not in the repo (§0.1).
 
 ---
 

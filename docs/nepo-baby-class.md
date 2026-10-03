@@ -4,10 +4,10 @@
 >
 > **Summary:** The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders.
 >
-> **Source of truth:** this doc; built in [`Data/Cards/NepoBaby/`](../Assets/Data/Cards/NepoBaby/) and [`NepoBabyConfig`](../Assets/Resources/NepoBabyConfig.asset) · **Related:** [`core-design.md`](core-design.md) · [`crookedile-starter-decks.md`](crookedile-starter-decks.md) · [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx)
+> **Source of truth:** this doc; built in [`Data/Cards/NepoBaby/`](../Assets/Data/Cards/NepoBaby/) and [`NepoBabyConfig`](../Assets/Resources/NepoBabyConfig.asset) · **Related:** [`core-design.md`](core-design.md) · [`core-design.md` §8](core-design.md#8-starter-decks) · [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx)
 
 This is the Nepo Baby class. It replaced the Patronage / summon design (2026-10-03); `core-design.md`,
-`crookedile-starter-decks.md` and `enemy-design-bible.md` now summarise this doc. Section 12 lists the conflicts with
+`enemy-design-bible.md` now summarise this doc (starter decks are in `core-design.md` §8). Section 12 lists the conflicts with
 the old code and how each was resolved; section 13 records what was built.
 
 Vocabulary: **Composure** = Support (the shield). **Sway** = a push on the Opinion meter. Statuses, not keywords.
@@ -252,7 +252,7 @@ Audited 2026-10-03. Items marked **Resolved** are settled; the rest are still op
 
 ### A. Design docs (docs win over code, so these need a decision first)
 
-1. **The whole class identity.** `core-design.md` section 7 and `crookedile-starter-decks.md` define Nepo Baby as the
+1. **The whole class identity.** `core-design.md` section 7 and the starter-decks doc (now `core-design.md` §8) defined Nepo Baby as the
    Patronage / summon class ("Who can I bring in?", summons receptive allies, Plant summons a hostile, fear = his own
    allies turning Turncoat). This spec says player-side summoning does not exist and makes the deck itself the resource.
    `core-design.md` section 8 ("teaches the Patronage loop") and `needs-detailing.md` section 8 ("Nepo Baby leash")
