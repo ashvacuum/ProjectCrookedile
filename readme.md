@@ -22,7 +22,7 @@
 - **Roguelite deck-builder**, political satire. The card **battles are the core**, wrapped in an **overworld campaign**: navigate a town map and accumulate **Support** toward winning the election by a deadline.
 - **No HP.** The per-battle battleground is a shared **Opinion Meter** (win at 100, lose at 0, Judgment at the turn limit). Directional session shields — **Support** (guards against drops) and **Denial** (guards against rises) — protect it. *(Per-battle "Support" the shield is distinct from campaign "Support points" the win condition — a naming overlap to resolve.)*
 - **Hostility** is a signed per-enemy stance you manage (hostile ↔ receptive). The central tension is the **Echo Chamber**: convert the *whole* room and your gains halve and your lead decays — so you always want a villain present.
-- **Three archetypes:** **Nepo Baby** (a glass cannon who burns, pulls and replays his own deck, paid for in the room's Hostility), **Celebrity** (an "open canvas" drafting into Attention / Scandal / Drama King), **Faith Leader** (stack statuses to convert enemies into one-turn meter-pumping followers).
+- **Three archetypes:** **Nepo Baby** (a glass cannon who burns, pulls and replays his own deck, paid for in the room's Hostility), **Celebrity** (all spectacle and borrowed momentum: Glamour lifts the meter every round, IOUs buy energy now and bill you next turn), **Faith Leader** (stack statuses to convert enemies into Fanatics who follow your lead until they're disillusioned).
 
 ---
 
@@ -39,12 +39,13 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) | Proposal | 2026-10-03 | The Celebrity's Glamour / IOU build, played as a variant against the canonical Celebrity design in core-design.md. | this doc; built in [`Data/Cards/Celebrity/GlamourIou/`](Assets/Data/Cards/Celebrity/GlamourIou) and [`GlamourIou.cs`](Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs) |
+| [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) | Built | 2026-10-03 | The Celebrity class: Glamour and IOU poles with Soundbite tokens between them, all its cards and rules. Numbers are placeholders. | this doc; built in [`Data/Cards/Celebrity/GlamourIou/`](Assets/Data/Cards/Celebrity/GlamourIou) and [`GlamourIou.cs`](Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs) |
 | [`core-design.md`](docs/core-design.md) | Canonical | 2026-10-03 | The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions. | this doc |
 | [`enemy-design-bible.md`](docs/enemy-design-bible.md) | Canonical | 2026-10-03 | The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete. | this doc |
 | [`metagame-campaign.md`](docs/metagame-campaign.md) | Partly built | 2026-10-03 | The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases. | this doc |
 | [`naming-glossary.md`](docs/naming-glossary.md) | Canonical | 2026-10-03 | Combat vocabulary mapped to "working a crowd" vocabulary. Read before naming anything. | this doc |
 | [`nepo-baby-class.md`](docs/nepo-baby-class.md) | Built | 2026-10-03 | The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders. | this doc; built in [`Data/Cards/NepoBaby/`](Assets/Data/Cards/NepoBaby) and [`NepoBabyConfig`](Assets/Resources/NepoBabyConfig.asset) |
+| [`unlocks.md`](docs/unlocks.md) | Proposal | 2026-10-03 | What unlocks (classes, cards, allies, events, campaigns), what earns each one, how fast, and how the player sees it. Design only; the code side is in meta-progression.md. | this doc |
 
 ### Systems — code reference
 
