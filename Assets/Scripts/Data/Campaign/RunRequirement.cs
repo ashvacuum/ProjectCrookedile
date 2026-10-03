@@ -121,7 +121,12 @@ namespace Crookedile.Data.Campaign
         private Cards.CardData _card;
 
         protected override bool Check(RunState state) =>
-            _card != null && (!_card.IsUnlockable || state.UnlockedContent.Contains(_card.ID));
+            _card != null
+            && (
+                !_card.IsUnlockable
+                || !Unlocks.UnlockRules.LocksEnabled
+                || state.UnlockedContent.Contains(_card.ID)
+            );
 
         protected override string Describe() =>
             _card == null ? "unlocked (NONE SET)" : $"{_card.CardName} unlocked";

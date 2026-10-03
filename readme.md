@@ -45,7 +45,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 | [`metagame-campaign.md`](docs/metagame-campaign.md) | Partly built | 2026-10-03 | The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases. | this doc |
 | [`naming-glossary.md`](docs/naming-glossary.md) | Canonical | 2026-10-03 | Combat vocabulary mapped to "working a crowd" vocabulary. Read before naming anything. | this doc |
 | [`nepo-baby-class.md`](docs/nepo-baby-class.md) | Built | 2026-10-03 | The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders. | this doc; built in [`Data/Cards/NepoBaby/`](Assets/Data/Cards/NepoBaby) and [`NepoBabyConfig`](Assets/Resources/NepoBabyConfig.asset) |
-| [`unlocks.md`](docs/unlocks.md) | Proposal | 2026-10-03 | What unlocks (classes, cards, allies, events, campaigns), what earns each one, how fast, and how the player sees it. Design only; the code side is in meta-progression.md. | this doc |
+| [`unlocks.md`](docs/unlocks.md) | Canonical | 2026-10-03 | What unlocks (classes, cards, allies, events, campaigns), what earns each one, how fast, and how the player sees it. Achievements and unlocks are one system. Everything is unlocked for now. | this doc |
 
 ### Systems — code reference
 

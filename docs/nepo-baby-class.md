@@ -171,7 +171,7 @@ Spread valves across card types. Do not make them mostly Rhetoric (it would make
 
 ## 7. Rare gating and unlocks
 
-Rarity ladder stays Basic / Enhanced / Rare. **Trust Fund** is a plain Rare, locked until the profile **wins a run as
+Rarity ladder stays Basic / Enhanced / Rare. **Trust Fund** is a plain Rare (unlock locks are off for now, so it is in the pool), locked until the profile **wins a run as
 Nepo Baby** (`_isUnlockable` + a `WonRunAs` unlock condition; see `meta-progression.md`). Runs started before the
 unlock never offer it. No new rarity tier, no unique flag.
 

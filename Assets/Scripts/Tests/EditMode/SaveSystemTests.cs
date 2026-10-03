@@ -26,6 +26,7 @@ namespace Crookedile.Tests
             _root = Path.Combine(Path.GetTempPath(), "crookedile-savesystem-" + Guid.NewGuid().ToString("N"));
             SaveSystem.UseRoot(_root);
             RunState.Clear();
+            UnlockRules.LocksEnabled = true;
             _cards = Resources.Load<CardDatabase>("Databases/CardDatabase");
             Assert.IsNotNull(_cards, "CardDatabase missing from Resources/Databases.");
         }
@@ -33,6 +34,7 @@ namespace Crookedile.Tests
         [TearDown]
         public void TearDown()
         {
+            UnlockRules.LocksEnabled = false;
             RunState.Clear();
             SaveSystem.UseRoot(null);
             if (Directory.Exists(_root))
