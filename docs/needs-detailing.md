@@ -50,9 +50,9 @@ Tag-driven starter collection gives 1 of each card; the doc wants repeats (e.g. 
 
 When re-keying `StatusEffectIconMapSO` by Id (the `StatusEffectIconMapSO` re-key): does it grow into the full "generic effects/statuses database" (SFX/VFX/category per status), or stay icon/color/text with audio-visual mapped elsewhere (BattleSoundMap pattern)? Decide once, during the re-key, to avoid touching the asset twice.
 
-## 8. Nepo Baby leash (blocks: Nepo roster/deck depth)
+## 8. Nepo Baby open questions (blocks: Nepo build)
 
-"Summoned allies are the *most* corruptible" is the signature fear, but nothing detailed: are summons extra-vulnerable to Sway? Higher Turncoat damage? Do Plants (hostile summons) count as your villain for echo-chamber purposes (they should — confirm)? The Hardened-breaking "daddy knows people" card — core or reward pool?
+The class was redesigned (2026-10-03, `nepo-baby-class.md`): no Patronage, no summons. Open questions with their defaults are in that doc's section 8 (seed vs junk, "I'm Just Like You" type, whether replays raise Hostility, Hostility-scaled junk injection, Friends in High Places). Section 12 lists conflicts with current code, including what to do with the unused Patronage / summon code.
 
 ## 9. Meta-progression: achievements and unlocks (blocks: nothing yet — wanted eventually)
 
