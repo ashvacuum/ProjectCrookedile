@@ -23,6 +23,20 @@ namespace Crookedile.Core
         public static event Action AnyEventPublished;
 
         /// <summary>
+        /// Deepest a publish may nest inside other publishes' handlers. Real cascades are a handful
+        /// deep; past this a handler chain is re-triggering itself. The bus then drops every publish
+        /// until the outermost one returns, so the chain unwinds instead of recursing until the stack
+        /// overflows (or branching without end) and taking the editor down with it.
+        /// </summary>
+        public const int MaxPublishDepth = 64;
+
+        private static int _publishDepth;
+        private static bool _breakingLoop;
+
+        /// <summary>Publishes dropped by <see cref="MaxPublishDepth"/> since startup. Tests read this.</summary>
+        public static int LoopsBroken { get; private set; }
+
+        /// <summary>
         /// Registers a handler to receive events of type <typeparamref name="T"/>.
         /// Call this in <c>OnEnable()</c> (MonoBehaviour) or at construction time.
         /// Always pair with a matching <see cref="Unsubscribe{T}"/> call to prevent memory leaks.
@@ -88,6 +102,35 @@ namespace Crookedile.Core
             // avoiding the box that a bare `gameEvent == null` would emit on every publish.
             if (!typeof(T).IsValueType && gameEvent == null)
                 return;
+
+            if (_breakingLoop)
+                return;
+            if (_publishDepth >= MaxPublishDepth)
+            {
+                _breakingLoop = true;
+                LoopsBroken++;
+                UnityEngine.Debug.LogError(
+                    $"[EventBus] Event loop broken at {typeof(T).Name}: publishes nested {_publishDepth} "
+                        + "deep, so a handler is re-triggering itself. Publishes are dropped until it unwinds."
+                );
+                return;
+            }
+
+            _publishDepth++;
+            try
+            {
+                Dispatch(gameEvent);
+            }
+            finally
+            {
+                if (--_publishDepth == 0)
+                    _breakingLoop = false;
+            }
+        }
+
+        private static void Dispatch<T>(T gameEvent)
+            where T : IGameEvent
+        {
 
             // Payload-free so struct events are never boxed just to raise it. Subscribers that
             // re-read state wholesale (whole-screen renderers) use this instead of subscribing

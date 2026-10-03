@@ -59,5 +59,7 @@ docs win; say so rather than quietly following the code.
 
 ## Known soft spots
 
-- Tests are thin. `Tests/EditMode` (NUnit, Unity Test Runner > Edit Mode) covers the save system only;
+- Tests are thin. `Tests/EditMode` (NUnit, Unity Test Runner > Edit Mode) covers the save system;
+  `Tests/PlayMode/CardSmokeTests` (Play Mode) plays every card against a receptive, neutral and
+  hostile enemy and fails on loops, errors or a stuck battle — a smoke test, not a check of card text;
   `Tests/EffectResolverTest.cs` is a manual MonoBehaviour harness, not NUnit.
