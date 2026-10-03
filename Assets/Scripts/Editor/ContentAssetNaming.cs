@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Crookedile.EditorTools
 {
-    public sealed class ContentAssetNaming : ContentAuditWindow.IContentProvider
+    public sealed class ContentAssetNaming : ContentChecks.IContentProvider
     {
         public const string CATEGORY = "Asset Names";
 
@@ -34,16 +34,16 @@ namespace Crookedile.EditorTools
             get { return CATEGORY; }
         }
 
-        public IEnumerable<ContentAuditWindow.Row> Rows()
+        public IEnumerable<ContentChecks.Row> Rows()
         {
             foreach (var entry in Scan())
             {
-                var issues = new List<ContentAuditWindow.AuditIssue>();
+                var issues = new List<ContentChecks.AuditIssue>();
                 if (!string.IsNullOrEmpty(entry.Error))
                 {
                     issues.Add(
-                        new ContentAuditWindow.AuditIssue(
-                            ContentAuditWindow.Severity.Error,
+                        new ContentChecks.AuditIssue(
+                            ContentChecks.Severity.Error,
                             entry.Error
                         )
                     );
@@ -51,14 +51,14 @@ namespace Crookedile.EditorTools
                 else if (entry.CanRename)
                 {
                     issues.Add(
-                        new ContentAuditWindow.AuditIssue(
-                            ContentAuditWindow.Severity.Warning,
+                        new ContentChecks.AuditIssue(
+                            ContentChecks.Severity.Warning,
                             $"Filename differs from authored name. Expected: {entry.AuthoredName}.asset"
                         )
                     );
                 }
 
-                yield return new ContentAuditWindow.Row(
+                yield return new ContentChecks.Row(
                     System.IO.Path.GetFileName(entry.Path),
                     $"{entry.Asset.GetType().Name} | Name: {entry.AuthoredName}\n{entry.Path}",
                     entry.Asset,

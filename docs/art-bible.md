@@ -2,11 +2,11 @@
 
 > **Kind:** Art · **Status:** Canonical · **Updated:** 2026-10-03
 >
-> **Summary:** Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Content Hub tabs are the live blank-slot checker.
+> **Summary:** Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Database window's tabs are the live blank-slot checker.
 >
 > **Source of truth:** this doc · **Related:** [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx) · [`style-mock-prompt.md`](reference/style-mock-prompt.md)
 
-*Canonical art-direction + resolution spec for artists. All sizes are measured from the real assets/prefabs or set as authoring targets; the Content Hub (Statuses / Intents / Enemies tabs) is the live blank-slot checker.*
+*Canonical art-direction + resolution spec for artists. All sizes are measured from the real assets/prefabs or set as authoring targets; the Database window (Statuses / Intents / Enemies tabs) is the live blank-slot checker.*
 
 **Theme:** Filipino political roguelite satire — you "work a crowd," you don't fight. Tone: glossy campaign-poster sheen over something rotten. Religious-political iconography for Faith Leader, dynastic luxury for Nepo Baby, tabloid-celebrity gloss for Celebrity.
 

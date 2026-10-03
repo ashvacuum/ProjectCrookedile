@@ -131,7 +131,7 @@ An unlockable card with **no** condition unlocks only through a grant. A grant u
 condition.
 
 **Answering "is this unlocked?" is a pure static function:** `UnlockRules.IsUnlocked(card, profile)`. No singleton
-and no lifetime, so reward pools, the save system and editor tools all ask the same thing. (A Content Hub audit of
+and no lifetime, so reward pools, the save system and editor tools all ask the same thing. (A Database-window audit of
 unreachable unlocks is not built yet.)
 
 Conditions only read counters, which only grow, so once something is unlocked it stays unlocked.
@@ -237,7 +237,7 @@ unlock snapshot and run counters.
 
 1. **Foundations — done.** Card IDs → asset GUIDs; save classes, envelope, atomic writes; profiles; old
    `SaveManager`/`SaveData` deleted; first NUnit Edit Mode tests.
-2. **Unlocks — done**, except the Content Hub reachability audit. `UnlockCondition` on cards, `UnlockRules`,
+2. **Unlocks — done**, except the reachability audit in the Database window. `UnlockCondition` on cards, `UnlockRules`,
    unlock-aware acquisition, `UnlockContentOutcome`, `HasUnlocked`, `unlockall`/`lockall`.
 3. **Run lifecycle — done** in `SaveSystem`, except `RunEndedEvent` and the run-end reveal screen.
 4. **Unlocks beyond cards — when locks go on** (everything is unlocked for now). Classes, campaigns, events and allies.

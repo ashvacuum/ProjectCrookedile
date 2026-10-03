@@ -65,7 +65,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`art-bible.md`](docs/art-bible.md) | Canonical | 2026-10-03 | Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Content Hub tabs are the live blank-slot checker. | this doc |
+| [`art-bible.md`](docs/art-bible.md) | Canonical | 2026-10-03 | Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Database window's tabs are the live blank-slot checker. | this doc |
 
 ### Generation prompts
 
@@ -114,7 +114,7 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 > **`Assets/Resources/` is deliberately small.** Everything in a Resources folder ships in every build, uncompressed and unstrippable, and is scanned at startup — so only assets genuinely loaded by *path string* belong there:
 > - `DOTweenSettings.asset` — pinned by DOTween's own loader
 > - `DebugSettings.asset` — log levels, loaded by `GameLogger` before the first scene
-> - `StatusEffectIconMap.asset` — `Resources.Load` by name, [AuthoringCatalogWindow.cs:52](Assets/Scripts/Editor/AuthoringCatalogWindow.cs#L52)
+> - `StatusEffectIconMap.asset` — referenced directly by the battle status badges; the Database window's Statuses tab edits it. Nothing loads it by name, so it no longer needs to live in Resources
 > - `Databases/CardDatabase.asset` — loaded only through `CardDatabase.Shared` (card outcomes, the save system, test starters)
 > - `Databases/{EnemyDatabase,AllyDatabase,OriginDatabase}.asset` — the save system resolves saved IDs through them; `OriginDatabase.Shared` reads starting values
 > - `NepoBabyConfig.asset` — Nepo Baby's class rules (`NepoBabyConfig.Current`)
@@ -127,17 +127,14 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 **The data-shape rule:** ScriptableObject for the noun you reference, name, and count (`CardData`, `EnemyData`, `EncounterData`). `[SerializeReference]` for the polymorphic verb inside it (`BattleEffect`, `BattlePassive`, `RunOutcome`). Reasoning in [`campaign-encounters.md`](docs/campaign-encounters.md#why-scriptableobject-and-not-serializereference).
 
 ### Editor tools (`Crookedile` menu)
-- **Database** — one window, one tab per content type (Cards, Enemies so far): search, filters, sortable columns, an
-  audit badge per asset, a preview of how it looks, and its inspector inline for editing. Shared code in
-  `Editor/Database/ContentTab.cs`; a new type is one tab class. Replacing the Card Database and Enemy Database windows,
-  and the Content Hub categories one by one.
-- **Content Hub** — audits all content for completeness; check here before assuming data is fine.
+- **Database** — the one content window: Cards, Enemies, Statuses, Allies, Origins, Encounters, Battle sessions,
+  Building blocks and Checks tabs, each with search, filters, sortable columns, an audit badge per item, a preview and
+  the inline inspector. Check here before assuming data is fine. Shared code in `Editor/Database/ContentTab.cs`; a new
+  type is one tab class.
 - **Card Database** / **Enemy Database** — older dashboards, kept until the Database window's tabs are confirmed.
-- **Authoring Catalog** — reflection-built reference of every `[SerializeReference]` building block the inspector offers (effects, triggers, conditions, status behaviors).
 - **Encounter Designer** — Timeline, Table, Dependencies, Flags, Simulate, Travel and Authoring views over an encounter pool.
 - **Save Debugger** — profiles, counters, unlocks, readable run saves, snapshots and corruption tests.
-- **Battle Inspector**, **Battle Session Builder**, **Playtest Bot** — battle debugging and automated playtests.
-- **Campaign** — `Create Campaign Scene`, `Fix Build Settings Scenes`, `Run Travel Checks`.
+- **Battle Inspector**, **Playtest Bot** — battle debugging and automated playtests.
 
 The in-game dev console (backquote) runs `[CheatCommand]` methods, including `addcard` and the `save*` commands; cheats need the `CHEATS_ENABLED` define.
 
