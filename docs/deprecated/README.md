@@ -2,6 +2,12 @@
 
 # Deprecated Docs
 
+> **Kind:** Index · **Status:** Deprecated · **Updated:** 2026-10-03
+>
+> **Summary:** Superseded docs, each banner-marked with what superseded it, plus ideas still worth mining.
+>
+> **Source of truth:** this doc · **Related:** [`core-design.md`](../core-design.md)
+
 *Nothing in this folder is current. First batch moved 2026-07-28; a second batch 2026-09-11.*
 
 **The 2026-07-28 batch** predates the combat + class redesign — the shift from an HP/damage prototype to the
@@ -52,7 +58,7 @@ The first full design pass, written around the campaign-era concept.
 | `SYSTEMS_STUDY.md` | System-by-system study |
 | `IMPLEMENTATION_STATUS.md` | Point-in-time build status |
 
-→ Superseded by [`readme.md`](../../readme.md) (orientation) and [`roadmap.md`](../roadmap.md) (status).
+→ Superseded by [`readme.md`](../../readme.md) (orientation) and [`roadmap.md`](roadmap.md) (status).
 Status snapshots rot fastest; trust `git log` over any of these.
 
 ### Setup and integration guides
@@ -76,8 +82,8 @@ effect", use the **Authoring Catalog** editor window — it's reflection-built a
 | `test-plan.md` | Rebuilding the test suite against the StatusBehavior API |
 
 Both dated 2026-06-10 and scoped to branch `test-new-gameplay`, which no longer exists. The
-work is done. → Live tracking is now [`roadmap.md`](../roadmap.md) and
-[`campaign-build-checklist.md`](../campaign-build-checklist.md).
+work is done. → Live tracking is now [`roadmap.md`](roadmap.md) and
+[`campaign-build-checklist.md`](campaign-build-checklist.md).
 
 ### Superseded checklist
 

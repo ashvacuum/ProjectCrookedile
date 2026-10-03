@@ -1,5 +1,11 @@
 # Crookedile — BGM prompts
 
+> **Kind:** Reference · **Status:** Canonical · **Updated:** 2026-10-03
+>
+> **Summary:** BGM prompts.
+>
+> **Source of truth:** this doc · **Related:** [`art-bible.md`](../art-bible.md)
+
 *Odd Taxi cool as the shared DNA: deadpan, jazzy, political, wry. Two moods — the map wanders, combat struts.*
 
 ---

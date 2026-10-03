@@ -1,5 +1,11 @@
 # Crookedile — Art Bible & Handoff Spec
 
+> **Kind:** Art · **Status:** Canonical · **Updated:** 2026-10-03
+>
+> **Summary:** Art direction and resolution spec for artists. The Content Hub tabs are the live blank-slot checker.
+>
+> **Source of truth:** this doc · **Related:** [`art-prompt-database.md`](art-prompt-database.md) · [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx) · [`style-mock-prompt.md`](reference/style-mock-prompt.md)
+
 *Canonical art-direction + resolution spec for artists. Supersedes the thin `art-needed.md` checklist. All sizes are measured from the real assets/prefabs or set as authoring targets; the Content Hub (Statuses / Intents / Enemies tabs) is the live blank-slot checker.*
 
 **Theme:** Filipino political roguelite satire — you "work a crowd," you don't fight. Tone: glossy campaign-poster sheen over something rotten. Religious-political iconography for Faith Leader, dynastic luxury for Nepo Baby, tabloid-celebrity gloss for Celebrity.
@@ -206,7 +212,7 @@ One brief per card, from `Assets/Data/Cards/FaithLeader`. The mechanic summary c
 | Us vs Them | Rare | Policy | one thick vertical line dividing two identical silhouettes, one gold accent |
 | Zealotry | Rare | Policy | one burning torch held aloft, one gold accent |
 
-*(Nepo Baby & Celebrity briefs are not written yet. Their card lists now exist — Nepo Baby's 42 cards in `nepo-baby-class.md` §5–6, Celebrity's Glamour/IOU set in `celebrity-glamour-iou.md` — so both are ready for the same template. Until art lands, Nepo cards can't appear in reward offers: cards without artwork are skipped.)*
+*(Card-art prompts for all three classes are in `crookedile-card-art-prompts.xlsx` (Nepo Baby tab added 2026-10-03, emerald green accent). Nepo Baby & Celebrity briefs are not written yet. Their card lists now exist — Nepo Baby's 42 cards in `nepo-baby-class.md` §5–6, Celebrity's Glamour/IOU set in `celebrity-glamour-iou.md` — so both are ready for the same template. Until art lands, Nepo cards can't appear in reward offers: cards without artwork are skipped.)*
 
 ---
 

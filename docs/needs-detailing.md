@@ -1,5 +1,11 @@
 # Needs Detailing — design questions awaiting a decision
 
+> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-10-03
+>
+> **Summary:** Design questions awaiting a call, ordered by how much they block. Read before authoring content.
+>
+> **Source of truth:** this doc · **Related:** [`core-design.md`](core-design.md) · [`doc-audit.md`](doc-audit.md)
+
 *As of 2026-10-03. These are NOT build tasks — each needs a design call (and usually a playtest) before code. Ordered by how much they block.*
 
 ---

@@ -43,6 +43,16 @@ docs win; say so rather than quietly following the code.
 - Mark deliberate simplifications with a `ponytail:` comment naming the ceiling and the upgrade
   path.
 
+## Docs
+
+- Every doc in `docs/` opens with the standard header (Kind, Status, Updated, Summary, Source of truth,
+  Related — format in `tools/check_docs.py`). The readme's documentation map is generated from those headers.
+- Run `python3 tools/check_docs.py --fix` after adding or editing a doc, adding or renaming a card, or pulling
+  the card-art workbook. It regenerates the map, adds workbook rows for new cards, and fails on dead links,
+  unlisted files in `docs/`, or workbook rows naming cards that no longer exist. Bump a doc's Updated date
+  when you change it.
+- The card assets own the workbook's Card, Rarity and Type columns; the Google Sheet owns Mechanic and Subject.
+
 ## Authoring tools (menu: Crookedile)
 
 - **Content Hub** — audits all content for completeness. Check here before assuming data is fine.
