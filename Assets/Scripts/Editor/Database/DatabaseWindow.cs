@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -14,12 +15,14 @@ namespace Crookedile.Editor.Database
     {
         private List<ContentTab> _tabs;
         private int _current;
-        private int _next = -1;
 
         // Tabs whose assets may have changed since they last loaded. Only the visible tab
         // reloads; the others reload when shown, so a change doesn't rescan every tab (the
         // Checks tab walks every prefab).
         private readonly HashSet<ContentTab> _stale = new HashSet<ContentTab>();
+
+        // Tabs that threw while loading or drawing, with the message shown in their place.
+        private readonly Dictionary<ContentTab, string> _errors = new Dictionary<ContentTab, string>();
 
         [MenuItem("Crookedile/Database", priority = 0)]
         private static void Open()
@@ -72,32 +75,72 @@ namespace Crookedile.Editor.Database
 
         private void OnGUI()
         {
-            // Anything that changes what gets drawn waits for a layout pass, so the layout and
-            // repaint passes of one frame always draw the same controls.
-            if (Event.current.type == EventType.Layout)
-            {
-                if (_next >= 0)
-                {
-                    _tabs[_current].OnDisable();
-                    _current = _next;
-                    _next = -1;
-                }
-                if (_stale.Remove(_tabs[_current]))
-                    _tabs[_current].Reload();
-            }
+            var tab = _tabs[_current];
+            if (Event.current.type == EventType.Layout && _stale.Remove(tab))
+                TryReload(tab);
 
             string[] labels = _tabs
-                .Select(t => !_stale.Contains(t) && t.ProblemCount > 0 ? $"{t.Title} ({t.ProblemCount})" : t.Title)
+                .Select(t => !_stale.Contains(t) && !_errors.ContainsKey(t) && t.ProblemCount > 0 ? $"{t.Title} ({t.ProblemCount})" : t.Title)
                 .ToArray();
             const float tabHeight = 24f;
             int picked = GUI.Toolbar(new Rect(4, 2, position.width - 8, tabHeight), _current, labels);
             if (picked != _current)
             {
-                _next = picked;
+                // Switch now and end this event, so the next event is a fresh layout pass that
+                // draws only the new tab.
+                tab.OnDisable();
+                _current = picked;
+                if (_stale.Remove(_tabs[_current]))
+                    TryReload(_tabs[_current]);
                 Repaint();
+                GUIUtility.ExitGUI();
             }
 
-            _tabs[_current].OnGUI(new Rect(0, tabHeight + 4, position.width, position.height - tabHeight - 4));
+            var area = new Rect(0, tabHeight + 4, position.width, position.height - tabHeight - 4);
+            if (_errors.TryGetValue(tab, out string error))
+            {
+                GUILayout.BeginArea(area);
+                EditorGUILayout.HelpBox($"The {tab.Title} tab failed:\n{error}", MessageType.Error);
+                if (GUILayout.Button("Retry", GUILayout.Width(80)))
+                {
+                    _errors.Remove(tab);
+                    _stale.Add(tab);
+                    Repaint();
+                }
+                GUILayout.EndArea();
+                return;
+            }
+
+            try
+            {
+                tab.OnGUI(area);
+            }
+            catch (ExitGUIException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                // A broken tab shows its error instead of taking the window down with it.
+                _errors[tab] = e.Message;
+                Debug.LogException(e);
+                Repaint();
+                GUIUtility.ExitGUI();
+            }
+        }
+
+        private void TryReload(ContentTab tab)
+        {
+            try
+            {
+                tab.Reload();
+                _errors.Remove(tab);
+            }
+            catch (Exception e)
+            {
+                _errors[tab] = "Loading failed: " + e.Message;
+                Debug.LogException(e);
+            }
         }
     }
 }
