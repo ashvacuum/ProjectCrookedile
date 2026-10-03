@@ -40,6 +40,11 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private float _multiplier = 1f;
 
+        [Tooltip("Caps the amount after scaling. 0 = no cap.")]
+        [MinValue(0)]
+        [SerializeField]
+        private int _maxAmount = 0;
+
         /// <summary>Authored fixed Support amount, for editor/preview display. 0 when context-sourced.</summary>
         public int PreviewSupportAmount =>
             _amountSource == EffectContextValue.FixedAmount ? _amount : 0;
@@ -47,6 +52,8 @@ namespace Crookedile.Gameplay.Battle
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             int amount = ResolveScaledAmount(ctx, amountOverride, _amount, _amountSource, _perXSource, _multiplier);
+            if (_maxAmount > 0)
+                amount = Mathf.Min(amount, _maxAmount);
 
             if (ctx.IsPlayerCard)
                 ApplyGainSupport(amount, ctx);
@@ -56,7 +63,8 @@ namespace Crookedile.Gameplay.Battle
 
         public override string GetDescription()
         {
-            return $"Gain {DescribeScaledAmount(_amount, _amountSource, _perXSource, _multiplier)} Support";
+            string cap = _maxAmount > 0 ? $" (max {_maxAmount})" : "";
+            return $"Gain {DescribeScaledAmount(_amount, _amountSource, _perXSource, _multiplier)}{cap} Support";
         }
     }
 }

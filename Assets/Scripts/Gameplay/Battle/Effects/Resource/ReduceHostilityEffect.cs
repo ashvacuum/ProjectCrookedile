@@ -42,6 +42,13 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private TargetType _target = TargetType.Opponent;
 
+        [Tooltip(
+            "Calm only to Neutral: never pushes an enemy into Receptive (Nepo Baby's Calm lane). "
+                + "An enemy already Receptive is left alone."
+        )]
+        [SerializeField]
+        private bool _stopAtNeutral = false;
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             int amount = ResolveScaledAmount(
@@ -56,7 +63,18 @@ namespace Crookedile.Gameplay.Battle
                 return;
             int total = 0;
             foreach (var (stats, _) in ctx.GetTargets(_target))
-                total += stats.ReduceHostility(amount);
+            {
+                int reduce = amount;
+                // Receptive starts past -NeutralZone, so -NeutralZone is the lowest Neutral value.
+                if (_stopAtNeutral)
+                    reduce = Mathf.Min(amount, Mathf.Max(0, stats.CurrentHostility + stats.NeutralZone));
+                if (reduce <= 0)
+                    continue;
+                bool wasReceptive = stats.IsReceptive;
+                total += stats.ReduceHostility(reduce);
+                if (!wasReceptive && stats.IsReceptive)
+                    ctx.TurnedReceptive++;
+            }
             ctx.LastHostilityLost += total;
             GameLogger.LogInfo<ReduceHostilityEffect>($"Reduced {total} Hostility ({_target})");
         }
@@ -64,9 +82,13 @@ namespace Crookedile.Gameplay.Battle
         public override string GetDescription()
         {
             string amountStr = DescribeScaledAmount(_amount, _amountSource, _perXSource, _multiplier);
-            return _target == TargetType.Opponent
-                ? $"Reduce target's Hostility by {amountStr}"
-                : $"Reduce Hostility by {amountStr} ({_target})";
+            string text =
+                _target == TargetType.Opponent
+                    ? $"Reduce target's Hostility by {amountStr}"
+                    : _target == TargetType.AllOpponents
+                        ? $"Reduce all enemies' Hostility by {amountStr}"
+                        : $"Reduce Hostility by {amountStr} ({_target})";
+            return _stopAtNeutral ? $"{text}, not below Neutral" : text;
         }
     }
 }

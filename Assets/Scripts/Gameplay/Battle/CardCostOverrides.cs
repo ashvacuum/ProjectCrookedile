@@ -23,6 +23,39 @@ namespace Crookedile.Gameplay.Battle
         // Non-null only while a "next-play-only" free-all pass is active.
         private Dictionary<CardData, int> _snapshot;
 
+        // Turn-scoped modifiers, cleared at the start of each turn. Kept apart from the
+        // battle-long reductions so snapshot/restore never touches them.
+        // ponytail: keyed by CardData like the battle-long map, so copies of one card share a
+        // modifier — fine while copies are rare in the pool; key by instance if that changes.
+        private readonly Dictionary<CardData, int> _increasesThisTurn =
+            new Dictionary<CardData, int>();
+        private readonly HashSet<CardData> _freeThisTurn = new HashSet<CardData>();
+
+        /// <summary>Stacks a cost increase onto the card until the turn ends. Returns the new total.</summary>
+        public int IncreaseThisTurn(CardData card, int increase)
+        {
+            _increasesThisTurn.TryGetValue(card, out int current);
+            _increasesThisTurn[card] = current + increase;
+            return _increasesThisTurn[card];
+        }
+
+        /// <summary>Makes the card cost 0 AP until the turn ends (wins over any increase).</summary>
+        public void MakeFreeThisTurn(CardData card) => _freeThisTurn.Add(card);
+
+        /// <summary>The card's turn-scoped cost increase; 0 if none.</summary>
+        public int GetIncreaseThisTurn(CardData card) =>
+            _increasesThisTurn.TryGetValue(card, out int i) ? i : 0;
+
+        /// <summary>True if the card was made free until the turn ends.</summary>
+        public bool IsFreeThisTurn(CardData card) => _freeThisTurn.Contains(card);
+
+        /// <summary>Drops every turn-scoped modifier. Called at the start of each turn.</summary>
+        public void ClearTurnModifiers()
+        {
+            _increasesThisTurn.Clear();
+            _freeThisTurn.Clear();
+        }
+
         /// <summary>Stacks an additive reduction onto the card. Returns the new total.</summary>
         public int ApplyReduction(CardData card, int reduction)
         {

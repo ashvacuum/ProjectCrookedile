@@ -241,6 +241,20 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
+    /// Published by <c>CardPlayController.ReplayCard</c> after a card's effects resolve again
+    /// (Executive Privilege, Dynasty, Encore). A replay is not a play: no
+    /// <see cref="CardPlayedEvent"/> accompanies it.
+    /// </summary>
+    public struct CardReplayedEvent : IGameEvent
+    {
+        /// <summary>The card that replayed.</summary>
+        public CardData Card;
+
+        /// <summary>Extra plays of this card in a row: 1 = its second play, 2 = its third.</summary>
+        public int ReplayNumber;
+    }
+
+    /// <summary>
     /// Published by <c>DeckManager.DiscardCard()</c> when a card moves from hand to the discard pile.
     /// </summary>
     public struct CardDiscardedEvent : IGameEvent

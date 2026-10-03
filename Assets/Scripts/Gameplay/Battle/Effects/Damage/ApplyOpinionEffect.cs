@@ -59,6 +59,11 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private bool _bypassSupport;
 
+        [Tooltip("Caps the amount per target after scaling. 0 = no cap.")]
+        [MinValue(0)]
+        [SerializeField]
+        private int _maxAmount = 0;
+
         /// <summary>Exposes the chosen pattern so single-target (Opponent) cards still bump hostility.</summary>
         public override TargetType Target => _target;
 
@@ -72,6 +77,8 @@ namespace Crookedile.Gameplay.Battle
                 _perXSource,
                 _multiplier
             );
+            if (_maxAmount > 0)
+                baseDamage = Mathf.Min(baseDamage, _maxAmount);
 
             if (ctx.IsPlayerCard)
             {
@@ -110,7 +117,8 @@ namespace Crookedile.Gameplay.Battle
                 _ => $" ({_target})",
             };
             string bypass = _bypassSupport ? " (ignores Support)" : "";
-            return $"Shift Opinion by {amountStr}{targetStr}{bypass}";
+            string cap = _maxAmount > 0 ? $" (max {_maxAmount})" : "";
+            return $"Shift Opinion by {amountStr}{cap}{targetStr}{bypass}";
         }
     }
 }

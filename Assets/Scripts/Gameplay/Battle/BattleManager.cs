@@ -131,6 +131,18 @@ namespace Crookedile.Gameplay.Battle
         public BattleStats PlayerStats => _playerStats;
         public DeckManager PlayerDeck => _playerDeck;
         public OriginType PlayerOrigin => _playerOrigin;
+
+        /// <summary>
+        /// The player class's modifiers on what its cards produce (Sway, Composure). Identity
+        /// for a class without any.
+        /// </summary>
+        public ClassModifiers PlayerClassModifiers =>
+            _playerOrigin == OriginType.NepoBaby
+                ? NepoBabyConfig.Current.Modifiers
+                : ClassModifiers.Identity;
+
+        /// <summary>The player's card-play pipeline: replays, extra plays and turn-scoped price breaks.</summary>
+        public CardPlayController CardPlay => _cards;
         public int CurrentTurn => _currentTurn;
         public bool IsPlayerTurn => _isPlayerTurn;
 
@@ -421,12 +433,12 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>
         /// Adds up to <paramref name="count"/> copies of <paramref name="data"/> to the enemy row
-        /// (capped so total enemies never exceed 5). Used both by enemy SummonMinion moves and by the
-        /// player's summon cards (Nepo Baby). Each new body immediately declares intent for next turn.
+        /// (capped so total enemies never exceed 5). Used by enemy SummonMinion moves and
+        /// SummonBodyEffect. Each new body immediately declares intent for next turn.
         /// </summary>
         /// <param name="initialHostility">
-        /// Overrides the body's starting hostility when set — e.g. a Nepo Baby "Call a Favor" ally
-        /// spawns receptive (negative), a "Plant" spawns hostile (positive). Null uses the EnemyData default.
+        /// Overrides the body's starting hostility when set — negative spawns it receptive, positive
+        /// hostile. Null uses the EnemyData default.
         /// </param>
         public void SummonMinions(EnemyData data, int count, int? initialHostility = null)
         {
@@ -602,6 +614,9 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>Celebrity's per-battle Debt and Debt-policy state.</summary>
         public CelebrityState Celebrity { get; } = new CelebrityState();
+
+        /// <summary>Nepo Baby's per-battle escalation counters.</summary>
+        public NepoBabyState NepoBaby { get; } = new NepoBabyState();
 
         public int CurrentGlamour => PlayerStatusEffects?.GetStacks<GlamourStatus>() ?? 0;
 
@@ -825,6 +840,9 @@ namespace Crookedile.Gameplay.Battle
 
                 // "Next turn: X" cards (DelayedEffect) fire now.
                 ResolveDueDelayedEffects();
+
+                // "Until your next turn" passives have seen the enemy turn through; they end here.
+                _passiveResolver?.ClearUntilNextTurnPassives();
             }
             else
             {
@@ -935,6 +953,7 @@ namespace Crookedile.Gameplay.Battle
             _attention.Reset();
             Celebrity.ResetBattle();
             _cards.ResetForBattle();
+            NepoBaby.Reset();
             _delayedEffects.Clear();
         }
 

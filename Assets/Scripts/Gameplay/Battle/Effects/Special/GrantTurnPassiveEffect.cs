@@ -17,6 +17,13 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private BattlePassive _passive = new BattlePassive();
 
+        [Tooltip(
+            "Keep the passive through the enemy turn, ending at the start of your next turn "
+                + "(for reactions to enemy pushes). Off: it ends with this turn."
+        )]
+        [SerializeField]
+        private bool _untilYourNextTurn = false;
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             if (_passive == null || _passive.Trigger == null)
@@ -29,12 +36,16 @@ namespace Crookedile.Gameplay.Battle
             if (ctx.BattleManager?.Passives == null)
                 return;
 
-            ctx.BattleManager.Passives.ActivateTemporaryPassive(_passive, ctx.OwnerCard);
+            ctx.BattleManager.Passives.ActivateTemporaryPassive(
+                _passive,
+                ctx.OwnerCard,
+                _untilYourNextTurn
+            );
         }
 
         public override string GetDescription() =>
             _passive != null && _passive.Trigger != null
-                ? $"This turn: {_passive.GetDescription()}"
+                ? $"{(_untilYourNextTurn ? "Until your next turn" : "This turn")}: {_passive.GetDescription()}"
                 : "This turn: (no passive authored)";
     }
 }
