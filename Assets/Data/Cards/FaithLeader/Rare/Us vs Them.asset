@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Us vs Them
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 202382ac-a5cc-409c-ba2e-b65e559f048b
+  _id: 98c918cc36a52be43a61f25208909e8e
   _cardName: Us vs Them
   _cardType: 2
   _rarity: 2

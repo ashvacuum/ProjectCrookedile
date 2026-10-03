@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Peace Offering
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: de7b7933-2158-4787-8b3b-3c95f30dfa1a
+  _id: e82b834b61c8be63507eae25cb142352
   _cardName: Peace Offering
   _cardType: 1
   _rarity: 1

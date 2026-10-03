@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Behind the Podium
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 72401663-a923-4e54-b1c6-4c38ce80c5cf
+  _id: 6e11921ee8d106542b0fe5e77ac60abb
   _cardName: Behind the Podium
   _cardType: 1
   _rarity: 1

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Heirloom
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: bcf00679-5314-4ef4-a28e-8eac7ef7ae3b
+  _id: bcf0067953144ef4a28e8eac7ef7ae3b
   _cardName: Heirloom
   _cardType: 0
   _rarity: 1

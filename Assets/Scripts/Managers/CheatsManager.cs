@@ -1,4 +1,4 @@
-using Crookedile.Core;
+﻿using Crookedile.Core;
 using Crookedile.Utilities;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -214,8 +214,30 @@ namespace Crookedile.Managers
         [CheatCommand("unlockall", "Unlock all cards in the game", Category = "Cards")]
         public void UnlockAllCards()
         {
+            Data.Save.SaveSystem.SetUnlockAll(true);
             EventBus.Publish(new CheatUnlockAllCardsEvent());
-            GameLogger.LogInfo("Cheats", "Unlocked all cards");
+            GameLogger.LogInfo("Cheats", "Unlocked all cards for this profile, from the next run");
+        }
+
+        [FoldoutGroup("Card Cheats")]
+        [Button("Lock All Cards", ButtonSizes.Medium)]
+        [CheatCommand("lockall", "Turn the unlock-all override off again", Category = "Cards")]
+        public void LockAllCards()
+        {
+            Data.Save.SaveSystem.SetUnlockAll(false);
+            GameLogger.LogInfo("Cheats", "Unlock-all override off, from the next run");
+        }
+
+        [FoldoutGroup("Card Cheats")]
+        [Button("List Unlocks", ButtonSizes.Medium)]
+        [CheatCommand("unlocks", "List every unlockable card and whether this profile has it", Category = "Cards")]
+        public void ListUnlocks()
+        {
+            foreach (var status in Data.Save.SaveSystem.GetUnlocks())
+                GameLogger.LogInfo(
+                    "Cheats",
+                    $"{(status.Unlocked ? "[x]" : "[ ]")} {status.Card.CardName} — {status.HowToUnlock}"
+                );
         }
 
         #endregion

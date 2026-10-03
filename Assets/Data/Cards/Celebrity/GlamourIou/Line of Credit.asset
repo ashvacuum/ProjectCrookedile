@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Line of Credit
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: cd97a4e7-6a41-4487-8c9d-923aff3756e5
+  _id: b39d65b2c378f2c4b8a8fa87b8274e78
   _cardName: Line of Credit
   _cardType: 2
   _rarity: 1

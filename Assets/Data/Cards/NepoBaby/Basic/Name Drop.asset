@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Name Drop
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 1b08a2f5-16c4-4143-9336-25ad08fea39e
+  _id: 1b08a2f516c44143933625ad08fea39e
   _cardName: Name Drop
   _cardType: 0
   _rarity: 0

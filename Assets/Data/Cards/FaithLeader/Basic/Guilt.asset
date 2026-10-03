@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Guilt
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: e2fd5ebf-838d-4613-a252-368114105d6a
+  _id: 178a016c59202b84aba8415c5543b39c
   _cardName: Guilt
   _cardType: 0
   _rarity: 0

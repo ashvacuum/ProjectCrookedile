@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Skip the Line
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: ff7a9eda-c37d-44d3-8569-9f358a04aa8a
+  _id: ff7a9edac37d44d385699f358a04aa8a
   _cardName: Skip the Line
   _cardType: 0
   _rarity: 0

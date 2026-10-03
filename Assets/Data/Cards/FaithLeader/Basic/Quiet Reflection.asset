@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Quiet Reflection
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: f5a16559-5d84-425c-8c6b-10b72f8fd940
+  _id: 799d81063be9943499b9183e6171781d
   _cardName: Quiet Reflection
   _cardType: 1
   _rarity: 0

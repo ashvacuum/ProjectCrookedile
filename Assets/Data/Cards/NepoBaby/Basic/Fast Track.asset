@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Fast Track
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 253a8252-51d6-48ff-b8a9-a985fc924328
+  _id: 253a825251d648ffb8a9a985fc924328
   _cardName: Fast Track
   _cardType: 0
   _rarity: 0

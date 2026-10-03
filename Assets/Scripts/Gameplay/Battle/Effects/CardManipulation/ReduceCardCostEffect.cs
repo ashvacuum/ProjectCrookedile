@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;

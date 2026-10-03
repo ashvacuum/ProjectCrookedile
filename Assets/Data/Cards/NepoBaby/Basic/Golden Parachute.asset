@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Golden Parachute
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 07410f86-7f40-49a2-ac63-93b43e22a268
+  _id: 07410f867f4049a2ac6393b43e22a268
   _cardName: Golden Parachute
   _cardType: 2
   _rarity: 0

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: I'm Just Like You
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: e139dde6-2e7b-4c8f-91db-acf397823ab5
+  _id: e139dde62e7b4c8f91dbacf397823ab5
   _cardName: I'm Just Like You
   _cardType: 1
   _rarity: 0

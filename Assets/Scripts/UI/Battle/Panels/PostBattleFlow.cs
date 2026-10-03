@@ -1,4 +1,4 @@
-using Crookedile.Core;
+﻿using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Gameplay.Battle;
@@ -136,10 +136,10 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
-            // Campaign defeat is a provisional game-over: no menu screen exists yet, so the
-            // map scene shows a "run ended" state and offers a fresh run.
+            // Campaign defeat ends the run: the profile records it, the run save is deleted,
+            // and the map scene shows its "run ended" state with a fresh run on offer.
             if (runEnded)
-                RunState.Clear();
+                Crookedile.Data.Save.SaveSystem.EndRun(victory: false);
 
             SceneLoader.Instance?.LoadScene("campaign");
         }

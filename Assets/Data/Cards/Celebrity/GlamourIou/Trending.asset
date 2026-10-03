@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Trending
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 6af3c71b-ed1a-4ab5-bff5-e6f4f87b59ac
+  _id: 713d92917b3f84d468325f49cd972af6
   _cardName: Trending
   _cardType: 1
   _rarity: 2

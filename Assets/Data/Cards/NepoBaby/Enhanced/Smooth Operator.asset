@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Smooth Operator
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 20d446d2-8753-4355-9545-7acdc3456355
+  _id: 20d446d28753435595457acdc3456355
   _cardName: Smooth Operator
   _cardType: 2
   _rarity: 1

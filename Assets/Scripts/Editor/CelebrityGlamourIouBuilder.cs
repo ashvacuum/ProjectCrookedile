@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Crookedile.Data;
@@ -189,8 +189,9 @@ namespace Crookedile.EditorTools
             var existing = AssetDatabase.LoadAssetAtPath<CardData>(path);
             if (existing == null)
             {
-                Set(card, "_id", Guid.NewGuid().ToString());
                 AssetDatabase.CreateAsset(card, path);
+                Set(card, "_id", AssetDatabase.AssetPathToGUID(path)); // card IDs are the asset GUID
+                EditorUtility.SetDirty(card);
                 return card;
             }
             Set(card, "_id", Get<string>(existing, "_id"));

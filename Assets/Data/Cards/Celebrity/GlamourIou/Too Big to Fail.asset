@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Too Big to Fail
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 59d5c8b3-7760-436a-aa4b-f0b35d554070
+  _id: 85193238408002d439ac695a2b987938
   _cardName: Too Big to Fail
   _cardType: 2
   _rarity: 1

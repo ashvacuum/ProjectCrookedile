@@ -1,7 +1,28 @@
-# Meta-progression: profiles, saves, unlocks, achievements (proposal v0.1)
+# Meta-progression: profiles, saves, unlocks, achievements (v0.2)
 
-**Status: proposal, not built.** Replaces the "Meta-progression" stub in `needs-detailing.md` section 9. Decisions
-still open are listed in section 9 below, with a recommended default for each.
+**Status: save system and unlocks built (2026-10-03); achievements, Steam and UI not built.** Replaces the
+"Meta-progression" stub in `needs-detailing.md` section 9. Open decisions are in section 9 with a recommended default.
+
+## 0. Built so far
+
+Code: `Assets/Scripts/Data/Save/`, `Assets/Scripts/Data/Unlocks/`, `RunState.Save.cs`. No UI yet: the campaign
+scene continues a saved run or starts a new one on entry, and the dev console lists unlocks (`unlocks`).
+
+- **`SaveSystem`** (static): profiles (up to 3, one created on first use), `StartNewRun`, `ContinueRun`,
+  `Checkpoint`, `EndRun`, `AbandonRun`, `GetUnlocks`, `GrantUnlock`, `MarkUnlocksSeen`, `SetUnlockAll`.
+  `UseRoot(path)` points it at another folder (tests).
+- **Files:** `persistentDataPath/profiles.idx` and `profiles/<id>/profile.sav` + `run.sav`, each with a `.bak`.
+- **Format:** hand-written binary payloads (`ProfileData`, `ProfileIndex`, `RunSaveData`) inside the CRC envelope.
+- **Run RNG:** `RunRng` (xorshift128 behind the `System.Random` API) so a resumed run continues the same stream.
+- **Content IDs:** `CardData._id` is now the asset GUID (all 117 card assets rewritten). `AllyDatabase` moved to
+  `Resources/Databases`. Encounters resolve through the Game Encounter Pool plus anything its events chain to.
+- **Unlocks:** `UnlockCondition` on `CardData` (`CounterAtLeast`, `WonRunAs`, `GrantedByEvent`), answered by
+  `UnlockRules`. Runs snapshot their unlocks at start. Campaign hooks: `UnlockContentOutcome`, `HasUnlocked`.
+  Trust Fund unlocks by winning a run as Nepo Baby.
+- **Lifecycle:** the campaign map checkpoints on every redraw and before battles. Quitting mid-battle restarts
+  that battle. Winning the last day or losing a battle calls `EndRun`, which updates counters and reports unlocks.
+- **Tests:** `Tests/EditMode` (Unity Test Runner, Edit Mode). `SaveCoreTests` covers the Unity-free core;
+  `SaveSystemTests` covers profiles, save/continue/end and unlocks against the real databases.
 
 ## 1. What exists today
 
@@ -57,11 +78,10 @@ fails its checksum falls back to `.bak`.
   keeps the file format stable while runtime classes change, and is the main thing JSON-of-runtime-objects gets wrong.
 - **Envelope:** `magic "CRKS"`, `formatVersion`, `payloadKind`, `payloadLength`, `CRC32`, then the payload.
   The version drives explicit migration steps (`Migrate_1_to_2`, …) run on load.
-- **Serializer:** behind `ISaveSerializer { byte[] Write<T>(T); T Read<T>(byte[]); }` so it can be swapped.
-  **Recommended: Odin Serializer's binary format.** It's already in the project (`Sirenix.Serialization`, with
-  runtime builds of the DLLs), compact, fast, and tolerant of added and removed fields. Standalone builds are Mono, so
-  no AOT step is needed. If an IL2CPP platform is ever targeted, run Odin's AOT generation or switch implementations.
-  Alternatives in 9.1.
+- **Serializer (built):** hand-written `BinaryWriter` payloads, one `Write`/`Read` pair per save class, with the
+  schema version passed to `Read` for migrations. Chosen over Odin's binary format because it has no Unity or
+  reflection dependency (works under IL2CPP unchanged, and the core is testable outside Unity) and the save classes
+  are few. Adding a field means writing it at the end and bumping the schema version.
 - **No encryption.** A key hardcoded in the binary only stops honest players editing their own single-player save.
   The CRC catches corruption, which is the real risk. (Add obfuscation later if a leaderboard ever needs it.)
 
@@ -205,11 +225,10 @@ Each step is shippable on its own.
 
 ## 9. Open decisions (recommended default first)
 
-1. **Serializer.** *Odin binary* (in the project, version-tolerant) · MemoryPack or MessagePack (fastest, adds a
-   package, needs code generation on IL2CPP) · hand-written `BinaryWriter` (no dependency, every field by hand).
-2. **Resume granularity.** *Campaign map only; mid-battle quits restart the battle* · full mid-battle saves (needs
+1. **Serializer.** *Decided: hand-written binary* (see section 3).
+2. **Resume granularity.** *Built as: campaign map only; mid-battle quits restart the battle* · full mid-battle saves (needs
    every status, pile and pending choice serialized; large and fragile).
-3. **When unlocks apply.** *Next run* · immediately, mid-run.
+3. **When unlocks apply.** *Built as: next run* · immediately, mid-run.
 4. **Profile count.** *3 slots* · unlimited.
 5. **Unlock sources.** *Counters, achievements and campaign events only* · add a meta-currency shop later (a
    separate design).

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Background Check
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: fdd6106c-ce13-4a93-a6fc-136555cfc420
+  _id: fdd6106cce134a93a6fc136555cfc420
   _cardName: Background Check
   _cardType: 2
   _rarity: 0

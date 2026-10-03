@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -107,6 +107,24 @@ namespace Crookedile.Data.Campaign
 
         protected override string Describe() =>
             string.IsNullOrWhiteSpace(_flag) ? "flag (NONE SET)" : $"flag \"{_flag}\"";
+    }
+
+    /// <summary>
+    /// True when this run started with a card unlocked. Reads the run's unlock snapshot, so
+    /// something unlocked mid-run counts from the next run, like every other unlock.
+    /// </summary>
+    [Serializable]
+    public class HasUnlocked : RunRequirement
+    {
+        [Tooltip("The card that must be unlocked.")]
+        [SerializeField]
+        private Cards.CardData _card;
+
+        protected override bool Check(RunState state) =>
+            _card != null && (!_card.IsUnlockable || state.UnlockedContent.Contains(_card.ID));
+
+        protected override string Describe() =>
+            _card == null ? "unlocked (NONE SET)" : $"{_card.CardName} unlocked";
     }
 
     /// <summary>True when the run holds at least <see cref="_amount"/> Funds.</summary>

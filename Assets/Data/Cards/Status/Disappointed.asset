@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Disappointed
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: fcb4bd23-223b-461b-b2be-1052609027db
+  _id: 8e8785b5be3b27c4881b54763c51e8bb
   _cardName: Disappointed
   _cardType: 3
   _rarity: 0

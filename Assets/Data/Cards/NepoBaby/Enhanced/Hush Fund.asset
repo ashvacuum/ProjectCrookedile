@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Hush Fund
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 4f98b728-7016-4429-85ff-35a569726bd0
+  _id: 4f98b7287016442985ff35a569726bd0
   _cardName: Hush Fund
   _cardType: 0
   _rarity: 1

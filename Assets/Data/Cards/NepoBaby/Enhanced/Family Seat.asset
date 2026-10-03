@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Family Seat
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: bd1c2c4d-e79b-4030-8e6a-6c6d2b136137
+  _id: bd1c2c4de79b40308e6a6c6d2b136137
   _cardName: Family Seat
   _cardType: 0
   _rarity: 1

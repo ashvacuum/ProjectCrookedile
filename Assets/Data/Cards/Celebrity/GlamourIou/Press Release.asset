@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Press Release
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 5073b342-a711-406f-a99f-83d960ac3ba6
+  _id: 60473cf9a840a0c4a89d3e83ba6f57bf
   _cardName: Press Release
   _cardType: 1
   _rarity: 0

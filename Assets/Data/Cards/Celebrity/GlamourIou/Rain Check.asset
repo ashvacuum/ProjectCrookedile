@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Rain Check
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 89b0c7a8-1ee7-4509-b18f-7d888d799074
+  _id: 0d3321b88e147a949b96f37774cbfc9c
   _cardName: Rain Check
   _cardType: 2
   _rarity: 0

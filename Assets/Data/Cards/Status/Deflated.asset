@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Deflated
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.Data.Cards.CardData
-  _id: fcb4bd23-223b-461b-b2be-1052609027db
+  _id: fc1e66e09e152964eaede3a47608280b
   _cardName: Deflated
   _cardType: 3
   _rarity: 0

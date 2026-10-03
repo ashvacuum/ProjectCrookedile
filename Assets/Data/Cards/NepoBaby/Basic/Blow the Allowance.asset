@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
   m_Name: Blow the Allowance
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 18ebcae8-9662-4b81-92c2-cc5893039290
+  _id: 18ebcae896624b8192c2cc5893039290
   _cardName: Blow the Allowance
   _cardType: 1
   _rarity: 0
