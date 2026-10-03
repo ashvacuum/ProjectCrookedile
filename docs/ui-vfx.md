@@ -1,5 +1,11 @@
 # UI VFX & Card Juice
 
+> **Kind:** Systems · **Status:** Built · **Updated:** 2026-10-03
+>
+> **Summary:** Canvas-space VFX: flipbooks, card shine, fly trails, and when UIParticle is warranted.
+>
+> **Source of truth:** [`UI/VFX/`](../Assets/Scripts/UI/VFX/), [`CardShine.cs`](../Assets/Scripts/UI/Battle/CardShine.cs) · **Related:** [`art-bible.md`](art-bible.md)
+
 *Reference for the canvas-space effect systems: what exists, which tool to reach for, and
 how to author each. Written 2026-07-28.*
 

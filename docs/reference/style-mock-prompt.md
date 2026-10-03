@@ -1,5 +1,11 @@
 # Style-mock generation prompt (edit of the original "Speech & Support" prompt)
 
+> **Kind:** Reference · **Status:** Canonical · **Updated:** 2026-10-03
+>
+> **Summary:** Style-mock generation prompt (v4 Odd Taxi, the locked look).
+>
+> **Source of truth:** this doc · **Related:** [`art-bible.md`](../art-bible.md) · [`iso-tile-prompt.md`](iso-tile-prompt.md)
+
 Drop generated images beside this file. Original mock: `style-mock-speech-and-support.png`.
 
 ---

@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Hand Me Down
+  m_Name: Burn the Receipts
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: 84377b8bba984f8bb8c75f1897719e73
-  _cardName: Hand Me Down
+  _id: 4f98b7287016442985ff35a569726bd0
+  _cardName: Burn the Receipts
   _cardType: 0
-  _rarity: 0
+  _rarity: 1
   _artwork: {fileID: 0}
   _description:
-  _flavorText: 'He threw it away. You''ll take it.'
+  _flavorText: 'Every secret has a line item.'
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -29,6 +29,7 @@ MonoBehaviour:
   _costReductionPerX: 7
   _effects:
   - rid: 7000000000000000000
+  - rid: 7000000000000000001
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
@@ -49,12 +50,13 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7000000000000000000
-      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _amount: 3
         _amountSource: 0
-        _perXSource: 28
+        _perXSource: 26
         _multiplier: 1
-        _target: 1
-        _bypassSupport: 0
-        _maxAmount: 0
+        _maxAmount: 15
+    - rid: 7000000000000000001
+      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

@@ -1,5 +1,11 @@
 # Crookedile — Core Design Doc
 
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-03
+>
+> **Summary:** The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure and the three archetypes.
+>
+> **Source of truth:** this doc · **Related:** [`needs-detailing.md`](needs-detailing.md) · [`naming-glossary.md`](naming-glossary.md) · [`enemy-design-bible.md`](enemy-design-bible.md)
+
 *A Filipino political roguelite deckbuilder. Working title: **Crookedile** (formerly Palakasan).*
 
 > You are not winning a fight. You are working a crowd — managing who speaks, how loudly, and in what direction they push public opinion.

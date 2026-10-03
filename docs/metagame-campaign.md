@@ -1,5 +1,11 @@
 # Metagame — The Campaign Map
 
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-10-03
+>
+> **Summary:** The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases.
+>
+> **Source of truth:** this doc · **Related:** [`campaign-encounters.md`](campaign-encounters.md) · [`meta-progression.md`](meta-progression.md) · [`iso-tile-prompt.md`](reference/iso-tile-prompt.md)
+
 *As of 2026-09-18. Supersedes the "StS map structure" sketch in `core-design.md` §10 — the
 map is **Potionomics-style free roam**, not a branching node chain, and is **drawn as a 2:1
 isometric sprite city** (§1.5, locked 2026-09-18). Build phases at the bottom; open design

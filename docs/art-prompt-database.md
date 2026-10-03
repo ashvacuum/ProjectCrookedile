@@ -1,5 +1,11 @@
 # Crookedile — Art Prompt Database
 
+> **Kind:** Art · **Status:** Stale · **Updated:** 2026-10-03
+>
+> **Summary:** Per-asset image prompts for cards, enemies and allies. Generated from 48 card assets on 2026-09-11; the card prompts are now kept in the card-art workbook.
+>
+> **Source of truth:** generated from [`Assets/Data/`](../Assets/Data/) · **Related:** [`art-bible.md`](art-bible.md) · [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx)
+
 *Generated from the live assets (2026-09-11): 48 card assets, 9 enemy assets, 6 ally assets.
 Paste **§1 the style block** first, then the subject line from the table. Card art uses the icon style in §1a (updated 2026-10-02, see `docs/art-bible.md` §3); portraits keep the Odd Taxi block in §1b
 (`docs/reference/style-mock-prompt.md` v4). Sizes are from `docs/art-bible.md` §0.5.*

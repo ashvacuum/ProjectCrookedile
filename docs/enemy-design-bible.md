@@ -1,5 +1,11 @@
 # Crookedile — Enemy Design Bible (v2, shared-meter model)
 
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-03
+>
+> **Summary:** The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete.
+>
+> **Source of truth:** this doc · **Related:** [`core-design.md`](core-design.md) · [`needs-detailing.md`](needs-detailing.md)
+
 > Source: `crookedile_enemies.xlsx` (2026-07-08). Corrected to match locked core design: ONE shared Opinion Meter per room; enemies are conditions to manage, not HP bars to delete.
 >
 > **Session notes (2026-07-08):** Credibility (P2) is a META/campaign resource, not a battle loss axis — parked as a goal. Ward redesigned: consumable status, not untargetability (see Roles). Echo Chamber needs its own design pass. Target types (below) not finalized — free to redo.
