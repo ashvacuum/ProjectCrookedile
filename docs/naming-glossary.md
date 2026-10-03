@@ -150,7 +150,7 @@ These are the right words — new code should match them:
 - **Support / Denial** (`CurrentSupport`, `CurrentDenial`, `SupportChangedEvent`, `DenialChangedEvent`)
 - **Hostility** (signed axis; receptive ↔ hostile)
 - **Voice / Intent** (`EnemyMoveData`, intent display)
-- **Attention** (archetype resource). Patronage is retired with the Nepo Baby redesign (`nepo-baby-class.md`).
+- **Glamour / Debt** (Celebrity). Attention went with the old Celebrity design; Patronage is retired with the Nepo Baby redesign (`nepo-baby-class.md`).
 - **Pacify / convert / Jaded** (Faith Leader)
 - **Ally** (the persistent per-run passive holder — `AllyData`, `RunState.Allies`). The design
   docs still call this a **relic**; the code never did. Ally is the name.
