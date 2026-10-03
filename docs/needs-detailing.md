@@ -44,13 +44,7 @@ mulligan placeholder (`Daddy's Gifts`). Decide: keep the upgraded first card, or
 
 The class was redesigned (2026-10-03, `nepo-baby-class.md`): no Patronage, no summons. Open questions with their defaults are in that doc's section 8 (seed vs junk, "I'm Just Like You" type, whether replays raise Hostility, Hostility-scaled junk injection, Friends in High Places). Section 12 lists the conflicts with the old code and how each was resolved; Patronage is removed, and the summon effect stays for enemy content.
 
-## 5. Unlocks (blocks: unlock content and the run-start screen)
-
-What unlocks and how is proposed in [`unlocks.md`](unlocks.md): classes, card tiers per class with class feats,
-allies met in story events, callback events, and campaigns. Its section 5 has the calls to make (which classes start
-locked, how much of each class is locked, whether campaign 2 needs a win).
-
-## 6. CardType colour taxonomy carries no meaning as authored
+## 5. CardType colour taxonomy carries no meaning as authored
 
 Pressure (green, persuade) vs Rhetoric (red, aggressive) is applied at random: draw-only cards
 sit in Rhetoric, and pressure is split across both. The colours are load-bearing for the player
@@ -73,6 +67,8 @@ stop pretending to be one.
   Scandal / Drama King pools are dropped. Scandal cards stay as enemy-inflicted junk.
 - **EncourageSides** (2026-10-03): an enemy move that angers the other enemies (raises their Hostility). That is the
   existing `RileOthers` move type (`RaiseAlliesHostilityEffect`), already used by three enemies — nothing new to build.
+- **Unlocks** (2026-10-03, `unlocks.md`): everything unlocked for now; campaign 2 needs day 7 of campaign 1;
+  achievements and unlocks are one system; no difficulty ladder.
 - **Meta-progression shape:** in `meta-progression.md` (profiles, saves, card unlocks, achievements, Steam).
 - **Campaign form** (2026-09-18, built since): a free-roam 2:1 isometric city over seven days, an hour budget, districts
   and travel (`metagame-campaign.md` §1.5, `campaign-encounters.md` §6). Still deferred, so don't detail yet: viral

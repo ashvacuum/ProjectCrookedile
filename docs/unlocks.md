@@ -1,10 +1,14 @@
 # Unlocks — what a player earns between runs
 
-> **Kind:** Design · **Status:** Proposal · **Updated:** 2026-10-03
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-03
 >
-> **Summary:** What unlocks (classes, cards, allies, events, campaigns), what earns each one, how fast, and how the player sees it. Design only; the code side is in meta-progression.md.
+> **Summary:** What unlocks (classes, cards, allies, events, campaigns), what earns each one, how fast, and how the player sees it. Achievements and unlocks are one system. Everything is unlocked for now.
 >
 > **Source of truth:** this doc · **Related:** [`meta-progression.md`](meta-progression.md) · [`metagame-campaign.md`](metagame-campaign.md) · [`core-design.md`](core-design.md)
+
+> **For now everything is unlocked** (decided 2026-10-03). Locks are off in code (`UnlockRules.LocksEnabled`); type
+> `locks true` in the dev console to play with them on. Conditions and counters still record, so turning locks on
+> later loses nothing. This doc is the structure that switches on once the unlock content is authored.
 
 Every number here is a placeholder. The point of this doc is the shape: what is locked, what opens it, and in what
 order a new player meets things. The data and save side already exist for cards and are described in
@@ -22,6 +26,8 @@ order a new player meets things. The data and save side already exist for cards 
    your class's verb) is readable. The pool fills as the player shows they understand it.
 5. **The city remembers you.** Some events and allies unlock because of something you did in an earlier run.
 6. **Nothing is missable.** Every unlock can still be earned later; nothing is lost on a defeat.
+7. **Achievements are unlocks.** One system, not two: each feat that unlocks something *is* an achievement, and
+   Steam achievements mirror them. No achievement exists just for display.
 
 ## 2. What unlocks
 
@@ -31,7 +37,7 @@ order a new player meets things. The data and save side already exist for cards 
 | **Cards** | Each class's core pool, about 60% of its cards | Class milestones, in three tiers (below) |
 | **Allies** (the relics) | The Basic allies: The Beef, Crowd Control, Opposition File | Meeting them in story events, or feats |
 | **Events** | The base campaign pool | Story callbacks from earlier runs |
-| **Campaigns** | Campaign 1 (the current seven-day pool) | Winning the one before |
+| **Campaigns** | Campaign 1 (the current seven-day pool) | Reaching day 7 of the one before |
 
 ### Classes
 
@@ -71,9 +77,8 @@ across runs, and it is the main source of new events.
 
 ### Campaigns
 
-Campaign 1 is the current seven-day race. Winning it unlocks campaign 2 (a new pool, a new boss, and room for a longer
-schedule), and so on. Harder versions of a campaign you have won (an Ascension-style ladder) are a separate design, not
-part of this one.
+Campaign 1 is the current seven-day race. Reaching day 7 of it unlocks campaign 2 (a new pool, a new boss, and room for
+a longer schedule), and so on. There is no difficulty ladder (no Ascension); not planned for now.
 
 ## 3. Pacing: what a new player sees
 
@@ -86,7 +91,8 @@ part of this one.
 | First run as Celebrity / Nepo Baby ends | That class's tier 2 |
 | A class feat | That feat's tier-3 card(s) |
 | A story beat | Its callback event or ally, next run |
-| First win | **Campaign 2** · that class's "win a run" card |
+| Reach day 7 of campaign 1 | **Campaign 2** |
+| First win as a class | That class's "win a run" card |
 
 Target: everything in campaign 1 is open after roughly 15–20 runs, and no single run ends without at least one thing
 having moved (a counter, a feat, or an unlock).
@@ -100,14 +106,15 @@ having moved (a counter, a feat, or an unlock).
 - **In the run:** locked cards and events never appear. An event option that recruits a locked ally shows disabled
   with how to unlock it, the same as any gated option, so the player learns the ally exists.
 
-## 5. Open questions (proposed default first)
+## 5. Decisions (2026-10-03)
 
-1. **Classes locked at the start?** *Faith Leader only, then Celebrity, then Nepo Baby* · all three from the start.
-2. **How much of each class is locked?** *About 40% (tiers 2 and 3)* · only the tier-3 Rares.
-3. **Does campaign 2 need a win?** *Yes* · reaching day 7 of campaign 1 is enough.
-4. **Do achievements unlock anything?** *Feats unlock content; achievements are the Steam/cosmetic layer that reads the
-   same counters* · every achievement grants something.
-5. **Difficulty ladder per campaign?** *Later, as its own design* · now.
+1. **Everything is unlocked for now.** Locks switch on once unlock content is authored and playtested.
+2. **Campaign 2 needs day 7 of campaign 1**, not a win.
+3. **Achievements and unlocks are the same system** (rule 7).
+4. **No difficulty ladder** (no Ascension) for now.
+
+Still to decide when locks go on: which classes start locked and how much of each class is locked. The tables above
+are the proposal.
 
 ## 6. What the code needs
 
