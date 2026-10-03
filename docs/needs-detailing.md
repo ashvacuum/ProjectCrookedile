@@ -54,37 +54,11 @@ When re-keying `StatusEffectIconMapSO` by Id (the `StatusEffectIconMapSO` re-key
 
 The class was redesigned (2026-10-03, `nepo-baby-class.md`): no Patronage, no summons. Open questions with their defaults are in that doc's section 8 (seed vs junk, "I'm Just Like You" type, whether replays raise Hostility, Hostility-scaled junk injection, Friends in High Places). Section 12 lists conflicts with current code, including what to do with the unused Patronage / summon code.
 
-## 9. Meta-progression: achievements and unlocks (blocks: nothing yet — wanted eventually)
+## 9. Meta-progression: achievements and unlocks
 
-**Want:** persistent milestones across runs that unlock content — cards, allies, encounters.
-
-**Already in the repo, all of it disconnected:**
-- `CardData.IsUnlockable` + `CardDatabase.GetUnlockableCards()` + `CardSearchQuery.UnlockableCardsOnly`. Acquisition skips flagged cards (`CardDatabase.IsAcquirable`, `GenerateRewardOffer`), so a flagged card is never acquired until something unlocks it. Only Nepo Baby's Trust Fund is meant to start locked.
-- `SaveData.unlockedCardIDs` / `unlockedLocationIDs` — written on new-save and cleared on reset, read by nothing. `unlockedLocationIDs` predates the encounter model; probably delete rather than repurpose.
-- `CheatsManager.UnlockAllCards()` publishes `CheatUnlockAllCardsEvent`, which has no subscriber.
-
-So the shape exists as three dead stubs, and the decision is what to make them mean.
-
-**Proposed shape — three pieces, in build order:**
-
-1. **A counter store, not an achievement engine.** Nearly every achievement is "count something that already fires on `EventBus`". A `Dictionary<string, int>` on `SaveData` plus one listener that increments named counters (`enemies_converted`, `runs_won_as_faithleader`, `day7_reached`) is the whole tracking layer. Achievements and unlocks both read it, so neither needs to know about the other.
-
-   **Split the counting from the answering.** They look like one "UnlockManager" and aren't:
-   - *Counting* needs a lifetime and `EventBus` subscriptions — a real object, `Singleton<T>` per convention, disposed the way `PassiveResolver` unsubscribes at battle end.
-   - *Answering "is this unlocked?"* is a pure function over `SaveData` — a static helper with no lifetime, callable from `GetAcquirable()` **and from editor tooling with no game running**, which is what lets the Content Hub audit unlock reachability offline. Fuse the two and every query needs a live singleton.
-
-2. **Three `UnlockCondition` subclasses, not a lot of them.** `[SerializeReference]` polymorphic, deliberately mirroring `RunRequirement`. "Convert 50 enemies", "win 3 runs as Faith Leader", "reach day 7", "beat the Incumbent" are *not* four conditions — they are one `StatAtLeast(key, n)` with four strings. Add `WonRunAs(origin)` because origin isn't a counter, and `HasUnlocked(otherId)` for chains, and the set is closed. A fifth subclass usually means a counter nobody incremented.
-
-   So **the counter keys are the design surface, not the condition classes** — and that is the flag problem again: a string on one side, an `EventBus` listener spelling it on the other, nothing checking they match. Unlike encounter flags, designers don't invent counters (code does), so `const string` fields on the tracker beat a free-form key with an editor index.
-
-3. **No fourth database.** Put an `UnlockCondition` field on the content asset itself — `CardData` (beside the existing `IsUnlockable`), `AllyData`, `EncounterData` — and gate at the acquisition chokepoints: `CardDatabase.GetAcquirable()` for cards, `EncounterPoolData.DrawForDay` for encounters. Cards funnel through one method, so that half is a two-line change once the condition type exists.
-
-**Keep achievements and unlocks separate.** An achievement is a *named, displayed* milestone; an unlock condition is a *gate*. Most unlocks want no achievement card attached, and some achievements unlock nothing. Coupling them means every gate needs display copy. Both read the same counters.
-
-**Decide before building:**
-- **Does an unlock apply mid-run or from the next run?** Next-run-only is far simpler — resolve unlocks once at run start into `RunState` and nothing has to re-check mid-battle. Mid-run means every acquisition site re-reads the save.
-- **Are encounters actually unlockable, or only cards and allies?** Locking encounters makes the pool a different shape per save file — the Encounter Designer's day-coverage strip and the schedule simulation both currently assume one fixed pool, and would need an "as unlocked by" toggle to stay honest.
-- **What counts as a "run" for the counters** — any run started, or only ones played to a conclusion? Abandoned-run farming is the usual exploit.
+Folded into **`meta-progression.md`** (profiles, saves, unlocks, achievements, campaign hooks, Steam). The shape
+proposed here (counters split from answering, unlock conditions on the content asset, achievements separate from
+unlocks, next-run unlocks) carried over.
 
 ## 10. EncourageSides — no agreed meaning
 
