@@ -55,6 +55,10 @@ docs win; say so rather than quietly following the code.
 
 ## Authoring tools (menu: Crookedile)
 
+- **Database** — one window with a tab per content type (Cards, Enemies so far): search, filters, sortable columns,
+  audit badges, a preview and the inline inspector. Shared browser in `Editor/Database/ContentTab.cs`; to add a type,
+  write one `ContentTab<T>` subclass (columns, filters, audit, preview) and list it in `DatabaseWindow`. Don't build
+  new standalone browser windows.
 - **Content Hub** — audits all content for completeness. Check here before assuming data is fine.
 - **Encounter Designer** — day-window timeline, dependency graph, multi-seed schedule simulation,
   and CSV import from `docs/campaign-ideation.xlsx`.
