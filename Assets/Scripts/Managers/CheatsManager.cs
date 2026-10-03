@@ -148,6 +148,67 @@ namespace Crookedile.Managers
         }
 
         [FoldoutGroup("Card Cheats")]
+        [Button("Add Card To Hand", ButtonSizes.Medium)]
+        [CheatCommand(
+            "addcard",
+            "Add a card to your hand mid-battle by name, spaces optional (addcard blowtheallowance)",
+            Category = "Cards"
+        )]
+        public void AddCardToHand([LabelText("Card name")] string cardName)
+        {
+            var battle = FindFirstObjectByType<Gameplay.Battle.BattleManager>();
+            var database = Resources.Load<Data.Cards.CardDatabase>("Databases/CardDatabase");
+            if (battle == null || battle.PlayerDeck == null || database == null)
+            {
+                GameLogger.LogWarning("Cheats", "addcard: no battle in progress");
+                return;
+            }
+
+            string wanted = Normalize(cardName);
+            Data.Cards.CardData match = null;
+            int partialMatches = 0;
+            foreach (var card in database.GetAll())
+            {
+                if (card == null || card.IsUpgraded)
+                    continue;
+                string name = Normalize(card.CardName);
+                if (name == wanted)
+                {
+                    match = card;
+                    partialMatches = 1;
+                    break;
+                }
+                if (name.Contains(wanted))
+                {
+                    match = card;
+                    partialMatches++;
+                }
+            }
+
+            if (match == null || partialMatches > 1)
+            {
+                GameLogger.LogWarning(
+                    "Cheats",
+                    partialMatches > 1
+                        ? $"addcard: '{cardName}' matches {partialMatches} cards; be more specific"
+                        : $"addcard: no card named '{cardName}'"
+                );
+                return;
+            }
+            battle.PlayerDeck.AddCardToHand(match);
+            GameLogger.LogInfo("Cheats", $"Added {match.CardName} to hand");
+        }
+
+        private static string Normalize(string text)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (char c in text ?? "")
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(char.ToLowerInvariant(c));
+            return sb.ToString();
+        }
+
+        [FoldoutGroup("Card Cheats")]
         [Button("Unlock All Cards", ButtonSizes.Large)]
         [GUIColor(1f, 0.5f, 1f)]
         [CheatCommand("unlockall", "Unlock all cards in the game", Category = "Cards")]

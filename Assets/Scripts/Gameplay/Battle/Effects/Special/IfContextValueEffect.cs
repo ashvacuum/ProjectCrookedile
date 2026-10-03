@@ -33,6 +33,23 @@ namespace Crookedile.Gameplay.Battle
         [SerializeReference]
         private List<BattleEffect> _else = new List<BattleEffect>();
 
+        /// <summary>
+        /// Single-target when either branch is, so a branched attack still counts as singling an
+        /// enemy out (the crowd's Hostility bump reads this).
+        /// </summary>
+        public override TargetType Target
+        {
+            get
+            {
+                foreach (var list in new[] { _then, _else })
+                    if (list != null)
+                        foreach (var effect in list)
+                            if (effect != null && effect.Target == TargetType.Opponent)
+                                return TargetType.Opponent;
+                return TargetType.Self;
+            }
+        }
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             int value = ctx.GetValue(_value);

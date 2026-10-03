@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
+  m_Name: Old Boys' Club
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
+  _id: c076e5f7-bdf6-4808-98d9-7acd727108c2
+  _cardName: Old Boys' Club
+  _cardType: 2
+  _rarity: 1
+  _artwork: {fileID: 0}
+  _description:
+  _flavorText: 'Membership has its privileges.'
+  _costs:
+  - _costType: 1
+    _baseAmount: 1
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _costReductionPerX: 7
+  _effects: []
+  _passives:
+  - rid: 7000000000000000000
+  _isUpgraded: 0
+  _upgradedCosts: []
+  _upgradedEffects: []
+  _upgradedPassives: []
+  _upgradedInnateRetain: 0
+  _tags:
+  - nepobaby
+  _fantasies: 0
+  _isStarterCard: 0
+  _isUnlockable: 0
+  _isGeneratedOnly: 0
+  _isUnplayable: 0
+  _innateRetain: 0
+  _cardVFX: {fileID: 0}
+  _configurationNotes:
+  references:
+    version: 2
+    RefIds:
+    - rid: 7000000000000000000
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 7000000000000000001
+        _conditions: []
+        _oneShot: 0
+        _oncePerTurn: 1
+        _effects:
+        - rid: 7000000000000000002
+    - rid: 7000000000000000001
+      type: {class: CardPlayedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _filterByType: 1
+        _filterType: 1
+    - rid: 7000000000000000002
+      type: {class: RefundEnergyEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 1
