@@ -18,6 +18,8 @@ So each deck = ~4 offense + ~3 defense + 1 hostility + identity cards.
 ---
 
 ## Nepo Baby — *the schemer*
+
+> **Superseded (2026-10-03), pending build:** `nepo-baby-class.md` replaces this Patronage / summon design with the Burn / Return / Calm class. Section 12 there lists what changes.
 **Verb:** burn the hand you were handed to fund borrowed power. **Distinct economy** — see below. Fantasy: unearned privilege; you don't build value, you spend down an inheritance of favors.
 
 ### The Patronage economy *(this class only)*

@@ -130,6 +130,8 @@ Each asks a different question every turn and lives at a different point in time
 > A distinctiveness test: each archetype must have a **unique capability** AND a **unique fear**. Overlapping fears are what make archetypes feel samey. Watch especially that Celebrity fears *self-overreach* while Faith Leader fears *opponent disruption* — if Celebrity's risk becomes "opponent breaks my setup," they've merged.
 
 ### Nepo Baby — *the schemer*
+
+> **Superseded (2026-10-03), pending build:** `nepo-baby-class.md` replaces this Patronage / summon design with the Burn / Return / Calm class. Section 12 there lists what changes.
 Controls room composition; imports allies via daddy's connections (necromancer-like — summons bodies). Can also **Plant** a hostile to break the echo chamber. **Leash:** summoned allies are the *most* corruptible — their own people turning Turncoat is the signature nightmare.
 
 ### Celebrity — *the open canvas* (archetype-flexible)
