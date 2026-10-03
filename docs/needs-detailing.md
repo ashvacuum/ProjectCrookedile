@@ -59,7 +59,7 @@ The class was redesigned (2026-10-03, `nepo-baby-class.md`): no Patronage, no su
 **Want:** persistent milestones across runs that unlock content — cards, allies, encounters.
 
 **Already in the repo, all of it disconnected:**
-- `CardData.IsUnlockable` + `CardDatabase.GetUnlockableCards()` + `CardSearchQuery.UnlockableCardsOnly` — a flag nothing reads at acquisition time.
+- `CardData.IsUnlockable` + `CardDatabase.GetUnlockableCards()` + `CardSearchQuery.UnlockableCardsOnly`. Acquisition skips flagged cards (`CardDatabase.IsAcquirable`, `GenerateRewardOffer`), so a flagged card is never acquired until something unlocks it. Only Nepo Baby's Trust Fund is meant to start locked.
 - `SaveData.unlockedCardIDs` / `unlockedLocationIDs` — written on new-save and cleared on reset, read by nothing. `unlockedLocationIDs` predates the encounter model; probably delete rather than repurpose.
 - `CheatsManager.UnlockAllCards()` publishes `CheatUnlockAllCardsEvent`, which has no subscriber.
 

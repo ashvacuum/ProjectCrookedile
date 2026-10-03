@@ -261,14 +261,28 @@ namespace Crookedile.Data.Cards
         /// <summary>
         /// Cards a run can actually be handed. Collects <see cref="GenerateRewardOffer"/>'s
         /// exclusions in one place so a random-gain outcome can't slip the player a starter
-        /// card, an upgraded duplicate, an artless work-in-progress, or a battle-only token.
+        /// card, an upgraded duplicate, an artless work-in-progress, a battle-only token, or a
+        /// card still locked behind progression.
         /// </summary>
         public static bool IsAcquirable(CardData card) =>
             card != null
             && !card.IsStarterCard
             && !card.IsUpgraded
             && !card.IsInDevelopment
-            && !card.IsGeneratedOnly;
+            && !card.IsGeneratedOnly
+            && !card.IsUnlockable;
+
+        /// <summary>
+        /// True if <paramref name="card"/> carries the tag of an origin other than
+        /// <paramref name="origin"/> — a class card that belongs in someone else's pool.
+        /// </summary>
+        private static bool IsOtherOriginsCard(CardData card, OriginType origin)
+        {
+            foreach (OriginType other in System.Enum.GetValues(typeof(OriginType)))
+                if (other != origin && card.HasTag(other.ToString().ToLower()))
+                    return true;
+            return false;
+        }
 
         /// <summary>Every acquirable card, optionally narrowed by type and/or rarity.</summary>
         public List<CardData> GetAcquirable(CardType? type = null, CardRarity? rarity = null)
@@ -371,7 +385,8 @@ namespace Crookedile.Data.Cards
         /// Generates a randomised reward card offer for the post-battle card pick screen.
         ///
         /// Rules:
-        ///   - Policy cards are universal — no origin filter applied.
+        ///   - Policy cards are universal unless tagged with another origin (class Policies
+        ///     anchor that class's build, so they stay in its pool).
         ///   - Pressure / Rhetoric cards must have the origin's tag or "universal".
         ///   - Starter cards (<see cref="CardData.IsStarterCard"/>) are always excluded.
         ///   - Upgraded cards are excluded so players receive base versions only.
@@ -421,11 +436,13 @@ namespace Crookedile.Data.Cards
                     continue; // no artwork — not ready for play
                 if (card.IsGeneratedOnly)
                     continue; // battle-generated token — never in acquisition pools
+                if (card.IsUnlockable)
+                    continue; // locked until a progression unlock exists
 
                 switch (card.CardType)
                 {
                     case CardType.Policy:
-                        if (includePolicy)
+                        if (includePolicy && !IsOtherOriginsCard(card, origin))
                             candidates.Add(card);
                         break;
 
