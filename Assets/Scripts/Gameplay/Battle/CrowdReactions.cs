@@ -29,6 +29,7 @@ namespace Crookedile.Gameplay.Battle
         private readonly int _turncoatStacks;
         private readonly int _turncoatOpinionHit;
         private readonly int _turncoatAdjacentNudge;
+        private readonly int _supportOnBecomingReceptive;
 
         private bool _echoChamberActive;
         private bool _resolvingTurncoat;
@@ -38,7 +39,8 @@ namespace Crookedile.Gameplay.Battle
             int echoChamberDecayPerTurn,
             int turncoatStacks,
             int turncoatOpinionHit,
-            int turncoatAdjacentNudge
+            int turncoatAdjacentNudge,
+            int supportOnBecomingReceptive
         )
         {
             _enemies = enemies;
@@ -46,9 +48,22 @@ namespace Crookedile.Gameplay.Battle
             _turncoatStacks = turncoatStacks;
             _turncoatOpinionHit = turncoatOpinionHit;
             _turncoatAdjacentNudge = turncoatAdjacentNudge;
+            _supportOnBecomingReceptive = supportOnBecomingReceptive;
 
             EventBus.Subscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
             EventBus.Subscribe<HostilityChangedEvent>(OnHostilityChanged);
+            EventBus.Subscribe<EnemyBecameReceptiveEvent>(OnEnemyBecameReceptive);
+        }
+
+        /// <summary>
+        /// Winning someone over pays at once: Support the moment an enemy turns receptive, the
+        /// mirror to an enemy turning hostile earning a draw. Staying receptive pays again each
+        /// turn start (BattleManager's per-receptive-enemy Support).
+        /// </summary>
+        private void OnEnemyBecameReceptive(EnemyBecameReceptiveEvent evt)
+        {
+            if (_supportOnBecomingReceptive > 0)
+                _opinion?.GainSupport(_supportOnBecomingReceptive);
         }
 
         #region Turn hostility tallies
@@ -90,6 +105,7 @@ namespace Crookedile.Gameplay.Battle
         {
             EventBus.Unsubscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
             EventBus.Unsubscribe<HostilityChangedEvent>(OnHostilityChanged);
+            EventBus.Unsubscribe<EnemyBecameReceptiveEvent>(OnEnemyBecameReceptive);
         }
 
         private IEnumerable<EnemyController> LivingEnemies => _enemies.Where(e => !e.IsDefeated);
@@ -253,7 +269,9 @@ namespace Crookedile.Gameplay.Battle
                 enemy.FlagForcedAggressiveIntent();
                 var intent = enemy.SelectNextMove(_enemies);
                 if (intent != null)
-                    EventBus.Publish(new EnemyIntentDeclaredEvent { Move = intent, EnemyIndex = idx });
+                    EventBus.Publish(
+                        new EnemyIntentDeclaredEvent { Move = intent, EnemyIndex = idx }
+                    );
 
                 GameLogger.LogInfo<CrowdReactions>(
                     $"Turncoat! [{idx}] {enemy.EnemyData.EnemyName} turned on you."

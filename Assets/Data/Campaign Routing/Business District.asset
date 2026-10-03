@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 27686cbb5b65972469df6def8421e73a, type: 3}
-  m_Name: Business District 1
+  m_Name: Business District
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.DistrictData
   _mapPosition: {x: 610, y: 60}
-  _displayName: Business District 1
+  _displayName: Business District

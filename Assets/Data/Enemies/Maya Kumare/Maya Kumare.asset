@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Maya Kumare
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _id: 12cdb8d669125dd55d5f0624410a277c
+  _enemyName: Maya Kumare
+  _portrait: {fileID: 0}
+  _startingHostility: 2
+  _maxHostility: 5
+  _minHostility: -5
+  _neutralZone: 0
+  _demographicClass: 0
+  _demographicValues: 0
+  _startingEffects: []
+  _passives: []
+  _movePattern: 0
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: 7a1844b238099b571b1f783d85b1137f, type: 2}
+  - {fileID: 11400000, guid: 7a1844b238099b571b1f783d85b1137f, type: 2}
+  - {fileID: 11400000, guid: 2ff52f7cf55faece0c17e37e0e555b39, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: 2ff52f7cf55faece0c17e37e0e555b39, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: 27b774cab2df30d746b5181b6813249c, type: 2}
+  references:
+    version: 2
+    RefIds: []

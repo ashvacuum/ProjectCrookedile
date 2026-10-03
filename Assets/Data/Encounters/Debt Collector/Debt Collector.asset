@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: Debt Collector
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _id: 9ee34a885ade1d0ebb7459e77cebf22c
+  _displayName: Debt Collector
+  _blurb: "A shakedown, timed to when you are flush."
+  _image: {fileID: 0}
+  _hourCost: 0
+  _extraMinutes: 45
+  _district: {fileID: 11400000, guid: d1be5f821475418c99c6c6335f0ba084, type: 2}
+  _openingMinute: 480
+  _closingMinute: 720
+  _dropWeight: 1
+  _body: "Two men in matching polo shirts are waiting at your market stall. Their employer lent your campaign money last cycle, they say, and he heard you are doing well this year."
+  _options:
+  - _label: "Pay up"
+    _resultText: "You count it out in front of the fish vendors. The men thank you politely and promise to stay in touch."
+    _requirements: []
+    _outcomes:
+    - rid: 1
+  - _label: "Refuse"
+    _resultText: "You tell them the campaign owes nothing. Ten minutes later they are back, and they have stopped being polite."
+    _requirements: []
+    _outcomes:
+    - rid: 2
+  references:
+    version: 2
+    RefIds:
+    - rid: 1
+      type: {class: AdjustFundsOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: -30
+    - rid: 2
+      type: {class: GoToEncounterOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _encounter: {fileID: 11400000, guid: 2057e550bc1cc767476cb063142ebb79, type: 2}

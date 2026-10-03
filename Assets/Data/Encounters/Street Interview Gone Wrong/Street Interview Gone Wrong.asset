@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: Street Interview Gone Wrong
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _id: 88f0e5a6fa8d179249e66084321425e0
+  _displayName: Street Interview Gone Wrong
+  _blurb: "A passerby ambushes you with a hostile question on camera."
+  _image: {fileID: 0}
+  _hourCost: 0
+  _extraMinutes: 30
+  _district: {fileID: 11400000, guid: d1be5f821475418c99c6c6335f0ba084, type: 2}
+  _openingMinute: 480
+  _closingMinute: 840
+  _dropWeight: 1
+  _body: "A man at the jeepney stop recognises you, pulls out his phone and asks, loud enough for the whole line to hear, why you voted to raise the fare."
+  _options:
+  - _label: "Deflect smoothly"
+    _resultText: "You thank him for his concern and change the subject to road repairs. The line loses interest before he does."
+    _requirements: []
+    _outcomes: []
+  - _label: "Snap back"
+    _resultText: "You tell him to check his facts. He does not appreciate it, and neither does the line."
+    _requirements: []
+    _outcomes:
+    - rid: 1
+  - _label: "Own the moment"
+    _resultText: "You admit the vote, explain it, and ask what he would have done. It is a gamble in front of a live camera."
+    _requirements: []
+    _outcomes:
+    - rid: 2
+  references:
+    version: 2
+    RefIds:
+    - rid: 1
+      type: {class: GoToEncounterOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _encounter: {fileID: 11400000, guid: 0c726a2d46f75d513961efffd02d3bd4, type: 2}
+    - rid: 2
+      type: {class: CoinFlipOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _successChance: 0.5
+        _onSuccess:
+        - rid: 3
+        _onFailure:
+        - rid: 4
+    - rid: 3
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 10
+    - rid: 4
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: -5

@@ -280,6 +280,15 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         private List<CardData> BuildDeck(OriginType origin)
         {
+            // The origin's authored deck is the one source of truth, shared with the campaign.
+            // The inspector lists below remain as a test override for origins without one.
+            var authored = (originDatabase != null ? originDatabase : OriginDatabase.Shared)?.BuildStarterDeck(origin);
+            if (authored != null && authored.Count > 0)
+            {
+                Debug.Log($"[BattleTestStarter] Built {origin} deck from OriginDatabase: {authored.Count} cards.");
+                return authored;
+            }
+
             List<StarterCardEntry> entries = origin switch
             {
                 OriginType.FaithLeader => faithLeaderDeck,

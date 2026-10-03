@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Uwak
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _id: b8a4c6c49fc5919340445b77c099f6c3
+  _enemyName: Uwak
+  _portrait: {fileID: 0}
+  _startingHostility: 2
+  _maxHostility: 5
+  _minHostility: -5
+  _neutralZone: 0
+  _demographicClass: 0
+  _demographicValues: 0
+  _startingEffects: []
+  _passives: []
+  _movePattern: 2
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: b1fc428109704078887b2f9ba1780bbd, type: 2}
+  - {fileID: 11400000, guid: b60382cf62234d6059d48d9917a3878a, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: 36d2d844bd0f583d60ef8672df3b9fdc, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: f8599149d14f7e4915e64b6192cba753, type: 2}
+  references:
+    version: 2
+    RefIds: []

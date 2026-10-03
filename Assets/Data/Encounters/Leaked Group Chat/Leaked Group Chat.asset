@@ -15,45 +15,65 @@ MonoBehaviour:
   _id: 349b59413fc6ee946a98291743c7083a
   _displayName: Leaked Group Chat
   _blurb: "Handle the leaked messages with the team at headquarters."
+  _image: {fileID: 0}
   _hourCost: 0
-  _district: {fileID: 11400000, guid: f92e8d6aa6b14629b92da64d357b2512, type: 2}
   _extraMinutes: 45
+  _district: {fileID: 11400000, guid: f92e8d6aa6b14629b92da64d357b2512, type: 2}
   _openingMinute: 480
   _closingMinute: 915
   _dropWeight: 1
-  _body: 
+  _body: "Your aide closes the office door before she shows you her phone. Screenshots from your rival's inner circle: jokes about the voters, a line about kickbacks, and your name next to a word you will not repeat."
   _options:
-  - _label: Leak It
-    _resultText: 
+  - _label: "Leak it"
+    _resultText: "The screenshots are everywhere by lunch. So are his people, and they know exactly who sent them."
     _requirements: []
     _outcomes:
-    - rid: 1430661995083595877
-  - _label: Wait it out
-    _resultText: 
+    - rid: 1
+    - rid: 2
+    - rid: 3
+  - _label: "Sit on it"
+    _resultText: "You buy a prepaid phone and keep the screenshots on it. Leverage is worth more unspent."
+    _requirements:
+    - rid: 10
+    _outcomes:
+    - rid: 4
+    - rid: 5
+  - _label: "Report it properly"
+    _resultText: "You forward everything to the election commission with a formal cover letter. It will go nowhere, but the reporters like that you did it."
     _requirements: []
     _outcomes:
-    - rid: 1430661995083595878
-  - _label: Walk Away
-    _resultText: 
-    _requirements: []
-    _outcomes:
-    - rid: 1430661995083595871
+    - rid: 6
   references:
     version: 2
     RefIds:
-    - rid: 1430661995083595871
-      type: {class: SetFlagOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
-      data:
-        _flag: walk_away
-        _clear: 0
-    - rid: 1430661995083595877
-      type: {class: RemoveChosenCardOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
-      data:
-        _restrictType: 1
-        _type: 0
-        _prompt: Choose a card to remove
-    - rid: 1430661995083595878
+    - rid: 1
       type: {class: SetFlagOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
       data:
         _flag: leaked_chat
         _clear: 0
+    - rid: 2
+      type: {class: NextBattleHostilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 2
+    - rid: 3
+      type: {class: GoToEncounterOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _encounter: {fileID: 11400000, guid: 1b000a9cc6243169f9cc42bdc1ab2eb8, type: 2}
+    - rid: 4
+      type: {class: RecruitAllyOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _ally: {fileID: 11400000, guid: 7f262914f74c5c9864832e9d445e40a2, type: 2}
+    - rid: 5
+      type: {class: SetFlagOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _flag: sat_on_leak
+        _clear: 0
+    - rid: 6
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 10
+    - rid: 10
+      type: {class: HasAlly, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _negate: 1
+        _ally: {fileID: 11400000, guid: a30f3445b8ece2c890f4d8b7ab5965e8, type: 2}

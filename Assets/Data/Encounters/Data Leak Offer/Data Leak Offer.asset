@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: Data Leak Offer
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _id: f416547b42f86c366d5eabfabe6eb4fd
+  _displayName: Data Leak Offer
+  _blurb: "A hacker offers you your rival's opposition research."
+  _image: {fileID: 0}
+  _hourCost: 0
+  _extraMinutes: 45
+  _district: {fileID: 11400000, guid: 953c76c063bd23d4f852ccff3d65ef38, type: 2}
+  _openingMinute: 600
+  _closingMinute: 900
+  _dropWeight: 1
+  _body: "An anonymous account sends you a link: your rival's internal polling and opposition research, scraped from a careless staffer's cloud drive. The hacker wants nothing, which is what worries you."
+  _options:
+  - _label: "Accept"
+    _resultText: "You download it and read it twice. Most of it is noise; some of it will be very useful."
+    _requirements: []
+    _outcomes:
+    - rid: 1
+  - _label: "Decline"
+    _resultText: "You delete the message and have your laptop checked. Some doors are better left shut."
+    _requirements: []
+    _outcomes: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 1
+      type: {class: RecruitAllyOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _ally: {fileID: 11400000, guid: ddc72e6266129cbbbdddf5a8cd8b0fbd, type: 2}

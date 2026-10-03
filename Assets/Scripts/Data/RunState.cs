@@ -310,6 +310,23 @@ namespace Crookedile.Data
         /// <summary>Clears <see cref="NextEncounter"/> — call once it's been consumed.</summary>
         public void ClearNextEncounter() => NextEncounter = null;
 
+        /// <summary>
+        /// Hostility added to every enemy at the start of the next battle, on top of its own
+        /// starting value. Event choices bank it; the next battle spends all of it.
+        /// </summary>
+        public int NextBattleHostility { get; private set; }
+
+        /// <summary>Banks hostility for the next battle. Stacks with anything already banked.</summary>
+        public void AddNextBattleHostility(int amount) => NextBattleHostility += amount;
+
+        /// <summary>Returns the banked hostility and clears it, so only one battle feels it.</summary>
+        public int ConsumeNextBattleHostility()
+        {
+            int amount = NextBattleHostility;
+            NextBattleHostility = 0;
+            return amount;
+        }
+
         /// <summary>Marks a map location as resolved so a non-repeatable one won't re-offer.</summary>
         public void MarkVisited(string locationId)
         {

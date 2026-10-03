@@ -1,5 +1,24 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-5913372280947561217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 753352c9291356a40b81076a162b5ad7, type: 3}
+  m_Name: The Incumbent Session
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.BattleSession
+  rounds:
+  - label: The Incumbent
+    enemies:
+    - {fileID: 11400000, guid: db87f831eb2314243ad00dbd3ac46f28, type: 2}
+    maxTurns: 10
+    maxOpinion: 100
+    startingOpinion: 50
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21,6 +40,6 @@ MonoBehaviour:
   _blurb: "The afternoon showdown at the civic center."
   _hourCost: 2
   _dropWeight: 1
-  _session: {fileID: 0}
-  _isBoss: 0
-  _rewardOverride: {fileID: 0}
+  _session: {fileID: -5913372280947561217}
+  _isBoss: 1
+  _rewardOverride: {fileID: 11400000, guid: 75ad8bc7ba494644daf3a590896ca7ad, type: 2}

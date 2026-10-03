@@ -52,6 +52,13 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private TargetType _target = TargetType.Opponent;
 
+        [Tooltip(
+            "Enemy moves only: the loss skips the player's Support entirely (a Smear). "
+                + "Flat — hostility doesn't scale it. Ignored on player cards."
+        )]
+        [SerializeField]
+        private bool _bypassSupport;
+
         /// <summary>Exposes the chosen pattern so single-target (Opponent) cards still bump hostility.</summary>
         public override TargetType Target => _target;
 
@@ -71,6 +78,12 @@ namespace Crookedile.Gameplay.Battle
                 // Address the chosen part of the crowd — the shift applies per target.
                 foreach (var (targetStats, _) in ctx.GetTargets(_target))
                     ApplyOpinion(targetStats, ctx.Caster, baseDamage, ctx);
+            }
+            else if (_bypassSupport)
+            {
+                // Smear: straight off the meter, no Support absorption.
+                if (baseDamage > 0)
+                    ctx.BattleManager?.Opinion?.DecayOpinion(baseDamage);
             }
             else
             {
@@ -96,7 +109,8 @@ namespace Crookedile.Gameplay.Battle
                 TargetType.AllOpponents => " to all enemies",
                 _ => $" ({_target})",
             };
-            return $"Shift Opinion by {amountStr}{targetStr}";
+            string bypass = _bypassSupport ? " (ignores Support)" : "";
+            return $"Shift Opinion by {amountStr}{targetStr}{bypass}";
         }
     }
 }

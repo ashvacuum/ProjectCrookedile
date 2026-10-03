@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Parrot
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _id: 37862e41b622b4864afcecb35181c18d
+  _enemyName: Parrot
+  _portrait: {fileID: 0}
+  _startingHostility: 2
+  _maxHostility: 5
+  _minHostility: -5
+  _neutralZone: 0
+  _demographicClass: 0
+  _demographicValues: 0
+  _startingEffects: []
+  _passives: []
+  _movePattern: 0
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: 076a425c34a967ffeef28ca636f48328, type: 2}
+  - {fileID: 11400000, guid: 3dd4d50e4d33dcaa59d718e98043899e, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: 78173e5aefac01dde0c321dd2a76154f, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: d2c4b9c595816b445473e978f44fded6, type: 2}
+  references:
+    version: 2
+    RefIds: []

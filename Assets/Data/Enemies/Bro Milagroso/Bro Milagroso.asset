@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Bro Milagroso
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _id: a468fc4ba110d159147b17f6fa8ffdb0
+  _enemyName: Bro Milagroso
+  _portrait: {fileID: 0}
+  _startingHostility: 3
+  _maxHostility: 7
+  _minHostility: -6
+  _neutralZone: 0
+  _demographicClass: 0
+  _demographicValues: 0
+  _startingEffects:
+  - _behavior:
+      rid: 900
+    _stacks: 2
+    _duration: 2
+  _passives: []
+  _movePattern: 1
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: ccf39f13222ca8d1c89b053684b9ad56, type: 2}
+  - {fileID: 11400000, guid: 0d7babafd255472d709a2d64f2317ff1, type: 2}
+  - {fileID: 11400000, guid: fb93dd4b1d0bf4892577e2df61503203, type: 2}
+  - {fileID: 11400000, guid: d10e58ae7f3af985750580b3594780a2, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: ccf39f13222ca8d1c89b053684b9ad56, type: 2}
+  - {fileID: 11400000, guid: 0d7babafd255472d709a2d64f2317ff1, type: 2}
+  - {fileID: 11400000, guid: d10e58ae7f3af985750580b3594780a2, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: 0d7babafd255472d709a2d64f2317ff1, type: 2}
+  - {fileID: 11400000, guid: fb93dd4b1d0bf4892577e2df61503203, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 900
+      type: {class: HardenedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

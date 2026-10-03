@@ -134,3 +134,63 @@ Pattern rules: move pools with constraints (no repeat x2 unless scripted; thresh
 | D14 | Credibility recovery economy | Rest slots? Cards? Post-room partial? | TBD — campaign-layer pass *(parked with Credibility)* | Difficulty tuning |
 | D15 | Numbers pass | Meter size, push values, shield counts, status thresholds | AFTER kits + targeting locked | Everything downstream |
 | D16 | Boss 2 "The Debate" tug-of-war | Rival pushes same meter negative vs own meter | Tug-of-war — same meter, purest mirror | B02 design |
+| D23 | Do player summons/allies count as non-Receptive presences for the Echo Chamber check? | (a) yes — summons are a mix-management tool (b) no — only enemies count | Leaning (a); test in EL1 first | EL1, Nepo tuning |
+| D24 | Elite rewards system | Endorsement relics (His Flock Follows, Borrowed Machinery) vs rare cards vs campaign resource | Leaning endorsement relics (Allies in code) | Elite rewards |
+
+**R7 (RULING, LOCKED):** Converter actions consume the enemy's full turn. The N02 judo line depends on it; converting is a real tempo cost for enemies too.
+
+## 8. Encounter Specs
+
+Merged from the xlsx "Encounter Specs" sheet (2026-09-29). Provisional baseline: Meter 100, ~3 cards/turn; every number is a tuning stake (D15). The sheet's Credibility figures predate the 2026-07-08 ruling: **Smear moves hit the Opinion Meter directly, bypassing Support** (pushes go through Support; smears don't), until Credibility returns as a battle axis.
+
+### N02 — "Merienda at Aling Corazon's" (Normal, mid-Act 1)
+
+Question: silence the engine, race the output, or use the engine against itself? Clock: Chika compounding — turn 6+ pushes outpace most decks. Cast: Cat Tita (Amplifier/Converter) + 2x Askal (Pushers).
+
+**Aling Corazon — Cat Tita — Amplifier/Converter.** Starts Hostile. Hardened 1 (first status each turn resisted). Never pushes the meter herself. While Receptive: no Chika; Guilt Trip 50%.
+
+| Move | Intent | Targets | Effect | Pattern rule |
+|---|---|---|---|---|
+| Chika | Buff (ally arrow) | Adjacent Askal | Target gains +2 Push permanently | Default; alternates targets |
+| Guilt Trip | Convert | One Receptive ally | Drag back to Hostile. Full turn (R7) | Only if an ally is Receptive; overrides Chika |
+| Mano Po | Smear | Player | 6 | Only if both Askals are Receptive (cornered move) |
+
+**Askal x2 — dogs — Pushers.** Start Hostile, Push 4. While Receptive: idle (wag) — ideal holdouts, but Guilt Trip re-drags.
+
+| Move | Intent | Targets | Effect | Pattern rule |
+|---|---|---|---|---|
+| Bark It Down | Push | Meter | -4 (+Chika stacks) | 2 of every 3 turns |
+| Nip | Smear | Player | 3 | Every 3rd turn |
+
+Three lines, all must stay viable: (1) DECAPITATE — flip the Tita through Hardened; dogs trivialize. (2) RACE — out-push the amplified dogs; fails for setup decks past T6. (3) JUDO — flip both dogs and LET Guilt Trip fire; every convert turn is a turn without pushes (depends on R7). Ratings: Nepo Med · Faith Med-Hard · Celebrity Easy-Med.
+
+### EL1 — "The Televangelist" (Elite) — hijacks the Echo Chamber
+
+Question: can you fight someone forcing you to "win"? Clock: every all-Receptive turn → meter -8 and he gains a shield. Cast: Bro. Milagroso, Peacock (inverted Converter/Shielder, Hardened 2 — convertible but expensive) + 2x Devotee sheep.
+
+Scripted opener: turn 1 is always Anointing — both Devotees flip Receptive, so you start one step from the penalty.
+
+| Move | Intent | Targets | Effect | Pattern rule |
+|---|---|---|---|---|
+| Anointing | Convert (mass, inverted) | All allies | Force all allies Receptive | T1 scripted; recast whenever ≥1 ally is Hostile; max every other turn |
+| Pass the Plate | Shield | Meter | +2 shields, +1 per Receptive ally | Default when allies are Receptive |
+| Sermon of Shame | Smear | Player | 8 | Only during the Echo Chamber penalty |
+| Testify! | Push | Meter | -6 | Filler |
+
+**Devotee x2 — sheep.** Push 3. While Receptive they sing — harmless-looking, but they feed Pass the Plate and the penalty. The trap is that they look solved.
+
+Puzzle: keep ≥1 Devotee Hostile on purpose, use removal, or body-block with summons if D23 lands (a). Reward proposal: "His Flock Follows" — the first enemy you flip each room stays Receptive permanently. Ratings: Nepo Med · Faith Hard · Celebrity Med.
+
+### EL2 — "The Dynast" (Elite) — hijacks the row
+
+Question: can you fight for physical space? Clock: a new Proxy every 2 turns; 4+ proxies snowball. Cast: Doña Agila, Eagle (Amplifier/Protector/Summoner, Hardened 1, centre slot).
+
+| Move | Intent | Targets | Effect | Pattern rule |
+|---|---|---|---|---|
+| Anak, Halika | Summon | Slot adjacent to her | Proxy Candidate enters | Every 2 turns, max 4 proxies |
+| Wing Ward | Ward | Adjacent proxies | Warded stacks | Whenever a new proxy lands |
+| Family Name | Buff | All proxies | +1 Push each | When the row is full |
+| Talon Memo | Smear | Player | 7 | Only with 3+ proxies |
+| Disowned | Eject | One Receptive proxy | Removes a converted proxy, freeing the slot | Replaces Anak, Halika when a Receptive proxy holds a slot she wants |
+
+**Proxy Candidate (fledgling).** Push 3, fragile, no resistances. Converted proxies stay in their slot and give +2 meter/turn to you until Disowned ejects them. Wards cover adjacent slots only (D10). Reward proposal: "Borrowed Machinery" — once per room, summon a free Proxy. Ratings: Nepo Hard-but-fair · Faith Med · Celebrity Med-Hard.

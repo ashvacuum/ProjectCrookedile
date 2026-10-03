@@ -114,7 +114,7 @@ namespace Crookedile.UI.Battle
             if (focusedEnemyHostilityText != null)
                 focusedEnemyHostilityText.text =
                     enemyStats != null
-                        ? $"Hostility: {enemyStats.CurrentHostility} ({enemyStats.HostilityDamageMultiplier:F1}x)"
+                        ? $"Hostility: {enemyStats.CurrentHostility}"
                         : "Hostility: —";
 
             if (turnInfoText != null)

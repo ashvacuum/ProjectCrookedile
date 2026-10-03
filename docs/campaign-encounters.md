@@ -115,6 +115,13 @@ the two methods. No other file changes.
 | `GainRandomCardOutcome` | Draws from `CardDatabase` — one rarity, or the standard reward weights |
 | `RemoveCardOutcome` | Removes one copy of a specific card. For cleansing events |
 | `GoToEncounterOutcome` | Sets `RunState.NextEncounter` — this choice leads into another encounter |
+| `CoinFlipOutcome` | Rolls `RunState.Rng`; applies an on-success or on-failure outcome list. For choices whose risk *is* the point ("improvise", "deny it") |
+| `NextBattleHostilityOutcome` | Banks hostility on the run; the next battle adds it to every enemy's start, then clears it |
+| `SpendTimeOutcome` | Takes extra minutes off today's budget, on top of the encounter's duration |
+
+`CoinFlipOutcome` is the one exception to "no branching within an option". Use it for a gamble
+the player knowingly takes; a consequence they should get to *choose* is still its own option.
+Chains nested inside it run, but the Encounter Designer only draws top-level chain edges.
 
 The card outcomes resolve the database through `CardDatabaseLookup` (`Resources/Databases/CardDatabase`)
 rather than an inspector field, because outcomes are plain serialized classes with nowhere to
@@ -345,7 +352,7 @@ Two streams derive from it, and one thing deliberately doesn't:
 | Stream | Covers | Source |
 |---|---|---|
 | Encounter draws | Which locations appear on which day | `EncounterPoolData.DrawForDay`, own `System.Random` per (seed, day) |
-| `RunState.Rng` | Card reward offers, `GainRandomCardOutcome` | One `System.Random` per run, offset from the seed |
+| `RunState.Rng` | Card reward offers, `GainRandomCardOutcome`, `CoinFlipOutcome` | One `System.Random` per run, offset from the seed |
 | **Not seeded** | Battle shuffles, chance effects, Confused rolls | `UnityEngine.Random` |
 
 **Battle RNG stays unseeded on purpose.** Sharing one global stream would make the campaign

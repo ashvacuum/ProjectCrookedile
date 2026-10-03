@@ -13,12 +13,29 @@ MonoBehaviour:
   m_Name: EnemyDatabase
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyDatabase
   _items:
+  - {fileID: 11400000, guid: 11d08081dc217b9978c39bc6444095e2, type: 2}
+  - {fileID: 11400000, guid: dded6e9618e88e0c8d1bd236ae4d8d44, type: 2}
+  - {fileID: 11400000, guid: a111c8a040e426af9c435902a6dcbff6, type: 2}
+  - {fileID: 11400000, guid: f4a14ab4987ca051e2f0e3e4330a453f, type: 2}
+  - {fileID: 11400000, guid: a468fc4ba110d159147b17f6fa8ffdb0, type: 2}
+  - {fileID: 11400000, guid: 81c0fd8df5a9cb8f2491c8f63f6ca18c, type: 2}
+  - {fileID: 11400000, guid: 86947a62100d205ecd8fb3ab3652a552, type: 2}
   - {fileID: 11400000, guid: 2fa6b2b1bc5267e4f8052005db94e5a9, type: 2}
+  - {fileID: 11400000, guid: 07cfcc95147f1c4f7cb824b32787ec72, type: 2}
+  - {fileID: 11400000, guid: 6bdc66e38c85adec40d6e9447d9f7331, type: 2}
   - {fileID: 11400000, guid: a416833577c45704b94db78550671b37, type: 2}
   - {fileID: 11400000, guid: f2760c6f1c00650438b4042308fcc23a, type: 2}
   - {fileID: 11400000, guid: db87f831eb2314243ad00dbd3ac46f28, type: 2}
   - {fileID: 11400000, guid: 628c20c44b592fc4b80177c4e0a4f2af, type: 2}
+  - {fileID: 11400000, guid: 4b967ad9bf26a25b2bbf9ee9cf76a63f, type: 2}
+  - {fileID: 11400000, guid: 12cdb8d669125dd55d5f0624410a277c, type: 2}
+  - {fileID: 11400000, guid: 699c59b1f9023cae9c4b1dcf33f6d941, type: 2}
+  - {fileID: 11400000, guid: 37862e41b622b4864afcecb35181c18d, type: 2}
+  - {fileID: 11400000, guid: 1d6b11cebb144b730a1c6251c37b492b, type: 2}
+  - {fileID: 11400000, guid: 1ffd97c0bdc887634bf53b5dafd24875, type: 2}
   - {fileID: 11400000, guid: ae5d1ba53d25faf4daed62e21c4ba8c6, type: 2}
   - {fileID: 11400000, guid: d5405064066c0604eaf6030507f67e3b, type: 2}
+  - {fileID: 11400000, guid: ea1fd02b94a30a3197ca28e01af8ca7f, type: 2}
   - {fileID: 11400000, guid: 6195703b449ca124682dbe9e4d06301e, type: 2}
   - {fileID: 11400000, guid: 7e3fba2cf7e33ab4795a943451970686, type: 2}
+  - {fileID: 11400000, guid: b8a4c6c49fc5919340445b77c099f6c3, type: 2}

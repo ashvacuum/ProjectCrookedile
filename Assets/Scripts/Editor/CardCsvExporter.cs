@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Crookedile.Data;
 using Crookedile.Data.Cards;
 using UnityEditor;
 using UnityEngine;
@@ -48,6 +49,8 @@ namespace Crookedile.Editor
                         card.GetInnateRetain(useUpgraded: false) ? "yes" : "",
                         (card.Effects?.Count ?? 0).ToString(),
                         (card.Passives?.Count ?? 0).ToString(),
+                        CardHostility.Of(card).Label(),
+                        card.Fantasies == CardFantasy.None ? "" : card.Fantasies.ToString(),
                         string.Join(" ", card.Tags ?? new List<string>()),
                         Flatten(card.Description),
                         Flatten(card.ConfigurationNotes),
@@ -68,7 +71,7 @@ namespace Crookedile.Editor
             var sb = new StringBuilder();
             sb.AppendLine(
                 "Class,Name,Type,Rarity,Cost,Starter,Upgrade,ActivatedPassive,Unplayable,"
-                    + "GeneratedOnly,InnateRetain,Effects,Passives,Tags,Description,ConfigNotes,AssetPath"
+                    + "GeneratedOnly,InnateRetain,Effects,Passives,Hostility,Fantasies,Tags,Description,ConfigNotes,AssetPath"
             );
             foreach (var row in rows)
             {

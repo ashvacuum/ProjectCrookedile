@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Musang
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _id: 699c59b1f9023cae9c4b1dcf33f6d941
+  _enemyName: Musang
+  _portrait: {fileID: 0}
+  _startingHostility: 2
+  _maxHostility: 6
+  _minHostility: -5
+  _neutralZone: 0
+  _demographicClass: 0
+  _demographicValues: 0
+  _startingEffects: []
+  _passives: []
+  _movePattern: 0
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: a4ee2999045260080b9361461d77aa38, type: 2}
+  - {fileID: 11400000, guid: 7dae86d31992662fd855bea1167b50f6, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: f0206689465831399bda8290cc28c931, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: 0f6a3a94329a59e53f0a20812c661b5c, type: 2}
+  references:
+    version: 2
+    RefIds: []

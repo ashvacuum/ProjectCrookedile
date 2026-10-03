@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Ahas
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _id: 11d08081dc217b9978c39bc6444095e2
+  _enemyName: Ahas
+  _portrait: {fileID: 0}
+  _startingHostility: 2
+  _maxHostility: 6
+  _minHostility: -5
+  _neutralZone: 0
+  _demographicClass: 0
+  _demographicValues: 0
+  _startingEffects: []
+  _passives: []
+  _movePattern: 0
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: fd0e16aa9ef95c0e74336a5b5c7bf6c2, type: 2}
+  - {fileID: 11400000, guid: 33cfc81fa04cbd776c6abde6c4b617cf, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: 1b4104441231b0bbf01dfce2e020971b, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: 16928ae4955cee2fe79bc75885ce9d48, type: 2}
+  references:
+    version: 2
+    RefIds: []

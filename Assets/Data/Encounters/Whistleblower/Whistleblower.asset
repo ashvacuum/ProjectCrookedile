@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: Whistleblower
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _id: a2b89f763fd10626f524a88400f60705
+  _displayName: Whistleblower
+  _blurb: "A different source offers you the same kind of leverage."
+  _image: {fileID: 0}
+  _hourCost: 0
+  _extraMinutes: 45
+  _district: {fileID: 11400000, guid: a54aa622f1ef40a1935aeae6f25c28e9, type: 2}
+  _openingMinute: 540
+  _closingMinute: 900
+  _dropWeight: 1
+  _body: "A clerk from the municipal treasurer's office meets you under the bridge by the river. She has the same kind of dirt your aide found, and she wants it used by someone who will not waste it."
+  _options:
+  - _label: "Accept"
+    _resultText: "She hands over a thumb drive and walks away without looking back. You now know things about the budget nobody is supposed to know."
+    _requirements: []
+    _outcomes:
+    - rid: 1
+  - _label: "Decline"
+    _resultText: "You tell her to take it to the ombudsman. She laughs, but she goes."
+    _requirements: []
+    _outcomes: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 1
+      type: {class: RecruitAllyOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _ally: {fileID: 11400000, guid: a30f3445b8ece2c890f4d8b7ab5965e8, type: 2}

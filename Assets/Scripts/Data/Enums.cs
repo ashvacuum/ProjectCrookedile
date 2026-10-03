@@ -5,6 +5,20 @@ namespace Crookedile.Data
     /// Pressure = persuasion / de-escalation, Rhetoric = aggressive framing,
     /// Policy = policy positions that shift crowd hostility (authored per card).
     /// </summary>
+    /// <summary>
+    /// Build fantasy a card supports. Informational only: it never restricts what a player can
+    /// draft or play, and a card can serve several (or none). Used by the Card Database to see
+    /// how well each fantasy is covered.
+    /// </summary>
+    [System.Flags]
+    public enum CardFantasy
+    {
+        None = 0,
+        Convert = 1, // stack statuses, convert enemies into followers
+        Agreeable = 2, // receptive room, cheap spend, big damage past the echo chamber rule
+        Underdog = 4, // thrive while hostile enemies outnumber receptive ones
+    }
+
     public enum CardType
     {
         Pressure, // Green  - Persuasion, de-escalation, relationship building
@@ -138,5 +152,8 @@ namespace Crookedile.Data
         PolicyPlayedThisTurn, // 20 — Policy cards played this turn
         HostilityGainedThisTurn, // 21 — total enemy hostility gained this turn, any source (Blessed are the Persecuted)
         HostilityLostThisTurn, // 22 — total enemy hostility lost this turn, any source
+        CurrentGlamour, // 23 — Celebrity's Glamour stacks
+        CurrentDebt, // 24 — Celebrity's outstanding Debt
+        DebtGainedThisTurn, // 25 — Debt gained so far this player turn (Campaign Donors)
     }
 }

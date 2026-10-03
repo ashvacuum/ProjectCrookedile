@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-5913372280947561217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 753352c9291356a40b81076a162b5ad7, type: 3}
+  m_Name: N04 Fence-Sitters Session
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.BattleSession
+  rounds:
+  - label: Fence-Sitters
+    enemies:
+    - {fileID: 11400000, guid: 81c0fd8df5a9cb8f2491c8f63f6ca18c, type: 2}
+    - {fileID: 11400000, guid: 81c0fd8df5a9cb8f2491c8f63f6ca18c, type: 2}
+    - {fileID: 11400000, guid: 81c0fd8df5a9cb8f2491c8f63f6ca18c, type: 2}
+    maxTurns: 10
+    maxOpinion: 100
+    startingOpinion: 50
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1335bd23a43efbe4c9bbe6efff3281e1, type: 3}
+  m_Name: N04 Fence-Sitters
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.BattleEncounterData
+  _id: 6da0ae4243f6165515465f14ac1fa4bc
+  _displayName: Fence-Sitters
+  _blurb: "Nobody commits, and the room slips away."
+  _image: {fileID: 0}
+  _hourCost: 1
+  _extraMinutes: 0
+  _district: {fileID: 11400000, guid: a54aa622f1ef40a1935aeae6f25c28e9, type: 2}
+  _openingMinute: 540
+  _closingMinute: 900
+  _dropWeight: 1
+  _session: {fileID: -5913372280947561217}
+  _isBoss: 0
+  _rewardOverride: {fileID: 0}

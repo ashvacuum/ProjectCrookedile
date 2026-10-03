@@ -427,6 +427,10 @@ namespace Crookedile.Gameplay.Battle
                     ?.HostilityGainedThisTurn ?? 0,
                 EffectContextValue.HostilityLostThisTurn => BattleManager?.HostilityLostThisTurn
                     ?? 0,
+                EffectContextValue.CurrentGlamour => BattleManager?.CurrentGlamour ?? 0,
+                EffectContextValue.CurrentDebt => BattleManager?.Celebrity.Debt ?? 0,
+                EffectContextValue.DebtGainedThisTurn => BattleManager?.Celebrity.DebtGainedThisTurn
+                    ?? 0,
                 _ => 0, // FixedAmount / None — use authored value
             };
 

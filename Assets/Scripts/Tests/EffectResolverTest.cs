@@ -40,7 +40,6 @@ namespace Crookedile.Tests
 
             TestBasicDamage();
             TestSupportAbsorption();
-            TestHostilityDamageMultiplier();
             TestStatusEffectDamageModifiers();
             TestSupportGainWithModifiers();
             TestCardCostModifiers();
@@ -86,18 +85,6 @@ namespace Crookedile.Tests
             Debug.Log(
                 "\n--- TEST: Support/Denial absorption â€” requires BattleManager, skipped in unit tester ---"
             );
-        }
-
-        [ContextMenu("Test: Hostility Damage Multiplier")]
-        public void TestHostilityDamageMultiplier()
-        {
-            Debug.Log("\n--- TEST: Hostility Multiplier ---");
-            SetupTestBattle();
-            opponentStats.GainHostility(2);
-            float mult = opponentStats.HostilityDamageMultiplier;
-            Debug.Log($"Hostility 2 â†’ multiplier: {mult:F2}x (expected 2.0x)");
-            Debug.Assert(Mathf.Approximately(mult, 2.0f), "Hostility multiplier wrong!");
-            Debug.Log("âœ“ PASSED");
         }
 
         [ContextMenu("Test: Status Effect Damage Modifiers")]

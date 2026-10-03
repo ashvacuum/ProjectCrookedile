@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b51d1b9f32dee848ad73f4ca4c3cc9c, type: 3}
+  m_Name: Proxy Candidate
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
+  _id: 1d6b11cebb144b730a1c6251c37b492b
+  _enemyName: Proxy Candidate
+  _portrait: {fileID: 0}
+  _startingHostility: 1
+  _maxHostility: 3
+  _minHostility: -3
+  _neutralZone: 0
+  _demographicClass: 0
+  _demographicValues: 0
+  _startingEffects: []
+  _passives: []
+  _movePattern: 0
+  _aggressiveMoves:
+  - {fileID: 11400000, guid: dc26c4b8ab19fd69954dd22f158252aa, type: 2}
+  _neutralMoves:
+  - {fileID: 11400000, guid: 4622c31fd7cbe1b6b871e4afda445678, type: 2}
+  _receptiveMoves:
+  - {fileID: 11400000, guid: a8d038f03c944f14ebb37559b52634ba, type: 2}
+  references:
+    version: 2
+    RefIds: []

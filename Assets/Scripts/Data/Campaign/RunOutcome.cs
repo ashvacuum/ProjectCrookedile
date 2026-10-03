@@ -644,4 +644,91 @@ namespace Crookedile.Data.Campaign
 
         public override string GetDescription() => "End the day";
     }
+
+    /// <summary>
+    /// Rolls the run's seeded RNG and applies one of two outcome lists: a gamble inside a
+    /// single option. Use it only where the uncertainty is the point ("improvise",
+    /// "deny everything"); a consequence the player should choose belongs on its own option.
+    ///
+    /// Chains (<see cref="GoToEncounterOutcome"/>) nested here still run, but the Encounter
+    /// Designer only draws chain edges from an option's top-level outcomes.
+    /// </summary>
+    [Serializable]
+    public class CoinFlipOutcome : RunOutcome
+    {
+        [Tooltip("Chance (0–1) the success list applies. 0.5 is a fair coin.")]
+        [Range(0f, 1f)]
+        [SerializeField]
+        private float _successChance = 0.5f;
+
+        [Tooltip("Applied, in order, when the roll succeeds.")]
+        [SerializeReference]
+        private List<RunOutcome> _onSuccess = new();
+
+        [Tooltip("Applied, in order, when the roll fails. Leave empty for 'nothing happens'.")]
+        [SerializeReference]
+        private List<RunOutcome> _onFailure = new();
+
+        public override void Apply(RunState state)
+        {
+            // The run's stream, so a replayed seed lands the same side.
+            bool success = state.Rng.NextDouble() < _successChance;
+            foreach (var outcome in success ? _onSuccess : _onFailure)
+                outcome?.Apply(state);
+        }
+
+        public override string GetDescription() =>
+            $"{Mathf.RoundToInt(_successChance * 100f)}%: {Describe(_onSuccess)}. "
+            + $"Otherwise: {Describe(_onFailure)}";
+
+        private static string Describe(List<RunOutcome> outcomes)
+        {
+            var parts = new List<string>();
+            foreach (var outcome in outcomes)
+                if (outcome != null)
+                    parts.Add(outcome.GetDescription());
+            return parts.Count > 0 ? string.Join(", ", parts) : "nothing";
+        }
+    }
+
+    /// <summary>
+    /// Every enemy in the next battle starts this much more hostile (negative = more
+    /// receptive). Banked on the run and spent by whichever battle comes next.
+    /// </summary>
+    [Serializable]
+    public class NextBattleHostilityOutcome : RunOutcome
+    {
+        [Tooltip("Added to each enemy's starting Hostility in the next battle. Negative calms the room.")]
+        [SerializeField]
+        private int _amount = 1;
+
+        public override void Apply(RunState state) => state.AddNextBattleHostility(_amount);
+
+        public override string GetDescription() =>
+            _amount >= 0
+                ? $"Next battle: enemies start {_amount} more hostile"
+                : $"Next battle: enemies start {-_amount} more receptive";
+    }
+
+    /// <summary>
+    /// Burns time off today's budget on top of the encounter's own duration: "let them rest"
+    /// costs you the afternoon. Spends whatever is left when the cost exceeds it.
+    /// </summary>
+    [Serializable]
+    public class SpendTimeOutcome : RunOutcome
+    {
+        [Tooltip("Minutes taken from today's remaining time.")]
+        [Min(0)]
+        [SerializeField]
+        private int _minutes = 60;
+
+        public override void Apply(RunState state)
+        {
+            if (!state.TrySpendMinutes(_minutes))
+                state.TrySpendMinutes(state.MinutesRemaining);
+        }
+
+        public override string GetDescription() =>
+            _minutes % 60 == 0 ? $"Lose {_minutes / 60} hour(s)" : $"Lose {_minutes} minutes";
+    }
 }
