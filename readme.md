@@ -22,7 +22,7 @@
 - **Roguelite deck-builder**, political satire. The card **battles are the core**, wrapped in an **overworld campaign**: navigate a town map and accumulate **Support** toward winning the election by a deadline.
 - **No HP.** The per-battle battleground is a shared **Opinion Meter** (win at 100, lose at 0, Judgment at the turn limit). Directional session shields — **Support** (guards against drops) and **Denial** (guards against rises) — protect it. *(Per-battle "Support" the shield is distinct from campaign "Support points" the win condition — a naming overlap to resolve.)*
 - **Hostility** is a signed per-enemy stance you manage (hostile ↔ receptive). The central tension is the **Echo Chamber**: convert the *whole* room and your gains halve and your lead decays — so you always want a villain present.
-- **Three archetypes:** **Nepo Baby** (summon bodies; a hand-gated *Patronage* economy), **Celebrity** (an "open canvas" drafting into Attention / Scandal / Drama King), **Faith Leader** (stack statuses to convert enemies into one-turn meter-pumping followers).
+- **Three archetypes:** **Nepo Baby** (a glass cannon who burns, pulls and replays his own deck, paid for in the room's Hostility), **Celebrity** (an "open canvas" drafting into Attention / Scandal / Drama King), **Faith Leader** (stack statuses to convert enemies into one-turn meter-pumping followers).
 
 ---
 
