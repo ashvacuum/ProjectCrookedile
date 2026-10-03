@@ -7,10 +7,9 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Nepo Baby's summon verb — brings a body into the row via daddy's connections. Spawns one or
-    /// more copies of an <see cref="EnemyData"/> at a chosen starting mood: a receptive ally
-    /// ("Call a Favor", negative hostility) or a hostile Plant ("Plant", positive hostility — a paid
-    /// villain that doubles as an echo-chamber escape valve). The Patronage cost lives on the card.
+    /// Brings a body into the row: spawns one or more copies of an <see cref="EnemyData"/> at a
+    /// chosen starting mood (negative hostility = receptive, positive = hostile). No player card
+    /// uses it — player-side summoning is cut — and it is kept for summon-style content to come.
     /// </summary>
     [Serializable]
     public class SummonBodyEffect : BattleEffect

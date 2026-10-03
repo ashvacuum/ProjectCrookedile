@@ -982,7 +982,7 @@ namespace Crookedile.UI.Battle
 
             if (cardCostText != null)
             {
-                // Show the cost only for cards that carry an Energy or Patronage cost. Cards with no
+                // Show the cost only for cards that carry an Energy cost. Cards with no
                 // cost item at all (empty Costs) have nothing to pay, so the whole cost badge is
                 // hidden rather than rendered as a "0"/"Free" label. Playable Scandals/Status that
                 // DO have a real cost keep it. Toggling both the badge root and the text covers any
@@ -1075,9 +1075,9 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
-        /// True if the card carries a cost worth showing — an Energy (ActionPoints) or Patronage
-        /// cost. Cards with no Costs, or only a None entry, have nothing to display and hide the
-        /// cost image entirely.
+        /// True if the card carries a cost worth showing — an Energy (ActionPoints) cost. Cards
+        /// with no Costs, or only a None entry, have nothing to display and hide the cost image
+        /// entirely.
         /// </summary>
         private bool HasDisplayableCost()
         {
@@ -1086,10 +1086,7 @@ namespace Crookedile.UI.Battle
 
             foreach (var cost in cardData.Costs)
             {
-                if (
-                    cost.CostType == CostType.ActionPoints
-                    || cost.CostType == CostType.Patronage
-                )
+                if (cost.CostType == CostType.ActionPoints)
                     return true;
             }
 
@@ -1101,33 +1098,23 @@ namespace Crookedile.UI.Battle
             if (cardData.Costs == null || cardData.Costs.Count == 0)
                 return "0";
 
-            // A card may carry an Energy cost, a Patronage cost (Nepo Baby), or both (double-gated).
             CardCost ap = null;
-            CardCost patronage = null;
             foreach (var c in cardData.Costs)
-            {
                 if (c.CostType == CostType.ActionPoints)
+                {
                     ap = c;
-                else if (c.CostType == CostType.Patronage)
-                    patronage = c;
+                    break;
+                }
+
+            if (ap != null)
+            {
+                if (ap.IsXCost)
+                    return "X";
+                // Energy uses the effective cost (post Focus/Energized/Entangled).
+                return _effectiveCost <= 0 ? "0" : _effectiveCost.ToString();
             }
 
-            if (ap != null && ap.IsXCost)
-                return "X";
-
-            // Energy uses the effective cost (post Focus/Energized/Entangled); Patronage is flat.
-            string apPart =
-                ap != null ? (_effectiveCost <= 0 ? "0" : _effectiveCost.ToString()) : null;
-            string patPart = patronage != null ? $"{patronage.CurrentAmount}P" : null;
-
-            if (apPart != null && patPart != null)
-                return $"{apPart} + {patPart}";
-            if (patPart != null)
-                return patPart;
-            if (apPart != null)
-                return apPart;
-
-            // No Energy/Patronage cost — Free (None) or unknown.
+            // No Energy cost — Free (None) or unknown.
             return cardData.Costs[0].CostType == CostType.None ? "Free" : "0";
         }
 

@@ -9,7 +9,7 @@ namespace Crookedile.EditorTools
 {
     /// <summary>
     /// Play-mode live battle inspector — a read-only dashboard of the active <see cref="BattleManager"/>:
-    /// opinion / Support / Denial, the archetype resources (Patronage, Attention), action points,
+    /// opinion / Support / Denial, the archetype resource (Attention), action points,
     /// deck pile counts, active player statuses, and every enemy's hostility / intent / statuses.
     /// Richer than the in-game BattleStatsOverlay and a natural companion to the Cheats window.
     ///
@@ -85,7 +85,6 @@ namespace Crookedile.EditorTools
 
             Field("Opinion", $"{bm.CurrentOpinion} / {bm.MaxOpinion}  ({bm.OpinionPercentage:P0})");
             Field("Support / Denial", $"{bm.CurrentSupport}  /  {bm.CurrentDenial}");
-            Field("Patronage", bm.CurrentPatronage.ToString());
             Field("Attention", bm.CurrentAttention.ToString());
 
             var stats = bm.PlayerStats;

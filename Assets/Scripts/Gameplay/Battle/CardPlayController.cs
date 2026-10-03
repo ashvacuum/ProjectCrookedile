@@ -241,11 +241,6 @@ namespace Crookedile.Gameplay.Battle
                     if (stats.CurrentActionPoints < GetEffectiveCardCost(card))
                         return false;
                 }
-                else if (cost.CostType == CostType.Patronage)
-                {
-                    if (_mgr.CurrentPatronage < cost.CurrentAmount)
-                        return false;
-                }
             }
             return true;
         }
@@ -262,13 +257,6 @@ namespace Crookedile.Gameplay.Battle
                         $"Paid {effective} AP for {card.CardName}"
                     );
                 }
-                else if (cost.CostType == CostType.Patronage)
-                {
-                    _mgr.SpendPatronage(cost.CurrentAmount);
-                    GameLogger.LogInfo<CardPlayController>(
-                        $"Paid {cost.CurrentAmount} Patronage for {card.CardName}"
-                    );
-                }
             }
         }
 
@@ -282,8 +270,7 @@ namespace Crookedile.Gameplay.Battle
         {
             if (card?.Costs == null || card.Costs.Count == 0)
                 return 0;
-            // Find the AP cost wherever it sits in the list — a card may be double-gated
-            // (e.g. Patronage + Energy), so we don't assume the AP cost is Costs[0].
+            // Find the AP cost wherever it sits in the list rather than assuming Costs[0].
             CardCost cost = null;
             foreach (var c in card.Costs)
                 if (c.CostType == CostType.ActionPoints)

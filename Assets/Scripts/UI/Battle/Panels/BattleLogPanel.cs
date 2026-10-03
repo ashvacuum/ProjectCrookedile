@@ -227,11 +227,6 @@ namespace Crookedile.UI.Battle
                 if (evt.NewValue != evt.OldValue)
                     AddOutcome($"Attention {evt.OldValue} → {evt.NewValue}");
             });
-            Sub<PatronageChangedEvent>(evt =>
-            {
-                if (evt.NewValue != evt.OldValue)
-                    AddOutcome($"Patronage {evt.OldValue} → {evt.NewValue}");
-            });
 
             // --- Enemies and the room ---
             Sub<EnemyIntentDeclaredEvent>(evt =>

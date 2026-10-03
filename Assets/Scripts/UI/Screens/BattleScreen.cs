@@ -258,7 +258,7 @@ namespace Crookedile.UI.Screens
                 int cost = _battleManager.GetEffectiveCardCost(card);
 
                 // Affordability preview only — BattleManager.RequestPlayCard is the real gate
-                // (Patronage, Silenced, Confused and the rest live there).
+                // (Silenced, Confused and the rest live there).
                 bool isPlayable =
                     _battleManager.IsPlayerTurn && !card.IsUnplayable && cost <= actionPoints;
 
