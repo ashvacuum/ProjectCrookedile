@@ -381,7 +381,7 @@ namespace Crookedile.Data.Save
         public static CardData FindCard(string query, out string error)
         {
             error = null;
-            var cards = Resources.Load<CardDatabase>("Databases/CardDatabase");
+            var cards = CardDatabase.Shared;
             if (cards == null)
             {
                 error = "CardDatabase not found.";

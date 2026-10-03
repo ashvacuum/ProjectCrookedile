@@ -38,7 +38,7 @@ namespace Crookedile.Data.Save
         /// <summary>The content the game ships, with encounters from <paramref name="pool"/>.</summary>
         public static SaveContent Load(EncounterPoolData pool) =>
             new SaveContent(
-                Resources.Load<CardDatabase>("Databases/CardDatabase"),
+                CardDatabase.Shared,
                 Resources.Load<EnemyDatabase>("Databases/EnemyDatabase"),
                 Resources.Load<AllyDatabase>("Databases/AllyDatabase"),
                 pool

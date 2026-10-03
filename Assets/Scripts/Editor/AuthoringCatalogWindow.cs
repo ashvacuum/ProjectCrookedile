@@ -95,7 +95,7 @@ namespace Crookedile.EditorTools
 
         /// <summary>
         /// Writes the whole catalog (Effects, Triggers, Conditions, Statuses) to
-        /// docs/authoring-bible.csv — the spreadsheet twin of this window.
+        /// Exports/authoring-bible.csv — the spreadsheet twin of this window.
         /// </summary>
         [MenuItem("Crookedile/Export/Authoring Bible CSV")]
         public static void ExportCsv()
@@ -152,7 +152,7 @@ namespace Crookedile.EditorTools
 
             string fullPath = System.IO.Path.Combine(
                 System.IO.Directory.GetParent(Application.dataPath).FullName,
-                "docs/authoring-bible.csv"
+                "Exports/authoring-bible.csv"
             );
             System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(fullPath));
             System.IO.File.WriteAllText(fullPath, sb.ToString(), System.Text.Encoding.UTF8);

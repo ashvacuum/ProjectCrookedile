@@ -76,7 +76,7 @@ namespace Crookedile.EditorTools.Playtest
             var previousLevel = GameLogger.GlobalLevel;
             GameLogger.SetGlobalLevel(LogLevel.Warning);
 
-            var cards = Resources.Load<CardDatabase>("Databases/CardDatabase");
+            var cards = CardDatabase.Shared;
             var passives = Find<OriginPassive>().ToArray();
             var pool = string.IsNullOrEmpty(config.PoolPath)
                 ? Find<EncounterPoolData>().FirstOrDefault()

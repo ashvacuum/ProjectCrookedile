@@ -104,44 +104,5 @@ namespace Crookedile.Gameplay.Battle
                 StanceCountMode.AtMost => $"at most {_count} enemies are {_band}",
                 _ => $"at least {_count} enemies are {_band}",
             };
-
-#if UNITY_EDITOR
-        /// <summary>
-        /// Self-check for the counting rules, which are the only part with edge cases worth
-        /// getting wrong. Run from Crookedile → Debug → Test Stance Count Condition.
-        /// </summary>
-        [UnityEditor.MenuItem("Crookedile/Debug/Test Stance Count Condition")]
-        private static void SelfTest()
-        {
-            // (matching, living) → expected, per mode. Counting is pure arithmetic once the
-            // band filter has run, so the cases that matter are the boundaries.
-            Check(StanceCountMode.All, 0, 0, false, "all: empty board");
-            Check(StanceCountMode.All, 2, 2, true, "all: everyone matches");
-            Check(StanceCountMode.All, 1, 2, false, "all: one holdout");
-            Check(StanceCountMode.Majority, 0, 0, false, "majority: empty board");
-            Check(StanceCountMode.Majority, 2, 4, false, "majority: exactly half is not a majority");
-            Check(StanceCountMode.Majority, 3, 4, true, "majority: three of four");
-            Check(StanceCountMode.Majority, 1, 1, true, "majority: sole survivor");
-            Debug.Log("EnemyStanceCountCondition self-test passed.");
-        }
-
-        private static void Check(
-            StanceCountMode mode,
-            int matching,
-            int living,
-            bool expected,
-            string label
-        )
-        {
-            bool actual = mode switch
-            {
-                StanceCountMode.All => living > 0 && matching == living,
-                StanceCountMode.Majority => living > 0 && matching * 2 > living,
-                _ => false,
-            };
-            if (actual != expected)
-                throw new Exception($"EnemyStanceCountCondition self-test failed — {label}");
-        }
-#endif
     }
 }

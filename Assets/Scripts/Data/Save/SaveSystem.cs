@@ -207,7 +207,7 @@ namespace Crookedile.Data.Save
         )
         {
             var profile = ActiveProfile;
-            var cards = Resources.Load<CardDatabase>("Databases/CardDatabase");
+            var cards = CardDatabase.Shared;
             var deck = cards != null ? cards.GetStarterDeck(origin) : new List<CardData>();
             if (deck.Count == 0)
                 GameLogger.LogWarning("Save", $"Starter deck for {origin} is empty.");
@@ -287,7 +287,7 @@ namespace Crookedile.Data.Save
             }
 
             var profile = ActiveProfile;
-            var cards = Resources.Load<CardDatabase>("Databases/CardDatabase");
+            var cards = CardDatabase.Shared;
             var before = new HashSet<string>(UnlockedIds(profile, cards));
 
             if (victory)
@@ -340,7 +340,7 @@ namespace Crookedile.Data.Save
         {
             var profile = ActiveProfile;
             var list = new List<UnlockStatus>();
-            var cards = Resources.Load<CardDatabase>("Databases/CardDatabase");
+            var cards = CardDatabase.Shared;
             if (cards == null)
                 return list;
             foreach (var card in cards.GetUnlockableCards())
