@@ -72,5 +72,5 @@ MonoBehaviour:
         _amount: 0
         _amountSource: 24
         _perXSource: 7
-        _multiplier: 2
+        _multiplier: 1
         _maxAmount: 0

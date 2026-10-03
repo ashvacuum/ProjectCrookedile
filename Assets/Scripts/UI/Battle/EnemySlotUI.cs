@@ -186,15 +186,6 @@ namespace Crookedile.UI.Battle
             TweenFill(_hostileFill, posT);
             TweenFill(_receptiveFill, negT);
 
-            // Exact signed hostility — always shown. The number line is the core read of
-            // the game (pacify thresholds, the pressure multiplier, the ±conversion edges),
-            // so every origin sees the actual value, not just the bar.
-            if (hostilityText != null)
-            {
-                hostilityText.gameObject.SetActive(true);
-                hostilityText.text = $"{h:+0;-0;0}";
-            }
-
             UpdateStanceBadge(enemy.Stats);
 
             // Buff/debuff icons
