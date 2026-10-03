@@ -68,7 +68,8 @@ stop pretending to be one.
 - **EncourageSides** (2026-10-03): an enemy move that angers the other enemies (raises their Hostility). That is the
   existing `RileOthers` move type (`RaiseAlliesHostilityEffect`), already used by three enemies — nothing new to build.
 - **Unlocks** (2026-10-03, `unlocks.md`): everything unlocked for now; campaign 2 needs day 7 of campaign 1;
-  achievements and unlocks are one system; no difficulty ladder.
+  achievements and unlocks are one system; no difficulty ladder. When locks go on, poles stay open and only pole
+  improvements and meta cards lock.
 - **Meta-progression shape:** in `meta-progression.md` (profiles, saves, card unlocks, achievements, Steam).
 - **Campaign form** (2026-09-18, built since): a free-roam 2:1 isometric city over seven days, an hour budget, districts
   and travel (`metagame-campaign.md` §1.5, `campaign-encounters.md` §6). Still deferred, so don't detail yet: viral

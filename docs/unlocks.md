@@ -34,7 +34,7 @@ order a new player meets things. The data and save side already exist for cards 
 | Kind | A new profile has | The rest unlocks by |
 |---|---|---|
 | **Classes** | Faith Leader | Run milestones (§3) |
-| **Cards** | Each class's core pool, about 60% of its cards | Class milestones, in three tiers (below) |
+| **Cards** | Every card that plays a pole | Pole improvements and meta cards unlock by class feats (below) |
 | **Allies** (the relics) | The Basic allies: The Beef, Crowd Control, Opposition File | Meeting them in story events, or feats |
 | **Events** | The base campaign pool | Story callbacks from earlier runs |
 | **Campaigns** | Campaign 1 (the current seven-day pool) | Reaching day 7 of the one before |
@@ -45,13 +45,22 @@ Faith Leader is the teaching class: its loop (stack, convert, lead your Fanatics
 directly. Celebrity is next because its base plays fine without understanding either pole. Nepo Baby, the hardest
 class by design, comes last.
 
-### Card tiers, per class
+### Which cards lock: poles open, meta cards earned
 
-- **Tier 1, the core pool:** available from that class's first run. Every card a starter deck or a basic build needs.
-- **Tier 2, the depth cards:** unlock at the end of your **first run as that class**, win or lose. Payoffs and
-  second-copy builds.
-- **Tier 3, the build-definers:** unlock through a **class feat**, one card or a small group per feat. These are the
-  Rares a run is built around (Trust Fund already works this way: win a run as Nepo Baby).
+**Every pole is open from the start.** A pole is a class's lane: Faith Leader's convert loop, Nepo Baby's Burn, Return
+and Calm, Celebrity's Glamour and IOU. All the cards that let you *play* a pole are in the pool on a fresh profile,
+so any build a class is designed around can be tried from its first run.
+
+Only two kinds of card ever lock:
+
+- **Pole improvements:** cards that make a pole you can already play stronger, rather than letting you play it at
+  all. The persistent Policy that turbocharges a lane is the typical one (Photo Op for Glamour, Bailout for IOU,
+  Executive Privilege for Burn).
+- **Meta cards:** the extremely strong cards a run gets built around, usually the Rares (Trust Fund already works
+  this way: win a run as Nepo Baby).
+
+Each unlocks through a **class feat**, one card or a small group per feat. Which cards count as improvements or meta
+is a per-card call made when locks go on; most of each class stays open.
 
 Class feats count what the class does, so they reward playing it the intended way:
 
@@ -84,12 +93,11 @@ a longer schedule), and so on. There is no difficulty ladder (no Ascension); not
 
 | Moment | Unlocks |
 |---|---|
-| First run | Faith Leader, campaign 1, tier-1 cards, Basic allies |
-| End of the first run (any result) | Faith Leader tier 2 · **Celebrity** |
+| First run | Faith Leader, campaign 1, every pole's cards, Basic allies |
+| End of the first run (any result) | **Celebrity** |
 | Reach day 4 in any run | Two allies |
 | 3 runs finished | **Nepo Baby** |
-| First run as Celebrity / Nepo Baby ends | That class's tier 2 |
-| A class feat | That feat's tier-3 card(s) |
+| A class feat | That feat's pole improvement or meta card(s) |
 | A story beat | Its callback event or ally, next run |
 | Reach day 7 of campaign 1 | **Campaign 2** |
 | First win as a class | That class's "win a run" card |
@@ -113,8 +121,10 @@ having moved (a counter, a feat, or an unlock).
 3. **Achievements and unlocks are the same system** (rule 7).
 4. **No difficulty ladder** (no Ascension) for now.
 
-Still to decide when locks go on: which classes start locked and how much of each class is locked. The tables above
-are the proposal.
+5. **Poles are open from the start; only pole improvements and meta cards lock** (when locks go on).
+
+Still to decide when locks go on: which classes start locked, and which cards count as pole improvements or meta. The
+tables above are the proposal.
 
 ## 6. What the code needs
 
