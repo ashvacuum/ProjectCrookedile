@@ -45,7 +45,9 @@ MonoBehaviour:
   - faithleader
   _fantasies: 1
   _isStarterCard: 0
-  _isUnlockable: 0
+  _isUnlockable: 1
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -63,12 +65,12 @@ MonoBehaviour:
           rid: 5004226247261945865
         _conditions: []
         _oneShot: 0
+        _oncePerTurn: 0
         _effects:
         - rid: 5004226247261945862
     - rid: 5004226247261945862
       type: {class: ConvertPacifiedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _target: 4
         _statusesToConvert:
         - rid: 5004226247261945866

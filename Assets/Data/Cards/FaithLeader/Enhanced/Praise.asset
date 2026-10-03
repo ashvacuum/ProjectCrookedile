@@ -40,7 +40,9 @@ MonoBehaviour:
   - faithleader
   _fantasies: 2
   _isStarterCard: 0
-  _isUnlockable: 0
+  _isUnlockable: 1
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -49,35 +51,35 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 5004226220983844864
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _condition: 1
         _effects:
         - rid: 5004226220983844865
     - rid: 5004226220983844865
       type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 2
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
         _target: 6
+        _stopAtNeutral: 0
     - rid: 5004226220983844866
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _condition: 1
         _effects:
         - rid: 5004226220983844867
     - rid: 5004226220983844867
       type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 4
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
         _target: 6
+        _stopAtNeutral: 0

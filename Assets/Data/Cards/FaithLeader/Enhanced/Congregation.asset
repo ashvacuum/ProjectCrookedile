@@ -40,7 +40,9 @@ MonoBehaviour:
   - faithleader
   _fantasies: 2
   _isStarterCard: 0
-  _isUnlockable: 0
+  _isUnlockable: 1
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -49,10 +51,11 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 5004226267226832981
       type: {class: DelayedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _turnsDelay: 1
         _effects:
         - rid: 5004226267226832983
@@ -60,16 +63,15 @@ MonoBehaviour:
     - rid: 5004226267226832983
       type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 3
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
         _target: 1
+        _stopAtNeutral: 0
     - rid: 5004226267226832984
       type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 2
         _amountSource: 0
         _perXSource: 7
@@ -77,7 +79,6 @@ MonoBehaviour:
     - rid: 5004226271355076666
       type: {class: DelayedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _turnsDelay: 1
         _effects:
         - rid: 5004226271355076667
@@ -85,16 +86,15 @@ MonoBehaviour:
     - rid: 5004226271355076667
       type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 5
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
         _target: 1
+        _stopAtNeutral: 0
     - rid: 5004226271355076668
       type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 2
         _amountSource: 0
         _perXSource: 7

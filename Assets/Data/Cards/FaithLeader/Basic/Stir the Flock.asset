@@ -47,6 +47,8 @@ MonoBehaviour:
   _fantasies: 2
   _isStarterCard: 1
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -55,10 +57,11 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 5004226203391361030
       type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 2
         _amountSource: 0
         _perXSource: 7
@@ -66,7 +69,6 @@ MonoBehaviour:
     - rid: 5004226541253034078
       type: {class: ShiftHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: -2
         _amountSource: 0
         _perXSource: 7

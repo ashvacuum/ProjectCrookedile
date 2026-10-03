@@ -40,11 +40,14 @@ MonoBehaviour:
     _maximumCost: 99
   _upgradedEffects: []
   _upgradedPassives: []
+  _upgradedInnateRetain: 0
   _tags:
   - faithleader
   _fantasies: 1
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -53,6 +56,8 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 5004226247261945856
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
@@ -61,6 +66,7 @@ MonoBehaviour:
         _conditions:
         - rid: 5004226267226833029
         _oneShot: 0
+        _oncePerTurn: 0
         _effects:
         - rid: 5004226267226833027
     - rid: 5004226247261945865
@@ -75,7 +81,6 @@ MonoBehaviour:
     - rid: 5004226267226833027
       type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _target: 11
         _behavior:
           rid: 5004226267226833028

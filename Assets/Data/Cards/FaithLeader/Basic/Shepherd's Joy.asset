@@ -35,11 +35,14 @@ MonoBehaviour:
   _upgradedEffects:
   - rid: 5004226271355076615
   _upgradedPassives: []
+  _upgradedInnateRetain: 0
   _tags:
   - faithleader
   _fantasies: 2
   _isStarterCard: 1
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -48,18 +51,21 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 5004226271355076610
       type: {class: GrantTurnPassiveEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _passive:
           _trigger:
             rid: 5004226271355076612
           _conditions:
           - rid: 5004226271355076613
           _oneShot: 0
+          _oncePerTurn: 0
           _effects:
           - rid: 5004226271355076614
+        _untilYourNextTurn: 0
     - rid: 5004226271355076612
       type: {class: EnemyBecameReceptiveTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
@@ -69,23 +75,24 @@ MonoBehaviour:
     - rid: 5004226271355076614
       type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 3
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
+        _maxAmount: 0
     - rid: 5004226271355076615
       type: {class: GrantTurnPassiveEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _passive:
           _trigger:
             rid: 5004226271355076616
           _conditions:
           - rid: 5004226271355076617
           _oneShot: 0
+          _oncePerTurn: 0
           _effects:
           - rid: 5004226271355076618
+        _untilYourNextTurn: 0
     - rid: 5004226271355076616
       type: {class: EnemyBecameReceptiveTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
@@ -95,8 +102,8 @@ MonoBehaviour:
     - rid: 5004226271355076618
       type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 5
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
+        _maxAmount: 0
