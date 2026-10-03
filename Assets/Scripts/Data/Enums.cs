@@ -154,7 +154,7 @@ namespace Crookedile.Data
         CurrentGlamour, // 23 — Celebrity's Glamour stacks
         CurrentDebt, // 24 — Celebrity's outstanding Debt
         DebtGainedThisTurn, // 25 — Debt gained so far this player turn (Campaign Donors)
-        CardsExhaustedThisBattle, // 26 — cards in the player's exhaust pile (Born Into It, Hush Fund)
+        CardsExhaustedThisBattle, // 26 — cards in the player's exhaust pile (Born Into It, Burn the Receipts)
         CardsPulledThisTurn, // 27 — cards pulled from the draw pile into hand this turn (Fast Track)
         CardsDiscardedThisTurn, // 28 — cards discarded from hand this turn, end-of-turn sweep excluded
         CardsBurnedByThisCard, // 29 — cards this card's Burn effects exhausted from hand
