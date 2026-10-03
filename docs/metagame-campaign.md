@@ -273,7 +273,7 @@ can grant relics (random-event relic path lands here).
 Boss flag on encounters (via `BattleSession`); boss victory → pick 1 of 3 relics.
 `BattleResult` carries end-of-battle crowd stats (converted count, hostiles remaining,
 meter margin); reward offer rarity/count scales off them through `RewardConfig`
-(finally consumed — closes the §6 item from `deprecated/work-now.md`).
+(not yet consumed: `PostBattleFlow` still offers 3 cards at the default weights).
 
 ### Phase M4 — campaign win/loss framing
 ⚑ What ends the campaign: fixed day count (election day)? Boss ladder? Blocks nothing

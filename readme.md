@@ -7,7 +7,7 @@
 ---
 
 > [!IMPORTANT]
-> **The design is in active flux.** The game went through a major combat + class redesign. Everything under `docs/` is current. Everything under [`docs/deprecated/`](docs/deprecated/README.md) predates that redesign and is not in use — kept only because some of its ideas are still worth mining.
+> **The design is in active flux.** The game went through a major combat + class redesign. Everything under `docs/` is current. The pre-redesign docs were removed on 2026-10-03; read any of them from git with `git show ae569699:docs/deprecated/<file>` (the `deprecated/README.md` there lists what each one was).
 
 ## Start here
 
@@ -40,8 +40,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
 | [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) | Proposal | 2026-10-03 | The Celebrity's Glamour / IOU build, played as a variant against the canonical Celebrity design in core-design.md. | this doc; built in [`Data/Cards/Celebrity/GlamourIou/`](Assets/Data/Cards/Celebrity/GlamourIou) and [`GlamourIou.cs`](Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs) |
-| [`core-design.md`](docs/core-design.md) | Canonical | 2026-10-03 | The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure and the three archetypes. | this doc |
-| [`crookedile-starter-decks.md`](docs/crookedile-starter-decks.md) | Draft | 2026-10-03 | Per-class starter decks and the reward-pool "potential" layer. | this doc; built decks in [`OriginDatabase`](Assets/Resources/Databases/OriginDatabase.asset) |
+| [`core-design.md`](docs/core-design.md) | Canonical | 2026-10-03 | The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions. | this doc |
 | [`enemy-design-bible.md`](docs/enemy-design-bible.md) | Canonical | 2026-10-03 | The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete. | this doc |
 | [`metagame-campaign.md`](docs/metagame-campaign.md) | Partly built | 2026-10-03 | The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases. | this doc |
 | [`naming-glossary.md`](docs/naming-glossary.md) | Canonical | 2026-10-03 | Combat vocabulary mapped to "working a crowd" vocabulary. Read before naming anything. | this doc |
@@ -51,8 +50,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`campaign-encounters.md`](docs/campaign-encounters.md) | Built | 2026-10-03 | Encounter types, event choices and outcomes, drop-chance resolution, seeded pools, the encounter database and the Encounter Designer. | [`Data/Campaign/`](Assets/Scripts/Data/Campaign), [`EncounterDesignerWindow.cs`](Assets/Scripts/Editor/EncounterDesignerWindow.cs) |
-| [`encounter-authoring-reference.md`](docs/encounter-authoring-reference.md) | Built | 2026-10-03 | Every building block for encounters: outcomes, requirements, option wiring, flags and origin starting values. | [`Data/Campaign/`](Assets/Scripts/Data/Campaign) |
+| [`campaign-encounters.md`](docs/campaign-encounters.md) | Built | 2026-10-03 | How encounters are typed, authored, scheduled and drawn, with every field, outcome, requirement and default: battles, events, chaining, flags, pools, travel, enemy moves, statuses, run state, rewards and the editor tools. | [`Data/Campaign/`](Assets/Scripts/Data/Campaign), [`EncounterDesignerWindow.cs`](Assets/Scripts/Editor/EncounterDesignerWindow.cs) |
 | [`meta-progression.md`](docs/meta-progression.md) | Partly built | 2026-10-03 | Profiles, the binary save format, run save/continue, unlocks and the save debugging tools. Achievements and Steam are designed, not built. | [`Data/Save/`](Assets/Scripts/Data/Save), [`Data/Unlocks/`](Assets/Scripts/Data/Unlocks) |
 | [`ui-vfx.md`](docs/ui-vfx.md) | Built | 2026-10-03 | Canvas-space VFX: flipbooks, card shine, fly trails, and when UIParticle is warranted. | [`UI/VFX/`](Assets/Scripts/UI/VFX), [`CardShine.cs`](Assets/Scripts/UI/Battle/CardShine.cs) |
 
@@ -60,15 +58,13 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`doc-audit.md`](docs/doc-audit.md) | Living | 2026-10-03 | Standing audit of the docs against the code: what was stale and what was done about it. | this doc |
 | [`needs-detailing.md`](docs/needs-detailing.md) | Living | 2026-10-03 | Design questions awaiting a call, ordered by how much they block. Read before authoring content. | this doc |
 
 ### Art
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`art-bible.md`](docs/art-bible.md) | Canonical | 2026-10-03 | Art direction and resolution spec for artists. The Content Hub tabs are the live blank-slot checker. | this doc |
-| [`art-prompt-database.md`](docs/art-prompt-database.md) | Stale | 2026-10-03 | Per-asset image prompts for cards, enemies and allies. Generated from 48 card assets on 2026-09-11; the card prompts are now kept in the card-art workbook. | generated from [`Assets/Data/`](Assets/Data) |
+| [`art-bible.md`](docs/art-bible.md) | Canonical | 2026-10-03 | Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Content Hub tabs are the live blank-slot checker. | this doc |
 
 ### Generation prompts
 
@@ -77,12 +73,6 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 | [`reference/iso-tile-prompt.md`](docs/reference/iso-tile-prompt.md) | Canonical | 2026-10-03 | Campaign-map generation prompt: 2:1 dimetric tiles and buildings, plus the acceptance check every sprite has to pass. | this doc; grid guide [`iso-grid-guide-256x128.png`](docs/reference/iso-grid-guide-256x128.png) |
 | [`reference/music-prompt.md`](docs/reference/music-prompt.md) | Canonical | 2026-10-03 | BGM prompts. | this doc |
 | [`reference/style-mock-prompt.md`](docs/reference/style-mock-prompt.md) | Canonical | 2026-10-03 | Style-mock generation prompt (v4 Odd Taxi, the locked look). | this doc |
-
-### Deprecated
-
-| Doc | Status | Updated | What it covers | Source of truth |
-|---|---|---|---|---|
-| [`deprecated/README.md`](docs/deprecated/README.md) | Deprecated | 2026-10-03 | Superseded docs, each banner-marked with what superseded it, plus ideas still worth mining. | this doc |
 
 <!-- docs-map:end -->
 

@@ -95,5 +95,5 @@ snake_case and grep for the writer before adding a reader.
   at most once.
 - `HasVisitedEncounter` cannot tell two rows of the same encounter apart.
 - Funds and Credibility gates depend on the origin: starts range from 150 to 600 Funds and 65 to 90
-  Credibility (`OriginDatabase`, tabled in `docs/encounter-authoring-reference.md`). A gate above
+  Credibility (`OriginDatabase`, tabled in `docs/campaign-encounters.md` §9.1). A gate above
   every start needs earlier encounters to pay into it.
