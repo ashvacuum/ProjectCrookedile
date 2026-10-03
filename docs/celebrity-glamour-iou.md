@@ -82,9 +82,9 @@ Fine Print, Calling It In, Settle Up, Cash Advance) are my placeholders.
    once-per-battle mulligan that duplicates Nepo Baby's — a placeholder to replace, not a design.
 
 ## Authoring and testing
-- `Crookedile > Celebrity > Build Glamour-IOU Cards` writes the assets to `Assets/Data/Cards/Celebrity/GlamourIou/`
-  (re-running overwrites in place). `Set Actor Starter Deck to Glamour-IOU` swaps the Actor starter deck.
-  `Self-Check Debt Rules` runs asserts on settlement, Line of Credit, Rain Check and the waiver.
+- The cards live in `Assets/Data/Cards/Celebrity/GlamourIou/` and are tuned on the assets (the one-shot builder that
+  first wrote them is gone). The starter deck is authored in `OriginDatabase`. `Tests/EditMode/CelebrityDebtTests`
+  covers settlement, Line of Credit, Rain Check and the waiver.
 - Bot run: use the existing playtest runner with origin `Actor`. Snowball combos to read first: Photo Op + Open Tab +
   Campaign Donors; Too Big to Fail + Bailout; Overdraft + Rain Check; Trending on a Photo Op deck.
 - Known gaps: no Glamour/Debt HUD, no status icon, cards have no artwork (so they read as in-development),

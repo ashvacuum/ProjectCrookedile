@@ -32,14 +32,14 @@ EncounterPoolData                    Days + EncounterPoolEntry[]   ← schedulin
 Create assets via `Assets → Create → Crookedile → Campaign → …`.
 
 `EncounterData.ID` is the asset's file GUID (kept in sync in `OnValidate`). Everything keys off it —
-`RunState.VisitedLocationIds`, saves, `EncounterDatabase`, pool exclusions — so renaming or moving
+`RunState.VisitedLocationIds`, saves, pool exclusions — so renaming or moving
 an asset never resets its run state.
 
 ### 1.1 Base fields (on every encounter)
 
 | Field | Type | Default | What it does |
 |---|---|---|---|
-| `ID` | string, read-only | the asset's file GUID | Stable identity. Keys `VisitedLocationIds`, saves, `EncounterDatabase`, pool exclusions. Never edit; survives renames and moves, and a duplicated asset gets its own |
+| `ID` | string, read-only | the asset's file GUID | Stable identity. Keys `VisitedLocationIds`, saves, pool exclusions. Never edit; survives renames and moves, and a duplicated asset gets its own |
 | `DisplayName` | string | empty | Name on the map. Falls back to the asset name in tooling when blank |
 | `Blurb` | text (2–4 lines) | empty | Short line on the map *before* the player commits |
 | `HourCost` | int ≥ 0 | **1** | Whole hours a visit takes; add **Extra Minutes** (0–59) for the rest. The day budget is 8 hours |
@@ -165,7 +165,7 @@ inspector).
 the player knowingly takes; a consequence they should get to *choose* is still its own option.
 Chains nested inside it run, but the Encounter Designer only draws top-level chain edges.
 
-The card outcomes resolve the database through `CardDatabaseLookup` (`Resources/Databases/CardDatabase`)
+The card outcomes resolve the database through `CardDatabase.Shared` (`Resources/Databases/CardDatabase`)
 rather than an inspector field, because outcomes are plain serialized classes with nowhere to
 hang an asset reference.
 
@@ -658,19 +658,10 @@ actually audits — a session is a test-harness gauntlet, not campaign content.
 > covered only by a gated encounter reads as covered; the dangling-dependency check is what
 > catches the common version of that mistake.
 
-### 11.2 `EncounterDatabase`
+### 11.2 Finding encounters
 
-`GameDatabase<EncounterData>`, same as `CardDatabase` and `EnemyDatabase`. Auto-populates via
-**Refresh Database** in the inspector, keyed by `EncounterData.ID`. **No asset exists yet**: the
-save system resolves encounter IDs through the Game Encounter Pool and the encounters its events
-chain to (`SaveContent`).
-
-One database across all subtypes — `t:EncounterData` matches derived assets, so battles and
-events land in one lookup rather than a database per type.
-
-- `GetOfType<T>()` — every encounter of a concrete type
-- `GetUndrawable()` — encounters with weight ≤ 0: authored but can never be drawn. Usually a
-  slip rather than intent, and invisible from the pool view.
+There is no encounter database. The save system resolves encounter IDs through the campaign pool and every encounter
+its events chain to (`SaveContent`), and the editor tools find them with an asset query (`t:EncounterData`).
 
 ### 11.3 Encounter Designer
 

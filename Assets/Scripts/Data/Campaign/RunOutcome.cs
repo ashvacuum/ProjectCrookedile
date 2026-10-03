@@ -51,30 +51,6 @@ namespace Crookedile.Data.Campaign
     // ponytail: the outcomes share this file while they're all a dozen lines each. Split to
     // one-per-file like Gameplay/Battle/Effects/ once they need folders.
 
-    /// <summary>
-    /// Cached handle to the shared <see cref="CardDatabase"/>. Outcomes are plain serialized
-    /// classes with no inspector-assignable asset reference, so they resolve it by path — the
-    /// same path <c>BattleTestStarter</c> uses.
-    /// </summary>
-    internal static class CardDatabaseLookup
-    {
-        private const string Path = "Databases/CardDatabase";
-        private static CardDatabase _cached;
-
-        public static CardDatabase Get()
-        {
-            // Re-resolves when null rather than caching the miss: a domain reload clears this,
-            // and an editor-time first call can precede the database existing.
-            if (_cached == null)
-            {
-                _cached = Resources.Load<CardDatabase>(Path);
-                if (_cached == null)
-                    Debug.LogWarning($"[RunOutcome] No CardDatabase at Resources/{Path}.");
-            }
-            return _cached;
-        }
-    }
-
     /// <summary>Adds to (or subtracts from) the run's Funds.</summary>
     [Serializable]
     public class AdjustFundsOutcome : RunOutcome
@@ -250,9 +226,12 @@ namespace Crookedile.Data.Campaign
 
         public override void Apply(RunState state)
         {
-            var db = CardDatabaseLookup.Get();
+            var db = CardDatabase.Shared;
             if (db == null)
+            {
+                Debug.LogWarning($"[RunOutcome] No CardDatabase at Resources/{CardDatabase.ResourcePath}.");
                 return;
+            }
 
             CardType? type = _restrictType ? _type : (CardType?)null;
             CardRarity? rarity = _restrictRarity ? _rarity : (CardRarity?)null;

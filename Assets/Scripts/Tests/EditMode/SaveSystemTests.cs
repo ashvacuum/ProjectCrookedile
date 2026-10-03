@@ -27,7 +27,7 @@ namespace Crookedile.Tests
             SaveSystem.UseRoot(_root);
             RunState.Clear();
             UnlockRules.LocksEnabled = true;
-            _cards = Resources.Load<CardDatabase>("Databases/CardDatabase");
+            _cards = CardDatabase.Shared;
             Assert.IsNotNull(_cards, "CardDatabase missing from Resources/Databases.");
         }
 

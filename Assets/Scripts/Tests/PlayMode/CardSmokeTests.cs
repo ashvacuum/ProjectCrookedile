@@ -44,7 +44,7 @@ namespace Crookedile.Tests
 
         public static IEnumerable<TestCaseData> Cases()
         {
-            var cards = Resources.Load<CardDatabase>("Databases/CardDatabase");
+            var cards = CardDatabase.Shared;
             if (cards == null)
                 yield break;
             foreach (var card in cards.GetAll().Where(c => c != null).OrderBy(c => c.CardName))
@@ -63,7 +63,7 @@ namespace Crookedile.Tests
         [TestCaseSource(nameof(Cases))]
         public IEnumerator PlayingTheCardDoesNotLoopOrBreak(string cardId, EnemyMood mood)
         {
-            var card = Resources.Load<CardDatabase>("Databases/CardDatabase").GetByID(cardId);
+            var card = CardDatabase.Shared.GetByID(cardId);
             Assert.IsNotNull(card, $"No card with ID {cardId}.");
             var enemy = PickEnemy();
             Assert.IsNotNull(enemy, "The enemy database is empty.");

@@ -352,7 +352,7 @@ namespace Crookedile.Gameplay.Battle
             // database is the canonical card list (Refresh Database repopulates it), and going
             // through it means the ~50 card assets don't have to live under Resources/ just to
             // serve this test path.
-            var database = Resources.Load<CardDatabase>("Databases/CardDatabase");
+            var database = CardDatabase.Shared;
             if (database == null)
             {
                 Debug.LogError(

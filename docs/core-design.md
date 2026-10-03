@@ -240,8 +240,7 @@ defense (heavy repeats), one shared-role hostility card, and as many identity ca
 placeholders: design the **relationships**, tune the magnitudes in play.
 
 The built decks are authored per origin in [`OriginDatabase`](../Assets/Resources/Databases/OriginDatabase.asset) (card +
-count). Where its list differs from the tables below, these tables are the design. Celebrity has no authored entry yet,
-so it falls back to one of each starter-tagged card (`Crookedile > Celebrity > Set Actor Starter Deck to Glamour-IOU` fills it).
+count). Where its list differs from the tables below, these tables are the design. All three classes have an authored deck.
 
 ### Shared basics (the "Strike / Defend" layer)
 

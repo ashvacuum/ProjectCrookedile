@@ -157,7 +157,7 @@ namespace Crookedile.Managers
         public void AddCardToHand([LabelText("Card name")] string cardName)
         {
             var battle = FindFirstObjectByType<Gameplay.Battle.BattleManager>();
-            var database = Resources.Load<Data.Cards.CardDatabase>("Databases/CardDatabase");
+            var database = Data.Cards.CardDatabase.Shared;
             if (battle == null || battle.PlayerDeck == null || database == null)
             {
                 GameLogger.LogWarning("Cheats", "addcard: no battle in progress");

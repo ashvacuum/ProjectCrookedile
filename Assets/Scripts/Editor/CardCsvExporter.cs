@@ -11,12 +11,12 @@ namespace Crookedile.Editor
     /// <summary>
     /// Exports every CardData asset to a CSV for spreadsheet auditing
     /// (Crookedile → Export → Cards CSV). One row per card; the Class column comes from the
-    /// asset's folder under Resources/Cards (FaithLeader/Celebrity/NepoBaby/Curses/...), so
+    /// asset's folder under Data/Cards (FaithLeader/Celebrity/NepoBaby/Curses/...), so
     /// filtering by class is a one-click spreadsheet filter.
     /// </summary>
     public static class CardCsvExporter
     {
-        private const string OutputPath = "docs/card-audit.csv";
+        private const string OutputPath = "Exports/cards.csv";
 
         [MenuItem("Crookedile/Export/Cards CSV")]
         public static void Export()

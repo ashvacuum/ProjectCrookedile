@@ -16,7 +16,7 @@ MonoBehaviour:
   - Type: 0
     DisplayName: Faith Leader
     Description: The converter. Stack pacify statuses (Guilt/Shame/Doubt) to convert
-      enemies into one-turn meter-pumping Fanatics.
+      enemies into Fanatics who follow your lead until they're disillusioned.
     Color: {r: 1, g: 1, b: 1, a: 1}
     Icon: {fileID: 0}
     Portrait: {fileID: 0}
@@ -63,15 +63,23 @@ MonoBehaviour:
     MaxHours: 8
   - Type: 2
     DisplayName: Celebrity
-    Description: The open canvas. Drafts into Attention, Scandal or Drama King; first
-      card each battle is played upgraded.
+    Description: The empty promise. Glamour lifts the meter every round; IOUs buy
+      energy now and bill you next turn.
     Color: {r: 1, g: 1, b: 1, a: 1}
     Icon: {fileID: 0}
     Portrait: {fileID: 0}
-    Resource: 2
+    Resource: 0
     Passive: {fileID: 11400000, guid: 9fe225578fe293c4ba31c366dd76670b, type: 2}
     StarterTag: actor
-    StarterDeck: []
+    StarterDeck:
+    - Card: {fileID: 11400000, guid: be9805520df828a409f296641a64a68d, type: 2}
+      Count: 3
+    - Card: {fileID: 11400000, guid: 1f53976387bf8cf4dbf50384ba7ada83, type: 2}
+      Count: 3
+    - Card: {fileID: 11400000, guid: eda244f7760f46f4eacc29a0fed67e89, type: 2}
+      Count: 3
+    - Card: {fileID: 11400000, guid: 89129eb2829f4cc4499575ec23a70215, type: 2}
+      Count: 1
     MaxActionPoints: 3
     StartingFunds: 250
     StartingCredibility: 79

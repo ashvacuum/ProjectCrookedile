@@ -99,7 +99,7 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 | Path | What lives there |
 |---|---|
 | `Assets/Scripts/Gameplay/Battle/` | `BattleManager` (FSM/flow), `OpinionLedger` (opinion + shields), `CrowdReactions` (hostility/echo/turncoat), `PassiveResolver`, polymorphic `BattleEffect`s under `Effects/` |
-| `Assets/Scripts/Data/` | ScriptableObject data + `GameDatabase<T>` databases (cards, enemies, allies, origins, encounters), `RunState` |
+| `Assets/Scripts/Data/` | ScriptableObject data + `GameDatabase<T>` databases (cards, enemies, allies, origins), `RunState` |
 | `Assets/Scripts/Data/Campaign/` | Encounter types, event outcomes, encounter pools — see [`campaign-encounters.md`](docs/campaign-encounters.md) |
 | `Assets/Scripts/Data/Save/`, `Data/Unlocks/` | Profiles, run save/continue, unlock conditions, save debugging — see [`meta-progression.md`](docs/meta-progression.md) |
 | `Assets/Scripts/Tests/EditMode/` | NUnit tests (Unity Test Runner → Edit Mode) |
@@ -115,7 +115,7 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 > - `DOTweenSettings.asset` — pinned by DOTween's own loader
 > - `DebugSettings.asset` — log levels, loaded by `GameLogger` before the first scene
 > - `StatusEffectIconMap.asset` — `Resources.Load` by name, [AuthoringCatalogWindow.cs:52](Assets/Scripts/Editor/AuthoringCatalogWindow.cs#L52)
-> - `Databases/CardDatabase.asset` — [BattleTestStarter.cs:355](Assets/Scripts/UI/Battle/BattleTestStarter.cs#L355), card outcomes, the save system
+> - `Databases/CardDatabase.asset` — loaded only through `CardDatabase.Shared` (card outcomes, the save system, test starters)
 > - `Databases/{EnemyDatabase,AllyDatabase,OriginDatabase}.asset` — the save system resolves saved IDs through them; `OriginDatabase.Shared` reads starting values
 > - `NepoBabyConfig.asset` — Nepo Baby's class rules (`NepoBabyConfig.Current`)
 > - `UI/CampaignMap.uss`, `UI/DefaultRuntimeTheme.tss` — the campaign screen's runtime-built UI
