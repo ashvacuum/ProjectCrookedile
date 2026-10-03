@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
   _moveName: Campaign for Lola
   _moveType: 0
-  _intentDescription: "Campaigns for Lola: -3 Opinion"
+  _intentDescription: 'Campaigns for Lola: -3 Opinion'
   _effects:
   - rid: 1
-  _moveVFX: {fileID: 0}
+  _moveVFX: {fileID: 11400000, guid: 66f457f9c1d5313479f3e3a4af459bc4, type: 2}
   _counterCardType: 1
   _minionToSummon: {fileID: 0}
   _minionCount: 1
@@ -37,3 +37,4 @@ MonoBehaviour:
         _multiplier: 1
         _target: 1
         _bypassSupport: 0
+        _maxAmount: 0

@@ -30,9 +30,6 @@ namespace Crookedile.UI.Battle
         private TMP_Text nameText;
 
         [SerializeField]
-        private TMP_Text hostilityText;
-
-        [SerializeField]
         private Image enemySprite;
 
         [SerializeField]
@@ -55,7 +52,9 @@ namespace Crookedile.UI.Battle
         private float _hostilityBarDuration = 0.25f;
 
         [Header("Stance Badge")]
-        [Tooltip("Label reading Hostile / Neutral / Receptive, derived from hostility vs NeutralZone.")]
+        [Tooltip(
+            "Label reading Hostile / Neutral / Receptive, derived from hostility vs NeutralZone."
+        )]
         [SerializeField]
         private TMP_Text _stanceText;
 
@@ -276,8 +275,7 @@ namespace Crookedile.UI.Battle
             // Hide all live display elements
             if (nameText != null)
                 nameText.gameObject.SetActive(false);
-            if (hostilityText != null)
-                hostilityText.gameObject.SetActive(false);
+
             if (_stanceBackground != null)
                 _stanceBackground.gameObject.SetActive(false);
             else if (_stanceText != null)
