@@ -131,7 +131,7 @@ Each asks a different question every turn and lives at a different point in time
 |---|---|---|---|---|
 | **Nepo Baby** | "What do I burn to get it now?" | **Now** | Consume his own deck: burn, pull, replay, retrieve | The room's anger (Hostility clock) and junk rotting a thinned deck |
 | **Celebrity** | "What deck am I building this run?" | **flexible** | Draft into multiple archetypes the locked classes can't (open canvas) | Committing wrong / an incoherent pile; weakest before it commits |
-| **Faith Leader** | "Who can I pacify into a follower?" | **After** | Stack statuses to convert enemies into 1-turn meter-pumping Fanatics | Disruption before reaching 3 stacks; a Hardened room (can't pacify) |
+| **Faith Leader** | "Who can I pacify into a follower?" | **After** | Stack statuses to convert enemies into Fanatics who follow your attacks and defends for a turn | Disruption before reaching 3 stacks; a Hardened room (can't pacify) |
 
 > A distinctiveness test: each archetype must have a **unique capability** AND a **unique fear**. Overlapping fears are what make archetypes feel samey. Watch especially that Celebrity fears *self-overreach* while Faith Leader fears *opponent disruption* — if Celebrity's risk becomes "opponent breaks my setup," they've merged.
 
@@ -179,7 +179,7 @@ Closest StS reference: **Silent's deep philosophy** (draft into poison/shiv/disc
 ### Faith Leader — *the converter* (status specialist)
 **Spine (as concrete as Nepo Baby's burn):**
 
-> **Stack statuses (Guilt / Shame / Doubt, any mix) on an enemy to the pacify threshold. This consumes the statuses and converts them. Normal enemy → becomes a Fanatic for 1 turn (a one-turn burst pumping the opinion meter), then reverts to neutral. Hardened enemy → silenced instead (can't be converted, but can be shut up).**
+> **Stack statuses (Guilt / Shame / Doubt, any mix) on an enemy to the pacify threshold. This consumes the statuses and converts them. Normal enemy → becomes a Fanatic, a loyal follower that copies your attacks and defends until the end of your next turn, then reverts to neutral. Hardened enemy → silenced instead (can't be converted, but can be shut up).**
 >
 > **Pacify threshold = 3 + the enemy's Jaded stacks.** Each time an enemy is fanaticized they gain a stack of **Jaded** (permanent for the fight, never consumed), raising their future conversion cost by 1. So a fresh enemy converts at 3; a once-burned backslider at 4; twice at 5; etc. **This is the anti-milking brake** — re-converting the same person hits diminishing returns, pushing you to win *new* converts rather than farm one target. On-fantasy: a believer who's already lapsed is harder to inspire again.
 
@@ -197,18 +197,40 @@ Closest StS reference: **Silent's deep philosophy** (draft into poison/shiv/disc
 
 All three count equally toward conversion: **any 3 = pacify.**
 
-**Lifecycle:** stack to threshold (3 + Jaded) → consume pacify statuses → **Fanatic for 1 turn** (meter burst) → **revert to neutral** + gain a **Jaded** stack. No permanent emitters. The class is **relentlessly active** — every turn is spent either stacking toward the next conversion or cashing one in. Kills auto-pilot; you can never coast on a built board, and you can't infinitely milk one target (Jaded escalation).
+**Lifecycle:** stack to threshold (3 + Jaded) → consume pacify statuses → the enemy becomes a **Fanatic**, your loyal follower → at the end of your next turn it **reverts to neutral** + gains a **Jaded** stack. No permanent emitters. The class is **relentlessly active** — every turn is spent either stacking toward the next conversion or using the followers you have. Kills auto-pilot; you can never coast on a built board, and you can't infinitely milk one target (Jaded escalation).
+
+#### Fanatics follow your lead *(ruled 2026-10-03)*
+
+A Fanatic is not a one-off burst. It is a follower that copies what you do, and cards can order it around. Conversion
+itself pays nothing; the value is in what the Fanatic does while it lasts. *All numbers are placeholders for the
+config.*
+
+- **Duration:** from conversion until the **end of your next turn**, so a Fanatic converted by your last play still
+  follows a full turn. Then it reverts to neutral and gains Jaded.
+- **It follows your plays.** Each time you play a card:
+  - that pushes the meter (an **attack**), every Fanatic also pushes: **+2 Opinion each**;
+  - that gains Support (a **defend**), every Fanatic adds to it: **+2 Support each**;
+  - that does both, both happen.
+- **If you do neither, they shout the room down.** At the end of your turn, if you played no attack and no defend card
+  and converted **2 or more** enemies this turn, each Fanatic **Silences** one non-Fanatic enemy (most hostile first)
+  for its next action.
+- **Command cards force it** whatever you played: *attack now* (each Fanatic pushes), *defend now* (each Fanatic adds
+  Support), *silence now* (each Fanatic Silences an enemy, no conversion count needed). These live in the reward pool.
+- **Over-stacking:** each pacify stack consumed above the threshold adds +1 to that Fanatic's follow amount.
+- **It is on your side in the enemy phase:** a Fanatic takes no action against you. Enemies can still interfere: a
+  Silenced or Stunned Fanatic doesn't follow.
+- **Harvest cards** (Sermon) scale off Fanatics present or conversions this turn.
 
 **Echo-chamber immunity (emergent):** because converts revert to *neutral* (not receptive), Faith Leader's core engine can't accidentally fill the row with permanent receptives — so playing their identity doesn't self-trigger the all-receptive penalty. The other two classes make *lasting* allies and genuinely risk the echo chamber; Faith Leader's allies are momentary, so they're naturally immune. (On non-converting turns they still want a hostile present — the **Hardened-enemy-as-permanent-villain** interaction handles this: can't convert them, so they reliably keep you out of the echo chamber; silence them only if too loud.)
 
 **Hard counter / fear:** a row of **Hardened** enemies starves Faith Leader (can't be pacified). On-fantasy: the preacher is powerless against true non-believers. **Leash:** disruption — losing setup or being rushed before reaching 3 stacks.
 
 **Tuning flags (key balance levers):**
-- Payoff math must be **generous** — 3 status-applications for a *1-turn* burst is a steep trade; the Fanatic burst (or a harvest card scaling off it) must pay well or it feels bad.
+- Payoff math must be **generous** — 3 status-applications for a follower that lasts about one turn is a steep trade; the follow amounts (or a harvest card scaling off them) must pay well or it feels bad.
 - Needs cards that apply **multiple statuses at once**, so conversion isn't always a full 3 turns of setup.
-- *(Open: can you over-stack past 3 for a bigger burst? Likely reward-pool, not core.)*
+- Over-stacking is ruled: each stack past the threshold strengthens that Fanatic's follow by 1.
 
-- Loop: **Stack → Convert → Burst → (revert) → repeat**
+- Loop: **Stack → Convert → Lead your Fanatics → (revert) → repeat**
 
 ---
 
@@ -282,9 +304,9 @@ The engine and status kit are in §7.
 | **Guilt** | 2 | 1e | Apply Guilt (weakens push) + counts toward pacify | **identity (stacker)** |
 | **Shame** | 2 | 1e | Apply Shame (drops shield) + counts toward pacify | **identity (stacker)** |
 | **Doubt** | 1 | 1e | Apply Doubt (soft reluctance) + counts toward pacify | **identity (stacker)** |
-| **Sermon** | 1 | 2e | Harvest: scales with Fanatic bursts / status converted this turn | **identity (payoff + villain-wanting)** |
+| **Sermon** | 1 | 2e | Harvest: scales with Fanatics present / conversions this turn | **identity (payoff + villain-wanting)** |
 
-**Why this set:** all three status types are present so the player learns the **any-3-to-convert** rule directly, and each status visibly does a *defensive* job too (so stacking never feels wasted). A first-timer stacks two statuses, sees the enemy isn't converting yet, adds a third, watches them flip to a Fanatic burst — the whole engine taught in one sequence. Sermon shows the harvest/payoff and wants a villain present.
+**Why this set:** all three status types are present so the player learns the **any-3-to-convert** rule directly, and each status visibly does a *defensive* job too (so stacking never feels wasted). A first-timer stacks two statuses, sees the enemy isn't converting yet, adds a third, watches them flip to a Fanatic that joins their next attack — the whole engine taught in one sequence. Sermon shows the harvest/payoff and wants a villain present.
 
 **Echo-chamber immunity:** converts revert to *neutral*, so Faith Leader's engine never floods the row with permanent receptives → can't self-trigger the all-receptive penalty. (Still wants a hostile present on non-converting turns; a Hardened enemy is the ideal permanent villain.)
 
@@ -310,7 +332,7 @@ Once starters feel right, sketch the **subset of directions** each class's *rewa
   - **Scandal** — Scandal-generators (and synergy with enemy-inflicted Scandals), per-Scandal-drawn payoffs (+shield etc.), per-Scandal-in-play payoffs (end-of-turn meter damage), and a **spin/cash-out** to clear Scandals for a burst (anti-Curse snowball, consistency risk, all-in). *Tuning: draw-severity gentle not punishing; on-draw vs in-play triggers.*
   - **Drama King** — sympathy/shield generators, disarm/enemy-weaken tools, grind payoffs (control, low risk). *Watch: disarm vs Faith Leader weaken — frame as self-protection, not conversion.*
   - Each line should be *coherent enough to commit to*; flexibility is **between** drafted archetypes, not mush within every card.
-- **Faith Leader** — **multi-status-per-card** cards (apply 2 statuses at once, so conversion isn't always 3 turns — a priority), bigger **harvest payoffs** that scale off Fanatic bursts (Sermon, Crusade), over-stacking past 3 for a bigger burst, Preach-style hard-silence tools, cards that exploit the *defensive* side of statuses (e.g. punish a Shamed enemy harder). Status-interaction *texture* (Guilt+Shame combos differently) lives here, not in core.
+- **Faith Leader** — **multi-status-per-card** cards (apply 2 statuses at once, so conversion isn't always 3 turns — a priority), bigger **harvest payoffs** that scale off Fanatics present (Sermon, Crusade), over-stacking past 3 for a bigger burst, Preach-style hard-silence tools, cards that exploit the *defensive* side of statuses (e.g. punish a Shamed enemy harder). Status-interaction *texture* (Guilt+Shame combos differently) lives here, not in core.
 
 This is where each class's *potential* lives. Starters only teach the verb; rewards reveal the ceiling.
 

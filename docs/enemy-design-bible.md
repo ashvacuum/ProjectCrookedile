@@ -30,7 +30,7 @@
 
 | Element | What it is | Player interaction | Enemy interaction |
 |---|---|---|---|
-| Opinion Meter | Single shared per-room win track. Fill = win. | Sway pushes (Pressure cards), Fanatic bursts (Faith Leader), Scandal payoffs (Celebrity). | Pushers drag it down; Shielders block upward movement. |
+| Opinion Meter | Single shared per-room win track. Fill = win. | Sway pushes (Pressure cards), Fanatics following your attacks (Faith Leader), Scandal payoffs (Celebrity). | Pushers drag it down; Shielders block upward movement. |
 | Directional shields | Blockers on the meter. Enemy shields block UP; player shields block DOWN. | Player places down-block shields (Composure/Rhetoric tools); can strip enemy up-shields. | Shielder role places/refreshes up-shields. |
 | Player Credibility | *(META resource — campaign layer, parked)* | Guard with Composure; heal rarely. | Smear/Exposé/Red-tag moves chip it. Which roles carry Credibility attacks = D8. |
 | Enemy states (Hostile/Receptive) | Per-enemy behavior modes. | Flip states via cards/statuses; MANAGE the mix — all-Receptive triggers Echo Chamber penalty. | Converters drag Receptives back to Hostile; some (Televangelist) weaponize Echo Chamber deliberately. |
@@ -54,7 +54,7 @@
 
 | Code | Target type | Examples | Rules |
 |---|---|---|---|
-| MTR | The Meter | Pressure pushes, Fanatic burst | No enemy selection. Blocked by enemy up-shields unless [pierce]. |
+| MTR | The Meter | Pressure pushes, Fanatics following your attacks | No enemy selection. Blocked by enemy up-shields unless [pierce]. |
 | ST | Single enemy | Insinuate Sins, Cast Out, Silence | Receptive enemies REMAIN legal targets; Jaded punishes milking (LOCKED). |
 | POS | Positional (row-relative) | Praise (adjacency) | Row is ORDERED; enemies do not move (LOCKED). No player-side summons. |
 | AOE | All enemies | Preach-type wide status | — |
