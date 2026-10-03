@@ -179,7 +179,7 @@ RunOutcome (abstract, [SerializeReference])      — mutates the RUN, not a batt
 ```
 
 **The load-bearing idea:** `RunRequirement`/`RunOutcome` are the campaign-scope mirror of
-`PassiveCondition`/`BattleEffect`. Same Odin type-picker authoring, same Content Hub
+`PassiveCondition`/`BattleEffect`. Same Odin type-picker authoring, same Database-window
 auditability (one provider each), same generator-seeding pattern. Battle-scope effects
 mutate battle state through `EffectExecutionContext`; run-scope outcomes mutate `RunState`.
 New encounter richness = new Requirement/Outcome subclasses, zero flow changes (Open/Closed,
@@ -249,7 +249,7 @@ campaign checkpoints (`meta-progression.md`).
    `BattleManager` passes `RunState.Current` relic passives at construction. Relics then
    ARE origin passives mechanically — zero new behavior code.
 3. Prototype relic generator (reflection pattern like `EnemyRosterGenerator`) → 4–6 relics
-   + `RelicDatabase` asset. Content Hub relic check already audits them.
+   + `RelicDatabase` asset. The Database window's Allies tab already audits them.
 4. Debug visibility only (overlay text). HUD relic bar = user-wired panel, later.
 5. Acquisition arrives with its systems: boss reward (Phase M3) + event outcome (M2).
    Until then a debug grant proves the pipeline.

@@ -79,7 +79,7 @@ snake_case and grep for the writer before adding a reader.
 
 ## Before calling it done
 
-1. **Content Hub** — catches no session, no options, no body, no display name, unreachable rows.
+1. **Database window** (Encounters tab, Checks tab) — catches no session, no options, no body, no display name, unreachable rows.
 2. **Encounter Designer → Timeline** — day windows; `w2` is the weight, `w2*` means inherited,
    `ALWAYS` means guaranteed.
 3. **→ Dependencies** — gates and boosts as a graph.

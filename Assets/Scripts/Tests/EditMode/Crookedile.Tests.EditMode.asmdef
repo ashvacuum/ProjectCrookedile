@@ -6,7 +6,8 @@
         "UnityEditor.TestRunner",
         "Crookedile.Core",
         "Crookedile.Utilities",
-        "Crookedile.Runtime"
+        "Crookedile.Runtime",
+        "Crookedile.Editor"
     ],
     "includePlatforms": [
         "Editor"

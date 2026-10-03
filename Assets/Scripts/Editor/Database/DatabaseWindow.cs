@@ -14,8 +14,12 @@ namespace Crookedile.Editor.Database
     {
         private List<ContentTab> _tabs;
         private int _current;
-        private bool _dirty;
         private int _next = -1;
+
+        // Tabs whose assets may have changed since they last loaded. Only the visible tab
+        // reloads; the others reload when shown, so a change doesn't rescan every tab (the
+        // Checks tab walks every prefab).
+        private readonly HashSet<ContentTab> _stale = new HashSet<ContentTab>();
 
         [MenuItem("Crookedile/Database", priority = 0)]
         private static void Open()
@@ -25,7 +29,18 @@ namespace Crookedile.Editor.Database
         }
 
         private static List<ContentTab> CreateTabs() =>
-            new List<ContentTab> { new CardsTab(), new EnemiesTab() };
+            new List<ContentTab>
+            {
+                new CardsTab(),
+                new EnemiesTab(),
+                new StatusesTab(),
+                new AlliesTab(),
+                new OriginsTab(),
+                new EncountersTab(),
+                new BattleSessionsTab(),
+                new BuildingBlocksTab(),
+                new ChecksTab(),
+            };
 
         private void OnEnable()
         {
@@ -33,7 +48,7 @@ namespace Crookedile.Editor.Database
             foreach (var tab in _tabs)
             {
                 tab.Repaint = Repaint;
-                tab.Reload();
+                _stale.Add(tab);
             }
             EditorApplication.projectChanged += MarkDirty;
             Undo.undoRedoPerformed += MarkDirty;
@@ -51,7 +66,7 @@ namespace Crookedile.Editor.Database
         // rather than mid-event.
         private void MarkDirty()
         {
-            _dirty = true;
+            _stale.UnionWith(_tabs);
             Repaint();
         }
 
@@ -61,22 +76,18 @@ namespace Crookedile.Editor.Database
             // repaint passes of one frame always draw the same controls.
             if (Event.current.type == EventType.Layout)
             {
-                if (_dirty)
-                {
-                    _dirty = false;
-                    foreach (var tab in _tabs)
-                        tab.Reload();
-                }
                 if (_next >= 0)
                 {
                     _tabs[_current].OnDisable();
                     _current = _next;
                     _next = -1;
                 }
+                if (_stale.Remove(_tabs[_current]))
+                    _tabs[_current].Reload();
             }
 
             string[] labels = _tabs
-                .Select(t => t.ProblemCount > 0 ? $"{t.Title} ({t.ProblemCount})" : t.Title)
+                .Select(t => !_stale.Contains(t) && t.ProblemCount > 0 ? $"{t.Title} ({t.ProblemCount})" : t.Title)
                 .ToArray();
             const float tabHeight = 24f;
             int picked = GUI.Toolbar(new Rect(4, 2, position.width - 8, tabHeight), _current, labels);

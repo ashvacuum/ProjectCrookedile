@@ -123,7 +123,7 @@ Defeat ends the run (`RunState.Clear`). Victory returns to the map with rewards.
 | `Outcomes` | `RunOutcome[]` | Applied **in order, all of them**, when picked |
 
 Both lists are `[SerializeReference]` — pick a concrete type from the Odin dropdown. A row with
-no type picked is skipped at runtime and flagged by the Content Hub.
+no type picked is skipped at runtime and flagged by the Database window's Encounters tab.
 
 **Option gating** is how "you need the Bishop's Ring for this" works: put a `HasAlly` (or
 `FundsAtLeast`, or anything else) in the option's `Requirements`. Unmet options render
@@ -294,7 +294,7 @@ scene load so it survives the round-trip.
 | `Guaranteed` | false | Always appears every day in its window, **ahead of the random picks and ignoring the per-day count**. This is how a day-7 boss or day-1 opener is made certain |
 | `Requirements` | empty | **Hard gate** — all must hold or it can't appear at all |
 | `BoostIf` | empty | **Soft nudge** — when all hold, weight × multiplier. Stays available either way |
-| `BoostMultiplier` | **2** | Applied when every BoostIf holds. **A 0 here erases the weight it's meant to favour** — the Content Hub flags it |
+| `BoostMultiplier` | **2** | Applied when every BoostIf holds. **A 0 here erases the weight it's meant to favour** — the Database window's Checks tab flags it |
 
 Effective weight = `ResolvedWeight × (BoostActive ? BoostMultiplier : 1)`.
 
@@ -445,9 +445,8 @@ asset edits. These are shared assets: editing a district updates every reference
 waiting, and duration, and only consumes encounters visited. Requirements still pass in this
 editor simulation and event outcomes are not applied; it is not a complete playthrough model.
 
-Run **Crookedile → Campaign → Run Travel Checks** for route, traffic, clock, window, and
-visit-state regression checks. This uses temporary in-memory assets and does not replace the
-active run. Existing content needs no migration: unset fields mean local all-day encounters.
+`Tests/EditMode/CampaignTravelTests` (Test Runner → Edit Mode) covers routes, traffic, the clock,
+entry windows, visit state and ally bonuses, using temporary in-memory assets. Existing content needs no migration: unset fields mean local all-day encounters.
 
 ### 6.1 Ally overworld passives
 
@@ -463,12 +462,12 @@ Each has a **Reduction Percent** field (25% on a newly added entry). An empty li
 no overworld benefits. Recruited allies' passive percentages add together independently for each
 category, capped at 100%. Fractional minutes round up, and a positive duration stays at least
 one minute. Already-free travel/encounters remain free. An ally may grant either bonus,
-both, battle passives, or any combination; the generated description and Content Hub audit
+both, battle passives, or any combination; the generated description and the Database window's Allies tab
 recognize campaign-only allies.
 
 These are plain serializable classes, not separate ScriptableObject assets. They are saved
 inside the ally asset and remain editable inline from Encounter Designer. Both are listed
-in **Crookedile → Authoring Catalog → Overworld passives**, including their fields and usages.
+in **Crookedile → Database → Building blocks** (Kind: Overworld passive), including their fields and usages.
 
 To add another visit modifier, create a `[Serializable]` subclass of `OverworldPassive`,
 implement `ModifyVisit(EncounterData, ref VisitModifiers)` and `GetDescription()`, and give
@@ -637,22 +636,21 @@ nothing consumes — wiring `GenerateRewardOffer` to read `RewardConfig` is the 
 
 ## 11. Validation and tools
 
-### 11.1 Content Hub
+### 11.1 Database window audits
 
-**Crookedile → Content Hub** has two campaign categories:
+**Crookedile → Database** audits campaign content in three places:
 
-- **Campaign encounters** — events with no options (unleavable), options with no label, options
+- **Encounters tab** — events with no options (unleavable), options with no label, options
   that do nothing *and* say nothing, `[SerializeReference]` rows where no type was picked,
   battle encounters with no session, and sessions with more than one round (chain with a
   `GoToEncounterOutcome` instead).
-- **Encounter pools** — day coverage (a day with nothing eligible is an empty map, and is
+- **Checks tab, Encounter pools** — day coverage (a day with nothing eligible is an empty map, and is
   invisible from the inspector), unreachable windows, weight-0 non-guaranteed entries,
   dependencies on encounters outside the pool (never satisfiable), pools with no boss, and a
   boost multiplier of 0 — which older assets deserialize by default and which *erases* the
   weight of whatever it's meant to favour.
 
-The pre-existing **Encounters** category was renamed **Battle sessions**, which is what it
-actually audits — a session is a test-harness gauntlet, not campaign content.
+- **Battle sessions tab** — the sessions themselves. A session is a test-harness gauntlet, not campaign content.
 
 > Pool coverage is evaluated without a `RunState`, so requirement gates count as passing. A day
 > covered only by a gated encounter reads as covered; the dangling-dependency check is what
