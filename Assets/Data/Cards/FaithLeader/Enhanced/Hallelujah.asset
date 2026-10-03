@@ -46,7 +46,9 @@ MonoBehaviour:
   - faithleader
   _fantasies: 5
   _isStarterCard: 0
-  _isUnlockable: 0
+  _isUnlockable: 1
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -55,17 +57,17 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 5004226315283595264
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _condition: 9
         _effects:
         - rid: 5004226315283595265
     - rid: 5004226315283595265
       type: {class: ForEachEnemyWithStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _filterStatus:
           rid: 5004226315283595266
         _effects:
@@ -76,7 +78,6 @@ MonoBehaviour:
     - rid: 5004226315283595267
       type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _target: 11
         _behavior:
           rid: 5004226315283595268
@@ -91,14 +92,12 @@ MonoBehaviour:
     - rid: 5004226315283595269
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _condition: 9
         _effects:
         - rid: 5004226315283595270
     - rid: 5004226315283595270
       type: {class: ForEachEnemyWithStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _filterStatus:
           rid: 5004226315283595271
         _effects:
@@ -109,7 +108,6 @@ MonoBehaviour:
     - rid: 5004226315283595272
       type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _target: 11
         _behavior:
           rid: 5004226315283595273

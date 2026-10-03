@@ -39,7 +39,9 @@ MonoBehaviour:
   _tags: []
   _fantasies: 2
   _isStarterCard: 0
-  _isUnlockable: 0
+  _isUnlockable: 1
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -48,6 +50,8 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 5004226271355076642
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
@@ -62,6 +66,8 @@ MonoBehaviour:
         _perXSource: 7
         _multiplier: 1
         _target: 1
+        _bypassSupport: 0
+        _maxAmount: 0
     - rid: 5004226271355076644
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
@@ -76,3 +82,5 @@ MonoBehaviour:
         _perXSource: 7
         _multiplier: 1
         _target: 1
+        _bypassSupport: 0
+        _maxAmount: 0

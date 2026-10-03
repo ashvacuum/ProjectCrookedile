@@ -29,9 +29,13 @@ MonoBehaviour:
   _upgradedEffects:
   - rid: 5004226271355076640
   _upgradedPassives: []
+  _upgradedInnateRetain: 0
   _tags: []
+  _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -40,33 +44,33 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 5004226271355076635
       type: {class: DelayedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _turnsDelay: 1
         _effects:
         - rid: 5004226271355076636
     - rid: 5004226271355076636
       type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 8
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
+        _maxAmount: 0
     - rid: 5004226271355076640
       type: {class: DelayedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _turnsDelay: 1
         _effects:
         - rid: 5004226271355076641
     - rid: 5004226271355076641
       type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 10
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
+        _maxAmount: 0

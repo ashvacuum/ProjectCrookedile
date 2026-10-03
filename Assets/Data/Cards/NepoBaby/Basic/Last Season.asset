@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 0
   _rarity: 0
   _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'He threw it away. You''ll take it.'
+  _description: 
+  _flavorText: He threw it away. You'll take it.
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -40,14 +40,18 @@ MonoBehaviour:
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 7000000000000000000
       type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

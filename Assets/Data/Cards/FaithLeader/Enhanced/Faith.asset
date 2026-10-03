@@ -48,7 +48,9 @@ MonoBehaviour:
   - faithleader
   _fantasies: 2
   _isStarterCard: 0
-  _isUnlockable: 0
+  _isUnlockable: 1
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
@@ -57,51 +59,51 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 5004226220983844979
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _condition: 0
         _effects:
         - rid: 5004226220983844980
     - rid: 5004226220983844980
       type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 2
         _amountSource: 6
         _perXSource: 0
         _multiplier: 2
         _target: 1
+        _stopAtNeutral: 0
     - rid: 5004226220983844981
       type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 3
         _amountSource: 16
         _perXSource: 0
         _multiplier: 1
+        _maxAmount: 0
     - rid: 5004226220983844983
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _condition: 0
         _effects:
         - rid: 5004226220983844985
     - rid: 5004226220983844984
       type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 3
         _amountSource: 16
         _perXSource: 0
         _multiplier: 1
+        _maxAmount: 0
     - rid: 5004226220983844985
       type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
         _amount: 2
         _amountSource: 6
         _perXSource: 0
         _multiplier: 2
         _target: 1
+        _stopAtNeutral: 0
