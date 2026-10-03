@@ -17,37 +17,28 @@ So each deck = ~4 offense + ~3 defense + 1 hostility + identity cards.
 
 ---
 
-## Nepo Baby — *the schemer*
+## Nepo Baby — *the glass cannon*
+> **Full spec: `nepo-baby-class.md`.** Numbers are placeholders and live in the Nepo Baby config asset.
 
-> **Superseded (2026-10-03), pending build:** `nepo-baby-class.md` replaces this Patronage / summon design with the Burn / Return / Calm class. Section 12 there lists what changes.
-**Verb:** burn the hand you were handed to fund borrowed power. **Distinct economy** — see below. Fantasy: unearned privilege; you don't build value, you spend down an inheritance of favors.
+**Verb:** burn your own deck to get exactly what you want, now. The room pays the bill in Hostility. His resource is the deck itself: no Patronage, no summons, no second currency.
 
-### The Patronage economy *(this class only)*
-Nepo Baby is the **odd one out by design**. The other two classes are *energy-gated* (3 energy/turn is the throttle). Nepo Baby is **hand-gated**:
-
-- **Most cards cost 0 energy** but cost **Patronage** instead. Energy is no object — doors open freely (the privilege fantasy). A few big plays still cost energy and/or extra Patronage to stay rare (double-gated).
-- **Patronage** is generated *only* by a dedicated **generate card** that **sacrifices a card from your hand** (the "burn what you're handed" cost, à la Prime Monster's exploit-for-capital). **No free baseline burn** — generation is gated to drawing the card, so Patronage is something you plan around, not a panic lever.
-- Therefore your real resource is **your hand itself**. Over-summon and you empty your hand: a big board, nothing left to play. The overload trap is baked into the economy, not bolted on.
-- **Hand size is lifeblood.** Card draw matters more for this class than any other → draw/refill is a reward-pool priority. *(The mulligan starter passive — discard any number, redraw — reinforces this perfectly: it's "reshuffle the hand I was dealt," the whole class in one ability.)*
-
-**Patronage buys three things:**
-1. **Summon** — bodies in the row (one-time)
-2. **Manipulate** — bend the room now: reduce hostility, flip a stance, shield (one-time)
-3. **Install** — persistent engines that pay out every turn (ongoing) — *reward-pool material, see potential layer (Troll Farm etc.)*
+Follows the standard 3 pressure + 3 shield + 3 hostility-reducer + 1 seed shape, with a glass-cannon tilt: pressure pitched above the other classes, shields below.
 
 ### Starter deck
 
-| Card | Qty | Energy | Patronage | Effect | Role |
+| Card | Qty | Type | Cost | Effect | Role |
 |---|---|---|---|---|---|
-| Push (offense) | 4 | 1e | — | Small opinion push | basic |
-| Cover (defense) | 3 | 1e | — | Small opinion shield | basic |
-| **Call in Patronage** | 2 | 0e | — | **Sacrifice a card from hand → gain Patronage** | **identity (generate)** |
-| **Call a Favor** | 2 | 0e | spend P | **Summon a receptive ally** into the row | **identity (summon)** |
-| Plant | 1 | 0e | spend P | Summon a **hostile** body | hostility / echo-chamber escape *(paid opposition — on-fantasy)* |
+| Name Drop | 2 | Pressure | 1e | Sway attack, above the Faith Leader/Celebrity baseline | basic offense |
+| **Pull Rank** | 1 | Pressure | 0e | 4 Sway to target, then +1 Hostility on that enemy | **aggravator** (also the echo-chamber escape) |
+| Daddy's Lawyer | 3 | Shield | 1e | Light Composure, below the other classes | basic defense |
+| I'm Just Like You | 3 | Rhetoric | 1e | Reduce target Hostility. Converts to Receptive: draw 1. Otherwise: a random card in hand costs 1 less (floor 1) | hostility reducer |
+| **Blow the Allowance** | 1 | Rhetoric | 1e | Burn a non-Policy card from hand, play it free, and deal Sway equal to its printed cost. Enhanced: 0e, damage doubled | **identity (seed)** |
 
-**Why this set:** the loop **burn → bank Patronage → summon** is the whole class, shown in three cards (generate, summon, the hostile-summon escape). Basics still cost energy so the player learns Patronage *gradually* against a familiar baseline rather than all at once. Plant doubles as echo-chamber escape AND "I bring my own villain." No manipulate card in the starter — keep it to the summon verb first; manipulation enters via rewards.
+**Passive:** once per battle, a full-hand Mulligan (discard hand, draw fresh).
 
-**Known tuning risk (playtest):** the death-spiral. Burning a card for Patronage *then* spending a card to summon = two cards spent per body. Without enough draw, the hand hollows out and stalls. Thematically perfect ("blew through daddy's favors") but needs the summoned board to generate enough value to justify the trade — especially since allies are fragile/corruptible. Tune: Patronage per generate, number of generate cards, draw availability.
+**Why this set:** Blow the Allowance teaches the burn (the bigger the card, the bigger the swing). Pull Rank teaches the price: free damage now, enemy anger later, and thin shields to absorb it. It is a poor burn target (printed cost 0), which is intended. "I'm Just Like You" is Rhetoric so it feeds Old Boys' Club from fight one (open question 8.2).
+
+**Known tuning risk (playtest):** Pull Rank against encounters that punish Hostility changes, and how fast a burn-heavy deck thins into Heckle/Scandal rot.
 
 ---
 
@@ -114,7 +105,7 @@ Each status blunts a specific enemy behavior *and* counts toward the 3-stack pac
 
 The discipline isn't a card count — it's whether a new player can read the opening hand and know what to do. Quick self-check per deck:
 
-- **Nepo Baby** — now the **heaviest to learn**, not the easiest: it carries a unique two-currency economy (energy + Patronage) and a sacrifice mechanic. Mitigated by teaching gradually (basics stay energy-only; the loop is just burn→summon). Still legible as three clean steps, but flag it as the class most likely to confuse a true first-timer. ⚠️ watch (was "easiest" under the old summon-only model)
+- **Nepo Baby** — the **hardest class by design**, but the starter is legible: three familiar basics plus one seed whose payoff is printed on the card (Sway = the burned card's cost). The difficulty is in the reward pool and the Hostility clock, not the opening hand. ⚠️ watch Pull Rank: a first-timer may spam it and not connect the angrier room to it.
 - **Celebrity** — basics + Read the Room are dead simple; the three single-copy seed cards each gesture at a direction without forcing a decision. Risk isn't legibility of the *starter* — it's that the *class* asks the player to eventually commit to a direction, which a true beginner won't know to do. ⚠️ advanced class by nature, not the on-ramp (see §7).
 - **Faith Leader** — the **any-3-statuses-to-convert** rule is countable and visible (player sees each enemy's stack climb), and each status does an obvious defensive job, so stacking never feels opaque. Legible. ✅ (watch: is the 3-setups-for-1-turn payoff *felt* as worth it? — tuning, not legibility)
 
@@ -126,7 +117,7 @@ The discipline isn't a card count — it's whether a new player can read the ope
 
 Once starters feel right, sketch the **subset of directions** each class's *reward pool* opens — explicitly NOT in the starter, so the two don't bleed:
 
-- **Nepo Baby** — Patronage-funded **installations** (signature category — *"buy a corrupt institution that works for you"*): **Troll Farm** (each turn: push the meter / suppress a hostile voice — manufactured online consensus), plus a captured news outlet, a bought official, a fake grassroots movement, etc. Persistent engines need a **leash** so they don't trivialize encounters — preferred: **upkeep Patronage each turn** to keep running (a troll farm needs funding — on-fantasy), or limited duration, or shut-down by enemy "exposé" intents. Also: ally protection (Cover Story), ally-payoff scaling, breaking Hardened, **draw/refill effects** (hand is lifeblood — high priority), manipulate cards (spend Patronage to bend the room). *Note: installations may render damage as opinion-meter pressure / voice suppression, since there is no enemy HP.*
+- **Nepo Baby** — three lanes plus valves (full card list in `nepo-baby-class.md` section 6): **Burn** (Executive Privilege, Dynasty, Legacy Admission, Encore, Born Into It, Bail Out; Trust Fund as an unlock-gated Rare), **Pull and scan** paid in Hostility (Inside Information, Background Check, Call in a Favor, Special Order), a deliberately sparse **Return** lane (I Know a Guy, Heirloom, Family Seat, Hand-Me-Downs), a slow **Calm** lane capped at Neutral (Apology Tour, Smooth Things Over, Smooth Operator), and **valves** that each cost something (Skip the Line, VIP Access, Do-Over, Not My Problem). Cap valves per reward screen so he stays a glass cannon.
 - **Celebrity** — the reward pool is the **widest in the game**, organized into three draftable sub-archetypes the player commits to over a run (see §7):
   - **Attention/Aggro** — cards that draw aggro and bank it, payoffs that spend banked attention as big meter hits (build-and-spend, tempo risk).
   - **Scandal** — Scandal-generators (and synergy with enemy-inflicted Scandals), per-Scandal-drawn payoffs (+shield etc.), per-Scandal-in-play payoffs (end-of-turn meter damage), and a **spin/cash-out** to clear Scandals for a burst (anti-Curse snowball, consistency risk, all-in). *Tuning: draw-severity gentle not punishing; on-draw vs in-play triggers.*

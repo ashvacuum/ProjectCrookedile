@@ -262,7 +262,6 @@ Author neutral **white**; the theme recolors per intent. One per `EnemyMoveType`
 ## 7. Resource / cost icons — `128 × 128`
 Small icons rendered next to the cost number. Author white/tintable.
 - **Action Points** (energy) — the universal cost. Lightning/peso-spark.
-- **Patronage** (₱) — Nepo Baby's banked favor currency. Coin/envelope-of-cash.
 - **Attention** — Celebrity's spotlight resource. Camera-flash/spotlight.
 
 ---

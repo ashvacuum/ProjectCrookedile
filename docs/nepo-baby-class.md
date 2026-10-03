@@ -1,8 +1,8 @@
 # Nepo Baby: Burn / Return / Calm class spec (v0.1)
 
-**Status: ideation locked, not built. Numbers are placeholders.** This spec replaces the Patronage / summon design in
-`core-design.md` section 7 and `crookedile-starter-decks.md` ("Nepo Baby: the schemer"). Those sections stay until this
-is built; section 12 lists every place they and the code disagree with it.
+**Status: canonical design, not built. Numbers are placeholders.** This is the Nepo Baby class. It replaced the
+Patronage / summon design (2026-10-03); `core-design.md`, `crookedile-starter-decks.md` and `enemy-design-bible.md`
+now summarise this doc. Section 12 lists where the code still disagrees.
 
 Vocabulary: **Composure** = Support (the shield). **Sway** = a push on the Opinion meter. Statuses, not keywords.
 
@@ -256,7 +256,8 @@ the other classes (hardest class by design).
 
 ## 12. Conflicts with existing docs and code
 
-Audited 2026-10-03. Nothing below has been changed; each item needs a ruling before implementation touches it.
+Audited 2026-10-03. Section A items marked **Resolved** are settled in the docs; everything else needs a ruling before
+implementation touches it. No code has changed yet.
 
 ### A. Design docs (docs win over code, so these need a decision first)
 
@@ -264,8 +265,10 @@ Audited 2026-10-03. Nothing below has been changed; each item needs a ruling bef
    Patronage / summon class ("Who can I bring in?", summons receptive allies, Plant summons a hostile, fear = his own
    allies turning Turncoat). This spec says player-side summoning does not exist and makes the deck itself the resource.
    `core-design.md` section 8 ("teaches the Patronage loop") and `needs-detailing.md` section 8 ("Nepo Baby leash")
-   are built on the old design. Ruling needed: this spec supersedes them, and those sections get rewritten.
-2. **Hostile = Strength buff.** Section 1 says Hostile grants a passive Strength buff. `core-design.md` section 3
+   are built on the old design. **Resolved (2026-10-03):** this spec supersedes them; core-design, starter-decks,
+   enemy-design-bible, needs-detailing, naming-glossary, art-bible and the readme were rewritten to match. The leftover
+   Patronage / summon code is B3.
+2. **Hostile = Strength buff.** Section 1 originally said Hostile grants a passive Strength buff. `core-design.md` section 3
    (ruling 2026-09-29) says hostility sets behaviour, never numbers: stance picks which authored move list an enemy
    draws from, and the old hostility damage multiplier was removed. The spec's "Hostility is a clock" still works under
    the ruling, but no Strength buff should be added.
@@ -273,14 +276,15 @@ Audited 2026-10-03. Nothing below has been changed; each item needs a ruling bef
    is decay **and** halved gains. The spec's wording is incomplete, not a change.
 4. **Starter passive.** `core-design.md` section 9: start of battle, discard any number of cards and redraw that many.
    This spec: once per battle, a full-hand Mulligan at any time. The existing `Nepotism` passive asset is neither: the
-   first card played each battle reduces a random card's cost by 1.
+   first card played each battle reduces a random card's cost by 1. **Resolved in docs:** core-design section 9 now
+   states this spec's version. The `Nepotism` asset still needs replacing (B8).
 5. **Roster names.** "First Impressions", "The Receptive Trap", the Bodyguard and "Ardent Fan" are not in
    `enemy-design-bible.md`, `campaign-encounters.md` or `Assets/Data`. Only the Heckler exists. Section 10's encounter
    tests cannot run until these exist or are mapped onto current encounter IDs.
 6. **"I Have All the Cards" is called existing.** No card, effect or doc by that name exists, and no Fibonacci cost
    scale exists. Dynasty reuses that scale, so it has to be built first.
 7. **Hardened.** `core-design.md` section 3 says Nepo Baby "may be able to break Hardened". This spec doesn't mention
-   it. Treat as dropped unless re-added.
+   it. **Resolved:** dropped. Calm caps at Neutral, so Hardened barely touches him; core-design section 3 says so.
 8. **Heckle exit rule.** Section 4 says Heckles "exhaust normally". `enemy-design-bible.md` D13 leaves the Heckle exit
    rule open (exhaust on draw/play vs end-of-encounter purge). Today a Heckle is just a card: it discards unless
    authored with an exhaust effect.

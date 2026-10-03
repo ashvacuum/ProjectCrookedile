@@ -17,7 +17,7 @@
 | P7 | Every room has a clock | Meter decay, enemy ramp (Escalator), shield stacking, Credibility chip, deck pollution. No free turtling. | LOCKED |
 | P8 | Readable intents (voice intents) | Telegraphed via the 21-glyph set. Conditional intents allowed ("Counter-Argues IF you play Rhetoric"). Constrained randomness in move pools. | LOCKED |
 | P9 | Bosses = rigged rooms | Rival candidates contesting the same meter. Phases trigger via ROOM CHANGES (new enemies, shields, rules), not HP thresholds. Incumbent = final boss. | LOCKED (core design) |
-| P10 | Archetype asymmetry | Rate encounters vs Nepo Baby (Patronage/summons), Faith Leader (Guilt/Shame/Doubt→Fanatic engine, Jaded escalator), Celebrity (Scandal-fuel subarchetypes). No encounter uniformly hard. | IN PROGRESS |
+| P10 | Archetype asymmetry | Rate encounters vs Nepo Baby (burn / pull / replay, Hostility as his clock, rot-sensitive), Faith Leader (Guilt/Shame/Doubt→Fanatic engine, Jaded escalator), Celebrity (Scandal-fuel subarchetypes). No encounter uniformly hard. | IN PROGRESS |
 | P11 | Theme & act framing | Anthro Filipino animals + mythological creatures, Spiritfarer-adjacent painterly register. Wardrobe = class satire. Acts: Barangay → City → National (proposed). Metagame: 30-day campaign, Debate milestone boss. | LOCKED / PROPOSED |
 
 ## 2. Room Anatomy — shared meter model
@@ -29,7 +29,7 @@
 | Player Credibility | *(META resource — campaign layer, parked)* | Guard with Composure; heal rarely. | Smear/Exposé/Red-tag moves chip it. Which roles carry Credibility attacks = D8. |
 | Enemy states (Hostile/Receptive) | Per-enemy behavior modes. | Flip states via cards/statuses; MANAGE the mix — all-Receptive triggers Echo Chamber penalty. | Converters drag Receptives back to Hostile; some (Televangelist) weaponize Echo Chamber deliberately. |
 | Statuses on enemies | Guilt, Shame, Doubt (pacify trio), Silence, Devotion, Jaded, Hardened, Fanatic, Turncoat, Warded. | FL engine: stack G/S/D to 3+Jaded → consume → 1-turn Fanatic bursts meter → reverts. Jaded = permanent per-enemy escalator (anti-milking). | Hardened resists statuses; Protectors guard allies via Warded stacks. |
-| The row | Ordered enemy positions. Adjacency matters (Praise). | Target selection, positional cards, Nepo summons occupy slots (most corruptible). | Amplifier/Converter range limits (proposed D10), summon insertion (bosses). |
+| The row | Ordered enemy positions. Adjacency matters (Praise). | Target selection, positional cards, enemy summons occupy slots. | Amplifier/Converter range limits (proposed D10), summon insertion (bosses). |
 | Clocks | Anti-stall pressure. | Race or control. | Escalator ramps, meter decay, shield stacking, pollution, Credibility chip. |
 
 ## 3. Role Taxonomy + Targeting
@@ -50,12 +50,11 @@
 |---|---|---|---|
 | MTR | The Meter | Pressure pushes, Fanatic burst | No enemy selection. Blocked by enemy up-shields unless [pierce]. |
 | ST | Single enemy | Insinuate Sins, Cast Out, Silence | Receptive enemies REMAIN legal targets; Jaded punishes milking (LOCKED). |
-| POS | Positional (row-relative) | Praise (adjacency) | Row is ORDERED; enemies do not move; Nepo summons choose slot (LOCKED). |
+| POS | Positional (row-relative) | Praise (adjacency) | Row is ORDERED; enemies do not move (LOCKED). No player-side summons. |
 | AOE | All enemies | Preach-type wide status | — |
 | RND | Random enemy | (none yet) | D12: leaning NONE — deterministic fits debate-puzzle identity. |
-| SLF | Self / player | Composure, draw, Patronage, purge | — |
+| SLF | Self / player | Composure, draw, burn, pull, scry, purge | — |
 | SHD | Shields (meter objects) | Shield-strip | Shields as targetable objects distinct from enemies. |
-| ALY | Own summons (Nepo) | Buff/sacrifice allies | Allies occupy row slots; enemies may target them (most corruptible). |
 
 ## 4. Act 1 — Barangay Politics (encounter compositions)
 
@@ -74,7 +73,7 @@ Enemies are conditions → the QUESTION lives in the role combo.
 | N05 | Normal | Bouncer & Handler | Bayawak Pusher/heavy Credibility hits + Ahas PROTECTOR warding him | Do you answer wards (burn stacks / pacify Protector)? | Bayawak Smears ramp | Med | Med | Hard |
 | N06 | Normal | Radio Commentator | 1x Tandang — Shielder/Escalator — stacks up-shields + Airtime | Can you strip shields or burst through? | Airtime +1/turn | Med | Easy (Fanatic burst) | Med |
 | EL1 | Elite | The Televangelist | 1x Peacock — Converter(inverted)/Shielder — pushes YOUR enemies Receptive to force Echo Chamber penalty on you | Manage the state MIX, not just flip everything friendly? | Echo Chamber decay while all-Receptive | Med | Hard (mirrors yours) | Med |
-| EL2 | Elite | The Dynast | 1x Agila — Pusher/Amplifier + summons proxy allies (Nepo mirror) — summons occupy row, warded | Handle summon pressure + wards? | New proxy every 3 turns | Hard (mirror, slot war) | Med | Med |
+| EL2 | Elite | The Dynast | 1x Agila — Pusher/Amplifier + summons proxy allies — summons occupy row, warded | Handle summon pressure + wards? | New proxy every 3 turns | Hard (proxies refill the room faster than Calm can settle it) | Med | Med |
 | EL3 | Elite | The Comment Section | 3x Uwak — Inflictors, CHAIN-adjacent — alternate Heckle floods + Smears | Purge/cycle through temporary pollution? | Heckle flood scales | Med | Hard | Easy |
 | B01 | Boss | The Kagawad Machine | Rigged room: Shielder core + rotating Pusher adds; PHASE = room change swaps the add roster | Full exam: shields + priority + tempo | Room change every N turns | Med | Med | Med |
 | B02 | Boss | The Debate (milestone) | Rival candidate (croc-adjacent?) contests the SAME meter — pushes it toward HIS side; audience enemies as conditions | Out-tempo a mirror who uses your win axis? | Meter is tug-of-war; stale after N turns | Med | Med | Med |
@@ -93,13 +92,13 @@ v1 wrongly modeled per-enemy Opinion ripple links. Actual system: the group puzz
 | Receptive vulnerabilities | Receptives take amplified statuses / enable payoffs, but count toward Echo Chamber. | Milking tension — Jaded escalates per-enemy to cap it. | FL target-milking (Jaded exists for this). |
 | Converter tension | Enemy Converters drag Receptives back Hostile — HURTS their Echo Chamber defense, HELPS you avoid the penalty. | Sometimes you LET the Converter act. When to Silence him vs use him. | The Tita, Televangelist counterplay. |
 | Protector wards | Warded stacks absorb hostility shifts / debuffs on allies. | Burn stacks vs remove Protector; composition ordering. | Handler (N05), Dynast proxies. |
-| Row adjacency | Ordered row; adjacency cards (Praise); summons pick slots. | Positional value; Amplifier range limits (proposed D10). | Comment Section (chain-adjacent), Nepo slot war vs Dynast. |
+| Row adjacency | Ordered row; adjacency cards (Praise); summons pick slots. | Positional value; Amplifier range limits (proposed D10). | Comment Section (chain-adjacent), Dynast proxy insertion. |
 
 ### Design rules (v2)
 - **R1** Every encounter has at least one "safe holdout" candidate (low-threat enemy you can afford to leave Hostile) OR deliberately denies one (elite/boss pressure).
 - **R2** Echo Chamber UI: show the penalty state loudly BEFORE triggering (warning at all-but-one Receptive). *(Needs design pass.)*
 - **R3** ~~Protector: ward untargetable by ST~~ → superseded by Warded-stacks redesign.
-- **R4** Row is ordered; enemies never reposition (v1); Nepo summons choose slot on entry.
+- **R4** Row is ordered; enemies never reposition (v1). Only enemies summon (no player-side summons).
 - **R5** No random-target player cards in v1 (pending D12) — deterministic debate-puzzle identity.
 - **R6** Receptive enemies stay legal targets; Jaded is the anti-milking valve, not targeting rules.
 
@@ -134,7 +133,7 @@ Pattern rules: move pools with constraints (no repeat x2 unless scripted; thresh
 | D14 | Credibility recovery economy | Rest slots? Cards? Post-room partial? | TBD — campaign-layer pass *(parked with Credibility)* | Difficulty tuning |
 | D15 | Numbers pass | Meter size, push values, shield counts, status thresholds | AFTER kits + targeting locked | Everything downstream |
 | D16 | Boss 2 "The Debate" tug-of-war | Rival pushes same meter negative vs own meter | Tug-of-war — same meter, purest mirror | B02 design |
-| D23 | Do player summons/allies count as non-Receptive presences for the Echo Chamber check? | (a) yes — summons are a mix-management tool (b) no — only enemies count | Leaning (a); test in EL1 first | EL1, Nepo tuning |
+| D23 | Do player summons/allies count as non-Receptive presences for the Echo Chamber check? | — | **Moot (2026-10-03):** player-side summoning is cut (`nepo-baby-class.md`). Only enemies count. | — |
 | D24 | Elite rewards system | Endorsement relics (His Flock Follows, Borrowed Machinery) vs rare cards vs campaign resource | Leaning endorsement relics (Allies in code) | Elite rewards |
 
 **R7 (RULING, LOCKED):** Converter actions consume the enemy's full turn. The N02 judo line depends on it; converting is a real tempo cost for enemies too.
@@ -179,7 +178,7 @@ Scripted opener: turn 1 is always Anointing — both Devotees flip Receptive, so
 
 **Devotee x2 — sheep.** Push 3. While Receptive they sing — harmless-looking, but they feed Pass the Plate and the penalty. The trap is that they look solved.
 
-Puzzle: keep ≥1 Devotee Hostile on purpose, use removal, or body-block with summons if D23 lands (a). Reward proposal: "His Flock Follows" — the first enemy you flip each room stays Receptive permanently. Ratings: Nepo Med · Faith Hard · Celebrity Med.
+Puzzle: keep ≥1 Devotee Hostile on purpose, or use removal. Reward proposal: "His Flock Follows" — the first enemy you flip each room stays Receptive permanently. Ratings: Nepo Med · Faith Hard · Celebrity Med.
 
 ### EL2 — "The Dynast" (Elite) — hijacks the row
 
@@ -193,4 +192,4 @@ Question: can you fight for physical space? Clock: a new Proxy every 2 turns; 4+
 | Talon Memo | Smear | Player | 7 | Only with 3+ proxies |
 | Disowned | Eject | One Receptive proxy | Removes a converted proxy, freeing the slot | Replaces Anak, Halika when a Receptive proxy holds a slot she wants |
 
-**Proxy Candidate (fledgling).** Push 3, fragile, no resistances. Converted proxies stay in their slot and give +2 meter/turn to you until Disowned ejects them. Wards cover adjacent slots only (D10). Reward proposal: "Borrowed Machinery" — once per room, summon a free Proxy. Ratings: Nepo Hard-but-fair · Faith Med · Celebrity Med-Hard.
+**Proxy Candidate (fledgling).** Push 3, fragile, no resistances. Converted proxies stay in their slot and give +2 meter/turn to you until Disowned ejects them. Wards cover adjacent slots only (D10). Reward proposal: "Borrowed Machinery" — once per room, summon a free Proxy. *(Conflicts with no player-side summoning; needs a new reward.)* Ratings: Nepo Hard-but-fair · Faith Med · Celebrity Med-Hard.

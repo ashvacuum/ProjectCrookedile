@@ -128,7 +128,7 @@ there, not here, then record the mapping in this table.
 | `RileOthers` | Rally | | | Boosts neighbours' hostility. |
 | `Buff` / `OffensiveBuff` / `DebuffAttack` / `Debuff` | — | | | Mechanical combos; may stay internal. |
 | `Idle` | Murmur | | | Low impact / presence. |
-| `SummonMinion` | — | | | Nepo-style; keep. |
+| `SummonMinion` | — | | | Enemy-only summon; keep. |
 | (no equivalent) | Sway | | | "convert a receptive enemy to hostile". |
 
 ---
@@ -144,7 +144,7 @@ These are the right words — new code should match them:
 - **Support / Denial** (`CurrentSupport`, `CurrentDenial`, `SupportChangedEvent`, `DenialChangedEvent`)
 - **Hostility** (signed axis; receptive ↔ hostile)
 - **Voice / Intent** (`EnemyMoveData`, intent display)
-- **Patronage / Attention** (archetype resources)
+- **Attention** (archetype resource). Patronage is retired with the Nepo Baby redesign (`nepo-baby-class.md`).
 - **Pacify / convert / Jaded** (Faith Leader)
 - **Ally** (the persistent per-run passive holder — `AllyData`, `RunState.Allies`). The design
   docs still call this a **relic**; the code never did. Ally is the name.

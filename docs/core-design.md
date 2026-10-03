@@ -42,7 +42,7 @@ Hostile enemies are **not purely a problem** — they are a resource. You want t
 - **Hardened** — cannot be turned receptive. The permanent villain.
 - **Fanatic** — cannot be turned hostile. The permanent loyalist.
 
-Both are **statuses** (can be applied and potentially removed), not fixed enemy types. Each archetype relates differently: Faith Leader is frustrated by Hardened (conversion kit fails), Celebrity loves Hardened (free permanent villain), Nepo Baby may be able to break Hardened ("daddy knows people").
+Both are **statuses** (can be applied and potentially removed), not fixed enemy types. Each archetype relates differently: Faith Leader is frustrated by Hardened (conversion kit fails), Celebrity loves Hardened (free permanent villain), Nepo Baby barely notices it (his calming stops at Neutral anyway, so Hardened only blocks reducers that convert incidentally).
 
 ### Status list (working)
 Guilt · Shame · Doubt · Silence · Devotion · Jaded · Hardened · Fanatic · Turncoat · Scandal (Celebrity)
@@ -123,19 +123,31 @@ Each asks a different question every turn and lives at a different point in time
 
 | Archetype | Question | Time | Can uniquely... | Fears... |
 |---|---|---|---|---|
-| **Nepo Baby** | "Who can I bring in?" | **Before** | Change who is even in the room (summon bodies) | Its own imported allies betraying it |
+| **Nepo Baby** | "What do I burn to get it now?" | **Now** | Consume his own deck: burn, pull, replay, retrieve | The room's anger (Hostility clock) and junk rotting a thinned deck |
 | **Celebrity** | "What deck am I building this run?" | **flexible** | Draft into multiple archetypes the locked classes can't (open canvas) | Committing wrong / an incoherent pile; weakest before it commits |
 | **Faith Leader** | "Who can I pacify into a follower?" | **After** | Stack statuses to convert enemies into 1-turn meter-pumping Fanatics | Disruption before reaching 3 stacks; a Hardened room (can't pacify) |
 
 > A distinctiveness test: each archetype must have a **unique capability** AND a **unique fear**. Overlapping fears are what make archetypes feel samey. Watch especially that Celebrity fears *self-overreach* while Faith Leader fears *opponent disruption* — if Celebrity's risk becomes "opponent breaks my setup," they've merged.
 
-### Nepo Baby — *the schemer*
+### Nepo Baby — *the glass cannon*
+> **Full spec: `nepo-baby-class.md`** (cards, config, open questions, conflicts with current code).
 
-> **Superseded (2026-10-03), pending build:** `nepo-baby-class.md` replaces this Patronage / summon design with the Burn / Return / Calm class. Section 12 there lists what changes.
-Controls room composition; imports allies via daddy's connections (necromancer-like — summons bodies). Can also **Plant** a hostile to break the echo chamber. **Leash:** summoned allies are the *most* corruptible — their own people turning Turncoat is the signature nightmare.
+Someone who has never been told no. He spends the family's resources (his own deck) to get exactly what he wants, and the whole room pays the bill (Hostility). Best-in-class damage and access, thin defense, a clock set by the room's anger. **The hardest class and the most mechanically different: his resource is the deck itself, not a status.** Celebrity *creates* cards; Nepo *consumes* them.
+
+**Three lanes plus a valve package**, each lane with its own verb and its own brake:
+- **Burn** (exhaust from hand as a cost): the high-ceiling engine. His cards are mostly cost 2-3, so burning one is a big swing. Thins the deck, so it is the lane Heckle/Scandal rot punishes.
+- **Return** (cards come back to hand): powerful but sparse (at most ~15% of the pool). Brake: in-turn cost increase.
+- **Calm** (Hostility control): small hits, steady Hostility reduction, payoffs for a room with no Hostile enemies. Wins elites and bosses by outlasting.
+- **Valves:** scry, skip, cycle, redirect. Every valve costs something (Hostility, energy or deck cleanliness).
+
+**Cost model:** burning is paid in cards; pulling and scanning is paid in Hostility. Hostility is a **pure price and clock**, never rewarded (rewarding it is Faith Leader's lane).
+
+**Guardrails:** no stacking statuses on enemies and no deep conversion (calming caps at Neutral; never rewarded for all-Receptive). No token generators or "add X cards to hand" engines (Celebrity's lane). **Policies can never be burned.** No player-side summoning.
+
+**Fear:** a thinned deck rotting with Heckles and Scandals while an angry room hits through thin shields.
 
 ### Celebrity — *the open canvas* (archetype-flexible)
-**Spine: deliberately none — and that absence IS the identity.** The other two are *locked* into one engine (Nepo Baby always Patronage; Faith Leader always stack-to-convert). Celebrity is the class whose final identity is **assembled during the run** — you draft into whichever sub-archetype the reward pool offers, and the class bends to support it. On-fantasy: a celebrity politician has *no fixed substance*, reinventing themselves for the moment (action star one cycle, tearful family man the next). "Empty vessel that becomes whatever the run shapes" is the sharpest expression of the celebrity-politician satire in the cast.
+**Spine: deliberately none — and that absence IS the identity.** The other two are *locked* into one engine (Nepo Baby always consumes his deck; Faith Leader always stack-to-convert). Celebrity is the class whose final identity is **assembled during the run** — you draft into whichever sub-archetype the reward pool offers, and the class bends to support it. On-fantasy: a celebrity politician has *no fixed substance*, reinventing themselves for the moment (action star one cycle, tearful family man the next). "Empty vessel that becomes whatever the run shapes" is the sharpest expression of the celebrity-politician satire in the cast.
 
 Closest StS reference: **Silent's deep philosophy** (draft into poison/shiv/discard) taken to the extreme, with an **Ironclad-style reliable floor** so it never bricks before committing. *Plays like the Silent (card flow, adapt), with Ironclad's floor (sturdy fundamentals).* **High floor early, high ceiling late.**
 
@@ -159,7 +171,7 @@ Closest StS reference: **Silent's deep philosophy** (draft into poison/shiv/disc
 **Why the set works:** three different *risk postures*, not three flavors of one thing — **Attention** = tempo risk (fast, snowbally), **Scandal** = consistency risk (all-in, sacrifices flexibility), **Drama King** = low risk (grind, control). Drafting Celebrity = choosing "fast and loud / all-in on spectacle / slow and safe." Three genuinely different runs from one class — the open canvas delivering.
 
 ### Faith Leader — *the converter* (status specialist)
-**Spine (as concrete as Nepo Baby's Patronage):**
+**Spine (as concrete as Nepo Baby's burn):**
 
 > **Stack statuses (Guilt / Shame / Doubt, any mix) on an enemy to the pacify threshold. This consumes the statuses and converts them. Normal enemy → becomes a Fanatic for 1 turn (a one-turn burst pumping the opinion meter), then reverts to neutral. Hardened enemy → silenced instead (can't be converted, but can be shut up).**
 >
@@ -197,7 +209,7 @@ All three count equally toward conversion: **any 3 = pacify.**
 ## 8. Starter Decks
 
 > **Canonical starter decks live in `crookedile-starter-decks.md`** (kept current there). Summary of the teaching goal per class:
-> - **Nepo Baby** — teaches the *Patronage* loop (burn a card → bank Patronage → summon). Two-currency economy; the heaviest to learn.
+> - **Nepo Baby** — teaches *burn for a big swing* (Blow the Allowance) and *free damage now, anger later* (Pull Rank), with deliberately thin shields. The hardest class.
 > - **Faith Leader** — teaches *stack-to-convert* (3 + Jaded statuses → Fanatic burst → revert neutral). All three pacify statuses present.
 > - **Celebrity** — teaches *fundamentals + a taste of each draftable direction* (Attention / Scandal / Drama King). Deliberately the most vanilla starter, hinting at breadth rather than one loop, with a sturdy floor.
 
@@ -209,7 +221,7 @@ Design rule: starters teach the **core verb** in its simplest form, mostly via r
 
 Two layers, like StS: **starter passives** = simple innate per-battle ability defining the baseline; **relics** = accumulated persistent passives that warp strategy (the real depth layer — TBD). Starter passives should be humble and reinforce the fantasy via their **trigger timing** (before / during / after).
 
-- **Nepo Baby (before)** — *start of battle:* discard any number of cards and redraw that many. (The mulligan — privilege, starts ahead.)
+- **Nepo Baby (now)** — *once per battle, any time on your turn:* full-hand Mulligan (discard your hand, draw a fresh one). Privilege: he never has to live with a bad hand. Do-Over is the paid, weaker version in the pool.
 - **Celebrity (start of battle)** — *the first card you play each battle is played upgraded.* "Mastering his craft" — his opening move is always the polished, rehearsed best-take. Uses the existing upgrade system (nothing new to build); adds a small *which card do I open with?* decision. Note: colorless/generic benefit — Celebrity's identity comes from the card pool, not this passive. *(Playtest watch: don't let any single card's upgraded version be a blowout, since this guarantees it turn one.)*
 - **Faith Leader (after)** — *(candidate, unresolved)* leaning toward something that protects the patient setup or engages hostility:
   - Option A: first opinion shield each battle gets a bonus (shelters the setup) — risk: a bit generic.
