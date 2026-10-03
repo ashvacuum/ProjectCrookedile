@@ -20,7 +20,6 @@ MonoBehaviour:
     Color: {r: 1, g: 1, b: 1, a: 1}
     Icon: {fileID: 0}
     Portrait: {fileID: 0}
-    Resource: 0
     Passive: {fileID: 11400000, guid: 1c444f8d41faab941946d3b7ac62f5f8, type: 2}
     StarterTag: faithleader
     StarterDeck:
@@ -43,7 +42,6 @@ MonoBehaviour:
     Color: {r: 1, g: 1, b: 1, a: 1}
     Icon: {fileID: 0}
     Portrait: {fileID: 0}
-    Resource: 0
     Passive: {fileID: 11400000, guid: 355a1499f47d2924ea3661bf9cef3c7e, type: 2}
     StarterTag: nepobaby
     StarterDeck:
@@ -68,7 +66,6 @@ MonoBehaviour:
     Color: {r: 1, g: 1, b: 1, a: 1}
     Icon: {fileID: 0}
     Portrait: {fileID: 0}
-    Resource: 0
     Passive: {fileID: 11400000, guid: 9fe225578fe293c4ba31c366dd76670b, type: 2}
     StarterTag: actor
     StarterDeck:

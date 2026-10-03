@@ -6,16 +6,6 @@ using UnityEngine;
 namespace Crookedile.Data
 {
     /// <summary>
-    /// The unique in-battle resource an archetype runs on. Faith Leader has none (it runs on statuses).
-    /// </summary>
-    public enum ArchetypeResource
-    {
-        None, // Faith Leader and Nepo Baby — no banked resource (statuses / the deck itself)
-        // 1 is retired (was Patronage); never reuse it — ordinals are serialized.
-        Attention = 2, // Celebrity (Actor) — court attention, spend as a meter hit
-    }
-
-    /// <summary>
     /// Central registry of per-archetype (<see cref="OriginType"/>) configuration that is otherwise
     /// scattered across passive assets, tag conventions and code: display name, description, color,
     /// icon, unique resource, starter-deck tag, and the origin's <see cref="OriginPassive"/>.
@@ -89,10 +79,6 @@ namespace Crookedile.Data
             public Color Color;
 
             [BoxGroup("Origin/Right/Battle", LabelText = "Battle")]
-            [EnumToggleButtons]
-            public ArchetypeResource Resource;
-
-            [BoxGroup("Origin/Right/Battle")]
             [Required("Without a passive this origin plays as a plain deck with no identity.")]
             [Tooltip("The origin's starter passive asset.")]
             public OriginPassive Passive;
@@ -225,9 +211,6 @@ namespace Crookedile.Data
                 BuildMap();
             return _map.TryGetValue(type, out entry);
         }
-
-        public ArchetypeResource GetResource(OriginType type) =>
-            TryGet(type, out var e) ? e.Resource : ArchetypeResource.None;
 
         public OriginPassive GetPassive(OriginType type) =>
             TryGet(type, out var e) ? e.Passive : null;
