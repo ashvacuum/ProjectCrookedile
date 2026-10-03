@@ -1,14 +1,13 @@
-# Celebrity: Glamour / IOU build (proposal v0.1)
+# Celebrity: Glamour / IOU
 
-> **Kind:** Design · **Status:** Proposal · **Updated:** 2026-10-03
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-03
 >
-> **Summary:** The Celebrity's Glamour / IOU build, played as a variant against the canonical Celebrity design in core-design.md.
+> **Summary:** The Celebrity class: Glamour and IOU poles with Soundbite tokens between them, all its cards and rules. Numbers are placeholders.
 >
 > **Source of truth:** this doc; built in [`Data/Cards/Celebrity/GlamourIou/`](../Assets/Data/Cards/Celebrity/GlamourIou/) and [`GlamourIou.cs`](../Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs) · **Related:** [`core-design.md`](core-design.md) · [`needs-detailing.md`](needs-detailing.md)
 
-Built as a variant: `core-design.md` section 7 (Attention / Scandal / Drama King) is still the
-canonical Celebrity design. This build exists to test an alternative against it. All numbers are placeholders and live
-on the card assets; shared engine rules are in `CelebrityRules` (`Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs`).
+This is the Celebrity (canonical since 2026-10-03; it replaced the Attention / Scandal / Drama King design summarised
+in `core-design.md` §7). All numbers are placeholders and live on the card assets; shared engine rules are in `CelebrityRules` (`Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs`).
 
 Vocabulary: **Composure** = Support (the shield). **Sway** = a push on the Opinion meter. Statuses, not keywords.
 

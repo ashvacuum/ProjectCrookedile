@@ -272,7 +272,8 @@ Square bust, head-and-shoulders, facing camera from slightly below (they sit at 
 ## 7. Resource / cost icons — `128 × 128`
 Small icons rendered next to the cost number. Author white/tintable.
 - **Action Points** (energy) — the universal cost. Lightning/peso-spark.
-- **Attention** — Celebrity's spotlight resource. Camera-flash/spotlight.
+- **Glamour** — Celebrity's status. Camera-flash/spotlight.
+- **Debt** — Celebrity's IOU. A torn IOU slip.
 
 ---
 

@@ -23,14 +23,14 @@
 | P7 | Every room has a clock | Meter decay, enemy ramp (Escalator), shield stacking, Credibility chip, deck pollution. No free turtling. | LOCKED |
 | P8 | Readable intents (voice intents) | Telegraphed via the 21-glyph set. Conditional intents allowed ("Counter-Argues IF you play Rhetoric"). Constrained randomness in move pools. | LOCKED |
 | P9 | Bosses = rigged rooms | Rival candidates contesting the same meter. Phases trigger via ROOM CHANGES (new enemies, shields, rules), not HP thresholds. Incumbent = final boss. | LOCKED (core design) |
-| P10 | Archetype asymmetry | Rate encounters vs Nepo Baby (burn / pull / replay, Hostility as his clock, rot-sensitive), Faith Leader (Guilt/Shame/Doubt→Fanatic engine, Jaded escalator), Celebrity (Scandal-fuel subarchetypes). No encounter uniformly hard. | IN PROGRESS |
+| P10 | Archetype asymmetry | Rate encounters vs Nepo Baby (burn / pull / replay, Hostility as his clock, rot-sensitive), Faith Leader (Guilt/Shame/Doubt→Fanatic engine, Jaded escalator), Celebrity (Glamour / IOU: Scrutiny punishes leaked hits, Debt bills land next turn). No encounter uniformly hard. | IN PROGRESS |
 | P11 | Theme & act framing | Anthro Filipino animals + mythological creatures, Spiritfarer-adjacent painterly register. Wardrobe = class satire. Acts: Barangay → City → National (proposed). Metagame: 30-day campaign, Debate milestone boss. | LOCKED / PROPOSED |
 
 ## 2. Room Anatomy — shared meter model
 
 | Element | What it is | Player interaction | Enemy interaction |
 |---|---|---|---|
-| Opinion Meter | Single shared per-room win track. Fill = win. | Sway pushes (Pressure cards), Fanatics following your attacks (Faith Leader), Scandal payoffs (Celebrity). | Pushers drag it down; Shielders block upward movement. |
+| Opinion Meter | Single shared per-room win track. Fill = win. | Sway pushes (Pressure cards), Fanatics following your attacks (Faith Leader), Glamour lifting it every round (Celebrity). | Pushers drag it down; Shielders block upward movement. |
 | Directional shields | Blockers on the meter. Enemy shields block UP; player shields block DOWN. | Player places down-block shields (Composure/Rhetoric tools); can strip enemy up-shields. | Shielder role places/refreshes up-shields. |
 | Player Credibility | *(META resource — campaign layer, parked)* | Guard with Composure; heal rarely. | Smear/Exposé/Red-tag moves chip it. Which roles carry Credibility attacks = D8. |
 | Enemy states (Hostile/Receptive) | Per-enemy behavior modes. | Flip states via cards/statuses; MANAGE the mix — all-Receptive triggers Echo Chamber penalty. | Converters drag Receptives back to Hostile; some (Televangelist) weaponize Echo Chamber deliberately. |
@@ -46,7 +46,7 @@
 | Shielder | The Meter (up-block shields) | Place/refresh up-shields; shield-stack ramp | Shield-strip cards; overwhelm with burst (Fanatic) | Shield HP vs count — D9, leaning count (code = count ✓) |
 | Amplifier | Other enemies (buff) | +Sway to allies, +shield value, haste | Priority target: Silence or pacify first; positional range limits it | The Tita (gossip). Range = adjacent only? (D10) |
 | Converter | Other enemies (states) | Drag Receptive → Hostile; strip player-applied statuses | Time your all-in around his cooldown; Silence | Also the anti-Echo-Chamber relief valve — deliberate tension! |
-| Inflictor | Player deck / statuses | Inject Scandal (permanent) or Heckle (temporary); player debuffs | Purge tools; Celebrity WANTS the Scandals (inversion) | Tabloid Reporter. Celebrity rating flips on these fights. |
+| Inflictor | Player deck / statuses | Inject Scandal (permanent) or Heckle (temporary); player debuffs | Purge tools | Tabloid Reporter. |
 | Escalator | Self | Ramp stacks (Airtime): +push, +resist | Race; or pacify early before stacks matter | The clock role. |
 | Protector | Other enemies (guard) | **Warded stacks on allies (REDESIGNED 2026-07-08):** each stack absorbs the next hostility change or incoming debuff on the carrier, then is consumed. Ally stays targetable. | Burn the stacks with cheap effects; pacify/Silence the Protector so wards stop refreshing | Supersedes the old "untargetable, no redirect" lock; D11 (AoE bypass) is MOOT. |
 
