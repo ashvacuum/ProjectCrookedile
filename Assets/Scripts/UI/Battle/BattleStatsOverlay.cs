@@ -26,10 +26,6 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private TMP_Text playerAPText;
 
-        [Tooltip("Celebrity banked Attention. Optional — leave null for other classes.")]
-        [SerializeField]
-        private TMP_Text attentionText;
-
         [Header("Focused Enemy")]
         [SerializeField]
         private TMP_Text focusedEnemyHostilityText;
@@ -48,14 +44,11 @@ namespace Crookedile.UI.Battle
         private void OnEnable()
         {
             EventBus.Subscribe<BattleStateChangedEvent>(OnBattleStateChanged);
-            // Banked resources change mid-turn (not just on state change) — refresh live.
-            EventBus.Subscribe<AttentionChangedEvent>(OnAttentionChanged);
         }
 
         private void OnDisable()
         {
             EventBus.Unsubscribe<BattleStateChangedEvent>(OnBattleStateChanged);
-            EventBus.Unsubscribe<AttentionChangedEvent>(OnAttentionChanged);
         }
 
         public void Initialize(BattleManager manager)
@@ -69,8 +62,6 @@ namespace Crookedile.UI.Battle
         #region Event Handlers
 
         private void OnBattleStateChanged(BattleStateChangedEvent evt) => RefreshStats();
-
-        private void OnAttentionChanged(AttentionChangedEvent evt) => RefreshStats();
 
         #endregion
 
@@ -95,9 +86,6 @@ namespace Crookedile.UI.Battle
             if (playerAPText != null && playerStats != null)
                 playerAPText.text =
                     $"AP: {playerStats.CurrentActionPoints}/{playerStats.MaxActionPoints}";
-
-            if (attentionText != null)
-                attentionText.text = $"Attention: {battleManager.CurrentAttention}";
 
             var enemyStats = battleManager.OpponentStats;
             if (focusedEnemyHostilityText != null)

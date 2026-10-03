@@ -427,7 +427,6 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.ConversionsThisTurn => BattleManager?.ConversionsThisTurn ?? 0,
                 EffectContextValue.ScandalsInHand => CountScandalsInHand(),
                 EffectContextValue.ScandalsDrawnThisTurn => Deck?.ScandalsDrawnThisTurn ?? 0,
-                EffectContextValue.CurrentAttention => BattleManager?.CurrentAttention ?? 0,
                 EffectContextValue.LastHostilityGained => LastHostilityGained,
                 EffectContextValue.LastHostilityLost => LastHostilityLost,
                 EffectContextValue.CardsPlayedThisTurn => BattleManager?.CardsPlayedThisTurn ?? 0,

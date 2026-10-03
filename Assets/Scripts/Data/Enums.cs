@@ -142,8 +142,8 @@ namespace Crookedile.Data
         // 11 is retired (was CurrentPatronage); never reuse it — ordinals are serialized.
         ScandalsInHand = 12, // 12 — Scandal cards currently clogging the player's hand (Celebrity Scandal line)
         ScandalsDrawnThisTurn, // 13 — Scandal cards drawn so far this turn (Celebrity on-draw payoffs)
-        CurrentAttention, // 14 — Celebrity's banked Attention (spotlight resource)
-        LastHostilityGained, // 15 — hostility actually ADDED by this card's effects (post Fanatic/Devotion/Ward)
+        // 14 is retired (was CurrentAttention); never reuse it — ordinals are serialized.
+        LastHostilityGained = 15, // 15 — hostility actually ADDED by this card's effects (post Fanatic/Devotion/Ward)
         LastHostilityLost, // 16 — hostility actually REMOVED by this card's effects (post Hardened/Ward)
         CardsPlayedThisTurn, // 17 — total cards played this turn (includes the card resolving now)
         PressurePlayedThisTurn, // 18 — Pressure cards played this turn
