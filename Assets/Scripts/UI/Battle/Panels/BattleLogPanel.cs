@@ -222,11 +222,6 @@ namespace Crookedile.UI.Battle
                     $"{EnemyName(evt.EnemyIndex)} hostility {evt.OldValue} → {evt.NewValue} ({Mood(evt.NewValue)})"
                 );
             });
-            Sub<AttentionChangedEvent>(evt =>
-            {
-                if (evt.NewValue != evt.OldValue)
-                    AddOutcome($"Attention {evt.OldValue} → {evt.NewValue}");
-            });
 
             // --- Enemies and the room ---
             Sub<EnemyIntentDeclaredEvent>(evt =>
