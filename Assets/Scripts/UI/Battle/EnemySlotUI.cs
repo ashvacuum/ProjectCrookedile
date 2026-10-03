@@ -30,9 +30,6 @@ namespace Crookedile.UI.Battle
         private TMP_Text nameText;
 
         [SerializeField]
-        private TMP_Text hostilityText;
-
-        [SerializeField]
         private Image enemySprite;
 
         [SerializeField]
@@ -55,7 +52,9 @@ namespace Crookedile.UI.Battle
         private float _hostilityBarDuration = 0.25f;
 
         [Header("Stance Badge")]
-        [Tooltip("Label reading Hostile / Neutral / Receptive, derived from hostility vs NeutralZone.")]
+        [Tooltip(
+            "Label reading Hostile / Neutral / Receptive, derived from hostility vs NeutralZone."
+        )]
         [SerializeField]
         private TMP_Text _stanceText;
 
@@ -187,15 +186,6 @@ namespace Crookedile.UI.Battle
             TweenFill(_hostileFill, posT);
             TweenFill(_receptiveFill, negT);
 
-            // Exact signed hostility — always shown. The number line is the core read of
-            // the game (pacify thresholds, the pressure multiplier, the ±conversion edges),
-            // so every origin sees the actual value, not just the bar.
-            if (hostilityText != null)
-            {
-                hostilityText.gameObject.SetActive(true);
-                hostilityText.text = $"{h:+0;-0;0}";
-            }
-
             UpdateStanceBadge(enemy.Stats);
 
             // Buff/debuff icons
@@ -276,8 +266,7 @@ namespace Crookedile.UI.Battle
             // Hide all live display elements
             if (nameText != null)
                 nameText.gameObject.SetActive(false);
-            if (hostilityText != null)
-                hostilityText.gameObject.SetActive(false);
+
             if (_stanceBackground != null)
                 _stanceBackground.gameObject.SetActive(false);
             else if (_stanceText != null)
