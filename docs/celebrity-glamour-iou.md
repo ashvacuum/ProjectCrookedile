@@ -2,7 +2,7 @@
 
 > **Kind:** Design · **Status:** Built · **Updated:** 2026-10-03
 >
-> **Summary:** The Celebrity class: Glamour and IOU poles with Soundbite tokens between them, all its cards and rules. Numbers are placeholders.
+> **Summary:** The Celebrity class: two poles, Glamour (dazzle the crowd) and IOU (empty promises, exposed next round). Built rules and cards, plus the v0.2 redesign proposal. Numbers are placeholders.
 >
 > **Source of truth:** this doc; built in [`Data/Cards/Celebrity/GlamourIou/`](../Assets/Data/Cards/Celebrity/GlamourIou/) and [`GlamourIou.cs`](../Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs) · **Related:** [`core-design.md`](core-design.md) · [`needs-detailing.md`](needs-detailing.md)
 
@@ -31,16 +31,111 @@ passive designed for this build. Persistent Policies declare the build, one-shot
 mostly built *from* Composure and spent *on* Composure; IOU has one Borrow card and six cards that only cushion
 Debt. The class defends instead of playing its engines.
 
-**The loop:** *Borrow* (or plain energy) pays for a *Headliner*, a high-cost card that dumps a lot of Glamour.
-Glamour then does damage three ways: it lifts the meter every round (as now), it makes every Sway hit harder
-(*Star Power*), and *Cash-outs* consume it for a burst. Composure is the Celebrity's willpower: it absorbs hits so
-Scrutiny can't strip the Glamour. The Debt bill lands next turn; Debt payoffs turn the bill into more Glamour or Sway.
+### Two fantasies, two poles
 
-**The room:** a real mix of *Aggressors* and *Pacifiers*. Aggressors are controversy: they raise Hostility and
-earn Glamour ("all publicity is good publicity"). Pacifiers are charm: they lower Hostility and scale with Glamour.
-Faith Leader still owns stacking statuses on enemies and conversion; Celebrity never does either.
+The Celebrity has two ways to win a crowd, and they are separate archetypes that lean on different cards. A deck
+can lean on one or mix both; neither is a rider on the other.
 
-### Rules added
+**Glamour: dazzle them.** Bedazzle and befuddle the crowd until they're too caught up in the glamour to think. Glamour
+is the spectacle: it builds up, lifts the meter every round, and does the damage:
+
+1. it lifts the meter every round (as built);
+2. **Star Power:** every Sway you deal gets +1 per 3 Glamour (new rule, `GlamourStatus.ModifyOutgoingOpinion`);
+3. **Cash-outs** consume it for a burst.
+
+It comes from the Glamour pole's own cards (Smile and Wave, the **Headliners** that dump or double it, Photo Op), not
+from every card in the class. Composure is the Celebrity's willpower: it absorbs hits so Scrutiny can't strip the
+Glamour.
+
+**IOU: empty promises.** Say things that sound good and mean nothing. **A Promise gives you something big now; the Debt
+is the promise; next round the audience finds out it was empty.** At the start of your next turn the Debt comes due:
+you pay what you can from that turn's energy, and whatever is left over is *exposed*: it hits the meter and nothing
+blocks it. So Borrow is not just energy. **Any effect can be a Promise**: a big Sway, a wall of Composure, a calmed
+room, a full hand. The pole is about how much to promise, when to deliver, and what to do when you can't.
+
+**Where they meet:** Headliners are expensive, and a Promise is how you afford one this turn. Keeping your word (Settle
+Up) earns Glamour. *(Option to decide: an exposed promise also strips 1 Glamour per unpaid Debt, so being found out
+breaks the spell too.)* An exposed promise is not a hit, so Composure can't block it.
+
+### Card roles
+
+| Role | Cards | What it does |
+|---|---|---|
+| Promise | Cash Advance, Fine Print, Cheap Rice *(new)*, Jobs for Everyone *(new)*, Clean Government *(new)*, No More Traffic *(new)* | A big effect now, Debt next turn |
+| Promise support | Open Tab, Line of Credit, Overdraft, Rain Check, Too Big to Fail, Bailout | Make promises cheaper, bigger, later, or survivable |
+| Promise payoff | Calling It In, Campaign Donors, Settle Up | Turn outstanding Debt into Sway, or keep your word for Glamour |
+| Headliner | Red Carpet *(new)*, Sold-Out Show *(new)*, Trending, Press Release | 2–4 energy (or a Promise to afford them): big Glamour or doubling |
+| Cash-out | Standing Ovation, Spotlight *(new)*, Mic Drop *(new)* | Spend Glamour as Sway |
+| Aggressor | Hot Take, Roast *(new)* | Big Sway, raise Hostility. No Glamour |
+| Pacifier | Autograph, Meet and Greet *(new)*, Fan Mail | Lower Hostility; Meet and Greet scales with Glamour |
+| Willpower | No Comment, Smile and Wave, Thumbs Up, Behind the Podium, Prepared Remarks, Media Training *(new)* | Composure that guards Glamour |
+
+Glamour sources are the Glamour pole's own 7 cards (Smile and Wave, the four Headliners, Photo Op, Settle Up); Hot Take, Autograph, Fan Mail, Thumbs Up and Campaign Donors stop adding it.
+
+### Card list (numbers are placeholders)
+
+**Starter (10):** 3 **Hot Take** (Pressure 1: 7 Sway, +1 target Hostility) · 2 **Autograph** (Pressure 1: −2 target
+Hostility) · 3 **No Comment** (Pressure 1: 5 Composure) · 1 **Smile and Wave** (Rhetoric 1: 4 Composure, 3 Glamour)
+· 1 **Cash Advance** (Rhetoric 0, Promise 2: +2 energy). One Glamour seed, one Promise seed, two room tools, three
+shields.
+
+| Card | Change | Type / rarity / cost | Effect |
+|---|---|---|---|
+| **Promises** | | | *a Promise card is its effects plus Borrow with 0 energy and N Debt, tagged `borrow`* |
+| Cash Advance | rework | Rhetoric basic 0 | Promise 2: +2 energy |
+| Fine Print | rework | Policy basic 0 | Promise 1: draw 2 |
+| Cheap Rice | new | Pressure basic 0 | Promise 3: 12 Sway |
+| Jobs for Everyone | new | Rhetoric enhanced 0 | Promise 3: −2 Hostility on every enemy |
+| Clean Government | new | Pressure enhanced 0 | Promise 2: 10 Composure |
+| No More Traffic | new | Rhetoric rare 0, exhaust | Promise 4: +3 energy, draw 2 |
+| **Promise support** | | | |
+| Open Tab | keep | Policy enhanced 1, persistent | First Promise each turn owes 1 less |
+| Line of Credit | keep | Policy enhanced 1, persistent | First Debt gain each turn is 1 less |
+| Overdraft | keep | Policy basic 1, exhaust | This turn Borrow gives double energy and double Debt |
+| Rain Check | keep | Policy basic 1, exhaust | Delay the next settlement one turn |
+| Too Big to Fail | keep | Policy enhanced 2, exhaust | The first exposure this fight deals nothing |
+| Bailout | keep | Policy rare 2, persistent | Exposed Debt adds that many Soundbites to hand (cap 3/turn) |
+| **Promise payoffs** | | | |
+| Calling It In | keep | Rhetoric enhanced 1 | Sway equal to 4 × Debt |
+| Campaign Donors | rework | Policy enhanced 1 | Sway equal to 2 × Debt gained this turn |
+| Settle Up | rework | Rhetoric enhanced 1, exhaust | Pay off all Debt now with nothing owed; gain 1 Glamour per Debt (you kept your word) |
+| **Headliners** | | | |
+| Red Carpet | new | Rhetoric enhanced 3 | Gain 6 Glamour |
+| Sold-Out Show | new | Rhetoric rare 4 | 10 Sway. Double your Glamour |
+| Trending | rework (cost 1 → 3) | Rhetoric rare 3, exhaust | Double your Glamour |
+| Press Release | rework | Rhetoric enhanced 2 | 4 Glamour, 4 Composure |
+| Photo Op | rework | Policy enhanced 1, persistent | Whenever you play a Headliner, gain 2 Glamour |
+| Going Viral | rework | Rhetoric rare 1 | Glamour ticks twice this round |
+| **Cash-outs** | | | |
+| Standing Ovation | keep | Rhetoric enhanced 2 | Sway equal to Glamour |
+| Spotlight | new | Rhetoric enhanced 1 | Consume all Glamour: Sway equal to twice what you consumed |
+| Mic Drop | new | Rhetoric rare 2, exhaust | Consume half your Glamour: that much Sway, and −1 Hostility on every enemy |
+| **Room** | | | |
+| Roast | new | Pressure enhanced 1 | 10 Sway, +2 target Hostility |
+| Meet and Greet | new | Pressure enhanced 2 | −1 Hostility on every enemy, −1 more per 5 Glamour |
+| Fan Mail | rework | Rhetoric enhanced 1 | Draw 1, −1 target Hostility |
+| **Willpower** | | | |
+| Thumbs Up | rework | Rhetoric basic 0 | 4 Composure |
+| Behind the Podium | keep | Rhetoric enhanced 1 | Composure equal to Glamour |
+| Prepared Remarks | keep | Rhetoric basic 1 | 4 Composure, add 2 Soundbites |
+| Media Training | new | Policy enhanced 2, persistent | Scrutiny only strips Glamour from hits that leak 5+ |
+| Soundbite (token) | keep | Rhetoric 0, exhaust | 2 Sway |
+
+### What it takes to build
+
+- **Data only (existing effects):** every Promise (effects + `BorrowEffect` with 0 energy), every Sway, Hostility,
+  Composure and draw change, Glamour doubling (gain scaled by current Glamour), the starter deck, and the new Cheap
+  Rice, Jobs for Everyone, Clean Government, No More Traffic, Red Carpet, Sold-Out Show, Roast and Meet and Greet.
+- **Small code:** Star Power (one override on `GlamourStatus`); a consume-Glamour effect (all or half, × multiplier)
+  for Spotlight and Mic Drop; the twice-a-round tick for Going Viral; Media Training's Scrutiny threshold; Settle
+  Up's Glamour option on `ForgiveDebtEffect`; Open Tab owing 1 less (today it makes the card cost 0 energy, which
+  does nothing for 0-cost Promises); Photo Op triggering on Headliners (a `headliner` tag).
+- **Decide:** whether exposure also strips Glamour; whether Pacifiers stop at Neutral (proposed) or can push enemies
+  Receptive.
+- **Then:** the Play Mode card smoke test covers the new cards; a human playtest matters most, since the bots don't
+  value Glamour or Debt yet.
+
+## Rules added
 
 1. **Star Power:** every Sway you deal gets +1 per 3 Glamour (`GlamourStatus.ModifyOutgoingOpinion`, number in
    `CelebrityRules`). Glamour is offense first.
