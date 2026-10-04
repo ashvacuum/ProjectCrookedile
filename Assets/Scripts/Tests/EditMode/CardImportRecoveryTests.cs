@@ -35,6 +35,18 @@ namespace Crookedile.Tests
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
                 Assert.Ignore("This rendering check requires a graphics-enabled Unity editor.");
 
+            var configType = System.Type.GetType(
+                "Sirenix.OdinInspector.Editor.GeneralDrawerConfig, Sirenix.OdinInspector.Editor"
+            );
+            var config = configType
+                .GetProperty(
+                    "Instance",
+                    BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy
+                )
+                .GetValue(null);
+            var toolkitSetting = configType.GetProperty("EnableUIToolkitSupport");
+            bool originalSetting = (bool)toolkitSetting.GetValue(config);
+            toolkitSetting.SetValue(config, true);
             var window = ScriptableObject.CreateInstance<DatabaseWindow>();
             try
             {
@@ -81,15 +93,17 @@ namespace Crookedile.Tests
                 );
                 var state = effects.GetType().GetProperty("State").GetValue(effects);
                 state.GetType().GetProperty("Expanded").SetValue(state, true);
+                var child = children
+                    .GetType()
+                    .GetProperty("Item", new[] { typeof(int) })
+                    .GetValue(children, new object[] { 0 });
+                var childState = child.GetType().GetProperty("State").GetValue(child);
+                childState.GetType().GetProperty("Expanded").SetValue(childState, true);
                 for (int i = 0; i < 20; i++)
                 {
                     window.Repaint();
                     yield return null;
                 }
-                var child = children
-                    .GetType()
-                    .GetProperty("Item", new[] { typeof(int) })
-                    .GetValue(children, new object[] { 0 });
                 var childRect = (Rect)
                     child.GetType().GetProperty("LastDrawnValueRect").GetValue(child);
                 Assert.IsFalse(
@@ -106,11 +120,16 @@ namespace Crookedile.Tests
                     0,
                     "The expanded list must draw its first effect entry."
                 );
+                Assert.IsTrue(
+                    (bool)toolkitSetting.GetValue(config),
+                    "Database drawing must restore Odin's UI Toolkit preference."
+                );
             }
             finally
             {
                 window.Close();
                 Object.DestroyImmediate(window);
+                toolkitSetting.SetValue(config, originalSetting);
             }
         }
 
