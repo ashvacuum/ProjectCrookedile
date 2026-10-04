@@ -45,6 +45,9 @@ namespace Crookedile.Gameplay.Battle
 
         public override TargetType Target => _target;
 
+        public override bool CanSelectBossTarget(BattleStats target) =>
+            !target.IsFanatic && target.CurrentHostility < target.MaxHostility;
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             int amount = ResolveScaledAmount(

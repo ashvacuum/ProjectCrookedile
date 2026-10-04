@@ -76,6 +76,8 @@ Together, converting the *whole* room is a mistake at every stage. You must alwa
 
 ### Boss debates (2026-10-04)
 
+For tree authoring, task settings, cooldown examples and runtime debugging, see [Boss Brain — Authoring and Runtime](boss-brain.md).
+
 A rival candidate is a separate entity above the audience row. The rival has no HP, cannot convert, and is not a player card target. The rival is always adversarial but does not contribute to Echo Chamber, hostile bonus draws, audience counts, Fanatic counts, wide audience effects, or adjacency. Cards still work against a populated audience; the rival manipulates that same audience and the shared Opinion Meter.
 
 At each player-turn start, Behaviour Designer selects one named bundle containing **two or three moves**. All moves reveal together in numbered execution order. The bundle stays committed throughout card play; randomly selected hostile/receptive audience targets also reveal and remain committed even if their stance changes. A target absent at reveal stays absent for that move. Group effects resolve against the live audience.

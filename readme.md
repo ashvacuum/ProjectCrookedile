@@ -51,6 +51,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
+| [`boss-brain.md`](docs/boss-brain.md) | Built | 2026-10-04 | Author Behaviour Designer boss plans, tune ordered move bundles, and understand commitment, cooldowns, targeting and fallback behavior. | [`BossBrain.cs`](Assets/Scripts/Gameplay/Battle/Boss/BossBrain.cs), [`BossController.cs`](Assets/Scripts/Gameplay/Battle/Boss/BossController.cs), [`BossData.cs`](Assets/Scripts/Data/Boss/BossData.cs) |
 | [`campaign-encounters.md`](docs/campaign-encounters.md) | Built | 2026-10-03 | How encounters are typed, authored, scheduled and drawn, with every field, outcome, requirement and default: battles, events, chaining, flags, pools, travel, enemy moves, statuses, run state, rewards and the editor tools. | [`Data/Campaign/`](Assets/Scripts/Data/Campaign), [`EncounterDesignerWindow.cs`](Assets/Scripts/Editor/EncounterDesignerWindow.cs) |
 | [`meta-progression.md`](docs/meta-progression.md) | Partly built | 2026-10-03 | Profiles, the binary save format, run save/continue, unlocks and the save debugging tools. Achievements and Steam are designed, not built. | [`Data/Save/`](Assets/Scripts/Data/Save), [`Data/Unlocks/`](Assets/Scripts/Data/Unlocks) |
 | [`ui-vfx.md`](docs/ui-vfx.md) | Built | 2026-10-03 | Canvas-space VFX: flipbooks, card shine, fly trails, and when UIParticle is warranted. | [`UI/VFX/`](Assets/Scripts/UI/VFX), [`CardShine.cs`](Assets/Scripts/UI/Battle/CardShine.cs) |

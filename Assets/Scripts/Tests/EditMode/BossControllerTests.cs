@@ -105,6 +105,83 @@ namespace Crookedile.Tests
             );
         }
 
+        [TestCase(false, false)]
+        [TestCase(false, true)]
+        [TestCase(true, false)]
+        [TestCase(true, true)]
+        public void HostilityTargetSelectionSkipsImmuneAudience(bool calming, bool useShift)
+        {
+            var boss = CreateBoss();
+            var category = calming ? TargetType.RandomHostile : TargetType.RandomReceptive;
+            BattleEffect effect =
+                useShift ? new ShiftHostilityEffect()
+                : calming ? new ReduceHostilityEffect()
+                : new RaiseTargetHostilityEffect();
+            Set(effect, "_target", category);
+            if (useShift)
+                Set(effect, "_amount", calming ? -2 : 2);
+            Set(boss.Data.Bundles[0].Moves[0], "_effects", new List<BattleEffect> { effect });
+            var audience = Audience(calming ? 5 : -3);
+            audience.Add(Audience(calming ? 5 : -3)[0]);
+            if (calming)
+                audience[0]
+                    .StatusEffects.ApplyStatus(
+                        new HardenedStatus(),
+                        1,
+                        StatusDurationType.Permanent
+                    );
+            else
+                audience[0]
+                    .StatusEffects.ApplyStatus(
+                        new FanaticStatus(),
+                        1,
+                        StatusDurationType.Permanent
+                    );
+            boss.BeginPlanning(1);
+            boss.CommitPlan();
+            for (int i = 0; i < 20; i++)
+            {
+                boss.LockAudienceTargets(audience);
+                Assert.AreEqual(1, boss.GetAudienceTargets(0)[category]);
+            }
+        }
+
+        [Test]
+        public void AllFanaticAudienceLeavesRileTargetAbsent()
+        {
+            var boss = CreateBoss();
+            var effect = new RaiseTargetHostilityEffect();
+            Set(effect, "_target", TargetType.RandomReceptive);
+            Set(boss.Data.Bundles[0].Moves[0], "_effects", new List<BattleEffect> { effect });
+            var audience = Audience(-3);
+            audience[0]
+                .StatusEffects.ApplyStatus(new FanaticStatus(), 1, StatusDurationType.Permanent);
+            boss.BeginPlanning(1);
+            boss.CommitPlan();
+            boss.LockAudienceTargets(audience);
+            Assert.AreEqual(-1, boss.GetAudienceTargets(0)[TargetType.RandomReceptive]);
+        }
+
+        [Test]
+        public void FanaticAppliedAfterRevealBlocksRileWithoutRetargeting()
+        {
+            var boss = CreateBoss();
+            var effect = new RaiseTargetHostilityEffect();
+            Set(effect, "_target", TargetType.RandomReceptive);
+            Set(boss.Data.Bundles[0].Moves[0], "_effects", new List<BattleEffect> { effect });
+            var audience = Audience(-3);
+            boss.BeginPlanning(1);
+            boss.CommitPlan();
+            boss.LockAudienceTargets(audience);
+            audience.Add(Audience(-3)[0]);
+            audience[0]
+                .StatusEffects.ApplyStatus(new FanaticStatus(), 1, StatusDurationType.Permanent);
+            effect.Execute(Context(boss, audience, boss.GetAudienceTargets(0)));
+            Assert.AreEqual(0, boss.GetAudienceTargets(0)[TargetType.RandomReceptive]);
+            Assert.AreEqual(-3, audience[0].Stats.CurrentHostility);
+            Assert.AreEqual(-3, audience[1].Stats.CurrentHostility);
+        }
+
         private BossController CreateBoss()
         {
             var data = Asset<BossData>();
