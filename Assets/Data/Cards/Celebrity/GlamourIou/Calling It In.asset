@@ -70,7 +70,7 @@ MonoBehaviour:
         _amount: 0
         _amountSource: 24
         _perXSource: 7
-        _multiplier: 4
+        _multiplier: 6
         _target: 1
         _bypassSupport: 1
         _maxAmount: 0

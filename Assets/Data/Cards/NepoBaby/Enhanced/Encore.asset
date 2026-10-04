@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Encore
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: e75f482cb61d404daa1ae0f102c4cdcb
-  _cardName: Encore
+  _cardName: A Second Opinion
   _cardType: 1
   _rarity: 1
   _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'They loved it so much, he said it again.'
+  _description: 
+  _flavorText: They loved it so much, he said it again.
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -42,14 +42,18 @@ MonoBehaviour:
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 7000000000000000000
       type: {class: ReplayCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
