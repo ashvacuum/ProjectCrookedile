@@ -52,6 +52,80 @@ namespace Crookedile.Tests
         }
 
         [UnityTest]
+        public IEnumerator DedicatedDebtEffectsStackAndRespectAmountOverrides()
+        {
+            var resolver = (EffectResolver)
+                typeof(BattleManager)
+                    .GetField("_effectResolver", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetValue(_battle);
+            var context = resolver.CreateContext(true);
+            var openTab = Card("Open Tab").Effects.OfType<OpenTabEffect>().Single();
+            openTab.Execute(context, 2);
+            openTab.Execute(context, 3);
+            Assert.AreEqual(5, _battle.Celebrity.FreeBorrowsPerTurn);
+            Card("Too Big to Fail").Effects.OfType<DebtWaiverEffect>().Single().Execute(context, 2);
+            Assert.AreEqual(2, _battle.Celebrity.DebtWaivers);
+            Card("Rain Check")
+                .Effects.OfType<DelayDebtSettlementEffect>()
+                .Single()
+                .Execute(context, 3);
+            Assert.AreEqual(3, _battle.Celebrity.SettlementsDelayed);
+            Card("Overdraft").Effects.OfType<OverdraftEffect>().Single().Execute(context, 2);
+            int energy = _battle.PlayerStats.CurrentActionPoints;
+            new BorrowEffect().Execute(context);
+            Assert.AreEqual(energy + 6, _battle.PlayerStats.CurrentActionPoints);
+            Assert.AreEqual(6, _battle.Celebrity.Debt);
+            var bailout = Card("Bailout").Effects.OfType<BailoutEffect>().Single();
+            bailout.Execute(context, 2);
+            bailout.Execute(context, 3);
+            Assert.AreEqual(5, _battle.Celebrity.BailoutCapPerTurn);
+            Assert.AreSame(Card("Soundbite"), _battle.Celebrity.BailoutCard);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator DedicatedNepoEffectsApplyAndConsumeTheirTurnSetups()
+        {
+            _battle.Opinion.DecayOpinion(30);
+            var resolver = (EffectResolver)
+                typeof(BattleManager)
+                    .GetField("_effectResolver", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetValue(_battle);
+            var context = resolver.CreateContext(true);
+            var card = Card("Hot Take");
+            int cost = _battle.CardPlay.GetEffectiveCardCost(card);
+            Assert.Greater(cost, 0);
+            new GrantFreePlaysEffect().Execute(context, 2);
+            for (int i = 0; i < 2; i++)
+            {
+                Assert.AreEqual(0, _battle.CardPlay.GetEffectiveCardCost(card));
+                _battle.RequestPlayCard(card, _battle.PlayerDeck.Hand.ToList().IndexOf(card));
+            }
+            Assert.AreEqual(cost, _battle.CardPlay.GetEffectiveCardCost(card));
+            new DiscountNextCardEffect().Execute(context, cost);
+            Assert.AreEqual(0, _battle.CardPlay.GetEffectiveCardCost(card));
+            _battle.RequestPlayCard(card, _battle.PlayerDeck.Hand.ToList().IndexOf(card));
+            Assert.AreEqual(cost, _battle.CardPlay.GetEffectiveCardCost(card));
+            int replays = 0;
+            void OnReplay(CardReplayedEvent e) => replays++;
+            EventBus.Subscribe<CardReplayedEvent>(OnReplay);
+            try
+            {
+                new ReplayNextCardEffect().Execute(context, 1);
+                _battle.RequestPlayCard(card, _battle.PlayerDeck.Hand.ToList().IndexOf(card));
+                Assert.AreEqual(1, replays);
+                Assert.AreEqual(BattleState.PlayerTurn, _battle.CurrentState);
+                _battle.RequestPlayCard(card, _battle.PlayerDeck.Hand.ToList().IndexOf(card));
+                Assert.AreEqual(1, replays);
+            }
+            finally
+            {
+                EventBus.Unsubscribe<CardReplayedEvent>(OnReplay);
+            }
+            yield return null;
+        }
+
+        [UnityTest]
         public IEnumerator GlamourThresholdsAndCashOutUseActualAssets()
         {
             Glamour(5);

@@ -1,6 +1,6 @@
 # Nepo Baby: Burn / Return / Calm class spec (v0.1)
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-03
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-04
 >
 > **Summary:** The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders.
 >
@@ -312,9 +312,11 @@ Audited 2026-10-03. Items marked **Resolved** are settled; the rest are still op
 
 Cards: `Assets/Data/Cards/NepoBaby/{Basic,Enhanced,Rare}` (42 cards, tag `nepobaby`), generated from one table.
 Effects and triggers are `[SerializeReference]` building blocks, so they show up in the Database window's Building blocks tab.
+Free plays, next-card discounts, and next-card replays are separate effect types with their own tuning fields,
+not variants selected through a shared mechanic enum.
 
 **Building blocks added:** `BurnEffect`, `BurnAndPlayEffect`, `PullFromDrawPileEffect`, `ScryEffect`,
-`ReturnToHandEffect`, `PutHandCardsOnTopEffect`, `RedrawHandEffect`, `ReplayCardEffect`, `TurnPriceBreakEffect`,
+`ReturnToHandEffect`, `PutHandCardsOnTopEffect`, `RedrawHandEffect`, `ReplayCardEffect`, `GrantFreePlaysEffect`, `DiscountNextCardEffect`, `ReplayNextCardEffect`,
 `IfContextValueEffect`, `EscalatingHostilityEffect`, `RefundEnergyEffect`, `MoveHostilityEffect`; the
 `CardResolvedTrigger`, `CardReplayedTrigger` and `DamageGotThroughTrigger` triggers; the `HandHasNoJunkCondition` and
 `TriggeringCardCostCondition` conditions; once-per-turn gating on `BattlePassive`; the `onceperturn` card tag.

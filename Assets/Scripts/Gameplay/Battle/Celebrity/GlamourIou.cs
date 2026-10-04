@@ -53,8 +53,7 @@ namespace Crookedile.Gameplay.Battle
         public int DebtGainedThisTurn { get; private set; }
         public int TotalDebt => Debt + PromisedDebt;
 
-        // Rule magnitudes, set by DebtRuleEffect. Each is a count so upgraded cards can carry a
-        // bigger number, and a second copy of the same Policy stacks onto the first.
+        // Policy counts accumulate across copies and upgrades within the battle.
 
         /// <summary>Line of Credit: relief armed for the next Debt gain this turn.</summary>
         public int LineOfCreditReduction { get; set; }

@@ -22,6 +22,15 @@ docs win; say so rather than quietly following the code.
 - **`[SerializeReference]` polymorphic content.** `BattleEffect`, `RunOutcome`, `RunRequirement`,
   `BattlePassive`, `StatusBehavior`. To add one: a `[Serializable]` subclass with its own fields
   and description override. No registry, no factory, no other file changes.
+- **One mechanic per effect type.** Give each distinct mechanic its own `BattleEffect` subclass
+  with only its relevant, clearly named tuning fields. Do not dispatch unrelated mechanics through
+  an enum, boolean, or string selector (for example, a single effect that chooses between a Debt
+  waiver, free Borrows, and settlement delay). Compose cards from effects and passives instead.
+  Keep dependent steps of one mechanic together (for example, paying Glamour before applying Weakened).
+  Enums may select a target, source, filter, or amount formula within one mechanic. When splitting
+  an existing effect, migrate every base, upgraded, and nested serialized reference while preserving
+  asset GUIDs, reference IDs, tuning values, and assigned assets; remove the old selector type only
+  after all users are migrated. Verify both runtime behavior and Database/Inspector authoring.
 - **`GameLogger`, not `Debug.Log`.** `GameLogger.LogInfo<T>(...)` takes its category from the
   class's `[Debuggable("Category")]` attribute, which is inherited — mark a base class once.
 - **Asset IDs come from the asset's file GUID** (`EncounterData`, `EnemyData`, `AllyData`).

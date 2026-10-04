@@ -4,7 +4,7 @@
 >
 > **Summary:** Celebrity banks and spends Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Composure cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points.
 >
-> **Source of truth:** this doc; values in [`Data/Cards/Celebrity/GlamourIou/`](../Assets/Data/Cards/Celebrity/GlamourIou/), shared rules in [`GlamourIou.cs`](../Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs), tactics in [`CelebrityTacticEffect.cs`](../Assets/Scripts/Gameplay/Battle/Celebrity/CelebrityTacticEffect.cs) · **Related:** [`core-design.md`](core-design.md) · [`needs-detailing.md`](needs-detailing.md)
+> **Source of truth:** this doc; values in [`Data/Cards/Celebrity/GlamourIou/`](../Assets/Data/Cards/Celebrity/GlamourIou/), shared rules in [`GlamourIou.cs`](../Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs), effects in [`Celebrity/`](../Assets/Scripts/Gameplay/Battle/Celebrity/) · **Related:** [`core-design.md`](core-design.md) · [`needs-detailing.md`](needs-detailing.md)
 
 ## Identity
 
@@ -110,6 +110,12 @@ Unlisted existing cards retain their existing values. New cards reuse Soundbite'
 ## Authoring and validation
 
 Effects use the existing SerializeReference model, visible in the Database window's Building blocks tab.
+Each mechanic has its own effect type: MediaTrainingEffect, SignatureCatchphraseEffect, LineOfCreditEffect,
+OverpromiseEffect, PaidOffPromisesEffect, DisarmingCharmEffect, and CharmOffensiveEffect.
+Debt policies likewise use OpenTabEffect, BailoutEffect, DebtWaiverEffect, DelayDebtSettlementEffect,
+and OverdraftEffect. Choose the mechanic through the effect type picker; each exposes only its own named
+tuning fields. Enums may configure a single mechanic's target, source, filter, or amount formula; they must
+not select unrelated mechanics. The project rule is recorded in `AGENTS.md`.
 Media Training accepts an authored BattleUI button or creates one above End Turn when unassigned.
 Runtime transformations and policy rules reset with each battle; turn setups reset at player-turn start.
 Reward bags are a separate future change.

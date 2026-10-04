@@ -25,6 +25,15 @@ namespace Crookedile.Tests
             "Never Meet Your Heroes",
             "Media Training",
             "Line of Credit",
+            "Open Tab",
+            "Bailout",
+            "Too Big to Fail",
+            "Rain Check",
+            "Payment Holiday",
+            "Overdraft",
+            "NepoBaby/Enhanced/Legacy Admission",
+            "NepoBaby/Enhanced/Smooth Operator",
+            "NepoBaby/Enhanced/Executive Privilege",
         };
 
         [UnityTest]
@@ -59,7 +68,9 @@ namespace Crookedile.Tests
                 var tab = (CardsTab)tabs[0];
                 tab.Reload();
                 var card = AssetDatabase.LoadAssetAtPath<CardData>(
-                    $"Assets/Data/Cards/Celebrity/GlamourIou/{cardName}.asset"
+                    cardName.StartsWith("NepoBaby/")
+                        ? $"Assets/Data/Cards/{cardName}.asset"
+                        : $"Assets/Data/Cards/Celebrity/GlamourIou/{cardName}.asset"
                 );
                 typeof(ContentTab<CardData>)
                     .GetMethod("SelectLater", BindingFlags.NonPublic | BindingFlags.Instance)
@@ -75,51 +86,44 @@ namespace Crookedile.Tests
                         .GetValue(tab);
                 Assert.IsNotNull(inspector);
                 var tree = inspector.GetType().GetProperty("Tree").GetValue(inspector);
-                var effects = tree.GetType()
-                    .GetMethod("GetPropertyAtPath", new[] { typeof(string) })
-                    .Invoke(tree, new object[] { "_effects" });
-                Assert.IsNotNull(effects);
-                var children = effects.GetType().GetProperty("Children").GetValue(effects);
-                Assert.AreEqual(
-                    card.Effects.Count,
-                    children.GetType().GetProperty("Count").GetValue(children)
+                var enumerate = tree.GetType()
+                    .GetMethod("EnumerateTree", new[] { typeof(bool), typeof(bool) });
+                var properties = ((IEnumerable)enumerate.Invoke(tree, new object[] { true, false }))
+                    .Cast<object>()
+                    .ToArray();
+                var effectProperties = new System.Collections.Generic.List<object>();
+                foreach (var property in properties)
+                {
+                    var state = property.GetType().GetProperty("State").GetValue(property);
+                    state.GetType().GetProperty("Expanded").SetValue(state, true);
+                    var entry = property.GetType().GetProperty("ValueEntry").GetValue(property);
+                    if (
+                        entry != null
+                        && entry.GetType().GetProperty("WeakSmartValue").GetValue(entry)
+                            is BattleEffect
+                    )
+                        effectProperties.Add(property);
+                }
+                Assert.IsNotEmpty(
+                    effectProperties,
+                    "The card must expose its base, upgraded, or passive effects."
                 );
-                var rect = (Rect)
-                    effects.GetType().GetProperty("LastDrawnValueRect").GetValue(effects);
-                Assert.Greater(
-                    rect.height,
-                    0,
-                    "Effects must actually be drawn in the Database pane."
-                );
-                var state = effects.GetType().GetProperty("State").GetValue(effects);
-                state.GetType().GetProperty("Expanded").SetValue(state, true);
-                var child = children
-                    .GetType()
-                    .GetProperty("Item", new[] { typeof(int) })
-                    .GetValue(children, new object[] { 0 });
-                var childState = child.GetType().GetProperty("State").GetValue(child);
-                childState.GetType().GetProperty("Expanded").SetValue(childState, true);
                 for (int i = 0; i < 20; i++)
                 {
                     window.Repaint();
                     yield return null;
                 }
-                var childRect = (Rect)
-                    child.GetType().GetProperty("LastDrawnValueRect").GetValue(child);
-                Assert.IsFalse(
-                    float.IsNaN(childRect.y),
-                    "Effect entries must have a valid layout position."
-                );
-                Assert.Greater(
-                    childRect.height,
-                    0,
-                    "Effect entries must have a visible layout height."
-                );
-                Assert.Greater(
-                    (int)child.GetType().GetProperty("DrawCount").GetValue(child),
-                    0,
-                    "The expanded list must draw its first effect entry."
-                );
+                foreach (var property in effectProperties)
+                {
+                    var rect = (Rect)
+                        property.GetType().GetProperty("LastDrawnValueRect").GetValue(property);
+                    var path = (string)property.GetType().GetProperty("Path").GetValue(property);
+                    Assert.IsFalse(
+                        float.IsNaN(rect.y),
+                        path + " must have a valid layout position."
+                    );
+                    Assert.Greater(rect.height, 0, path + " must have a visible layout height.");
+                }
                 Assert.IsTrue(
                     (bool)toolkitSetting.GetValue(config),
                     "Database drawing must restore Odin's UI Toolkit preference."
@@ -146,7 +150,7 @@ namespace Crookedile.Tests
             foreach (
                 var guid in AssetDatabase.FindAssets(
                     "t:CardData",
-                    new[] { "Assets/Data/Cards/Celebrity" }
+                    new[] { "Assets/Data/Cards/Celebrity", "Assets/Data/Cards/NepoBaby" }
                 )
             )
             {
@@ -157,7 +161,10 @@ namespace Crookedile.Tests
                     UnityEditor.SerializationUtility.HasManagedReferencesWithMissingTypes(card),
                     card.name
                 );
-                Assert.IsTrue(card.Effects.All(effect => effect != null), card.name);
+                Assert.IsTrue(
+                    card.Effects.Concat(card.UpgradedEffects).All(effect => effect != null),
+                    card.name
+                );
             }
         }
 

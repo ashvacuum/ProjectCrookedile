@@ -1,6 +1,6 @@
 # Meta-progression: profiles, saves, unlocks, achievements (v0.2)
 
-> **Kind:** Systems · **Status:** Partly built · **Updated:** 2026-10-03
+> **Kind:** Systems · **Status:** Partly built · **Updated:** 2026-10-05
 >
 > **Summary:** Profiles, the binary save format, run save/continue, unlocks and the save debugging tools. Achievements and Steam are designed, not built.
 >
@@ -28,7 +28,11 @@ scene continues a saved run or starts a new one on entry, and the dev console li
   Trust Fund unlocks by winning a run as Nepo Baby.
 - **Lifecycle:** the campaign map checkpoints on every redraw and before battles. Quitting mid-battle restarts
   that battle. Winning the last day or losing a battle calls `EndRun`, which updates counters and reports unlocks.
-- **Debugging:** `SaveDebug` + the **Crookedile > Save Debugger** window + dev-console commands. Readable dumps
+- **Debugging:** The Save Debugger has structured profile and run fields, expandable content lists with clickable assets,
+  a Saved checkpoint / Live run selector, and local timestamps. Live campaign state refreshes twice per second;
+  saved data refreshes on Reload from disk. The open event is only available in the saved checkpoint.
+  Destructive profile/run actions and corruption tests are under Advanced.
+  `SaveDebug` + the **Crookedile > Save Debugger** window + dev-console commands. Readable dumps
   (IDs resolved to names, `savedump` writes `save-dump.txt`), named snapshots of every save file (`savesnap`,
   `saveload`, `savesnaps`), counter and grant edits (`savecounter`, `savegrant`, `saverevoke`), wipe, abandon,
   checkpoint now, and deliberate corruption (`savecorrupt run true`) to exercise the backup fallback. Snapshots
