@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Victim Narrative
+  m_Name: Persecution Complex
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: fb16d4d65406406fb8150a285ad55068
   _cardName: Victim Narrative
   _cardType: 1
   _rarity: 1
   _artwork: {fileID: 21300000, guid: 11dda9187956ace4d9bf3875a197d823, type: 3}
-  _description:
-  _flavorText:
+  _description: 
+  _flavorText: 
   _costs:
   - _costType: 1
     _baseAmount: 0
@@ -72,4 +72,4 @@ MonoBehaviour:
         _multiplier: 1
     - rid: 5000000000000000003
       type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
+      data: 

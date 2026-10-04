@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Crookedile.Data.Database;
+using Crookedile.Data.Cards;
+using Crookedile.Utilities;
 using UnityEditor;
 using UnityEngine;
 
@@ -16,8 +18,37 @@ namespace Crookedile.EditorTools
     ///
     /// Left dirty rather than saved: writing assets inside an import callback invites reentrancy.
     /// </summary>
+    [Debuggable("Database")]
     public class DatabaseAutoRefresh : AssetPostprocessor
     {
+        [UnityEditor.Callbacks.DidReloadScripts]
+        private static void RecoverCardImportsAfterCompilation()
+        {
+            EditorApplication.delayCall += ReimportStaleCards;
+        }
+
+        /// <summary>Reimports the source YAML when a prior failed compilation left cached effect types or names stale.</summary>
+        internal static void ReimportStaleCards()
+        {
+            int recovered = 0;
+            foreach (string guid in AssetDatabase.FindAssets("t:CardData"))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var card = AssetDatabase.LoadAssetAtPath<CardData>(path);
+                if (card == null || EditorUtility.IsDirty(card))
+                    continue;
+
+                bool missingTypes = UnityEditor.SerializationUtility.HasManagedReferencesWithMissingTypes(card);
+                bool staleName = card.name != System.IO.Path.GetFileNameWithoutExtension(path);
+                if (!missingTypes && !staleName)
+                    continue;
+
+                AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
+                recovered++;
+            }
+            if (recovered > 0)
+                GameLogger.LogInfo<DatabaseAutoRefresh>($"Reimported {recovered} card assets with stale names or managed-reference types.");
+        }
         private static void OnPostprocessAllAssets(
             string[] importedAssets,
             string[] deletedAssets,
@@ -64,6 +95,7 @@ namespace Crookedile.EditorTools
         [MenuItem("Crookedile/Refresh All Databases")]
         internal static void RefreshAll()
         {
+            ReimportStaleCards();
             foreach (var database in LoadAllDatabases())
                 Refresh(database);
             AssetDatabase.SaveAssets();

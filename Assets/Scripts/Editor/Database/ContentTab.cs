@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Sirenix.OdinInspector.Editor;
+using Sirenix.Utilities;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -210,6 +212,11 @@ namespace Crookedile.Editor.Database
 
         public override void Reload()
         {
+            if (_inspector != null)
+            {
+                Object.DestroyImmediate(_inspector);
+                _inspector = null;
+            }
             _columns ??= BuildColumns().ToList();
             _all = Find().OrderBy(DisplayName).ToList();
             OnReloaded(_all);
@@ -404,9 +411,20 @@ namespace Crookedile.Editor.Database
                     EditorGUILayout.Space();
                     if (asset != null)
                     {
-                        UnityEditor.Editor.CreateCachedEditor(asset, null, ref _inspector);
+                        var inspector = GetInspector(asset);
                         EditorGUI.BeginChangeCheck();
-                        _inspector.OnInspectorGUI();
+                        var config = GlobalConfig<GeneralDrawerConfig>.Instance;
+                        bool useUIToolkit = config.EnableUIToolkitSupport;
+                        // Native UI Toolkit drawers require an inspector panel; this pane uses IMGUI.
+                        config.EnableUIToolkitSupport = false;
+                        try
+                        {
+                            inspector.OnInspectorGUI();
+                        }
+                        finally
+                        {
+                            config.EnableUIToolkitSupport = useUIToolkit;
+                        }
                         if (EditorGUI.EndChangeCheck())
                             _issues[_selected] = RunAudit(_selected);
                     }
@@ -417,6 +435,12 @@ namespace Crookedile.Editor.Database
         }
 
         // ---- Helpers ------------------------------------------------------------------
+
+        private UnityEditor.Editor GetInspector(Object asset)
+        {
+            UnityEditor.Editor.CreateCachedEditor(asset, typeof(OdinEditor), ref _inspector);
+            return _inspector;
+        }
 
         /// <summary>Selects on the next layout pass, so one frame never draws two layouts.</summary>
         protected void SelectLater(T item)
