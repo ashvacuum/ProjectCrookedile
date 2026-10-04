@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: A Second Opinion
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 193b51e1be84f544fbb2c9707a91a134, type: 3}
   _description: 
   _flavorText: They loved it so much, he said it again.
   _costs:
@@ -34,7 +34,9 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685915685993578738
+  - rid: 2685915685993578739
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -54,6 +56,14 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 2685915685993578738
+      type: {class: ReplayCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _source: 0
+    - rid: 2685915685993578739
+      type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 1
     - rid: 7000000000000000000
       type: {class: ReplayCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

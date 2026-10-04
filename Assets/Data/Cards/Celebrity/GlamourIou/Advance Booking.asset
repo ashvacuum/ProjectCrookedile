@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 1
   _artwork: {fileID: 21300000, guid: 11dda9187956ace4d9bf3875a197d823, type: 3}
-  _description:
-  _flavorText:
+  _description: 
+  _flavorText: 
   _costs:
   - _costType: 1
     _baseAmount: 0
@@ -32,7 +32,8 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685915685993578741
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -53,8 +54,13 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 2685915685993578741
+      type: {class: BorrowCardSelectionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _nextTurn: 0
+        _debt: 2
     - rid: 5000000000000000001
       type: {class: BorrowCardSelectionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _nextTurn: 1
-        _debt: 2
+        _debt: 1
