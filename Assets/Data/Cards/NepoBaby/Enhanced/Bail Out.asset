@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Bail Out
   _cardType: 0
   _rarity: 1
-  _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'Too rich to fail.'
+  _artwork: {fileID: 21300000, guid: f8fddb35491bc834bad07b1d816a5dc9, type: 3}
+  _description: 
+  _flavorText: Too rich to fail.
   _costs:
   - _costType: 1
     _baseAmount: 0
@@ -33,7 +33,8 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685915685993578746
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -41,14 +42,36 @@ MonoBehaviour:
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2685915685993578746
+      type: {class: BurnEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _count: 3
+        _upTo: 1
+        _filter: 0
+        _perBurnedCard:
+        - rid: 2685915685993578748
+        _perCardMinimumCost: 2
+        _afterBurn: []
+        _afterRequiresBurn: 1
+    - rid: 2685915685993578748
+      type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 2
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
     - rid: 7000000000000000000
       type: {class: BurnEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

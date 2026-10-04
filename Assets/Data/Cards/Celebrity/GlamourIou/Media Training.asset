@@ -54,8 +54,7 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 5000000000000000001
-      type: {class: CelebrityTacticEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: MediaTrainingEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _tactic: 0
-        _amount: 2
-        _secondaryAmount: 1
+        _glamourCost: 2
+        _drawCount: 1

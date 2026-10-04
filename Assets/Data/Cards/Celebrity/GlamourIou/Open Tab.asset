@@ -54,8 +54,6 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 2685915650502426748
-      type: {class: DebtRuleEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: OpenTabEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _rule: 1
-        _amount: 1
-        _soundbite: {fileID: 0}
+        _freeBorrowsPerTurn: 1

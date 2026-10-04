@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Fan Mail
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 8ea9424b0ad31b948bf82ade1eef081f, type: 3}
   _description: 
   _flavorText: 
   _costs:

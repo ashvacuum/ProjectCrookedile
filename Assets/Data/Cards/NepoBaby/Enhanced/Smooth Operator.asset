@@ -77,7 +77,6 @@ MonoBehaviour:
         _perXSource: 7
         _multiplier: 1
     - rid: 7000000000000000004
-      type: {class: TurnPriceBreakEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: DiscountNextCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _kind: 1
-        _amount: 1
+        _discount: 1

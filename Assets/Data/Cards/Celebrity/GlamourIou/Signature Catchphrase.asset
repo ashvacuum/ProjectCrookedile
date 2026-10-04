@@ -54,10 +54,7 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 5000000000000000001
-      type: {class: CelebrityTacticEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: SignatureCatchphraseEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _tactic: 1
-        _amount: 2
-        _secondaryAmount: 1
         _soundbite: {fileID: 11400000, guid: 54fb8f7b991f812449043e05cae2e2f7, type: 2}
         _movieQuote: {fileID: 11400000, guid: 3c08c6f8cdcf4fd3aafd00161893de80, type: 2}

@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Autograph
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 560d69a7f63640a4daaea25ca639d382, type: 3}
   _description: 
   _flavorText: 
   _costs:

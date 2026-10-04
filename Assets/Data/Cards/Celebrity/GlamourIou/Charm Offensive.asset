@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 0
   _rarity: 2
   _artwork: {fileID: 21300000, guid: 11dda9187956ace4d9bf3875a197d823, type: 3}
-  _description:
-  _flavorText:
+  _description: 
+  _flavorText: 
   _costs:
   - _costType: 1
     _baseAmount: 0
@@ -28,13 +28,14 @@ MonoBehaviour:
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 5000000000000000001
+  - rid: 2685915685993578755
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685915685993578756
   _upgradedPassives: []
-  _upgradedInnateRetain: 0
+  _upgradedInnateRetain: 1
   _tags:
   - actor
   - glamouriou
@@ -47,15 +48,17 @@ MonoBehaviour:
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes: Glamour spending pass. Numbers are playtest starting points.
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 5000000000000000001
-      type: {class: CelebrityTacticEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 2685915685993578755
+      type: {class: CharmOffensiveEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _tactic: 6
-        _amount: 2
-        _secondaryAmount: 1
+        _swayAndComposurePerEnergy: 2
+    - rid: 2685915685993578756
+      type: {class: CharmOffensiveEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _swayAndComposurePerEnergy: 2

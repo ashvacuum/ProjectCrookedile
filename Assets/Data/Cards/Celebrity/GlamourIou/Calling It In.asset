@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Calling It In
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: fcadd04e4ab3b8640aaf89f5fce52478, type: 3}
   _description: 
   _flavorText: 
   _costs:

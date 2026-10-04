@@ -55,11 +55,9 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 2685915650502426750
-      type: {class: DebtRuleEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: DebtWaiverEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _rule: 3
-        _amount: 1
-        _soundbite: {fileID: 0}
+        _waiverCount: 1
     - rid: 2685915650502426751
       type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 

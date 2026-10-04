@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Golden Parachute
   _cardType: 2
   _rarity: 0
-  _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'He landed softly. He always does.'
+  _artwork: {fileID: 21300000, guid: 0d21724780b7d2d4f88cffca15eb36a1, type: 3}
+  _description: 
+  _flavorText: He landed softly. He always does.
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -32,7 +32,8 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685915685993578782
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -40,14 +41,36 @@ MonoBehaviour:
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2685915685993578782
+      type: {class: BurnEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _count: 1
+        _upTo: 0
+        _filter: 0
+        _perBurnedCard: []
+        _perCardMinimumCost: 0
+        _afterBurn:
+        - rid: 2685915685993578783
+        _afterRequiresBurn: 1
+    - rid: 2685915685993578783
+      type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 2
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
     - rid: 7000000000000000000
       type: {class: BurnEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

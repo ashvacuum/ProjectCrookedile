@@ -61,11 +61,9 @@ MonoBehaviour:
         _energy: 0
         _debt: 3
     - rid: 5000000000000000002
-      type: {class: CelebrityTacticEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: OverpromiseEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _tactic: 3
-        _amount: 3
-        _secondaryAmount: 1
+        _swayMultiplier: 3
     - rid: 5000000000000000003
       type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

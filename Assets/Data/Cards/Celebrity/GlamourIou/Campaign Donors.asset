@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Campaign Donors
   _cardType: 2
   _rarity: 1
-  _artwork: {fileID: 0}
-  _description:
-  _flavorText:
+  _artwork: {fileID: 21300000, guid: 8894f7d2cef11f74b865a514ce8487d2, type: 3}
+  _description: 
+  _flavorText: 
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -48,7 +48,7 @@ MonoBehaviour:
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes: Glamour spending pass. Numbers are playtest starting points.
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
