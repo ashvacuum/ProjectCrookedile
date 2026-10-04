@@ -1,6 +1,8 @@
 using Crookedile.Core;
 using Crookedile.Data.Enemy;
 using Crookedile.Utilities;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
@@ -16,8 +18,16 @@ namespace Crookedile.Gameplay.Battle
 
         public override void OnEnter()
         {
+            BeginTurn(_manager.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        private async UniTaskVoid BeginTurn(System.Threading.CancellationToken ct)
+        {
             _manager.NextTurn();
             _manager.StartTurn();
+
+            if (_manager.CurrentState == BattleState.BattleEnd)
+                return;
 
             GameLogger.LogInfo<BattleManager>($"Starting turn {_manager.CurrentTurn}");
 
@@ -25,6 +35,9 @@ namespace Crookedile.Gameplay.Battle
             {
                 // Track the player's personal turn count and fire per-player-turn passives
                 _manager.FirePlayerTurnStartPassives();
+
+                if (_manager.CurrentState == BattleState.BattleEnd)
+                    return;
 
                 // Count bonus draws BEFORE snapshotting (BecameHostileThisTurn reflects last turn's escalations)
                 int bonusDraws = 0;
@@ -70,8 +83,13 @@ namespace Crookedile.Gameplay.Battle
                         );
                     }
                 }
+                if (_manager.BossBrain != null)
+                    await _manager.BossBrain.DeclarePlan(ct);
             }
             // Enemy turn: no card draw; intent was already declared during the previous player turn
+
+            if (_manager.CurrentState == BattleState.BattleEnd)
+                return;
 
             EventBus.Publish(
                 new TurnStartedEvent

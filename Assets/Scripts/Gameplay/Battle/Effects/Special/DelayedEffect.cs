@@ -30,6 +30,13 @@ namespace Crookedile.Gameplay.Battle
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
+            if (ctx.IsBossMove)
+            {
+                GameLogger.LogWarning<DelayedEffect>(
+                    "Boss delayed effects are unsupported; use a future planning bundle."
+                );
+                return;
+            }
             if (_effects == null || _effects.Count == 0)
                 return;
             if (ctx.BattleManager == null)

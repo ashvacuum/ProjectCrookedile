@@ -149,6 +149,9 @@ namespace Crookedile.Gameplay.Battle
         // Multi-enemy
         public IReadOnlyList<EnemyController> Enemies => _enemies;
 
+        public BossController Boss { get; private set; }
+        internal BossBrain BossBrain { get; private set; }
+
         /// <summary>Enemies still in the fight. (Currently always all of them — there is no HP/death.)</summary>
         private IEnumerable<EnemyController> LivingEnemies => _enemies.Where(e => !e.IsDefeated);
 
@@ -203,6 +206,7 @@ namespace Crookedile.Gameplay.Battle
 
         private void OnDestroy()
         {
+            BossBrain?.StopPlanning();
             _passiveResolver?.Dispose();
             _crowd?.Dispose();
         }
@@ -239,6 +243,14 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void StartBattle(BattleSetup setup)
         {
+            if (BossBrain != null)
+            {
+                BossBrain.StopPlanning();
+                BossBrain.gameObject.SetActive(false);
+                Destroy(BossBrain.gameObject);
+            }
+            BossBrain = null;
+            Boss = setup.boss != null ? new BossController(setup.boss) : null;
             GameLogger.LogInfo<BattleManager>(
                 $"Starting battle: {setup.playerOrigin} vs {setup.enemies.Count} enemies"
             );
@@ -378,6 +390,15 @@ namespace Crookedile.Gameplay.Battle
                 onOpinionZeroed: () => CheckAndEndBattleIfOver()
             );
             _crowd.AttachLedger(_opinion);
+            if (Boss != null)
+            {
+                var brainObject = new GameObject("Boss planning");
+                brainObject.SetActive(false);
+                brainObject.transform.SetParent(transform, false);
+                BossBrain = brainObject.AddComponent<BossBrain>();
+                BossBrain.Bind(this, Boss);
+                brainObject.SetActive(true);
+            }
             _opinion.OnPlayerLeak = _ =>
                 PlayerStatusEffects?.RemoveStacks<GlamourStatus>(
                     CelebrityRules.ScrutinyStripPerHit

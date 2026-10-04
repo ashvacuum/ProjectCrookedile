@@ -85,6 +85,7 @@ namespace Crookedile.EditorTools
                 new ReadinessProvider(),
                 new ContentAssetNaming(),
                 new EnemyMovesProvider(),
+                new BossesProvider(),
                 new EncounterPoolsProvider(),
                 new OriginPassivesProvider(),
                 new SharedArtProvider(),
@@ -105,6 +106,28 @@ namespace Crookedile.EditorTools
                 .Select(g => AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(g)))
                 .Where(o => o != null)
                 .ToList();
+        }
+
+        internal sealed class BossesProvider : IContentProvider
+        {
+            public string Category => "Bosses";
+
+            public IEnumerable<Row> Rows()
+            {
+                foreach (var boss in LoadAll<Crookedile.Data.Boss.BossData>())
+                {
+                    var issues = new List<AuditIssue>();
+                    foreach (var issue in boss.GetConfigurationIssues())
+                        issues.Add(new AuditIssue(Severity.Error, issue));
+                    yield return new Row(
+                        boss.DisplayName,
+                        $"{boss.Bundles.Count} bundles",
+                        boss,
+                        issues,
+                        boss.Portrait
+                    );
+                }
+            }
         }
 
         internal static T LoadFirst<T>()
@@ -581,6 +604,11 @@ namespace Crookedile.EditorTools
                     for (int i = 0; i < rounds; i++)
                     {
                         var round = session.GetRound(i);
+                        if (round?.boss != null)
+                            foreach (var issue in round.boss.GetConfigurationIssues())
+                                issues.Add(
+                                    new AuditIssue(Severity.Error, $"{round.label}: {issue}")
+                                );
                         int enemies = round?.enemies?.Count ?? 0;
                         string label = string.IsNullOrWhiteSpace(round?.label)
                             ? $"Round {i + 1}"
@@ -657,6 +685,16 @@ namespace Crookedile.EditorTools
                     {
                         case BattleEncounterData battle:
                             detail = battle.IsBoss ? "Battle (BOSS)" : "Battle";
+                            bool hasRival =
+                                battle.Session != null
+                                && battle.Session.rounds.Any(r => r?.boss != null);
+                            if (battle.IsBoss != hasRival)
+                                issues.Add(
+                                    new AuditIssue(
+                                        Severity.Error,
+                                        "Boss classification must match the session's assigned rival."
+                                    )
+                                );
                             if (battle.Session == null)
                                 issues.Add(
                                     new AuditIssue(

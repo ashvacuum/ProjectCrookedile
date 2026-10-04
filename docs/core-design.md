@@ -1,6 +1,6 @@
 # Crookedile — Core Design Doc
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-03
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-04
 >
 > **Summary:** The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions.
 >
@@ -73,6 +73,20 @@ Together, converting the *whole* room is a mistake at every stage. You must alwa
 ---
 
 ## 5. Enemies & Voice Intents
+
+### Boss debates (2026-10-04)
+
+A rival candidate is a separate entity above the audience row. The rival has no HP, cannot convert, and is not a player card target. The rival is always adversarial but does not contribute to Echo Chamber, hostile bonus draws, audience counts, Fanatic counts, wide audience effects, or adjacency. Cards still work against a populated audience; the rival manipulates that same audience and the shared Opinion Meter.
+
+At each player-turn start, Behaviour Designer selects one named bundle containing **two or three moves**. All moves reveal together in numbered execution order. The bundle stays committed throughout card play; randomly selected hostile/receptive audience targets also reveal and remain committed even if their stance changes. A target absent at reveal stays absent for that move. Group effects resolve against the live audience.
+
+The opponent phase resolves the rival's moves in their displayed order, then audience modifier intents, then audience direct intents. Reaching full Opinion wins immediately; reaching zero loses immediately. Timed Judgment uses the existing majority rule, after the final opponent response in a boss debate. Standard fights retain their existing Judgment timing.
+
+The planning tree runs only during intent declaration and stops before player input. Its conditions can inspect Opinion, audience stance counts, player turn, Support and Denial. Bundle cooldowns prevent repetitive plans; a valid two/three-move bundle with no cooldown is the fallback. Effects use the existing move/effect system. Player delayed-effect wrappers are unsupported for rival moves; represent later threats with future planning bundles.
+
+Author through **Crookedile → Database → Encounters**: campaign scheduling/rewards on the encounter, audience and turn/Opinion limits in its inline Battle Session, rival/tree/bundles in the round's inline Boss asset, and effects in the bundle's inline move assets. An assigned rival makes the scenario read **Boss Debate**; an empty rival makes it **Standard Fight**. The campaign Boss flag must agree with that assignment and is checked by Database audits. Shared boss/move assets affect every referring encounter; use the Bosses tab's duplicate action for an independent boss, tree and move set, then assign the variant to the desired round.
+
+The prototype encounter is `Assets/Data/Bosses/Debate Prototype/Debate Prototype.asset`. Its session contains four audience members and an eight-turn limit. The rival chooses defensive pressure at 75% Opinion, audience disruption with at least two receptive members, and otherwise an opening bundle. Use the Encounters preview's selected-encounter bot playtest with an origin and seed to iterate.
 
 Enemies have **no HP**. Instead they have:
 - **Voice** — their revealed intent for the turn (what they plan to do).

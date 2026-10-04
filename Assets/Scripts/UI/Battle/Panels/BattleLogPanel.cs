@@ -118,6 +118,14 @@ namespace Crookedile.UI.Battle
             });
 
             // --- Opinion ---
+            Sub<BossActingEvent>(evt =>
+            {
+                EndGroup();
+                AddEntry(
+                    $"{evt.Boss.Data.DisplayName} uses <b>{evt.Move.MoveName}</b> ({evt.IntentIndex + 1}/{evt.Boss.Intents.Count})"
+                );
+                _group = Group.Enemy;
+            });
             Sub<DamageDealtEvent>(evt =>
             {
                 if (evt.IsToPlayer)

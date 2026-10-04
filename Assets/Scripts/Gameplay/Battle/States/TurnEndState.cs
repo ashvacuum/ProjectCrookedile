@@ -13,6 +13,8 @@ namespace Crookedile.Gameplay.Battle
         public override void OnEnter()
         {
             _manager.EndTurn();
+            if (_manager.CurrentState == BattleState.BattleEnd)
+                return;
             GameLogger.LogInfo<BattleManager>("Ending turn");
 
             EventBus.Publish(
@@ -41,42 +43,48 @@ namespace Crookedile.Gameplay.Battle
                         TurnsRemaining = remaining,
                     }
                 );
+            }
 
-                if (_manager.MaxTurns > 0 && _manager.PlayerTurnsElapsed >= _manager.MaxTurns)
-                {
-                    // Judgment — outcome decided by majority opinion
-                    var ledger = _manager.Opinion;
-                    int threshold = ledger.MaxOpinion / 2;
-                    bool isVictory = ledger.CurrentOpinion >= threshold;
+            bool judgmentPhase =
+                _manager.Boss != null ? !_manager.IsPlayerTurn : _manager.IsPlayerTurn;
+            if (
+                judgmentPhase
+                && _manager.MaxTurns > 0
+                && _manager.PlayerTurnsElapsed >= _manager.MaxTurns
+            )
+            {
+                // Judgment — outcome decided by majority opinion
+                var ledger = _manager.Opinion;
+                int threshold = ledger.MaxOpinion / 2;
+                bool isVictory = ledger.CurrentOpinion >= threshold;
 
-                    _manager.SetBattleResult(
-                        new BattleResult
-                        {
-                            isVictory = isVictory,
-                            turnsToWin = _manager.CurrentTurn,
-                            finalPlayerSupport = ledger.CurrentSupport,
-                            finalPlayerHostility = _manager.PlayerStats.CurrentHostility,
-                            finalOpinion = ledger.CurrentOpinion,
-                            wasJudgmentVictory = isVictory,
-                        }
-                    );
+                _manager.SetBattleResult(
+                    new BattleResult
+                    {
+                        isVictory = isVictory,
+                        turnsToWin = _manager.CurrentTurn,
+                        finalPlayerSupport = ledger.CurrentSupport,
+                        finalPlayerHostility = _manager.PlayerStats.CurrentHostility,
+                        finalOpinion = ledger.CurrentOpinion,
+                        wasJudgmentVictory = isVictory,
+                    }
+                );
 
-                    EventBus.Publish(
-                        new JudgmentEvent
-                        {
-                            FinalOpinion = ledger.CurrentOpinion,
-                            Threshold = threshold,
-                            IsVictory = isVictory,
-                        }
-                    );
+                EventBus.Publish(
+                    new JudgmentEvent
+                    {
+                        FinalOpinion = ledger.CurrentOpinion,
+                        Threshold = threshold,
+                        IsVictory = isVictory,
+                    }
+                );
 
-                    GameLogger.LogInfo<BattleManager>(
-                        $"Judgment! Opinion {ledger.CurrentOpinion}/{ledger.MaxOpinion} — {(isVictory ? "VICTORY" : "DEFEAT")}"
-                    );
+                GameLogger.LogInfo<BattleManager>(
+                    $"Judgment! Opinion {ledger.CurrentOpinion}/{ledger.MaxOpinion} — {(isVictory ? "VICTORY" : "DEFEAT")}"
+                );
 
-                    _manager.TransitionToState(BattleState.BattleEnd);
-                    return;
-                }
+                _manager.TransitionToState(BattleState.BattleEnd);
+                return;
             }
 
             if (_manager.CheckVictoryConditions())

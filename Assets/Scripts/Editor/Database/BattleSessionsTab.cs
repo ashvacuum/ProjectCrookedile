@@ -19,7 +19,9 @@ namespace Crookedile.Editor.Database
         public override string Title => "Battle sessions";
 
         protected override string SearchText(BattleSession session) =>
-            string.Join(" ", session.rounds.SelectMany(r => r.enemies).Where(e => e != null).Select(e => e.EnemyName));
+            string.Join(" ", session.rounds.Select(r => r.Scenario))
+            + " "
+            + string.Join(" ", session.rounds.SelectMany(r => r.enemies).Where(e => e != null).Select(e => e.EnemyName));
 
         protected override void OnReloaded(IReadOnlyList<BattleSession> all) =>
             _issues = ProviderAudit.ByAsset(new ContentChecks.EncountersProvider());
@@ -28,6 +30,12 @@ namespace Crookedile.Editor.Database
         {
             yield return new Column("Session", 180, null, s => s.name);
             yield return new Column("Rounds", 50, s => s.RoundCount.ToString(), s => s.RoundCount);
+            yield return new Column(
+                "Scenario",
+                160,
+                s => s.GetRound(0)?.Scenario ?? "",
+                s => s.GetRound(0)?.Scenario ?? ""
+            );
             yield return new Column("Enemies", 56, s => EnemyCount(s).ToString(), s => EnemyCount(s));
             yield return new Column("Turns", 46, s => s.rounds.Count > 0 ? s.rounds[0].maxTurns.ToString() : "", s => s.rounds.Count > 0 ? s.rounds[0].maxTurns : 0);
         }
@@ -45,7 +53,10 @@ namespace Crookedile.Editor.Database
                 for (int i = 0; i < session.rounds.Count; i++)
                 {
                     var round = session.rounds[i];
-                    EditorGUILayout.LabelField($"Round {i + 1}: {round.label}", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField($"Round {i + 1}: {round.label}",
+                        EditorStyles.boldLabel
+                    );
+                    EditorGUILayout.LabelField(round.Scenario, EditorStyles.boldLabel);
                     EditorGUILayout.LabelField(
                         string.Join(", ", round.enemies.Select(e => e != null ? e.EnemyName : "(empty)")),
                         EditorStyles.wordWrappedLabel

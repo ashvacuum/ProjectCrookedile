@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Raises Hostility on the chosen target(s), making them deal more damage.
+    /// Raises Hostility on the chosen target(s), changing their stance and available moves.
     /// With <see cref="TargetType.RandomReceptive"/> (and enough amount to cross 0) this is a Sway —
     /// converting a receptive enemy to hostile, which can trigger the Turncoat cascade.
     /// </summary>
@@ -42,6 +42,8 @@ namespace Crookedile.Gameplay.Battle
         )]
         [SerializeField]
         private TargetType _target = TargetType.Opponent;
+
+        public override TargetType Target => _target;
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {

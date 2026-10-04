@@ -24,6 +24,7 @@ namespace Crookedile.EditorTools.Playtest
         public int RunsPerCampaignBot = 10;
         public int LocationsPerDay = 3;
         public string PoolPath;
+        public string EncounterPath;
         public List<string> Origins = new() { "FaithLeader", "NepoBaby", "Actor" };
         public List<string> BattleBots = new() { "Random", "Greedy", "Tempo", "Hoarder", "Scored" };
         public List<string> CampaignBots = new() { "RandomRun", "GreedyRun" };
@@ -100,6 +101,10 @@ namespace Crookedile.EditorTools.Playtest
             {
                 var encounters = Find<BattleEncounterData>()
                     .Where(e => e.Session != null && e.Session.RoundCount > 0)
+                    .Where(e =>
+                        string.IsNullOrEmpty(config.EncounterPath)
+                        || AssetDatabase.GetAssetPath(e) == config.EncounterPath
+                    )
                     .OrderBy(e => e.name)
                     .ToList();
                 int total = encounters.Count * origins.Count * battleBots.Count * config.SeedsPerMatchup, done = 0;
@@ -121,6 +126,7 @@ namespace Crookedile.EditorTools.Playtest
                         originDatabase = OriginDatabase.Shared,
                         playerDeck = cards.GetStarterDeck(origin),
                         enemies = round.enemies.Where(e => e != null).ToList(),
+                            boss = round.boss,
                         maxTurns = round.maxTurns > 0 ? round.maxTurns : (int?)null,
                         startingOpinion = round.startingOpinion,
                         maxOpinion = round.maxOpinion > 0 ? round.maxOpinion : 100,
@@ -240,7 +246,8 @@ namespace Crookedile.EditorTools.Playtest
         }
 
         public static IEnumerable<IBattleBot> AllBattleBots() =>
-            new IBattleBot[] { new RandomBot(), new GreedyBot(), new TempoBot(), new HoarderBot(), new ScoredBot() };
+            new IBattleBot[] { new RandomBot(), new GreedyBot(), new TempoBot(), new HoarderBot(), new ScoredBot(),
+            };
 
         public static IEnumerable<ICampaignBot> AllCampaignBots() =>
             new ICampaignBot[] { new RandomCampaignBot(), new GreedyCampaignBot() };

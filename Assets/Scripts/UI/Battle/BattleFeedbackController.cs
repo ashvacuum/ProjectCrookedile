@@ -162,7 +162,11 @@ namespace Crookedile.UI.Battle
             // Enemy → player: VFX at the attacking enemy's slot.
             // Player → enemy: VFX at the player slot (source of the attack).
             var vfxSource = evt.IsToPlayer
-                ? _battleUI?.GetEnemySlotTransform(evt.SourceEnemyIndex)
+                ? (
+                    evt.IsBossSource
+                        ? _battleUI?.BossTransform
+                        : _battleUI?.GetEnemySlotTransform(evt.SourceEnemyIndex)
+                )
                 : _battleUI?.PlayerSlotTransform;
             Play(trigger, vfxSource);
 

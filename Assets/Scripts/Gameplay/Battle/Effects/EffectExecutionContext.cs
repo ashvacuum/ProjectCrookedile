@@ -37,6 +37,7 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>True for player cards; false for enemy moves.</summary>
         public bool IsPlayerCard { get; }
+        public bool IsBossMove { get; }
 
         #endregion
 
@@ -66,6 +67,7 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>Always the player's StatusEffectManager (direction-independent).</summary>
         public StatusEffectManager PlayerStatusEffects { get; }
+        private readonly IReadOnlyDictionary<TargetType, int> _fixedAudienceTargets;
 
         #endregion
 
@@ -158,7 +160,9 @@ namespace Crookedile.Gameplay.Battle
             StatusEffectManager playerStatusEffects,
             BattleManager battleManager = null,
             string attackerName = "Player",
-            int attackerEnemyIndex = -1
+            int attackerEnemyIndex = -1,
+            IReadOnlyDictionary<TargetType, int> fixedAudienceTargets = null,
+            bool isBossMove = false
         )
         {
             Caster = caster;
@@ -173,6 +177,8 @@ namespace Crookedile.Gameplay.Battle
             BattleManager = battleManager;
             AttackerName = attackerName;
             AttackerEnemyIndex = attackerEnemyIndex;
+            _fixedAudienceTargets = fixedAudienceTargets;
+            IsBossMove = isBossMove;
         }
 
         #endregion
@@ -188,6 +194,15 @@ namespace Crookedile.Gameplay.Battle
         )
         {
             var pairs = new List<(BattleStats, StatusEffectManager)>();
+
+            if (
+                _fixedAudienceTargets != null
+                && _fixedAudienceTargets.TryGetValue(targetType, out int fixedIndex)
+            )
+            {
+                AddEnemyAt(pairs, fixedIndex);
+                return pairs;
+            }
 
             switch (targetType)
             {
@@ -392,6 +407,11 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public StatusEffectManager GetStatusEffectManager(BattleStats stats)
         {
+            if (stats == Caster)
+                return CasterStatusEffects;
+            if (stats == Target)
+                return TargetStatusEffects;
+
             if (stats == PlayerStats)
                 return PlayerStatusEffects;
 

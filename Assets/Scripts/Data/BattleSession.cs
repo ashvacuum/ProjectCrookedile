@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Crookedile.Data.Boss;
 using Crookedile.Data.Enemy;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -29,6 +30,14 @@ namespace Crookedile.Data
         [Serializable]
         public class BattleRound
         {
+            [Tooltip("Separate rival. Empty means a standard fight; assigned means a Boss Debate.")]
+            [InlineEditor(Expanded = true)]
+            public BossData boss;
+
+            [ShowInInspector, ReadOnly]
+            public string Scenario =>
+                boss != null ? $"Boss Debate — {boss.DisplayName}" : "Standard Fight";
+
             [Tooltip("Short display label shown in console logs (e.g. \"Round 1 — Town Square\").")]
             public string label = "Round";
 
@@ -65,7 +74,7 @@ namespace Crookedile.Data
             private string Summary =>
                 enemies == null || enemies.Count == 0
                     ? $"{label} — (no enemies)"
-                    : $"{label} — {string.Join(", ", enemies.ConvertAll(e => e == null ? "(empty)" : e.name))}";
+                    : $"{label} — {Scenario} — {string.Join(", ", enemies.ConvertAll(e => e == null ? "(empty)" : e.name))}";
         }
 
         [Tooltip(

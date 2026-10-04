@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Crookedile.Data;
+using Crookedile.Data.Boss;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
 using UnityEngine;
@@ -23,6 +24,9 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>All enemies present in this room (1–5). Order = display order.</summary>
         public List<EnemyData> enemies = new List<EnemyData>();
+
+        [Tooltip("Optional rival, never included in the audience roster.")]
+        public BossData boss;
 
         /// <summary>Maximum number of player turns before Judgment is called. 0 = no limit.</summary>
         public int? maxTurns;

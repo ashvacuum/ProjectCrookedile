@@ -5,7 +5,10 @@
         "UniTask",
         "Crookedile.Core",
         "Crookedile.Utilities",
-        "com.rlabrecque.steamworks.net"
+        "com.rlabrecque.steamworks.net",
+        "Opsive.BehaviorDesigner.Runtime.Wrappers",
+        "Unity.Entities",
+        "Unity.Collections"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

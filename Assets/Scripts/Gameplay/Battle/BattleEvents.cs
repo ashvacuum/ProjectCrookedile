@@ -117,6 +117,18 @@ using Crookedile.Data.Enemy;
 
 namespace Crookedile.Gameplay.Battle
 {
+    public struct BossIntentsDeclaredEvent : IGameEvent
+    {
+        public BossController Boss;
+    }
+
+    public struct BossActingEvent : IGameEvent
+    {
+        public BossController Boss;
+        public EnemyMoveData Move;
+        public int IntentIndex;
+    }
+
     #region Battle Lifecycle Events
 
     /// <summary>
@@ -331,6 +343,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Zero-based index of the attacking enemy in BattleManager.Enemies.
         /// -1 when the player is the attacker.</summary>
         public int SourceEnemyIndex;
+        public bool IsBossSource;
 
         /// <summary>Zero-based index of the enemy that received the damage.
         /// -1 when the player is the damage target (use <see cref="IsToPlayer"/> to confirm).</summary>

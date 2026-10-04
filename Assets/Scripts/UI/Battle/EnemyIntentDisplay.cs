@@ -53,6 +53,12 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private bool _showMoveName = false;
 
+        [Tooltip(
+            "Show the full authored effect description alongside any damage preview. Useful for boss plans."
+        )]
+        [SerializeField]
+        private bool _showFullDescription;
+
         [Tooltip("Intent description text, e.g. 'Will deal 8 damage'")]
         [SerializeField]
         private TMP_Text intentDescText;
@@ -189,7 +195,11 @@ namespace Crookedile.UI.Battle
                 string preview = isOffensive
                     ? BuildDamagePreview(move, attackerStatus, targetStatus, _multiHitSubTextSize)
                     : string.Empty;
-                intentDescText.text = preview;
+                intentDescText.text = _showFullDescription
+                    ? string.IsNullOrEmpty(preview)
+                        ? move.Description
+                        : $"{preview} — {move.Description}"
+                    : preview;
                 if (!string.IsNullOrEmpty(preview))
                     TriggerDescPunch();
             }

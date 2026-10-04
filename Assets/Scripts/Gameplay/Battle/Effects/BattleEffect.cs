@@ -262,7 +262,8 @@
                     toPlayer,
                     attackerName,
                     sourceEnemyIndex,
-                    targetEnemyIndex
+                    targetEnemyIndex,
+                    isBossSource: ctx.IsBossMove
                 );
             }
             else
@@ -277,6 +278,7 @@
                         IsToPlayer = toPlayer,
                         AttackerName = attackerName,
                         SourceEnemyIndex = sourceEnemyIndex,
+                        IsBossSource = ctx.IsBossMove,
                         TargetEnemyIndex = targetEnemyIndex,
                     }
                 );
