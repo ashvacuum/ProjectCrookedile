@@ -198,6 +198,7 @@ namespace Crookedile.Gameplay.Battle
         private void Awake()
         {
             InitializeStateMachine();
+            EventBus.Subscribe<HostilityChangedEvent>(OnPoisonedPerceptionHostilityChanged);
             // Player input (end turn, play card) arrives as direct method calls
             // (RequestEndTurn / RequestPlayCard); VFX sequencing is a direct callback
             // handshake (ICardPlayFeedback). The bus is notification-only here.
@@ -206,6 +207,7 @@ namespace Crookedile.Gameplay.Battle
 
         private void OnDestroy()
         {
+            EventBus.Unsubscribe<HostilityChangedEvent>(OnPoisonedPerceptionHostilityChanged);
             BossBrain?.StopPlanning();
             _passiveResolver?.Dispose();
             _crowd?.Dispose();
@@ -618,8 +620,45 @@ namespace Crookedile.Gameplay.Battle
 
         public int CurrentGlamour => PlayerStatusEffects?.GetStacks<GlamourStatus>() ?? 0;
 
+        public bool CanUseMediaTraining => _cards != null && _playerDeck != null
+            && Celebrity.MediaTrainingCost > 0 && Celebrity.MediaTrainingDraw > 0
+            && CurrentState == BattleState.PlayerTurn
+            && Celebrity.MediaTrainingAvailable && !_cards.IsResolving
+            && CurrentGlamour >= Celebrity.MediaTrainingCost && !_playerDeck.IsHandFull
+            && _playerDeck.DeckCount + _playerDeck.DiscardCount > 0;
+
+        /// <summary>The draw window closes on the first card play or when the turn ends.</summary>
+        public bool TryUseMediaTraining()
+        {
+            if (!CanUseMediaTraining)
+                return false;
+
+            Celebrity.MediaTrainingAvailable = false;
+            PlayerStatusEffects.RemoveStacksNotify<GlamourStatus>(Celebrity.MediaTrainingCost);
+            _playerDeck.DrawCards(Celebrity.MediaTrainingDraw);
+            return true;
+        }
+
+        private void OnPoisonedPerceptionHostilityChanged(HostilityChangedEvent evt)
+        {
+            if (evt.IsPlayer || _effectResolver == null || CurrentState == BattleState.BattleEnd
+                || evt.EnemyIndex < 0 || evt.EnemyIndex >= _enemies.Count)
+                return;
+
+            var enemy = _enemies[evt.EnemyIndex];
+            if (!enemy.IsDefeated && enemy.Stats.IsHostile
+                && enemy.StatusEffects.GetStacks<PoisonedPerceptionStatus>() > 0)
+            {
+                var context = new EffectExecutionContext(_playerStats, enemy.Stats, _playerStats,
+                    true, _playerDeck, _enemies, PlayerStatusEffects, enemy.StatusEffects,
+                    PlayerStatusEffects, this, attackerName: "Poisoned Perception",
+                    attackerEnemyIndex: evt.EnemyIndex);
+                PoisonPerceptionEffect.ResolvePayoff(context);
+            }
+        }
+
         /// <summary>After the enemy turn: Glamour pushes Opinion up by its stacks, then decays.</summary>
-        private void TickGlamour()
+        public void TickGlamour()
         {
             int glamour = CurrentGlamour;
             if (glamour <= 0)
@@ -847,6 +886,9 @@ namespace Crookedile.Gameplay.Battle
                 foreach (var enemy in LivingEnemies)
                 {
                     enemy.Stats.StartTurn();
+                    var poison = PoisonPerceptionEffect.GetBehavior(enemy.StatusEffects);
+                    if (poison != null)
+                        enemy.Stats.GainHostility(poison.HostilityPerTurn);
                     enemy.StatusEffects.OnTurnStart(enemy.Stats);
 
                     // Enemy Ritual grants Denial.
@@ -866,6 +908,8 @@ namespace Crookedile.Gameplay.Battle
         {
             if (_isPlayerTurn)
             {
+                Celebrity.MediaTrainingAvailable = false;
+                Celebrity.SettlePromises(_opinion, _playerStats, (c, n) => _playerDeck.AddCardsToHand(c, n));
                 _playerStats.EndTurn();
                 // Apply opinion-affecting statuses (read at current stacks) before OnTurnEnd decrements.
                 ApplyTurnEndOpinionStatuses(_effectResolver.PlayerStatusEffects);

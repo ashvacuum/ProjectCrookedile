@@ -176,14 +176,14 @@ A guy who knows nothing, talks the talk, and never walks the walk. Every promise
 He does not convert enemies. He wins by spectacle and borrowed momentum.
 
 - **Glamour** (a status on the player): after the enemy acts, the meter rises by your Glamour, then Glamour drops by 1.
-  **Scrutiny:** every hit that leaks past Composure strips 1 Glamour. The slow, defensive, long-fight engine.
+  **Scrutiny:** every hit that leaks past Composure strips 1 Glamour. Bank it for ticks or spend it on Sway, draws, and suppression.
 - **IOU / Debt:** Borrow cards give energy now and Debt that is settled at the start of your next turn, out of that
   turn's energy first and the meter second. The fast, aggressive overcharge engine.
-- **Soundbites:** cheap generated token cards that glue the two together.
-- **Structure:** a plain defensive base that works alone, plus the two poles; persistent Policies declare the build,
+- **Promises:** reserve existing Debt, then play a costly card next turn to earn cancellation; missed commitments collect at that turn's end.
+- **Soundbites:** zero-energy 2-Sway tokens. Signature Catchphrase turns them into Glamour-generating Movie Quotes for the battle.
+- **Structure:** four core Composure cards protect a flexible offensive base; persistent Policies declare the build,
   one-shot Policies are tactical.
-- **Guardrails:** nothing stacks on enemies and nothing moves Hostility toward Receptive (Faith Leader's lane); no
-  fetch, tutor, search or redirect (Nepo Baby's lane).
+- **Guardrails:** explicit hostility tools and limited Debt-funded recovery are allowed; no separate conversion mechanic or recovery from Exhaust.
 
 **Design history:** the open-canvas Celebrity (draft into Attention / Scandal / Drama King) was replaced by this build
 on 2026-10-03. An earlier "Credibility" resource was cut before that as over-engineered. Glamour and Debt are a
@@ -284,7 +284,7 @@ pitched above the other classes, shields below.
 ### Celebrity — *spectacle on credit*
 
 Starter (10), from [`celebrity-glamour-iou.md`](celebrity-glamour-iou.md): 3 **Hot Take** (Pressure, 1: Sway 6),
-3 **No Comment** (Pressure, 1: 5 Composure), 3 **Autograph** (Pressure, 1: -2 Hostility), 1 **Smile and Wave**
+3 **No Comment** (Pressure, 1: 7 Composure), 3 **Autograph** (Pressure, 1: -2 Hostility), 1 **Smile and Wave**
 (Rhetoric, 1: 5 Composure + 3 Glamour). The base plays fine alone; Smile and Wave is the one seed, showing Glamour
 lifting the meter on its own. The IOU pole arrives through rewards.
 
@@ -325,7 +325,7 @@ The discipline isn't a card count — it's whether a new player can read the ope
 Once starters feel right, sketch the **subset of directions** each class's *reward pool* opens — explicitly NOT in the starter, so the two don't bleed:
 
 - **Nepo Baby** — three lanes plus valves (full card list in `nepo-baby-class.md` section 6): **Burn** (Executive Privilege, Dynasty, Legacy Admission, Encore, Born Into It, Bail Out; Trust Fund as an unlock-gated Rare), **Pull and scan** paid in Hostility (Inside Information, Background Check, Call in a Favor, Special Order), a deliberately sparse **Return** lane (I Know a Guy, Heirloom, Family Seat, Hand-Me-Downs), a slow **Calm** lane capped at Neutral (Apology Tour, Smooth Things Over, Smooth Operator), and **valves** that each cost something (Skip the Line, VIP Access, Do-Over, Not My Problem). Cap valves per reward screen so he stays a glass cannon.
-- **Celebrity** — the two poles and their connector (full list in `celebrity-glamour-iou.md`): **Glamour** (Photo Op, Behind the Podium, Standing Ovation, Trending, Going Viral, Fan Mail), **IOU** (Cash Advance, Calling It In, Settle Up, Line of Credit, Open Tab, Bailout, Too Big to Fail, Campaign Donors, Overdraft, Rain Check), and **Soundbite** tokens between them. Persistent Policies declare the build.
+- **Celebrity** — bank and spend **Glamour** (Iconic Line, Media Training, Victim Narrative, Disarming Charm), borrow **Debt** for tempo (Cash Advance, Fine Print, Second Take, Line of Credit, Overpromise), and earn relief through **Promises** (Paid-Off Promises). Soundbites connect the engines; Signature Catchphrase turns them into Movie Quotes. Full list in `celebrity-glamour-iou.md`.
 - **Faith Leader** — **multi-status-per-card** cards (apply 2 statuses at once, so conversion isn't always 3 turns — a priority), bigger **harvest payoffs** that scale off Fanatics present (Sermon, Crusade), over-stacking past 3 for a bigger burst, Preach-style hard-silence tools, cards that exploit the *defensive* side of statuses (e.g. punish a Shamed enemy harder). Status-interaction *texture* (Guilt+Shame combos differently) lives here, not in core.
 
 This is where each class's *potential* lives. Starters only teach the verb; rewards reveal the ceiling.

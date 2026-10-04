@@ -17,19 +17,19 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 2
   _artwork: {fileID: 0}
-  _description: 
-  _flavorText: 
+  _description:
+  _flavorText:
   _costs:
   - _costType: 1
-    _baseAmount: 1
+    _baseAmount: 2
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 2685915650502426736
-  - rid: 2685915650502426737
+  - rid: 5000000000000000001
+  - rid: 5000000000000000002
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
@@ -48,19 +48,21 @@ MonoBehaviour:
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes: 
+  _configurationNotes: Glamour spending pass. Numbers are playtest starting points.
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 2685915650502426736
+    - rid: 5000000000000000001
       type: {class: GainGlamourEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _amount: 0
-        _amountSource: 23
+        _amount: 2
+        _amountSource: 0
         _perXSource: 7
         _multiplier: 1
-    - rid: 2685915650502426737
-      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
+    - rid: 5000000000000000002
+      type: {class: AddCardToHandEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _card: {fileID: 11400000, guid: 54fb8f7b991f812449043e05cae2e2f7, type: 2}
+        _amount: 2

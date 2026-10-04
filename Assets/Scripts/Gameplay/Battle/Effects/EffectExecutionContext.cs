@@ -86,6 +86,7 @@ namespace Crookedile.Gameplay.Battle
         #region Accumulated results (mutable during resolution)
         /// <summary>Total opinion-meter pressure applied by this card's effects.</summary>
         public int LastDamageDealt { get; set; }
+        public int SwayMultiplier { get; set; } = 1;
 
         /// <summary>Total Opinion raised directly by this card's effects.</summary>
         public int LastHealAmount { get; set; }
@@ -464,7 +465,7 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.HostilityLostThisTurn => BattleManager?.HostilityLostThisTurn
                     ?? 0,
                 EffectContextValue.CurrentGlamour => BattleManager?.CurrentGlamour ?? 0,
-                EffectContextValue.CurrentDebt => BattleManager?.Celebrity.Debt ?? 0,
+                EffectContextValue.CurrentDebt => BattleManager?.Celebrity.TotalDebt ?? 0,
                 EffectContextValue.DebtGainedThisTurn => BattleManager?.Celebrity.DebtGainedThisTurn
                     ?? 0,
                 EffectContextValue.CardsExhaustedThisBattle => Deck?.ExhaustCount ?? 0,

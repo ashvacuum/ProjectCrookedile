@@ -1,267 +1,124 @@
-# Celebrity: Glamour / IOU
+# Celebrity: Glamour / IOU / Promises
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-03
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-04
 >
-> **Summary:** The Celebrity class: two poles, Glamour (dazzle the crowd) and IOU (empty promises, exposed next round). Built rules and cards, plus the v0.2 redesign proposal. Numbers are placeholders.
+> **Summary:** Celebrity banks and spends Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Composure cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points.
 >
-> **Source of truth:** this doc; built in [`Data/Cards/Celebrity/GlamourIou/`](../Assets/Data/Cards/Celebrity/GlamourIou/) and [`GlamourIou.cs`](../Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs) · **Related:** [`core-design.md`](core-design.md) · [`needs-detailing.md`](needs-detailing.md)
+> **Source of truth:** this doc; values in [`Data/Cards/Celebrity/GlamourIou/`](../Assets/Data/Cards/Celebrity/GlamourIou/), shared rules in [`GlamourIou.cs`](../Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs), tactics in [`CelebrityTacticEffect.cs`](../Assets/Scripts/Gameplay/Battle/Celebrity/CelebrityTacticEffect.cs) · **Related:** [`core-design.md`](core-design.md) · [`needs-detailing.md`](needs-detailing.md)
 
-This is the Celebrity (canonical since 2026-10-03; it replaced the Attention / Scandal / Drama King design summarised
-in `core-design.md` §7). All numbers are placeholders and live on the card assets; shared engine rules are in `CelebrityRules` (`Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs`).
+## Identity
 
-Vocabulary: **Composure** = Support (the shield). **Sway** = a push on the Opinion meter. Statuses, not keywords.
+Celebrity wins through spectacle, borrowed momentum, and promises he may or may not deliver.
+Composure means Support; Sway means an ordinary Opinion push through Denial and the existing modifiers.
 
-## Fantasy
-A guy who knows nothing, talks the talk, and never walks the walk. Every promise is empty and it is all for the press.
-He does not convert enemies. He wins by spectacle and borrowed momentum.
+- **Glamour:** bank it for round ticks, cash it out for Sway, or spend it on draws and suppression.
+- **Debt:** acquire cards and energy now, then manage the repayment deadline.
+- **Promises:** reserve existing Debt and earn cancellation by delivering a costly card next turn.
+- **Soundbites:** generated, zero-energy, 2 Sway, Exhaust. No Glamour payment prompt on the token.
 
-## Structure (Silent-style: base + poles + connector)
-- **Base:** plain, defensive, good alone. Playable with no pole online.
-- **Glamour pole:** slow, defensive, long-fight engine.
-- **IOU pole:** fast, aggressive overcharge engine (borrow now, pay next turn).
-- **Connector: Soundbite tokens.** Cheap generated cards that glue the poles together.
+This revision supersedes the earlier defensive v0.2 proposals. There is no blanket Glamour damage bonus.
+Enemy debuffs, hostility changes, and limited card recovery are now explicit parts of this kit.
+Celebrity has no separate conversion mechanic; these effects use normal stance and Opinion rules.
 
-Guardrails: nothing stacks on enemies and nothing moves Hostility toward Receptive (Faith Leader's lane; v0.2 below proposes Pacifier cards); no fetch,
-tutor, search or choose-from-pile effects and no redirect or reflect (Nepo Baby's lane); no new keywords; no class
-passive designed for this build. Persistent Policies declare the build, one-shot Policies are tactical.
+## Shared rules
 
-## v0.2 direction (proposal, 2026-10-03)
+### Glamour
 
-**Why:** the built set is defense-heavy. 9 of 25 cards produce Composure and only 4 push the meter; Glamour is
-mostly built *from* Composure and spent *on* Composure; IOU has one Borrow card and six cards that only cushion
-Debt. The class defends instead of playing its engines.
+After each enemy turn, Glamour raises Opinion by its stacks, then loses 1. This direct raise bypasses Denial
+and observes the echo-chamber rule. Each enemy hit leaking past Composure strips 1 Glamour.
+Debt settlement is not an enemy hit and does not strip Glamour.
+Iconic Line consumes Glamour before its normal Sway hit. Disarming Charm requires a hostile target and sufficient Glamour.
+Its Weakened application does not change stance; the ordinary targeted-card crowd reaction still applies.
 
-### Two fantasies, two poles
+### Debt and Promises
 
-The Celebrity has two ways to win a crowd, and they are separate archetypes that lean on different cards. A deck
-can lean on one or mix both; neither is a rider on the other.
+Normal Debt settles at next player-turn start after energy refreshes. It consumes energy first, then lowers
+Opinion directly, bypassing Composure. Battle end discards the bill. Debt gained this turn records the amount actually added.
 
-**Glamour: dazzle them.** Bedazzle and befuddle the crowd until they're too caught up in the glamour to think. Glamour
-is the spectacle: it builds up, lifts the meter every round, and does the damage:
+Line of Credit is a Rhetoric setup, not a permanent Policy. Only the next positive Debt gain this turn is reduced;
+it also discounts a random card still in hand until next turn. Old Debt is unaffected; an unused setup expires.
+Payment Holiday skips the next normal settlement and adds 1 Debt. Rain Check remains an alternative with no added bill.
+Neither postpones a missed Promise deadline.
 
-1. it lifts the meter every round (as built);
-2. **Star Power:** every Sway you deal gets +1 per 3 Glamour (new rule, `GlamourStatus.ModifyOutgoingOpinion`);
-3. **Cash-outs** consume it for a burst.
+Paid-Off Promises reserves up to 3 existing Debt, exempting that portion from next-turn-start repayment.
+Play a card with printed energy cost 2+ during the next player turn to cancel it. Discounts do not invalidate delivery.
+X-cost cards qualify when at least 2 energy was actually spent.
+Setup-turn plays and ordinary effect replays do not count. One qualifying play fulfils all due commitments.
+A missed commitment collects at the end of that next turn, using remaining energy first, then Opinion.
+Fresh Debt keeps its normal deadline. Settle Up can remove ordinary or reserved Debt.
 
-It comes from the Glamour pole's own cards (Smile and Wave, the **Headliners** that dump or double it, Photo Op), not
-from every card in the class. Composure is the Celebrity's willpower: it absorbs hits so Scrutiny can't strip the
-Glamour.
+### Tokens, draws, and recovery
 
-**IOU: empty promises.** Say things that sound good and mean nothing. **A Promise gives you something big now; the Debt
-is the promise; next round the audience finds out it was empty.** At the start of your next turn the Debt comes due:
-you pay what you can from that turn's energy, and whatever is left over is *exposed*: it hits the meter and nothing
-blocks it. So Borrow is not just energy. **Any effect can be a Promise**: a big Sway, a wall of Composure, a calmed
-room, a full hand. The pole is about how much to promise, when to deliver, and what to do when you can't.
+Soundbite: 0 energy, 2 Sway, Exhaust. Movie Quote: 0 energy, gain 1 Glamour, Exhaust.
+Both are Rhetoric tokens excluded from acquisition pools.
+Signature Catchphrase transforms existing Soundbites in every zone and future generated copies for this battle.
+It never changes the campaign deck or source assets.
 
-**Where they meet:** Headliners are expensive, and a Promise is how you afford one this turn. Keeping your word (Settle
-Up) earns Glamour. *(Option to decide: an exposed promise also strips 1 Glamour per unpaid Debt, so being found out
-breaks the spell too.)* An exposed promise is not a hit, so Composure can't block it.
+Media Training opens a once-per-player-turn button after normal draws: spend 2 Glamour to draw 1 without energy.
+The first card play or ending the turn dismisses it. No mandatory modal prompt.
+The button is disabled when Glamour is insufficient, the hand is full, or draw and discard piles are empty.
+Playing the Policy does not open the current turn's window; extra copies do not grant extra activations.
 
-### Card roles
+Second Take and Advance Booking charge Debt only when selection successfully moves a non-Exhaust card.
+Recovery preserves its normal energy cost and does not access Exhaust.
+Booked cards arrive after next turn's normal draws; hand overflow goes to discard rather than losing the card.
 
-| Role | Cards | What it does |
-|---|---|---|
-| Promise | Cash Advance, Fine Print, Cheap Rice *(new)*, Jobs for Everyone *(new)*, Clean Government *(new)*, No More Traffic *(new)* | A big effect now, Debt next turn |
-| Promise support | Open Tab, Line of Credit, Overdraft, Rain Check, Too Big to Fail, Bailout | Make promises cheaper, bigger, later, or survivable |
-| Promise payoff | Calling It In, Campaign Donors, Settle Up | Turn outstanding Debt into Sway, or keep your word for Glamour |
-| Headliner | Red Carpet *(new)*, Sold-Out Show *(new)*, Trending, Press Release | 2–4 energy (or a Promise to afford them): big Glamour or doubling |
-| Cash-out | Standing Ovation, Spotlight *(new)*, Mic Drop *(new)* | Spend Glamour as Sway |
-| Aggressor | Hot Take, Roast *(new)* | Big Sway, raise Hostility. No Glamour |
-| Pacifier | Autograph, Meet and Greet *(new)*, Fan Mail | Lower Hostility; Meet and Greet scales with Glamour |
-| Willpower | No Comment, Smile and Wave, Thumbs Up, Behind the Podium, Prepared Remarks, Media Training *(new)* | Composure that guards Glamour |
+### Poisoned Perception
 
-Glamour sources are the Glamour pole's own 7 cards (Smile and Wave, the four Headliners, Photo Op, Settle Up); Hot Take, Autograph, Fan Mail, Thumbs Up and Campaign Donors stop adding it.
+Never Meet Your Heroes applies the debuff to a non-hostile opponent for 3 enemy turns.
+Each enemy-turn start raises their Hostility by 2, respecting Fanatic, Devotion, Ward, and hostility limits.
+Becoming hostile by any source removes the debuff before dealing 10 normal Sway; it triggers once.
+Otherwise it expires after the third enemy turn. Reapplication refreshes the deadline without stacking payoffs.
 
-### Card list (numbers are placeholders)
+## Retained defensive cards
 
-**Starter (10):** 3 **Hot Take** (Pressure 1: 7 Sway, +1 target Hostility) · 2 **Autograph** (Pressure 1: −2 target
-Hostility) · 3 **No Comment** (Pressure 1: 5 Composure) · 1 **Smile and Wave** (Rhetoric 1: 4 Composure, 3 Glamour)
-· 1 **Cash Advance** (Rhetoric 0, Promise 2: +2 energy). One Glamour seed, one Promise seed, two room tools, three
-shields.
+No Comment, Smile and Wave, Behind the Podium, and Prepared Remarks retain their existing assets and upgrades.
+No Comment currently grants 7 Composure. Prepared Remarks supplies 2 Soundbites alongside its 4 Composure.
+Charm Offensive is the rare hybrid exception to the four core defensive card types.
 
-| Card | Change | Type / rarity / cost | Effect |
-|---|---|---|---|
-| **Promises** | | | *a Promise card is its effects plus Borrow with 0 energy and N Debt, tagged `borrow`* |
-| Cash Advance | rework | Rhetoric basic 0 | Promise 2: +2 energy |
-| Fine Print | rework | Policy basic 0 | Promise 1: draw 2 |
-| Cheap Rice | new | Pressure basic 0 | Promise 3: 12 Sway |
-| Jobs for Everyone | new | Rhetoric enhanced 0 | Promise 3: −2 Hostility on every enemy |
-| Clean Government | new | Pressure enhanced 0 | Promise 2: 10 Composure |
-| No More Traffic | new | Rhetoric rare 0, exhaust | Promise 4: +3 energy, draw 2 |
-| **Promise support** | | | |
-| Open Tab | keep | Policy enhanced 1, persistent | First Promise each turn owes 1 less |
-| Line of Credit | keep | Policy enhanced 1, persistent | First Debt gain each turn is 1 less |
-| Overdraft | keep | Policy basic 1, exhaust | This turn Borrow gives double energy and double Debt |
-| Rain Check | keep | Policy basic 1, exhaust | Delay the next settlement one turn |
-| Too Big to Fail | keep | Policy enhanced 2, exhaust | The first exposure this fight deals nothing |
-| Bailout | keep | Policy rare 2, persistent | Exposed Debt adds that many Soundbites to hand (cap 3/turn) |
-| **Promise payoffs** | | | |
-| Calling It In | keep | Rhetoric enhanced 1 | Sway equal to 4 × Debt |
-| Campaign Donors | rework | Policy enhanced 1 | Sway equal to 2 × Debt gained this turn |
-| Settle Up | rework | Rhetoric enhanced 1, exhaust | Pay off all Debt now with nothing owed; gain 1 Glamour per Debt (you kept your word) |
-| **Headliners** | | | |
-| Red Carpet | new | Rhetoric enhanced 3 | Gain 6 Glamour |
-| Sold-Out Show | new | Rhetoric rare 4 | 10 Sway. Double your Glamour |
-| Trending | rework (cost 1 → 3) | Rhetoric rare 3, exhaust | Double your Glamour |
-| Press Release | rework | Rhetoric enhanced 2 | 4 Glamour, 4 Composure |
-| Photo Op | rework | Policy enhanced 1, persistent | Whenever you play a Headliner, gain 2 Glamour |
-| Going Viral | rework | Rhetoric rare 1 | Glamour ticks twice this round |
-| **Cash-outs** | | | |
-| Standing Ovation | keep | Rhetoric enhanced 2 | Sway equal to Glamour |
-| Spotlight | new | Rhetoric enhanced 1 | Consume all Glamour: Sway equal to twice what you consumed |
-| Mic Drop | new | Rhetoric rare 2, exhaust | Consume half your Glamour: that much Sway, and −1 Hostility on every enemy |
-| **Room** | | | |
-| Roast | new | Pressure enhanced 1 | 10 Sway, +2 target Hostility |
-| Meet and Greet | new | Pressure enhanced 2 | −1 Hostility on every enemy, −1 more per 5 Glamour |
-| Fan Mail | rework | Rhetoric enhanced 1 | Draw 1, −1 target Hostility |
-| **Willpower** | | | |
-| Thumbs Up | rework | Rhetoric basic 0 | 4 Composure |
-| Behind the Podium | keep | Rhetoric enhanced 1 | Composure equal to Glamour |
-| Prepared Remarks | keep | Rhetoric basic 1 | 4 Composure, add 2 Soundbites |
-| Media Training | new | Policy enhanced 2, persistent | Scrutiny only strips Glamour from hits that leak 5+ |
-| Soundbite (token) | keep | Rhetoric 0, exhaust | 2 Sway |
+## Reworked cards
 
-### What it takes to build
+- **Thumbs Up:** Pressure, 0 energy. If Glamour is 2 or less, gain 2 Glamour; deal 2 Sway. Upgraded: 3 Sway. Threshold checked first.
+- **Press Release:** Rhetoric, 1 energy. If Glamour is 6+, gain 5 Glamour. Upgraded: gain 6.
+- **Photo Op:** Policy, 1 energy. The first Pressure card played each turn grants 1 Glamour.
+- **Going Viral:** Policy, 1 energy. Trigger a Glamour tick now, including decay. Upgraded: 0 energy.
+- **Trending:** Policy, 2 energy. Gain 2 Glamour and add 2 Soundbites; token setup rather than another doubling effect.
+- **Campaign Donors:** Policy, 1 energy. Deal 2 Sway per Debt gained this turn. Upgraded: 3 per Debt.
+- **Fine Print:** Rhetoric, 0 energy. Draw 2, take 2 Debt, Exhaust. Upgraded: draw 3.
+- **Settle Up:** Rhetoric, 0 energy. Cancel up to 1 Debt. Upgraded: up to 2. No Glamour or Composure payoff.
+- **Line of Credit:** Rhetoric, 0 energy. The next Debt gain this turn is reduced by up to 2; discount a random hand card by 1 this turn. Exhaust.
+- **Soundbite:** keep 0 energy, 2 Sway, Exhaust; extra options live on other cards and Policies.
 
-- **Data only (existing effects):** every Promise (effects + `BorrowEffect` with 0 energy), every Sway, Hostility,
-  Composure and draw change, Glamour doubling (gain scaled by current Glamour), the starter deck, and the new Cheap
-  Rice, Jobs for Everyone, Clean Government, No More Traffic, Red Carpet, Sold-Out Show, Roast and Meet and Greet.
-- **Small code:** Star Power (one override on `GlamourStatus`); a consume-Glamour effect (all or half, × multiplier)
-  for Spotlight and Mic Drop; the twice-a-round tick for Going Viral; Media Training's Scrutiny threshold; Settle
-  Up's Glamour option on `ForgiveDebtEffect`; Open Tab owing 1 less (today it makes the card cost 0 energy, which
-  does nothing for 0-cost Promises); Photo Op triggering on Headliners (a `headliner` tag).
-- **Decide:** whether exposure also strips Glamour; whether Pacifiers stop at Neutral (proposed) or can push enemies
-  Receptive.
-- **Then:** the Play Mode card smoke test covers the new cards; a human playtest matters most, since the bots don't
-  value Glamour or Debt yet.
+## New cards
 
-## Rules added
+- **Iconic Line:** Enhanced Rhetoric, 1 energy. Consume all Glamour; deal 2 Sway per consumed stack. Upgraded: 0 energy.
+- **Media Training:** Enhanced Policy, 1 energy. Install the optional start-of-turn Glamour draw button.
+- **Signature Catchphrase:** Rare Policy, 1 energy. All Soundbites become Movie Quotes for this battle.
+- **Victim Narrative:** Enhanced Rhetoric, 0 energy. Lose 5 Opinion bypassing Composure; double Glamour. Exhaust.
+- **Disarming Charm:** Enhanced Rhetoric, 1 energy. Spend 2 Glamour to apply 3 Weakened to a hostile opponent.
+- **Overpromise:** Rare Rhetoric, 1 energy. Take 3 Debt; the next card this turn deals triple its Sway. Exhaust. Other effects are not tripled.
+- **Payment Holiday:** Enhanced Rhetoric, 0 energy. Defer the next normal settlement; take 1 Debt. Exhaust.
+- **Paid-Off Promises:** Enhanced Rhetoric, 0 energy. Reserve up to 3 Debt; next turn's printed-cost-2+ play cancels it. Exhaust.
+- **Second Take:** Enhanced Rhetoric, 0 energy. Recover a non-Exhaust discard card; take 1 Debt.
+- **Advance Booking:** Enhanced Rhetoric, 0 energy. Reserve a non-Exhaust draw-pile card for next turn; take 2 Debt.
+- **Never Meet Your Heroes:** Enhanced Rhetoric, 1 energy. Apply Poisoned Perception to a non-hostile opponent.
+- **Charm Offensive:** Rare Pressure, X energy. Deal 2X Sway, gain 2X Composure, reduce Hostility by X, in that order. X is energy actually spent; ordinary modifiers and subsequent crowd reaction apply.
+- **Movie Quote:** Basic generated-only Rhetoric, 0 energy. Gain 1 Glamour. Exhaust.
 
-1. **Star Power:** every Sway you deal gets +1 per 3 Glamour (`GlamourStatus.ModifyOutgoingOpinion`, number in
-   `CelebrityRules`). Glamour is offense first.
-2. **Encore round:** some cards make Glamour tick twice this round (new `CelebrityState` flag).
-3. Scrutiny, Debt settlement and Soundbites stay as they are. Composure protecting Glamour is the point of defense.
+Unlisted existing cards retain their existing values. New cards reuse Soundbite's illustration as placeholder art.
 
-### Card roles (target mix for the 31 cards)
+## Authoring and validation
 
-| Role | Cards | What it does |
-|---|---|---|
-| Headliner (high cost) | Red Carpet *(new)*, Sold-Out Show *(new)*, Trending, Press Release | 2–4 energy: big Glamour or doubling. The reason to Borrow. |
-| Cash-out | Standing Ovation, Spotlight *(new)*, Mic Drop *(new)* | Spend Glamour as Sway |
-| Amplifier | Photo Op, Going Viral | More Glamour, faster |
-| Aggressor | Hot Take, Roast *(new)*, Calling It In | Sway, raise Hostility, earn Glamour |
-| Pacifier | Autograph, Meet and Greet *(new)*, Fan Mail | Lower Hostility, stronger with Glamour |
-| Willpower | No Comment, Smile and Wave, Thumbs Up, Behind the Podium, Prepared Remarks, Media Training *(new)* | Composure that guards Glamour |
-| Borrow | Cash Advance, Fine Print, Overdraft, Open Tab, Line of Credit | Energy now, Debt next turn |
-| Debt payoff / insurance | Campaign Donors, Settle Up, Calling It In, Too Big to Fail, Rain Check, Bailout | Turn the bill into Glamour or Sway; soften it |
+Effects use the existing SerializeReference model, visible in the Database window's Building blocks tab.
+Media Training accepts an authored BattleUI button or creates one above End Turn when unassigned.
+Runtime transformations and policy rules reset with each battle; turn setups reset at player-turn start.
+Reward bags are a separate future change.
+Focused Play Mode tests cover card effects and deadlines; CardSmokeTests exercise each card against three stances.
 
-Roughly 12 cards push the meter or spend Glamour on it, 6 defend, 5 manage the room, 9 run the IOU engine.
+## Playtest questions
 
-### Card list (numbers are placeholders)
-
-**Starter (10):** 3 **Hot Take** (Pressure 1: 6 Sway, +1 target Hostility, +1 Glamour) · 2 **Autograph** (Pressure
-1: −2 target Hostility, +1 Glamour) · 3 **No Comment** (Pressure 1: 5 Composure) · 1 **Smile and Wave** (Rhetoric 1:
-4 Composure, 3 Glamour) · 1 **Cash Advance** (Rhetoric 1, Borrow: +2 energy, +2 Debt). One seed per engine, two
-room tools, three shields.
-
-| Card | Change | Type / rarity / cost | Effect |
-|---|---|---|---|
-| Red Carpet | new | Rhetoric enhanced 3 | Gain 6 Glamour |
-| Sold-Out Show | new | Rhetoric rare 4 | 10 Sway. Double your Glamour |
-| Trending | rework (cost 1 → 3) | Rhetoric rare 3, exhaust | Double your Glamour |
-| Press Release | rework | Rhetoric enhanced 2 | 4 Glamour, 4 Composure (build or protect, either way) |
-| Standing Ovation | keep | Rhetoric enhanced 2 | Sway equal to Glamour |
-| Spotlight | new | Rhetoric enhanced 1 | Consume all Glamour: Sway equal to twice what you consumed |
-| Mic Drop | new | Rhetoric rare 2, exhaust | Consume half your Glamour: that much Sway, and −1 Hostility on every enemy |
-| Photo Op | rework | Policy enhanced 1, persistent | Whenever you play a Rhetoric card, gain 1 Glamour |
-| Going Viral | rework | Rhetoric rare 1 | Glamour ticks twice this round |
-| Roast | new | Pressure enhanced 1 | 8 Sway, +2 target Hostility, +2 Glamour |
-| Calling It In | keep | Rhetoric enhanced 1 | Sway equal to 4 × Debt |
-| Meet and Greet | new | Pressure enhanced 2 | −1 Hostility on every enemy, −1 more per 5 Glamour |
-| Fan Mail | rework | Rhetoric enhanced 1 | Draw 1 (2 at 5+ Glamour), −1 target Hostility |
-| Thumbs Up | keep | Rhetoric basic 0 | 3 Composure, 1 Glamour |
-| Behind the Podium | keep | Rhetoric enhanced 1 | Composure equal to Glamour |
-| Prepared Remarks | keep | Rhetoric basic 1 | 4 Composure, add 2 Soundbites |
-| Media Training | new | Policy enhanced 2, persistent | Scrutiny only strips Glamour from hits that leak 5+ |
-| Fine Print | rework | Policy basic 0, Borrow | +1 energy, +1 Debt, draw 1 |
-| Overdraft, Open Tab, Line of Credit | keep | | Borrow support |
-| Campaign Donors | rework | Policy enhanced 1 | Gain Glamour equal to Debt gained this turn |
-| Settle Up | rework | Rhetoric enhanced 1, exhaust | Cancel all Debt; gain 1 Glamour per Debt cancelled |
-| Too Big to Fail, Rain Check, Bailout | keep | | Debt insurance |
-| Soundbite (token) | rework | Rhetoric 0, exhaust | 2 Sway, +1 Glamour |
-
-### What it takes to build
-
-- **Data only (existing effects):** every Sway, Hostility, Composure, Glamour gain, Glamour doubling (gain scaled by
-  current Glamour), Borrow and draw change above; the starter deck; the new Red Carpet, Sold-Out Show, Roast and
-  Meet and Greet.
-- **Small code:** Star Power (one override on `GlamourStatus`), a consume-Glamour effect (all or half, × multiplier)
-  for Spotlight and Mic Drop, the Encore-round flag for Going Viral, the Media Training Scrutiny threshold, and
-  Settle Up's "Glamour instead of Composure" option on `ForgiveDebtEffect`.
-- **Then:** the Play Mode card smoke test covers the new cards; a playtest-bot run compares Celebrity win rates
-  before and after (the bots don't value Glamour yet, so a human pass matters most).
-
-## Rules
-**Glamour** (player status, stacking, never decays on its own)
-1. Gained from card effects (`GainGlamourEffect`).
-2. After all enemy actions, Opinion rises by the stack count, then 1 stack is removed (`BattleManager.TickGlamour`).
-3. Scrutiny: each Opinion hit that leaks past Composure strips 1 Glamour, flat. A fully blocked hit strips nothing.
-4. Enemy hits resolve before the tick. Unpaid-Debt damage is not a hit.
-
-**Debt** (player number, `CelebrityState`)
-1. Gained from Borrow cards.
-2. Settled at the start of the player's next turn, after energy refreshes: Debt reduces energy (floor 0), the remainder
-   becomes Opinion damage 1:1. Debt resets to 0.
-3. Default: unpaid-Debt damage ignores Composure (`CelebrityRules.UnpaidDebtBlockable`).
-4. Debt outstanding when the fight ends is never collected.
-
-**Soundbite** (token): cost 0, Exhaust, Sway 2, generated only (Rhetoric).
-
-## Starter deck (10)
-3 Hot Take (Pressure, 1: Sway 6), 3 No Comment (Pressure, 1: 5 Composure), 3 Autograph (Pressure, 1: -2 Hostility),
-1 **Smile and Wave** (Rhetoric, 1: 5 Composure + 3 Glamour; upgraded 7 + 4).
-
-## Cards
-| Pole | Card | Type / rarity / cost | Effect |
-|---|---|---|---|
-| Glamour | Thumbs Up | Rhetoric basic 0 | 3 Composure, 1 Glamour |
-| Glamour | Press Release | Rhetoric basic 1 | 6 Composure, 2 Glamour |
-| Glamour | Prepared Remarks | Rhetoric basic 1 | 4 Composure, add 2 Soundbites |
-| Glamour | **Photo Op** | Policy enhanced 1 | Persistent: whenever you gain Composure, gain 1 Glamour |
-| Glamour | Behind the Podium | Rhetoric enhanced 1 | Composure equal to Glamour |
-| Glamour | Trending | Rhetoric rare 1, exhaust | Double Glamour |
-| Glamour | Going Viral | Rhetoric rare 1 | Glamour equal to half current Composure |
-| Glamour | Standing Ovation | Rhetoric enhanced 2 | Sway equal to Glamour |
-| Glamour | Fan Mail | Rhetoric enhanced 1 | Draw 1; draw 1 more at 5+ Glamour |
-| IOU | Cash Advance (Borrow) | Rhetoric basic 1, tag `borrow` | +2 energy, +2 Debt, add 2 Soundbites |
-| IOU | Calling It In (Leverage) | Rhetoric enhanced 1 | Sway = 4 x Debt |
-| IOU | Settle Up (Forgive) | Rhetoric enhanced 1, exhaust | Cancel all Debt, 2 Composure per Debt |
-| IOU | **Line of Credit** | Policy enhanced 1 | Persistent: first Debt gain each turn is 1 less |
-| IOU | **Open Tab** | Policy enhanced 1 | Persistent: first Borrow card each turn costs 0 |
-| IOU | **Bailout** | Policy rare 2 | Persistent: unpaid-Debt damage adds that many Soundbites (cap 3/turn) |
-| IOU | Too Big to Fail | Policy enhanced 2, exhaust | First unpaid-Debt damage this fight deals none |
-| IOU | Campaign Donors | Policy enhanced 1 | Composure per Debt gained this turn |
-| IOU | Overdraft | Policy basic 1, exhaust | This turn Borrow gives double energy and double Debt |
-| IOU | Rain Check | Policy basic 1, exhaust | Delay Debt settlement one turn |
-| IOU | Fine Print | Policy basic 0, exhaust | Composure equal to current Debt |
-
-Rarities and costs not given in the original spec (Trending, Going Viral, Standing Ovation, Overdraft, Rain Check,
-Fine Print, Calling It In, Settle Up, Cash Advance) are my placeholders.
-
-## Open questions (default implemented)
-1. Which Policies persist vs one-shot: assignment above is a proposal. Persistence is a battle flag set when the Policy
-   is played, so it lasts the fight regardless of where the card goes.
-2. Unpaid-Debt damage: unblockable (flip `UnpaidDebtBlockable`).
-3. Soundbite card type: Rhetoric.
-4. Photo Op: enhanced, cost 1.
-5. Class passive: none designed for this build. The `Actor` origin currently points at `Daddy's Gifts.asset`, a
-   once-per-battle mulligan that duplicates Nepo Baby's — a placeholder to replace, not a design.
-
-## Authoring and testing
-- The cards live in `Assets/Data/Cards/Celebrity/GlamourIou/` and are tuned on the assets (the one-shot builder that
-  first wrote them is gone). The starter deck is authored in `OriginDatabase`. `Tests/EditMode/CelebrityDebtTests`
-  covers settlement, Line of Credit, Rain Check and the waiver.
-- Bot run: use the existing playtest runner with origin `Actor`. Snowball combos to read first: Photo Op + Open Tab +
-  Campaign Donors; Too Big to Fail + Bailout; Overdraft + Rain Check; Trending on a Photo Op deck.
-- Known gaps: no Glamour/Debt HUD, no status icon, cards have no artwork (so they read as in-development),
-  and the bots do not value Glamour or Debt (they rank cards by Opinion preview).
+- Does Press Release reward stockpiling without stranding low-Glamour hands?
+- Are zero-energy Debt tools constrained enough by repayment, hand size, and Exhaust?
+- Are promised Debt deadlines and printed-cost delivery clear?
+- Does Overpromise create satisfying big turns without making ordinary attacks irrelevant?
+- Is the Glamour button readable beside End Turn at supported resolutions?

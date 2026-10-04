@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 2
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: 
-  _flavorText: 
+  _description:
+  _flavorText:
   _costs:
   - _costType: 1
     _baseAmount: 0
@@ -28,18 +28,22 @@ MonoBehaviour:
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 2685915650502426757
-  - rid: 2685915650502426758
+  - rid: 5000000000000000001
+  - rid: 5000000000000000002
+  - rid: 5000000000000000003
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects:
-  - rid: 2685915650502426765
+  - rid: 5000000000000000004
+  - rid: 5000000000000000005
+  - rid: 5000000000000000006
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
   - actor
   - glamouriou
+  - borrow
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
@@ -49,28 +53,39 @@ MonoBehaviour:
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes: 
+  _configurationNotes: Glamour spending pass. Numbers are playtest starting points.
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 2685915650502426757
-      type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 5000000000000000001
+      type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _amount: 0
-        _amountSource: 24
+        _amount: 2
+        _amountSource: 0
         _perXSource: 7
         _multiplier: 1
-        _maxAmount: 0
-    - rid: 2685915650502426758
+    - rid: 5000000000000000002
+      type: {class: BorrowEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _energy: 0
+        _debt: 2
+    - rid: 5000000000000000003
       type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 2685915650502426765
-      type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _amount: 0
-        _amountSource: 24
+    - rid: 5000000000000000004
+      type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 3
+        _amountSource: 0
         _perXSource: 7
         _multiplier: 1
-        _maxAmount: 0
+    - rid: 5000000000000000005
+      type: {class: BorrowEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _energy: 0
+        _debt: 2
+    - rid: 5000000000000000006
+      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:

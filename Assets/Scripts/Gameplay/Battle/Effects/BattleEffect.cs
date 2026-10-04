@@ -196,6 +196,9 @@
             EffectExecutionContext ctx
         )
         {
+            if (ctx.IsPlayerCard && target != ctx.PlayerStats)
+                baseAmount *= ctx.SwayMultiplier;
+
             StatusEffectManager attackerMgr = ctx.GetStatusEffectManager(attacker);
             StatusEffectManager targetMgr = ctx.GetStatusEffectManager(target);
 
