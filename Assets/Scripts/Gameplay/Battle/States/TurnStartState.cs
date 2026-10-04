@@ -60,6 +60,7 @@ namespace Crookedile.Gameplay.Battle
                 int totalDraw =
                     _manager.PlayerTurnNumber > 1 ? _manager.CardsPerTurn + bonusDraws : 0;
                 _manager.PlayerDeck.StartTurn(totalDraw);
+                _manager.PlayerDeck.DeliverBookedCards();
 
                 if (_manager.PlayerTurnNumber > 1 && bonusDraws > 0)
                     GameLogger.LogInfo<BattleManager>(

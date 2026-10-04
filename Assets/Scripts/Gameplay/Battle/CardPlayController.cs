@@ -182,6 +182,7 @@ namespace Crookedile.Gameplay.Battle
             // Shift Confused override indices — the played card is gone, so subsequent indices move down
             ShiftConfusedOverridesAfterPlay(handIndex);
 
+            _mgr.Celebrity.OnCardPlayed(card, LastEnergyPaid);
             EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
             // PassiveResolver listens to CardPlayedEvent via EventBus — no direct call needed
 
@@ -496,6 +497,9 @@ namespace Crookedile.Gameplay.Battle
                 }
             if (cost == null)
                 return 0;
+
+            if (cost.IsXCost)
+                return _mgr.PlayerStats.CurrentActionPoints;
 
             // Open Tab: the first N Borrow cards each turn are free.
             if (_mgr.Celebrity.NextBorrowIsFree && card.HasTag(CelebrityRules.BorrowTag))

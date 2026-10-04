@@ -14,27 +14,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: b39d65b2c378f2c4b8a8fa87b8274e78
   _cardName: Line of Credit
-  _cardType: 2
+  _cardType: 1
   _rarity: 1
   _artwork: {fileID: 0}
-  _description: 
-  _flavorText: 
+  _description:
+  _flavorText:
   _costs:
   - _costType: 1
-    _baseAmount: 1
+    _baseAmount: 0
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 2685915650502426747
+  - rid: 5000000000000000001
+  - rid: 5000000000000000002
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
-  _upgradedPassives:
-  - rid: 2685915650502426776
+  _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
   - actor
@@ -48,41 +48,18 @@ MonoBehaviour:
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes: 
+  _configurationNotes: Glamour spending pass. Numbers are playtest starting points.
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 2685915650502426747
-      type: {class: DebtRuleEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 5000000000000000001
+      type: {class: CelebrityTacticEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _rule: 0
-        _amount: 1
-        _soundbite: {fileID: 0}
-    - rid: 2685915650502426776
-      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _trigger:
-          rid: 2685915650502426777
-        _conditions:
-        - rid: 2685915650502426778
-        _oneShot: 0
-        _oncePerTurn: 0
-        _effects:
-        - rid: 2685915650502426779
-    - rid: 2685915650502426777
-      type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 2685915650502426778
-      type: {class: DebtCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _comparison: 0
-        _value: 1
-    - rid: 2685915650502426779
-      type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
+        _tactic: 2
         _amount: 2
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1
+        _secondaryAmount: 1
+    - rid: 5000000000000000002
+      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:

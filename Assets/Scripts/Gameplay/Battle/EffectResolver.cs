@@ -49,6 +49,15 @@ namespace Crookedile.Gameplay.Battle
             _battleManager = battleManager;
             _playerStatusEffects = new StatusEffectManager("Player");
             _opponentStatusEffects = new StatusEffectManager("Opponent");
+            if (allEnemies != null)
+            {
+                for (int i = 0; i < allEnemies.Count; i++)
+                    if (allEnemies[i].Stats == opponentStats)
+                    {
+                        SetFocusedOpponent(opponentStats, allEnemies[i].StatusEffects, i, allEnemies[i].EnemyData.EnemyName);
+                        break;
+                    }
+            }
         }
 
         public StatusEffectManager PlayerStatusEffects => _playerStatusEffects;
@@ -145,6 +154,11 @@ namespace Crookedile.Gameplay.Battle
             // Effects know the card they're printed on (CardSelectionMode.ThisCard,
             // MoveOwnerCardEffect). Passive dispatches set this separately in PassiveResolver.
             execCtx.OwnerCard = card;
+            if (isPlayerCard && _battleManager != null)
+            {
+                execCtx.SwayMultiplier = _battleManager.Celebrity.NextSwayMultiplier;
+                _battleManager.Celebrity.NextSwayMultiplier = 1;
+            }
 
             // Honour the card's upgrade state — GetNewEffects returns the upgraded effect list when
             // the card is upgraded (and one is authored), else the base list. Identical to .Effects

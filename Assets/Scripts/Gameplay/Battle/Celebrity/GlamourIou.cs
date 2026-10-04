@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Crookedile.Data.Cards;
 using UnityEngine;
 
@@ -45,19 +46,17 @@ namespace Crookedile.Gameplay.Battle
             + $"Each Opinion hit that gets past Support strips {CelebrityRules.ScrutinyStripPerHit}.";
     }
 
-    /// <summary>
-    /// Per-battle Debt and the Debt-policy flags (Line of Credit, Open Tab, Bailout, ...). Debt is
-    /// settled at the start of the player's next turn and never collected when the fight ends.
-    /// </summary>
+    /// <summary>Normal Debt settles at next turn start; promised Debt waits for its commitment's deadline.</summary>
     public class CelebrityState
     {
         public int Debt { get; private set; }
         public int DebtGainedThisTurn { get; private set; }
+        public int TotalDebt => Debt + PromisedDebt;
 
         // Rule magnitudes, set by DebtRuleEffect. Each is a count so upgraded cards can carry a
         // bigger number, and a second copy of the same Policy stacks onto the first.
 
-        /// <summary>Line of Credit: Debt shaved off the first Debt gain each turn.</summary>
+        /// <summary>Line of Credit: relief armed for the next Debt gain this turn.</summary>
         public int LineOfCreditReduction { get; set; }
 
         /// <summary>Open Tab: Borrow cards per turn that cost 0.</summary>
@@ -80,12 +79,79 @@ namespace Crookedile.Gameplay.Battle
         private bool _lineOfCreditUsedThisTurn;
         private int _bailoutTokensThisTurn;
 
+        public int MediaTrainingCost { get; set; }
+        public int MediaTrainingDraw { get; set; }
+        public bool MediaTrainingAvailable { get; set; }
+        public int NextSwayMultiplier { get; set; } = 1;
+        private int _creditDiscount;
+        private int _playerTurn;
+        private readonly List<(int debt, int dueTurn, int minimumCost)> _promises = new();
+
+        public int PromisedDebt
+        {
+            get
+            {
+                int total = 0;
+                foreach (var promise in _promises)
+                    total += promise.debt;
+                return total;
+            }
+        }
+
+        /// <summary>Arms only the next positive Debt gain; it expires at the next player turn.</summary>
+        public void ArmCredit(int reduction, int discount)
+        {
+            LineOfCreditReduction = reduction;
+            _creditDiscount = discount;
+            _lineOfCreditUsedThisTurn = false;
+        }
+
+        /// <summary>Reserved Debt cannot settle before the player has a turn to fulfil the promise.</summary>
+        public void MakePromise(int amount, int minimumCost)
+        {
+            int held = Mathf.Min(amount, Debt);
+            if (held <= 0)
+                return;
+
+            Debt -= held;
+            _promises.Add((held, _playerTurn + 1, minimumCost));
+        }
+
+        /// <summary>A successful hand play closes the draw window and can fulfil due commitments.</summary>
+        public void OnCardPlayed(CardData card, int energyPaid = 0)
+        {
+            MediaTrainingAvailable = false;
+            bool isX = card.GetCosts().Exists(cost => cost.IsXCost);
+            for (int i = _promises.Count - 1; i >= 0; i--)
+                if (_promises[i].dueTurn == _playerTurn
+                    && (card.PrintedCost >= _promises[i].minimumCost || isX && energyPaid >= _promises[i].minimumCost))
+                    _promises.RemoveAt(i);
+        }
+
+        /// <summary>Only missed commitments come due at turn end; fresh Debt keeps its normal deadline.</summary>
+        public void SettlePromises(OpinionLedger ledger, BattleStats player, Func<CardData, int, int> addToHand)
+        {
+            int owed = 0;
+            for (int i = _promises.Count - 1; i >= 0; i--)
+            {
+                if (_promises[i].dueTurn > _playerTurn)
+                    continue;
+
+                owed += _promises[i].debt;
+                _promises.RemoveAt(i);
+            }
+            Collect(owed, ledger, player, addToHand);
+        }
+
         public void ResetBattle()
         {
             Debt = 0;
             LineOfCreditReduction = FreeBorrowsPerTurn = SettlementsDelayed = DebtWaivers = 0;
             BailoutCard = null;
             BailoutCapPerTurn = 0;
+            MediaTrainingCost = MediaTrainingDraw = 0;
+            _playerTurn = -1;
+            _promises.Clear();
             ResetTurn();
         }
 
@@ -95,18 +161,29 @@ namespace Crookedile.Gameplay.Battle
             DebtGainedThisTurn = BorrowsPlayedThisTurn = BorrowBonusMultiplesThisTurn = 0;
             _lineOfCreditUsedThisTurn = false;
             _bailoutTokensThisTurn = 0;
+            _playerTurn++;
+            LineOfCreditReduction = _creditDiscount = 0;
+            NextSwayMultiplier = 1;
+            MediaTrainingAvailable = MediaTrainingCost > 0;
         }
 
         /// <summary>True while Open Tab still has a free Borrow left this turn.</summary>
         public bool NextBorrowIsFree => BorrowsPlayedThisTurn < FreeBorrowsPerTurn;
 
         /// <summary>Adds Debt after Line of Credit and the per-turn cap. Returns the Debt actually added.</summary>
-        public int GainDebt(int amount)
+        public int GainDebt(int amount, DeckManager deck = null)
         {
             if (LineOfCreditReduction > 0 && !_lineOfCreditUsedThisTurn && amount > 0)
             {
                 _lineOfCreditUsedThisTurn = true;
                 amount -= LineOfCreditReduction;
+                if (deck != null && deck.HandCount > 0 && _creditDiscount > 0)
+                {
+                    int index = Crookedile.Data.RunState.Current?.Rng.Next(deck.HandCount)
+                        ?? UnityEngine.Random.Range(0, deck.HandCount);
+                    deck.ReduceCostThisTurn(deck.Hand[index], _creditDiscount);
+                }
+                LineOfCreditReduction = 0;
             }
 
             if (CelebrityRules.MaxDebtPerTurn > 0)
@@ -122,8 +199,21 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Cancels up to <paramref name="max"/> Debt (0 = all). Returns the amount cancelled.</summary>
         public int Forgive(int max)
         {
-            int forgiven = max <= 0 ? Debt : Mathf.Min(max, Debt);
+            int limit = max <= 0 ? Debt + PromisedDebt : max;
+            int forgiven = Mathf.Min(limit, Debt);
             Debt -= forgiven;
+            int left = limit - forgiven;
+            for (int i = _promises.Count - 1; i >= 0 && left > 0; i--)
+            {
+                var p = _promises[i];
+                int n = Mathf.Min(left, p.debt);
+                left -= n;
+                forgiven += n;
+                if (n == p.debt)
+                    _promises.RemoveAt(i);
+                else
+                    _promises[i] = (p.debt - n, p.dueTurn, p.minimumCost);
+            }
             return forgiven;
         }
 
@@ -146,6 +236,14 @@ namespace Crookedile.Gameplay.Battle
             if (owed <= 0)
                 return;
             Debt = 0;
+
+            Collect(owed, ledger, player, addToHand);
+        }
+
+        private void Collect(int owed, OpinionLedger ledger, BattleStats player, Func<CardData, int, int> addToHand)
+        {
+            if (owed <= 0)
+                return;
 
             int paid = Mathf.Min(owed, player.CurrentActionPoints);
             player.GainActionPoints(-paid);

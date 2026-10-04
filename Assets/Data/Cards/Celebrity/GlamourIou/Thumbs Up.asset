@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: 0e33bbece47200a498211986e9322a99
   _cardName: Thumbs Up
-  _cardType: 1
+  _cardType: 0
   _rarity: 0
   _artwork: {fileID: 0}
-  _description: 
-  _flavorText: 
+  _description:
+  _flavorText:
   _costs:
   - _costType: 1
     _baseAmount: 0
@@ -28,12 +28,14 @@ MonoBehaviour:
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 2685915650502426726
-  - rid: 2685915650502426727
+  - rid: 5000000000000000002
+  - rid: 5000000000000000003
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 5000000000000000005
+  - rid: 5000000000000000006
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -48,24 +50,61 @@ MonoBehaviour:
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes: 
+  _configurationNotes: Glamour spending pass. Numbers are playtest starting points.
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 2685915650502426726
-      type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 5000000000000000001
+      type: {class: GainGlamourEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 2
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+    - rid: 5000000000000000002
+      type: {class: IfContextValueEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _value: 23
+        _comparison: 1
+        _threshold: 2
+        _then:
+        - rid: 5000000000000000001
+        _else: []
+    - rid: 5000000000000000003
+      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 2
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _target: 1
+        _bypassSupport: 0
+        _maxAmount: 0
+    - rid: 5000000000000000004
+      type: {class: GainGlamourEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 2
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+    - rid: 5000000000000000005
+      type: {class: IfContextValueEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _value: 23
+        _comparison: 1
+        _threshold: 2
+        _then:
+        - rid: 5000000000000000004
+        _else: []
+    - rid: 5000000000000000006
+      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _amount: 3
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
+        _target: 1
+        _bypassSupport: 0
         _maxAmount: 0
-    - rid: 2685915650502426727
-      type: {class: GainGlamourEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _amount: 1
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1

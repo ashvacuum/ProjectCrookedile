@@ -73,7 +73,7 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private int _energy = 2;
 
-        [Tooltip("Debt owed next turn. Keep early Borrow cards at 2+ so Line of Credit does not make them free.")]
+        [Tooltip("Debt owed next turn, after any armed Line of Credit reduction.")]
         [SerializeField]
         private int _debt = 2;
 
@@ -85,13 +85,13 @@ namespace Crookedile.Gameplay.Battle
             int mult = 1 + state.BorrowBonusMultiplesThisTurn;
             state.BorrowsPlayedThisTurn++;
             ctx.Caster.GainActionPoints(_energy * mult);
-            state.GainDebt(_debt * mult);
+            state.GainDebt(_debt * mult, ctx.Deck);
         }
 
         public override string GetDescription() => $"Borrow: gain {_energy} energy, owe {_debt} Debt";
     }
 
-    /// <summary>Cancels Debt (all, or up to a cap) for Composure per Debt cancelled.</summary>
+    /// <summary>Cancels Debt, optionally granting Composure per Debt cancelled.</summary>
     [Serializable]
     public class ForgiveDebtEffect : BattleEffect
     {
@@ -111,12 +111,13 @@ namespace Crookedile.Gameplay.Battle
         }
 
         public override string GetDescription() =>
-            $"Cancel {(_max <= 0 ? "all" : $"up to {_max}")} Debt, gain {_supportPerDebt} Composure per Debt";
+            $"Cancel {(_max <= 0 ? "all" : $"up to {_max}")} Debt"
+            + (_supportPerDebt > 0 ? $", gain {_supportPerDebt} Composure per Debt" : "");
     }
 
     public enum DebtRule
     {
-        LineOfCredit, // battle: first Debt gain each turn is N less
+        LineOfCredit, // this turn: next Debt gain is N less
         OpenTab, // battle: first N Borrow cards (tag "borrow") each turn cost 0
         Bailout, // battle: unpaid Debt damage adds that many Soundbites to hand (max N per turn)
         TooBigToFail, // the next N unpaid Debt damage instances this fight deal none
@@ -172,7 +173,7 @@ namespace Crookedile.Gameplay.Battle
         public override string GetDescription() =>
             _rule switch
             {
-                DebtRule.LineOfCredit => $"The first time each turn you would gain Debt, gain {_amount} less",
+                DebtRule.LineOfCredit => $"The next time this turn you would gain Debt, gain {_amount} less",
                 DebtRule.OpenTab => _amount == 1
                     ? "The first Borrow card each turn costs 0"
                     : $"The first {_amount} Borrow cards each turn cost 0",

@@ -42,6 +42,52 @@ namespace Crookedile.Gameplay.Battle
 
         // Per-card AP cost reductions this battle (+ snapshot/restore for transient passes).
         private readonly CardCostOverrides _costOverrides = new CardCostOverrides();
+        private readonly Dictionary<string, CardData> _tokenReplacements = new();
+        private readonly List<CardData> _bookedCards = new();
+
+        /// <summary>Transforms current tokens in every zone and all future generated copies for this battle.</summary>
+        public void InstallTokenReplacement(CardData source, CardData replacement)
+        {
+            if (source == null || replacement == null || source == replacement)
+                return;
+
+            _tokenReplacements[source.ID] = replacement;
+            foreach (var zone in new[] { _deck, _hand, _discard, _exhaust, _bookedCards })
+                for (int i = 0; i < zone.Count; i++)
+                    zone[i] = ResolveToken(zone[i]);
+        }
+
+        private CardData ResolveToken(CardData card) =>
+            card != null && _tokenReplacements.TryGetValue(card.ID, out var replacement) ? replacement : card;
+
+        /// <summary>Reserves the selected draw-pile copy so ordinary draws cannot take it before next turn.</summary>
+        public bool BookForNextTurn(CardData card)
+        {
+            if (!_deck.Remove(card))
+                return false;
+
+            _bookedCards.Add(card);
+            return true;
+        }
+
+        /// <summary>Delivers booked cards after normal draws; overflow goes to discard rather than being lost.</summary>
+        public void DeliverBookedCards()
+        {
+            foreach (var card in _bookedCards)
+            {
+                if (!AddCardToHand(card))
+                    AddCardToDiscard(card);
+                else
+                    EventBus.Publish(new CardRecoveredEvent { Card = card, IsPlayer = _isPlayer });
+            }
+            _bookedCards.Clear();
+        }
+
+        public void ReduceCostThisTurn(CardData card, int amount)
+        {
+            if (card != null && amount > 0)
+                _costOverrides.IncreaseThisTurn(card, -amount);
+        }
 
         // Cached ReadOnlyCollection wrappers — live views of the underlying lists.
         // AsReadOnly() returns a wrapper that reflects the list directly, so we only
@@ -124,11 +170,11 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>
         /// All cards across every zone — draw pile, hand, discard, and exhaust (snapshot).
-        /// Order: draw → hand → discard → exhaust.
+        /// Order: draw → hand → discard → exhaust → booked for next turn.
         /// Note: allocates a new list; use the individual zone properties for repeated access.
         /// </summary>
         public IReadOnlyList<CardData> AllCards =>
-            _deck.Concat(_hand).Concat(_discard).Concat(_exhaust).ToList().AsReadOnly();
+            _deck.Concat(_hand).Concat(_discard).Concat(_exhaust).Concat(_bookedCards).ToList().AsReadOnly();
 
         #endregion
 
@@ -167,6 +213,8 @@ namespace Crookedile.Gameplay.Battle
             _discard.Clear();
             _exhaust.Clear();
             _retain.Reset();
+            _tokenReplacements.Clear();
+            _bookedCards.Clear();
 
             _deck.AddRange(cards);
             Shuffle();
@@ -886,6 +934,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void AddCardsToDeck(CardData card, int count)
         {
+            card = ResolveToken(card);
             if (card == null)
             {
                 GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to deck");
@@ -917,6 +966,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public int AddCardsToHand(CardData card, int count)
         {
+            card = ResolveToken(card);
             if (card == null)
             {
                 GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to hand");
@@ -950,6 +1000,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void AddCardsToDiscard(CardData card, int count)
         {
+            card = ResolveToken(card);
             if (card == null)
             {
                 GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to discard");

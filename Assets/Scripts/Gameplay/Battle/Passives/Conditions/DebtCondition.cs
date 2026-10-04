@@ -20,7 +20,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override bool Evaluate(PassiveEvaluationContext ctx)
         {
-            int debt = ctx.BattleManager?.Celebrity.Debt ?? 0;
+            int debt = ctx.BattleManager?.Celebrity.TotalDebt ?? 0;
             return _comparison switch
             {
                 ComparisonType.AtLeast => debt >= _value,

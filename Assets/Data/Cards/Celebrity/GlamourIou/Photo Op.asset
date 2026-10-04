@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 2
   _rarity: 1
   _artwork: {fileID: 0}
-  _description: 
-  _flavorText: 
+  _description:
+  _flavorText:
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -29,7 +29,7 @@ MonoBehaviour:
   _costReductionPerX: 7
   _effects: []
   _passives:
-  - rid: 2685915650502426732
+  - rid: 5000000000000000003
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
@@ -47,29 +47,31 @@ MonoBehaviour:
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes: 
+  _configurationNotes: Glamour spending pass. Numbers are playtest starting points.
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 2685915650502426732
-      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 5000000000000000001
+      type: {class: CardPlayedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _trigger:
-          rid: 2685915650502426733
-        _conditions: []
-        _oneShot: 0
-        _oncePerTurn: 0
-        _effects:
-        - rid: 2685915650502426734
-    - rid: 2685915650502426733
-      type: {class: SupportGainedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 2685915650502426734
+        _filterByType: 1
+        _filterType: 0
+    - rid: 5000000000000000002
       type: {class: GainGlamourEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _amount: 1
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
+    - rid: 5000000000000000003
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 5000000000000000001
+        _conditions: []
+        _oneShot: 0
+        _oncePerTurn: 1
+        _effects:
+        - rid: 5000000000000000002

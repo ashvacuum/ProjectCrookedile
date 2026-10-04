@@ -119,6 +119,13 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private Button endTurnButton;
 
+        [Tooltip("Optional authored Media Training button; when absent, one is created above End Turn.")]
+        [SerializeField]
+        private Button _mediaTrainingButton;
+        private TMP_Text _mediaTrainingLabel;
+        private int _displayedGlamourCost = -1;
+        private int _displayedDrawCount = -1;
+
         [Tooltip(
             "General-purpose interactive card picker for card-choice effects (ChooseFromDiscard, Upgrade, Retain, etc.)."
         )]
@@ -168,6 +175,51 @@ namespace Crookedile.UI.Battle
         {
             if (endTurnButton != null)
                 endTurnButton.onClick.AddListener(OnEndTurnClicked);
+            InitializeMediaTrainingButton();
+        }
+
+        private void InitializeMediaTrainingButton()
+        {
+            if (_mediaTrainingButton == null && endTurnButton != null)
+            {
+                var go = new GameObject("MediaTrainingButton", typeof(RectTransform), typeof(Image), typeof(Button));
+                var rect = (RectTransform)go.transform;
+                var source = (RectTransform)endTurnButton.transform;
+                rect.SetParent(source.parent, false);
+                rect.anchorMin = source.anchorMin;
+                rect.anchorMax = source.anchorMax;
+                rect.pivot = source.pivot;
+                rect.sizeDelta = new Vector2(Mathf.Max(220, source.sizeDelta.x), Mathf.Max(48, source.sizeDelta.y));
+                rect.anchoredPosition = source.anchoredPosition + Vector2.up * (rect.sizeDelta.y + 12);
+                go.GetComponent<Image>().color = new Color(0.18f, 0.28f, 0.38f, 1);
+                _mediaTrainingButton = go.GetComponent<Button>();
+                var label = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
+                label.transform.SetParent(rect, false);
+                var labelRect = (RectTransform)label.transform;
+                labelRect.anchorMin = Vector2.zero;
+                labelRect.anchorMax = Vector2.one;
+                labelRect.offsetMin = new Vector2(8, 4);
+                labelRect.offsetMax = new Vector2(-8, -4);
+                _mediaTrainingLabel = label.GetComponent<TMP_Text>();
+                var originalLabel = endTurnButton.GetComponentInChildren<TMP_Text>();
+                if (originalLabel != null)
+                    _mediaTrainingLabel.font = originalLabel.font;
+                _mediaTrainingLabel.fontSize = 18;
+                _mediaTrainingLabel.alignment = TextAlignmentOptions.Center;
+                _mediaTrainingLabel.raycastTarget = false;
+            }
+            if (_mediaTrainingButton == null)
+                return;
+
+            _mediaTrainingLabel = _mediaTrainingButton.GetComponentInChildren<TMP_Text>();
+            _mediaTrainingButton.onClick.AddListener(OnMediaTrainingClicked);
+            _mediaTrainingButton.gameObject.SetActive(false);
+        }
+
+        private void OnMediaTrainingClicked()
+        {
+            if (!_cardChoiceActive && battleManager != null)
+                battleManager.TryUseMediaTraining();
         }
 
         private void OnEnable() => SubscribeToEvents();
@@ -397,6 +449,22 @@ namespace Crookedile.UI.Battle
 
         private void LateUpdate()
         {
+            if (_mediaTrainingButton != null)
+            {
+                bool available = battleManager != null && battleManager.CurrentState == BattleState.PlayerTurn
+                    && battleManager.Celebrity.MediaTrainingAvailable;
+                if (_mediaTrainingButton.gameObject.activeSelf != available)
+                    _mediaTrainingButton.gameObject.SetActive(available);
+                _mediaTrainingButton.interactable = available && !_cardChoiceActive && battleManager.CanUseMediaTraining;
+                if (available && _mediaTrainingLabel != null
+                    && (_displayedGlamourCost != battleManager.Celebrity.MediaTrainingCost
+                        || _displayedDrawCount != battleManager.Celebrity.MediaTrainingDraw))
+                {
+                    _displayedGlamourCost = battleManager.Celebrity.MediaTrainingCost;
+                    _displayedDrawCount = battleManager.Celebrity.MediaTrainingDraw;
+                    _mediaTrainingLabel.text = $"Spend {battleManager.Celebrity.MediaTrainingCost} Glamour: Draw {battleManager.Celebrity.MediaTrainingDraw}";
+                }
+            }
             if (!_statsRefreshQueued)
                 return;
             _statsRefreshQueued = false;

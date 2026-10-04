@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
+  m_Name: Paid-Off Promises
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
+  _id: c03edfb0557e4270b3fb2524c00147e1
+  _cardName: Paid-Off Promises
+  _cardType: 1
+  _rarity: 1
+  _artwork: {fileID: 21300000, guid: 11dda9187956ace4d9bf3875a197d823, type: 3}
+  _description:
+  _flavorText:
+  _costs:
+  - _costType: 1
+    _baseAmount: 0
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _costReductionPerX: 7
+  _effects:
+  - rid: 5000000000000000001
+  - rid: 5000000000000000002
+  _passives: []
+  _isUpgraded: 0
+  _upgradedCosts: []
+  _upgradedEffects: []
+  _upgradedPassives: []
+  _upgradedInnateRetain: 0
+  _tags:
+  - actor
+  - glamouriou
+  _fantasies: 0
+  _isStarterCard: 0
+  _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
+  _isGeneratedOnly: 0
+  _isUnplayable: 0
+  _innateRetain: 0
+  _cardVFX: {fileID: 0}
+  _configurationNotes: Glamour spending pass. Numbers are playtest starting points.
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5000000000000000001
+      type: {class: CelebrityTacticEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _tactic: 4
+        _amount: 3
+        _secondaryAmount: 2
+    - rid: 5000000000000000002
+      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:

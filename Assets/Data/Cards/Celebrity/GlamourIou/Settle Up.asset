@@ -17,23 +17,23 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 1
   _artwork: {fileID: 0}
-  _description: 
-  _flavorText: 
+  _description:
+  _flavorText:
   _costs:
   - _costType: 1
-    _baseAmount: 1
+    _baseAmount: 0
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 2685915650502426745
-  - rid: 2685915650502426746
+  - rid: 5000000000000000001
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 5000000000000000002
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -48,17 +48,19 @@ MonoBehaviour:
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes: 
+  _configurationNotes: Glamour spending pass. Numbers are playtest starting points.
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 2685915650502426745
+    - rid: 5000000000000000001
       type: {class: ForgiveDebtEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _max: 0
-        _supportPerDebt: 2
-    - rid: 2685915650502426746
-      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
+        _max: 1
+        _supportPerDebt: 0
+    - rid: 5000000000000000002
+      type: {class: ForgiveDebtEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _max: 2
+        _supportPerDebt: 0
