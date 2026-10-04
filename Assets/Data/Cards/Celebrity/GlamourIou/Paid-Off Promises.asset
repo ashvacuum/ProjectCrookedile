@@ -55,13 +55,10 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 5000000000000000001
-      type: {class: CelebrityTacticEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: PaidOffPromisesEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _tactic: 4
-        _amount: 3
-        _secondaryAmount: 2
-        _soundbite: {fileID: 0}
-        _movieQuote: {fileID: 0}
+        _debtAmount: 3
+        _minimumPrintedCost: 2
     - rid: 5000000000000000002
       type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 

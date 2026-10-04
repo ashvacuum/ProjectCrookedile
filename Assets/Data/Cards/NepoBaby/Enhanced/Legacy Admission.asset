@@ -60,7 +60,6 @@ MonoBehaviour:
         - rid: 7000000000000000001
         _afterRequiresBurn: 1
     - rid: 7000000000000000001
-      type: {class: TurnPriceBreakEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: GrantFreePlaysEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _kind: 0
-        _amount: 2
+        _cardCount: 2

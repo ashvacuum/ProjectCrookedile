@@ -55,11 +55,10 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 5000000000000000001
-      type: {class: CelebrityTacticEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: LineOfCreditEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _tactic: 2
-        _amount: 2
-        _secondaryAmount: 1
+        _debtReduction: 2
+        _cardDiscount: 1
     - rid: 5000000000000000002
       type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

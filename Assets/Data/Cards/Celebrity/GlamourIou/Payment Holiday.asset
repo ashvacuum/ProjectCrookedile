@@ -56,11 +56,9 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 5000000000000000001
-      type: {class: DebtRuleEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: DelayDebtSettlementEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _rule: 4
-        _amount: 1
-        _soundbite: {fileID: 0}
+        _settlementsToDelay: 1
     - rid: 5000000000000000002
       type: {class: BorrowEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
