@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
 {
+    /// <summary>Runs Behaviour Designer only during intent declaration so the boss commits its full move bundle before player input.</summary>
     [Debuggable("Boss", LogLevel.Info)]
     public sealed class BossBrain : MonoBehaviour
     {
@@ -17,6 +18,7 @@ namespace Crookedile.Gameplay.Battle
         public BattleManager Battle { get; private set; }
         public BossController Boss { get; private set; }
 
+        /// <summary>Binds the rival to its battle and configures manual tree evaluation to prevent replanning during card play.</summary>
         public void Bind(BattleManager battle, BossController boss)
         {
             Battle = battle;
@@ -32,6 +34,7 @@ namespace Crookedile.Gameplay.Battle
             _tree.Subgraph = boss.Data.Behavior;
         }
 
+        /// <summary>Chooses a bundle within 64 planning ticks, attempts fallback if needed, then stops the tree and locks audience targets before revealing intents.</summary>
         public async UniTask DeclarePlan(CancellationToken cancellationToken)
         {
             _planningCancellation?.Dispose();
@@ -63,6 +66,7 @@ namespace Crookedile.Gameplay.Battle
             Crookedile.Core.EventBus.Publish(new BossIntentsDeclaredEvent { Boss = Boss });
         }
 
+        /// <summary>Cancels pending declaration and stops the tree so an ended or restarted battle cannot continue planning.</summary>
         public void StopPlanning()
         {
             _planningCancellation?.Cancel();

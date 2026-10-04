@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
   _id: db87f831eb2314243ad00dbd3ac46f28
   _enemyName: The Incumbent
-  _portrait: {fileID: 0}
+  _portrait: {fileID: 21300000, guid: a93d723d071753a42871d877415928ee, type: 3}
   _startingHostility: 15
   _maxHostility: 60
   _minHostility: 10
@@ -39,6 +39,7 @@ MonoBehaviour:
         _conditions:
         - rid: 4020939437640777824
         _oneShot: 0
+        _oncePerTurn: 0
         _effects: []
     - rid: 4020939437640777824
       type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}

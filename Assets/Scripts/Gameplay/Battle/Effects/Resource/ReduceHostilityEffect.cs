@@ -49,6 +49,12 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private bool _stopAtNeutral = false;
 
+        public override TargetType Target => _target;
+
+        public override bool CanSelectBossTarget(BattleStats target) =>
+            !target.IsHardened
+            && target.CurrentHostility > (_stopAtNeutral ? -target.NeutralZone : target.MinHostility);
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             int amount = ResolveScaledAmount(

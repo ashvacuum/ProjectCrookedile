@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: ImportStatus
   m_EditorClassIdentifier: Opsive.Shared.Editor.Import::Opsive.Shared.Editor.Import.ImportStatus
   m_CharacterProjectSettingsShown: 0
-  m_BehaviorWindowShown: 0
-  m_StartupWindowShownPackageNames: []
+  m_BehaviorWindowShown: 1
+  m_StartupWindowShownPackageNames:
+  - com.opsive.behaviordesigner

@@ -56,6 +56,9 @@
         /// </summary>
         public virtual TargetType Target => TargetType.Self;
 
+        /// <summary>Filters boss audience selection without changing execution guards or player targeting.</summary>
+        public virtual bool CanSelectBossTarget(BattleStats target) => true;
+
         /// <summary>
         /// Returns damage preview data for intent display. Non-damage effects return null.
         /// Override in damage subclasses to expose their amounts without executing.

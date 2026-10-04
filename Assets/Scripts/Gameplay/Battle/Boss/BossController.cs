@@ -92,6 +92,7 @@ namespace Crookedile.Gameplay.Battle
             return true;
         }
 
+        /// <summary>Locks effect-eligible audience targets before reveal while preserving status counterplay after commitment.</summary>
         public void LockAudienceTargets(IReadOnlyList<EnemyController> audience)
         {
             _audienceTargets.Clear();
@@ -111,6 +112,7 @@ namespace Crookedile.Gameplay.Battle
                     for (int i = 0; i < audience.Count; i++)
                         if (
                             !audience[i].IsDefeated
+                            && CanSelectTarget(move, target, audience[i].Stats)
                             && (
                                 target == TargetType.RandomReceptive
                                     ? audience[i].Stats.IsReceptive
@@ -132,6 +134,24 @@ namespace Crookedile.Gameplay.Battle
             return intentIndex >= 0 && intentIndex < _audienceTargets.Count
                 ? _audienceTargets[intentIndex]
                 : null;
+        }
+
+        /// <summary>Requires every direct effect sharing the locked target category to accept that audience member.</summary>
+        private static bool CanSelectTarget(
+            EnemyMoveData move,
+            TargetType category,
+            Crookedile.Gameplay.BattleStats stats
+        )
+        {
+            foreach (var effect in move.Effects)
+                if (
+                    effect != null
+                    && effect.Target == category
+                    && !effect.CanSelectBossTarget(stats)
+                )
+                    return false;
+
+            return true;
         }
     }
 }

@@ -49,6 +49,16 @@ namespace Crookedile.Gameplay.Battle
 
         public override TargetType Target => _target;
 
+        public override bool CanSelectBossTarget(BattleStats target)
+        {
+            if (_amountSource != EffectContextValue.FixedAmount)
+                return true;
+
+            return _amount > 0
+                ? !target.IsFanatic && target.CurrentHostility < target.MaxHostility
+                : _amount < 0 && !target.IsHardened && target.CurrentHostility > target.MinHostility;
+        }
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             int amount = ResolveScaledAmount(
