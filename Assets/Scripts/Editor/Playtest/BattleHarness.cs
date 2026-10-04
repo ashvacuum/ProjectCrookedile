@@ -53,6 +53,7 @@ namespace Crookedile.EditorTools.Playtest
             void OnEnded(BattleEndedEvent e) => result = e.Result;
             void OnChoice(CardChoiceRequestedEvent e) => pendingChoice = e;
             void OnActing(EnemyActingEvent e) => Bump(rec.EnemyMoves, e.Move != null ? e.Move.name : "(none)");
+            void OnBossActing(BossActingEvent e) => Bump(rec.EnemyMoves, "Boss: " + e.Move.name);
             // Every drop of the meter, not DamageDealtEvent: smears go straight through the ledger
             // and never publish one, and they are exactly the hits worth counting.
             void OnOpinion(OpinionChangedEvent e)
@@ -71,6 +72,7 @@ namespace Crookedile.EditorTools.Playtest
             EventBus.Subscribe<BattleEndedEvent>(OnEnded);
             EventBus.Subscribe<CardChoiceRequestedEvent>(OnChoice);
             EventBus.Subscribe<EnemyActingEvent>(OnActing);
+            EventBus.Subscribe<BossActingEvent>(OnBossActing);
             EventBus.Subscribe<OpinionChangedEvent>(OnOpinion);
             Application.logMessageReceived += OnLog;
 
@@ -206,6 +208,7 @@ namespace Crookedile.EditorTools.Playtest
                 EventBus.Unsubscribe<BattleEndedEvent>(OnEnded);
                 EventBus.Unsubscribe<CardChoiceRequestedEvent>(OnChoice);
                 EventBus.Unsubscribe<EnemyActingEvent>(OnActing);
+                EventBus.Unsubscribe<BossActingEvent>(OnBossActing);
                 EventBus.Unsubscribe<OpinionChangedEvent>(OnOpinion);
                 Application.logMessageReceived -= OnLog;
 

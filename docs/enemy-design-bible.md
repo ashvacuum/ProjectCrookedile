@@ -1,6 +1,6 @@
 # Crookedile — Enemy Design Bible (v2, shared-meter model)
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-03
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-04
 >
 > **Summary:** The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete.
 >
@@ -22,7 +22,7 @@
 | P6 | One question per encounter | Each encounter composition asks one deck question — usually in the COMBO of roles, not a single enemy. | LOCKED |
 | P7 | Every room has a clock | Meter decay, enemy ramp (Escalator), shield stacking, Credibility chip, deck pollution. No free turtling. | LOCKED |
 | P8 | Readable intents (voice intents) | Telegraphed via the 21-glyph set. Conditional intents allowed ("Counter-Argues IF you play Rhetoric"). Constrained randomness in move pools. | LOCKED |
-| P9 | Bosses = rigged rooms | Rival candidates contesting the same meter. Phases trigger via ROOM CHANGES (new enemies, shields, rules), not HP thresholds. Incumbent = final boss. | LOCKED (core design) |
+| P9 | Bosses = rigged rooms | Separate, untargetable rival candidates contest the same meter through committed bundles of 2–3 revealed moves. Rivals never count toward Echo Chamber or audience effects. Phases use Opinion, turns and audience changes. Incumbent = final boss. | LOCKED (core design §5) |
 | P10 | Archetype asymmetry | Rate encounters vs Nepo Baby (burn / pull / replay, Hostility as his clock, rot-sensitive), Faith Leader (Guilt/Shame/Doubt→Fanatic engine, Jaded escalator), Celebrity (Glamour / IOU: Scrutiny punishes leaked hits, Debt bills land next turn). No encounter uniformly hard. | IN PROGRESS |
 | P11 | Theme & act framing | Anthro Filipino animals + mythological creatures, Spiritfarer-adjacent painterly register. Wardrobe = class satire. Acts: Barangay → City → National (proposed). Metagame: 30-day campaign, Debate milestone boss. | LOCKED / PROPOSED |
 
@@ -122,9 +122,9 @@ v1 wrongly modeled per-enemy Opinion ripple links. Actual system: the group puzz
 | Ward (guard) | Wards an ally (Warded stacks) | Human Shield | No | **Ward = 10** (built) |
 | Counter (conditional) | Punishes IF player does X this turn | "Counter-Argue if Rhetoric played" | YES | **Counter = 11** (built; fizzles to idle) |
 | Threshold (conditional) | Triggers at meter % / turn count | Phase/room changes, Padrino wake | YES | **OpinionAtOrAbove/Below conditions** (built) |
-| Unknown (?) | Hidden; boss openers only | — | Sparingly (P8) | not built |
+| Unknown (?) | Hidden intent proposal | — | Not used by boss debates: all rival moves reveal before player input | not built |
 
-Pattern rules: move pools with constraints (no repeat x2 unless scripted; threshold/room-change moves override pool; bosses get scripted openers).
+Pattern rules: audience move pools use constraints (no repeat x2 unless scripted; threshold/room-change moves override pool). Bosses use a Behaviour Designer planning subtree selecting named, cooldown-controlled bundles of two or three existing move assets. Reveal the whole ordered bundle and its selected audience targets before player input. Boss execution precedes both audience passes. See [core design §5](core-design.md#5-enemies--voice-intents) for the runtime and authoring rules.
 
 ## 7. Open Decisions (v2)
 

@@ -30,6 +30,35 @@ namespace Crookedile.Gameplay.Battle
             // Capture count before the loop so summoned enemies act next turn, not this one.
             int enemyCount = _manager.Enemies.Count;
 
+            var boss = _manager.Boss;
+            while (boss != null && boss.TryTakeNextIntent(out var bossMove))
+            {
+                int intentIndex = boss.ResolvedIntentCount - 1;
+                EventBus.Publish(
+                    new BossActingEvent
+                    {
+                        Boss = boss,
+                        Move = bossMove,
+                        IntentIndex = intentIndex,
+                    }
+                );
+                await UniTask.WaitForSeconds(_manager.PerEnemyAttackDelay, cancellationToken: ct);
+                if (
+                    bossMove.MoveType != EnemyMoveType.Counter
+                    || _manager.WasCardTypePlayedThisTurn(bossMove.CounterCardType)
+                )
+                    await _manager.Resolver.ResolveBossMoveEffects(boss, bossMove, ct);
+
+                if (_manager.CurrentState == BattleState.BattleEnd)
+                    return;
+
+                if (
+                    bossMove.MoveType == EnemyMoveType.SummonMinion
+                    && bossMove.MinionToSummon != null
+                )
+                    _manager.SummonMinions(bossMove.MinionToSummon, bossMove.MinionCount);
+            }
+
             // Two-pass resolution. Pass 1: modifier intents (e.g. RileOthers) resolve first so
             // their board changes — amplifying allies' hostility, summoning bodies — land before
             // the direct hits. Pass 2: direct intents (attacks, shields) resolve left to right.
@@ -150,7 +179,8 @@ namespace Crookedile.Gameplay.Battle
                         + $"({enemy.CurrentIntent.CounterCardType}) not triggered — fizzles"
                 );
                 EventBus.Publish(
-                    new EnemySkippedTurnEvent { EnemyIndex = i, EnemyName = enemy.EnemyData.EnemyName }
+                    new EnemySkippedTurnEvent { EnemyIndex = i, EnemyName = enemy.EnemyData.EnemyName,
+                    }
                 );
                 return;
             }

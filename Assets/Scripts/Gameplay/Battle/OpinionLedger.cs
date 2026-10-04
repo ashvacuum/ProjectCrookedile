@@ -71,7 +71,8 @@ namespace Crookedile.Gameplay.Battle
             string attackerName,
             int sourceEnemyIndex,
             int targetEnemyIndex,
-            bool isHit = true
+            bool isHit = true,
+            bool isBossSource = false
         )
         {
             if (amount <= 0)
@@ -91,6 +92,7 @@ namespace Crookedile.Gameplay.Battle
                     IsToPlayer = toPlayer,
                     AttackerName = attackerName,
                     SourceEnemyIndex = sourceEnemyIndex,
+                    IsBossSource = isBossSource,
                     TargetEnemyIndex = targetEnemyIndex,
                 }
             );

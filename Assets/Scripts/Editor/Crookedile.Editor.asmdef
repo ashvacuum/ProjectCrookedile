@@ -6,7 +6,11 @@
         "Crookedile.Utilities",
         "Crookedile.Runtime",
         "Crookedile.UI",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Opsive.BehaviorDesigner.Runtime.Wrappers",
+        "Opsive.BehaviorDesigner.Runtime.Tasks.Composites",
+        "Unity.Entities",
+        "Unity.Collections"
     ],
     "includePlatforms": [
         "Editor"

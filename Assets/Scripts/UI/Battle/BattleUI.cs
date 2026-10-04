@@ -47,6 +47,10 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private EnemyRowPanel enemyRow;
 
+        [Tooltip("Separate rival podium. Hidden when the session has no boss.")]
+        [SerializeField]
+        private BossPanel bossPanel;
+
         #endregion
 
         #region VFX Anchors
@@ -216,6 +220,7 @@ namespace Crookedile.UI.Battle
             logPanel?.Bind(manager);
             handPanel?.Bind(manager, OnCardButtonClicked);
             enemyRow?.Bind(manager);
+            bossPanel?.Bind(manager);
             cardZoneBar?.Bind(manager);
             postBattleFlow?.Bind(manager);
 
@@ -472,6 +477,8 @@ namespace Crookedile.UI.Battle
         /// Used by <see cref="BattleFeedbackController"/> to aim VFX at specific enemy panels.
         /// </summary>
         public RectTransform GetEnemySlotTransform(int index) => enemyRow?.GetSlotTransform(index);
+
+        public RectTransform BossTransform => bossPanel?.Anchor;
 
         #endregion
 

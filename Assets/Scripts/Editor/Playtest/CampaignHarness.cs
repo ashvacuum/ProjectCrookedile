@@ -227,6 +227,7 @@ namespace Crookedile.EditorTools.Playtest
                     originDatabase = OriginDatabase.Shared,
                     playerDeck = state.Deck,
                     enemies = state.CurrentBattleEnemies.Where(e => e != null).ToList(),
+                    boss = round?.boss,
                     maxTurns = round != null && round.maxTurns > 0 ? round.maxTurns : (int?)null,
                     startingOpinion = round?.startingOpinion ?? 50,
                     maxOpinion = round != null && round.maxOpinion > 0 ? round.maxOpinion : 100,

@@ -36,6 +36,7 @@ namespace Crookedile.Editor.Database
             {
                 new CardsTab(),
                 new EnemiesTab(),
+                new BossesTab(),
                 new StatusesTab(),
                 new AlliesTab(),
                 new OriginsTab(),

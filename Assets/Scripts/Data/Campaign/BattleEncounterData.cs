@@ -23,7 +23,9 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private BattleSession _session;
 
-        [Tooltip("Boss victory grants a pick-1-of-3 ally (M3). Unused until then.")]
+        [Tooltip(
+            "Campaign boss classification and rewards. Boss encounters must assign a rival in their session round."
+        )]
         [SerializeField]
         private bool _isBoss;
 

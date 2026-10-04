@@ -24,6 +24,8 @@ namespace Crookedile.Editor.Database
 
         private Kind? _kind;
         private Dictionary<Object, List<Issue>> _issues;
+        private Crookedile.Data.OriginType _testOrigin;
+        private int _testSeed = 1000;
 
         public override string Title => "Encounters";
 
@@ -87,13 +89,30 @@ namespace Crookedile.Editor.Database
                 }
                 else if (encounter is BattleEncounterData battle)
                 {
+                    _testOrigin = (Crookedile.Data.OriginType)
+                        EditorGUILayout.EnumPopup("Playtest origin", _testOrigin);
+                    _testSeed = EditorGUILayout.IntField("Playtest seed", _testSeed);
+                    if (GUILayout.Button("Play selected encounter with Scored bot"))
+                    {
+                        var config = new Crookedile.EditorTools.Playtest.PlaytestConfig
+                        {
+                            RunBattles = true,
+                            RunCampaigns = false,
+                            SeedsPerMatchup = 1,
+                            BaseSeed = _testSeed,
+                            EncounterPath = AssetDatabase.GetAssetPath(battle),
+                            Origins = new List<string> { _testOrigin.ToString() },
+                            BattleBots = new List<string> { "Scored" },
+                        };
+                        Later(() => Crookedile.EditorTools.Playtest.PlaytestRunner.Launch(config));
+                    }
                     var rounds = battle.Session != null ? battle.Session.rounds : null;
                     if (rounds == null || rounds.Count == 0)
                         EditorGUILayout.LabelField("No battle session.", EditorStyles.miniLabel);
                     else
                         foreach (var round in rounds)
                             EditorGUILayout.LabelField(
-                                $"▸ {string.Join(", ", round.enemies.Where(x => x != null).Select(x => x.EnemyName))}   ({round.maxTurns} turns)",
+                                $"{round.Scenario}: {string.Join(", ", round.enemies.Where(x => x != null).Select(x => x.EnemyName))}   ({round.maxTurns} turns)",
                                 EditorStyles.wordWrappedMiniLabel
                             );
                 }

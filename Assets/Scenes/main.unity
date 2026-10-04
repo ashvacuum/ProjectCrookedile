@@ -451,6 +451,7 @@ MonoBehaviour:
   logPanel: {fileID: 1035820859}
   resultPanel: {fileID: 4666463026194963306}
   enemyRow: {fileID: 766848211377123528}
+  bossPanel: {fileID: 1551181047}
   <PlayerStatsPanel>k__BackingField: {fileID: 1468479633}
   _playerSlotUI: {fileID: 7925704348922541647}
   _opinionMeterUI: {fileID: 766848211377123526}
@@ -1072,6 +1073,119 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8615146589443220447, guid: 273ae325d52ff8b498aeb86a50c93051, type: 3}
   m_PrefabInstance: {fileID: 8487920766331241097}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1551181045
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1961816016}
+    m_Modifications:
+    - target: {fileID: 2729842622471618524, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_Name
+      value: BossPodium
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.98
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.98
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.82
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+--- !u!224 &1551181046 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 9135982470406940261, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+  m_PrefabInstance: {fileID: 1551181045}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1551181047 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5283700600586204570, guid: a905be7bd39c40f4480d98d0869eca1e, type: 3}
+  m_PrefabInstance: {fileID: 1551181045}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b3e1429169a86a4e99d31de0176ea7f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Crookedile.UI::Crookedile.UI.Battle.BossPanel
 --- !u!1 &1637603095
 GameObject:
   m_ObjectHideFlags: 0
@@ -1283,6 +1397,7 @@ RectTransform:
   - {fileID: 65218834}
   - {fileID: 871349214}
   - {fileID: 125203753}
+  - {fileID: 1551181046}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1383,6 +1498,7 @@ MonoBehaviour:
   logPanel: {fileID: 1035820859}
   resultPanel: {fileID: 4666463026194963306}
   enemyRow: {fileID: 766848211377123528}
+  bossPanel: {fileID: 0}
   <PlayerStatsPanel>k__BackingField: {fileID: 1468479633}
   _playerSlotUI: {fileID: 7925704348922541647}
   _opinionMeterUI: {fileID: 766848211377123526}

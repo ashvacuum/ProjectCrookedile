@@ -185,5 +185,46 @@ namespace Crookedile.Gameplay.Battle
                     await UniTask.WaitForSeconds(EffectStepDelay, cancellationToken: ct);
             }
         }
+
+        public EffectExecutionContext CreateBossContext(BossController boss, int intentIndex = -1)
+        {
+            return new EffectExecutionContext(
+                boss.Stats,
+                _playerStats,
+                _playerStats,
+                false,
+                _playerDeck,
+                _allEnemies,
+                boss.StatusEffects,
+                _playerStatusEffects,
+                _playerStatusEffects,
+                _battleManager,
+                boss.Data.DisplayName,
+                fixedAudienceTargets: boss.GetAudienceTargets(intentIndex),
+                isBossMove: true
+            );
+        }
+
+        public async UniTask ResolveBossMoveEffects(
+            BossController boss,
+            EnemyMoveData move,
+            CancellationToken ct
+        )
+        {
+            var context = CreateBossContext(boss, boss.ResolvedIntentCount - 1);
+            foreach (var effect in move.Effects)
+            {
+                ct.ThrowIfCancellationRequested();
+                effect?.Execute(context);
+                if (
+                    _battleManager.CurrentState == BattleState.BattleEnd
+                    || _battleManager.CheckAndEndBattleIfOver()
+                )
+                    return;
+
+                if (EffectStepDelay > 0)
+                    await UniTask.WaitForSeconds(EffectStepDelay, cancellationToken: ct);
+            }
+}
     }
 }

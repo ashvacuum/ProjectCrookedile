@@ -264,6 +264,7 @@ namespace Crookedile.Gameplay.Battle
                 originDatabase = originDatabase,
                 playerDeck = playerDeck,
                 enemies = battleEnemies,
+                boss = currentRound?.boss,
                 maxTurns = roundMaxTurns > 0 ? roundMaxTurns : (int?)null,
                 startingOpinion = roundStartOpinion,
                 maxOpinion = roundMaxOpinion,
