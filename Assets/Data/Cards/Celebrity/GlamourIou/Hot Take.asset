@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Hot Take
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 0483fed8ed85f8743b88c47b30e1a890, type: 3}
   _description: 
   _flavorText: 
   _costs:

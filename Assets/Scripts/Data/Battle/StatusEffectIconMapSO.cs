@@ -42,6 +42,8 @@ namespace Crookedile.Data.Battle
         }
 
         [SerializeField]
+        [Searchable]
+        [ListDrawerSettings(ListElementLabelName = "id")]
         private List<Entry> _entries = new List<Entry>();
 
         private Dictionary<string, Entry> _lookup;

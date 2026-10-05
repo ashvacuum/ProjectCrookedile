@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: The Fixer's Offer
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _id: b73e53372d692f1925438ee0d2fc805d
+  _displayName: The Fixer's Offer
+  _blurb: "The money had strings after all."
+  _image: {fileID: 0}
+  _hourCost: 1
+  _extraMinutes: 0
+  _district: {fileID: 11400000, guid: a54aa622f1ef40a1935aeae6f25c28e9, type: 2}
+  _openingMinute: 600
+  _closingMinute: 900
+  _dropWeight: 1
+  _body: "The envelope had a return address after all. A man who calls himself Tatay
+    Boy invites you to his compound by the river. He would like a small thing done,
+    and he would like it done as a friend."
+  _options:
+  - _label: "Pay the favor back"
+    _resultText: "You agree to hear his terms. The terms turn out to be a room full
+      of his people, and you will have to talk your way out."
+    _requirements: []
+    _outcomes:
+    - rid: 1
+  - _label: "Refuse and eat the fallout"
+    _resultText: "You tell him the money was a gift. By the weekend a story about
+      your campaign finances is in every group chat in town."
+    _requirements: []
+    _outcomes:
+    - rid: 2
+  references:
+    version: 2
+    RefIds:
+    - rid: 1
+      type: {class: GoToEncounterOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _encounter: {fileID: 11400000, guid: 15bc2c80d163fac19a17d38c30e826d1, type: 2}
+    - rid: 2
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: -10
