@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc0531e77308c4db623b06b57f6222, type: 3}
+  m_Name: "An Audience with Do\xF1a Agila"
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.EventEncounterData
+  _id: 5f19ed82fef8245676f5718686ae07c5
+  _displayName: An Audience with Doña Agila
+  _blurb: "The Agila family would like to see you."
+  _image: {fileID: 0}
+  _hourCost: 1
+  _extraMinutes: 0
+  _district: {fileID: 11400000, guid: 953c76c063bd23d4f852ccff3d65ef38, type: 2}
+  _openingMinute: 600
+  _closingMinute: 900
+  _dropWeight: 1
+  _body: "The Agila family has held the vice mayor's office for forty years. Do\xF1a
+    Agila will receive you at the ancestral house. Three of her grandchildren are
+    running for council this year, and she would like you to meet them."
+  _options:
+  - _label: "Accept the audience"
+    _resultText: "Her grandchildren file in behind her one by one. By the time she
+      sits down, there is no room left at the table for you."
+    _requirements: []
+    _outcomes:
+    - rid: 1
+  - _label: "Kiss the ring"
+    _resultText: "You ask for her blessing in front of her family. She gives it,
+      with a donation, and everyone in town hears about both."
+    _requirements: []
+    _outcomes:
+    - rid: 2
+    - rid: 3
+    - rid: 4
+  - _label: "Decline politely"
+    _resultText: "You send a note and a basket of fruit. The Agilas have been refused
+      before; they have a long memory for it."
+    _requirements: []
+    _outcomes: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 1
+      type: {class: GoToEncounterOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _encounter: {fileID: 11400000, guid: 9d4c3aa2c745bb5eb22f20ce66b15233, type: 2}
+    - rid: 2
+      type: {class: AdjustCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: -10
+    - rid: 3
+      type: {class: AdjustFundsOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 20
+    - rid: 4
+      type: {class: SetFlagOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _flag: agila_blessing
+        _clear: 0

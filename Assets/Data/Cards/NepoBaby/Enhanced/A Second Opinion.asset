@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Heirloom
+  m_Name: A Second Opinion
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: bcf0067953144ef4a28e8eac7ef7ae3b
-  _cardName: Heirloom
-  _cardType: 0
+  _id: e75f482cb61d404daa1ae0f102c4cdcb
+  _cardName: A Second Opinion
+  _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 21300000, guid: 3c7d9c73be97aa74fbac75f215c36f94, type: 3}
+  _artwork: {fileID: 21300000, guid: 193b51e1be84f544fbb2c9707a91a134, type: 3}
   _description: 
-  _flavorText: Passed down. Never put down.
+  _flavorText: They loved it so much, he said it again.
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -30,12 +30,13 @@ MonoBehaviour:
   _effects:
   - rid: 7000000000000000000
   - rid: 7000000000000000001
+  - rid: 7000000000000000002
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects:
-  - rid: 2685915716395466846
-  - rid: 2685915716395466847
+  - rid: 2685915685993578738
+  - rid: 2685915685993578739
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -55,37 +56,22 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 2685915716395466846
-      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _amount: 15
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1
-        _target: 1
-        _bypassSupport: 0
-        _maxAmount: 0
-    - rid: 2685915716395466847
-      type: {class: ReturnToHandEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 2685915685993578738
+      type: {class: ReplayCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _source: 0
-        _cardType: 1
-        _applyReturnBrake: 1
-        _onReturned: []
+    - rid: 2685915685993578739
+      type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 1
     - rid: 7000000000000000000
-      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _amount: 10
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1
-        _target: 1
-        _bypassSupport: 0
-        _maxAmount: 0
-    - rid: 7000000000000000001
-      type: {class: ReturnToHandEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: ReplayCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _source: 0
-        _cardType: 1
-        _applyReturnBrake: 1
-        _onReturned: []
+    - rid: 7000000000000000001
+      type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 1
+    - rid: 7000000000000000002
+      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

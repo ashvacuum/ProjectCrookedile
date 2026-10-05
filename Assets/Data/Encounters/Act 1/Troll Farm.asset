@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-5913372280947561217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 753352c9291356a40b81076a162b5ad7, type: 3}
+  m_Name: N01 Troll Farm Session
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.BattleSession
+  rounds:
+  - label: Troll Farm
+    enemies:
+    - {fileID: 11400000, guid: 1ffd97c0bdc887634bf53b5dafd24875, type: 2}
+    - {fileID: 11400000, guid: 1ffd97c0bdc887634bf53b5dafd24875, type: 2}
+    - {fileID: 11400000, guid: 1ffd97c0bdc887634bf53b5dafd24875, type: 2}
+    - {fileID: 11400000, guid: 1ffd97c0bdc887634bf53b5dafd24875, type: 2}
+    maxTurns: 10
+    maxOpinion: 100
+    startingOpinion: 50
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1335bd23a43efbe4c9bbe6efff3281e1, type: 3}
+  m_Name: Troll Farm
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.BattleEncounterData
+  _id: 14bd162991f353656d01b7fbeafc0293
+  _displayName: Troll Farm
+  _blurb: "Four accounts, one rate card."
+  _image: {fileID: 0}
+  _hourCost: 1
+  _extraMinutes: 0
+  _district: {fileID: 11400000, guid: 953c76c063bd23d4f852ccff3d65ef38, type: 2}
+  _openingMinute: 540
+  _closingMinute: 960
+  _dropWeight: 1
+  _session: {fileID: -5913372280947561217}
+  _isBoss: 0
+  _rewardOverride: {fileID: 0}

@@ -89,6 +89,7 @@ namespace Crookedile.EditorTools
                 new EncounterPoolsProvider(),
                 new OriginPassivesProvider(),
                 new SharedArtProvider(),
+                new DuplicateEffectsProvider(),
                 new CardVisualsProvider(),
                 new IntentsProvider(),
                 new AudioVfxProvider(),
@@ -258,6 +259,85 @@ namespace Crookedile.EditorTools
                         issues.Add(new AuditIssue(Severity.Error, "Summon move has no minion."));
                     yield return new Row(move.name, move.MoveType.ToString(), move, issues);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Cards whose base effect lists are identical: same effect types, same order, same tuning
+        /// values. Upgraded effects are compared separately so a card that only differs once
+        /// upgraded still shows up under its base list.
+        /// </summary>
+        internal sealed class DuplicateEffectsProvider : IContentProvider
+        {
+            public string Category => "Duplicate effects";
+
+            // ponytail: JsonUtility signature; nested [SerializeReference] fields may serialize by
+            // reference id and miss a match. Switch to SerializedProperty walking if that bites.
+            private static string Signature(List<BattleEffect> effects) =>
+                effects == null || effects.Count == 0
+                    ? null
+                    : string.Join(
+                        "|",
+                        effects.Select(e =>
+                            e == null ? "null" : e.GetType().FullName + JsonUtility.ToJson(e)
+                        )
+                    );
+
+            private static string Summary(List<BattleEffect> effects) =>
+                string.Join(", ", effects.Select(e => e?.GetType().Name ?? "(empty)"));
+
+            public IEnumerable<Row> Rows()
+            {
+                var cards = LoadAll<CardData>();
+                bool any = false;
+                foreach (
+                    var (label, pick) in new (string, Func<CardData, List<BattleEffect>>)[]
+                    {
+                        ("base", c => c.Effects),
+                        ("upgraded", c => c.UpgradedEffects),
+                    }
+                )
+                {
+                    var groups = cards
+                        .Select(c => (card: c, sig: Signature(pick(c))))
+                        .Where(x => x.sig != null)
+                        .GroupBy(x => x.sig)
+                        .Where(g => g.Count() > 1)
+                        .OrderByDescending(g => g.Count());
+
+                    foreach (var group in groups)
+                    {
+                        any = true;
+                        var members = group.Select(x => x.card).ToList();
+                        string summary = Summary(pick(members[0]));
+                        foreach (var card in members)
+                            yield return new Row(
+                                card.name,
+                                $"{label}: {summary}  —  shared by {members.Count}",
+                                card,
+                                new List<AuditIssue>
+                                {
+                                    new AuditIssue(
+                                        Severity.Warning,
+                                        $"Same {label} effects as: "
+                                            + string.Join(
+                                                ", ",
+                                                members.Where(o => o != card).Select(o => o.name)
+                                            )
+                                    ),
+                                },
+                                card.Artwork
+                            );
+                    }
+                }
+
+                if (!any)
+                    yield return new Row(
+                        "(none)",
+                        "every card has a unique effect list",
+                        null,
+                        new List<AuditIssue>()
+                    );
             }
         }
 
