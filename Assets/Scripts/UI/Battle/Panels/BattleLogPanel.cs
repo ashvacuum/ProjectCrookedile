@@ -209,7 +209,7 @@ namespace Crookedile.UI.Battle
             {
                 // Gains from effects only: spends and the turn-start refill are routine.
                 if (evt.IsPlayer && _group == Group.Card && evt.NewValue > evt.OldValue)
-                    AddOutcome($"+{evt.NewValue - evt.OldValue} AP");
+                    AddOutcome($"+{evt.NewValue - evt.OldValue} Energy");
             });
             Sub<SupportChangedEvent>(evt =>
             {

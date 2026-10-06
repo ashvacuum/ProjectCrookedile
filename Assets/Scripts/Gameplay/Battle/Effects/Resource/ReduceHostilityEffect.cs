@@ -90,10 +90,10 @@ namespace Crookedile.Gameplay.Battle
             string amountStr = DescribeScaledAmount(_amount, _amountSource, _perXSource, _multiplier);
             string text =
                 _target == TargetType.Opponent
-                    ? $"Reduce target's Hostility by {amountStr}"
+                    ? $"Soothe {amountStr}"
                     : _target == TargetType.AllOpponents
-                        ? $"Reduce all enemies' Hostility by {amountStr}"
-                        : $"Reduce Hostility by {amountStr} ({_target})";
+                        ? $"Soothe {amountStr} (all enemies)"
+                        : $"Soothe {amountStr} ({_target})";
             return _stopAtNeutral ? $"{text}, not below Neutral" : text;
         }
     }

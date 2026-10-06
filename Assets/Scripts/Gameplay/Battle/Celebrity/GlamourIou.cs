@@ -7,7 +7,7 @@ namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
     /// Celebrity (Glamour / IOU build) engine tunables. Card numbers live on the card assets; only
-    /// the rules every card shares are here. Composure = Support, Sway = an Opinion push.
+    /// the rules every card shares are here. Sway = an Opinion push.
     /// </summary>
     public static class CelebrityRules
     {

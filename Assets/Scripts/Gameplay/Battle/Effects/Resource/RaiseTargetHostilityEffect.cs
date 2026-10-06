@@ -71,8 +71,8 @@ namespace Crookedile.Gameplay.Battle
         {
             string amountStr = DescribeScaledAmount(_amount, _amountSource, _perXSource, _multiplier);
             return _target == TargetType.Opponent
-                ? $"Raise target's Hostility by {amountStr}"
-                : $"Raise Hostility by {amountStr} ({_target})";
+                ? $"Aggravate {amountStr}"
+                : $"Aggravate {amountStr} ({_target})";
         }
     }
 }

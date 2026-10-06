@@ -1,6 +1,6 @@
 # Crookedile — Core Design Doc
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-04
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-05
 >
 > **Summary:** The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions.
 >
@@ -146,7 +146,7 @@ Each asks a different question every turn and lives at a different point in time
 | Archetype | Question | Time | Can uniquely... | Fears... |
 |---|---|---|---|---|
 | **Nepo Baby** | "What do I burn to get it now?" | **Now** | Consume his own deck: burn, pull, replay, retrieve | The room's anger (Hostility clock) and junk rotting a thinned deck |
-| **Celebrity** | "What can I promise now and pay for later?" | **Borrowed time** | Build Glamour that lifts the meter every round, and borrow energy against next turn (Debt) | Hits that leak past Composure (Scrutiny strips Glamour) and the bill coming due (unpaid Debt hits the meter) |
+| **Celebrity** | "What can I promise now and pay for later?" | **Borrowed time** | Build Glamour that lifts the meter every round, and borrow energy against next turn (Debt) | Hits that leak past Support (Scrutiny strips Glamour) and the bill coming due (unpaid Debt hits the meter) |
 | **Faith Leader** | "Who can I pacify into a follower?" | **After** | Stack statuses to convert enemies into Fanatics who follow your attacks and defends for a turn | Disruption before reaching 3 stacks; a Hardened room (can't pacify) |
 
 > A distinctiveness test: each archetype must have a **unique capability** AND a **unique fear**. Overlapping fears are what make archetypes feel samey. Watch especially that Celebrity fears *self-overreach* while Faith Leader fears *opponent disruption* — if Celebrity's risk becomes "opponent breaks my setup," they've merged.
@@ -176,12 +176,12 @@ A guy who knows nothing, talks the talk, and never walks the walk. Every promise
 He does not convert enemies. He wins by spectacle and borrowed momentum.
 
 - **Glamour** (a status on the player): after the enemy acts, the meter rises by your Glamour, then Glamour drops by 1.
-  **Scrutiny:** every hit that leaks past Composure strips 1 Glamour. Bank it for ticks or spend it on Sway, draws, and suppression.
+  **Scrutiny:** every hit that leaks past Support strips 1 Glamour. Bank it for ticks or spend it on Sway, draws, and suppression.
 - **IOU / Debt:** Borrow cards give energy now and Debt that is settled at the start of your next turn, out of that
   turn's energy first and the meter second. The fast, aggressive overcharge engine.
 - **Promises:** reserve existing Debt, then play a costly card next turn to earn cancellation; missed commitments collect at that turn's end.
 - **Soundbites:** zero-energy 2-Sway tokens. Signature Catchphrase turns them into Glamour-generating Movie Quotes for the battle.
-- **Structure:** four core Composure cards protect a flexible offensive base; persistent Policies declare the build,
+- **Structure:** four core Support cards protect a flexible offensive base; persistent Policies declare the build,
   one-shot Policies are tactical.
 - **Guardrails:** explicit hostility tools and limited Debt-funded recovery are allowed; no separate conversion mechanic or recovery from Exhaust.
 
@@ -284,8 +284,8 @@ pitched above the other classes, shields below.
 ### Celebrity — *spectacle on credit*
 
 Starter (10), from [`celebrity-glamour-iou.md`](celebrity-glamour-iou.md): 3 **Hot Take** (Pressure, 1: Sway 6),
-3 **No Comment** (Pressure, 1: 7 Composure), 3 **Autograph** (Pressure, 1: -2 Hostility), 1 **Smile and Wave**
-(Rhetoric, 1: 5 Composure + 3 Glamour). The base plays fine alone; Smile and Wave is the one seed, showing Glamour
+3 **No Comment** (Pressure, 1: 7 Support), 3 **Autograph** (Pressure, 1: -2 Hostility), 1 **Smile and Wave**
+(Rhetoric, 1: 5 Support + 3 Glamour). The base plays fine alone; Smile and Wave is the one seed, showing Glamour
 lifting the meter on its own. The IOU pole arrives through rewards.
 
 ### Faith Leader — *stack to convert*

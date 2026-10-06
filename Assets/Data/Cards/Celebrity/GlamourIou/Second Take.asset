@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Second Take
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 21300000, guid: 11dda9187956ace4d9bf3875a197d823, type: 3}
+  _artwork: {fileID: 21300000, guid: f90023789d2df3e429ba890a62aab089, type: 3}
   _description: 
   _flavorText: 
   _costs:

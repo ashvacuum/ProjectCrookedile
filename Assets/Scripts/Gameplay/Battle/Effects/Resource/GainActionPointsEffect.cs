@@ -50,6 +50,6 @@ namespace Crookedile.Gameplay.Battle
         }
 
         public override string GetDescription() =>
-            $"Gain {DescribeScaledAmount(_amount, _amountSource, _perXSource, _multiplier)} Action Point(s)";
+            $"Gain {DescribeScaledAmount(_amount, _amountSource, _perXSource, _multiplier)} Energy";
     }
 }

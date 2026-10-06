@@ -133,7 +133,7 @@ namespace Crookedile.Gameplay.Battle
         public OriginType PlayerOrigin => _playerOrigin;
 
         /// <summary>
-        /// The player class's modifiers on what its cards produce (Sway, Composure). Identity
+        /// The player class's modifiers on what its cards produce (Sway, Support). Identity
         /// for a class without any.
         /// </summary>
         public ClassModifiers PlayerClassModifiers =>

@@ -16,7 +16,7 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private int _amount = 1;
 
-        [Tooltip("Where to read the amount from at runtime (e.g. CurrentGlamour doubles it; CurrentSupport with x0.5 halves Composure).")]
+        [Tooltip("Where to read the amount from at runtime (e.g. CurrentGlamour doubles it; CurrentSupport with x0.5 halves Support).")]
         [SerializeField]
         private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
 
@@ -91,7 +91,7 @@ namespace Crookedile.Gameplay.Battle
         public override string GetDescription() => $"Borrow: gain {_energy} energy, owe {_debt} Debt";
     }
 
-    /// <summary>Cancels Debt, optionally granting Composure per Debt cancelled.</summary>
+    /// <summary>Cancels Debt, optionally granting Support per Debt cancelled.</summary>
     [Serializable]
     public class ForgiveDebtEffect : BattleEffect
     {
@@ -99,7 +99,7 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private int _max;
 
-        [Tooltip("Composure (Support) gained per Debt cancelled.")]
+        [Tooltip("Support gained per Debt cancelled.")]
         [SerializeField]
         private int _supportPerDebt = 2;
 
@@ -112,6 +112,6 @@ namespace Crookedile.Gameplay.Battle
 
         public override string GetDescription() =>
             $"Cancel {(_max <= 0 ? "all" : $"up to {_max}")} Debt"
-            + (_supportPerDebt > 0 ? $", gain {_supportPerDebt} Composure per Debt" : "");
+            + (_supportPerDebt > 0 ? $", gain {_supportPerDebt} Support per Debt" : "");
     }
 }

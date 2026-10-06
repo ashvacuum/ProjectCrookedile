@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Inside Information
   _cardType: 2
   _rarity: 1
-  _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'His cousin works at the ministry.'
+  _artwork: {fileID: 21300000, guid: 1128c512eb9028846bdd89ca54135a68, type: 3}
+  _description: 
+  _flavorText: His cousin works at the ministry.
   _costs:
   - _costType: 1
     _baseAmount: 2
@@ -33,21 +33,60 @@ MonoBehaviour:
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
-  _upgradedPassives: []
+  _upgradedPassives:
+  - rid: 2685915716395466854
   _upgradedInnateRetain: 0
   _tags:
   - nepobaby
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2685915716395466854
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 2685915716395466855
+        _conditions: []
+        _oneShot: 0
+        _oncePerTurn: 0
+        _effects:
+        - rid: 2685915716395466856
+        - rid: 2685915716395466857
+    - rid: 2685915716395466855
+      type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 2685915716395466856
+      type: {class: PullFromDrawPileEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _source: 1
+        _lookAt: 5
+        _count: 2
+        _upTo: 1
+        _minimumPrintedCost: 0
+        _freeThisTurn: 0
+        _hostilityPerPull: 0
+        _hostilityScale: 0
+        _hostilityTarget: 4
+    - rid: 2685915716395466857
+      type: {class: RaiseTargetHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 1
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _target: 3
     - rid: 7000000000000000000
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
@@ -66,7 +105,7 @@ MonoBehaviour:
       type: {class: PullFromDrawPileEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _source: 1
-        _lookAt: 5
+        _lookAt: 3
         _count: 1
         _upTo: 1
         _minimumPrintedCost: 0

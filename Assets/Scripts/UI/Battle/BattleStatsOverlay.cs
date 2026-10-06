@@ -85,7 +85,7 @@ namespace Crookedile.UI.Battle
             var playerStats = battleManager.PlayerStats;
             if (playerAPText != null && playerStats != null)
                 playerAPText.text =
-                    $"AP: {playerStats.CurrentActionPoints}/{playerStats.MaxActionPoints}";
+                    $"Energy: {playerStats.CurrentActionPoints}/{playerStats.MaxActionPoints}";
 
             var enemyStats = battleManager.OpponentStats;
             if (focusedEnemyHostilityText != null)

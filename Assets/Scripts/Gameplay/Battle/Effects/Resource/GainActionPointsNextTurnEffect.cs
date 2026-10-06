@@ -21,6 +21,6 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<GainActionPointsNextTurnEffect>($"Will gain {amount} AP next turn");
         }
 
-        public override string GetDescription() => $"Gain {_amount} Action Point(s) next turn";
+        public override string GetDescription() => $"Gain {_amount} Energy next turn";
     }
 }

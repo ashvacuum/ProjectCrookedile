@@ -62,6 +62,6 @@ namespace Crookedile.Gameplay.Battle
         }
 
         public override string GetDescription() =>
-            "All cards in hand cost 0 AP. Reverts after the next card you play.";
+            "All cards in hand cost 0 Energy. Reverts after the next card you play.";
     }
 }

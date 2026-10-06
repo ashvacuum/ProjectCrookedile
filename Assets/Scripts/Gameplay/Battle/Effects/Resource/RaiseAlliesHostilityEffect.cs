@@ -48,7 +48,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override string GetDescription() =>
             _includeSelf
-                ? $"Raise all enemies' Hostility by {_amount}"
-                : $"Rile other enemies' Hostility by {_amount}";
+                ? $"Aggravate {_amount} (all enemies)"
+                : $"Aggravate {_amount} (other enemies)";
     }
 }

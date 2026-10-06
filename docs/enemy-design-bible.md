@@ -1,6 +1,6 @@
 # Crookedile — Enemy Design Bible (v2, shared-meter model)
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-04
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-05
 >
 > **Summary:** The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete.
 >
@@ -15,7 +15,7 @@
 | # | Pillar | Detail | Status |
 |---|--------|--------|--------|
 | P1 | Win axis: the shared Opinion Meter | ONE meter per room. Player pushes it up (Sway); enemies push it down / block it. Fill it = win the room. Directional shields: enemies place up-block shields, player places down-block shields. | LOCKED (core design) |
-| P2 | Loss axis: player Credibility | Player Credibility hits 0 = run over. Enemy attacks (Smears/Exposés/Red-tags) damage Credibility. Composure = the block analog. | ~~LOCKED~~ → META resource, parked (2026-07-08) |
+| P2 | Loss axis: player Credibility | Player Credibility hits 0 = run over. Enemy attacks (Smears/Exposés/Red-tags) damage Credibility. Support = the block analog. | ~~LOCKED~~ → META resource, parked (2026-07-08) |
 | P3 | Enemies are conditions, not HP bars | Not "killed." Managed: statused (Guilt/Shame/Doubt), Silenced, state-flipped, converted (Fanatic), corrupted. Room ends when the METER fills. | LOCKED (core design) |
 | P4 | Hostile / Receptive states + Echo Chamber | Per-enemy states modify behavior and card effectiveness. ECHO CHAMBER: if ALL enemies are Receptive, meter gains are HALVED and the meter decays. Keep ≥1 non-receptive enemy — managing the mix IS the game. | LOCKED (needs design pass on UI/holdout) |
 | P5 | Role × Stance variety engine | 7 roles: Pusher, Shielder, Amplifier, Converter, Inflictor, Escalator, Protector. Variety from role combos + stances, not bespoke stat blocks. | LOCKED |
@@ -31,8 +31,8 @@
 | Element | What it is | Player interaction | Enemy interaction |
 |---|---|---|---|
 | Opinion Meter | Single shared per-room win track. Fill = win. | Sway pushes (Pressure cards), Fanatics following your attacks (Faith Leader), Glamour lifting it every round (Celebrity). | Pushers drag it down; Shielders block upward movement. |
-| Directional shields | Blockers on the meter. Enemy shields block UP; player shields block DOWN. | Player places down-block shields (Composure/Rhetoric tools); can strip enemy up-shields. | Shielder role places/refreshes up-shields. |
-| Player Credibility | *(META resource — campaign layer, parked)* | Guard with Composure; heal rarely. | Smear/Exposé/Red-tag moves chip it. Which roles carry Credibility attacks = D8. |
+| Directional shields | Blockers on the meter. Enemy shields block UP; player shields block DOWN. | Player places down-block shields (Support/Rhetoric tools); can strip enemy up-shields. | Shielder role places/refreshes up-shields. |
+| Player Credibility | *(META resource — campaign layer, parked)* | Guard with Support; heal rarely. | Smear/Exposé/Red-tag moves chip it. Which roles carry Credibility attacks = D8. |
 | Enemy states (Hostile/Receptive) | Per-enemy behavior modes. | Flip states via cards/statuses; MANAGE the mix — all-Receptive triggers Echo Chamber penalty. | Converters drag Receptives back to Hostile; some (Televangelist) weaponize Echo Chamber deliberately. |
 | Statuses on enemies | Guilt, Shame, Doubt (pacify trio), Silence, Devotion, Jaded, Hardened, Fanatic, Turncoat, Warded. | FL engine: stack G/S/D to 3+Jaded → consume → 1-turn Fanatic bursts meter → reverts. Jaded = permanent per-enemy escalator (anti-milking). | Hardened resists statuses; Protectors guard allies via Warded stacks. |
 | The row | Ordered enemy positions. Adjacency matters (Praise). | Target selection, positional cards, enemy summons occupy slots. | Amplifier/Converter range limits (proposed D10), summon insertion (bosses). |
@@ -59,7 +59,7 @@
 | POS | Positional (row-relative) | Praise (adjacency) | Row is ORDERED; enemies do not move (LOCKED). No player-side summons. |
 | AOE | All enemies | Preach-type wide status | — |
 | RND | Random enemy | (none yet) | D12: leaning NONE — deterministic fits debate-puzzle identity. |
-| SLF | Self / player | Composure, draw, burn, pull, scry, purge | — |
+| SLF | Self / player | Support, draw, burn, pull, scry, purge | — |
 | SHD | Shields (meter objects) | Shield-strip | Shields as targetable objects distinct from enemies. |
 
 ## 4. Act 1 — Barangay Politics (encounter compositions)

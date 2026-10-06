@@ -24,13 +24,14 @@ MonoBehaviour:
   _condition: 0
   _conditionTurn: 1
   _conditionPercent: 50
+  _conditionCount: 1
   references:
     version: 2
     RefIds:
     - rid: 1430661995083595874
       type: {class: ShiftHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _amount: 1
+        _amount: 2
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
