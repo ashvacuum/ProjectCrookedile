@@ -18,7 +18,7 @@ namespace Crookedile.Data
         [Title("Class modifiers")]
         [InfoBox(
             "Glass-cannon asymmetry against the Faith Leader baseline: applied to every Sway and "
-                + "Composure Nepo Baby's cards produce."
+                + "Support Nepo Baby's cards produce."
         )]
         [HideLabel]
         [SerializeField]

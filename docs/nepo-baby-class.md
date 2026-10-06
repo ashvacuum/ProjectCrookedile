@@ -1,6 +1,6 @@
 # Nepo Baby: Burn / Return / Calm class spec (v0.1)
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-04
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-05
 >
 > **Summary:** The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders.
 >
@@ -10,7 +10,7 @@ This is the Nepo Baby class. It replaced the Patronage / summon design (2026-10-
 `enemy-design-bible.md` now summarise this doc (starter decks are in `core-design.md` §8). Section 12 lists the conflicts with
 the old code and how each was resolved; section 13 records what was built.
 
-Vocabulary: **Composure** = Support (the shield). **Sway** = a push on the Opinion meter. Statuses, not keywords.
+Vocabulary: **Support** = the shield. **Sway** = a push on the Opinion meter. Statuses, not keywords.
 
 ## 0. How to use this doc
 
@@ -23,8 +23,8 @@ current code (section 12).
 
 - Combat is single-axis: one shared **Opinion meter** per encounter (enemies push down, the player pushes up). Zero =
   loss, max = win. No player HP in combat. Credibility lives on the metagame layer.
-- **Sway** = push on the Opinion meter in the player's favor. **Composure** = defensive resource that absorbs incoming
-  Opinion damage (existing Composure rules).
+- **Sway** = push on the Opinion meter in the player's favor. **Support** = defensive resource that absorbs incoming
+  Opinion damage (existing Support rules).
 - Each enemy has **Hostility** and a state: Hostile / Neutral / Receptive. Hostile = stronger (see 12.A2), Receptive =
   weaker moveset. If ALL enemies are Receptive at once, the echo chamber decays Opinion. Every encounter has more than
   one enemy.
@@ -91,7 +91,7 @@ everything".
 |---|---|---|---|---|
 | 2 | Name Drop | Pressure | 1 | Sway attack. Pitched above Faith Leader/Celebrity baseline (config multiplier) |
 | 1 | **Pull Rank** (aggravator) | Pressure | 0 | Deal 4 Sway to target, then raise that enemy's Hostility by 1. Single target |
-| 3 | Daddy's Lawyer | Shield | 1 | Composure, light. Pitched below other classes' (config multiplier) |
+| 3 | Daddy's Lawyer | Shield | 1 | Support, light. Pitched below other classes' (config multiplier) |
 | 3 | I'm Just Like You | Hostility-reducer | 1 | Reduce target Hostility by a flat amount. If it converts the target to Receptive, draw a card, otherwise reduce a random card in hand's cost by 1 (floor 1) |
 | 1 | **Blow the Allowance** (seed) | Rhetoric | 1 | Burn a non-Policy card from hand. Play it for free, and deal Sway equal to its printed energy cost. Enhanced: cost 0 and damage doubled |
 
@@ -115,7 +115,7 @@ everything".
   Hostility on all enemies by 1. Locked behind a future unlock system (section 7).
 - **Encore** (Rhetoric, 1, exhaust): replay the last non-Policy card you played; raise Hostility on all enemies by 1.
 - **Born Into It** (Pressure, 0, exhaust): deal Sway per card exhausted this combat, with a config cap.
-- **Inheritance** (Rhetoric, 1): burn up to 2 cards from hand; gain Composure per card burned.
+- **Inheritance** (Rhetoric, 1): burn up to 2 cards from hand; gain Support per card burned.
 - **Spin Doctor** (Rhetoric, 1): burn a Heckle or Scandal from hand and lower target Hostility by 1.
 - **Golden Parachute** (Policy, one-shot, 1, exhaust): burn a Heckle or Scandal from hand and draw 2.
 - **Silver Spoon** (Policy, persistent): at the start of your turn, if your hand has no Heckles or Scandals, gain 1
@@ -140,7 +140,7 @@ everything".
 - **I Know a Guy** (Rhetoric, 1): retrieve the last Rhetoric card played from the discard. Enhanced: any Rhetoric card,
   player's choice. (No extra exhaust on the retrieved card. The in-turn cost rule is the brake.)
 - **Heirloom** (Pressure, 2): deal 10 Sway, then return this card to hand. It costs 1 more for the rest of the turn.
-- **Family Seat** (Shield, 2): gain 8 Composure, then return this card to hand at +1 cost this turn.
+- **Family Seat** (Shield, 2): gain 8 Support, then return this card to hand at +1 cost this turn.
 - **Hand-Me-Downs** (Policy, persistent): once per turn, a card with printed cost 2+ that would go to discard returns to
   hand instead; raise Hostility on all enemies by 1.
 - **Stacked Deck** (Rhetoric, 1): put up to 2 cards from hand on top of the draw pile.
@@ -162,9 +162,9 @@ everything".
 - **Bail Out** (0, exhaust): burn up to 3 cards from hand; gain 2 energy per burned card with printed cost 2+.
 - **That Was Supposed to Be Mine** (2): remove a buff from target enemy.
 - **Not My Problem** (1, once per turn): move up to 2 Hostility from one enemy to another.
-- **I Know You Are But What Am I** (1): this turn, the first time Opinion damage gets through Composure, gain Sway equal
+- **I Know You Are But What Am I** (1): this turn, the first time Opinion damage gets through Support, gain Sway equal
   to that damage.
-- **Burn the Receipts** (1, exhaust): gain 3 Composure per card in your exhaust pile, capped (config).
+- **Burn the Receipts** (1, exhaust): gain 3 Support per card in your exhaust pile, capped (config).
 - **Damage Control** (2, exhaust): set all Hostile enemies to Neutral; add a Heckle to your discard pile.
 
 Spread valves across card types. Do not make them mostly Rhetoric (it would make Old Boys' Club trigger trivially).
@@ -200,7 +200,7 @@ Hostility) live on its card asset, where the Database window audits them. Asset:
 | Group | Field | Default | Notes |
 |---|---|---|---|
 | Class modifiers | Sway multiplier | 1.15 | Every Sway Nepo Baby's cards push |
-| | Composure multiplier | 0.8 | Every Composure (Support) Nepo Baby's cards grant |
+| | Support multiplier | 0.8 | Every Support Nepo Baby's cards grant |
 | Burn | Policies burnable | false | Decided. Checked by `NepoBabyRules.CanBurn`, the one Burn check |
 | | Seed can target junk | false | Open question 8.1 |
 | Replays | Replays raise Hostility by default | false | Open question 8.4 |
@@ -327,7 +327,7 @@ count as plays and add no single-target Hostility. Policies never replay. Nested
 **Deliberate readings of the spec:**
 - Pull Rank's "+1 Hostility on the target" is the existing core rule that every single-target Sway raises the target's
   Hostility by 1. Name Drop and the other single-target attacks do the same.
-- The class modifiers apply to every Sway and Composure Nepo Baby's cards produce, not only the starter basics.
+- The class modifiers apply to every Sway and Support Nepo Baby's cards produce, not only the starter basics.
 - Executive Privilege offers its burn at the start of each turn; the next non-Policy card played that turn replays.
 - Hand-Me-Downs returns a card once it finishes resolving. Its Hostility is charged only if the card actually returns.
 - I Know You Are But What Am I lasts until your next turn, so it sees the enemy pushes.

@@ -5,7 +5,7 @@ namespace Crookedile.Data
 {
     /// <summary>
     /// Class-wide multipliers on what the player's cards produce. Applied to every player-side
-    /// Sway and Composure (Support) gain resolved through the shared effect helpers, on top of
+    /// Sway and Support gain resolved through the shared effect helpers, on top of
     /// each card's own numbers. Identity (1, 1) for a class that sets none.
     /// </summary>
     [Serializable]
@@ -18,7 +18,7 @@ namespace Crookedile.Data
         public float SwayMultiplier;
 
         [Tooltip(
-            "Multiplies every Composure (Support) the player's cards grant. 1 = the shared baseline."
+            "Multiplies every Support the player's cards grant. 1 = the shared baseline."
         )]
         [Min(0f)]
         public float ComposureMultiplier;

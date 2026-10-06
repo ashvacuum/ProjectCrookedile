@@ -22,6 +22,6 @@ namespace Crookedile.Gameplay.Battle
         public override bool IsDebuff => true;
 
         public override string Describe(int stacks) =>
-            $"Gain {HostilityPerTurn} Hostility at the start of each enemy turn for {stacks} turns. Becoming hostile removes this and deals {SwayOnHostile} Sway.";
+            $"Aggravate {HostilityPerTurn} at the start of each enemy turn for {stacks} turns. Becoming hostile removes this and deals {SwayOnHostile} Sway.";
     }
 }

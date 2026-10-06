@@ -89,7 +89,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override string GetDescription()
         {
-            string verb = _amount < 0 ? "Lower" : "Raise";
+            string verb = _amount < 0 ? "Soothe" : "Aggravate";
             string amountStr = DescribeScaledAmount(
                 Mathf.Abs(_amount),
                 _amountSource,
@@ -97,8 +97,8 @@ namespace Crookedile.Gameplay.Battle
                 _multiplier
             );
             return _target == TargetType.Opponent
-                ? $"{verb} target's Hostility by {amountStr}"
-                : $"{verb} Hostility by {amountStr} ({_target})";
+                ? $"{verb} {amountStr}"
+                : $"{verb} {amountStr} ({_target})";
         }
     }
 }

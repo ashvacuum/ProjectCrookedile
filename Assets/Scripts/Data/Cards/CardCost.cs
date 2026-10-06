@@ -217,7 +217,7 @@ namespace Crookedile.Data.Cards
         /// Gets a formatted string representation of this cost.
         /// </summary>
         /// <param name="showModifiers">If true, shows base cost and modifiers separately</param>
-        /// <returns>String like "2 AP", "X AP", "3 AP (was 5)", or "Free"</returns>
+        /// <returns>String like "2 Energy", "X Energy", "3 Energy (was 5)", or "Free"</returns>
         public string ToString(bool showModifiers = false)
         {
             if (_costType == CostType.None)
@@ -227,7 +227,7 @@ namespace Crookedile.Data.Cards
 
             if (_isXCost)
             {
-                return "X AP";
+                return "X Energy";
             }
 
             int current = CurrentAmount;
@@ -240,10 +240,10 @@ namespace Crookedile.Data.Cards
             // Show modifiers if requested and cost has changed
             if (showModifiers && current != _baseAmount)
             {
-                return $"{current} AP (was {_baseAmount})";
+                return $"{current} Energy (was {_baseAmount})";
             }
 
-            return $"{current} AP";
+            return $"{current} Energy";
         }
 
         public override string ToString()

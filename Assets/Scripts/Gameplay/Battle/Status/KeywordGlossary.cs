@@ -30,8 +30,18 @@ namespace Crookedile.Gameplay.Battle
             ["Support"] = "Absorbs incoming Opinion drops on the meter. Expires at the start of your next turn.",
             ["Denial"] = "Absorbs incoming Opinion rises on the meter. Expires at the start of their next turn.",
             ["Hostility"] = "How aggressive an enemy is. Hostile enemies push harder; receptive ones hold back.",
+            ["Aggravate"] = "Raise an enemy's Hostility. Fanatic enemies ignore it.",
+            ["Soothe"] = "Lower an enemy's Hostility. Hardened enemies ignore it.",
+            ["Hostile"] = "An enemy with high Hostility. It uses its hostile moves, which push hardest.",
+            ["Neutral"] = "An enemy between Hostile and Receptive. It uses its neutral moves.",
+            ["Receptive"] = "An enemy with low Hostility. It uses its gentler moves and gives you Support.",
+            ["Sway"] = "An Opinion push from your cards. It goes through the enemy's Denial.",
+            ["Energy"] = "Spent to play cards. Refills at the start of your turn.",
+            ["Debt"] = "Owed Energy. Settled at the start of your next turn, out of that turn's Energy first and the meter second.",
+            ["Borrow"] = "Gain Energy now in exchange for Debt.",
             ["Burn"] = "Exhaust a card from your hand as a cost. Policies can't be burned.",
             ["Pull"] = "Take a chosen card from your draw pile into your hand.",
+            ["Rehearse"] = "Put up to that many cards from your hand on top of your draw pile, in the order you choose.",
             ["Scry"] = "Look at the top cards of your draw pile and discard any of them.",
             ["Replay"] = "The card's effects happen again. A replay isn't a new play.",
         };
@@ -44,19 +54,22 @@ namespace Crookedile.Gameplay.Battle
             if (_entries != null)
                 return;
 
-            _entries = new Dictionary<string, (string, string)>();
+            _entries = new Dictionary<string, (string, string)>(
+                System.StringComparer.OrdinalIgnoreCase
+            );
             foreach (var behavior in StatusRegistry.All)
                 _entries[behavior.DisplayName] = (behavior.DisplayName, behavior.Describe(1));
             foreach (var kvp in CoreTerms)
                 _entries[kvp.Key] = (kvp.Key, kvp.Value);
 
             // One alternation regex over all keywords, longest first so "Drama King"-style
-            // multiword names beat their prefixes. Word boundaries keep "Ward" out of "Warded".
+            // multiword names beat their prefixes. Word boundaries keep "Ward" out of "Warded"; case is
+            // ignored so "hostile" and "energy" in running text link too.
             var names = new List<string>(_entries.Keys);
             names.Sort((a, b) => b.Length.CompareTo(a.Length));
             for (int i = 0; i < names.Count; i++)
                 names[i] = Regex.Escape(names[i]);
-            _matcher = new Regex($@"\b({string.Join("|", names)})\b");
+            _matcher = new Regex($@"\b({string.Join("|", names)})\b", RegexOptions.IgnoreCase);
         }
 
         /// <summary>

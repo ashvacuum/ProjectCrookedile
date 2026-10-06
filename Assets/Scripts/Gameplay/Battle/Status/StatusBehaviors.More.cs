@@ -40,7 +40,7 @@ namespace Crookedile.Gameplay.Battle
         public override string DisplayName => "Entangled";
         public override bool IsDebuff => true;
         public override int ModifyCardCost(int cost, int stacks) => stacks > 0 ? cost + 1 : cost;
-        public override string Describe(int stacks) => "Cards cost +1 AP.";
+        public override string Describe(int stacks) => "Cards cost +1 Energy.";
     }
 
     /// <summary>Next attack against this target deals double, then it fades.</summary>
@@ -165,10 +165,10 @@ namespace Crookedile.Gameplay.Battle
         public override string DisplayName => "Focus";
         public override bool IsDebuff => false;
         public override int ModifyCardCost(int cost, int stacks) => cost - stacks;
-        public override string Describe(int stacks) => $"Cards cost {stacks} less AP this turn.";
+        public override string Describe(int stacks) => $"Cards cost {stacks} less Energy this turn.";
     }
 
-    /// <summary>Cards cost X less AP this turn.</summary>
+    /// <summary>Cards cost X less Energy this turn.</summary>
     [Serializable]
     public sealed class EnergizedStatus : StatusBehavior
     {
@@ -176,7 +176,7 @@ namespace Crookedile.Gameplay.Battle
         public override string DisplayName => "Energized";
         public override bool IsDebuff => false;
         public override int ModifyCardCost(int cost, int stacks) => cost - stacks;
-        public override string Describe(int stacks) => $"Cards cost {stacks} less AP this turn.";
+        public override string Describe(int stacks) => $"Cards cost {stacks} less Energy this turn.";
     }
 
     /// <summary>Reduces incoming Opinion by X.</summary>

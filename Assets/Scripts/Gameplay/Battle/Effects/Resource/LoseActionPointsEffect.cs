@@ -25,9 +25,9 @@ namespace Crookedile.Gameplay.Battle
             if (amount <= 0)
                 return;
             ctx.Caster.GainActionPoints(-amount);
-            GameLogger.LogInfo<LoseActionPointsEffect>($"Lost {amount} Action Point(s)");
+            GameLogger.LogInfo<LoseActionPointsEffect>($"Lost {amount} Energy");
         }
 
-        public override string GetDescription() => $"Lose {_amount} Action Point(s)";
+        public override string GetDescription() => $"Lose {_amount} Energy";
     }
 }

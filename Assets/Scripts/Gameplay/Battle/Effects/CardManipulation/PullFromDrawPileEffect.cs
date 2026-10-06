@@ -141,8 +141,8 @@ namespace Crookedile.Gameplay.Battle
                 string who = _hostilityTarget == TargetType.AllOpponents ? "all enemies" : $"{_hostilityTarget}";
                 from +=
                     _hostilityScale == HostilityScale.Fibonacci
-                        ? $". Each pull raises Hostility on {who}, more each time (1, 1, 2, 3, 5…)"
-                        : $". Each pull raises Hostility on {who} by {_hostilityPerPull}";
+                        ? $". Each pull: Aggravate {who}, more each time (1, 1, 2, 3, 5…)"
+                        : $". Each pull: Aggravate {_hostilityPerPull} ({who})";
             }
             return from;
         }

@@ -1,6 +1,6 @@
 # Crookedile — Naming Glossary (combat → "working a crowd")
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-03
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-05
 >
 > **Summary:** Combat vocabulary mapped to "working a crowd" vocabulary. Read before naming anything.
 >
@@ -147,8 +147,9 @@ These are the right words — new code should match them:
 - **Opinion, applied** (`ApplyOpinionEffect`, `ModifyOutgoing/IncomingOpinion`) — the *effect and
   status-hook* verb. **Pressure** is now narrower than this doc originally assumed: it means
   specifically what the ledger does, `OpinionLedger.ApplyPressure`.
-- **Support / Denial** (`CurrentSupport`, `CurrentDenial`, `SupportChangedEvent`, `DenialChangedEvent`)
-- **Hostility** (signed axis; receptive ↔ hostile)
+- **Support / Denial** (`CurrentSupport`, `CurrentDenial`, `SupportChangedEvent`, `DenialChangedEvent`) — player text says **Support** (blocks the meter going down) and **Denial** (blocks it going up). Not "Composure". Player resource is **Energy**, never "AP".
+- **Hostility** (signed axis; receptive ↔ hostile). Card-text keywords: **Aggravate N** raises it, **Soothe N** lowers it. Not "pacify" — that word belongs to Faith Leader's conversion statuses.
+- **Rehearse N** (card-text keyword): put up to N cards from hand on top of the draw pile, first chosen on top. Not "stack", which means a status count.
 - **Voice / Intent** (`EnemyMoveData`, intent display)
 - **Glamour / Debt** (Celebrity). Attention went with the old Celebrity design; Patronage is retired with the Nepo Baby redesign (`nepo-baby-class.md`).
 - **Pacify / convert / Jaded** (Faith Leader)

@@ -184,7 +184,7 @@ namespace Crookedile.UI.Screens
             BattleStats stats = _battleManager.PlayerStats;
             SetText(
                 _energyText,
-                stats != null ? "AP " + stats.CurrentActionPoints + " / " + stats.MaxActionPoints : "AP -"
+                stats != null ? "Energy " + stats.CurrentActionPoints + " / " + stats.MaxActionPoints : "Energy -"
             );
 
             DeckManager deck = _battleManager.PlayerDeck;

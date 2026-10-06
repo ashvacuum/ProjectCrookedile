@@ -288,7 +288,7 @@ namespace Crookedile.EditorTools
 
             public IEnumerable<Row> Rows()
             {
-                var cards = LoadAll<CardData>();
+                var cards = LoadAll<CardData>().Distinct().ToList();
                 bool any = false;
                 foreach (
                     var (label, pick) in new (string, Func<CardData, List<BattleEffect>>)[]
@@ -298,9 +298,14 @@ namespace Crookedile.EditorTools
                     }
                 )
                 {
+                    // An upgraded list that copies the card's own base list is not a second
+                    // duplicate; the base pass already reports it.
                     var groups = cards
                         .Select(c => (card: c, sig: Signature(pick(c))))
-                        .Where(x => x.sig != null)
+                        .Where(x =>
+                            x.sig != null
+                            && (label == "base" || x.sig != Signature(x.card.Effects))
+                        )
                         .GroupBy(x => x.sig)
                         .Where(g => g.Count() > 1)
                         .OrderByDescending(g => g.Count());

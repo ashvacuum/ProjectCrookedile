@@ -10,7 +10,7 @@ namespace Crookedile.Gameplay.Battle
     public sealed class CharmOffensiveEffect : BattleEffect
     {
         [Tooltip(
-            "Sway and Composure gained per energy actually spent; Hostility falls by one per energy spent."
+            "Sway and Support gained per Energy actually spent; Hostility falls by one per energy spent."
         )]
         [MinValue(1)]
         [SerializeField]
@@ -30,7 +30,7 @@ namespace Crookedile.Gameplay.Battle
         }
 
         public override string GetDescription() =>
-            $"Deal {_swayAndComposurePerEnergy}X Sway, gain {_swayAndComposurePerEnergy}X Composure, reduce Hostility by X (X = energy spent)";
+            $"Deal {_swayAndComposurePerEnergy}X Sway, gain {_swayAndComposurePerEnergy}X Support, Soothe X (X = Energy spent)";
 
 #if UNITY_EDITOR
         public override IEnumerable<string> GetConfigurationIssues()

@@ -26,7 +26,7 @@ namespace Crookedile.Gameplay.Battle
                 ctx.Deck.Hand,
                 CardSelectionMode.PlayerChoice,
                 CardType.Pressure, // ignored by PlayerChoice
-                $"Put up to {_count} cards on top of your draw pile",
+                $"Rehearse up to {_count}: choose cards to put on top of your draw pile",
                 _count,
                 chosen =>
                 {
@@ -42,6 +42,6 @@ namespace Crookedile.Gameplay.Battle
         }
 
         public override string GetDescription() =>
-            $"Put up to {_count} cards from your hand on top of your draw pile";
+            $"Rehearse {_count}";
     }
 }

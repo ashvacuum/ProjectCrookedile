@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Inheritance
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'Grandma''s estate covers it.'
+  _artwork: {fileID: 21300000, guid: d1cb464ced4a2294099e0211a978a759, type: 3}
+  _description: 
+  _flavorText: Grandma's estate covers it.
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -32,7 +32,8 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685915716395466852
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -40,14 +41,37 @@ MonoBehaviour:
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2685915716395466852
+      type: {class: BurnEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _count: 2
+        _upTo: 1
+        _filter: 0
+        _perBurnedCard:
+        - rid: 2685915716395466853
+        _perCardMinimumCost: 0
+        _afterBurn: []
+        _afterRequiresBurn: 1
+    - rid: 2685915716395466853
+      type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 6
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _maxAmount: 0
     - rid: 7000000000000000000
       type: {class: BurnEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

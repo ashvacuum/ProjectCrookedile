@@ -299,7 +299,7 @@
         {
             if (ctx.BattleManager == null)
                 return;
-            // The player's class modifier scales the Composure its cards grant, before statuses.
+            // The player's class modifier scales the Support its cards grant, before statuses.
             if (ctx.IsPlayerCard)
                 amount = ctx.BattleManager.PlayerClassModifiers.ModifyComposure(amount);
             int modified = ctx.PlayerStatusEffects?.ModifySupportGained(amount) ?? amount;

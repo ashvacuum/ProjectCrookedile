@@ -40,7 +40,7 @@ namespace Crookedile.Gameplay.Battle
         }
 
         public override string GetDescription() =>
-            $"Apply Poisoned Perception to a non-hostile opponent: +{_hostilityPerTurn} Hostility each enemy turn for {_turns} turns; becoming hostile removes it and deals {_swayOnHostile} Sway";
+            $"Apply Poisoned Perception to a non-hostile opponent: Aggravate {_hostilityPerTurn} each enemy turn for {_turns} turns; becoming hostile removes it and deals {_swayOnHostile} Sway";
 
         internal static PoisonedPerceptionStatus GetBehavior(StatusEffectManager statuses)
         {

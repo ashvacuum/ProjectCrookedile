@@ -38,7 +38,7 @@ namespace Crookedile.Gameplay.Battle
         public override string GetDescription()
         {
             string who = _target == TargetType.AllOpponents ? "all enemies" : _target.ToString();
-            return $"Raise Hostility on {who}, more each time this battle (1, 1, 2, 3, 5…)";
+            return $"Aggravate {who}, more each time this battle (1, 1, 2, 3, 5…)";
         }
     }
 }

@@ -40,6 +40,6 @@ namespace Crookedile.Gameplay.Battle
             );
         }
 
-        public override string GetDescription() => $"Raise all enemies' Hostility by {_amount}";
+        public override string GetDescription() => $"Aggravate {_amount} (all enemies)";
     }
 }
