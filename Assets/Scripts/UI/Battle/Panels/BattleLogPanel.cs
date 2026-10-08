@@ -22,7 +22,7 @@ namespace Crookedile.UI.Battle
     ///
     /// Notification-only consumer — never calls back into gameplay.
     /// </summary>
-    public class BattleLogPanel : MonoBehaviour
+    public class BattleLogPanel : BattlePanel
     {
         [Header("Log Display")]
         [SerializeField]
@@ -36,12 +36,6 @@ namespace Crookedile.UI.Battle
         private int maxLogLines = 150;
 
         private readonly List<string> _lines = new List<string>();
-
-        // Optional — only needed for entries that look up enemy names. Set via Bind.
-        private BattleManager _battleManager;
-
-        /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
-        private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
 
         private enum Group
         {
@@ -60,54 +54,37 @@ namespace Crookedile.UI.Battle
         private int _drawLine = -1;
         private readonly List<string> _drawnNames = new List<string>();
 
-        /// <summary>Gives the log access to the battle for name lookups. Called by BattleUI.Initialize.</summary>
-        public void Bind(BattleManager manager) => _battleManager = manager;
-
         #region Event subscription
 
         private void OnEnable() => SubscribeToEvents();
 
-        private void OnDisable()
-        {
-            foreach (var unsub in _eventUnsubscribers)
-                unsub();
-            _eventUnsubscribers.Clear();
-        }
-
-        private void Sub<T>(System.Action<T> handler)
-            where T : IGameEvent
-        {
-            EventBus.Subscribe(handler);
-            _eventUnsubscribers.Add(() => EventBus.Unsubscribe(handler));
-        }
-
         private void SubscribeToEvents()
         {
             // --- Structure: battle, turns, and the causes outcomes group under ---
-            Sub<BattleStartedEvent>(_ =>
+            On<BattleStartedEvent>(_ =>
             {
                 EndGroup();
                 AddEntry("=== Battle Started ===");
             });
-            Sub<TurnStartedEvent>(evt =>
+            On<TurnStartedEvent>(evt =>
             {
                 EndGroup();
                 AddEntry($"--- Turn {evt.TurnNumber}: {(evt.IsPlayerTurn ? "Player" : "Opponent")} ---");
             });
-            Sub<TurnEndedEvent>(_ => EndGroup());
-            Sub<CardPlayedEvent>(evt =>
+            On<TurnEndedEvent>(_ => EndGroup());
+            On<CardPlayedEvent>(evt =>
             {
                 EndGroup();
                 AddEntry($"{(evt.IsPlayer ? "You" : "Opponent")} played <b>{evt.Card.CardName}</b>");
                 _group = Group.Card;
                 _groupCard = evt.Card;
             });
-            Sub<CardPlayResolvedEvent>(_ =>
+            On<CardPlayResolvedEvent>(_ =>
             {
                 if (_group == Group.Card)
                     EndGroup();
             });
-            Sub<EnemyActingEvent>(evt =>
+            On<EnemyActingEvent>(evt =>
             {
                 EndGroup();
                 string move = evt.Move != null && !string.IsNullOrEmpty(evt.Move.MoveName)
@@ -118,7 +95,7 @@ namespace Crookedile.UI.Battle
             });
 
             // --- Opinion ---
-            Sub<BossActingEvent>(evt =>
+            On<BossActingEvent>(evt =>
             {
                 EndGroup();
                 AddEntry(
@@ -126,7 +103,7 @@ namespace Crookedile.UI.Battle
                 );
                 _group = Group.Enemy;
             });
-            Sub<DamageDealtEvent>(evt =>
+            On<DamageDealtEvent>(evt =>
             {
                 if (evt.IsToPlayer)
                 {
@@ -143,36 +120,36 @@ namespace Crookedile.UI.Battle
                     );
                 }
             });
-            Sub<HealingAppliedEvent>(evt =>
+            On<HealingAppliedEvent>(evt =>
             {
                 if (evt.IsToPlayer)
                     AddOutcome($"+{evt.Amount} Opinion");
             });
 
             // --- Cards ---
-            Sub<CardDrawnEvent>(evt =>
+            On<CardDrawnEvent>(evt =>
             {
                 if (evt.IsPlayer && evt.Card != null)
                     AddDraw(evt.Card.CardName);
             });
-            Sub<DeckReshuffledEvent>(evt =>
+            On<DeckReshuffledEvent>(evt =>
             {
                 if (evt.IsPlayer)
                     AddOutcome($"Shuffled {evt.Count} cards from discard into the draw pile");
             });
-            Sub<CardDiscardedEvent>(evt =>
+            On<CardDiscardedEvent>(evt =>
             {
                 // Only effect-driven discards: the played card's own trip to discard and the
                 // end-of-turn hand discard would drown out everything else.
                 if (evt.IsPlayer && _group == Group.Card && evt.Card != _groupCard)
                     AddOutcome($"Discarded {evt.Card.CardName}");
             });
-            Sub<CardExhaustedEvent>(evt =>
+            On<CardExhaustedEvent>(evt =>
             {
                 if (evt.IsPlayer)
                     AddOutcome($"Exhausted {evt.Card.CardName}");
             });
-            Sub<CardGrantedEvent>(evt =>
+            On<CardGrantedEvent>(evt =>
             {
                 if (!evt.IsPlayer)
                     return;
@@ -180,24 +157,24 @@ namespace Crookedile.UI.Battle
                 string pile = evt.ToDiscard ? "discard" : "draw";
                 AddOutcome($"Added {copies}{evt.Card.CardName} to your {pile} pile");
             });
-            Sub<CardRecoveredEvent>(evt =>
+            On<CardRecoveredEvent>(evt =>
             {
                 if (evt.IsPlayer)
                     AddOutcome($"Returned {evt.Card.CardName} to hand");
             });
-            Sub<CardRetainedEvent>(evt =>
+            On<CardRetainedEvent>(evt =>
             {
                 if (evt.IsPlayer)
                     AddOutcome($"{evt.Card.CardName} will stay in hand");
             });
-            Sub<CardUpgradedEvent>(evt =>
+            On<CardUpgradedEvent>(evt =>
             {
                 if (evt.IsPlayer)
                     AddOutcome($"Upgraded {evt.OldCard.CardName} to {evt.NewCard.CardName}");
             });
 
             // --- Statuses and resources ---
-            Sub<StatusEffectAppliedEvent>(evt =>
+            On<StatusEffectAppliedEvent>(evt =>
             {
                 if (evt.Stacks == 0 || evt.Behavior == null)
                     return;
@@ -205,24 +182,24 @@ namespace Crookedile.UI.Battle
                 string verb = evt.Stacks > 0 ? "gained" : "lost";
                 AddOutcome($"{who} {verb} {Mathf.Abs(evt.Stacks)} {evt.Behavior.DisplayName}");
             });
-            Sub<ActionPointsChangedEvent>(evt =>
+            On<ActionPointsChangedEvent>(evt =>
             {
                 // Gains from effects only: spends and the turn-start refill are routine.
                 if (evt.IsPlayer && _group == Group.Card && evt.NewValue > evt.OldValue)
                     AddOutcome($"+{evt.NewValue - evt.OldValue} Energy");
             });
-            Sub<SupportChangedEvent>(evt =>
+            On<SupportChangedEvent>(evt =>
             {
                 // Losses show on the hit that caused them; decay is routine.
                 if (!evt.IsDecay && evt.NewValue > evt.OldValue)
                     AddOutcome($"+{evt.NewValue - evt.OldValue} Support");
             });
-            Sub<DenialChangedEvent>(evt =>
+            On<DenialChangedEvent>(evt =>
             {
                 if (!evt.IsDecay && evt.NewValue > evt.OldValue)
                     AddOutcome($"The room gained {evt.NewValue - evt.OldValue} Denial");
             });
-            Sub<HostilityChangedEvent>(evt =>
+            On<HostilityChangedEvent>(evt =>
             {
                 if (evt.IsPlayer || evt.NewValue == evt.OldValue)
                     return;
@@ -232,39 +209,39 @@ namespace Crookedile.UI.Battle
             });
 
             // --- Enemies and the room ---
-            Sub<EnemyIntentDeclaredEvent>(evt =>
+            On<EnemyIntentDeclaredEvent>(evt =>
             {
                 if (evt.Move != null)
                     AddEntry($"{EnemyName(evt.EnemyIndex)} intends: {evt.Move.IntentDescription}");
             });
-            Sub<EnemyConvertedEvent>(evt =>
+            On<EnemyConvertedEvent>(evt =>
                 AddOutcome(
                     evt.WasSilenced
                         ? $"{EnemyName(evt.EnemyIndex)} is Hardened and was silenced instead"
                         : $"{EnemyName(evt.EnemyIndex)} converted! +{evt.OpinionBurst} Opinion"
                 )
             );
-            Sub<EnemyTurncoatEvent>(evt =>
+            On<EnemyTurncoatEvent>(evt =>
                 AddOutcome($"{EnemyName(evt.EnemyIndex)} turned on you! They'll hit harder for a turn.")
             );
-            Sub<EnemyDefeatedEvent>(evt => AddOutcome($"{evt.EnemyName} defeated!"));
-            Sub<EnemySummonedEvent>(evt => AddOutcome($"{evt.EnemyData.EnemyName} was summoned!"));
-            Sub<EnemySkippedTurnEvent>(evt => AddEntry($"{evt.EnemyName} held back this turn."));
-            Sub<EchoChamberChangedEvent>(evt =>
+            On<EnemyDefeatedEvent>(evt => AddOutcome($"{evt.EnemyName} defeated!"));
+            On<EnemySummonedEvent>(evt => AddOutcome($"{evt.EnemyData.EnemyName} was summoned!"));
+            On<EnemySkippedTurnEvent>(evt => AddEntry($"{evt.EnemyName} held back this turn."));
+            On<EchoChamberChangedEvent>(evt =>
                 AddOutcome(
                     evt.Active
                         ? "Echo chamber! The room agrees with you — opinion gains are halved and your lead will bleed. Provoke someone."
                         : "Echo chamber broken — the room has a dissenter again."
                 )
             );
-            Sub<JudgmentEvent>(evt =>
+            On<JudgmentEvent>(evt =>
             {
                 EndGroup();
                 AddEntry(
                     $"=== JUDGMENT: Opinion {evt.FinalOpinion} / {evt.Threshold * 2} — {(evt.IsVictory ? "VICTORY" : "DEFEAT")} ==="
                 );
             });
-            Sub<BattleEndedEvent>(evt =>
+            On<BattleEndedEvent>(evt =>
             {
                 EndGroup();
                 AddEntry(evt.Result.isVictory ? "=== VICTORY ===" : "=== DEFEAT ===");
@@ -374,8 +351,8 @@ namespace Crookedile.UI.Battle
         private static string Indent(string message) => "    - " + message;
 
         private string EnemyName(int index) =>
-            _battleManager != null && index >= 0 && index < _battleManager.Enemies.Count
-                ? _battleManager.Enemies[index].EnemyData.EnemyName
+            Battle != null && index >= 0 && index < Battle.Enemies.Count
+                ? Battle.Enemies[index].EnemyData.EnemyName
                 : "An enemy";
 
         private static string Mood(int hostility) =>

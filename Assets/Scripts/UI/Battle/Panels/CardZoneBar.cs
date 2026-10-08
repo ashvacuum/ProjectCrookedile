@@ -18,7 +18,7 @@ namespace Crookedile.UI.Battle
     /// Self-subscribes to CardGranted/CardExhausted; BattleUI drives the coalesced
     /// <see cref="RefreshCounts"/> from its stats refresh.
     /// </summary>
-    public class CardZoneBar : MonoBehaviour
+    public class CardZoneBar : BattlePanel
     {
         [Header("Zone Buttons")]
         [SerializeField]
@@ -53,19 +53,11 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private float _countPunchScale = 1.4f;
 
-        private BattleManager _bm;
-
         /// <summary>
         /// Cards the model has drawn that haven't left the deck on screen yet. The deck counter
         /// shows them as still in the pile, so it ticks down as each card flies out.
         /// </summary>
         private int _drawsAwaitingLaunch;
-
-        /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
-        private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
-
-        /// <summary>Supplies the battle context. Called by BattleUI.Initialize.</summary>
-        public void Bind(BattleManager bm) => _bm = bm;
 
         #region Lifecycle / events
 
@@ -85,25 +77,11 @@ namespace Crookedile.UI.Battle
 
         private void OnEnable()
         {
-            Sub<CardGrantedEvent>(OnCardGranted);
-            Sub<CardExhaustedEvent>(OnCardExhausted);
-            Sub<CardDrawnEvent>(OnCardDrawn);
-            Sub<DrawnCardLaunchedEvent>(OnDrawnCardLaunched);
-            Sub<DeckReshuffledEvent>(OnDeckReshuffled);
-        }
-
-        private void OnDisable()
-        {
-            foreach (var unsub in _eventUnsubscribers)
-                unsub();
-            _eventUnsubscribers.Clear();
-        }
-
-        private void Sub<T>(System.Action<T> handler)
-            where T : IGameEvent
-        {
-            EventBus.Subscribe(handler);
-            _eventUnsubscribers.Add(() => EventBus.Unsubscribe(handler));
+            On<CardGrantedEvent>(OnCardGranted);
+            On<CardExhaustedEvent>(OnCardExhausted);
+            On<CardDrawnEvent>(OnCardDrawn);
+            On<DrawnCardLaunchedEvent>(OnDrawnCardLaunched);
+            On<DeckReshuffledEvent>(OnDeckReshuffled);
         }
 
         private void OnCardGranted(CardGrantedEvent evt)
@@ -141,7 +119,7 @@ namespace Crookedile.UI.Battle
 
         private void OnDeckReshuffled(DeckReshuffledEvent evt)
         {
-            if (!evt.IsPlayer || _bm == null)
+            if (!evt.IsPlayer || Battle == null)
                 return;
             RefreshCounts();
             PunchCountText(discardCountText);
@@ -154,7 +132,7 @@ namespace Crookedile.UI.Battle
                 discardZoneButton != null ? discardZoneButton.transform : null,
                 deckZoneButton != null ? deckZoneButton.transform : null,
                 evt.Count,
-                _bm.PlayerOrigin,
+                Battle.PlayerOrigin,
                 () => PunchCountText(deckCountText)
             );
         }
@@ -169,7 +147,7 @@ namespace Crookedile.UI.Battle
         /// </summary>
         public void RefreshCounts()
         {
-            DeckManager deck = _bm?.PlayerDeck;
+            DeckManager deck = Battle?.PlayerDeck;
             if (deck == null)
                 return;
             if (discardCountText != null)
@@ -180,7 +158,7 @@ namespace Crookedile.UI.Battle
             // ponytail: self-heals rather than tracking every exit path. Off-turn the hand is
             // discarded or cleared, so nothing is waiting to launch; and you can never wait on more
             // cards than are in hand. Exact per-card bookkeeping only if the counter visibly drifts.
-            if (!_bm.IsPlayerTurn)
+            if (!Battle.IsPlayerTurn)
                 _drawsAwaitingLaunch = 0;
             _drawsAwaitingLaunch = Mathf.Min(_drawsAwaitingLaunch, deck.HandCount);
             if (deckCountText != null)
@@ -209,8 +187,8 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
-            int ap = _bm?.PlayerStats.CurrentActionPoints ?? 0;
-            int cost = _bm?.GetEffectiveCardCost(card) ?? 1;
+            int ap = Battle?.PlayerStats.CurrentActionPoints ?? 0;
+            int cost = Battle?.GetEffectiveCardCost(card) ?? 1;
             btn.Initialize(card, 0, ap, cost, forceUnplayable: true);
 
             if (CardFlyAnimator.Instance == null)
@@ -258,25 +236,25 @@ namespace Crookedile.UI.Battle
 
         private void ShowDiscardZone()
         {
-            if (cardZonePanel == null || _bm?.PlayerDeck == null)
+            if (cardZonePanel == null || Battle?.PlayerDeck == null)
                 return;
-            cardZonePanel.Open("Discard Pile", _bm.PlayerDeck.DiscardPile);
+            cardZonePanel.Open("Discard Pile", Battle.PlayerDeck.DiscardPile);
         }
 
         private void ShowExhaustZone()
         {
-            if (cardZonePanel == null || _bm?.PlayerDeck == null)
+            if (cardZonePanel == null || Battle?.PlayerDeck == null)
                 return;
-            cardZonePanel.Open("Exhaust Pile", _bm.PlayerDeck.ExhaustPile);
+            cardZonePanel.Open("Exhaust Pile", Battle.PlayerDeck.ExhaustPile);
         }
 
         private void ShowDeckZone()
         {
-            if (cardZonePanel == null || _bm?.PlayerDeck == null)
+            if (cardZonePanel == null || Battle?.PlayerDeck == null)
                 return;
 
             // Shuffle display copy — don't reveal the real draw order.
-            var display = new List<CardData>(_bm.PlayerDeck.DrawPile);
+            var display = new List<CardData>(Battle.PlayerDeck.DrawPile);
             for (int i = display.Count - 1; i > 0; i--)
             {
                 int j = Random.Range(0, i + 1);

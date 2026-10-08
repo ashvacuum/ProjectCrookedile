@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Crookedile.UI.Battle
 {
-    public sealed class BossPanel : MonoBehaviour
+    public sealed class BossPanel : BattlePanel
     {
         [Tooltip(
             "Podium content, hidden in ordinary fights. Keep the subscribing component outside this root."
@@ -30,27 +30,14 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private TMP_Text[] _orderLabels;
 
-        private BattleManager _battle;
         public RectTransform Anchor =>
             _content != null ? _content.transform as RectTransform : null;
 
-        public void Bind(BattleManager battle)
-        {
-            _battle = battle;
-        }
-
         private void OnEnable()
         {
-            EventBus.Subscribe<BattleStartedEvent>(OnBattleStarted);
-            EventBus.Subscribe<BossIntentsDeclaredEvent>(OnDeclared);
-            EventBus.Subscribe<BossActingEvent>(OnActing);
-        }
-
-        private void OnDisable()
-        {
-            EventBus.Unsubscribe<BattleStartedEvent>(OnBattleStarted);
-            EventBus.Unsubscribe<BossIntentsDeclaredEvent>(OnDeclared);
-            EventBus.Unsubscribe<BossActingEvent>(OnActing);
+            On<BattleStartedEvent>(OnBattleStarted);
+            On<BossIntentsDeclaredEvent>(OnDeclared);
+            On<BossActingEvent>(OnActing);
         }
 
         private void OnBattleStarted(BattleStartedEvent evt)
@@ -71,7 +58,7 @@ namespace Crookedile.UI.Battle
 
         private void OnDeclared(BossIntentsDeclaredEvent evt)
         {
-            if (_battle == null || evt.Boss != _battle.Boss)
+            if (Battle == null || evt.Boss != Battle.Boss)
                 return;
 
             _name.text = $"{evt.Boss.Data.DisplayName} — {evt.Boss.BundleName}";
@@ -87,15 +74,15 @@ namespace Crookedile.UI.Battle
                     .ShowIntent(
                         evt.Boss.Intents[i],
                         evt.Boss.StatusEffects,
-                        _battle.PlayerStatusEffects
+                        Battle.PlayerStatusEffects
                     );
                 string label = $"{i + 1}.";
                 var targets = evt.Boss.GetAudienceTargets(i);
                 if (targets != null)
                     foreach (var target in targets.Values)
                         label +=
-                            target >= 0 && target < _battle.Enemies.Count
-                                ? $" → {_battle.Enemies[target].EnemyData.EnemyName}"
+                            target >= 0 && target < Battle.Enemies.Count
+                                ? $" → {Battle.Enemies[target].EnemyData.EnemyName}"
                                 : " → no eligible audience";
                 _orderLabels[i].text = label;
             }
@@ -103,7 +90,7 @@ namespace Crookedile.UI.Battle
 
         private void OnActing(BossActingEvent evt)
         {
-            if (_battle == null || evt.Boss != _battle.Boss || evt.IntentIndex >= _intents.Length)
+            if (Battle == null || evt.Boss != Battle.Boss || evt.IntentIndex >= _intents.Length)
                 return;
 
             _orderLabels[evt.IntentIndex].text += " — acting";
