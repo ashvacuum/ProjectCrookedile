@@ -130,6 +130,24 @@ namespace Crookedile.Gameplay
         /// <summary>Registers this combatant's index into BattleManager.Enemies. Called once the enemy joins the roster.</summary>
         public void SetOwnerEnemyIndex(int index) => _ownerEnemyIndex = index;
 
+        /// <summary>
+        /// The battle's hostility rules, called with (this, old, new) after every change has been
+        /// announced on the EventBus. BattleManager assigns it when the enemy joins the roster.
+        /// </summary>
+        public Action<BattleStats, int, int> HostilityRules { get; set; }
+
+        /// <summary>A shift from below the neutral zone's top edge to above it.</summary>
+        public bool BecameHostile(int oldValue, int newValue) =>
+            oldValue <= _neutralZone && newValue > _neutralZone;
+
+        /// <summary>A shift from above the neutral zone's bottom edge to below it.</summary>
+        public bool BecameReceptive(int oldValue, int newValue) =>
+            oldValue >= -_neutralZone && newValue < -_neutralZone;
+
+        /// <summary>Receptive to hostile in one shift: a betrayal.</summary>
+        public bool IsTurncoatShift(int oldValue, int newValue) =>
+            oldValue < -_neutralZone && newValue > _neutralZone;
+
         /// <summary>Sets per-enemy hostility clamps. Called by EnemyController after construction.</summary>
         public void SetHostilityLimits(int min, int max)
         {
@@ -187,7 +205,7 @@ namespace Crookedile.Gameplay
                 PublishHostilityEvents(old, _currentHostility);
         }
 
-        /// <summary>Publishes HostilityChangedEvent and any boundary/state-transition events.</summary>
+        /// <summary>Announces the change and its threshold crossings, then runs the hostility rules.</summary>
         private void PublishHostilityEvents(int oldValue, int newValue)
         {
             EventBus.Publish(
@@ -206,18 +224,20 @@ namespace Crookedile.Gameplay
                 EventBus.Publish(new EnemyMaxedReceptiveEvent { EnemyIndex = _ownerEnemyIndex });
             // "Became" thresholds respect the neutral zone — an enemy needs convincing past the
             // buffer, not just a single point, before it's genuinely Hostile/Receptive.
-            if (oldValue <= _neutralZone && newValue > _neutralZone)
+            if (BecameHostile(oldValue, newValue))
                 EventBus.Publish(new EnemyBecameHostileEvent { EnemyIndex = _ownerEnemyIndex });
             // Turncoat: a receptive enemy (past the zone into <0) flipping all the way to hostile
             // (past the zone into >0) in one shift is a betrayal.
-            if (oldValue < -_neutralZone && newValue > _neutralZone)
+            if (IsTurncoatShift(oldValue, newValue))
                 EventBus.Publish(new EnemyTurncoatEvent { EnemyIndex = _ownerEnemyIndex });
-            if (oldValue >= -_neutralZone && newValue < -_neutralZone)
+            if (BecameReceptive(oldValue, newValue))
                 EventBus.Publish(new EnemyBecameReceptiveEvent { EnemyIndex = _ownerEnemyIndex });
             // Neutralized stays keyed to literal 0 — "returned to dead center" is still a distinct,
             // narrower signal from merely re-entering the (possibly wider) neutral zone.
             if (oldValue != 0 && newValue == 0)
                 EventBus.Publish(new EnemyNeutralizedEvent { EnemyIndex = _ownerEnemyIndex });
+
+            HostilityRules?.Invoke(this, oldValue, newValue);
         }
 
         #endregion

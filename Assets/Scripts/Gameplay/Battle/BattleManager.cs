@@ -202,21 +202,17 @@ namespace Crookedile.Gameplay.Battle
         {
             Current = this;
             InitializeStateMachine();
-            EventBus.Subscribe<HostilityChangedEvent>(OnStarstruckHostilityChanged);
             // Player input (end turn, play card) arrives as direct method calls
             // (RequestEndTurn / RequestPlayCard); VFX sequencing is a direct callback
             // handshake (ICardPlayFeedback). The bus is notification-only here.
-            // EnemyTurncoatEvent is owned by CrowdReactions (subscribed in its constructor).
         }
 
         private void OnDestroy()
         {
             if (Current == this)
                 Current = null;
-            EventBus.Unsubscribe<HostilityChangedEvent>(OnStarstruckHostilityChanged);
             BossBrain?.StopPlanning();
             _passiveResolver?.Dispose();
-            _crowd?.Dispose();
         }
 
         /// <summary>
@@ -299,9 +295,12 @@ namespace Crookedile.Gameplay.Battle
                         )
                     );
             }
-            // Register each enemy's roster index so its BattleStats can stamp hostility events.
+            // Each enemy stamps its hostility events with its roster index and runs the battle's rules.
             for (int i = 0; i < _enemies.Count; i++)
+            {
                 _enemies[i].Stats.SetOwnerEnemyIndex(i);
+                _enemies[i].Stats.HostilityRules = ApplyHostilityRules;
+            }
             _focusedEnemyIndex = 0;
 
             // Campaign choices can send the room in angrier (NextBattleHostilityOutcome).
@@ -397,7 +396,6 @@ namespace Crookedile.Gameplay.Battle
 
             // Crowd dynamics — created before the ledger because the ledger asks it whether the
             // room is an echo chamber. (Dispose any prior instance if a battle is restarted.)
-            _crowd?.Dispose();
             _crowd = new CrowdReactions(
                 _enemies,
                 _echoChamberDecayPerTurn,
@@ -515,6 +513,7 @@ namespace Crookedile.Gameplay.Battle
                 int newIndex = _enemies.Count;
                 _enemies.Add(controller);
                 controller.Stats.SetOwnerEnemyIndex(newIndex);
+                controller.Stats.HostilityRules = ApplyHostilityRules;
 
                 // Player summons override the body's mood (receptive ally / hostile Plant).
                 if (initialHostility.HasValue)
@@ -670,18 +669,31 @@ namespace Crookedile.Gameplay.Battle
             return true;
         }
 
-        private void OnStarstruckHostilityChanged(HostilityChangedEvent evt)
+        /// <summary>
+        /// Every enemy hostility rule, in order: turn tallies, the Starstruck payoff, the Turncoat
+        /// cascade, then receptive Support. Runs after the change is announced; nested changes
+        /// (Turncoat contagion) resolve fully inside it.
+        /// </summary>
+        private void ApplyHostilityRules(BattleStats stats, int oldValue, int newValue)
         {
-            if (
-                evt.IsPlayer
-                || _effectResolver == null
-                || CurrentState == BattleState.BattleEnd
-                || evt.EnemyIndex < 0
-                || evt.EnemyIndex >= _enemies.Count
-            )
+            int index = stats.OwnerEnemyIndex;
+            if (index < 0 || index >= _enemies.Count)
                 return;
 
-            var enemy = _enemies[evt.EnemyIndex];
+            _crowd?.RecordHostilityShift(oldValue, newValue);
+            ResolveStarstruck(index);
+            if (stats.IsTurncoatShift(oldValue, newValue))
+                _crowd?.ResolveTurncoat(index);
+            if (stats.BecameReceptive(oldValue, newValue))
+                _crowd?.PayReceptiveSupport();
+        }
+
+        private void ResolveStarstruck(int index)
+        {
+            if (_effectResolver == null || CurrentState == BattleState.BattleEnd)
+                return;
+
+            var enemy = _enemies[index];
             if (
                 !enemy.IsDefeated
                 && enemy.Stats.IsHostile
@@ -700,7 +712,7 @@ namespace Crookedile.Gameplay.Battle
                     PlayerStatusEffects,
                     this,
                     attackerName: "Starstruck",
-                    attackerEnemyIndex: evt.EnemyIndex
+                    attackerEnemyIndex: index
                 );
                 StarstruckStatus.ResolvePayoff(context);
             }
