@@ -198,7 +198,7 @@ namespace Crookedile.Gameplay.Battle
         private void Awake()
         {
             InitializeStateMachine();
-            EventBus.Subscribe<HostilityChangedEvent>(OnPoisonedPerceptionHostilityChanged);
+            EventBus.Subscribe<HostilityChangedEvent>(OnStarstruckHostilityChanged);
             // Player input (end turn, play card) arrives as direct method calls
             // (RequestEndTurn / RequestPlayCard); VFX sequencing is a direct callback
             // handshake (ICardPlayFeedback). The bus is notification-only here.
@@ -207,7 +207,7 @@ namespace Crookedile.Gameplay.Battle
 
         private void OnDestroy()
         {
-            EventBus.Unsubscribe<HostilityChangedEvent>(OnPoisonedPerceptionHostilityChanged);
+            EventBus.Unsubscribe<HostilityChangedEvent>(OnStarstruckHostilityChanged);
             BossBrain?.StopPlanning();
             _passiveResolver?.Dispose();
             _crowd?.Dispose();
@@ -620,11 +620,16 @@ namespace Crookedile.Gameplay.Battle
 
         public int CurrentGlamour => PlayerStatusEffects?.GetStacks<GlamourStatus>() ?? 0;
 
-        public bool CanUseMediaTraining => _cards != null && _playerDeck != null
-            && Celebrity.MediaTrainingCost > 0 && Celebrity.MediaTrainingDraw > 0
+        public bool CanUseMediaTraining =>
+            _cards != null
+            && _playerDeck != null
+            && Celebrity.MediaTrainingCost > 0
+            && Celebrity.MediaTrainingDraw > 0
             && CurrentState == BattleState.PlayerTurn
-            && Celebrity.MediaTrainingAvailable && !_cards.IsResolving
-            && CurrentGlamour >= Celebrity.MediaTrainingCost && !_playerDeck.IsHandFull
+            && Celebrity.MediaTrainingAvailable
+            && !_cards.IsResolving
+            && CurrentGlamour >= Celebrity.MediaTrainingCost
+            && !_playerDeck.IsHandFull
             && _playerDeck.DeckCount + _playerDeck.DiscardCount > 0;
 
         /// <summary>The draw window closes on the first card play or when the turn ends.</summary>
@@ -639,21 +644,39 @@ namespace Crookedile.Gameplay.Battle
             return true;
         }
 
-        private void OnPoisonedPerceptionHostilityChanged(HostilityChangedEvent evt)
+        private void OnStarstruckHostilityChanged(HostilityChangedEvent evt)
         {
-            if (evt.IsPlayer || _effectResolver == null || CurrentState == BattleState.BattleEnd
-                || evt.EnemyIndex < 0 || evt.EnemyIndex >= _enemies.Count)
+            if (
+                evt.IsPlayer
+                || _effectResolver == null
+                || CurrentState == BattleState.BattleEnd
+                || evt.EnemyIndex < 0
+                || evt.EnemyIndex >= _enemies.Count
+            )
                 return;
 
             var enemy = _enemies[evt.EnemyIndex];
-            if (!enemy.IsDefeated && enemy.Stats.IsHostile
-                && enemy.StatusEffects.GetStacks<PoisonedPerceptionStatus>() > 0)
+            if (
+                !enemy.IsDefeated
+                && enemy.Stats.IsHostile
+                && enemy.StatusEffects.GetStacks<StarstruckStatus>() > 0
+            )
             {
-                var context = new EffectExecutionContext(_playerStats, enemy.Stats, _playerStats,
-                    true, _playerDeck, _enemies, PlayerStatusEffects, enemy.StatusEffects,
-                    PlayerStatusEffects, this, attackerName: "Poisoned Perception",
-                    attackerEnemyIndex: evt.EnemyIndex);
-                PoisonPerceptionEffect.ResolvePayoff(context);
+                var context = new EffectExecutionContext(
+                    _playerStats,
+                    enemy.Stats,
+                    _playerStats,
+                    true,
+                    _playerDeck,
+                    _enemies,
+                    PlayerStatusEffects,
+                    enemy.StatusEffects,
+                    PlayerStatusEffects,
+                    this,
+                    attackerName: "Starstruck",
+                    attackerEnemyIndex: evt.EnemyIndex
+                );
+                StarstruckStatus.ResolvePayoff(context);
             }
         }
 
@@ -886,9 +909,9 @@ namespace Crookedile.Gameplay.Battle
                 foreach (var enemy in LivingEnemies)
                 {
                     enemy.Stats.StartTurn();
-                    var poison = PoisonPerceptionEffect.GetBehavior(enemy.StatusEffects);
-                    if (poison != null)
-                        enemy.Stats.GainHostility(poison.HostilityPerTurn);
+                    var starstruck = StarstruckStatus.Find(enemy.StatusEffects);
+                    if (starstruck != null)
+                        enemy.Stats.GainHostility(starstruck.HostilityPerTurn);
                     enemy.StatusEffects.OnTurnStart(enemy.Stats);
 
                     // Enemy Ritual grants Denial.
@@ -909,7 +932,11 @@ namespace Crookedile.Gameplay.Battle
             if (_isPlayerTurn)
             {
                 Celebrity.MediaTrainingAvailable = false;
-                Celebrity.SettlePromises(_opinion, _playerStats, (c, n) => _playerDeck.AddCardsToHand(c, n));
+                Celebrity.SettlePromises(
+                    _opinion,
+                    _playerStats,
+                    (c, n) => _playerDeck.AddCardsToHand(c, n)
+                );
                 _playerStats.EndTurn();
                 // Apply opinion-affecting statuses (read at current stacks) before OnTurnEnd decrements.
                 ApplyTurnEndOpinionStatuses(_effectResolver.PlayerStatusEffects);

@@ -34,10 +34,17 @@ namespace Crookedile.Gameplay.Battle
 
         public abstract bool IsDebuff { get; }
 
-        public virtual StatusCategory Category => IsDebuff ? StatusCategory.Debuff : StatusCategory.Buff;
+        public virtual StatusCategory Category =>
+            IsDebuff ? StatusCategory.Debuff : StatusCategory.Buff;
 
         /// <summary>True if this status counts toward the Faith Leader pacify threshold (Guilt/Shame/Doubt).</summary>
         public virtual bool CountsTowardPacify => false;
+
+        /// <summary>False rejects the application outright, before Ward is consumed.</summary>
+        public virtual bool CanApplyTo(BattleStats owner) => true;
+
+        /// <summary>True when reapplying resets the stack count to the new amount instead of adding.</summary>
+        public virtual bool RefreshesOnReapply => false;
 
         /// <summary>Human-readable description for the given stack count.</summary>
         public virtual string Describe(int stacks) => DisplayName;
@@ -48,8 +55,11 @@ namespace Crookedile.Gameplay.Battle
         public virtual float ModifyOutgoingOpinion(float amount, int stacks) => amount;
 
         /// <summary>Adjusts the Opinion shift this combatant TAKES (Vulnerable/Plated/Rattled).</summary>
-        public virtual float ModifyIncomingOpinion(float amount, int stacks, int attackerHostility) =>
-            amount;
+        public virtual float ModifyIncomingOpinion(
+            float amount,
+            int stacks,
+            int attackerHostility
+        ) => amount;
 
         /// <summary>Adjusts Support gained by the player (Dexterity/Frail).</summary>
         public virtual int ModifySupportGained(int support, int stacks) => support;

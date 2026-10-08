@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Never Meet Your Heroes
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 21300000, guid: 11dda9187956ace4d9bf3875a197d823, type: 3}
-  _description:
-  _flavorText:
+  _artwork: {fileID: 21300000, guid: 0e61b2ccb761e2845b488a7327834523, type: 3}
+  _description: 
+  _flavorText: 
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -28,11 +28,12 @@ MonoBehaviour:
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 5000000000000000001
+  - rid: 2685915787672158309
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685915787672158311
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -47,15 +48,41 @@ MonoBehaviour:
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes: Glamour spending pass. Numbers are playtest starting points.
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 5000000000000000001
-      type: {class: PoisonPerceptionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 2685915787672158309
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _turns: 3
+        _target: 1
+        _behavior:
+          rid: 2685915787672158310
+        _stacks: 1
+        _stacksSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _duration: 0
+    - rid: 2685915787672158310
+      type: {class: StarstruckStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _hostilityPerTurn: 2
+        _swayOnHostile: 10
+    - rid: 2685915787672158311
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _target: 1
+        _behavior:
+          rid: 2685915787672158312
+        _stacks: 2
+        _stacksSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _duration: 0
+    - rid: 2685915787672158312
+      type: {class: StarstruckStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
         _hostilityPerTurn: 2
         _swayOnHostile: 10
