@@ -70,16 +70,15 @@ namespace Crookedile.Tests
 
             int plays = 0, events = 0;
             bool ended = false;
-            CardChoiceRequestedEvent pendingChoice = null;
+            CardChoiceRequest pendingChoice = null;
             void OnPlayed(CardPlayedEvent e) => plays++;
             void OnReplayed(CardReplayedEvent e) => plays++;
             void OnEnded(BattleEndedEvent e) => ended = true;
-            void OnChoice(CardChoiceRequestedEvent e) => pendingChoice = e;
+            void OnChoice(CardChoiceRequest e) => pendingChoice = e;
             void OnAny() => events++;
             EventBus.Subscribe<CardPlayedEvent>(OnPlayed);
             EventBus.Subscribe<CardReplayedEvent>(OnReplayed);
             EventBus.Subscribe<BattleEndedEvent>(OnEnded);
-            EventBus.Subscribe<CardChoiceRequestedEvent>(OnChoice);
             EventBus.AnyEventPublished += OnAny;
             int loopsBefore = EventBus.LoopsBroken;
 
@@ -87,6 +86,7 @@ namespace Crookedile.Tests
             {
                 _battleObject = new GameObject("CardSmokeBattle");
                 var bm = _battleObject.AddComponent<BattleManager>();
+                bm.CardChoicePrompt = OnChoice;
                 bm.ConfigureForSimulation(new OriginPassive[0]);
                 bm.StartBattle(
                     new BattleSetup
@@ -142,7 +142,6 @@ namespace Crookedile.Tests
                 EventBus.Unsubscribe<CardPlayedEvent>(OnPlayed);
                 EventBus.Unsubscribe<CardReplayedEvent>(OnReplayed);
                 EventBus.Unsubscribe<BattleEndedEvent>(OnEnded);
-                EventBus.Unsubscribe<CardChoiceRequestedEvent>(OnChoice);
                 EventBus.AnyEventPublished -= OnAny;
             }
         }
@@ -180,7 +179,7 @@ namespace Crookedile.Tests
             bm.CurrentState == BattleState.PlayerTurn && bm.IsPlayerTurn && !bm.IsCardResolving;
 
         /// <summary>Confirms a pending card choice with the first cards offered.</summary>
-        private static void AnswerChoice(ref CardChoiceRequestedEvent pending)
+        private static void AnswerChoice(ref CardChoiceRequest pending)
         {
             if (pending == null)
                 return;

@@ -353,7 +353,7 @@
         /// <summary>
         /// Central card-selection resolver — routes to player-choice UI or random auto-pick.
         /// <list type="bullet">
-        ///   <item><see cref="CardSelectionMode.PlayerChoice"/> — publishes <see cref="CardChoiceRequestedEvent"/></item>
+        ///   <item><see cref="CardSelectionMode.PlayerChoice"/> — asks <see cref="BattleManager.RequestCardChoice"/></item>
         ///   <item><see cref="CardSelectionMode.RandomAny"/> — picks randomly from full pool</item>
         ///   <item><see cref="CardSelectionMode.RandomByType"/> — filters by <paramref name="filterType"/>, then picks randomly</item>
         ///   <item><see cref="CardSelectionMode.ThisCard"/> — resolves to <paramref name="thisCard"/> (ctx.OwnerCard), ignoring the pool</item>
@@ -399,8 +399,8 @@
 
             if (mode == CardSelectionMode.PlayerChoice)
             {
-                EventBus.Publish(
-                    new CardChoiceRequestedEvent
+                BattleManager.Current?.RequestCardChoice(
+                    new CardChoiceRequest
                     {
                         Title = choiceTitle,
                         Choices = candidates,

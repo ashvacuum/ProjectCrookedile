@@ -23,7 +23,7 @@ namespace Crookedile.EditorTools.Playtest
         /// <summary>Enemy index to focus before a play.</summary>
         int ChooseTarget(BattleManager bm, System.Random rng);
 
-        List<CardData> AnswerChoice(CardChoiceRequestedEvent choice, System.Random rng);
+        List<CardData> AnswerChoice(CardChoiceRequest choice, System.Random rng);
     }
 
     public static class BotMath
@@ -64,7 +64,7 @@ namespace Crookedile.EditorTools.Playtest
         }
 
         /// <summary>Picks exactly what a choice needs: the required count, or a random amount up to it.</summary>
-        public static List<CardData> PickChoices(CardChoiceRequestedEvent choice, System.Random rng, bool best)
+        public static List<CardData> PickChoices(CardChoiceRequest choice, System.Random rng, bool best)
         {
             var pool = choice.Choices?.ToList() ?? new List<CardData>();
             int count = System.Math.Min(choice.RequiredCount, pool.Count);
@@ -87,7 +87,7 @@ namespace Crookedile.EditorTools.Playtest
 
         public int ChooseTarget(BattleManager bm, System.Random rng) => BotMath.RandomLiving(bm, rng);
 
-        public List<CardData> AnswerChoice(CardChoiceRequestedEvent c, System.Random rng) =>
+        public List<CardData> AnswerChoice(CardChoiceRequest c, System.Random rng) =>
             BotMath.PickChoices(c, rng, best: false);
     }
 
@@ -103,7 +103,7 @@ namespace Crookedile.EditorTools.Playtest
 
         public int ChooseTarget(BattleManager bm, System.Random rng) => BotMath.MostHostile(bm);
 
-        public List<CardData> AnswerChoice(CardChoiceRequestedEvent c, System.Random rng) =>
+        public List<CardData> AnswerChoice(CardChoiceRequest c, System.Random rng) =>
             BotMath.PickChoices(c, rng, best: true);
     }
 
@@ -119,7 +119,7 @@ namespace Crookedile.EditorTools.Playtest
 
         public int ChooseTarget(BattleManager bm, System.Random rng) => BotMath.MostHostile(bm);
 
-        public List<CardData> AnswerChoice(CardChoiceRequestedEvent c, System.Random rng) =>
+        public List<CardData> AnswerChoice(CardChoiceRequest c, System.Random rng) =>
             BotMath.PickChoices(c, rng, best: true);
     }
 
@@ -135,7 +135,7 @@ namespace Crookedile.EditorTools.Playtest
 
         public int ChooseTarget(BattleManager bm, System.Random rng) => bm.FocusedEnemyIndex;
 
-        public List<CardData> AnswerChoice(CardChoiceRequestedEvent c, System.Random rng) =>
+        public List<CardData> AnswerChoice(CardChoiceRequest c, System.Random rng) =>
             BotMath.PickChoices(c, rng, best: false);
     }
 
@@ -286,7 +286,7 @@ namespace Crookedile.EditorTools.Playtest
         public int ChooseTarget(BattleManager bm, System.Random rng) =>
             _target >= 0 ? _target : BotMath.MostHostile(bm);
 
-        public List<CardData> AnswerChoice(CardChoiceRequestedEvent c, System.Random rng) =>
+        public List<CardData> AnswerChoice(CardChoiceRequest c, System.Random rng) =>
             BotMath.PickChoices(c, rng, best: true);
 
         private static Mood MoodOf(EnemyController e) =>

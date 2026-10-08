@@ -39,8 +39,8 @@ namespace Crookedile.Gameplay.Battle
                 return;
 
             bool resolved = false;
-            EventBus.Publish(
-                new CardChoiceRequestedEvent
+            ctx.BattleManager?.RequestCardChoice(
+                new CardChoiceRequest
                 {
                     Title = _nextTurn ? "Book a card for next turn" : "Return a card to hand",
                     Choices = choices,

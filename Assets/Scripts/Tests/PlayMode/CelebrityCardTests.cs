@@ -323,9 +323,8 @@ namespace Crookedile.Tests
         [UnityTest]
         public IEnumerator RecoveryChargesDebtOnlyAfterSelectionAndBookingPreservesCopy()
         {
-            CardChoiceRequestedEvent choice = null;
-            void OnChoice(CardChoiceRequestedEvent e) => choice = e;
-            EventBus.Subscribe<CardChoiceRequestedEvent>(OnChoice);
+            CardChoiceRequest choice = null;
+            _battle.CardChoicePrompt = e => choice = e;
             try
             {
                 _battle.PlayerDeck.AddCardToDiscard(Card("Thumbs Up"));
@@ -348,7 +347,7 @@ namespace Crookedile.Tests
             }
             finally
             {
-                EventBus.Unsubscribe<CardChoiceRequestedEvent>(OnChoice);
+                _battle.CardChoicePrompt = null;
             }
             yield return null;
         }

@@ -28,8 +28,8 @@ namespace Crookedile.Gameplay.Battle
                 count == 1
                     ? "Choose a card — return to Deck"
                     : $"Choose {count} cards — return to Deck";
-            EventBus.Publish(
-                new CardChoiceRequestedEvent
+            ctx.BattleManager?.RequestCardChoice(
+                new CardChoiceRequest
                 {
                     Title = title,
                     Choices = ctx.Deck.DiscardPile,

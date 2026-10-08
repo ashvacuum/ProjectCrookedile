@@ -226,6 +226,26 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public ICardPlayFeedback CardPlayFeedback { get; set; }
 
+        /// <summary>
+        /// Answers card-choice prompts: the battle UI in play, a capture hook in tests and
+        /// playtests. Whoever is assigned owns calling <see cref="CardChoiceRequest.OnConfirmed"/>.
+        /// </summary>
+        public Action<CardChoiceRequest> CardChoicePrompt { get; set; }
+
+        /// <summary>Asks the player to pick cards; with nobody to ask, the choice is cancelled.</summary>
+        public void RequestCardChoice(CardChoiceRequest request)
+        {
+            if (CardChoicePrompt != null)
+            {
+                CardChoicePrompt(request);
+                return;
+            }
+            GameLogger.LogWarning<BattleManager>(
+                $"No card-choice prompt assigned; cancelling '{request.Title}'"
+            );
+            request.OnConfirmed?.Invoke(new List<CardData>());
+        }
+
         private void InitializeStateMachine()
         {
             _stateMachine = new StateMachine<BattleState>();

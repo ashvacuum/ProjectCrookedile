@@ -154,12 +154,12 @@ namespace Crookedile.UI.Battle
         private BattleManager battleManager;
         private BattleResult _lastBattleResult;
         private bool _cardChoiceActive;
-        private CardChoiceRequestedEvent _pendingCardChoice;
+        private CardChoiceRequest _pendingCardChoice;
 
         // Choices requested while another is open (several start-of-turn prompts at once) wait
         // here and open in request order.
-        private readonly Queue<CardChoiceRequestedEvent> _queuedCardChoices =
-            new Queue<CardChoiceRequestedEvent>();
+        private readonly Queue<CardChoiceRequest> _queuedCardChoices =
+            new Queue<CardChoiceRequest>();
         private Sequence _battleInfoFadeSeq;
 
         /// <summary>One-frame coalescing flag — see <see cref="RequestStatsRefresh"/>.</summary>
@@ -222,6 +222,13 @@ namespace Crookedile.UI.Battle
 
         private void OnEnable() => SubscribeToEvents();
 
+        protected override void OnDisable()
+        {
+            if (battleManager != null && battleManager.CardChoicePrompt == OnCardChoiceRequested)
+                battleManager.CardChoicePrompt = null;
+            base.OnDisable();
+        }
+
         private void SubscribeToEvents()
         {
             On<BattleStateChangedEvent>(OnBattleStateChanged);
@@ -229,7 +236,6 @@ namespace Crookedile.UI.Battle
             On<CardPlayedEvent>(OnCardPlayed);
             On<BattleEndedEvent>(OnBattleEnded);
             On<EnemySummonedEvent>(OnEnemySummoned);
-            On<CardChoiceRequestedEvent>(OnCardChoiceRequested);
             On<SupportChangedEvent>(OnSupportChanged);
             On<DenialChangedEvent>(OnDenialChanged);
             On<StatusEffectAppliedEvent>(OnStatusEffectApplied);
@@ -244,6 +250,7 @@ namespace Crookedile.UI.Battle
         public void Initialize(BattleManager manager)
         {
             battleManager = manager;
+            manager.CardChoicePrompt = OnCardChoiceRequested;
 
             RequestStatsRefresh();
         }
@@ -330,7 +337,7 @@ namespace Crookedile.UI.Battle
             _queuedCardChoices.Clear(); // a choice still waiting belongs to the finished battle
         }
 
-        private void OnCardChoiceRequested(CardChoiceRequestedEvent evt)
+        private void OnCardChoiceRequested(CardChoiceRequest evt)
         {
             if (_cardChoiceActive)
             {
@@ -340,7 +347,7 @@ namespace Crookedile.UI.Battle
             OpenCardChoice(evt);
         }
 
-        private void OpenCardChoice(CardChoiceRequestedEvent evt)
+        private void OpenCardChoice(CardChoiceRequest evt)
         {
             _pendingCardChoice = evt;
             _cardChoiceActive = true;
