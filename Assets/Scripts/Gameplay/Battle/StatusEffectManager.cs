@@ -70,6 +70,14 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
 
+            if (stacks > 0 && !behavior.CanApplyTo(_owner))
+            {
+                GameLogger.LogInfo<StatusEffectManager>(
+                    $"{_ownerName}: {behavior.DisplayName} can't apply — ignored"
+                );
+                return;
+            }
+
             // Warded (Protector): a ward stack eats an incoming debuff before it lands.
             // Only genuine applications (positive stacks) are blocked — stack removals pass.
             if (stacks > 0 && behavior.IsDebuff && TryConsumeWardStack())
@@ -93,8 +101,10 @@ namespace Crookedile.Gameplay.Battle
                     return;
                 }
 
-                // Stack exists — add (or subtract) stacks.
-                existing.AddStacks(stacks);
+                // Stack exists — refresh to the new count, or add (or subtract) stacks.
+                existing.AddStacks(
+                    behavior.RefreshesOnReapply && stacks > 0 ? stacks - existing.Stacks : stacks
+                );
 
                 // If the effect has been neutralised (e.g. +3 Strength cancelled by -3), remove it
                 // immediately so the UI doesn't show a lingering 0-stack badge.

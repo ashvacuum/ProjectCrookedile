@@ -189,7 +189,7 @@
         /// the target reflects the shift back through the same ledger.
         /// </summary>
         /// <returns>The Opinion shift that reached the meter, pre session-shield absorption.</returns>
-        protected static int ApplyOpinion(
+        protected internal static int ApplyOpinion(
             BattleStats target,
             BattleStats attacker,
             int baseAmount,
@@ -325,7 +325,10 @@
         /// Runs a nested effect list (follow-ups that must wait for a player choice, branches)
         /// against the same context.
         /// </summary>
-        protected static void ExecuteAll(IReadOnlyList<BattleEffect> effects, EffectExecutionContext ctx)
+        protected static void ExecuteAll(
+            IReadOnlyList<BattleEffect> effects,
+            EffectExecutionContext ctx
+        )
         {
             if (effects == null)
                 return;

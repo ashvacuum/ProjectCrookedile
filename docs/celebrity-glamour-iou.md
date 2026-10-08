@@ -1,6 +1,6 @@
 # Celebrity: Glamour / IOU / Promises
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-05
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-09
 >
 > **Summary:** Celebrity banks and spends Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points.
 >
@@ -63,7 +63,7 @@ Second Take and Advance Booking charge Debt only when selection successfully mov
 Recovery preserves its normal energy cost and does not access Exhaust.
 Booked cards arrive after next turn's normal draws; hand overflow goes to discard rather than losing the card.
 
-### Poisoned Perception
+### Starstruck
 
 Never Meet Your Heroes applies the debuff to a non-hostile opponent for 3 enemy turns.
 Each enemy-turn start raises their Hostility by 2, respecting Fanatic, Devotion, Ward, and hostility limits.
@@ -101,7 +101,7 @@ Charm Offensive is the rare hybrid exception to the four core defensive card typ
 - **Paid-Off Promises:** Enhanced Rhetoric, 0 energy. Reserve up to 3 Debt; next turn's printed-cost-2+ play cancels it. Exhaust.
 - **Second Take:** Enhanced Rhetoric, 0 energy. Recover a non-Exhaust discard card; take 1 Debt.
 - **Advance Booking:** Enhanced Rhetoric, 0 energy. Reserve a non-Exhaust draw-pile card for next turn; take 2 Debt.
-- **Never Meet Your Heroes:** Enhanced Rhetoric, 1 energy. Apply Poisoned Perception to a non-hostile opponent.
+- **Never Meet Your Heroes:** Enhanced Rhetoric, 1 energy. Apply Starstruck to a non-hostile opponent.
 - **Charm Offensive:** Rare Pressure, X energy. Deal 2X Sway, gain 2X Support, reduce Hostility by X, in that order. X is energy actually spent; ordinary modifiers and subsequent crowd reaction apply.
 - **Movie Quote:** Basic generated-only Rhetoric, 0 energy. Gain 1 Glamour. Exhaust.
 
