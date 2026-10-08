@@ -60,8 +60,7 @@ namespace Crookedile.Tests
         {
             var boss = CreateBoss();
             var audience = Audience(-3);
-            using (var crowd = new CrowdReactions(audience, 5, 1, 1, 1, 2))
-                Assert.IsTrue(crowd.IsEchoChamber());
+            Assert.IsTrue(new CrowdReactions(audience, 5, 1, 1, 1, 2).IsEchoChamber());
             var context = Context(boss, audience);
             var targets = context.GetTargets(TargetType.AllOpponents);
             Assert.AreEqual(1, targets.Count);

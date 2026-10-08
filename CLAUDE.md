@@ -36,7 +36,10 @@ docs win; say so rather than quietly following the code.
 - **Asset IDs come from the asset's file GUID** (`EncounterData`, `EnemyData`, `AllyData`).
   Never mint `Guid.NewGuid()` for a new id field: duplicating an asset copies the value and two
   assets answer to one id.
-- **`EventBus`** for cross-system notifications; `Singleton<T>` for managers.
+- **`EventBus` is notification-only** (UI, VFX, log, audio); `Singleton<T>` for managers. Game rules that
+  react to a state change are called directly and in order by `BattleManager` (e.g. `ApplyHostilityRules`,
+  hooked in through `BattleStats.HostilityRules`), never subscribed. Requests that need an answer go through a
+  `BattleManager` hook (`RequestCardChoice`), not an event with a callback. Passives still run off the bus.
 - **Battle UI panels subclass `BattlePanel`** (`UI/Battle/BattlePanel.cs`): subscribe with `On<T>` in `OnEnable`
   (auto-unsubscribed on disable; override `OnDisable` only to call `base.OnDisable()`), read `Battle`
   (`BattleManager.Current`). No BattleUI field or Bind call. `UIView` popups find their `UIRouter` themselves.

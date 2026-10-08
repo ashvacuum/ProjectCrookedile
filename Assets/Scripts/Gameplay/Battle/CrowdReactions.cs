@@ -19,7 +19,7 @@ namespace Crookedile.Gameplay.Battle
     /// live reference BattleManager holds, so summoned enemies are seen automatically.
     /// </summary>
     [Debuggable("CrowdReactions", LogLevel.Info)]
-    public class CrowdReactions : IDisposable
+    public class CrowdReactions
     {
         private readonly IReadOnlyList<EnemyController> _enemies;
         private OpinionLedger _opinion; // attached after construction (ledger needs IsEchoChamber)
@@ -50,9 +50,6 @@ namespace Crookedile.Gameplay.Battle
             _turncoatAdjacentNudge = turncoatAdjacentNudge;
             _supportOnBecomingReceptive = supportOnBecomingReceptive;
 
-            EventBus.Subscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
-            EventBus.Subscribe<HostilityChangedEvent>(OnHostilityChanged);
-            EventBus.Subscribe<EnemyBecameReceptiveEvent>(OnEnemyBecameReceptive);
         }
 
         /// <summary>
@@ -60,7 +57,7 @@ namespace Crookedile.Gameplay.Battle
         /// mirror to an enemy turning hostile earning a draw. Staying receptive pays again each
         /// turn start (BattleManager's per-receptive-enemy Support).
         /// </summary>
-        private void OnEnemyBecameReceptive(EnemyBecameReceptiveEvent evt)
+        public void PayReceptiveSupport()
         {
             if (_supportOnBecomingReceptive > 0)
                 _opinion?.GainSupport(_supportOnBecomingReceptive);
@@ -81,11 +78,10 @@ namespace Crookedile.Gameplay.Battle
             HostilityLostThisTurn = 0;
         }
 
-        private void OnHostilityChanged(HostilityChangedEvent evt)
+        /// <summary>Adds one enemy hostility shift to this turn's tallies.</summary>
+        public void RecordHostilityShift(int oldValue, int newValue)
         {
-            if (evt.IsPlayer)
-                return;
-            int delta = evt.NewValue - evt.OldValue;
+            int delta = newValue - oldValue;
             if (delta > 0)
                 HostilityGainedThisTurn += delta;
             else if (delta < 0)
@@ -100,13 +96,6 @@ namespace Crookedile.Gameplay.Battle
         /// passed into the constructor).
         /// </summary>
         public void AttachLedger(OpinionLedger opinion) => _opinion = opinion;
-
-        public void Dispose()
-        {
-            EventBus.Unsubscribe<EnemyTurncoatEvent>(OnEnemyTurncoat);
-            EventBus.Unsubscribe<HostilityChangedEvent>(OnHostilityChanged);
-            EventBus.Unsubscribe<EnemyBecameReceptiveEvent>(OnEnemyBecameReceptive);
-        }
 
         private IEnumerable<EnemyController> LivingEnemies => _enemies.Where(e => !e.IsDefeated);
 
@@ -220,12 +209,11 @@ namespace Crookedile.Gameplay.Battle
         /// opinion hit (the crowd noticed), nudges immediate neighbours toward hostility (contagion),
         /// and forces the betrayer's next intent aggressive.
         /// </summary>
-        private void OnEnemyTurncoat(EnemyTurncoatEvent evt)
+        public void ResolveTurncoat(int idx)
         {
             if (_resolvingTurncoat)
                 return;
 
-            int idx = evt.EnemyIndex;
             if (idx < 0 || idx >= _enemies.Count)
                 return;
             var enemy = _enemies[idx];
