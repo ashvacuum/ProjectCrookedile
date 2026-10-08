@@ -4,6 +4,7 @@ using Crookedile.Data.Cards;
 using Crookedile.Gameplay.Battle;
 using Crookedile.Utilities;
 using DG.Tweening;
+using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,20 +24,23 @@ namespace Crookedile.UI.Battle
     /// MonoBehaviour components (HandPanel, BattleLogPanel, BattleResultPanel).
     /// Structural UI changes are driven by <see cref="BattleStateChangedEvent"/> via <c>ConfigureForBattleState</c>.
     /// </summary>
-    public class BattleUI : MonoBehaviour
+    public class BattleUI : BattlePanel
     {
         #region Panels (extracted subsystems)
         [Header("Panels")]
         [Tooltip("Manages card hand display and object pool.")]
         [SerializeField]
+        [Required]
         private HandPanel handPanel;
 
         [Tooltip("Battle log text + auto-scroll.")]
         [SerializeField]
+        [Required]
         private BattleLogPanel logPanel;
 
         [Tooltip("Victory / defeat result panels.")]
         [SerializeField]
+        [Required]
         private BattleResultPanel resultPanel;
 
         #endregion
@@ -45,6 +49,7 @@ namespace Crookedile.UI.Battle
         [Header("Enemy Slots")]
         [Tooltip("Self-subscribing enemy row — owns slot spawning and per-slot event reactions.")]
         [SerializeField]
+        [Required]
         private EnemyRowPanel enemyRow;
 
         [Tooltip("Separate rival podium. Hidden when the session has no boss.")]
@@ -140,12 +145,8 @@ namespace Crookedile.UI.Battle
             "Self-subscribing zone bar — owns deck/discard/exhaust buttons, counts, and grant animations."
         )]
         [SerializeField]
+        [Required]
         private CardZoneBar cardZoneBar;
-
-        [Header("Post-battle")]
-        [Tooltip("Owns reward offers and RunState progression after the result panel's Continue.")]
-        [SerializeField]
-        private PostBattleFlow postBattleFlow;
 
         #endregion
 
@@ -163,9 +164,6 @@ namespace Crookedile.UI.Battle
 
         /// <summary>One-frame coalescing flag — see <see cref="RequestStatsRefresh"/>.</summary>
         private bool _statsRefreshQueued;
-
-        /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
-        private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
 
         #endregion
 
@@ -224,68 +222,28 @@ namespace Crookedile.UI.Battle
 
         private void OnEnable() => SubscribeToEvents();
 
-        private void OnDisable() => UnsubscribeFromEvents();
-
-        /// <summary>
-        /// Subscribes <paramref name="handler"/> and records the matching unsubscribe so
-        /// <see cref="UnsubscribeFromEvents"/> can't drift out of sync with this list.
-        /// </summary>
-        private void Sub<T>(System.Action<T> handler)
-            where T : IGameEvent
-        {
-            EventBus.Subscribe(handler);
-            _eventUnsubscribers.Add(() => EventBus.Unsubscribe(handler));
-        }
-
         private void SubscribeToEvents()
         {
-            Sub<BattleStateChangedEvent>(OnBattleStateChanged);
-            Sub<BattleStartedEvent>(OnBattleStarted);
-            Sub<CardPlayedEvent>(OnCardPlayed);
-            Sub<BattleEndedEvent>(OnBattleEnded);
-            Sub<EnemySummonedEvent>(OnEnemySummoned);
-            Sub<CardChoiceRequestedEvent>(OnCardChoiceRequested);
-            Sub<SupportChangedEvent>(OnSupportChanged);
-            Sub<DenialChangedEvent>(OnDenialChanged);
-            Sub<StatusEffectAppliedEvent>(OnStatusEffectApplied);
-            Sub<OpinionChangedEvent>(OnOpinionChanged);
-            Sub<TurnLimitUpdatedEvent>(OnTurnLimitUpdated);
-        }
-
-        private void UnsubscribeFromEvents()
-        {
-            foreach (var unsub in _eventUnsubscribers)
-                unsub();
-            _eventUnsubscribers.Clear();
+            On<BattleStateChangedEvent>(OnBattleStateChanged);
+            On<BattleStartedEvent>(OnBattleStarted);
+            On<CardPlayedEvent>(OnCardPlayed);
+            On<BattleEndedEvent>(OnBattleEnded);
+            On<EnemySummonedEvent>(OnEnemySummoned);
+            On<CardChoiceRequestedEvent>(OnCardChoiceRequested);
+            On<SupportChangedEvent>(OnSupportChanged);
+            On<DenialChangedEvent>(OnDenialChanged);
+            On<StatusEffectAppliedEvent>(OnStatusEffectApplied);
+            On<OpinionChangedEvent>(OnOpinionChanged);
+            On<TurnLimitUpdatedEvent>(OnTurnLimitUpdated);
         }
 
         /// <summary>
-        /// Called by BattleTestStarter once the battle is ready.
-        /// Wires zone viewers and result panel; the UI configures itself once
+        /// Called by BattleTestStarter once the battle is ready; the UI configures itself once
         /// <see cref="BattleStateChangedEvent"/> fires from BattleManager.
         /// </summary>
         public void Initialize(BattleManager manager)
         {
             battleManager = manager;
-
-            // Self-subscribing panels get their battle context here.
-            logPanel?.Bind(manager);
-            handPanel?.Bind(manager, OnCardButtonClicked);
-            enemyRow?.Bind(manager);
-            bossPanel?.Bind(manager);
-            cardZoneBar?.Bind(manager);
-            postBattleFlow?.Bind(manager);
-
-            // One-shot wiring report — flags any panel ref left unassigned on this BattleUI.
-            GameLogger.LogInfo(
-                "BattleUI",
-                "Panel wiring — "
-                    + $"hand:{(handPanel != null ? "ok" : "MISSING")} "
-                    + $"log:{(logPanel != null ? "ok" : "MISSING")} "
-                    + $"enemyRow:{(enemyRow != null ? "ok" : "MISSING")} "
-                    + $"zoneBar:{(cardZoneBar != null ? "ok" : "MISSING")} "
-                    + $"postBattle:{(postBattleFlow != null ? "ok" : "MISSING")}"
-            );
 
             RequestStatsRefresh();
         }
@@ -558,26 +516,6 @@ namespace Crookedile.UI.Battle
             {
                 logPanel?.AddEntry("Player ended turn");
                 battleManager.RequestEndTurn();
-            }
-        }
-
-        private void OnCardButtonClicked(CardData card, int handIndex)
-        {
-            GameLogger.LogInfo(
-                "Card",
-                $"OnCardButtonClicked: '{card?.CardName}' [handIndex={handIndex}]  battleManager={(battleManager != null ? "set" : "null")}  IsPlayerTurn={battleManager?.IsPlayerTurn}"
-            );
-            if (battleManager != null && battleManager.IsPlayerTurn)
-            {
-                GameLogger.LogInfo("Card", $"Requesting card play for '{card?.CardName}'");
-                battleManager.RequestPlayCard(card, handIndex);
-            }
-            else
-            {
-                GameLogger.LogWarning(
-                    "Card",
-                    $"Card play blocked in BattleUI — battleManager={(battleManager != null ? "set" : "null")}  IsPlayerTurn={battleManager?.IsPlayerTurn}"
-                );
             }
         }
 

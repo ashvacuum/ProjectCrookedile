@@ -20,7 +20,7 @@ namespace Crookedile.UI.Battle
     /// All entries in the sound map are optional — a missing entry or null AudioEvent/VFXEvent
     /// is silently ignored, so the game runs without sound until assets are assigned.
     /// </summary>
-    public class BattleFeedbackController : MonoBehaviour, ICardPlayFeedback
+    public class BattleFeedbackController : BattlePanel, ICardPlayFeedback
     {
         [Header("Data")]
         [Tooltip(
@@ -64,20 +64,6 @@ namespace Crookedile.UI.Battle
         private Color _supportColor = new Color(0.4f, 0.6f, 0.9f);
 
         #region Lifecycle
-        /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
-        private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
-
-        /// <summary>
-        /// Subscribes <paramref name="handler"/> and records the matching unsubscribe so
-        /// <see cref="OnDisable"/> can't drift out of sync with the subscribe list.
-        /// </summary>
-        private void Sub<T>(System.Action<T> handler)
-            where T : IGameEvent
-        {
-            EventBus.Subscribe(handler);
-            _eventUnsubscribers.Add(() => EventBus.Unsubscribe(handler));
-        }
-
         private void OnEnable()
         {
             // Register as the card-play VFX implementation — a direct callback handshake,
@@ -87,35 +73,33 @@ namespace Crookedile.UI.Battle
             if (_battleManager != null)
                 _battleManager.CardPlayFeedback = this;
 
-            Sub<BattleStartedEvent>(OnBattleStarted);
-            Sub<BattleEndedEvent>(OnBattleEnded);
-            Sub<TurnStartedEvent>(OnTurnStarted);
-            Sub<TurnEndedEvent>(OnTurnEnded);
-            Sub<CardPlayedEvent>(OnCardPlayed);
-            Sub<CardDrawnEvent>(OnCardDrawn);
-            Sub<CardDiscardedEvent>(OnCardDiscarded);
-            Sub<CardExhaustedEvent>(OnCardExhausted);
-            Sub<DamageDealtEvent>(OnDamageDealt);
-            Sub<HealingAppliedEvent>(OnHealApplied);
-            Sub<StatusEffectAppliedEvent>(OnStatusApplied);
-            Sub<EnemyDefeatedEvent>(OnEnemyDefeated);
-            Sub<EnemyActingEvent>(OnEnemyActing);
-            Sub<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
-            Sub<SupportChangedEvent>(OnSupportChanged);
-            Sub<DenialChangedEvent>(OnDenialChanged);
-            Sub<HostilityChangedEvent>(OnHostilityChanged);
-            Sub<OpinionChangedEvent>(OnOpinionChanged);
-            Sub<ActionPointsChangedEvent>(OnAPChanged);
+            On<BattleStartedEvent>(OnBattleStarted);
+            On<BattleEndedEvent>(OnBattleEnded);
+            On<TurnStartedEvent>(OnTurnStarted);
+            On<TurnEndedEvent>(OnTurnEnded);
+            On<CardPlayedEvent>(OnCardPlayed);
+            On<CardDrawnEvent>(OnCardDrawn);
+            On<CardDiscardedEvent>(OnCardDiscarded);
+            On<CardExhaustedEvent>(OnCardExhausted);
+            On<DamageDealtEvent>(OnDamageDealt);
+            On<HealingAppliedEvent>(OnHealApplied);
+            On<StatusEffectAppliedEvent>(OnStatusApplied);
+            On<EnemyDefeatedEvent>(OnEnemyDefeated);
+            On<EnemyActingEvent>(OnEnemyActing);
+            On<EnemyIntentDeclaredEvent>(OnEnemyIntentDeclared);
+            On<SupportChangedEvent>(OnSupportChanged);
+            On<DenialChangedEvent>(OnDenialChanged);
+            On<HostilityChangedEvent>(OnHostilityChanged);
+            On<OpinionChangedEvent>(OnOpinionChanged);
+            On<ActionPointsChangedEvent>(OnAPChanged);
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
             if (_battleManager != null && ReferenceEquals(_battleManager.CardPlayFeedback, this))
                 _battleManager.CardPlayFeedback = null;
 
-            foreach (var unsub in _eventUnsubscribers)
-                unsub();
-            _eventUnsubscribers.Clear();
+            base.OnDisable();
         }
 
         #endregion

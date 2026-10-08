@@ -18,7 +18,7 @@ namespace Crookedile.UI.Battle
     /// <c>bm.PlayerDeck.Hand</c>; cards that weren't already on screen fly in, the rest just
     /// re-arrange. No incremental-merge bookkeeping, no full-vs-partial refresh race.
     /// </summary>
-    public class HandPanel : MonoBehaviour
+    public class HandPanel : BattlePanel
     {
         [Header("Hand Container")]
         [Tooltip("Parent Transform that card buttons are placed inside.")]
@@ -27,50 +27,32 @@ namespace Crookedile.UI.Battle
 
         private readonly List<CardButton> _activeButtons = new List<CardButton>();
 
-        private BattleManager _bm;
-        private System.Action<CardData, int> _onCardClicked;
-
         /// <summary>Card pulled from hand on CardPlayedEvent, held until VFX resolves before flying to discard.</summary>
         private CardButton _pendingDiscardButton;
 
         private bool _rebuildQueued;
 
-        private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
-
         #region Setup / events
-
-        /// <summary>Supplies the battle context the refresh needs. Called by <c>BattleUI.Initialize</c>.</summary>
-        public void Bind(BattleManager bm, System.Action<CardData, int> onCardClicked)
-        {
-            _bm = bm;
-            _onCardClicked = onCardClicked;
-        }
 
         private void OnEnable()
         {
-            Sub<CardPlayedEvent>(OnCardPlayed);
-            Sub<CardPlayResolvedEvent>(OnCardPlayResolved);
-            Sub<CardDrawnEvent>(OnCardDrawn);
-            Sub<ActionPointsChangedEvent>(OnActionPointsChanged);
+            On<CardPlayedEvent>(OnCardPlayed);
+            On<CardPlayResolvedEvent>(OnCardPlayResolved);
+            On<CardDrawnEvent>(OnCardDrawn);
+            On<ActionPointsChangedEvent>(OnActionPointsChanged);
         }
 
-        private void OnDisable()
+        private void OnCardClicked(CardData card, int handIndex)
         {
-            foreach (var unsub in _eventUnsubscribers)
-                unsub();
-            _eventUnsubscribers.Clear();
-        }
-
-        private void Sub<T>(System.Action<T> handler)
-            where T : IGameEvent
-        {
-            EventBus.Subscribe(handler);
-            _eventUnsubscribers.Add(() => EventBus.Unsubscribe(handler));
+            if (Battle != null && Battle.IsPlayerTurn)
+                Battle.RequestPlayCard(card, handIndex);
+            else
+                GameLogger.LogWarning<HandPanel>($"Card play blocked: '{card?.CardName}' outside the player turn");
         }
 
         private void OnCardPlayed(CardPlayedEvent evt)
         {
-            if (_bm == null || !evt.IsPlayer)
+            if (Battle == null || !evt.IsPlayer)
                 return; // enemy plays don't touch the player hand (it's hidden on the enemy turn)
 
             // Pull the played card from hand and hold it; the gap closes now, the card flies
@@ -84,7 +66,7 @@ namespace Crookedile.UI.Battle
         /// <summary>Played card fully resolved (VFX done): fly the held card to discard, then refresh.</summary>
         private void OnCardPlayResolved(CardPlayResolvedEvent evt)
         {
-            if (_bm == null)
+            if (Battle == null)
                 return;
 
             var btn = _pendingDiscardButton;
@@ -115,7 +97,7 @@ namespace Crookedile.UI.Battle
 
         private void OnCardDrawn(CardDrawnEvent evt)
         {
-            if (_bm == null || !evt.IsPlayer)
+            if (Battle == null || !evt.IsPlayer)
                 return;
             RequestHandRefresh();
         }
@@ -154,17 +136,17 @@ namespace Crookedile.UI.Battle
         /// </summary>
         private void RebuildHand()
         {
-            if (cardButtonContainer == null || _bm?.PlayerStats == null || _onCardClicked == null)
+            if (cardButtonContainer == null || Battle?.PlayerStats == null)
             {
                 GameLogger.LogWarning<HandPanel>(
                     "RebuildHand skipped: setup incomplete — "
-                        + $"container={(cardButtonContainer != null)} bm={(_bm != null)} "
-                        + $"stats={(_bm?.PlayerStats != null)} clickCb={(_onCardClicked != null)}. "
-                        + "Hand will not appear. Check HandPanel wiring / Bind() ordering."
+                        + $"container={(cardButtonContainer != null)} bm={(Battle != null)} "
+                        + $"stats={(Battle?.PlayerStats != null)}. "
+                        + "Hand will not appear. Check the HandPanel container and that a BattleManager is in the scene."
                 );
                 return;
             }
-            if (BattlePoolManager.Instance == null || !_bm.IsPlayerTurn)
+            if (BattlePoolManager.Instance == null || !Battle.IsPlayerTurn)
                 return; // not our turn → BattleUI drives ClearHand / DiscardHandAnimated instead
 
             ValidateLayoutContainerOnce();
@@ -185,9 +167,9 @@ namespace Crookedile.UI.Battle
 
             ClearHand();
 
-            int currentAP = _bm.PlayerStats.CurrentActionPoints;
-            bool isSilenced = _bm.PlayerStatusEffects?.HasStatus<SilencedStatus>() ?? false;
-            var hand = _bm.PlayerDeck.Hand;
+            int currentAP = Battle.PlayerStats.CurrentActionPoints;
+            bool isSilenced = Battle.PlayerStatusEffects?.HasStatus<SilencedStatus>() ?? false;
+            var hand = Battle.PlayerDeck.Hand;
             var newButtons = new List<CardButton>();
 
             for (int i = 0; i < hand.Count; i++)
@@ -203,10 +185,10 @@ namespace Crookedile.UI.Battle
                     card,
                     i,
                     currentAP,
-                    _bm.GetEffectiveCardCost(card),
+                    Battle.GetEffectiveCardCost(card),
                     card.IsUnplayable || (isSilenced && card.CardType == CardType.Rhetoric),
-                    _bm.PlayerDeck.GetCardCostReduction(card) != 0,
-                    () => _onCardClicked(captured, idx)
+                    Battle.PlayerDeck.GetCardCostReduction(card) != 0,
+                    () => OnCardClicked(captured, idx)
                 );
                 _activeButtons.Add(btn);
                 if (previous.TryGetValue(card, out var copies) && copies.Count > 0)
@@ -217,7 +199,7 @@ namespace Crookedile.UI.Battle
                 }
                 else
                 {
-                    btn.SetCardBackForOrigin(_bm.PlayerOrigin);
+                    btn.SetCardBackForOrigin(Battle.PlayerOrigin);
                     newButtons.Add(btn);
                 }
             }

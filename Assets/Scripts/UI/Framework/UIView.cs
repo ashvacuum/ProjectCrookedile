@@ -10,11 +10,16 @@ namespace Crookedile.UI
     {
         [Tooltip(
             "Scene router. Modal views push/pop themselves through it (dimmer + input "
-                + "blocking). Falls back to plain Show/Hide while unassigned, so an unwired "
-                + "scene still works."
+                + "blocking). Optional: when unassigned, the nearest router up the hierarchy (or "
+                + "in the scene) is used; with none at all, plain Show/Hide."
         )]
         [SerializeField]
         private UIRouter _router;
+
+        private UIRouter Router =>
+            _router != null
+                ? _router
+                : _router = GetComponentInParent<UIRouter>(true) ?? FindAnyObjectByType<UIRouter>();
 
         /// <summary>True while this view is on a router stack (visible or covered).</summary>
         public bool IsOnStack { get; private set; }
@@ -28,8 +33,8 @@ namespace Crookedile.UI
         /// <summary>Opens this view as a popup via the router (dimmer + input blocking under it).</summary>
         protected void PushAsPopup()
         {
-            if (_router != null)
-                _router.PushPopup(this);
+            if (Router != null)
+                Router.PushPopup(this);
             else
                 Show();
         }
@@ -37,8 +42,8 @@ namespace Crookedile.UI
         /// <summary>Closes this view if it is an open popup (or just hides it when unrouted).</summary>
         protected void CloseAsPopup()
         {
-            if (_router != null)
-                _router.ClosePopup(this);
+            if (Router != null)
+                Router.ClosePopup(this);
             else
                 Hide();
         }

@@ -195,8 +195,12 @@ namespace Crookedile.Gameplay.Battle
 
         #region Initialization
 
+        /// <summary>The scene's battle; battle UI panels read it instead of being bound by hand.</summary>
+        public static BattleManager Current { get; private set; }
+
         private void Awake()
         {
+            Current = this;
             InitializeStateMachine();
             EventBus.Subscribe<HostilityChangedEvent>(OnStarstruckHostilityChanged);
             // Player input (end turn, play card) arrives as direct method calls
@@ -207,6 +211,8 @@ namespace Crookedile.Gameplay.Battle
 
         private void OnDestroy()
         {
+            if (Current == this)
+                Current = null;
             EventBus.Unsubscribe<HostilityChangedEvent>(OnStarstruckHostilityChanged);
             BossBrain?.StopPlanning();
             _passiveResolver?.Dispose();

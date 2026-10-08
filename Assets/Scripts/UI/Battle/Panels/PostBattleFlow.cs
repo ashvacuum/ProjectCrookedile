@@ -13,7 +13,7 @@ namespace Crookedile.UI.Battle
     /// and reloading the scene. Extracted from BattleUI — this is run progression, not
     /// battle UI, and it's the piece that grows when the real metagame lands.
     /// </summary>
-    public class PostBattleFlow : MonoBehaviour
+    public class PostBattleFlow : BattlePanel
     {
         [Header("Post-battle")]
         [Tooltip("Result panel whose Continue click starts the post-battle flow.")]
@@ -30,25 +30,18 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private CardPickerPanel _rewardScreen;
 
-        private BattleManager _bm;
         private BattleResult _lastResult;
-
-        private System.Action<BattleEndedEvent> _onBattleEnded;
-
-        /// <summary>Supplies the battle context. Called by BattleUI.Initialize.</summary>
-        public void Bind(BattleManager bm) => _bm = bm;
 
         private void OnEnable()
         {
-            _onBattleEnded = OnBattleEnded;
-            EventBus.Subscribe(_onBattleEnded);
+            On<BattleEndedEvent>(OnBattleEnded);
             if (resultPanel != null)
                 resultPanel.OnContinueClicked += OnResultContinueClicked;
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
-            EventBus.Unsubscribe(_onBattleEnded);
+            base.OnDisable();
             if (resultPanel != null)
                 resultPanel.OnContinueClicked -= OnResultContinueClicked;
         }
@@ -85,7 +78,7 @@ namespace Crookedile.UI.Battle
             }
 
             var offers = _cardDatabase.GenerateRewardOffer(
-                _bm != null ? _bm.PlayerOrigin : default,
+                Battle != null ? Battle.PlayerOrigin : default,
                 count: 3,
                 typeFilter: null,
                 rng: RunState.Current?.Rng

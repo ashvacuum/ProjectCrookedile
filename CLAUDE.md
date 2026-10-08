@@ -37,6 +37,9 @@ docs win; say so rather than quietly following the code.
   Never mint `Guid.NewGuid()` for a new id field: duplicating an asset copies the value and two
   assets answer to one id.
 - **`EventBus`** for cross-system notifications; `Singleton<T>` for managers.
+- **Battle UI panels subclass `BattlePanel`** (`UI/Battle/BattlePanel.cs`): subscribe with `On<T>` in `OnEnable`
+  (auto-unsubscribed on disable; override `OnDisable` only to call `base.OnDisable()`), read `Battle`
+  (`BattleManager.Current`). No BattleUI field or Bind call. `UIView` popups find their `UIRouter` themselves.
 - **Saves go through `SaveSystem`** (`Data/Save`): binary save classes with a schema version, content stored by
   asset-GUID ID. A new `RunState` field that must survive a reload also goes in `RunSaveData` and
   `RunState.Save.cs`. See `docs/meta-progression.md`.

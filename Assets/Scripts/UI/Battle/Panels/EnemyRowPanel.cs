@@ -15,48 +15,26 @@ namespace Crookedile.UI.Battle
     /// <see cref="RefreshAll"/> (stats + focus highlight) and reads
     /// <see cref="GetSlotTransform"/> for VFX aiming.
     /// </summary>
-    public class EnemyRowPanel : MonoBehaviour
+    public class EnemyRowPanel : BattlePanel
     {
         [Header("Enemy Slots")]
         [Tooltip("Parent transform that enemy slot panels are spawned into.")]
         [SerializeField]
         private Transform enemySlotContainer;
-
-        private BattleManager _bm;
         private readonly List<EnemySlotUI> _slots = new List<EnemySlotUI>();
-
-        /// <summary>Unsubscribe actions collected by <see cref="Sub{T}"/>; run on disable.</summary>
-        private readonly List<System.Action> _eventUnsubscribers = new List<System.Action>();
-
-        /// <summary>Supplies the battle context. Called by BattleUI.Initialize.</summary>
-        public void Bind(BattleManager bm) => _bm = bm;
 
         #region Event subscription
 
         private void OnEnable()
         {
-            Sub<BattleStartedEvent>(_ => BuildSlots());
-            Sub<EnemyIntentDeclaredEvent>(OnIntentDeclared);
-            Sub<HostilityChangedEvent>(OnHostilityChanged);
-            Sub<EnemyDefeatedEvent>(OnEnemyDefeated);
-            Sub<EnemySummonedEvent>(OnEnemySummoned);
-            Sub<EnemyActingEvent>(OnEnemyActing);
-            Sub<StatusEffectAppliedEvent>(OnStatusEffectApplied);
-            Sub<EnemyTurncoatEvent>(OnEnemyTurncoat);
-        }
-
-        private void OnDisable()
-        {
-            foreach (var unsub in _eventUnsubscribers)
-                unsub();
-            _eventUnsubscribers.Clear();
-        }
-
-        private void Sub<T>(System.Action<T> handler)
-            where T : IGameEvent
-        {
-            EventBus.Subscribe(handler);
-            _eventUnsubscribers.Add(() => EventBus.Unsubscribe(handler));
+            On<BattleStartedEvent>(_ => BuildSlots());
+            On<EnemyIntentDeclaredEvent>(OnIntentDeclared);
+            On<HostilityChangedEvent>(OnHostilityChanged);
+            On<EnemyDefeatedEvent>(OnEnemyDefeated);
+            On<EnemySummonedEvent>(OnEnemySummoned);
+            On<EnemyActingEvent>(OnEnemyActing);
+            On<StatusEffectAppliedEvent>(OnStatusEffectApplied);
+            On<EnemyTurncoatEvent>(OnEnemyTurncoat);
         }
 
         private void OnIntentDeclared(EnemyIntentDeclaredEvent evt)
@@ -164,18 +142,18 @@ namespace Crookedile.UI.Battle
 
             _slots.Clear();
 
-            if (enemySlotContainer == null || _bm == null)
+            if (enemySlotContainer == null || Battle == null)
                 return;
 
-            for (int i = 0; i < _bm.Enemies.Count; i++)
+            for (int i = 0; i < Battle.Enemies.Count; i++)
                 SpawnSlot(i);
         }
 
         private void AddSlot(int index)
         {
-            if (enemySlotContainer == null || _bm == null)
+            if (enemySlotContainer == null || Battle == null)
                 return;
-            if (index >= _bm.Enemies.Count)
+            if (index >= Battle.Enemies.Count)
                 return;
             SpawnSlot(index);
         }
@@ -192,7 +170,7 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
-            slot.Initialize(index, _bm, _bm.Enemies[index].EnemyData);
+            slot.Initialize(index, Battle, Battle.Enemies[index].EnemyData);
             _slots.Add(slot);
         }
 
