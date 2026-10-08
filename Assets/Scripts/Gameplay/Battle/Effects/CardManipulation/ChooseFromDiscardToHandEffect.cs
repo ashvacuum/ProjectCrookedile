@@ -26,8 +26,8 @@ namespace Crookedile.Gameplay.Battle
             int count = Mathf.Min(_amount, ctx.Deck.DiscardCount);
             string title =
                 count == 1 ? "Choose a card from Discard" : $"Choose {count} cards from Discard";
-            EventBus.Publish(
-                new CardChoiceRequestedEvent
+            ctx.BattleManager?.RequestCardChoice(
+                new CardChoiceRequest
                 {
                     Title = title,
                     Choices = ctx.Deck.DiscardPile,

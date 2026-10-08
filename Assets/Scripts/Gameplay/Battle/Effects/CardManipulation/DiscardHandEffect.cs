@@ -35,8 +35,8 @@ namespace Crookedile.Gameplay.Battle
 
             int count = Mathf.Min(reclaim, discarded.Count);
             string title = count == 1 ? "Reclaim 1 card" : $"Reclaim {count} cards";
-            EventBus.Publish(
-                new CardChoiceRequestedEvent
+            ctx.BattleManager?.RequestCardChoice(
+                new CardChoiceRequest
                 {
                     Title = title,
                     Choices = discarded,

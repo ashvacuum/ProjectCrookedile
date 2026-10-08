@@ -49,9 +49,10 @@ namespace Crookedile.EditorTools.Playtest
             bm.ConfigureForSimulation(originPassives);
 
             BattleResult result = null;
-            CardChoiceRequestedEvent pendingChoice = null;
+            CardChoiceRequest pendingChoice = null;
             void OnEnded(BattleEndedEvent e) => result = e.Result;
-            void OnChoice(CardChoiceRequestedEvent e) => pendingChoice = e;
+            void OnChoice(CardChoiceRequest e) => pendingChoice = e;
+            bm.CardChoicePrompt = OnChoice;
             void OnActing(EnemyActingEvent e) => Bump(rec.EnemyMoves, e.Move != null ? e.Move.name : "(none)");
             void OnBossActing(BossActingEvent e) => Bump(rec.EnemyMoves, "Boss: " + e.Move.name);
             // Every drop of the meter, not DamageDealtEvent: smears go straight through the ledger
@@ -70,7 +71,6 @@ namespace Crookedile.EditorTools.Playtest
             }
 
             EventBus.Subscribe<BattleEndedEvent>(OnEnded);
-            EventBus.Subscribe<CardChoiceRequestedEvent>(OnChoice);
             EventBus.Subscribe<EnemyActingEvent>(OnActing);
             EventBus.Subscribe<BossActingEvent>(OnBossActing);
             EventBus.Subscribe<OpinionChangedEvent>(OnOpinion);
@@ -206,7 +206,6 @@ namespace Crookedile.EditorTools.Playtest
                 // Runs even when the battle is abandoned mid-way (an exception further up disposes
                 // this iterator), so a failed battle never leaves its listeners on the bus.
                 EventBus.Unsubscribe<BattleEndedEvent>(OnEnded);
-                EventBus.Unsubscribe<CardChoiceRequestedEvent>(OnChoice);
                 EventBus.Unsubscribe<EnemyActingEvent>(OnActing);
                 EventBus.Unsubscribe<BossActingEvent>(OnBossActing);
                 EventBus.Unsubscribe<OpinionChangedEvent>(OnOpinion);
