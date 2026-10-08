@@ -16,7 +16,9 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private int _amount = 1;
 
-        [Tooltip("Where to read the amount from at runtime (e.g. CurrentGlamour doubles it; CurrentSupport with x0.5 halves Support).")]
+        [Tooltip(
+            "Where to read the amount from at runtime (e.g. CurrentGlamour doubles it; CurrentSupport with x0.5 halves Support)."
+        )]
         [SerializeField]
         private EffectContextValue _amountSource = EffectContextValue.FixedAmount;
 
@@ -32,7 +34,14 @@ namespace Crookedile.Gameplay.Battle
         {
             if (!ctx.IsPlayerCard || ctx.PlayerStatusEffects == null)
                 return;
-            int amount = ResolveScaledAmount(ctx, amountOverride, _amount, _amountSource, _perXSource, _multiplier);
+            int amount = ResolveScaledAmount(
+                ctx,
+                amountOverride,
+                _amount,
+                _amountSource,
+                _perXSource,
+                _multiplier
+            );
             if (amount > 0)
                 ctx.PlayerStatusEffects.ApplyStatus(
                     StatusRegistry.Get<GlamourStatus>(),
@@ -82,13 +91,12 @@ namespace Crookedile.Gameplay.Battle
             var state = ctx.BattleManager?.Celebrity;
             if (state == null)
                 return;
-            int mult = 1 + state.BorrowBonusMultiplesThisTurn;
-            state.BorrowsPlayedThisTurn++;
-            ctx.Caster.GainActionPoints(_energy * mult);
-            state.GainDebt(_debt * mult, ctx.Deck);
+            ctx.Caster.GainActionPoints(_energy);
+            state.GainDebt(_debt, ctx.Deck);
         }
 
-        public override string GetDescription() => $"Borrow: gain {_energy} energy, owe {_debt} Debt";
+        public override string GetDescription() =>
+            $"Borrow: gain {_energy} energy, owe {_debt} Debt";
     }
 
     /// <summary>Cancels Debt, optionally granting Support per Debt cancelled.</summary>

@@ -59,22 +59,17 @@ namespace Crookedile.Tests
                     .GetField("_effectResolver", BindingFlags.Instance | BindingFlags.NonPublic)
                     .GetValue(_battle);
             var context = resolver.CreateContext(true);
-            var openTab = Card("Open Tab").Effects.OfType<OpenTabEffect>().Single();
-            openTab.Execute(context, 2);
-            openTab.Execute(context, 3);
-            Assert.AreEqual(5, _battle.Celebrity.FreeBorrowsPerTurn);
             Card("Too Big to Fail").Effects.OfType<DebtWaiverEffect>().Single().Execute(context, 2);
             Assert.AreEqual(2, _battle.Celebrity.DebtWaivers);
-            Card("Rain Check")
+            Card("Payment Holiday")
                 .Effects.OfType<DelayDebtSettlementEffect>()
                 .Single()
                 .Execute(context, 3);
             Assert.AreEqual(3, _battle.Celebrity.SettlementsDelayed);
-            Card("Overdraft").Effects.OfType<OverdraftEffect>().Single().Execute(context, 2);
             int energy = _battle.PlayerStats.CurrentActionPoints;
             new BorrowEffect().Execute(context);
-            Assert.AreEqual(energy + 6, _battle.PlayerStats.CurrentActionPoints);
-            Assert.AreEqual(6, _battle.Celebrity.Debt);
+            Assert.AreEqual(energy + 2, _battle.PlayerStats.CurrentActionPoints);
+            Assert.AreEqual(2, _battle.Celebrity.Debt);
             var bailout = Card("Bailout").Effects.OfType<BailoutEffect>().Single();
             bailout.Execute(context, 2);
             bailout.Execute(context, 3);
@@ -315,7 +310,11 @@ namespace Crookedile.Tests
             Play("Empty Promise");
             Assert.AreEqual(-4, enemy.Stats.CurrentHostility);
             _battle.RequestEndTurn();
-            for (int frame = 0; frame < 120 && _battle.CurrentState != BattleState.PlayerTurn; frame++)
+            for (
+                int frame = 0;
+                frame < 120 && _battle.CurrentState != BattleState.PlayerTurn;
+                frame++
+            )
                 yield return null;
             Assert.AreEqual(BattleState.PlayerTurn, _battle.CurrentState);
             Assert.AreEqual(-2, enemy.Stats.CurrentHostility);
@@ -371,10 +370,7 @@ namespace Crookedile.Tests
                     yield return null;
                 Assert.AreEqual(BattleState.PlayerTurn, _battle.CurrentState);
                 Assert.AreEqual(-10 + turn * 2, enemy.Stats.CurrentHostility);
-                Assert.AreEqual(
-                    3 - turn,
-                    enemy.StatusEffects.GetStacks<StarstruckStatus>()
-                );
+                Assert.AreEqual(3 - turn, enemy.StatusEffects.GetStacks<StarstruckStatus>());
             }
         }
 

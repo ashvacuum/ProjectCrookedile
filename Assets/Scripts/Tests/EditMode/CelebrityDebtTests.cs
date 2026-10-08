@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Crookedile.Tests
 {
-    /// <summary>The Celebrity's Debt rules: settlement, Line of Credit, Rain Check and the waiver.</summary>
+    /// <summary>The Celebrity's Debt rules: settlement, Line of Credit, delayed settlement and the waiver.</summary>
     public class CelebrityDebtTests
     {
         private OpinionLedger _ledger;
@@ -65,7 +65,11 @@ namespace Crookedile.Tests
             Settle();
 
             Assert.AreEqual(0, _player.CurrentActionPoints, "energy still pays first");
-            Assert.AreEqual(50, _ledger.CurrentOpinion, "the waiver eats the 4 that would hit the meter");
+            Assert.AreEqual(
+                50,
+                _ledger.CurrentOpinion,
+                "the waiver eats the 4 that would hit the meter"
+            );
             Assert.AreEqual(0, _state.DebtWaivers);
         }
     }
