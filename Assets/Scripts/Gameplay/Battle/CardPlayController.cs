@@ -501,10 +501,6 @@ namespace Crookedile.Gameplay.Battle
             if (cost.IsXCost)
                 return _mgr.PlayerStats.CurrentActionPoints;
 
-            // Open Tab: the first N Borrow cards each turn are free.
-            if (_mgr.Celebrity.NextBorrowIsFree && card.HasTag(CelebrityRules.BorrowTag))
-                return 0;
-
             StatusEffectManager statusMgr = _mgr.PlayerStatusEffects;
             int baseCost =
                 statusMgr != null

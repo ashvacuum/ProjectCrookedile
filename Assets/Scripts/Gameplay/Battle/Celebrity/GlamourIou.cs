@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Crookedile.Core;
 using Crookedile.Data.Cards;
 using UnityEngine;
 
@@ -25,9 +26,6 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>Max Debt gained per turn; 0 = uncapped.</summary>
         public const int MaxDebtPerTurn = 0;
-
-        /// <summary>Card tag marking a Borrow card (Open Tab discounts the first one each turn).</summary>
-        public const string BorrowTag = "borrow";
     }
 
     /// <summary>
@@ -58,14 +56,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Line of Credit: relief armed for the next Debt gain this turn.</summary>
         public int LineOfCreditReduction { get; set; }
 
-        /// <summary>Open Tab: Borrow cards per turn that cost 0.</summary>
-        public int FreeBorrowsPerTurn { get; set; }
-        public int BorrowsPlayedThisTurn { get; set; }
-
-        /// <summary>Overdraft: extra multiples of Borrow energy/Debt this turn (1 = double).</summary>
-        public int BorrowBonusMultiplesThisTurn { get; set; }
-
-        /// <summary>Rain Check: upcoming settlements skipped.</summary>
+        /// <summary>Payment Holiday: upcoming settlements skipped.</summary>
         public int SettlementsDelayed { get; set; }
 
         /// <summary>Too Big to Fail: upcoming unpaid-Debt damage instances negated.</summary>
@@ -122,13 +113,22 @@ namespace Crookedile.Gameplay.Battle
             MediaTrainingAvailable = false;
             bool isX = card.GetCosts().Exists(cost => cost.IsXCost);
             for (int i = _promises.Count - 1; i >= 0; i--)
-                if (_promises[i].dueTurn == _playerTurn
-                    && (card.PrintedCost >= _promises[i].minimumCost || isX && energyPaid >= _promises[i].minimumCost))
+                if (
+                    _promises[i].dueTurn == _playerTurn
+                    && (
+                        card.PrintedCost >= _promises[i].minimumCost
+                        || isX && energyPaid >= _promises[i].minimumCost
+                    )
+                )
                     _promises.RemoveAt(i);
         }
 
         /// <summary>Only missed commitments come due at turn end; fresh Debt keeps its normal deadline.</summary>
-        public void SettlePromises(OpinionLedger ledger, BattleStats player, Func<CardData, int, int> addToHand)
+        public void SettlePromises(
+            OpinionLedger ledger,
+            BattleStats player,
+            Func<CardData, int, int> addToHand
+        )
         {
             int owed = 0;
             for (int i = _promises.Count - 1; i >= 0; i--)
@@ -145,7 +145,7 @@ namespace Crookedile.Gameplay.Battle
         public void ResetBattle()
         {
             Debt = 0;
-            LineOfCreditReduction = FreeBorrowsPerTurn = SettlementsDelayed = DebtWaivers = 0;
+            LineOfCreditReduction = SettlementsDelayed = DebtWaivers = 0;
             BailoutCard = null;
             BailoutCapPerTurn = 0;
             MediaTrainingCost = MediaTrainingDraw = 0;
@@ -157,7 +157,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Per-player-turn tallies; call at the start of each player turn.</summary>
         public void ResetTurn()
         {
-            DebtGainedThisTurn = BorrowsPlayedThisTurn = BorrowBonusMultiplesThisTurn = 0;
+            DebtGainedThisTurn = 0;
             _lineOfCreditUsedThisTurn = false;
             _bailoutTokensThisTurn = 0;
             _playerTurn++;
@@ -165,9 +165,6 @@ namespace Crookedile.Gameplay.Battle
             NextSwayMultiplier = 1;
             MediaTrainingAvailable = MediaTrainingCost > 0;
         }
-
-        /// <summary>True while Open Tab still has a free Borrow left this turn.</summary>
-        public bool NextBorrowIsFree => BorrowsPlayedThisTurn < FreeBorrowsPerTurn;
 
         /// <summary>Adds Debt after Line of Credit and the per-turn cap. Returns the Debt actually added.</summary>
         public int GainDebt(int amount, DeckManager deck = null)
@@ -178,7 +175,8 @@ namespace Crookedile.Gameplay.Battle
                 amount -= LineOfCreditReduction;
                 if (deck != null && deck.HandCount > 0 && _creditDiscount > 0)
                 {
-                    int index = Crookedile.Data.RunState.Current?.Rng.Next(deck.HandCount)
+                    int index =
+                        Crookedile.Data.RunState.Current?.Rng.Next(deck.HandCount)
                         ?? UnityEngine.Random.Range(0, deck.HandCount);
                     deck.ReduceCostThisTurn(deck.Hand[index], _creditDiscount);
                 }
@@ -228,7 +226,7 @@ namespace Crookedile.Gameplay.Battle
         {
             if (SettlementsDelayed > 0)
             {
-                SettlementsDelayed--; // Rain Check: Debt stays on the books one more turn
+                SettlementsDelayed--; // Payment Holiday: Debt stays on the books one more turn
                 return;
             }
             int owed = Debt;
@@ -239,7 +237,12 @@ namespace Crookedile.Gameplay.Battle
             Collect(owed, ledger, player, addToHand);
         }
 
-        private void Collect(int owed, OpinionLedger ledger, BattleStats player, Func<CardData, int, int> addToHand)
+        private void Collect(
+            int owed,
+            OpinionLedger ledger,
+            BattleStats player,
+            Func<CardData, int, int> addToHand
+        )
         {
             if (owed <= 0)
                 return;
@@ -260,13 +263,11 @@ namespace Crookedile.Gameplay.Battle
                 ledger.ApplyOpinionShift(damage, true, "Debt", -1, -1, isHit: false);
             else
                 ledger.DecayOpinion(damage);
+            EventBus.Publish(new DebtUnpaidEvent { OpinionLost = damage });
 
             if (BailoutCard != null)
             {
-                int tokens = Mathf.Min(
-                    damage,
-                    BailoutCapPerTurn - _bailoutTokensThisTurn
-                );
+                int tokens = Mathf.Min(damage, BailoutCapPerTurn - _bailoutTokensThisTurn);
                 if (tokens > 0)
                 {
                     _bailoutTokensThisTurn += tokens;
