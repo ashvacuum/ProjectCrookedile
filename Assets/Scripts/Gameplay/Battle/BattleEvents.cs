@@ -485,6 +485,13 @@ namespace Crookedile.Gameplay.Battle
         public int EnemyIndex;
     }
 
+    /// <summary>Published when Celebrity Debt comes due and the energy on hand cannot cover it.</summary>
+    public struct DebtUnpaidEvent : IGameEvent
+    {
+        /// <summary>Opinion lost to the unpaid part of the bill.</summary>
+        public int OpinionLost;
+    }
+
     /// <summary>Published when an enemy's hostility returns to exactly 0 from any non-zero value.</summary>
     public struct EnemyNeutralizedEvent : IGameEvent
     {

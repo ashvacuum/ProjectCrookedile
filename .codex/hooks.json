@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && command -v python3 >/dev/null 2>&1 || exit 0; if [ \"$CLAUDE_CODE_REMOTE\" = \"true\" ]; then python3 -c 'import openpyxl' 2>/dev/null || pip install -q openpyxl >/dev/null 2>&1; fi; python3 tools/check_docs.py | tail -20; exit 0",
+            "timeout": 120,
+            "statusMessage": "Checking docs, readme map and card-art workbook..."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Media Training
+  m_Name: Promissory Note
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: b5bd39417618465aa733062e06c456f8
-  _cardName: Media Training
+  _id: 1436fa5621a04d3d6005e4e7f8688c4b
+  _cardName: Promissory Note
   _cardType: 2
   _rarity: 1
   _artwork: {fileID: 21300000, guid: 11dda9187956ace4d9bf3875a197d823, type: 3}
@@ -27,13 +27,18 @@ MonoBehaviour:
     _minimumCost: 0
     _maximumCost: 99
   _costReductionPerX: 7
-  _effects:
-  - rid: 5000000000000000001
-  _passives: []
+  _effects: []
+  _passives:
+  - rid: 5000000000000000003
   _isUpgraded: 0
-  _upgradedCosts: []
-  _upgradedEffects:
-  - rid: 2685915787672158213
+  _upgradedCosts:
+  - _costType: 1
+    _baseAmount: 0
+    _isXCost: 0
+    _costChangePerTurn: 0
+    _minimumCost: 0
+    _maximumCost: 99
+  _upgradedEffects: []
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -48,19 +53,29 @@ MonoBehaviour:
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes: 
+  _configurationNotes: Hostility pass. Numbers are playtest starting points.
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 2685915787672158213
-      type: {class: MediaTrainingEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _glamourCost: 1
-        _drawCount: 1
     - rid: 5000000000000000001
-      type: {class: MediaTrainingEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: DebtUnpaidTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5000000000000000002
+      type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _glamourCost: 2
-        _drawCount: 1
+        _amount: 2
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+    - rid: 5000000000000000003
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 5000000000000000001
+        _conditions: []
+        _oneShot: 0
+        _oncePerTurn: 1
+        _effects:
+        - rid: 5000000000000000002

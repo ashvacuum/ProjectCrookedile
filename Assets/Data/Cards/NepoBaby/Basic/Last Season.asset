@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Last Season
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 0ae1c95fa62ee444299f5ef3afdb0711, type: 3}
   _description: 
   _flavorText: He threw it away. You'll take it.
   _costs:
@@ -32,7 +32,8 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685915787672158208
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -52,6 +53,16 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 2685915787672158208
+      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 4
+        _amountSource: 0
+        _perXSource: 28
+        _multiplier: 1
+        _target: 1
+        _bypassSupport: 0
+        _maxAmount: 0
     - rid: 7000000000000000000
       type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

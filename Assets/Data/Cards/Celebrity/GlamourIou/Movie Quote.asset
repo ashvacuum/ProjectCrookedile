@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Movie Quote
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 21300000, guid: 11dda9187956ace4d9bf3875a197d823, type: 3}
-  _description:
-  _flavorText:
+  _artwork: {fileID: 21300000, guid: bc576c852d713f64cbca419bc0915984, type: 3}
+  _description: 
+  _flavorText: 
   _costs:
   - _costType: 1
     _baseAmount: 0
@@ -33,7 +33,8 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685915787672158214
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -48,12 +49,19 @@ MonoBehaviour:
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes: Glamour spending pass. Numbers are playtest starting points.
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 2685915787672158214
+      type: {class: GainGlamourEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 1
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
     - rid: 5000000000000000001
       type: {class: GainGlamourEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
@@ -63,4 +71,4 @@ MonoBehaviour:
         _multiplier: 1
     - rid: 5000000000000000002
       type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
+      data: 

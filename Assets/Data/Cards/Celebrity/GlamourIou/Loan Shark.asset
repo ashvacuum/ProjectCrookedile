@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Line of Credit
+  m_Name: Loan Shark
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
-  _id: b39d65b2c378f2c4b8a8fa87b8274e78
-  _cardName: Line of Credit
+  _id: 09de89e63ab559f2a7d3e873f857f7f3
+  _cardName: Loan Shark
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 21300000, guid: fa0917a73bec9bb4da7843a576bf539d, type: 3}
+  _artwork: {fileID: 21300000, guid: 6978c96dce3d2f347adaecbda903d5f1, type: 3}
   _description: 
   _flavorText: 
   _costs:
@@ -34,7 +34,8 @@ MonoBehaviour:
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects:
-  - rid: 2685915787672158211
+  - rid: 5000000000000000001
+  - rid: 5000000000000000004
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -55,16 +56,33 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 2685915787672158211
-      type: {class: LineOfCreditEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _debtReduction: 2
-        _cardDiscount: 1
     - rid: 5000000000000000001
-      type: {class: LineOfCreditEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: RaiseTargetHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _debtReduction: 2
-        _cardDiscount: 1
+        _amount: 2
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _target: 1
     - rid: 5000000000000000002
-      type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
+      type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _condition: 0
+        _effects:
+        - rid: 5000000000000000003
+    - rid: 5000000000000000003
+      type: {class: BorrowEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _energy: 4
+        _debt: 2
+    - rid: 5000000000000000004
+      type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _condition: 0
+        _effects:
+        - rid: 5000000000000000005
+    - rid: 5000000000000000005
+      type: {class: BorrowEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _energy: 5
+        _debt: 2
