@@ -1,6 +1,6 @@
 # Crookedile — Core Design Doc
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-05
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-09
 >
 > **Summary:** The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions.
 >
@@ -325,7 +325,7 @@ The discipline isn't a card count — it's whether a new player can read the ope
 Once starters feel right, sketch the **subset of directions** each class's *reward pool* opens — explicitly NOT in the starter, so the two don't bleed:
 
 - **Nepo Baby** — three lanes plus valves (full card list in `nepo-baby-class.md` section 6): **Burn** (Executive Privilege, Dynasty, Legacy Admission, Encore, Born Into It, Bail Out; Trust Fund as an unlock-gated Rare), **Pull and scan** paid in Hostility (Inside Information, Background Check, Call in a Favor, Special Order), a deliberately sparse **Return** lane (I Know a Guy, Heirloom, Family Seat, Hand-Me-Downs), a slow **Calm** lane capped at Neutral (Apology Tour, Smooth Things Over, Smooth Operator), and **valves** that each cost something (Skip the Line, VIP Access, Do-Over, Not My Problem). Cap valves per reward screen so he stays a glass cannon.
-- **Celebrity** — bank and spend **Glamour** (Iconic Line, Media Training, Victim Narrative, Disarming Charm), borrow **Debt** for tempo (Cash Advance, Fine Print, Second Take, Line of Credit, Overpromise), and earn relief through **Promises** (Paid-Off Promises). Soundbites connect the engines; Signature Catchphrase turns them into Movie Quotes. Full list in `celebrity-glamour-iou.md`.
+- **Celebrity** — bank and spend **Glamour** (Iconic Line, Media Training, Victim Narrative, Disarming Charm), borrow **Debt** for tempo (Cash Advance, Fine Print, Second Take, Line of Credit, Overpromise), and earn relief through **Promises** (Paid-Off Promises). Pick villains with **Aggravate** (Callout, Rage Bait, Feud, Tell-All Interview, Settle the Score, Manufactured Outrage) and pay for **Soothe** with Glamour or Debt (Photo With a Fan, Empty Promise, Red Carpet, Star Power, NDA, Beloved). Soundbites connect the engines; Signature Catchphrase turns them into Movie Quotes. Full list in `celebrity-glamour-iou.md`.
 - **Faith Leader** — **multi-status-per-card** cards (apply 2 statuses at once, so conversion isn't always 3 turns — a priority), bigger **harvest payoffs** that scale off Fanatics present (Sermon, Crusade), over-stacking past 3 for a bigger burst, Preach-style hard-silence tools, cards that exploit the *defensive* side of statuses (e.g. punish a Shamed enemy harder). Status-interaction *texture* (Guilt+Shame combos differently) lives here, not in core.
 
 This is where each class's *potential* lives. Starters only teach the verb; rewards reveal the ceiling.

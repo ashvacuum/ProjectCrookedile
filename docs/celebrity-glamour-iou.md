@@ -37,7 +37,7 @@ Opinion directly, bypassing Support. Battle end discards the bill. Debt gained t
 
 Line of Credit is a Rhetoric setup, not a permanent Policy. Only the next positive Debt gain this turn is reduced;
 it also discounts a random card still in hand until next turn. Old Debt is unaffected; an unused setup expires.
-Payment Holiday skips the next normal settlement and adds 1 Debt. Rain Check remains an alternative with no added bill.
+Payment Holiday skips the next normal settlement and adds 1 Debt.
 Neither postpones a missed Promise deadline.
 
 Paid-Off Promises reserves up to 3 existing Debt, exempting that portion from next-turn-start repayment.
@@ -69,6 +69,14 @@ Never Meet Your Heroes applies the debuff to a non-hostile opponent for 3 enemy 
 Each enemy-turn start raises their Hostility by 2, respecting Fanatic, Devotion, Ward, and hostility limits.
 Becoming hostile by any source removes the debuff before dealing 10 normal Sway; it triggers once.
 Otherwise it expires after the third enemy turn. Reapplication refreshes the deadline without stacking payoffs.
+
+### Hostility
+
+Celebrity wants a villain on camera. Aggravate feeds Glamour; Soothe costs Glamour or Debt.
+Hostility guards gate the best rates: Loan Shark only lends against a hostile target; They Love Me pays per receptive enemy. The echo chamber caps soothing everyone.
+Manufactured Outrage turns every enemy that goes hostile into 1 Glamour. Feud locks hostile enemies as Hardened.
+Empty Promise soothes one enemy now; at the start of your next turn every enemy Aggravates 2.
+Single-target cards still add the crowd's +1 Hostility.
 
 ## Retained defensive cards
 
@@ -104,6 +112,28 @@ Charm Offensive is the rare hybrid exception to the four core defensive card typ
 - **Never Meet Your Heroes:** Enhanced Rhetoric, 1 energy. Apply Starstruck to a non-hostile opponent.
 - **Charm Offensive:** Rare Pressure, X energy. Deal 2X Sway, gain 2X Support, reduce Hostility by X, in that order. X is energy actually spent; ordinary modifiers and subsequent crowd reaction apply.
 - **Movie Quote:** Basic generated-only Rhetoric, 0 energy. Gain 1 Glamour. Exhaust.
+- **Callout:** Basic Pressure, 1 energy. Deal 4 Sway; Aggravate 3. Upgraded: 6 Sway.
+- **Photo With a Fan:** Basic Pressure, 1 energy. Deal 3 Sway; Soothe 3; gain 1 Glamour. Upgraded: 4 Sway, Soothe 4.
+- **Rage Bait:** Enhanced Pressure, 1 energy. Aggravate 2; deal 1 Sway per Hostility gained this turn. Upgraded: 0 energy.
+- **Feud:** Enhanced Rhetoric, 1 energy. Aggravate 3; apply permanent Hardened to every hostile enemy; gain 2 Glamour. Upgraded: 3 Glamour.
+- **Empty Promise:** Enhanced Rhetoric, 0 energy. Soothe 4; next turn, Aggravate 2 to all enemies. Upgraded: Soothe 5.
+- **Manufactured Outrage:** Enhanced Policy, 1 energy. Whenever an enemy becomes hostile, gain 1 Glamour. Upgraded: 0 energy.
+- **Red Carpet:** Basic Pressure, 1 energy. Deal 5 Sway; if Glamour is 3+, Soothe 3. Upgraded: 7 Sway.
+- **Backhanded Thanks:** Basic Pressure, 0 energy. Deal 2 Sway; Aggravate 2; gain 1 Glamour. Upgraded: gain 2.
+- **Star Power:** Enhanced Pressure, 1 energy. Deal 4 Sway; Soothe 1 per 2 Glamour (rounded). Upgraded: 6 Sway.
+- **Tell-All Interview:** Enhanced Rhetoric, 2 energy. Gain 3 Glamour; Aggravate 4; deal 6 Sway. Upgraded: gain 4.
+- **NDA:** Enhanced Rhetoric, 0 energy. Soothe 4; take 2 Debt. Upgraded: Soothe 6.
+- **Settle the Score:** Enhanced Rhetoric, 0 energy. Cancel up to 2 Debt; Aggravate 4. Upgraded: up to 3.
+- **They Love Me:** Enhanced Policy, 1 energy. At the start of your turn, gain 1 Glamour per receptive enemy. Upgraded: 0 energy.
+- **Loan Shark:** Enhanced Rhetoric, 0 energy. Aggravate 2; if the target is hostile, Borrow 4 energy and owe 2 Debt. Upgraded: 5 energy.
+- **Promissory Note:** Enhanced Policy, 1 energy. Once per turn, when Debt goes unpaid, draw 2. Upgraded: 0 energy.
+- **Turn on the Charm:** Basic Rhetoric, 0 energy. Until your next turn, when an enemy turns receptive, draw 1 and gain 1 Glamour. Upgraded: gain 2.
+- **Big Spender:** Rare Pressure, 3 energy, costs 1 less per Debt. Deal 14 Sway. Upgraded: 18 Sway.
+- **Prime Time Ad Buy:** Rare Pressure, 3 energy. Deal 8 Sway; if Debt is 4+, deal 8 more. Upgraded: 10 and 10.
+- **Debt Consolidation:** Enhanced Rhetoric, 2 energy. Cancel all Debt; gain 3 Support per Debt cancelled. Upgraded: 4 per Debt.
+- **Spending Spree:** Enhanced Rhetoric, 2 energy. Borrow 3 energy and owe 3 Debt; draw 3. Upgraded: draw 4.
+- **Hostile Takeover:** Enhanced Pressure, 2 energy. Deal 6 Sway; if the target is hostile, cancel up to 3 Debt. Upgraded: 9 Sway.
+- **Beloved:** Rare Rhetoric, 1 energy. Soothe 2 on all enemies; gain 2 Glamour per receptive enemy; deal 4 Sway. Exhaust. Upgraded: 0 energy.
 
 Unlisted existing cards retain their existing values. New cards reuse Soundbite's illustration as placeholder art.
 
@@ -112,8 +142,9 @@ Unlisted existing cards retain their existing values. New cards reuse Soundbite'
 Effects use the existing SerializeReference model, visible in the Database window's Building blocks tab.
 Each mechanic has its own effect type: MediaTrainingEffect, SignatureCatchphraseEffect, LineOfCreditEffect,
 OverpromiseEffect, PaidOffPromisesEffect, DisarmingCharmEffect, and CharmOffensiveEffect.
-Debt policies likewise use OpenTabEffect, BailoutEffect, DebtWaiverEffect, DelayDebtSettlementEffect,
-and OverdraftEffect. Choose the mechanic through the effect type picker; each exposes only its own named
+Debt policies likewise use BailoutEffect, DebtWaiverEffect, and DelayDebtSettlementEffect.
+Unpaid Debt publishes DebtUnpaidEvent after the meter takes the hit; DebtUnpaidTrigger lets any passive react (Promissory Note).
+Choose the mechanic through the effect type picker; each exposes only its own named
 tuning fields. Enums may configure a single mechanic's target, source, filter, or amount formula; they must
 not select unrelated mechanics. The project rule is recorded in `AGENTS.md`.
 Media Training accepts an authored BattleUI button or creates one above End Turn when unassigned.

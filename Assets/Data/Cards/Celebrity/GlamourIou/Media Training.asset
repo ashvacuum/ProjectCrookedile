@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 2
   _rarity: 1
   _artwork: {fileID: 21300000, guid: 11dda9187956ace4d9bf3875a197d823, type: 3}
-  _description:
-  _flavorText:
+  _description: 
+  _flavorText: 
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -32,7 +32,8 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685915787672158213
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -47,12 +48,17 @@ MonoBehaviour:
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes: Glamour spending pass. Numbers are playtest starting points.
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 2685915787672158213
+      type: {class: MediaTrainingEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _glamourCost: 1
+        _drawCount: 1
     - rid: 5000000000000000001
       type: {class: MediaTrainingEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
