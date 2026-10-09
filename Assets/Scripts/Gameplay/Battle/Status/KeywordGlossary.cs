@@ -17,7 +17,10 @@ namespace Crookedile.Gameplay.Battle
         // Core non-status terms. Statuses come from the registry automatically.
         // ponytail: hardcoded dictionary — move to an SO only if a designer ever needs to edit
         // these without a code change.
-        private static readonly Dictionary<string, string> CoreTerms = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> CoreTerms = new Dictionary<
+            string,
+            string
+        >
         {
             ["Convert"] =
                 "Consume the target's pacify stacks (needs 3 + their Jaded) for an opinion burst. The enemy reverts to neutral.",
@@ -27,21 +30,28 @@ namespace Crookedile.Gameplay.Battle
             ["Scandal"] = "Unplayable junk that clogs your hand until addressed.",
             ["Heckle"] = "Temporary junk card; leaves your deck when the battle ends.",
             ["Opinion"] = "The shared meter. Fill it to win the room; hit zero and you lose it.",
-            ["Support"] = "Absorbs incoming Opinion drops on the meter. Expires at the start of your next turn.",
-            ["Denial"] = "Absorbs incoming Opinion rises on the meter. Expires at the start of their next turn.",
-            ["Hostility"] = "How aggressive an enemy is. Hostile enemies push harder; receptive ones hold back.",
+            ["Support"] =
+                "Absorbs incoming Opinion drops on the meter. Expires at the start of your next turn.",
+            ["Denial"] =
+                "Absorbs incoming Opinion rises on the meter. Expires at the start of their next turn.",
+            ["Hostility"] =
+                "How aggressive an enemy is. Hostile enemies push harder; receptive ones hold back.",
             ["Aggravate"] = "Raise an enemy's Hostility. Fanatic enemies ignore it.",
             ["Soothe"] = "Lower an enemy's Hostility. Hardened enemies ignore it.",
-            ["Hostile"] = "An enemy with high Hostility. It uses its hostile moves, which push hardest.",
+            ["Hostile"] =
+                "An enemy with high Hostility. It uses its hostile moves, which push hardest.",
             ["Neutral"] = "An enemy between Hostile and Receptive. It uses its neutral moves.",
-            ["Receptive"] = "An enemy with low Hostility. It uses its gentler moves and gives you Support.",
+            ["Receptive"] =
+                "An enemy with low Hostility. It uses its gentler moves and gives you Support.",
             ["Sway"] = "An Opinion push from your cards. It goes through the enemy's Denial.",
             ["Energy"] = "Spent to play cards. Refills at the start of your turn.",
-            ["Debt"] = "Owed Energy. Settled at the start of your next turn, out of that turn's Energy first and the meter second.",
+            ["Debt"] =
+                "Owed Energy. Settled at the start of your next turn, out of that turn's Energy first and the meter second.",
             ["Borrow"] = "Gain Energy now in exchange for Debt.",
             ["Burn"] = "Exhaust a card from your hand as a cost. Policies can't be burned.",
             ["Pull"] = "Take a chosen card from your draw pile into your hand.",
-            ["Rehearse"] = "Put up to that many cards from your hand on top of your draw pile, in the order you choose.",
+            ["Rehearse"] =
+                "Put up to that many cards from your hand on top of your draw pile, in the order you choose.",
             ["Scry"] = "Look at the top cards of your draw pile and discard any of them.",
             ["Replay"] = "The card's effects happen again. A replay isn't a new play.",
         };
@@ -89,13 +99,25 @@ namespace Crookedile.Gameplay.Battle
             );
         }
 
+        /// <summary>The first known keyword in plain <paramref name="text"/>, with its glossary entry.</summary>
+        public static bool TryGetFirst(string text, out string title, out string description)
+        {
+            EnsureBuilt();
+            var match = string.IsNullOrEmpty(text) ? null : _matcher.Match(text);
+            if (match != null && match.Success)
+                return TryGet(match.Value, out title, out description);
+            title = description = null;
+            return false;
+        }
+
         /// <summary>Resolves a link id (from TMP hover) back to tooltip content.</summary>
         public static bool TryGet(string linkId, out string title, out string description)
         {
             EnsureBuilt();
-            string key = linkId != null && linkId.StartsWith(LinkPrefix)
-                ? linkId.Substring(LinkPrefix.Length)
-                : linkId;
+            string key =
+                linkId != null && linkId.StartsWith(LinkPrefix)
+                    ? linkId.Substring(LinkPrefix.Length)
+                    : linkId;
             if (key != null && _entries.TryGetValue(key, out var entry))
             {
                 title = entry.title;

@@ -65,6 +65,13 @@
         /// </summary>
         public virtual DamagePreview? GetDamagePreview() => null;
 
+        /// <summary>
+        /// True when this effect has a condition and it holds in <paramref name="ctx"/> right now,
+        /// so the card can be highlighted in hand. Must not change state. Unconditional effects
+        /// return false.
+        /// </summary>
+        public virtual bool IsConditionMet(EffectExecutionContext ctx) => false;
+
 #if UNITY_EDITOR
         /// <summary>
         /// Editor-only health check: yields human-readable configuration problems with this effect

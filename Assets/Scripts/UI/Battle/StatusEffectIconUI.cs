@@ -80,7 +80,7 @@ namespace Crookedile.UI.Battle
             if (_iconMap == null || BattleTooltipUI.Instance == null)
                 return;
 
-            _iconMap.TryGet(_id, out var icon, out var color, out var name, out var desc);
+            _iconMap.TryGet(_id, out Sprite _, out Color _, out var name, out var desc);
 
             // Default: fall back to the behavior's display name when effectName is not authored in the SO
             if (string.IsNullOrEmpty(name))
@@ -89,9 +89,7 @@ namespace Crookedile.UI.Battle
             // Template substitution: replace {a} with the current stack count
             if (!string.IsNullOrEmpty(desc))
                 desc = desc.Replace("{a}", _currentStacks.ToString());
-
-            string extraLine = _currentStacks > 1 ? $"Stacks: {_currentStacks}" : null;
-            BattleTooltipUI.Instance.Show(name, desc, icon, color, extraLine);
+            BattleTooltipUI.Instance.Show(name, desc);
         }
 
         public void OnPointerExit(PointerEventData _)

@@ -7,7 +7,6 @@ namespace Crookedile.Utilities
     public interface IState
     {
         void OnEnter();
-        void OnUpdate();
         void OnExit();
     }
 
@@ -69,11 +68,6 @@ namespace Crookedile.Utilities
             _currentState?.OnEnter();
         }
 
-        public void Update()
-        {
-            _currentState?.OnUpdate();
-        }
-
         public bool IsInState(T stateType)
         {
             return EqualityComparer<T>.Default.Equals(_currentStateType, stateType);
@@ -84,8 +78,6 @@ namespace Crookedile.Utilities
     public abstract class State : IState
     {
         public virtual void OnEnter() { }
-
-        public virtual void OnUpdate() { }
 
         public virtual void OnExit() { }
     }

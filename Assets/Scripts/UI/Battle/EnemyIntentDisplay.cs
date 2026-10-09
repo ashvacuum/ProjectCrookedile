@@ -16,8 +16,8 @@ namespace Crookedile.UI.Battle
     /// Embed this as a child of each EnemySlotUI prefab. EnemySlotUI drives it directly
     /// via ShowIntent() — no EventBus subscriptions needed here.
     ///
-    /// Hovering the intent panel opens <see cref="BattleTooltipUI"/> with the move's
-    /// authored <see cref="Crookedile.Data.Enemy.EnemyMoveData.Description"/>.
+    /// Hovering the intent panel stacks <see cref="BattleTooltipUI"/> boxes beside it: the
+    /// move's damage first, then one box per other effect.
     ///
     /// Inspector wiring:
     ///   intentPanel      → the root GameObject of this intent display (show/hide)
@@ -216,9 +216,58 @@ namespace Crookedile.UI.Battle
         {
             if (_currentMove == null || BattleTooltipUI.Instance == null)
                 return;
-            if (string.IsNullOrEmpty(_currentMove.Description))
-                return;
-            BattleTooltipUI.Instance.Show(_currentMove.MoveName, _currentMove.Description);
+            BattleTooltipUI.Instance.ShowBeside(
+                (RectTransform)transform,
+                BuildTooltip(_currentMove)
+            );
+        }
+
+        /// <summary>
+        /// One box for the move's damage (titled with the move name, identical hits collapsed to
+        /// "×N"), then one box per other effect, titled with the keyword it applies.
+        /// </summary>
+        private static List<(string title, string description)> BuildTooltip(EnemyMoveData move)
+        {
+            var entries = new List<(string title, string description)>();
+            var damageLines = new List<string>();
+            var damageCounts = new Dictionary<string, int>();
+
+            foreach (var effect in move.Effects)
+            {
+                string line = effect?.GetDescription();
+                if (string.IsNullOrEmpty(line))
+                    continue;
+
+                if (effect.GetDamagePreview().HasValue)
+                {
+                    if (damageCounts.TryGetValue(line, out int n))
+                        damageCounts[line] = n + 1;
+                    else
+                    {
+                        damageCounts[line] = 1;
+                        damageLines.Add(line);
+                    }
+                    continue;
+                }
+
+                entries.Add(
+                    KeywordGlossary.TryGetFirst(line, out string keyword, out string meaning)
+                        ? (keyword, $"{line}\n{meaning}")
+                        : (move.MoveName, line)
+                );
+            }
+
+            if (damageLines.Count > 0)
+            {
+                for (int i = 0; i < damageLines.Count; i++)
+                {
+                    int hits = damageCounts[damageLines[i]];
+                    if (hits > 1)
+                        damageLines[i] = $"{damageLines[i]} ×{hits}";
+                }
+                entries.Insert(0, (move.MoveName, string.Join("\n", damageLines)));
+            }
+            return entries;
         }
 
         public void OnPointerExit(PointerEventData _)

@@ -47,7 +47,9 @@ namespace Crookedile.UI.Battle
             if (Battle != null && Battle.IsPlayerTurn)
                 Battle.RequestPlayCard(card, handIndex);
             else
-                GameLogger.LogWarning<HandPanel>($"Card play blocked: '{card?.CardName}' outside the player turn");
+                GameLogger.LogWarning<HandPanel>(
+                    $"Card play blocked: '{card?.CardName}' outside the player turn"
+                );
         }
 
         private void OnCardPlayed(CardPlayedEvent evt)
@@ -109,6 +111,7 @@ namespace Crookedile.UI.Battle
             foreach (var btn in _activeButtons)
                 if (btn != null)
                     btn.RefreshVisuals(evt.NewValue);
+            RefreshHighlights();
         }
 
         #endregion
@@ -128,6 +131,22 @@ namespace Crookedile.UI.Battle
                 return;
             _rebuildQueued = false;
             RebuildHand();
+            RefreshHighlights();
+        }
+
+        /// <summary>
+        /// Rims playable cards whose condition is met. Runs after each hand rebuild (turn-start
+        /// draw, every resolved play) and on Energy changes; nothing changes in between.
+        /// </summary>
+        private void RefreshHighlights()
+        {
+            if (Battle == null)
+                return;
+            foreach (var btn in _activeButtons)
+                if (btn != null)
+                    btn.SetConditionHighlight(
+                        btn.IsPlayable && Battle.IsCardConditionMet(btn.CardData)
+                    );
         }
 
         /// <summary>
@@ -175,7 +194,10 @@ namespace Crookedile.UI.Battle
             for (int i = 0; i < hand.Count; i++)
             {
                 CardData card = hand[i];
-                CardButton btn = BattlePoolManager.Instance.RentCard(card.CardType, cardButtonContainer);
+                CardButton btn = BattlePoolManager.Instance.RentCard(
+                    card.CardType,
+                    cardButtonContainer
+                );
                 if (btn == null)
                     continue;
 

@@ -645,6 +645,21 @@ namespace Crookedile.Gameplay.Battle
 
         public int CurrentGlamour => PlayerStatusEffects?.GetStacks<GlamourStatus>() ?? 0;
 
+        /// <summary>
+        /// True when any effect on <paramref name="card"/> has a condition that holds right now,
+        /// read against the focused enemy. Drives the in-hand highlight; changes no state.
+        /// </summary>
+        public bool IsCardConditionMet(CardData card)
+        {
+            if (card?.Effects == null || _effectResolver == null)
+                return false;
+            var ctx = _effectResolver.CreateContext(isPlayerCard: true);
+            foreach (var effect in card.Effects)
+                if (effect != null && effect.IsConditionMet(ctx))
+                    return true;
+            return false;
+        }
+
         public bool CanUseMediaTraining =>
             _cards != null
             && _playerDeck != null
@@ -1025,11 +1040,6 @@ namespace Crookedile.Gameplay.Battle
         }
 
         #endregion
-
-        private void Update()
-        {
-            _stateMachine?.Update();
-        }
 
         #region Internal state-machine surface
 

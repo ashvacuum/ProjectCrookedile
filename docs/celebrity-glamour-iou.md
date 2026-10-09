@@ -56,7 +56,7 @@ It never changes the campaign deck or source assets.
 
 Media Training opens a once-per-player-turn button after normal draws: spend 2 Glamour to draw 1 without energy.
 The first card play or ending the turn dismisses it. No mandatory modal prompt.
-The button is disabled when Glamour is insufficient, the hand is full, or draw and discard piles are empty.
+The button is hidden when Glamour is insufficient, the hand is full, or draw and discard piles are empty.
 Playing the Policy does not open the current turn's window; extra copies do not grant extra activations.
 
 Second Take and Advance Booking charge Debt only when selection successfully moves a non-Exhaust card.

@@ -124,7 +124,9 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private Button endTurnButton;
 
-        [Tooltip("Optional authored Media Training button; when absent, one is created above End Turn.")]
+        [Tooltip(
+            "Optional authored Media Training button; when absent, one is created above End Turn."
+        )]
         [SerializeField]
         private Button _mediaTrainingButton;
         private TMP_Text _mediaTrainingLabel;
@@ -180,15 +182,24 @@ namespace Crookedile.UI.Battle
         {
             if (_mediaTrainingButton == null && endTurnButton != null)
             {
-                var go = new GameObject("MediaTrainingButton", typeof(RectTransform), typeof(Image), typeof(Button));
+                var go = new GameObject(
+                    "MediaTrainingButton",
+                    typeof(RectTransform),
+                    typeof(Image),
+                    typeof(Button)
+                );
                 var rect = (RectTransform)go.transform;
                 var source = (RectTransform)endTurnButton.transform;
                 rect.SetParent(source.parent, false);
                 rect.anchorMin = source.anchorMin;
                 rect.anchorMax = source.anchorMax;
                 rect.pivot = source.pivot;
-                rect.sizeDelta = new Vector2(Mathf.Max(220, source.sizeDelta.x), Mathf.Max(48, source.sizeDelta.y));
-                rect.anchoredPosition = source.anchoredPosition + Vector2.up * (rect.sizeDelta.y + 12);
+                rect.sizeDelta = new Vector2(
+                    Mathf.Max(220, source.sizeDelta.x),
+                    Mathf.Max(48, source.sizeDelta.y)
+                );
+                rect.anchoredPosition =
+                    source.anchoredPosition + Vector2.up * (rect.sizeDelta.y + 12);
                 go.GetComponent<Image>().color = new Color(0.18f, 0.28f, 0.38f, 1);
                 _mediaTrainingButton = go.GetComponent<Button>();
                 var label = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -351,6 +362,7 @@ namespace Crookedile.UI.Battle
         {
             _pendingCardChoice = evt;
             _cardChoiceActive = true;
+            RequestStatsRefresh(); // Media Training locks while a choice is open
             if (endTurnButton != null)
                 endTurnButton.interactable = false;
             cardChoicePanel?.Open(
@@ -368,6 +380,7 @@ namespace Crookedile.UI.Battle
             var confirmed = _pendingCardChoice;
             _pendingCardChoice = null;
             _cardChoiceActive = false;
+            RequestStatsRefresh();
             cardChoicePanel?.Close();
             if (endTurnButton != null)
                 endTurnButton.interactable = true;
@@ -414,26 +427,40 @@ namespace Crookedile.UI.Battle
 
         private void LateUpdate()
         {
-            if (_mediaTrainingButton != null)
-            {
-                bool available = battleManager != null && battleManager.CurrentState == BattleState.PlayerTurn
-                    && battleManager.Celebrity.MediaTrainingAvailable;
-                if (_mediaTrainingButton.gameObject.activeSelf != available)
-                    _mediaTrainingButton.gameObject.SetActive(available);
-                _mediaTrainingButton.interactable = available && !_cardChoiceActive && battleManager.CanUseMediaTraining;
-                if (available && _mediaTrainingLabel != null
-                    && (_displayedGlamourCost != battleManager.Celebrity.MediaTrainingCost
-                        || _displayedDrawCount != battleManager.Celebrity.MediaTrainingDraw))
-                {
-                    _displayedGlamourCost = battleManager.Celebrity.MediaTrainingCost;
-                    _displayedDrawCount = battleManager.Celebrity.MediaTrainingDraw;
-                    _mediaTrainingLabel.text = $"Spend {battleManager.Celebrity.MediaTrainingCost} Glamour: Draw {battleManager.Celebrity.MediaTrainingDraw}";
-                }
-            }
             if (!_statsRefreshQueued)
                 return;
             _statsRefreshQueued = false;
             UpdateStatsDisplay();
+            RefreshMediaTraining();
+        }
+
+        /// <summary>
+        /// Shows the Media Training button only while it can be used (player turn, before any card
+        /// play, enough Glamour, something to draw, no card choice open). Its inputs all request a
+        /// stats refresh, so this runs with it rather than every frame.
+        /// </summary>
+        private void RefreshMediaTraining()
+        {
+            if (_mediaTrainingButton == null)
+                return;
+            bool available =
+                battleManager != null && !_cardChoiceActive && battleManager.CanUseMediaTraining;
+            if (_mediaTrainingButton.gameObject.activeSelf != available)
+                _mediaTrainingButton.gameObject.SetActive(available);
+            if (
+                available
+                && _mediaTrainingLabel != null
+                && (
+                    _displayedGlamourCost != battleManager.Celebrity.MediaTrainingCost
+                    || _displayedDrawCount != battleManager.Celebrity.MediaTrainingDraw
+                )
+            )
+            {
+                _displayedGlamourCost = battleManager.Celebrity.MediaTrainingCost;
+                _displayedDrawCount = battleManager.Celebrity.MediaTrainingDraw;
+                _mediaTrainingLabel.text =
+                    $"Spend {battleManager.Celebrity.MediaTrainingCost} Glamour: Draw {battleManager.Celebrity.MediaTrainingDraw}";
+            }
         }
 
         private void UpdateStatsDisplay()
