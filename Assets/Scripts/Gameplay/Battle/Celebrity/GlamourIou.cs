@@ -247,15 +247,16 @@ namespace Crookedile.Gameplay.Battle
             if (owed <= 0)
                 return;
 
-            int paid = Mathf.Min(owed, player.CurrentActionPoints);
+            var paid = Mathf.Min(owed, player.CurrentActionPoints);
             player.GainActionPoints(-paid);
 
-            int damage = (owed - paid) * CelebrityRules.DebtToOpinionRate;
+            var damage = (owed - paid) * CelebrityRules.DebtToOpinionRate;
             if (damage > 0 && DebtWaivers > 0)
             {
                 DebtWaivers--; // Too Big to Fail
                 damage = 0;
             }
+
             if (damage <= 0)
                 return;
 
@@ -265,15 +266,15 @@ namespace Crookedile.Gameplay.Battle
                 ledger.DecayOpinion(damage);
             EventBus.Publish(new DebtUnpaidEvent { OpinionLost = damage });
 
-            if (BailoutCard != null)
-            {
-                int tokens = Mathf.Min(damage, BailoutCapPerTurn - _bailoutTokensThisTurn);
-                if (tokens > 0)
-                {
-                    _bailoutTokensThisTurn += tokens;
-                    addToHand(BailoutCard, tokens);
-                }
-            }
+            if (BailoutCard == null)
+                return;
+
+            var tokens = Mathf.Min(damage, BailoutCapPerTurn - _bailoutTokensThisTurn);
+
+            if (tokens <= 0)
+                return;
+            _bailoutTokensThisTurn += tokens;
+            addToHand(BailoutCard, tokens);
         }
     }
 }

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33e4e862044caaa47af84390235bb948, type: 3}
-  m_Name: Persecution Complex
+  m_Name: Victim Narrative
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: fb16d4d65406406fb8150a285ad55068
   _cardName: Victim Narrative
