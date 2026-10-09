@@ -1,6 +1,6 @@
 # Crookedile — Art Bible & Handoff Spec
 
-> **Kind:** Art · **Status:** Canonical · **Updated:** 2026-10-03
+> **Kind:** Art · **Status:** Canonical · **Updated:** 2026-10-09
 >
 > **Summary:** Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Database window's tabs are the live blank-slot checker.
 >
@@ -17,6 +17,8 @@
 > **Rendering direction: the anime _Odd Taxi_, played livelier** — flat, muted, sophisticated, deadpan; grounded anthropomorphic cast with dry restraint. *Lively* is the one deliberate departure: Odd Taxi's stillness is the wrong read for a room you are actively working, so keep its flatness and its palette but not its inertia — more colour saturation in the accents, more posture and gesture in the cast, faces that are reacting rather than observing. Full generation prompt: `docs/reference/style-mock-prompt.md` (v4).
 >
 > **Reference of record: `docs/design/crookedile-style-v4-oddtaxi.png`** (approved 2026-07-03 — the flat muted committee-hall mock). This is the look to match: flat cel shading, dusty warm palette (mustard/teal/brick/cream/olive), thin clean lines, deadpan grounded animal-people, even soft lighting. The earlier dark-painterly mock is superseded.
+
+> **Battle UI reference: [`docs/design/battle-ui-reference.png`](design/battle-ui-reference.png)** — the battle screen layout to build toward: Opinion bar with Support and Denial, a row of opponents with one intent tag, a stance tag and a hostility track each, the player at the podium with the class resource tray above a fanned hand, Energy/Draw/Discard bottom left, End Turn bottom right. Edit prompt: `docs/reference/battle-ui-mock-prompt.md`.
 >
 > ⚑ **That file is not in the repo.** `docs/design/` holds two PNGs under GUID filenames — rename whichever is the approved v4 mock to the path above, and delete or clearly label the other, or this pointer stays dead for anyone the file is handed to.
 >
