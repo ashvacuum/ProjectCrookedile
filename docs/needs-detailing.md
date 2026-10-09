@@ -1,6 +1,6 @@
 # Needs Detailing — design questions awaiting a decision
 
-> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-10-03
+> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-10-09
 >
 > **Summary:** Design questions awaiting a call, ordered by how much they block. Read before authoring content.
 >
@@ -55,6 +55,10 @@ stop pretending to be one.
 
 ## Resolved
 
+- **Card highlight** (2026-10-09, not built): a card in hand glows when **a condition on it is met** right now
+  (target is Hostile, Debt is owed, the enemy has a status). Boosted numbers are not a highlight; they belong on
+  the card's own numbers, once damage, Aggravate and Soothe preview per target. Combos are out: there's no clear
+  rule for when one is "ready".
 - **Receptive enemy bonus** (2026-10-03): **+2 Support when an enemy turns receptive, +1 per receptive enemy at the
   start of your turn** (`core-design.md` §3). No taper toward the Echo Chamber.
 - **Echo-chamber escape valve** (2026-10-03): the hostility card is an ordinary, removable card. The bot playtests show
