@@ -11,12 +11,6 @@ namespace Crookedile.Gameplay.Battle
         public override void OnEnter() =>
             GameLogger.LogInfo<BattleManager>("Player's turn started");
 
-        public override void OnExit() =>
-            GameLogger.LogInfo<BattleManager>("Player's turn ended");
-
-        public override void OnUpdate()
-        {
-            // Waits for the UI to call RequestEndTurn()
-        }
+        public override void OnExit() => GameLogger.LogInfo<BattleManager>("Player's turn ended");
     }
 }

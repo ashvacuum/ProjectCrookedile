@@ -1,20 +1,19 @@
-﻿using TMPro;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Unified cursor-following tooltip singleton used by both status effect icons
-    /// (<see cref="StatusEffectIconUI"/>) and enemy intent panels (<see cref="EnemyIntentDisplay"/>).
+    /// Shared battle tooltip: one name + description box per entry.
     ///
-    /// Setup:
-    ///   1. Add this component to a root panel GameObject on a canvas with a high sort order.
-    ///   2. Assign <see cref="_canvas"/>, <see cref="_panel"/>, and the optional text/image fields.
-    ///   3. The panel starts hidden; it is shown/hidden by callers via <see cref="Show"/> and <see cref="Hide"/>.
+    /// <see cref="Show"/> opens a single box that follows the cursor (status icons, enemy intents).
+    /// <see cref="ShowBeside"/> stacks one box per entry beside an anchor (a hovered card lists
+    /// every keyword it uses), flipping to the anchor's left when the right side runs out of room.
     ///
-    /// Pass null/empty strings for optional parameters to hide those elements.
+    /// Extra boxes are clones of this panel; the first instance is the singleton and lays the
+    /// clones out, the clones only hold text.
     /// </summary>
     public class BattleTooltipUI : MonoBehaviour
     {
@@ -28,10 +27,6 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private RectTransform _panel;
 
-        [Tooltip("Optional icon image. Hidden when Show() is called without an icon.")]
-        [SerializeField]
-        private Image _icon;
-
         [Tooltip("Title / name line.")]
         [SerializeField]
         private TMP_Text _titleTxt;
@@ -40,18 +35,33 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private TMP_Text _descTxt;
 
-        [Tooltip("Optional extra line (e.g. 'Stacks: 3'). Hidden when Show() passes null/empty.")]
-        [SerializeField]
-        private TMP_Text _extraTxt;
-
         [Tooltip("Pixel offset from the cursor position to the top-left corner of the panel.")]
         [SerializeField]
         private Vector2 _cursorOffset = new Vector2(12f, -12f);
 
+        [Tooltip("Horizontal gap between an anchor (e.g. a hovered card) and its tooltip stack.")]
+        [SerializeField]
+        private float _anchorGap = 12f;
+
+        [Tooltip("Vertical gap between stacked tooltip boxes.")]
+        [SerializeField]
+        private float _stackSpacing = 8f;
+
+        // Row 0 is this panel; further rows are clones. Only populated on the singleton.
+        private readonly List<BattleTooltipUI> _rows = new List<BattleTooltipUI>();
+        private readonly Vector3[] _corners = new Vector3[4];
+        private RectTransform _anchor;
+        private bool _anchored;
+        private int _shown;
+
         #region Lifecycle
         private void Awake()
         {
-            Instance = this;
+            if (Instance == null)
+            {
+                Instance = this;
+                _rows.Add(this);
+            }
             if (_panel != null)
                 _panel.gameObject.SetActive(false);
         }
@@ -64,8 +74,17 @@ namespace Crookedile.UI.Battle
 
         private void Update()
         {
-            if (_panel == null || !_panel.gameObject.activeSelf)
+            if (Instance != this || _panel == null || !_panel.gameObject.activeSelf)
                 return;
+
+            if (_anchored)
+            {
+                if (_anchor == null || !_anchor.gameObject.activeInHierarchy)
+                    Hide();
+                else
+                    LayOutBesideAnchor();
+                return;
+            }
 
             Vector2 mousePos =
                 Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
@@ -83,56 +102,91 @@ namespace Crookedile.UI.Battle
         #endregion
 
         #region Public API
+        /// <summary>Show one box near the cursor.</summary>
+        public void Show(string title, string description)
+        {
+            _anchored = false;
+            _anchor = null;
+            SetRows(new[] { (title, description) });
+        }
+
         /// <summary>
-        /// Show the tooltip near the cursor.
+        /// Show one box per entry, stacked top-down beside <paramref name="anchor"/>. Hides when
+        /// <paramref name="entries"/> is empty or the anchor goes away.
         /// </summary>
-        /// <param name="title">Header line (move name or effect name).</param>
-        /// <param name="description">Body text (what the effect / move does).</param>
-        /// <param name="icon">Optional icon sprite — element hidden when null.</param>
-        /// <param name="iconColor">Tint applied to the icon; defaults to white when <c>default</c>.</param>
-        /// <param name="extraLine">Optional footer line (e.g. "Stacks: 3") — element hidden when null/empty.</param>
-        public void Show(
-            string title,
-            string description,
-            Sprite icon = null,
-            Color iconColor = default,
-            string extraLine = null
+        public void ShowBeside(
+            RectTransform anchor,
+            IReadOnlyList<(string title, string description)> entries
         )
         {
-            if (_titleTxt != null)
-                _titleTxt.text = title;
-            if (_descTxt != null)
-                _descTxt.text = description;
-
-            if (_icon != null)
+            if (anchor == null || entries.Count == 0)
             {
-                bool hasIcon = icon != null;
-                _icon.gameObject.SetActive(hasIcon);
-                if (hasIcon)
-                {
-                    _icon.sprite = icon;
-                    _icon.color = iconColor == default ? Color.white : iconColor;
-                }
+                Hide();
+                return;
             }
-
-            if (_extraTxt != null)
-            {
-                bool hasExtra = !string.IsNullOrEmpty(extraLine);
-                _extraTxt.gameObject.SetActive(hasExtra);
-                if (hasExtra)
-                    _extraTxt.text = extraLine;
-            }
-
-            if (_panel != null)
-                _panel.gameObject.SetActive(true);
+            _anchored = true;
+            _anchor = anchor;
+            SetRows(entries);
+            LayOutBesideAnchor();
         }
 
-        /// <summary>Hides the tooltip panel immediately.</summary>
+        /// <summary>Hides every tooltip box immediately.</summary>
         public void Hide()
         {
-            if (_panel != null)
-                _panel.gameObject.SetActive(false);
+            _anchored = false;
+            _anchor = null;
+            _shown = 0;
+            foreach (var row in _rows)
+                row._panel.gameObject.SetActive(false);
         }
         #endregion
+
+        private void SetRows(IReadOnlyList<(string title, string description)> entries)
+        {
+            while (_rows.Count < entries.Count)
+                _rows.Add(Instantiate(this, _panel.parent));
+
+            _shown = entries.Count;
+            for (int i = 0; i < _rows.Count; i++)
+            {
+                var row = _rows[i];
+                bool on = i < _shown;
+                row._panel.gameObject.SetActive(on);
+                if (!on)
+                    continue;
+                if (row._titleTxt != null)
+                    row._titleTxt.text = entries[i].title;
+                if (row._descTxt != null)
+                    row._descTxt.text = entries[i].description;
+            }
+        }
+
+        // ponytail: boxes are the prefab's fixed size; add a ContentSizeFitter to the panel and a
+        // LayoutRebuilder pass here if long descriptions start overflowing.
+        private void LayOutBesideAnchor()
+        {
+            var parent = (RectTransform)_panel.parent;
+            _anchor.GetWorldCorners(_corners); // 0 bottom-left, 1 top-left, 2 top-right
+            Vector2 topLeft = parent.InverseTransformPoint(_corners[1]);
+            Vector2 topRight = parent.InverseTransformPoint(_corners[2]);
+
+            float width = _panel.rect.width;
+            float x = topRight.x + _anchorGap;
+            if (x + width > parent.rect.xMax)
+                x = topLeft.x - _anchorGap - width;
+
+            float total = 0f;
+            for (int i = 0; i < _shown; i++)
+                total += _rows[i]._panel.rect.height + (i > 0 ? _stackSpacing : 0f);
+
+            // Start level with the anchor's top, pushed up if the stack would leave the screen.
+            float y = Mathf.Max(topRight.y, parent.rect.yMin + total);
+            for (int i = 0; i < _shown; i++)
+            {
+                var rt = _rows[i]._panel;
+                rt.localPosition = new Vector3(x, y, 0f); // pivot is top-left
+                y -= rt.rect.height + _stackSpacing;
+            }
+        }
     }
 }

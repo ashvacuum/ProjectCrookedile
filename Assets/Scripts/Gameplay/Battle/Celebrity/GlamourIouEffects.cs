@@ -71,6 +71,9 @@ namespace Crookedile.Gameplay.Battle
                 ctx.Deck.DrawCards(amountOverride ?? _amount);
         }
 
+        public override bool IsConditionMet(EffectExecutionContext ctx) =>
+            (ctx.BattleManager?.CurrentGlamour ?? 0) >= _threshold;
+
         public override string GetDescription() =>
             $"If Glamour is {_threshold}+, draw {_amount} more";
     }

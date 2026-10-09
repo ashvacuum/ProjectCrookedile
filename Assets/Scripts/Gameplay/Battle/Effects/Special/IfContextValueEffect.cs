@@ -50,17 +50,23 @@ namespace Crookedile.Gameplay.Battle
             }
         }
 
-        public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
+        public override void Execute(EffectExecutionContext ctx, int? amountOverride = null) =>
+            ExecuteAll(Holds(ctx) ? _then : _else, ctx);
+
+        /// <summary>Met when the Then branch would run; an "Unless" (empty Then) has no bonus to show.</summary>
+        public override bool IsConditionMet(EffectExecutionContext ctx) =>
+            _then != null && _then.Count > 0 && Holds(ctx);
+
+        private bool Holds(EffectExecutionContext ctx)
         {
             int value = ctx.GetValue(_value);
-            bool holds = _comparison switch
+            return _comparison switch
             {
                 ComparisonType.AtLeast => value >= _threshold,
                 ComparisonType.AtMost => value <= _threshold,
                 ComparisonType.Equals => value == _threshold,
                 _ => false,
             };
-            ExecuteAll(holds ? _then : _else, ctx);
         }
 
         public override string GetDescription()
