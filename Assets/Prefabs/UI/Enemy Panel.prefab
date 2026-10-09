@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 100/100
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 4c9581b0f074374498fe2166d24a660b, type: 2}
-  m_sharedMaterial: {fileID: -8958199728935286697, guid: 4c9581b0f074374498fe2166d24a660b, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2edaeefba9e4a41409207ba32bc3dc26, type: 2}
+  m_sharedMaterial: {fileID: -7347246411779152372, guid: 2edaeefba9e4a41409207ba32bc3dc26, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -277,7 +277,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 10, y: 50}
+  m_SizeDelta: {x: 141.81, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1983262881914126548
 CanvasRenderer:
@@ -454,10 +454,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Crookedile.UI::Crookedile.UI.Battle.OpinionMeterUI
   _barContainer: {fileID: 5126733439877567004}
-  _playerShield: {fileID: 1471582496989247320}
+  _playerSupportBar: {fileID: 1471582496989247320}
   _barFill: {fileID: 32329655388704423}
-  _enemyShield: {fileID: 9137516265271607830}
+  _enemyDenialBar: {fileID: 9137516265271607830}
   _tweenDuration: 0.25
+  _ghostFill: {fileID: 0}
+  _ghostLossColor: {r: 1, g: 0.85, b: 0.3, a: 1}
+  _ghostGainColor: {r: 0.75, g: 1, b: 0.75, a: 1}
+  _ghostDelay: 0.35
+  _ghostDuration: 0.45
+  _fullJuiceShift: 0.15
+  _shakeStrength: 18
+  _punchScale: 0.12
+  _flashColor: {r: 1, g: 1, b: 1, a: 1}
   _thresholdMarker: {fileID: 3973458710541158314}
   _valueText: {fileID: 3084105616310411813}
   _turnsText: {fileID: 2371662875373801271}
@@ -500,7 +509,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 10, y: 50}
+  m_SizeDelta: {x: 657.1, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6728180962871489537
 CanvasRenderer:
@@ -607,8 +616,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 100/100
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 4c9581b0f074374498fe2166d24a660b, type: 2}
-  m_sharedMaterial: {fileID: -8958199728935286697, guid: 4c9581b0f074374498fe2166d24a660b, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2edaeefba9e4a41409207ba32bc3dc26, type: 2}
+  m_sharedMaterial: {fileID: -7347246411779152372, guid: 2edaeefba9e4a41409207ba32bc3dc26, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -768,7 +777,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Crookedile.UI::Crookedile.UI.Battle.EnemyRowPanel
   enemySlotContainer: {fileID: 6356149785948822252}
-  enemySlotPrefab: {fileID: 5129716837229297804, guid: 27b4f0d6ccdeff948896ca6804495b83, type: 3}
 --- !u!1 &7387195345980057061
 GameObject:
   m_ObjectHideFlags: 0
@@ -866,7 +874,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 10, y: 50}
+  m_SizeDelta: {x: 240.59, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8610721909200273027
 CanvasRenderer:
