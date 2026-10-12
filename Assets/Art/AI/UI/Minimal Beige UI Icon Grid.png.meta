@@ -1,0 +1,2405 @@
+fileFormatVersion: 2
+guid: 5d9eaa608fbae84418326bf782be8653
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3179802785148782195
+    second: Minimal Beige UI Icon Grid_0
+  - first:
+      213: 6701025179303396589
+    second: Minimal Beige UI Icon Grid_1
+  - first:
+      213: 8263380770839980990
+    second: Minimal Beige UI Icon Grid_2
+  - first:
+      213: 6431345524327636553
+    second: Minimal Beige UI Icon Grid_3
+  - first:
+      213: 1722049716896299501
+    second: Minimal Beige UI Icon Grid_4
+  - first:
+      213: -4970392780141698306
+    second: Minimal Beige UI Icon Grid_5
+  - first:
+      213: -7870787131554923702
+    second: Minimal Beige UI Icon Grid_6
+  - first:
+      213: -7401026560857776467
+    second: Minimal Beige UI Icon Grid_7
+  - first:
+      213: 6347799674867311226
+    second: Minimal Beige UI Icon Grid_8
+  - first:
+      213: -9136965005376914156
+    second: Minimal Beige UI Icon Grid_9
+  - first:
+      213: -4593554912139954938
+    second: Minimal Beige UI Icon Grid_10
+  - first:
+      213: -5299402269151329515
+    second: Minimal Beige UI Icon Grid_11
+  - first:
+      213: 1797080514186243227
+    second: Minimal Beige UI Icon Grid_12
+  - first:
+      213: -4359663336255946802
+    second: Minimal Beige UI Icon Grid_13
+  - first:
+      213: -7389109621074551595
+    second: Minimal Beige UI Icon Grid_14
+  - first:
+      213: -6012952571034512800
+    second: Minimal Beige UI Icon Grid_15
+  - first:
+      213: -8026060952925652475
+    second: Minimal Beige UI Icon Grid_16
+  - first:
+      213: 3852003466261948195
+    second: Minimal Beige UI Icon Grid_17
+  - first:
+      213: 6371096704458394736
+    second: Minimal Beige UI Icon Grid_18
+  - first:
+      213: -8046162254556407763
+    second: Minimal Beige UI Icon Grid_19
+  - first:
+      213: -4440513476708907102
+    second: Minimal Beige UI Icon Grid_20
+  - first:
+      213: -2987273512665625380
+    second: Minimal Beige UI Icon Grid_21
+  - first:
+      213: -3505032379120567014
+    second: Minimal Beige UI Icon Grid_22
+  - first:
+      213: 6920825892098080590
+    second: Minimal Beige UI Icon Grid_23
+  - first:
+      213: -5717438538566144480
+    second: Minimal Beige UI Icon Grid_24
+  - first:
+      213: 753898297943252301
+    second: Minimal Beige UI Icon Grid_25
+  - first:
+      213: 3613571171214894081
+    second: Minimal Beige UI Icon Grid_26
+  - first:
+      213: 3152482442858366229
+    second: Minimal Beige UI Icon Grid_27
+  - first:
+      213: 8207122137948360168
+    second: Minimal Beige UI Icon Grid_28
+  - first:
+      213: -1535807055420544419
+    second: Minimal Beige UI Icon Grid_29
+  - first:
+      213: 5333423103910149933
+    second: Minimal Beige UI Icon Grid_30
+  - first:
+      213: 4006827320918352437
+    second: Minimal Beige UI Icon Grid_31
+  - first:
+      213: -8228806761635179921
+    second: Minimal Beige UI Icon Grid_32
+  - first:
+      213: -4700143176733765506
+    second: Minimal Beige UI Icon Grid_33
+  - first:
+      213: 2312934940572168002
+    second: Minimal Beige UI Icon Grid_34
+  - first:
+      213: -1817560261980410238
+    second: Minimal Beige UI Icon Grid_35
+  - first:
+      213: 4417523978182579528
+    second: Minimal Beige UI Icon Grid_36
+  - first:
+      213: 7398715326546436456
+    second: Minimal Beige UI Icon Grid_37
+  - first:
+      213: 1202950199915091374
+    second: Minimal Beige UI Icon Grid_38
+  - first:
+      213: -6276222856872593460
+    second: Minimal Beige UI Icon Grid_39
+  - first:
+      213: 2173229979834634044
+    second: Minimal Beige UI Icon Grid_40
+  - first:
+      213: -4957149827104855250
+    second: Minimal Beige UI Icon Grid_41
+  - first:
+      213: 3397824199775398391
+    second: Minimal Beige UI Icon Grid_42
+  - first:
+      213: 3810144793347313511
+    second: Minimal Beige UI Icon Grid_43
+  - first:
+      213: -6702258982987548943
+    second: Minimal Beige UI Icon Grid_44
+  - first:
+      213: 5915805129687521025
+    second: Minimal Beige UI Icon Grid_45
+  - first:
+      213: -7256917978435100353
+    second: Minimal Beige UI Icon Grid_46
+  - first:
+      213: 6196869847839856486
+    second: Minimal Beige UI Icon Grid_47
+  - first:
+      213: -6582533175422747625
+    second: Minimal Beige UI Icon Grid_48
+  - first:
+      213: 5074576192936070020
+    second: Minimal Beige UI Icon Grid_49
+  - first:
+      213: -1796250103847282163
+    second: Minimal Beige UI Icon Grid_50
+  - first:
+      213: 1867326330314035967
+    second: Minimal Beige UI Icon Grid_51
+  - first:
+      213: 3991985820123085820
+    second: Minimal Beige UI Icon Grid_52
+  - first:
+      213: 6286715802117930475
+    second: Minimal Beige UI Icon Grid_53
+  - first:
+      213: -3044800893939765877
+    second: Minimal Beige UI Icon Grid_54
+  - first:
+      213: -3537889412482283318
+    second: Minimal Beige UI Icon Grid_55
+  - first:
+      213: -7410790416090975984
+    second: Minimal Beige UI Icon Grid_56
+  - first:
+      213: 237722008219269404
+    second: Minimal Beige UI Icon Grid_57
+  - first:
+      213: -3994961990587286474
+    second: Minimal Beige UI Icon Grid_58
+  - first:
+      213: 1693779478548965300
+    second: Minimal Beige UI Icon Grid_59
+  - first:
+      213: -5306997493748620376
+    second: Minimal Beige UI Icon Grid_60
+  - first:
+      213: -1314552497361751954
+    second: Minimal Beige UI Icon Grid_61
+  - first:
+      213: -4902832078375246460
+    second: Minimal Beige UI Icon Grid_62
+  - first:
+      213: 3950975647928300498
+    second: Minimal Beige UI Icon Grid_63
+  - first:
+      213: 3452973348864951057
+    second: Minimal Beige UI Icon Grid_64
+  - first:
+      213: 2971113782229737150
+    second: Minimal Beige UI Icon Grid_65
+  - first:
+      213: -877465989051727174
+    second: Minimal Beige UI Icon Grid_66
+  - first:
+      213: 5980942609730995979
+    second: Minimal Beige UI Icon Grid_67
+  - first:
+      213: -6640325003889804930
+    second: Minimal Beige UI Icon Grid_68
+  - first:
+      213: -1533422136663004742
+    second: Minimal Beige UI Icon Grid_69
+  - first:
+      213: -7100841452434029492
+    second: Minimal Beige UI Icon Grid_70
+  - first:
+      213: 5706655001364350919
+    second: Minimal Beige UI Icon Grid_71
+  - first:
+      213: 4258982237820926787
+    second: Minimal Beige UI Icon Grid_72
+  - first:
+      213: -1591378154727534427
+    second: Minimal Beige UI Icon Grid_73
+  - first:
+      213: -6833186152443122677
+    second: Minimal Beige UI Icon Grid_74
+  - first:
+      213: -3227502402362843009
+    second: Minimal Beige UI Icon Grid_75
+  - first:
+      213: 2760223139444158964
+    second: Minimal Beige UI Icon Grid_76
+  - first:
+      213: 8914633248979489505
+    second: Minimal Beige UI Icon Grid_77
+  - first:
+      213: 4799617142770206092
+    second: Minimal Beige UI Icon Grid_78
+  - first:
+      213: 7205697322797108702
+    second: Minimal Beige UI Icon Grid_79
+  - first:
+      213: 7352033367235449141
+    second: Minimal Beige UI Icon Grid_80
+  - first:
+      213: -7871955313604897585
+    second: Minimal Beige UI Icon Grid_81
+  - first:
+      213: 110050471741856608
+    second: Minimal Beige UI Icon Grid_82
+  - first:
+      213: 2055048064099844687
+    second: Minimal Beige UI Icon Grid_83
+  - first:
+      213: -6683928052044668676
+    second: Minimal Beige UI Icon Grid_84
+  - first:
+      213: -7161065224121372765
+    second: Minimal Beige UI Icon Grid_85
+  - first:
+      213: 8098638504241985566
+    second: Minimal Beige UI Icon Grid_86
+  - first:
+      213: -7053313112325021195
+    second: Minimal Beige UI Icon Grid_87
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_0
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 1040
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 376479829cde02c20800000000000000
+      internalID: 3179802785148782195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_1
+      rect:
+        serializedVersion: 2
+        x: 93
+        y: 1049
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de4c353a5e2defc50800000000000000
+      internalID: 6701025179303396589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_2
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 1036
+        width: 14
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebbe5b1a70d6da270800000000000000
+      internalID: 8263380770839980990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_3
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 1030
+        width: 25
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94ed85dfdaab04950800000000000000
+      internalID: 6431345524327636553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_4
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 1040
+        width: 21
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de97a2df713f5e710800000000000000
+      internalID: 1722049716896299501
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_5
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 1036
+        width: 11
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef2ec79c91e950bb0800000000000000
+      internalID: -4970392780141698306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_6
+      rect:
+        serializedVersion: 2
+        x: 207
+        y: 1039
+        width: 23
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4bf3f81ec855c290800000000000000
+      internalID: -7870787131554923702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_7
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 1006
+        width: 79
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dae57d22e854a4990800000000000000
+      internalID: -7401026560857776467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_8
+      rect:
+        serializedVersion: 2
+        x: 438
+        y: 1008
+        width: 30
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a726ec51c2ae71850800000000000000
+      internalID: 6347799674867311226
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_9
+      rect:
+        serializedVersion: 2
+        x: 473
+        y: 1044
+        width: 71
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41d7551ccbaf23180800000000000000
+      internalID: -9136965005376914156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_10
+      rect:
+        serializedVersion: 2
+        x: 593
+        y: 1042
+        width: 56
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 605b5a5252a6040c0800000000000000
+      internalID: -4593554912139954938
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_11
+      rect:
+        serializedVersion: 2
+        x: 851
+        y: 1043
+        width: 37
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5130651b6bdb476b0800000000000000
+      internalID: -5299402269151329515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_12
+      rect:
+        serializedVersion: 2
+        x: 917
+        y: 1036
+        width: 49
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9ce8d0d43380f810800000000000000
+      internalID: 1797080514186243227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_13
+      rect:
+        serializedVersion: 2
+        x: 959
+        y: 1024
+        width: 30
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecf7b2e4b4d5f73c0800000000000000
+      internalID: -4359663336255946802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_14
+      rect:
+        serializedVersion: 2
+        x: 1028
+        y: 982
+        width: 67
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5dc1e65e2fb947990800000000000000
+      internalID: -7389109621074551595
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_15
+      rect:
+        serializedVersion: 2
+        x: 1164
+        y: 1052
+        width: 22
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0625730ae73bd8ca0800000000000000
+      internalID: -6012952571034512800
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_16
+      rect:
+        serializedVersion: 2
+        x: 1211
+        y: 1036
+        width: 35
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50abb335614bd9090800000000000000
+      internalID: -8026060952925652475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_17
+      rect:
+        serializedVersion: 2
+        x: 1275
+        y: 1023
+        width: 88
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 327ed186eb0157530800000000000000
+      internalID: 3852003466261948195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_18
+      rect:
+        serializedVersion: 2
+        x: 1367
+        y: 1044
+        width: 54
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07c87ea72beaa6850800000000000000
+      internalID: 6371096704458394736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_19
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1448
+        height: 1039
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d2852045f0a465090800000000000000
+      internalID: -8046162254556407763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_20
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 978
+        width: 40
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a74e6015802062c0800000000000000
+      internalID: -4440513476708907102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_21
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 1026
+        width: 10
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cdcc1a641921b86d0800000000000000
+      internalID: -2987273512665625380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_22
+      rect:
+        serializedVersion: 2
+        x: 617
+        y: 1026
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1db6442f9f9b5fc0800000000000000
+      internalID: -3505032379120567014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_23
+      rect:
+        serializedVersion: 2
+        x: 987
+        y: 1022
+        width: 20
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4ff4d21b76bb0060800000000000000
+      internalID: 6920825892098080590
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_24
+      rect:
+        serializedVersion: 2
+        x: 1138
+        y: 1012
+        width: 29
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02ee2a301f397a0b0800000000000000
+      internalID: -5717438538566144480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_25
+      rect:
+        serializedVersion: 2
+        x: 1171
+        y: 1025
+        width: 23
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4ddda5f182667a00800000000000000
+      internalID: 753898297943252301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_26
+      rect:
+        serializedVersion: 2
+        x: 1205
+        y: 1036
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1042bdea5dbf52230800000000000000
+      internalID: 3613571171214894081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_27
+      rect:
+        serializedVersion: 2
+        x: 201
+        y: 1010
+        width: 9
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5158a37441edfbb20800000000000000
+      internalID: 3152482442858366229
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_28
+      rect:
+        serializedVersion: 2
+        x: 374
+        y: 1018
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ed08ace91e85e170800000000000000
+      internalID: 8207122137948360168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_29
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 1006
+        width: 7
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5aae12ce97bfaae0800000000000000
+      internalID: -1535807055420544419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_30
+      rect:
+        serializedVersion: 2
+        x: 682
+        y: 1020
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d2ffc692e00240a40800000000000000
+      internalID: 5333423103910149933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_31
+      rect:
+        serializedVersion: 2
+        x: 1164
+        y: 1026
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5322ba3283c1b9730800000000000000
+      internalID: 4006827320918352437
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_32
+      rect:
+        serializedVersion: 2
+        x: 562
+        y: 1004
+        width: 12
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f62176f29d76dcd80800000000000000
+      internalID: -8228806761635179921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_33
+      rect:
+        serializedVersion: 2
+        x: 619
+        y: 1014
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e70de45eeacb5ceb0800000000000000
+      internalID: -4700143176733765506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_34
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 1010
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24fa461f212391020800000000000000
+      internalID: 2312934940572168002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_35
+      rect:
+        serializedVersion: 2
+        x: 666
+        y: 1008
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28eaac2529ab6c6e0800000000000000
+      internalID: -1817560261980410238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_36
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 1011
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 845d75237a23e4d30800000000000000
+      internalID: 4417523978182579528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_37
+      rect:
+        serializedVersion: 2
+        x: 979
+        y: 1006
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 861e901b3648da660800000000000000
+      internalID: 7398715326546436456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_38
+      rect:
+        serializedVersion: 2
+        x: 983
+        y: 1006
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea59c6455dcb1b010800000000000000
+      internalID: 1202950199915091374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_39
+      rect:
+        serializedVersion: 2
+        x: 1166
+        y: 1013
+        width: 6
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc7fbe4809066e8a0800000000000000
+      internalID: -6276222856872593460
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_40
+      rect:
+        serializedVersion: 2
+        x: 1349
+        y: 1004
+        width: 16
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3fc543072dd82e10800000000000000
+      internalID: 2173229979834634044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_41
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 982
+        width: 16
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2ba6011f7aa43bb0800000000000000
+      internalID: -4957149827104855250
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_42
+      rect:
+        serializedVersion: 2
+        x: 76
+        y: 864
+        width: 15
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f9a6d47b1f772f20800000000000000
+      internalID: 3397824199775398391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_43
+      rect:
+        serializedVersion: 2
+        x: 1404
+        y: 882
+        width: 19
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76f4546a08a50e430800000000000000
+      internalID: 3810144793347313511
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_44
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 686
+        width: 36
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f63b5e07faccf2a0800000000000000
+      internalID: -6702258982987548943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_45
+      rect:
+        serializedVersion: 2
+        x: 1410
+        y: 646
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10755731c69291250800000000000000
+      internalID: 5915805129687521025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_46
+      rect:
+        serializedVersion: 2
+        x: 1432
+        y: 660
+        width: 16
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f31ea332c8f3a4b90800000000000000
+      internalID: -7256917978435100353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_47
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 631
+        width: 21
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 667d2df4b44bff550800000000000000
+      internalID: 6196869847839856486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_48
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 582
+        width: 16
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71cf3b4e3f426a4a0800000000000000
+      internalID: -6582533175422747625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_49
+      rect:
+        serializedVersion: 2
+        x: 1416
+        y: 606
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48bcb9549248c6640800000000000000
+      internalID: 5074576192936070020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_50
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 546
+        width: 57
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0a9c682c007217e0800000000000000
+      internalID: -1796250103847282163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_51
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 481
+        width: 297
+        height: 71
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff21a1667631ae910800000000000000
+      internalID: 1867326330314035967
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_52
+      rect:
+        serializedVersion: 2
+        x: 1416
+        y: 542
+        width: 7
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cfb35d4f3f1666730800000000000000
+      internalID: 3991985820123085820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_53
+      rect:
+        serializedVersion: 2
+        x: 1416
+        y: 518
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bedf21da6b6ee3750800000000000000
+      internalID: 6286715802117930475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_54
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 469
+        width: 9
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8dade018b1beb5d0800000000000000
+      internalID: -3044800893939765877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_55
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 453
+        width: 9
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac8c06ae254e6eec0800000000000000
+      internalID: -3537889412482283318
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_56
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 384
+        width: 8
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01137007165972990800000000000000
+      internalID: -7410790416090975984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_57
+      rect:
+        serializedVersion: 2
+        x: 77
+        y: 364
+        width: 35
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c19b33f28ee8c4300800000000000000
+      internalID: 237722008219269404
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_58
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 315
+        width: 29
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 63c7bdb5c3b0f88c0800000000000000
+      internalID: -3994961990587286474
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_59
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 259
+        width: 23
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b7e1c23673818710800000000000000
+      internalID: 1693779478548965300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_60
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 208
+        width: 9
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a3a939a5e1c956b0800000000000000
+      internalID: -5306997493748620376
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_61
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 214
+        width: 25
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e60762ce775c1cde0800000000000000
+      internalID: -1314552497361751954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_62
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 157
+        width: 25
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 485ad077334a5fbb0800000000000000
+      internalID: -4902832078375246460
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_63
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 144
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d33cfa2b6fa4d630800000000000000
+      internalID: 3950975647928300498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_64
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 104
+        width: 29
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1138cf557fc6bef20800000000000000
+      internalID: 3452973348864951057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_65
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 115
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebe12194e348b3920800000000000000
+      internalID: 2971113782229737150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_66
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 23
+        width: 15
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab2c51cf45d92d3f0800000000000000
+      internalID: -877465989051727174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_67
+      rect:
+        serializedVersion: 2
+        x: 372
+        y: 0
+        width: 132
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b07830b7d93900350800000000000000
+      internalID: 5980942609730995979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_68
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 48
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e79f0064793d8d3a0800000000000000
+      internalID: -6640325003889804930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_69
+      rect:
+        serializedVersion: 2
+        x: 438
+        y: 55
+        width: 15
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab92b7de0b038bae0800000000000000
+      internalID: -1533422136663004742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_70
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 31
+        width: 7
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c440d45225eb47d90800000000000000
+      internalID: -7100841452434029492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_71
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 33
+        width: 9
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c747041d7c123f40800000000000000
+      internalID: 5706655001364350919
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_72
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 39
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34bb30eb7c1fa1b30800000000000000
+      internalID: 4258982237820926787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_73
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 35
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a01620fff94ae9e0800000000000000
+      internalID: -1591378154727534427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_74
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 40
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0c628be565ab21a0800000000000000
+      internalID: -6833186152443122677
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_75
+      rect:
+        serializedVersion: 2
+        x: 223
+        y: 13
+        width: 17
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7061734aab9533d0800000000000000
+      internalID: -3227502402362843009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_76
+      rect:
+        serializedVersion: 2
+        x: 714
+        y: 23
+        width: 9
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f1f16f22584e4620800000000000000
+      internalID: 2760223139444158964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_77
+      rect:
+        serializedVersion: 2
+        x: 722
+        y: 29
+        width: 9
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e21f4c45b327bb70800000000000000
+      internalID: 8914633248979489505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_78
+      rect:
+        serializedVersion: 2
+        x: 159
+        y: 15
+        width: 9
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8581b4ac5aab9240800000000000000
+      internalID: 4799617142770206092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_79
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 17
+        width: 9
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edd0e44a987cff360800000000000000
+      internalID: 7205697322797108702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_80
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 20
+        width: 11
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53153ee056ba70660800000000000000
+      internalID: 7352033367235449141
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_81
+      rect:
+        serializedVersion: 2
+        x: 507
+        y: 17
+        width: 9
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc4d4d4895231c290800000000000000
+      internalID: -7871955313604897585
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_82
+      rect:
+        serializedVersion: 2
+        x: 537
+        y: 19
+        width: 9
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06b998b225af68100800000000000000
+      internalID: 110050471741856608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_83
+      rect:
+        serializedVersion: 2
+        x: 571
+        y: 19
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f428601835ff48c10800000000000000
+      internalID: 2055048064099844687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_84
+      rect:
+        serializedVersion: 2
+        x: 587
+        y: 23
+        width: 13
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf0eb9189daed33a0800000000000000
+      internalID: -6683928052044668676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_85
+      rect:
+        serializedVersion: 2
+        x: 627
+        y: 31
+        width: 10
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3afa7de9e19ce9c90800000000000000
+      internalID: -7161065224121372765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_86
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 8
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e18f4a9afc4246070800000000000000
+      internalID: 8098638504241985566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Minimal Beige UI Icon Grid_87
+      rect:
+        serializedVersion: 2
+        x: 513
+        y: 19
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f1234a28199d1e90800000000000000
+      internalID: -7053313112325021195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Minimal Beige UI Icon Grid_0: 3179802785148782195
+      Minimal Beige UI Icon Grid_1: 6701025179303396589
+      Minimal Beige UI Icon Grid_10: -4593554912139954938
+      Minimal Beige UI Icon Grid_11: -5299402269151329515
+      Minimal Beige UI Icon Grid_12: 1797080514186243227
+      Minimal Beige UI Icon Grid_13: -4359663336255946802
+      Minimal Beige UI Icon Grid_14: -7389109621074551595
+      Minimal Beige UI Icon Grid_15: -6012952571034512800
+      Minimal Beige UI Icon Grid_16: -8026060952925652475
+      Minimal Beige UI Icon Grid_17: 3852003466261948195
+      Minimal Beige UI Icon Grid_18: 6371096704458394736
+      Minimal Beige UI Icon Grid_19: -8046162254556407763
+      Minimal Beige UI Icon Grid_2: 8263380770839980990
+      Minimal Beige UI Icon Grid_20: -4440513476708907102
+      Minimal Beige UI Icon Grid_21: -2987273512665625380
+      Minimal Beige UI Icon Grid_22: -3505032379120567014
+      Minimal Beige UI Icon Grid_23: 6920825892098080590
+      Minimal Beige UI Icon Grid_24: -5717438538566144480
+      Minimal Beige UI Icon Grid_25: 753898297943252301
+      Minimal Beige UI Icon Grid_26: 3613571171214894081
+      Minimal Beige UI Icon Grid_27: 3152482442858366229
+      Minimal Beige UI Icon Grid_28: 8207122137948360168
+      Minimal Beige UI Icon Grid_29: -1535807055420544419
+      Minimal Beige UI Icon Grid_3: 6431345524327636553
+      Minimal Beige UI Icon Grid_30: 5333423103910149933
+      Minimal Beige UI Icon Grid_31: 4006827320918352437
+      Minimal Beige UI Icon Grid_32: -8228806761635179921
+      Minimal Beige UI Icon Grid_33: -4700143176733765506
+      Minimal Beige UI Icon Grid_34: 2312934940572168002
+      Minimal Beige UI Icon Grid_35: -1817560261980410238
+      Minimal Beige UI Icon Grid_36: 4417523978182579528
+      Minimal Beige UI Icon Grid_37: 7398715326546436456
+      Minimal Beige UI Icon Grid_38: 1202950199915091374
+      Minimal Beige UI Icon Grid_39: -6276222856872593460
+      Minimal Beige UI Icon Grid_4: 1722049716896299501
+      Minimal Beige UI Icon Grid_40: 2173229979834634044
+      Minimal Beige UI Icon Grid_41: -4957149827104855250
+      Minimal Beige UI Icon Grid_42: 3397824199775398391
+      Minimal Beige UI Icon Grid_43: 3810144793347313511
+      Minimal Beige UI Icon Grid_44: -6702258982987548943
+      Minimal Beige UI Icon Grid_45: 5915805129687521025
+      Minimal Beige UI Icon Grid_46: -7256917978435100353
+      Minimal Beige UI Icon Grid_47: 6196869847839856486
+      Minimal Beige UI Icon Grid_48: -6582533175422747625
+      Minimal Beige UI Icon Grid_49: 5074576192936070020
+      Minimal Beige UI Icon Grid_5: -4970392780141698306
+      Minimal Beige UI Icon Grid_50: -1796250103847282163
+      Minimal Beige UI Icon Grid_51: 1867326330314035967
+      Minimal Beige UI Icon Grid_52: 3991985820123085820
+      Minimal Beige UI Icon Grid_53: 6286715802117930475
+      Minimal Beige UI Icon Grid_54: -3044800893939765877
+      Minimal Beige UI Icon Grid_55: -3537889412482283318
+      Minimal Beige UI Icon Grid_56: -7410790416090975984
+      Minimal Beige UI Icon Grid_57: 237722008219269404
+      Minimal Beige UI Icon Grid_58: -3994961990587286474
+      Minimal Beige UI Icon Grid_59: 1693779478548965300
+      Minimal Beige UI Icon Grid_6: -7870787131554923702
+      Minimal Beige UI Icon Grid_60: -5306997493748620376
+      Minimal Beige UI Icon Grid_61: -1314552497361751954
+      Minimal Beige UI Icon Grid_62: -4902832078375246460
+      Minimal Beige UI Icon Grid_63: 3950975647928300498
+      Minimal Beige UI Icon Grid_64: 3452973348864951057
+      Minimal Beige UI Icon Grid_65: 2971113782229737150
+      Minimal Beige UI Icon Grid_66: -877465989051727174
+      Minimal Beige UI Icon Grid_67: 5980942609730995979
+      Minimal Beige UI Icon Grid_68: -6640325003889804930
+      Minimal Beige UI Icon Grid_69: -1533422136663004742
+      Minimal Beige UI Icon Grid_7: -7401026560857776467
+      Minimal Beige UI Icon Grid_70: -7100841452434029492
+      Minimal Beige UI Icon Grid_71: 5706655001364350919
+      Minimal Beige UI Icon Grid_72: 4258982237820926787
+      Minimal Beige UI Icon Grid_73: -1591378154727534427
+      Minimal Beige UI Icon Grid_74: -6833186152443122677
+      Minimal Beige UI Icon Grid_75: -3227502402362843009
+      Minimal Beige UI Icon Grid_76: 2760223139444158964
+      Minimal Beige UI Icon Grid_77: 8914633248979489505
+      Minimal Beige UI Icon Grid_78: 4799617142770206092
+      Minimal Beige UI Icon Grid_79: 7205697322797108702
+      Minimal Beige UI Icon Grid_8: 6347799674867311226
+      Minimal Beige UI Icon Grid_80: 7352033367235449141
+      Minimal Beige UI Icon Grid_81: -7871955313604897585
+      Minimal Beige UI Icon Grid_82: 110050471741856608
+      Minimal Beige UI Icon Grid_83: 2055048064099844687
+      Minimal Beige UI Icon Grid_84: -6683928052044668676
+      Minimal Beige UI Icon Grid_85: -7161065224121372765
+      Minimal Beige UI Icon Grid_86: 8098638504241985566
+      Minimal Beige UI Icon Grid_87: -7053313112325021195
+      Minimal Beige UI Icon Grid_9: -9136965005376914156
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

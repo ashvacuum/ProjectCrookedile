@@ -1,0 +1,871 @@
+fileFormatVersion: 2
+guid: a6e8edc1791d04140adff0044a7b498b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 561384155524801490
+    second: Transparent Brown-Gold Game UI Sprite Sheet_0
+  - first:
+      213: 3173264032280982220
+    second: Transparent Brown-Gold Game UI Sprite Sheet_1
+  - first:
+      213: 4882511948584646511
+    second: Transparent Brown-Gold Game UI Sprite Sheet_2
+  - first:
+      213: -5719235402852673770
+    second: Transparent Brown-Gold Game UI Sprite Sheet_3
+  - first:
+      213: -8671434899629319041
+    second: Transparent Brown-Gold Game UI Sprite Sheet_4
+  - first:
+      213: 3020464046563227609
+    second: Transparent Brown-Gold Game UI Sprite Sheet_5
+  - first:
+      213: -5922382698187403004
+    second: Transparent Brown-Gold Game UI Sprite Sheet_6
+  - first:
+      213: -8134449627408964745
+    second: Transparent Brown-Gold Game UI Sprite Sheet_7
+  - first:
+      213: -5535338047008163772
+    second: Transparent Brown-Gold Game UI Sprite Sheet_8
+  - first:
+      213: 6010821863545671619
+    second: Transparent Brown-Gold Game UI Sprite Sheet_9
+  - first:
+      213: -3359272855594432233
+    second: Transparent Brown-Gold Game UI Sprite Sheet_10
+  - first:
+      213: -3126316162752000038
+    second: Transparent Brown-Gold Game UI Sprite Sheet_11
+  - first:
+      213: -1236724128910541377
+    second: Transparent Brown-Gold Game UI Sprite Sheet_12
+  - first:
+      213: -3253865169813791176
+    second: Transparent Brown-Gold Game UI Sprite Sheet_13
+  - first:
+      213: 1828833469512970816
+    second: Transparent Brown-Gold Game UI Sprite Sheet_14
+  - first:
+      213: -965229640618354566
+    second: Transparent Brown-Gold Game UI Sprite Sheet_15
+  - first:
+      213: 8043502828656775205
+    second: Transparent Brown-Gold Game UI Sprite Sheet_16
+  - first:
+      213: 6260690966655957641
+    second: Transparent Brown-Gold Game UI Sprite Sheet_17
+  - first:
+      213: -1203884999991745976
+    second: Transparent Brown-Gold Game UI Sprite Sheet_18
+  - first:
+      213: -3310698530967757425
+    second: Transparent Brown-Gold Game UI Sprite Sheet_19
+  - first:
+      213: 7473704343413036940
+    second: Transparent Brown-Gold Game UI Sprite Sheet_20
+  - first:
+      213: 463043361330620516
+    second: Transparent Brown-Gold Game UI Sprite Sheet_21
+  - first:
+      213: 689821630201556122
+    second: Transparent Brown-Gold Game UI Sprite Sheet_22
+  - first:
+      213: 5899796795834655159
+    second: Transparent Brown-Gold Game UI Sprite Sheet_23
+  - first:
+      213: -5515956410011475293
+    second: Transparent Brown-Gold Game UI Sprite Sheet_24
+  - first:
+      213: -2434864242000194562
+    second: Transparent Brown-Gold Game UI Sprite Sheet_25
+  - first:
+      213: 5478118223238608153
+    second: Transparent Brown-Gold Game UI Sprite Sheet_26
+  - first:
+      213: -6287658758160257518
+    second: Transparent Brown-Gold Game UI Sprite Sheet_27
+  - first:
+      213: -8305608368508336409
+    second: Transparent Brown-Gold Game UI Sprite Sheet_28
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 475
+        width: 566
+        height: 249
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d3a6944aef6ac700800000000000000
+      internalID: 561384155524801490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 695
+        width: 13
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc2b1ae13d2b90c20800000000000000
+      internalID: 3173264032280982220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 614
+        y: 679
+        width: 65
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f67fcf2afba22c340800000000000000
+      internalID: 4882511948584646511
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 692
+        y: 701
+        width: 29
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 617d022f3b131a0b0800000000000000
+      internalID: -5719235402852673770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 734
+        y: 699
+        width: 21
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7c5baae6efd8a780800000000000000
+      internalID: -8671434899629319041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 758
+        y: 657
+        width: 96
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d77d381c08dae920800000000000000
+      internalID: 3020464046563227609
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 776
+        y: 711
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 401de9a60587fcda0800000000000000
+      internalID: -5922382698187403004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 847
+        y: 705
+        width: 8
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 773eafa7921ac1f80800000000000000
+      internalID: -8134449627408964745
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 854
+        y: 657
+        width: 103
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 448bf5caf578e23b0800000000000000
+      internalID: -5535338047008163772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 230
+        y: 689
+        width: 9
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3cf8ac063aaba6350800000000000000
+      internalID: 6010821863545671619
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 248
+        y: 687
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7198ea2d2277161d0800000000000000
+      internalID: -3359272855594432233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 686
+        y: 655
+        width: 75
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: adfca9f83081d94d0800000000000000
+      internalID: -3126316162752000038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 852
+        y: 671
+        width: 23
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fbdf12b05f546dee0800000000000000
+      internalID: -1236724128910541377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 904
+        y: 673
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83e9b362ed2f7d2d0800000000000000
+      internalID: -3253865169813791176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 589
+        y: 457
+        width: 686
+        height: 199
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0427aa7d952516910800000000000000
+      internalID: 1828833469512970816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 1254
+        y: 469
+        width: 9
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a78d34081c0da92f0800000000000000
+      internalID: -965229640618354566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 1256
+        y: 482
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 520dfe3d43340af60800000000000000
+      internalID: 8043502828656775205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 1304
+        y: 485
+        width: 20
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98a760c734172e650800000000000000
+      internalID: 6260690966655957641
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 455
+        width: 309
+        height: 178
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 842221198f0fa4fe0800000000000000
+      internalID: -1203884999991745976
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 1545
+        y: 250
+        width: 474
+        height: 259
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8d52471a390e02d0800000000000000
+      internalID: -3310698530967757425
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 268
+        width: 481
+        height: 166
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c879d61c08ee7b760800000000000000
+      internalID: 7473704343413036940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 538
+        y: 269
+        width: 474
+        height: 164
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 468e6bbdb7f0d6600800000000000000
+      internalID: 463043361330620516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_22
+      rect:
+        serializedVersion: 2
+        x: 1037
+        y: 267
+        width: 476
+        height: 166
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9c6b8a2e1db29900800000000000000
+      internalID: 689821630201556122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_23
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 53
+        width: 450
+        height: 209
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b166b66de940e150800000000000000
+      internalID: 5899796795834655159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_24
+      rect:
+        serializedVersion: 2
+        x: 558
+        y: 0
+        width: 433
+        height: 254
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a22ab0bed26373b0800000000000000
+      internalID: -5515956410011475293
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_25
+      rect:
+        serializedVersion: 2
+        x: 840
+        y: 79
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef317435fdf953ed0800000000000000
+      internalID: -2434864242000194562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_26
+      rect:
+        serializedVersion: 2
+        x: 872
+        y: 65
+        width: 9
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9153bbdef7f260c40800000000000000
+      internalID: 5478118223238608153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_27
+      rect:
+        serializedVersion: 2
+        x: 1032
+        y: 49
+        width: 459
+        height: 196
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21eebf24cafbdb8a0800000000000000
+      internalID: -6287658758160257518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Transparent Brown-Gold Game UI Sprite Sheet_28
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 0
+        width: 488
+        height: 242
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e68c8f913d8cbc80800000000000000
+      internalID: -8305608368508336409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Transparent Brown-Gold Game UI Sprite Sheet_0: 561384155524801490
+      Transparent Brown-Gold Game UI Sprite Sheet_1: 3173264032280982220
+      Transparent Brown-Gold Game UI Sprite Sheet_10: -3359272855594432233
+      Transparent Brown-Gold Game UI Sprite Sheet_11: -3126316162752000038
+      Transparent Brown-Gold Game UI Sprite Sheet_12: -1236724128910541377
+      Transparent Brown-Gold Game UI Sprite Sheet_13: -3253865169813791176
+      Transparent Brown-Gold Game UI Sprite Sheet_14: 1828833469512970816
+      Transparent Brown-Gold Game UI Sprite Sheet_15: -965229640618354566
+      Transparent Brown-Gold Game UI Sprite Sheet_16: 8043502828656775205
+      Transparent Brown-Gold Game UI Sprite Sheet_17: 6260690966655957641
+      Transparent Brown-Gold Game UI Sprite Sheet_18: -1203884999991745976
+      Transparent Brown-Gold Game UI Sprite Sheet_19: -3310698530967757425
+      Transparent Brown-Gold Game UI Sprite Sheet_2: 4882511948584646511
+      Transparent Brown-Gold Game UI Sprite Sheet_20: 7473704343413036940
+      Transparent Brown-Gold Game UI Sprite Sheet_21: 463043361330620516
+      Transparent Brown-Gold Game UI Sprite Sheet_22: 689821630201556122
+      Transparent Brown-Gold Game UI Sprite Sheet_23: 5899796795834655159
+      Transparent Brown-Gold Game UI Sprite Sheet_24: -5515956410011475293
+      Transparent Brown-Gold Game UI Sprite Sheet_25: -2434864242000194562
+      Transparent Brown-Gold Game UI Sprite Sheet_26: 5478118223238608153
+      Transparent Brown-Gold Game UI Sprite Sheet_27: -6287658758160257518
+      Transparent Brown-Gold Game UI Sprite Sheet_28: -8305608368508336409
+      Transparent Brown-Gold Game UI Sprite Sheet_3: -5719235402852673770
+      Transparent Brown-Gold Game UI Sprite Sheet_4: -8671434899629319041
+      Transparent Brown-Gold Game UI Sprite Sheet_5: 3020464046563227609
+      Transparent Brown-Gold Game UI Sprite Sheet_6: -5922382698187403004
+      Transparent Brown-Gold Game UI Sprite Sheet_7: -8134449627408964745
+      Transparent Brown-Gold Game UI Sprite Sheet_8: -5535338047008163772
+      Transparent Brown-Gold Game UI Sprite Sheet_9: 6010821863545671619
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
