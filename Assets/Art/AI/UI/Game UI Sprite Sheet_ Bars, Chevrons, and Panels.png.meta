@@ -1,0 +1,1209 @@
+fileFormatVersion: 2
+guid: 33e3a4ff0ed380948b1be6a91695e202
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -147550511765651549
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_0
+  - first:
+      213: -2648792893270871245
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_1
+  - first:
+      213: 4026601763860287172
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_2
+  - first:
+      213: 2982521118166651033
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_3
+  - first:
+      213: 5115970077788472046
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_4
+  - first:
+      213: 3163835205529654507
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_5
+  - first:
+      213: -6301420012468759382
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_6
+  - first:
+      213: -2156400632211679597
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_7
+  - first:
+      213: 600026897721182199
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_8
+  - first:
+      213: -1148908921657039603
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_9
+  - first:
+      213: -6982184103970332929
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_10
+  - first:
+      213: 5496308285029579917
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_11
+  - first:
+      213: -1381702811276900240
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_12
+  - first:
+      213: 7352794142159251087
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_13
+  - first:
+      213: -1104979499117327454
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_14
+  - first:
+      213: -1527686151174807611
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_15
+  - first:
+      213: 2940947354615065508
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_16
+  - first:
+      213: 65098812563094336
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_17
+  - first:
+      213: -5722892908677730454
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_18
+  - first:
+      213: -5131983984234860643
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_19
+  - first:
+      213: 8715386152255878153
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_20
+  - first:
+      213: -8608344450980407684
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_21
+  - first:
+      213: 8557999069913106060
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_22
+  - first:
+      213: -2919573938356148988
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_23
+  - first:
+      213: -1606926100328448536
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_24
+  - first:
+      213: -5225000024921200992
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_25
+  - first:
+      213: 1562555792366939398
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_26
+  - first:
+      213: -4256192589154196988
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_27
+  - first:
+      213: -6629216710393222010
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_28
+  - first:
+      213: 7053559946441416852
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_29
+  - first:
+      213: 7087900233430736046
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_30
+  - first:
+      213: -4662895629437373711
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_31
+  - first:
+      213: -4683549315819487927
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_32
+  - first:
+      213: 1990289707133109635
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_33
+  - first:
+      213: -5917769908654064303
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_34
+  - first:
+      213: 3072716653760046231
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_35
+  - first:
+      213: -1328205959731142072
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_36
+  - first:
+      213: -259454648994445872
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_37
+  - first:
+      213: 2312699071869085866
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_38
+  - first:
+      213: 9044046044522161894
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_39
+  - first:
+      213: -2207045601680148944
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_40
+  - first:
+      213: 533076622669536147
+    second: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_41
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_0
+      rect:
+        serializedVersion: 2
+        x: 1181
+        y: 742
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3aff7cf579bc3fdf0800000000000000
+      internalID: -147550511765651549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_1
+      rect:
+        serializedVersion: 2
+        x: 1924
+        y: 705
+        width: 36
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 333b201c5e89d3bd0800000000000000
+      internalID: -2648792893270871245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_2
+      rect:
+        serializedVersion: 2
+        x: 1100
+        y: 568
+        width: 940
+        height: 169
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ce8ada68fc51e730800000000000000
+      internalID: 4026601763860287172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_3
+      rect:
+        serializedVersion: 2
+        x: 1151
+        y: 711
+        width: 29
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9909c67a72b046920800000000000000
+      internalID: 2982521118166651033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_4
+      rect:
+        serializedVersion: 2
+        x: 1257
+        y: 718
+        width: 10
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee20c102ea39ff640800000000000000
+      internalID: 5115970077788472046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_5
+      rect:
+        serializedVersion: 2
+        x: 1263
+        y: 714
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be458715b5338eb20800000000000000
+      internalID: 3163835205529654507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_6
+      rect:
+        serializedVersion: 2
+        x: 1444
+        y: 713
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa4134092ebdc88a0800000000000000
+      internalID: -6301420012468759382
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_7
+      rect:
+        serializedVersion: 2
+        x: 1510
+        y: 710
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3965893dc0de212e0800000000000000
+      internalID: -2156400632211679597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_8
+      rect:
+        serializedVersion: 2
+        x: 1522
+        y: 710
+        width: 28
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f7c95ec849b35800800000000000000
+      internalID: 600026897721182199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_9
+      rect:
+        serializedVersion: 2
+        x: 1547
+        y: 713
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d05ea554c614e00f0800000000000000
+      internalID: -1148908921657039603
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_10
+      rect:
+        serializedVersion: 2
+        x: 1647
+        y: 704
+        width: 7
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ffe1876fc8c4a1f90800000000000000
+      internalID: -6982184103970332929
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_11
+      rect:
+        serializedVersion: 2
+        x: 1663
+        y: 702
+        width: 21
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8c7939b34fc64c40800000000000000
+      internalID: 5496308285029579917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_12
+      rect:
+        serializedVersion: 2
+        x: 1720
+        y: 706
+        width: 15
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0788eac1d9433dce0800000000000000
+      internalID: -1381702811276900240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_13
+      rect:
+        serializedVersion: 2
+        x: 1749
+        y: 711
+        width: 8
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f86a9f5c05f5a0660800000000000000
+      internalID: 7352794142159251087
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_14
+      rect:
+        serializedVersion: 2
+        x: 1757
+        y: 710
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2abc50ffff25aa0f0800000000000000
+      internalID: -1104979499117327454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_15
+      rect:
+        serializedVersion: 2
+        x: 1775
+        y: 702
+        width: 15
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5cf11fe1a819ccae0800000000000000
+      internalID: -1527686151174807611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_16
+      rect:
+        serializedVersion: 2
+        x: 1896
+        y: 706
+        width: 23
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4aba4f6890850d820800000000000000
+      internalID: 2940947354615065508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_17
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 79
+        width: 1004
+        height: 628
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04b7f1e660747e000800000000000000
+      internalID: 65098812563094336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_18
+      rect:
+        serializedVersion: 2
+        x: 1510
+        y: 705
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6f69a288333490b0800000000000000
+      internalID: -5722892908677730454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_19
+      rect:
+        serializedVersion: 2
+        x: 1462
+        y: 568
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9fefaab1c787c8b0800000000000000
+      internalID: -5131983984234860643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_20
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 401
+        width: 114
+        height: 137
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 904f195878543f870800000000000000
+      internalID: 8715386152255878153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_21
+      rect:
+        serializedVersion: 2
+        x: 163
+        y: 401
+        width: 101
+        height: 137
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c769b1fa454098880800000000000000
+      internalID: -8608344450980407684
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_22
+      rect:
+        serializedVersion: 2
+        x: 263
+        y: 399
+        width: 102
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c864b46dfce14c670800000000000000
+      internalID: 8557999069913106060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_23
+      rect:
+        serializedVersion: 2
+        x: 942
+        y: 465
+        width: 21
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4052bccb8f69b77d0800000000000000
+      internalID: -2919573938356148988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_24
+      rect:
+        serializedVersion: 2
+        x: 962
+        y: 478
+        width: 17
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ed7e91c93d03b9e0800000000000000
+      internalID: -1606926100328448536
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_25
+      rect:
+        serializedVersion: 2
+        x: 1117
+        y: 289
+        width: 871
+        height: 250
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a62a2b19221d77b0800000000000000
+      internalID: -5225000024921200992
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_26
+      rect:
+        serializedVersion: 2
+        x: 852
+        y: 457
+        width: 7
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60da2c1e6305fa510800000000000000
+      internalID: 1562555792366939398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_27
+      rect:
+        serializedVersion: 2
+        x: 858
+        y: 454
+        width: 9
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40260d3f367fee4c0800000000000000
+      internalID: -4256192589154196988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_28
+      rect:
+        serializedVersion: 2
+        x: 827
+        y: 433
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 68cade5668a4004a0800000000000000
+      internalID: -6629216710393222010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_29
+      rect:
+        serializedVersion: 2
+        x: 829
+        y: 426
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4906091666743e160800000000000000
+      internalID: 7053559946441416852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_30
+      rect:
+        serializedVersion: 2
+        x: 890
+        y: 433
+        width: 6
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eac1c0185b74d5260800000000000000
+      internalID: 7087900233430736046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_31
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 432
+        width: 19
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f2f9ae41211a4fb0800000000000000
+      internalID: -4662895629437373711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_32
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 399
+        width: 13
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94d3e8636b0b00fb0800000000000000
+      internalID: -4683549315819487927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_33
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 404
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38509c191fdee9b10800000000000000
+      internalID: 1990289707133109635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_34
+      rect:
+        serializedVersion: 2
+        x: 316
+        y: 231
+        width: 413
+        height: 124
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15dbd2c2f9bdfdda0800000000000000
+      internalID: -5917769908654064303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_35
+      rect:
+        serializedVersion: 2
+        x: 1286
+        y: 119
+        width: 593
+        height: 237
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7946bc2448b74aa20800000000000000
+      internalID: 3072716653760046231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_36
+      rect:
+        serializedVersion: 2
+        x: 1516
+        y: 182
+        width: 14
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8422bad77b3419de0800000000000000
+      internalID: -1328205959731142072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_37
+      rect:
+        serializedVersion: 2
+        x: 1952
+        y: 183
+        width: 52
+        height: 132
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d5cc531f5b366cf0800000000000000
+      internalID: -259454648994445872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_38
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 43
+        width: 485
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa8e12b7d8b581020800000000000000
+      internalID: 2312699071869085866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_39
+      rect:
+        serializedVersion: 2
+        x: 1141
+        y: 119
+        width: 119
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e62508c5f7e28d70800000000000000
+      internalID: 9044046044522161894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_40
+      rect:
+        serializedVersion: 2
+        x: 1259
+        y: 113
+        width: 12
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03634ccf7bffe51e0800000000000000
+      internalID: -2207045601680148944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Game UI Sprite Sheet_ Bars, Chevrons, and Panels_41
+      rect:
+        serializedVersion: 2
+        x: 1493
+        y: 119
+        width: 11
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39b584c2d5ed56700800000000000000
+      internalID: 533076622669536147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_0: -147550511765651549
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_1: -2648792893270871245
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_10: -6982184103970332929
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_11: 5496308285029579917
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_12: -1381702811276900240
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_13: 7352794142159251087
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_14: -1104979499117327454
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_15: -1527686151174807611
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_16: 2940947354615065508
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_17: 65098812563094336
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_18: -5722892908677730454
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_19: -5131983984234860643
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_2: 4026601763860287172
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_20: 8715386152255878153
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_21: -8608344450980407684
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_22: 8557999069913106060
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_23: -2919573938356148988
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_24: -1606926100328448536
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_25: -5225000024921200992
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_26: 1562555792366939398
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_27: -4256192589154196988
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_28: -6629216710393222010
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_29: 7053559946441416852
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_3: 2982521118166651033
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_30: 7087900233430736046
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_31: -4662895629437373711
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_32: -4683549315819487927
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_33: 1990289707133109635
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_34: -5917769908654064303
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_35: 3072716653760046231
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_36: -1328205959731142072
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_37: -259454648994445872
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_38: 2312699071869085866
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_39: 9044046044522161894
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_4: 5115970077788472046
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_40: -2207045601680148944
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_41: 533076622669536147
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_5: 3163835205529654507
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_6: -6301420012468759382
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_7: -2156400632211679597
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_8: 600026897721182199
+      Game UI Sprite Sheet_ Bars, Chevrons, and Panels_9: -1148908921657039603
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
