@@ -75,7 +75,7 @@ Otherwise it expires after the third enemy turn. Reapplication refreshes the dea
 Celebrity wants a villain on camera. Aggravate feeds Glamour; Soothe costs Glamour or Debt.
 Hostility guards gate the best rates: Loan Shark only lends against a hostile target; They Love Me pays per receptive enemy. The echo chamber caps soothing everyone.
 Manufactured Outrage turns every enemy that goes hostile into 1 Glamour. Feud locks hostile enemies as Hardened.
-Empty Promise soothes one enemy and puts off the next normal Debt settlement; the delay is spent even on a turn with no Debt.
+Empty Promise soothes one enemy and puts off the next normal Debt settlement (spent even on a turn with no Debt); at the start of your next turn every enemy Aggravates 2.
 Single-target cards still add the crowd's +1 Hostility.
 
 ## Retained defensive cards
@@ -116,7 +116,7 @@ Charm Offensive is the rare hybrid exception to the four core defensive card typ
 - **Photo With a Fan:** Basic Pressure, 1 energy. Deal 3 Sway; Soothe 3; gain 1 Glamour. Upgraded: 4 Sway, Soothe 4.
 - **Rage Bait:** Enhanced Pressure, 1 energy. Aggravate 2; deal 1 Sway per Hostility gained this turn. Upgraded: 0 energy.
 - **Feud:** Enhanced Rhetoric, 1 energy. Aggravate 3; apply permanent Hardened to every hostile enemy; gain 2 Glamour. Upgraded: 3 Glamour.
-- **Empty Promise:** Enhanced Rhetoric, 0 energy. Soothe 4; delay Debt settlement by 1 turn. Upgraded: Soothe 7.
+- **Empty Promise:** Enhanced Rhetoric, 0 energy. Soothe 4; delay Debt settlement by 1 turn; next turn, Aggravate 2 to all enemies. Upgraded: Soothe 7.
 - **Manufactured Outrage:** Enhanced Policy, 1 energy. Whenever an enemy becomes hostile, gain 1 Glamour. Upgraded: 0 energy.
 - **Red Carpet:** Basic Pressure, 1 energy. Deal 5 Sway; if Glamour is 3+, Soothe 3. Upgraded: 7 Sway.
 - **Backhanded Thanks:** Basic Pressure, 0 energy. Deal 2 Sway; Aggravate 2; gain 1 Glamour. Upgraded: gain 2.

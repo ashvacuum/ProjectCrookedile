@@ -30,12 +30,14 @@ MonoBehaviour:
   _effects:
   - rid: 5000000000000000001
   - rid: 2685916036791271427
+  - rid: 2685916036791271430
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects:
   - rid: 2685916036791271428
   - rid: 2685916036791271429
+  - rid: 2685916036791271432
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -73,6 +75,26 @@ MonoBehaviour:
       type: {class: DelayDebtSettlementEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _settlementsToDelay: 1
+    - rid: 2685916036791271430
+      type: {class: DelayedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _turnsDelay: 1
+        _effects:
+        - rid: 2685916036791271431
+    - rid: 2685916036791271431
+      type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 2
+    - rid: 2685916036791271432
+      type: {class: DelayedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _turnsDelay: 1
+        _effects:
+        - rid: 2685916036791271433
+    - rid: 2685916036791271433
+      type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 2
     - rid: 5000000000000000001
       type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
