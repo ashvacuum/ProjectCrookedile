@@ -21,7 +21,7 @@ MonoBehaviour:
   _flavorText: 
   _costs:
   - _costType: 1
-    _baseAmount: 3
+    _baseAmount: 2
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
@@ -58,7 +58,7 @@ MonoBehaviour:
       type: {class: ForgiveDebtEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _max: 0
-        _supportPerDebt: 2
+        _supportPerDebt: 3
     - rid: 5000000000000000002
       type: {class: ForgiveDebtEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

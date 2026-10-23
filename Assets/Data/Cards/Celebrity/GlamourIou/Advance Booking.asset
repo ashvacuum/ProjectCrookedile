@@ -57,10 +57,10 @@ MonoBehaviour:
     - rid: 2685915685993578741
       type: {class: BorrowCardSelectionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _nextTurn: 0
+        _nextTurn: 1
         _debt: 1
     - rid: 5000000000000000001
       type: {class: BorrowCardSelectionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _nextTurn: 1
-        _debt: 1
+        _debt: 2

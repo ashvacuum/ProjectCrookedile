@@ -59,7 +59,7 @@ MonoBehaviour:
     - rid: 5000000000000000001
       type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _amount: 6
+        _amount: 4
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
@@ -77,7 +77,7 @@ MonoBehaviour:
     - rid: 5000000000000000003
       type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _amount: 9
+        _amount: 6
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1

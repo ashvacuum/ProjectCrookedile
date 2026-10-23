@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: 036fa8ac42cb95249b4ae66808902908
   _cardName: Going Viral
-  _cardType: 1
+  _cardType: 2
   _rarity: 2
   _artwork: {fileID: 21300000, guid: bc5b6f7a7f82b51499ea11cdecab6c27, type: 3}
   _description: 
   _flavorText: 
   _costs:
   - _costType: 1
-    _baseAmount: 2
+    _baseAmount: 1
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
@@ -33,7 +33,7 @@ MonoBehaviour:
   _isUpgraded: 0
   _upgradedCosts:
   - _costType: 1
-    _baseAmount: 1
+    _baseAmount: 0
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0

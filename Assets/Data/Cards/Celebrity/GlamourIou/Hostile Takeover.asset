@@ -21,7 +21,7 @@ MonoBehaviour:
   _flavorText: 
   _costs:
   - _costType: 1
-    _baseAmount: 5
+    _baseAmount: 2
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
