@@ -134,16 +134,18 @@ namespace Crookedile.Tests
             }
         }
 
+        private const string SecondOpinionPath =
+            "Assets/Data/Cards/NepoBaby/Enhanced/A Second Opinion.asset";
+
         [Test]
-        public void EncoreAndCelebrityCardsHaveEditableEffectObjects()
+        public void SecondOpinionAndCelebrityCardsHaveEditableEffectObjects()
         {
-            var encore = AssetDatabase.LoadAssetAtPath<CardData>(
-                "Assets/Data/Cards/NepoBaby/Enhanced/Encore.asset"
-            );
-            Assert.AreEqual(3, encore.Effects.Count);
-            Assert.IsInstanceOf<ReplayCardEffect>(encore.Effects[0]);
-            Assert.IsInstanceOf<RaiseAllOpponentsHostilityEffect>(encore.Effects[1]);
-            Assert.IsInstanceOf<ExhaustThisCardEffect>(encore.Effects[2]);
+            var secondOpinion = AssetDatabase.LoadAssetAtPath<CardData>(SecondOpinionPath);
+            Assert.IsNotNull(secondOpinion, SecondOpinionPath);
+            Assert.AreEqual(3, secondOpinion.Effects.Count);
+            Assert.IsInstanceOf<ReplayCardEffect>(secondOpinion.Effects[0]);
+            Assert.IsInstanceOf<RaiseAllOpponentsHostilityEffect>(secondOpinion.Effects[1]);
+            Assert.IsInstanceOf<ExhaustThisCardEffect>(secondOpinion.Effects[2]);
             foreach (
                 var guid in AssetDatabase.FindAssets(
                     "t:CardData",
@@ -250,9 +252,8 @@ namespace Crookedile.Tests
             bool previousLogSetting = LogAssert.ignoreFailingMessages;
             try
             {
-                var source = AssetDatabase.LoadAssetAtPath<CardData>(
-                    "Assets/Data/Cards/NepoBaby/Enhanced/Encore.asset"
-                );
+                var source = AssetDatabase.LoadAssetAtPath<CardData>(SecondOpinionPath);
+                Assert.IsNotNull(source, SecondOpinionPath);
                 var card = Object.Instantiate(source);
                 card.name = "ImportRecovery";
                 AssetDatabase.CreateAsset(card, path);
