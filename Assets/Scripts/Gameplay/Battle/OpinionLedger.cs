@@ -102,7 +102,7 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Raises opinion past the Denial shield (rally/Regeneration/pacify burst) — note "direct"
+        /// Raises opinion past the Denial shield (rally/Regeneration) — note "direct"
         /// deliberately still eats echo-chamber halving, which is a room penalty, not a shield.
         /// </summary>
         public void RaiseDirect(int amount) => Raise(amount);

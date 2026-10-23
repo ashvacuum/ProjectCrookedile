@@ -125,6 +125,18 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
 
+            // A Fanatic is your follower: it takes no action against you while the buff lasts.
+            if (enemy.StatusEffects.HasStatus<FanaticStatus>())
+            {
+                GameLogger.LogInfo<BattleManager>(
+                    $"Enemy [{i}] {enemy.EnemyData.EnemyName} is a Fanatic — follows you, skips its action"
+                );
+                EventBus.Publish(
+                    new EnemySkippedTurnEvent { EnemyIndex = i, EnemyName = enemy.EnemyData.EnemyName }
+                );
+                return;
+            }
+
             // Doubt (pacify): a doubting enemy may hold back its action (soft skip, 25% per stack).
             int doubt = enemy.StatusEffects.GetStacks<DoubtStatus>();
             if (doubt > 0)

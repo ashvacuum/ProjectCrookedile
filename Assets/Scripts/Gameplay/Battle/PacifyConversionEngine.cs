@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Crookedile.Core;
+using Crookedile.Data;
 using Crookedile.Utilities;
 using UnityEngine;
 
@@ -10,29 +11,22 @@ namespace Crookedile.Gameplay.Battle
     /// CARD-DRIVEN: <see cref="ConvertPacifiedEffect"/> calls <see cref="TryConvert"/> when an
     /// explicit conversion card is played (the old auto-convert on pacify-status application
     /// was removed by design). When the target's total pacify stacks reach
-    /// <c>3 + its Jaded stacks</c>, the pacify statuses are consumed and the enemy converts:
+    /// <c>FaithLeaderConfig.ConversionThreshold + its Jaded stacks</c>, the pacify statuses are
+    /// consumed and the enemy converts:
     /// <list type="bullet">
-    ///   <item>Hardened enemy — can't be converted; silenced instead (no burst, no Jaded).</item>
-    ///   <item>Any other enemy — a one-turn Fanatic burst pumps the meter, then it reverts to
-    ///   neutral and gains a permanent Jaded stack (raising its next conversion cost).</item>
+    ///   <item>Hardened enemy — can't be converted; silenced instead (no awards).</item>
+    ///   <item>Any other enemy — reverts to neutral; the conversion card then awards its statuses,
+    ///   usually Fanatic. Conversion itself pays nothing: the value is what the Fanatic does
+    ///   (<see cref="FanaticFollowers"/>).</item>
     /// </list>
     /// </summary>
     [Debuggable("PacifyConversion", LogLevel.Info)]
     public class PacifyConversionEngine
     {
-        // Base pacify threshold before Jaded; each Jaded stack on the enemy raises it by 1.
-        private const int BaseThreshold = 3;
-
-        // Opinion pumped into the meter per pacify stack consumed on conversion (generous by
-        // design; over-stacking past the threshold yields a proportionally bigger burst).
-        private const int BurstPerStack = 3;
-
-        private readonly OpinionLedger _opinion;
         private readonly BattleStats _playerStats;
 
-        public PacifyConversionEngine(OpinionLedger opinion, BattleStats playerStats)
+        public PacifyConversionEngine(BattleStats playerStats)
         {
-            _opinion = opinion;
             _playerStats = playerStats;
         }
 
@@ -69,11 +63,11 @@ namespace Crookedile.Gameplay.Battle
         {
             NotReady = 0, // threshold unmet — nothing happened
             Silenced = 1, // Hardened target: fuel consumed, silenced, no awards
-            Converted = 2, // full conversion: burst fired, reverted to neutral
+            Converted = 2, // full conversion: reverted to neutral, ready for awards
         }
 
         /// <param name="bufferStatus">
-        /// The escalator status: the threshold is 3 + the target's current stacks of it.
+        /// The escalator status: the threshold is the config threshold + the target's stacks of it.
         /// Null = the default Jaded. The CALLER is responsible for awarding it on success —
         /// the engine only reads it.
         /// </param>
@@ -101,7 +95,8 @@ namespace Crookedile.Gameplay.Battle
                     total += mgr.GetStacks(status);
 
             // The buffer status is the escalator: its stacks raise this conversion's cost.
-            int threshold = BaseThreshold + mgr.GetStacks(bufferStatus);
+            int threshold =
+                FaithLeaderConfig.Current.ConversionThreshold + mgr.GetStacks(bufferStatus);
             if (total < threshold)
                 return Outcome.NotReady;
 
@@ -131,20 +126,9 @@ namespace Crookedile.Gameplay.Battle
                 GameLogger.LogInfo<PacifyConversionEngine>(
                     $"Enemy [{idx}] is Hardened — pacify failed, silenced instead"
                 );
-                EventBus.Publish(
-                    new EnemyConvertedEvent
-                    {
-                        EnemyIndex = idx,
-                        OpinionBurst = 0,
-                        WasSilenced = true,
-                    }
-                );
+                EventBus.Publish(new EnemyConvertedEvent { EnemyIndex = idx, WasSilenced = true });
                 return Outcome.Silenced;
             }
-
-            // Convert: one-turn Fanatic burst pumping the meter (generous, scales with stacks eaten).
-            int burst = consumed * BurstPerStack;
-            _opinion.RaiseDirect(burst);
 
             // Revert to neutral. Awards (buffer/Jaded, Fanatic, ...) are the CALLER's job —
             // ConvertPacifiedEffect applies its authored award list on Outcome.Converted.
@@ -153,16 +137,9 @@ namespace Crookedile.Gameplay.Battle
             ConversionsThisTurn++;
 
             GameLogger.LogInfo<PacifyConversionEngine>(
-                $"Enemy [{idx}] converted — {consumed} pacify stacks → {burst} opinion burst"
+                $"Enemy [{idx}] converted — {consumed} pacify stacks consumed"
             );
-            EventBus.Publish(
-                new EnemyConvertedEvent
-                {
-                    EnemyIndex = idx,
-                    OpinionBurst = burst,
-                    WasSilenced = false,
-                }
-            );
+            EventBus.Publish(new EnemyConvertedEvent { EnemyIndex = idx, WasSilenced = false });
             return Outcome.Converted;
         }
     }

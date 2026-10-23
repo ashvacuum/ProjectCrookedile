@@ -513,17 +513,14 @@ namespace Crookedile.Gameplay.Battle
 
     /// <summary>
     /// Published by the Faith Leader pacify-conversion engine when an enemy's stacked pacify statuses
-    /// reach the threshold and are consumed. A normal enemy fires a one-turn meter burst then reverts
-    /// to neutral and gains a Jaded stack (<see cref="WasSilenced"/> = false); a Hardened enemy can't
-    /// be converted and is silenced instead (<see cref="WasSilenced"/> = true, <see cref="OpinionBurst"/> = 0).
+    /// reach the threshold and are consumed. A normal enemy reverts to neutral and takes the
+    /// conversion card's awards, usually Fanatic (<see cref="WasSilenced"/> = false); a Hardened
+    /// enemy can't be converted and is silenced instead (<see cref="WasSilenced"/> = true).
     /// </summary>
     public struct EnemyConvertedEvent : IGameEvent
     {
         /// <summary>Zero-based index into <c>BattleManager.Enemies</c> that was converted/silenced.</summary>
         public int EnemyIndex;
-
-        /// <summary>Opinion pumped into the meter by the conversion burst (0 when silenced).</summary>
-        public int OpinionBurst;
 
         /// <summary>True when the enemy was Hardened and got silenced instead of converted.</summary>
         public bool WasSilenced;

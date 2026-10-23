@@ -253,6 +253,7 @@ namespace Crookedile.Gameplay.Battle
         private void ApplyCardEffects(CardData card, int[] amountOverrides)
         {
             var ctx = _mgr.Resolver.ResolveCardEffects(card, isPlayerCard: true, amountOverrides);
+            _mgr.FanaticsFollow(ctx);
 
             // Activated passive (Policy card): its effects resolved above; now switch on its
             // passives for the rest of the battle. The card is exhausted below so it leaves play.
@@ -405,7 +406,7 @@ namespace Crookedile.Gameplay.Battle
             EventBus.Publish(new CardPlayedEvent { Card = card, IsPlayer = true });
             GameLogger.LogInfo<CardPlayController>($"Played {card.CardName} out of hand, free");
 
-            _mgr.Resolver.ResolveCardEffects(card, isPlayerCard: true);
+            _mgr.FanaticsFollow(_mgr.Resolver.ResolveCardEffects(card, isPlayerCard: true));
             SettleAfterResolution();
             TriggerMomentum();
             _mgr.CheckAndEndBattleIfOver();

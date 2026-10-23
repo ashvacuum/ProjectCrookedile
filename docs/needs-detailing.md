@@ -1,6 +1,6 @@
 # Needs Detailing — design questions awaiting a decision
 
-> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-10-09
+> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-10-23
 >
 > **Summary:** Design questions awaiting a call, ordered by how much they block. Read before authoring content.
 >
@@ -27,8 +27,12 @@ Still to detail, all with a placeholder in the ruling:
 - **Command card list** for the reward pool (attack now / defend now / silence now, plus Sermon-style harvest).
 - **What counts as an attack or a defend** for cards that do something else too (draw, apply a status).
 
-**Code gap:** `PacifyConversionEngine` still pays an instant burst on conversion (`BurstPerStack` × consumed), and
-`FanaticStatus` is only a hostility flag. The follower behaviour is not built.
+**Built (2026-10-23):** follow-on-attack, follow-on-defend, the quiet-turn Silence, skipping its action against you,
+and disillusion (neutral + Jaded) run in `FanaticFollowers` and `FanaticStatus`, with every placeholder in
+`Resources/FaithLeaderConfig`. Conversion pays no burst. Attack/defend is read off what the card did (pushed the
+meter / gained Support). **Not built:** command cards, over-stacking (+1 follow per stack past the threshold), and
+cards that extend the buff. **Open:** Gospel and God's Chosen still award Jaded at conversion, so a converted enemy
+now pays Jaded twice (once from the card, once on disillusion).
 
 ## 2. Intent vocabulary (blocks: enemy roster authoring)
 

@@ -1,6 +1,6 @@
 # Crookedile — Enemy Design Bible (v2, shared-meter model)
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-05
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-23
 >
 > **Summary:** The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete.
 >
@@ -34,7 +34,7 @@
 | Directional shields | Blockers on the meter. Enemy shields block UP; player shields block DOWN. | Player places down-block shields (Support/Rhetoric tools); can strip enemy up-shields. | Shielder role places/refreshes up-shields. |
 | Player Credibility | *(META resource — campaign layer, parked)* | Guard with Support; heal rarely. | Smear/Exposé/Red-tag moves chip it. Which roles carry Credibility attacks = D8. |
 | Enemy states (Hostile/Receptive) | Per-enemy behavior modes. | Flip states via cards/statuses; MANAGE the mix — all-Receptive triggers Echo Chamber penalty. | Converters drag Receptives back to Hostile; some (Televangelist) weaponize Echo Chamber deliberately. |
-| Statuses on enemies | Guilt, Shame, Doubt (pacify trio), Silence, Devotion, Jaded, Hardened, Fanatic, Turncoat, Warded. | FL engine: stack G/S/D to 3+Jaded → consume → 1-turn Fanatic bursts meter → reverts. Jaded = permanent per-enemy escalator (anti-milking). | Hardened resists statuses; Protectors guard allies via Warded stacks. |
+| Statuses on enemies | Guilt, Shame, Doubt (pacify trio), Silence, Devotion, Jaded, Hardened, Fanatic, Turncoat, Warded. | FL engine: stack G/S/D to 3+Jaded → consume → Fanatic follows your attacks and defends while the buff lasts → reverts with Jaded. Jaded = permanent per-enemy escalator (anti-milking). | Hardened resists statuses; Protectors guard allies via Warded stacks. |
 | The row | Ordered enemy positions. Adjacency matters (Praise). | Target selection, positional cards, enemy summons occupy slots. | Amplifier/Converter range limits (proposed D10), summon insertion (bosses). |
 | Clocks | Anti-stall pressure. | Race or control. | Escalator ramps, meter decay, shield stacking, pollution, Credibility chip. |
 

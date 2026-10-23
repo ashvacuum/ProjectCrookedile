@@ -95,8 +95,11 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Devotion — reduces incoming hostility gains by this much per stack.</summary>
         public virtual int HostilityResistPerStack => 0;
 
-        /// <summary>Called when this status's stacks hit zero and it falls off its owner (Fanatic snaps hostility back up).</summary>
-        public virtual void OnDepleted(BattleStats owner) { }
+        /// <summary>
+        /// Called when this status falls off its owner (a disillusioned Fanatic reverts to neutral
+        /// and gains Jaded). <paramref name="statuses"/> is the owner's manager.
+        /// </summary>
+        public virtual void OnDepleted(BattleStats owner, StatusEffectManager statuses) { }
 
         #endregion
     }

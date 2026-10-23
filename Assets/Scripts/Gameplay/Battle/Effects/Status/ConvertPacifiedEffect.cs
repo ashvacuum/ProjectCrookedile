@@ -11,14 +11,16 @@ namespace Crookedile.Gameplay.Battle
     /// the authored replacement for the old hidden auto-convert. The whole recipe lives here:
     ///
     ///   FUEL: the statuses that count toward the threshold and are consumed (empty = the
-    ///   Guilt/Shame/Doubt trio). Threshold = 3 + the target's Buffer Status stacks.
+    ///   Guilt/Shame/Doubt trio). Threshold = FaithLeaderConfig.ConversionThreshold + the
+    ///   target's Buffer Status stacks.
     ///
     ///   AWARDS: statuses stamped on the enemy after a successful conversion, e.g. Jaded
     ///   (the tax) + Fanatic (the converted state). With Stacks Per Award = N, each award's
     ///   stacks are multiplied by consumed/N — big conversions mint more.
     ///
-    /// The engine consumes fuel, fires the opinion burst (3 x consumed), and reverts the
-    /// enemy to neutral; Hardened targets are Silenced instead (fuel spent, no awards).
+    /// The engine consumes fuel and reverts the enemy to neutral; conversion pays nothing on its
+    /// own (an awarded Fanatic follows your plays). Hardened targets are Silenced instead (fuel
+    /// spent, no awards).
     /// </summary>
     [Serializable]
     public class ConvertPacifiedEffect : BattleEffect
@@ -53,7 +55,7 @@ namespace Crookedile.Gameplay.Battle
         private List<StatusBehavior> _statusesToConvert = new List<StatusBehavior>();
 
         [Tooltip(
-            "BUFFER: the escalator status — the conversion threshold is 3 + the target's "
+            "BUFFER: the escalator status — the conversion threshold (Faith Leader config) + the target's "
                 + "current stacks of it. Leave EMPTY for the default Jaded. Award it below or "
                 + "conversions never get more expensive."
         )]
@@ -128,7 +130,7 @@ namespace Crookedile.Gameplay.Battle
         public override string GetDescription()
         {
             // Keyword-short: "Convert" is a glossary term — the tooltip explains the
-            // threshold/consume/burst mechanic. Only name what THIS card customizes.
+            // threshold/consume mechanic. Only name what THIS card customizes.
             string targetStr = _target == TargetType.Opponent ? "an enemy" : $"{_target}";
             string fuel =
                 _statusesToConvert == null || _statusesToConvert.Count == 0
