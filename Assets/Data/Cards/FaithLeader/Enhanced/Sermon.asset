@@ -38,7 +38,8 @@ MonoBehaviour:
   - rid: 5004226315283595381
   _upgradedPassives: []
   _upgradedInnateRetain: 0
-  _tags: []
+  _tags:
+  - faithleader
   _fantasies: 4
   _isStarterCard: 0
   _isUnlockable: 0
