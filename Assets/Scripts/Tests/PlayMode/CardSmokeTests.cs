@@ -15,7 +15,7 @@ namespace Crookedile.Tests
     /// <summary>
     /// Plays every card in the card database once against a single enemy held receptive, neutral
     /// and hostile, with AP and Support topped up so cost never blocks it, then plays out one
-    /// enemy turn. Fails on an event loop, a runaway chain of plays, any logged error, or a battle
+    /// enemy turn. An Unplayable card is checked to refuse play and held through that turn instead. Fails on an event loop, a runaway chain of plays, any logged error, or a battle
     /// that stops returning to the player's turn. Says nothing about whether the card does what
     /// its text says.
     /// </summary>
@@ -114,15 +114,23 @@ namespace Crookedile.Tests
                 int handIndex = IndexOf(bm.PlayerDeck.Hand, card);
                 if (handIndex < 0)
                     Assert.Inconclusive("The card was not in the opening hand.");
-                if (!bm.CanPlayCard(card))
-                    Assert.Inconclusive("Unplayable here even with AP and Support topped up.");
 
-                plays = 0;
-                events = 0;
-                bm.RequestPlayCard(card, handIndex);
-                yield return WaitForPlayerTurn(bm, () => ended, "the card to resolve", () => AnswerChoice(ref pendingChoice));
-                Assert.LessOrEqual(plays, MaxPlaysFromOneCard, "Runaway plays/replays from one card.");
-                Assert.LessOrEqual(events, MaxEventsFromOneCard, "Runaway events from one card.");
+                // Unplayable cards (curses, Scandals, statuses) act through passives while held, so
+                // they skip the play and sit in hand through the turn below instead.
+                if (card.IsUnplayable)
+                    Assert.IsFalse(bm.CanPlayCard(card), "An Unplayable card was allowed to play.");
+                else
+                {
+                    if (!bm.CanPlayCard(card))
+                        Assert.Inconclusive("Unplayable here even with AP and Support topped up.");
+
+                    plays = 0;
+                    events = 0;
+                    bm.RequestPlayCard(card, handIndex);
+                    yield return WaitForPlayerTurn(bm, () => ended, "the card to resolve", () => AnswerChoice(ref pendingChoice));
+                    Assert.LessOrEqual(plays, MaxPlaysFromOneCard, "Runaway plays/replays from one card.");
+                    Assert.LessOrEqual(events, MaxEventsFromOneCard, "Runaway events from one card.");
+                }
 
                 if (!ended)
                 {

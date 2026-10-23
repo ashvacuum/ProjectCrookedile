@@ -10,17 +10,52 @@ using Crookedile.Gameplay.Battle;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using static Crookedile.Tests.TestContent;
 
 namespace Crookedile.Tests
 {
+    /// <summary>
+    /// Celebrity mechanics (Glamour, Debt, Promises, Starstruck), each checked through the effect
+    /// that implements it. Cards are built in code with the numbers each test states, so retuning a
+    /// card asset never breaks these; CardSmokeTests covers the assets themselves.
+    /// </summary>
     public class CelebrityCardTests
     {
         private readonly List<Object> _objects = new();
         private BattleManager _battle;
 
+        // Shared cards whose identity matters (deck contents, token swaps, Bailout's card).
+        private CardData _pressure; // costs 1, Sway 6
+        private CardData _soundbite; // free, Sway 2, exhausts
+        private CardData _movieQuote; // free, 1 Glamour, exhausts
+
         [UnitySetUp]
         public IEnumerator SetUp()
         {
+            _pressure = Card(
+                _objects,
+                "Pressure",
+                CardType.Pressure,
+                1,
+                Make<ApplyOpinionEffect>(("_amount", 6))
+            );
+            _soundbite = Card(
+                _objects,
+                "Soundbite",
+                CardType.Rhetoric,
+                0,
+                Make<ApplyOpinionEffect>(("_amount", 2)),
+                new ExhaustThisCardEffect()
+            );
+            _movieQuote = Card(
+                _objects,
+                "Movie Quote",
+                CardType.Rhetoric,
+                0,
+                Make<GainGlamourEffect>(("_amount", 1)),
+                new ExhaustThisCardEffect()
+            );
+
             var enemy = ScriptableObject.CreateInstance<EnemyData>();
             _objects.Add(enemy);
             Set(enemy, "_minHostility", -10);
@@ -32,14 +67,12 @@ namespace Crookedile.Tests
                 new BattleSetup
                 {
                     enemies = new List<EnemyData> { enemy },
-                    playerDeck = Enumerable.Repeat(Card("Hot Take"), 12).ToList(),
+                    playerDeck = Enumerable.Repeat(_pressure, 12).ToList(),
                     startingOpinion = 50,
                     maxTurns = 20,
                 }
             );
-            for (int i = 0; i < 120 && _battle.CurrentState != BattleState.PlayerTurn; i++)
-                yield return null;
-            Assert.AreEqual(BattleState.PlayerTurn, _battle.CurrentState);
+            yield return WaitForPlayerTurn();
             _battle.Enemies[0].Stats.SetHostility(0);
         }
 
@@ -54,27 +87,20 @@ namespace Crookedile.Tests
         [UnityTest]
         public IEnumerator DedicatedDebtEffectsStackAndRespectAmountOverrides()
         {
-            var resolver = (EffectResolver)
-                typeof(BattleManager)
-                    .GetField("_effectResolver", BindingFlags.Instance | BindingFlags.NonPublic)
-                    .GetValue(_battle);
-            var context = resolver.CreateContext(true);
-            Card("Too Big to Fail").Effects.OfType<DebtWaiverEffect>().Single().Execute(context, 2);
+            var context = Resolver.CreateContext(true);
+            new DebtWaiverEffect().Execute(context, 2);
             Assert.AreEqual(2, _battle.Celebrity.DebtWaivers);
-            Card("Payment Holiday")
-                .Effects.OfType<DelayDebtSettlementEffect>()
-                .Single()
-                .Execute(context, 3);
+            new DelayDebtSettlementEffect().Execute(context, 3);
             Assert.AreEqual(3, _battle.Celebrity.SettlementsDelayed);
             int energy = _battle.PlayerStats.CurrentActionPoints;
-            new BorrowEffect().Execute(context);
+            Make<BorrowEffect>(("_energy", 2), ("_debt", 2)).Execute(context);
             Assert.AreEqual(energy + 2, _battle.PlayerStats.CurrentActionPoints);
             Assert.AreEqual(2, _battle.Celebrity.Debt);
-            var bailout = Card("Bailout").Effects.OfType<BailoutEffect>().Single();
+            var bailout = Make<BailoutEffect>(("_soundbite", _soundbite));
             bailout.Execute(context, 2);
             bailout.Execute(context, 3);
             Assert.AreEqual(5, _battle.Celebrity.BailoutCapPerTurn);
-            Assert.AreSame(Card("Soundbite"), _battle.Celebrity.BailoutCard);
+            Assert.AreSame(_soundbite, _battle.Celebrity.BailoutCard);
             yield return null;
         }
 
@@ -82,12 +108,8 @@ namespace Crookedile.Tests
         public IEnumerator DedicatedNepoEffectsApplyAndConsumeTheirTurnSetups()
         {
             _battle.Opinion.DecayOpinion(30);
-            var resolver = (EffectResolver)
-                typeof(BattleManager)
-                    .GetField("_effectResolver", BindingFlags.Instance | BindingFlags.NonPublic)
-                    .GetValue(_battle);
-            var context = resolver.CreateContext(true);
-            var card = Card("Hot Take");
+            var context = Resolver.CreateContext(true);
+            var card = _pressure;
             int cost = _battle.CardPlay.GetEffectiveCardCost(card);
             Assert.Greater(cost, 0);
             new GrantFreePlaysEffect().Execute(context, 2);
@@ -121,21 +143,22 @@ namespace Crookedile.Tests
         }
 
         [UnityTest]
-        public IEnumerator GlamourThresholdsAndCashOutUseActualAssets()
+        public IEnumerator GlamourThresholdsGateGainsAndCashOutConsumesAll()
         {
+            var gainFiveAtSix = IfGlamour(ComparisonType.AtLeast, 6, GainGlamour(5));
             Glamour(5);
-            Play("Press Release");
+            Play(gainFiveAtSix);
             Assert.AreEqual(5, _battle.CurrentGlamour);
             Glamour(1);
-            Play("Press Release");
+            Play(gainFiveAtSix);
             Assert.AreEqual(11, _battle.CurrentGlamour);
             _battle.PlayerStatusEffects.RemoveStacksNotify<GlamourStatus>(int.MaxValue);
-            Play("Thumbs Up");
+            Play(IfGlamour(ComparisonType.AtMost, 2, GainGlamour(2)));
             Assert.AreEqual(2, _battle.CurrentGlamour);
             Glamour(4);
             _battle.GainDenial(4);
             int before = _battle.Opinion.CurrentOpinion;
-            Play("Iconic Line");
+            Play(Make<ConsumeGlamourForOpinionEffect>(("_swayPerGlamour", 2)));
             Assert.AreEqual(0, _battle.CurrentGlamour);
             Assert.AreEqual(before + 8, _battle.Opinion.CurrentOpinion);
             yield return null;
@@ -144,20 +167,23 @@ namespace Crookedile.Tests
         [UnityTest]
         public IEnumerator MovieQuotesReplaceCurrentAndFutureTokens()
         {
-            var soundbite = Card("Soundbite");
-            var quote = Card("Movie Quote");
-            _battle.PlayerDeck.AddCardToHand(soundbite);
-            _battle.PlayerDeck.AddCardToDiscard(soundbite);
-            _battle.PlayerDeck.AddCardToDeck(soundbite);
-            Play("Signature Catchphrase");
-            Assert.IsFalse(_battle.PlayerDeck.AllCards.Contains(soundbite));
-            Assert.AreEqual(3, _battle.PlayerDeck.AllCards.Count(c => c == quote));
-            _battle.PlayerDeck.AddCardToHand(soundbite);
-            Assert.AreEqual(2, _battle.PlayerDeck.Hand.Count(c => c == quote));
-            var result = Play("Movie Quote");
+            _battle.PlayerDeck.AddCardToHand(_soundbite);
+            _battle.PlayerDeck.AddCardToDiscard(_soundbite);
+            _battle.PlayerDeck.AddCardToDeck(_soundbite);
+            Play(
+                Make<SignatureCatchphraseEffect>(
+                    ("_soundbite", _soundbite),
+                    ("_movieQuote", _movieQuote)
+                )
+            );
+            Assert.IsFalse(_battle.PlayerDeck.AllCards.Contains(_soundbite));
+            Assert.AreEqual(3, _battle.PlayerDeck.AllCards.Count(c => c == _movieQuote));
+            _battle.PlayerDeck.AddCardToHand(_soundbite);
+            Assert.AreEqual(2, _battle.PlayerDeck.Hand.Count(c => c == _movieQuote));
+            var result = Play(_movieQuote);
             Assert.AreEqual(1, _battle.CurrentGlamour);
             Assert.IsTrue(result.ShouldExhaust);
-            Assert.AreEqual(2, Play("Soundbite").LastDamageDealt);
+            Assert.AreEqual(2, Play(_soundbite).LastDamageDealt);
             yield return null;
         }
 
@@ -165,13 +191,13 @@ namespace Crookedile.Tests
         public IEnumerator CreditAppliesToOneNewDebtGainAndDiscountExpires()
         {
             _battle.Celebrity.GainDebt(4);
-            Play("Line of Credit");
+            Play(Make<LineOfCreditEffect>(("_debtReduction", 2), ("_cardDiscount", 1)));
             Assert.AreEqual(1, _battle.Celebrity.GainDebt(3, _battle.PlayerDeck));
             Assert.AreEqual(5, _battle.Celebrity.Debt);
-            Assert.AreEqual(-1, _battle.PlayerDeck.GetCostIncreaseThisTurn(Card("Hot Take")));
+            Assert.AreEqual(-1, _battle.PlayerDeck.GetCostIncreaseThisTurn(_pressure));
             Assert.AreEqual(3, _battle.Celebrity.GainDebt(3, _battle.PlayerDeck));
             _battle.PlayerDeck.StartTurn(0);
-            Assert.AreEqual(0, _battle.PlayerDeck.GetCostIncreaseThisTurn(Card("Hot Take")));
+            Assert.AreEqual(0, _battle.PlayerDeck.GetCostIncreaseThisTurn(_pressure));
             _battle.Celebrity.ResetTurn();
             Assert.AreEqual(3, _battle.Celebrity.GainDebt(3));
             yield return null;
@@ -180,13 +206,18 @@ namespace Crookedile.Tests
         [UnityTest]
         public IEnumerator OverpromiseTriplesOnlyTheNextCardsSway()
         {
-            Play("Overpromise");
+            var overpromise = new BattleEffect[]
+            {
+                Make<BorrowEffect>(("_energy", 0), ("_debt", 3)),
+                Make<OverpromiseEffect>(("_swayMultiplier", 3)),
+            };
+            Play(overpromise);
             Assert.AreEqual(3, _battle.Celebrity.Debt);
-            Assert.AreEqual(6, Play("Soundbite").LastDamageDealt);
-            Assert.AreEqual(2, Play("Soundbite").LastDamageDealt);
-            Play("Overpromise");
+            Assert.AreEqual(6, Play(_soundbite).LastDamageDealt);
+            Assert.AreEqual(2, Play(_soundbite).LastDamageDealt);
+            Play(overpromise);
             _battle.Celebrity.ResetTurn();
-            Assert.AreEqual(2, Play("Soundbite").LastDamageDealt);
+            Assert.AreEqual(2, Play(_soundbite).LastDamageDealt);
             yield return null;
         }
 
@@ -194,12 +225,10 @@ namespace Crookedile.Tests
         public IEnumerator PaidPromisesReserveDebtAndOnlyNextTurnCanFulfil()
         {
             _battle.Celebrity.GainDebt(5);
-            Play("Paid-Off Promises");
+            Play(PaidOffPromises());
             Assert.AreEqual(2, _battle.Celebrity.Debt);
             Assert.AreEqual(3, _battle.Celebrity.PromisedDebt);
-            var costly = ScriptableObject.CreateInstance<CardData>();
-            _objects.Add(costly);
-            Set(costly, "_costs", new List<CardCost> { new(CostType.ActionPoints, 2) });
+            var costly = Card(_objects, "Costs 2", CardType.Rhetoric, 2);
             _battle.Celebrity.OnCardPlayed(costly);
             Assert.AreEqual(3, _battle.Celebrity.PromisedDebt);
             _battle.Celebrity.ResetTurn();
@@ -220,9 +249,9 @@ namespace Crookedile.Tests
         public IEnumerator MissedPromisesCollectAtNextTurnEndAndSettleUpRemovesOne()
         {
             _battle.Celebrity.GainDebt(4);
-            Play("Settle Up");
+            Play(Make<ForgiveDebtEffect>(("_max", 1), ("_supportPerDebt", 0)));
             Assert.AreEqual(3, _battle.Celebrity.Debt);
-            Play("Paid-Off Promises");
+            Play(PaidOffPromises());
             _battle.Celebrity.ResetTurn();
             _battle.PlayerStats.SpendActionPoints(_battle.PlayerStats.CurrentActionPoints);
             int before = _battle.Opinion.CurrentOpinion;
@@ -239,7 +268,7 @@ namespace Crookedile.Tests
         [UnityTest]
         public IEnumerator MediaTrainingPaysOnceAndClosesAfterCardPlay()
         {
-            Play("Media Training");
+            Play(Make<MediaTrainingEffect>(("_glamourCost", 2), ("_drawCount", 1)));
             Glamour(6);
             Assert.IsFalse(_battle.TryUseMediaTraining());
             _battle.Celebrity.ResetTurn();
@@ -249,7 +278,7 @@ namespace Crookedile.Tests
             Assert.AreEqual(hand + 1, _battle.PlayerDeck.HandCount);
             Assert.IsFalse(_battle.TryUseMediaTraining());
             _battle.Celebrity.ResetTurn();
-            _battle.Celebrity.OnCardPlayed(Card("Soundbite"));
+            _battle.Celebrity.OnCardPlayed(_soundbite);
             Assert.IsFalse(_battle.TryUseMediaTraining());
             yield return null;
         }
@@ -257,14 +286,15 @@ namespace Crookedile.Tests
         [UnityTest]
         public IEnumerator DisarmingCharmSpendsGlamourWithoutChangingHostility()
         {
+            var charm = Make<DisarmingCharmEffect>(("_glamourCost", 2), ("_weakenedStacks", 3));
             Glamour(4);
             _battle.Enemies[0].Stats.SetHostility(5);
-            Play("Disarming Charm");
+            Play(charm);
             Assert.AreEqual(5, _battle.Enemies[0].Stats.CurrentHostility);
             Assert.AreEqual(3, _battle.Enemies[0].StatusEffects.GetStacks<WeakenedStatus>());
             Assert.AreEqual(2, _battle.CurrentGlamour);
             _battle.Enemies[0].Stats.SetHostility(-5);
-            Play("Disarming Charm");
+            Play(charm);
             Assert.AreEqual(2, _battle.CurrentGlamour);
             yield return null;
         }
@@ -274,7 +304,7 @@ namespace Crookedile.Tests
         {
             var enemy = _battle.Enemies[0];
             enemy.Stats.SetHostility(-5);
-            Play("Never Meet Your Heroes");
+            Play(Starstruck(3));
             Assert.AreEqual(3, enemy.StatusEffects.GetStacks<StarstruckStatus>());
             int before = _battle.Opinion.CurrentOpinion;
             enemy.Stats.GainHostility(6);
@@ -291,13 +321,13 @@ namespace Crookedile.Tests
         {
             var enemy = _battle.Enemies[0];
             enemy.Stats.SetHostility(-10);
-            Play("Never Meet Your Heroes");
+            Play(Starstruck(3));
             enemy.StatusEffects.RemoveStacksNotify<StarstruckStatus>(1);
-            Play("Never Meet Your Heroes");
+            Play(Starstruck(3));
             Assert.AreEqual(3, enemy.StatusEffects.GetStacks<StarstruckStatus>());
             enemy.StatusEffects.RemoveStacksNotify<StarstruckStatus>(int.MaxValue);
             enemy.Stats.SetHostility(10);
-            Play("Never Meet Your Heroes");
+            Play(Starstruck(3));
             Assert.AreEqual(0, enemy.StatusEffects.GetStacks<StarstruckStatus>());
             yield return null;
         }
@@ -307,16 +337,22 @@ namespace Crookedile.Tests
         {
             var enemy = _battle.Enemies[0];
             enemy.Stats.SetHostility(0);
-            Play("Empty Promise");
+            Play(
+                Make<ReduceHostilityEffect>(("_amount", 4)),
+                Make<DelayedEffect>(
+                    ("_turnsDelay", 1),
+                    (
+                        "_effects",
+                        new List<BattleEffect>
+                        {
+                            Make<RaiseAllOpponentsHostilityEffect>(("_amount", 2)),
+                        }
+                    )
+                )
+            );
             Assert.AreEqual(-4, enemy.Stats.CurrentHostility);
             _battle.RequestEndTurn();
-            for (
-                int frame = 0;
-                frame < 120 && _battle.CurrentState != BattleState.PlayerTurn;
-                frame++
-            )
-                yield return null;
-            Assert.AreEqual(BattleState.PlayerTurn, _battle.CurrentState);
+            yield return WaitForPlayerTurn();
             Assert.AreEqual(-2, enemy.Stats.CurrentHostility);
         }
 
@@ -327,18 +363,19 @@ namespace Crookedile.Tests
             _battle.CardChoicePrompt = e => choice = e;
             try
             {
-                _battle.PlayerDeck.AddCardToDiscard(Card("Thumbs Up"));
-                Play("Second Take");
+                var discarded = Card(_objects, "In discard", CardType.Rhetoric, 0);
+                _battle.PlayerDeck.AddCardToDiscard(discarded);
+                Play(Make<BorrowCardSelectionEffect>(("_nextTurn", false), ("_debt", 1)));
                 Assert.IsNotNull(choice);
                 Assert.AreEqual(0, _battle.Celebrity.Debt);
-                choice.OnConfirmed(new List<CardData> { Card("Thumbs Up") });
-                choice.OnConfirmed(new List<CardData> { Card("Thumbs Up") });
+                choice.OnConfirmed(new List<CardData> { discarded });
+                choice.OnConfirmed(new List<CardData> { discarded });
                 Assert.AreEqual(1, _battle.Celebrity.Debt);
                 choice = null;
                 int total = _battle.PlayerDeck.AllCards.Count;
-                Play("Advance Booking");
+                Play(Make<BorrowCardSelectionEffect>(("_nextTurn", true), ("_debt", 2)));
                 Assert.IsNotNull(choice);
-                choice.OnConfirmed(new List<CardData> { Card("Hot Take") });
+                choice.OnConfirmed(new List<CardData> { _pressure });
                 Assert.AreEqual(3, _battle.Celebrity.Debt);
                 int hand = _battle.PlayerDeck.HandCount;
                 _battle.PlayerDeck.DeliverBookedCards();
@@ -357,17 +394,11 @@ namespace Crookedile.Tests
         {
             var enemy = _battle.Enemies[0];
             enemy.Stats.SetHostility(-10);
-            Play("Never Meet Your Heroes");
+            Play(Starstruck(3));
             for (int turn = 1; turn <= 3; turn++)
             {
                 _battle.RequestEndTurn();
-                for (
-                    int frame = 0;
-                    frame < 120 && _battle.CurrentState != BattleState.PlayerTurn;
-                    frame++
-                )
-                    yield return null;
-                Assert.AreEqual(BattleState.PlayerTurn, _battle.CurrentState);
+                yield return WaitForPlayerTurn();
                 Assert.AreEqual(-10 + turn * 2, enemy.Stats.CurrentHostility);
                 Assert.AreEqual(3 - turn, enemy.StatusEffects.GetStacks<StarstruckStatus>());
             }
@@ -377,18 +408,38 @@ namespace Crookedile.Tests
         public IEnumerator PhotoOpRewardsOnlyFirstPressureAndPersecutionBypassesComposure()
         {
             _battle.PlayerStats.GainActionPoints(20);
-            var photo = Card("Photo Op");
+            var photo = Policy(
+                _objects,
+                "Glamour on first Pressure",
+                1,
+                Make<BattlePassive>(
+                    (
+                        "_trigger",
+                        Make<CardPlayedTrigger>(
+                            ("_filterByType", true),
+                            ("_filterType", CardType.Pressure)
+                        )
+                    ),
+                    ("_oncePerTurn", true),
+                    ("_effects", new List<BattleEffect> { GainGlamour(1) })
+                )
+            );
             _battle.PlayerDeck.AddCardToHand(photo);
             _battle.RequestPlayCard(photo, _battle.PlayerDeck.Hand.ToList().IndexOf(photo));
-            var pressure = Card("Hot Take");
-            _battle.RequestPlayCard(pressure, _battle.PlayerDeck.Hand.ToList().IndexOf(pressure));
+            _battle.RequestPlayCard(_pressure, _battle.PlayerDeck.Hand.ToList().IndexOf(_pressure));
             Assert.AreEqual(1, _battle.CurrentGlamour);
-            _battle.RequestPlayCard(pressure, _battle.PlayerDeck.Hand.ToList().IndexOf(pressure));
+            _battle.RequestPlayCard(_pressure, _battle.PlayerDeck.Hand.ToList().IndexOf(_pressure));
             Assert.AreEqual(1, _battle.CurrentGlamour);
             Glamour(4);
             _battle.GainSupport(20);
             int before = _battle.Opinion.CurrentOpinion;
-            Play("Victim Narrative");
+            Play(
+                Make<LowerOwnOpinionEffect>(("_amount", 5), ("_bypassSupport", true)),
+                Make<GainGlamourEffect>(
+                    ("_amount", 0),
+                    ("_amountSource", EffectContextValue.CurrentGlamour)
+                )
+            );
             Assert.AreEqual(before - 5, _battle.Opinion.CurrentOpinion);
             Assert.AreEqual(20, _battle.CurrentSupport);
             Assert.AreEqual(10, _battle.CurrentGlamour);
@@ -399,9 +450,15 @@ namespace Crookedile.Tests
         public IEnumerator CharmOffensiveSpendsAllEnergyAndScalesThreeEffects()
         {
             _battle.Celebrity.GainDebt(3);
-            Play("Paid-Off Promises");
+            Play(PaidOffPromises());
             _battle.Celebrity.ResetTurn();
-            var card = Card("Charm Offensive");
+            var card = Card(
+                _objects,
+                "Charm Offensive",
+                CardType.Pressure,
+                -1,
+                Make<CharmOffensiveEffect>(("_swayAndComposurePerEnergy", 2))
+            );
             _battle.PlayerDeck.AddCardToHand(card);
             _battle.Enemies[0].Stats.SetHostility(5);
             _battle.PlayerStats.SpendActionPoints(_battle.PlayerStats.CurrentActionPoints);
@@ -416,13 +473,52 @@ namespace Crookedile.Tests
             yield return null;
         }
 
-        private EffectExecutionContext Play(string name) =>
-            (
-                (EffectResolver)
-                    typeof(BattleManager)
-                        .GetField("_effectResolver", BindingFlags.Instance | BindingFlags.NonPublic)
-                        .GetValue(_battle)
-            ).ResolveCardEffects(Card(name), true);
+        private EffectResolver Resolver =>
+            (EffectResolver)
+                typeof(BattleManager)
+                    .GetField("_effectResolver", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetValue(_battle);
+
+        /// <summary>Resolves a card's effects as a player play, without paying or moving it.</summary>
+        private EffectExecutionContext Play(CardData card) =>
+            Resolver.ResolveCardEffects(card, true);
+
+        /// <summary>Resolves the given effects as one free player card.</summary>
+        private EffectExecutionContext Play(params BattleEffect[] effects) =>
+            Play(Card(_objects, "Test card", CardType.Rhetoric, 0, effects));
+
+        private static GainGlamourEffect GainGlamour(int amount) =>
+            Make<GainGlamourEffect>(("_amount", amount));
+
+        private static IfContextValueEffect IfGlamour(
+            ComparisonType comparison,
+            int threshold,
+            params BattleEffect[] then
+        ) =>
+            Make<IfContextValueEffect>(
+                ("_value", EffectContextValue.CurrentGlamour),
+                ("_comparison", comparison),
+                ("_threshold", threshold),
+                ("_then", then.ToList())
+            );
+
+        private static ApplyStatusBehaviorEffect Starstruck(int turns) =>
+            Make<ApplyStatusBehaviorEffect>(
+                ("_target", TargetType.Opponent),
+                (
+                    "_behavior",
+                    Make<StarstruckStatus>(("_hostilityPerTurn", 2), ("_swayOnHostile", 10))
+                ),
+                ("_stacks", turns),
+                ("_duration", StatusDurationType.DecreasePerTurn)
+            );
+
+        private BattleEffect[] PaidOffPromises() =>
+            new BattleEffect[]
+            {
+                Make<PaidOffPromisesEffect>(("_debtAmount", 3), ("_minimumPrintedCost", 2)),
+                new ExhaustThisCardEffect(),
+            };
 
         private void Glamour(int amount) =>
             _battle.PlayerStatusEffects.ApplyStatus(
@@ -431,23 +527,11 @@ namespace Crookedile.Tests
                 StatusDurationType.Permanent
             );
 
-        private static void Set(object target, string field, object value) =>
-            target
-                .GetType()
-                .GetField(field, BindingFlags.Instance | BindingFlags.NonPublic)
-                .SetValue(target, value);
-
-        private static CardData Card(string name)
+        private IEnumerator WaitForPlayerTurn()
         {
-#if UNITY_EDITOR
-            var card = UnityEditor.AssetDatabase.LoadAssetAtPath<CardData>(
-                $"Assets/Data/Cards/Celebrity/GlamourIou/{name}.asset"
-            );
-#else
-            var card = CardDatabase.Shared.GetAll().FirstOrDefault(c => c.CardName == name);
-#endif
-            Assert.IsNotNull(card, name);
-            return card;
+            for (int i = 0; i < 120 && _battle.CurrentState != BattleState.PlayerTurn; i++)
+                yield return null;
+            Assert.AreEqual(BattleState.PlayerTurn, _battle.CurrentState);
         }
     }
 }
