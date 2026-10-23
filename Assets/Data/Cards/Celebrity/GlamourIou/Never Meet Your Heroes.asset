@@ -60,7 +60,7 @@ MonoBehaviour:
         _target: 1
         _behavior:
           rid: 2685915787672158310
-        _stacks: 1
+        _stacks: 3
         _stacksSource: 0
         _perXSource: 7
         _multiplier: 1
@@ -76,7 +76,7 @@ MonoBehaviour:
         _target: 1
         _behavior:
           rid: 2685915787672158312
-        _stacks: 2
+        _stacks: 4
         _stacksSource: 0
         _perXSource: 7
         _multiplier: 1

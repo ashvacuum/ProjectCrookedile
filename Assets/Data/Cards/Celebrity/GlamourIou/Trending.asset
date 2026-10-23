@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: 713d92917b3f84d468325f49cd972af6
   _cardName: Trending
-  _cardType: 1
+  _cardType: 2
   _rarity: 2
   _artwork: {fileID: 0}
   _description:

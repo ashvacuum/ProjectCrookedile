@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: f091af22c2b341244841b40f1ebca5bb
   _cardName: Fine Print
-  _cardType: 2
+  _cardType: 1
   _rarity: 0
   _artwork: {fileID: 21300000, guid: e076eba4bdf2fc447b9a797efba14504, type: 3}
   _description: 
@@ -69,7 +69,7 @@ MonoBehaviour:
     - rid: 5000000000000000002
       type: {class: BorrowEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _energy: 3
+        _energy: 0
         _debt: 2
     - rid: 5000000000000000003
       type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
@@ -84,7 +84,7 @@ MonoBehaviour:
     - rid: 5000000000000000005
       type: {class: BorrowEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _energy: 4
+        _energy: 0
         _debt: 2
     - rid: 5000000000000000006
       type: {class: ExhaustThisCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
