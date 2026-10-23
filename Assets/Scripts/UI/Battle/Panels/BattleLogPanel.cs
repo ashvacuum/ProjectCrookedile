@@ -218,7 +218,7 @@ namespace Crookedile.UI.Battle
                 AddOutcome(
                     evt.WasSilenced
                         ? $"{EnemyName(evt.EnemyIndex)} is Hardened and was silenced instead"
-                        : $"{EnemyName(evt.EnemyIndex)} converted! +{evt.OpinionBurst} Opinion"
+                        : $"{EnemyName(evt.EnemyIndex)} converted!"
                 )
             );
             On<EnemyTurncoatEvent>(evt =>

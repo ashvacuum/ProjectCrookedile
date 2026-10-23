@@ -41,7 +41,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 |---|---|---|---|---|
 | [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) | Built | 2026-10-22 | Celebrity banks and spends Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points. | this doc; values in [`Data/Cards/Celebrity/GlamourIou/`](Assets/Data/Cards/Celebrity/GlamourIou), shared rules in [`GlamourIou.cs`](Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs), effects in [`Celebrity/`](Assets/Scripts/Gameplay/Battle/Celebrity) |
 | [`core-design.md`](docs/core-design.md) | Canonical | 2026-10-09 | The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions. | this doc |
-| [`enemy-design-bible.md`](docs/enemy-design-bible.md) | Canonical | 2026-10-05 | The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete. | this doc |
+| [`enemy-design-bible.md`](docs/enemy-design-bible.md) | Canonical | 2026-10-23 | The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete. | this doc |
 | [`metagame-campaign.md`](docs/metagame-campaign.md) | Partly built | 2026-10-03 | The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases. | this doc |
 | [`naming-glossary.md`](docs/naming-glossary.md) | Canonical | 2026-10-05 | Combat vocabulary mapped to "working a crowd" vocabulary. Read before naming anything. | this doc |
 | [`nepo-baby-class.md`](docs/nepo-baby-class.md) | Built | 2026-10-05 | The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders. | this doc; built in [`Data/Cards/NepoBaby/`](Assets/Data/Cards/NepoBaby) and [`NepoBabyConfig`](Assets/Resources/NepoBabyConfig.asset) |
@@ -60,7 +60,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`needs-detailing.md`](docs/needs-detailing.md) | Living | 2026-10-09 | Design questions awaiting a call, ordered by how much they block. Read before authoring content. | this doc |
+| [`needs-detailing.md`](docs/needs-detailing.md) | Living | 2026-10-23 | Design questions awaiting a call, ordered by how much they block. Read before authoring content. | this doc |
 | [`ui-elements.md`](docs/ui-elements.md) | Living | 2026-10-09 | The battle UI broken into reusable prefabs, smallest first, as a checklist to build against. | this doc |
 
 ### Art

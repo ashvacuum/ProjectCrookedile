@@ -102,8 +102,11 @@ namespace Crookedile.Gameplay.Battle
         // Card-play pipeline — costs, VFX handshake, Confused/Momentum/Echo side-effects.
         private CardPlayController _cards;
 
-        // Faith Leader conversion engine — pacify-threshold checks and the convert burst.
+        // Faith Leader conversion engine — pacify-threshold checks.
         private PacifyConversionEngine _pacify;
+
+        // Faith Leader Fanatics — follow your plays, Silence on quiet conversion turns.
+        private FanaticFollowers _fanatics;
 
         // Passive ability resolver — one per battle, origin-specific
         private PassiveResolver _passiveResolver;
@@ -430,8 +433,9 @@ namespace Crookedile.Gameplay.Battle
                     CelebrityRules.ScrutinyStripPerHit
                 );
 
-            // Faith Leader conversion engine — needs the ledger for the convert burst.
-            _pacify = new PacifyConversionEngine(_opinion, _playerStats);
+            // Faith Leader: conversion, and the Fanatics it makes (they move the meter via the ledger).
+            _pacify = new PacifyConversionEngine(_playerStats);
+            _fanatics = new FanaticFollowers(_opinion, _enemies);
 
             EventBus.Publish(new BattleStartedEvent { Setup = setup });
             TransitionToState(BattleState.Initialize);
@@ -772,6 +776,9 @@ namespace Crookedile.Gameplay.Battle
             return _pacify.TryConvert(enemyStats, mgr, statuses, bufferStatus, out consumed);
         }
 
+        /// <summary>Fanatics follow a card the player just played (called by CardPlayController).</summary>
+        internal void FanaticsFollow(EffectExecutionContext ctx) => _fanatics?.OnCardResolved(ctx);
+
         #endregion
 
         #region Card Playing (pipeline owned by CardPlayController)
@@ -916,6 +923,7 @@ namespace Crookedile.Gameplay.Battle
             {
                 // Fresh tallies each player turn (conversion harvest + hostility-shift payoffs).
                 _pacify?.ResetTurnTally();
+                _fanatics?.ResetTurnTally();
                 _crowd?.ResetTurnTallies();
 
                 _playerStats.StartTurn();
@@ -984,6 +992,8 @@ namespace Crookedile.Gameplay.Battle
         {
             if (_isPlayerTurn)
             {
+                // Before enemy statuses tick, so the Silence lands on the coming enemy turn.
+                _fanatics?.OnPlayerTurnEnd(ConversionsThisTurn);
                 Celebrity.MediaTrainingAvailable = false;
                 Celebrity.SettlePromises(
                     _opinion,

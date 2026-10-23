@@ -56,7 +56,11 @@ namespace Crookedile.Gameplay.Battle
         public override string Describe(int stacks) => "Can't be made receptive.";
     }
 
-    /// <summary>Can't be riled — hostility gains are no-ops (the permanent loyalist).</summary>
+    /// <summary>
+    /// Your follower while it lasts: can't be riled, takes no action against you, and copies
+    /// your attacks and defends (<see cref="FanaticFollowers"/>). When it runs out the follower is
+    /// disillusioned: back to neutral, plus Jaded (FaithLeaderConfig.JadedOnDisillusion).
+    /// </summary>
     [Serializable]
     public sealed class FanaticStatus : StatusBehavior
     {
@@ -65,11 +69,21 @@ namespace Crookedile.Gameplay.Battle
         public override bool IsDebuff => false;
         public override StatusCategory Category => StatusCategory.HostilityFlag;
         public override bool BlocksHostilityGain => true;
-        public override string Describe(int stacks) => "Can't be riled up; can still be won over.";
 
-        // Grace period's over — snaps back hostile. Clamped per-enemy by SetHostility, so
-        // low-cap enemies (e.g. MaxHostility 5) just land at their own max.
-        public override void OnDepleted(BattleStats owner) => owner?.SetHostility(0);
+        public override string Describe(int stacks) =>
+            "Follows your lead: pushes when you attack, adds Support when you defend. Won't act against you.";
+
+        public override void OnDepleted(BattleStats owner, StatusEffectManager statuses)
+        {
+            owner?.SetHostility(0);
+            int jaded = Crookedile.Data.FaithLeaderConfig.Current.JadedOnDisillusion;
+            if (jaded > 0)
+                statuses?.ApplyStatus(
+                    StatusRegistry.Get<JadedStatus>(),
+                    jaded,
+                    StatusDurationType.Permanent
+                );
+        }
     }
 
     /// <summary>Steadfast — resists hostility gains by X per stack (protects converts).</summary>
