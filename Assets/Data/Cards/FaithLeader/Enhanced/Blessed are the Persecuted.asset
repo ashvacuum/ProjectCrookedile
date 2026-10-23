@@ -35,7 +35,8 @@ MonoBehaviour:
   _upgradedEffects: []
   _upgradedPassives: []
   _upgradedInnateRetain: 1
-  _tags: []
+  _tags:
+  - faithleader
   _fantasies: 4
   _isStarterCard: 0
   _isUnlockable: 0
