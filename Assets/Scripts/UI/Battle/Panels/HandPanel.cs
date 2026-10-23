@@ -27,6 +27,9 @@ namespace Crookedile.UI.Battle
 
         private readonly List<CardButton> _activeButtons = new List<CardButton>();
 
+        /// <summary>Card buttons in hand order. A card still mid-deal is inactive.</summary>
+        public IReadOnlyList<CardButton> Cards => _activeButtons;
+
         /// <summary>Card pulled from hand on CardPlayedEvent, held until VFX resolves before flying to discard.</summary>
         private CardButton _pendingDiscardButton;
 

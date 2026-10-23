@@ -331,6 +331,7 @@ namespace Crookedile.UI.Battle
             baseRotation = transform.localRotation;
             _basePositionSet = false;
             _pickerMode = false; // default to hand behavior; pickers re-enable after Initialize
+            isHovered = false; // a pooled button may come back from a play made while focused
             SetFaceDown(false);
             SetConditionHighlight(false); // pooled buttons must not carry the last card's rim
 
@@ -461,8 +462,13 @@ namespace Crookedile.UI.Battle
 
         #endregion
 
-        #region Pointer Handlers
-        public void OnPointerEnter(PointerEventData eventData)
+        #region Focus (pointer hover and gamepad share these)
+        public void OnPointerEnter(PointerEventData eventData) => Focus();
+
+        public void OnPointerExit(PointerEventData eventData) => Unfocus();
+
+        /// <summary>Hover pose: lift, scale up, spread the hand, show keyword tooltips.</summary>
+        public void Focus()
         {
             if (isHovered || _isDragging)
                 return;
@@ -531,7 +537,8 @@ namespace Crookedile.UI.Battle
             BattleTooltipUI.Instance?.Hide();
         }
 
-        public void OnPointerExit(PointerEventData eventData)
+        /// <summary>Leaves the hover pose and returns the card to its hand slot.</summary>
+        public void Unfocus()
         {
             HideKeywordTooltip();
             if (!isHovered)
@@ -611,6 +618,41 @@ namespace Crookedile.UI.Battle
                 Disarm();
             else
                 ArmForTargeting(eventData.pressEventCamera);
+        }
+
+        /// <summary>
+        /// Gamepad confirm: plays an untargeted card at once, arms a targeted one (the caller then
+        /// picks an enemy and plays it with <see cref="EnemySlotUI.PlayArmedCard"/>), and fires
+        /// the callback in picker grids. Returns false when the card can't be played.
+        /// </summary>
+        public bool TryPlay()
+        {
+            if (_pickerMode)
+            {
+                onClickCallback?.Invoke();
+                return true;
+            }
+
+            if (!isPlayable)
+            {
+                PlayUnplayableNudge();
+                return false;
+            }
+
+            if (RequiresSpecificTarget())
+            {
+                Canvas canvas = ParentCanvas;
+                ArmForTargeting(
+                    canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay
+                        ? canvas.worldCamera
+                        : null
+                );
+                return true;
+            }
+
+            Unfocus();
+            ConfirmPlay();
+            return true;
         }
 
         #endregion

@@ -372,7 +372,10 @@ namespace Crookedile.UI.Battle
         /// Click-to-target play: if a card is armed (clicked in hand), play it on this enemy.
         /// With no armed card a click is ignored — focus advances via gameplay, not manual clicks.
         /// </summary>
-        public void OnPointerClick(PointerEventData eventData)
+        public void OnPointerClick(PointerEventData eventData) => PlayArmedCard();
+
+        /// <summary>Plays the armed card (clicked or gamepad-confirmed in hand) on this enemy, if any.</summary>
+        public void PlayArmedCard()
         {
             CardButton armed = CardButton.ArmedCard;
             if (armed == null)
@@ -383,24 +386,37 @@ namespace Crookedile.UI.Battle
             PlayCardOnEnemy(armed);
         }
 
+        /// <summary>False once the enemy is defeated; a card can't be aimed at it.</summary>
+        public bool IsTargetable =>
+            _battleManager != null
+            && _enemyIndex < _battleManager.Enemies.Count
+            && !_battleManager.Enemies[_enemyIndex].IsDefeated;
+
         /// <summary>Shows the targeting highlight when the arrow enters this slot during targeting mode.</summary>
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (!CardButton.IsTargeting)
-                return;
-            if (dragDropHighlight != null)
-                dragDropHighlight.enabled = true;
-            TargetedSlot = this;
-            LastTargetedRect = GetComponent<RectTransform>();
-            GameLogger.LogVerbose("Card", $"Arrow hovering enemy slot [{_enemyIndex}]", this);
+            if (CardButton.IsTargeting)
+                SetTargeted(true);
         }
 
         /// <summary>Hides the targeting highlight and clears this slot as the target when the cursor leaves.</summary>
-        public void OnPointerExit(PointerEventData eventData)
+        public void OnPointerExit(PointerEventData eventData) => SetTargeted(false);
+
+        /// <summary>
+        /// Makes this slot the arrow's target (highlight on) or drops it (highlight off). Pointer
+        /// hover and gamepad target cycling both go through here.
+        /// </summary>
+        public void SetTargeted(bool targeted)
         {
             if (dragDropHighlight != null)
-                dragDropHighlight.enabled = false;
-            if (TargetedSlot == this)
+                dragDropHighlight.enabled = targeted;
+            if (targeted)
+            {
+                TargetedSlot = this;
+                LastTargetedRect = GetComponent<RectTransform>();
+                GameLogger.LogVerbose("Card", $"Arrow on enemy slot [{_enemyIndex}]", this);
+            }
+            else if (TargetedSlot == this)
             {
                 GameLogger.LogVerbose("Card", $"Arrow left enemy slot [{_enemyIndex}]", this);
                 TargetedSlot = null;

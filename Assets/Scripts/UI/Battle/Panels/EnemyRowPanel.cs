@@ -105,6 +105,9 @@ namespace Crookedile.UI.Battle
 
         #region Public API
 
+        /// <summary>Slots by enemy index; an entry is null once that enemy is defeated.</summary>
+        public IReadOnlyList<EnemySlotUI> Slots => _slots;
+
         /// <summary>
         /// Refreshes every slot and applies the focus highlight. Called from BattleUI's
         /// coalesced stats refresh so multiple events in one resolution repaint once.

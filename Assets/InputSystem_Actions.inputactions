@@ -476,6 +476,34 @@
             ]
         },
         {
+            "name": "Battle",
+            "id": "5b1f3c2e-7d4a-4e8b-9c61-2a7f0d9e4b13",
+            "actions": [
+                {
+                    "name": "EndTurn",
+                    "type": "Button",
+                    "id": "8e2d6a41-3f5c-4b7e-a0d9-6c1b2f4e8a75",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "c4a7e9b2-1d3f-4a6c-8e5b-9f2d0a7c3e61",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "EndTurn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
             "name": "UI",
             "id": "272f6d14-89ba-496f-b7ff-215263d3219f",
             "actions": [
