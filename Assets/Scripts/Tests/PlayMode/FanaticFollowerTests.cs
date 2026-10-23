@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
@@ -22,16 +21,32 @@ namespace Crookedile.Tests
     {
         private readonly List<Object> _objects = new();
         private BattleManager _battle;
+        private CardData _attack;
+        private CardData _defend;
 
         [UnitySetUp]
         public IEnumerator SetUp()
         {
+            _attack = TestContent.Card(
+                _objects,
+                "Sway 5",
+                CardType.Pressure,
+                1,
+                TestContent.Make<ApplyOpinionEffect>(("_amount", 5))
+            );
+            _defend = TestContent.Card(
+                _objects,
+                "Support 4",
+                CardType.Pressure,
+                1,
+                TestContent.Make<GainSupportEffect>(("_amount", 4))
+            );
             var enemies = new List<EnemyData>();
             for (int i = 0; i < 2; i++)
             {
                 var enemy = ScriptableObject.CreateInstance<EnemyData>();
                 _objects.Add(enemy);
-                Set(enemy, "_minHostility", -10);
+                TestContent.Set(enemy, "_minHostility", -10);
                 enemies.Add(enemy);
             }
             var host = new GameObject("Fanatic follower test");
@@ -42,7 +57,7 @@ namespace Crookedile.Tests
                 new BattleSetup
                 {
                     enemies = enemies,
-                    playerDeck = Enumerable.Repeat(Card("Pressure"), 12).ToList(),
+                    playerDeck = Enumerable.Repeat(_attack, 12).ToList(),
                     startingOpinion = 50,
                     maxTurns = 20,
                 }
@@ -73,7 +88,7 @@ namespace Crookedile.Tests
             EventBus.Subscribe<DamageDealtEvent>(OnDamage);
             try
             {
-                PlayFromHand(Card("Pressure"));
+                PlayFromHand(_attack);
             }
             finally
             {
@@ -89,7 +104,7 @@ namespace Crookedile.Tests
         [UnityTest]
         public IEnumerator EachFanaticAddsSupportWhenYouPlayADefend()
         {
-            var support = Card("Support");
+            var support = _defend;
             int before = _battle.CurrentSupport;
             PlayFromHand(support);
             int alone = _battle.CurrentSupport - before;
@@ -126,7 +141,7 @@ namespace Crookedile.Tests
             EventBus.Subscribe<DamageDealtEvent>(OnDamage);
             try
             {
-                PlayFromHand(Card("Pressure"));
+                PlayFromHand(_attack);
             }
             finally
             {
@@ -175,23 +190,5 @@ namespace Crookedile.Tests
             Assert.AreEqual(BattleState.PlayerTurn, _battle.CurrentState);
         }
 
-        private static void Set(object target, string field, object value) =>
-            target
-                .GetType()
-                .GetField(field, BindingFlags.Instance | BindingFlags.NonPublic)
-                .SetValue(target, value);
-
-        private static CardData Card(string name)
-        {
-#if UNITY_EDITOR
-            var card = UnityEditor.AssetDatabase.LoadAssetAtPath<CardData>(
-                $"Assets/Data/Cards/FaithLeader/Basic/{name}.asset"
-            );
-#else
-            var card = CardDatabase.Shared.GetAll().FirstOrDefault(c => c.CardName == name);
-#endif
-            Assert.IsNotNull(card, $"Card asset '{name}' not found");
-            return card;
-        }
     }
 }
