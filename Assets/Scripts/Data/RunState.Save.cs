@@ -49,11 +49,14 @@ namespace Crookedile.Data
                 CurrentBattleIndex = CurrentBattleIndex,
                 UnlockedContent = new List<string>(UnlockedContent),
                 RunCounters = new Dictionary<string, int>(RunCounters),
+                CardsSinceRare = CardsSinceRare,
             };
 
             foreach (var card in Deck)
                 if (card != null)
-                    data.Deck.Add(new RunSaveData.CardEntry { Id = card.ID, Upgraded = card.IsUpgraded });
+                    data.Deck.Add(
+                        new RunSaveData.CardEntry { Id = card.ID, Upgraded = card.IsUpgraded }
+                    );
             foreach (var ally in Allies)
                 if (ally != null)
                     data.AllyIds.Add(ally.Id);
@@ -113,6 +116,7 @@ namespace Crookedile.Data
                 CurrentBattleIndex = data.CurrentBattleIndex,
                 UnlockedContent = new HashSet<string>(data.UnlockedContent),
                 RunCounters = new Dictionary<string, int>(data.RunCounters),
+                CardsSinceRare = data.CardsSinceRare,
             };
 
             foreach (var entry in data.Deck)
@@ -123,7 +127,9 @@ namespace Crookedile.Data
                     lost.Add($"card {entry.Id}");
                     continue;
                 }
-                run.Deck.Add(entry.Upgraded && card.CanUpgrade ? card.CreateUpgradedInstance() : card);
+                run.Deck.Add(
+                    entry.Upgraded && card.CanUpgrade ? card.CreateUpgradedInstance() : card
+                );
             }
 
             foreach (var id in data.AllyIds)

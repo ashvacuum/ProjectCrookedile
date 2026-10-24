@@ -10,7 +10,7 @@ namespace Crookedile.Data.Save
     /// </summary>
     public class RunSaveData
     {
-        public const ushort SchemaVersion = 1;
+        public const ushort SchemaVersion = 2;
 
         public struct CardEntry
         {
@@ -52,6 +52,9 @@ namespace Crookedile.Data.Save
 
         /// <summary>This run's counters, folded into the profile when the run ends.</summary>
         public Dictionary<string, int> RunCounters = new Dictionary<string, int>();
+
+        /// <summary>Rare pity timer (v2+; v1 saves load as 0).</summary>
+        public int CardsSinceRare;
 
         public byte[] ToBytes() =>
             SaveEnvelope.Wrap(SaveKind.Run, SchemaVersion, SaveBinary.ToBytes(Write));
@@ -109,11 +112,12 @@ namespace Crookedile.Data.Save
 
             w.WriteStrings(UnlockedContent);
             w.WriteCounters(RunCounters);
+            w.Write(CardsSinceRare);
         }
 
         private static RunSaveData Read(BinaryReader r, ushort version)
         {
-            // Version 1 is the only schema so far; later versions branch here.
+            // Each version only appends fields; older saves stop reading where they end.
             var data = new RunSaveData
             {
                 SavedUtcTicks = r.ReadInt64(),
@@ -132,7 +136,9 @@ namespace Crookedile.Data.Save
 
             int deckCount = r.ReadCount();
             for (int i = 0; i < deckCount; i++)
-                data.Deck.Add(new CardEntry { Id = r.ReadNullableString(), Upgraded = r.ReadBoolean() });
+                data.Deck.Add(
+                    new CardEntry { Id = r.ReadNullableString(), Upgraded = r.ReadBoolean() }
+                );
             data.AllyIds = r.ReadStringList();
             data.VisitedLocationIds = r.ReadStringList();
             data.Flags = r.ReadStringList();
@@ -155,6 +161,8 @@ namespace Crookedile.Data.Save
 
             data.UnlockedContent = r.ReadStringList();
             data.RunCounters = r.ReadCounters();
+            if (version >= 2)
+                data.CardsSinceRare = r.ReadInt32();
             return data;
         }
     }

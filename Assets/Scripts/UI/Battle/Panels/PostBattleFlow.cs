@@ -77,12 +77,13 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
+            var run = RunState.Current;
             var offers = _cardDatabase.GenerateRewardOffer(
                 Battle != null ? Battle.PlayerOrigin : default,
-                count: 3,
-                typeFilter: null,
-                rng: RunState.Current?.Rng
+                rng: run?.Rng,
+                cardsSinceRare: run?.CardsSinceRare ?? 0
             );
+            run?.NoteRewardOffer(offers);
             _rewardScreen.OpenSingle("Choose a Card", offers, "Take Card", OnRewardChosen);
         }
 

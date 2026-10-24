@@ -339,6 +339,7 @@ namespace Crookedile.Editor
             EditorGUILayout.LabelField("District", run.DistrictName ?? "None");
             EditorGUILayout.LabelField("Funds / credibility", $"{run.Funds} / {run.Credibility}");
             EditorGUILayout.LabelField("Next-battle hostility", run.NextBattleHostility.ToString());
+            EditorGUILayout.LabelField("Cards since rare", run.CardsSinceRare.ToString());
 
             if (Expanded("Deck", run.Deck.Count))
                 foreach (var group in run.Deck.GroupBy(card => (card.Id, card.Upgraded)))

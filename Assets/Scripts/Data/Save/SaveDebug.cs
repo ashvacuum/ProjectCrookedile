@@ -51,7 +51,9 @@ namespace Crookedile.Data.Save
             {
                 sb.AppendLine();
                 bool isActive = active != null && entry.Id == active.Id;
-                sb.AppendLine($"=== Profile '{entry.DisplayName}'{(isActive ? "  (active)" : "")} ===");
+                sb.AppendLine(
+                    $"=== Profile '{entry.DisplayName}'{(isActive ? "  (active)" : "")} ==="
+                );
                 var profile = isActive ? active : SaveSystem.PeekProfile(entry.Id);
                 if (profile == null)
                 {
@@ -62,7 +64,11 @@ namespace Crookedile.Data.Save
 
                 if (SaveSystem.TryReadRunSave(entry.Id, out var run, out bool backup))
                 {
-                    sb.AppendLine(backup ? "  --- Run in progress (read from BACKUP) ---" : "  --- Run in progress ---");
+                    sb.AppendLine(
+                        backup
+                            ? "  --- Run in progress (read from BACKUP) ---"
+                            : "  --- Run in progress ---"
+                    );
                     sb.Append(DescribeRun(run, content));
                 }
                 else
@@ -71,7 +77,11 @@ namespace Crookedile.Data.Save
 
             var snapshots = ListSnapshots();
             sb.AppendLine();
-            sb.AppendLine(snapshots.Count == 0 ? "No snapshots." : $"Snapshots: {string.Join(", ", snapshots)}");
+            sb.AppendLine(
+                snapshots.Count == 0
+                    ? "No snapshots."
+                    : $"Snapshots: {string.Join(", ", snapshots)}"
+            );
             return sb.ToString();
         }
 
@@ -80,7 +90,9 @@ namespace Crookedile.Data.Save
         {
             var sb = new StringBuilder();
             sb.AppendLine($"  Id: {profile.Id}");
-            sb.AppendLine($"  Created: {Time(profile.CreatedUtcTicks)}   Last played: {Time(profile.LastPlayedUtcTicks)}");
+            sb.AppendLine(
+                $"  Created: {Time(profile.CreatedUtcTicks)}   Last played: {Time(profile.LastPlayedUtcTicks)}"
+            );
             sb.AppendLine($"  Unlock-all override: {(profile.UnlockAll ? "ON" : "off")}");
             sb.AppendLine("  Counters:");
             if (profile.Counters.Count == 0)
@@ -107,34 +119,52 @@ namespace Crookedile.Data.Save
         {
             var sb = new StringBuilder();
             sb.AppendLine($"    Saved: {Time(run.SavedUtcTicks)}");
-            sb.AppendLine($"    Origin: {(OriginType)run.Origin}   Campaign run: {run.IsCampaignRun}   Seed: {run.Seed}");
+            sb.AppendLine(
+                $"    Origin: {(OriginType)run.Origin}   Campaign run: {run.IsCampaignRun}   Seed: {run.Seed}"
+            );
             sb.AppendLine($"    RNG state: {string.Join(" ", run.RngState ?? new uint[0])}");
             sb.AppendLine(
                 $"    Day {run.Day}   Time left {run.MinutesRemaining / 60}h {run.MinutesRemaining % 60}m   "
                     + $"Elapsed {run.ElapsedMinutes}m   Max hours {run.MaxHours}   District: {run.DistrictName ?? "(none)"}"
             );
-            sb.AppendLine($"    Funds {run.Funds}   Credibility {run.Credibility}   Next-battle Hostility +{run.NextBattleHostility}");
+            sb.AppendLine(
+                $"    Funds {run.Funds}   Credibility {run.Credibility}   Next-battle Hostility +{run.NextBattleHostility}   Cards since rare {run.CardsSinceRare}"
+            );
 
             sb.AppendLine($"    Deck ({run.Deck.Count}):");
-            foreach (var group in run.Deck.GroupBy(c => (c.Id, c.Upgraded)).OrderBy(g => CardName(g.Key.Id, content)))
+            foreach (
+                var group in run
+                    .Deck.GroupBy(c => (c.Id, c.Upgraded))
+                    .OrderBy(g => CardName(g.Key.Id, content))
+            )
                 sb.AppendLine(
                     $"      {group.Count()}x {CardName(group.Key.Id, content)}{(group.Key.Upgraded ? "+" : "")}"
                 );
 
             sb.AppendLine($"    Allies: {List(run.AllyIds, id => content?.Ally(id)?.AllyName)}");
-            sb.AppendLine($"    Flags: {(run.Flags.Count == 0 ? "(none)" : string.Join(", ", run.Flags))}");
-            sb.AppendLine($"    Visited: {List(run.VisitedLocationIds, id => EncounterName(id, content))}");
+            sb.AppendLine(
+                $"    Flags: {(run.Flags.Count == 0 ? "(none)" : string.Join(", ", run.Flags))}"
+            );
+            sb.AppendLine(
+                $"    Visited: {List(run.VisitedLocationIds, id => EncounterName(id, content))}"
+            );
             sb.AppendLine(
                 $"    Today's locations (day {run.TodaysLocationsDay}): {List(run.TodaysLocationIds, id => EncounterName(id, content))}"
             );
             sb.AppendLine($"    Pending battle: {OneEncounter(run.PendingBattleId, content)}");
-            sb.AppendLine($"    Next encounter (chain): {OneEncounter(run.NextEncounterId, content)}");
+            sb.AppendLine(
+                $"    Next encounter (chain): {OneEncounter(run.NextEncounterId, content)}"
+            );
             sb.AppendLine($"    Open event: {OneEncounter(run.OpenEventId, content)}");
             if (run.BattleQueue != null)
             {
-                sb.AppendLine($"    Battle queue (round {run.CurrentBattleIndex + 1} of {run.BattleQueue.Count}):");
+                sb.AppendLine(
+                    $"    Battle queue (round {run.CurrentBattleIndex + 1} of {run.BattleQueue.Count}):"
+                );
                 for (int i = 0; i < run.BattleQueue.Count; i++)
-                    sb.AppendLine($"      {i + 1}. {List(run.BattleQueue[i], id => content?.Enemy(id)?.EnemyName)}");
+                    sb.AppendLine(
+                        $"      {i + 1}. {List(run.BattleQueue[i], id => content?.Enemy(id)?.EnemyName)}"
+                    );
             }
             sb.AppendLine($"    Unlocks this run: {Names(run.UnlockedContent, content)}");
             sb.AppendLine(
@@ -164,7 +194,11 @@ namespace Crookedile.Data.Save
         }
 
         private static string Time(long ticks) =>
-            ticks <= 0 ? "(never)" : new DateTime(ticks, DateTimeKind.Utc).ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+            ticks <= 0
+                ? "(never)"
+                : new DateTime(ticks, DateTimeKind.Utc)
+                    .ToLocalTime()
+                    .ToString("yyyy-MM-dd HH:mm:ss");
 
         private static string CardName(string id, SaveContent content) =>
             content?.Card(id)?.CardName ?? $"<missing card {id}>";
@@ -174,11 +208,15 @@ namespace Crookedile.Data.Save
             var encounter = content?.Encounter(id);
             if (encounter == null)
                 return null;
-            return string.IsNullOrEmpty(encounter.DisplayName) ? encounter.name : encounter.DisplayName;
+            return string.IsNullOrEmpty(encounter.DisplayName)
+                ? encounter.name
+                : encounter.DisplayName;
         }
 
         private static string OneEncounter(string id, SaveContent content) =>
-            string.IsNullOrEmpty(id) ? "(none)" : EncounterName(id, content) ?? $"<unresolved {id}>";
+            string.IsNullOrEmpty(id)
+                ? "(none)"
+                : EncounterName(id, content) ?? $"<unresolved {id}>";
 
         private static string Names(IEnumerable<string> ids, SaveContent content) =>
             List(ids, id => content?.Card(id)?.CardName);
@@ -241,7 +279,10 @@ namespace Crookedile.Data.Save
             CopySaves(source, SaveSystem.Root);
             RunState.Clear();
             SaveSystem.Reload();
-            GameLogger.LogInfo("Save", $"Snapshot '{name}' restored. Re-enter the campaign to continue its run.");
+            GameLogger.LogInfo(
+                "Save",
+                $"Snapshot '{name}' restored. Re-enter the campaign to continue its run."
+            );
             return true;
         }
 
@@ -256,7 +297,11 @@ namespace Crookedile.Data.Save
 
         private static bool ValidName(string name)
         {
-            if (string.IsNullOrWhiteSpace(name) || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || name.Contains(".."))
+            if (
+                string.IsNullOrWhiteSpace(name)
+                || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0
+                || name.Contains("..")
+            )
             {
                 GameLogger.LogWarning("Save", $"'{name}' isn't a usable snapshot name.");
                 return false;
@@ -270,7 +315,10 @@ namespace Crookedile.Data.Save
         /// </summary>
         private static bool IsSaveFile(string relativePath)
         {
-            string first = relativePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)[0];
+            string first = relativePath.Split(
+                Path.DirectorySeparatorChar,
+                Path.AltDirectorySeparatorChar
+            )[0];
             return first == "profiles" || first.StartsWith(SaveSystem.IndexPath);
         }
 
@@ -282,7 +330,8 @@ namespace Crookedile.Data.Save
                 return;
             foreach (var file in Directory.GetFiles(from, "*", SearchOption.AllDirectories))
             {
-                string relative = file.Substring(from.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                string relative = file.Substring(from.Length)
+                    .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
                 if (!IsSaveFile(relative))
                     continue;
                 string dest = Path.Combine(to, relative);
@@ -337,7 +386,8 @@ namespace Crookedile.Data.Save
         public static void RevokeUnlock(string contentId)
         {
             var profile = SaveSystem.ActiveProfile;
-            bool changed = profile.GrantedUnlocks.Remove(contentId) | profile.SeenUnlocks.Remove(contentId);
+            bool changed =
+                profile.GrantedUnlocks.Remove(contentId) | profile.SeenUnlocks.Remove(contentId);
             if (changed)
                 SaveSystem.SaveProfile();
         }
@@ -369,7 +419,10 @@ namespace Crookedile.Data.Save
             if (backupToo && File.Exists(path + ".bak"))
                 File.WriteAllBytes(path + ".bak", garbage);
             SaveSystem.Reload();
-            GameLogger.LogWarning("Save", $"Corrupted {which}{(backupToo ? " and its backup" : "")}: {path}");
+            GameLogger.LogWarning(
+                "Save",
+                $"Corrupted {which}{(backupToo ? " and its backup" : "")}: {path}"
+            );
         }
 
         #endregion
@@ -388,13 +441,19 @@ namespace Crookedile.Data.Save
                 return null;
             }
             string wanted = Normalize(query);
-            var matches = cards.GetAll().Where(c => c != null && !c.IsUpgraded && Normalize(c.CardName).Contains(wanted)).ToList();
+            var matches = cards
+                .GetAll()
+                .Where(c => c != null && !c.IsUpgraded && Normalize(c.CardName).Contains(wanted))
+                .ToList();
             var exact = matches.FirstOrDefault(c => Normalize(c.CardName) == wanted);
             if (exact != null)
                 return exact;
             if (matches.Count == 1)
                 return matches[0];
-            error = matches.Count == 0 ? $"No card named '{query}'." : $"'{query}' matches {matches.Count} cards.";
+            error =
+                matches.Count == 0
+                    ? $"No card named '{query}'."
+                    : $"'{query}' matches {matches.Count} cards.";
             return null;
         }
 

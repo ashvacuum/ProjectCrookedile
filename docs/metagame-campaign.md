@@ -1,6 +1,6 @@
 # Metagame — The Campaign Map
 
-> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-10-03
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-10-24
 >
 > **Summary:** The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases.
 >
@@ -273,7 +273,8 @@ can grant relics (random-event relic path lands here).
 Boss flag on encounters (via `BattleSession`); boss victory → pick 1 of 3 relics.
 `BattleResult` carries end-of-battle crowd stats (converted count, hostiles remaining,
 meter margin); reward offer rarity/count scales off them through `RewardConfig`
-(not yet consumed: `PostBattleFlow` still offers 3 cards at the default weights).
+(partly consumed: `PostBattleFlow` offers at `CardDatabase`'s default `RewardConfig` with rare pity;
+per-encounter `RewardOverride` and scaling off crowd stats are not wired yet).
 
 ### Phase M4 — campaign win/loss framing
 ⚑ What ends the campaign: fixed day count (election day)? Boss ladder? Blocks nothing
