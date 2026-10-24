@@ -213,7 +213,8 @@ namespace Crookedile.EditorTools.Playtest
             md.AppendLine().AppendLine("## Encounter difficulty");
             md.AppendLine(
                 "Win rate per bot, standalone battles with starter decks. **Too easy** = Random wins 60%+. "
-                    + "**Too hard** = no bot reaches 20%. **Always goes the distance** = 90%+ end on the turn limit."
+                    + "**Too hard** = no bot reaches 20%. **Always goes the distance** = 90%+ end on the turn limit. "
+                    + "A flag ending in **?** could be noise: the 95% interval still reaches the other side of its threshold."
             );
             var bots = battles.Select(b => b.Bot).Distinct().OrderBy(b => b).ToList();
             md.AppendLine()
@@ -222,11 +223,12 @@ namespace Crookedile.EditorTools.Playtest
             foreach (var g in battles.GroupBy(b => b.Encounter).OrderBy(g => g.Key))
             {
                 var rates = bots.ToDictionary(bot => bot, bot => Rate(g.Where(b => b.Bot == bot)));
+                var bounds = bots.ToDictionary(bot => bot, bot => Wilson(g.Where(b => b.Bot == bot)));
                 var flags = new List<string>();
                 if (rates.TryGetValue("Random", out float r) && r >= 0.6f)
-                    flags.Add("too easy");
+                    flags.Add(bounds["Random"].lo >= 0.6f ? "too easy" : "too easy?");
                 if (rates.Values.All(v => v < 0.2f))
-                    flags.Add("too hard");
+                    flags.Add(bounds.Values.All(b => b.hi < 0.2f) ? "too hard" : "too hard?");
                 if (g.Count(b => b.Judgment) >= 0.9f * g.Count())
                     flags.Add("always goes the distance");
                 md.AppendLine(
@@ -237,11 +239,13 @@ namespace Crookedile.EditorTools.Playtest
 
             md.AppendLine().AppendLine("Win rate by bot (all encounters and origins):").AppendLine();
             foreach (var g in battles.GroupBy(b => b.Bot).OrderByDescending(g => Rate(g)))
-                md.AppendLine($"- **{g.Key}**: {Pct(Rate(g))} over {g.Count()} battles");
+                md.AppendLine($"- **{g.Key}**: {Pct(Rate(g))} {Range(Wilson(g))} over {g.Count()} battles");
 
             md.AppendLine().AppendLine("Win rate by origin (all bots):").AppendLine();
             foreach (var g in battles.GroupBy(b => b.Origin))
-                md.AppendLine($"- **{g.Key}**: {Pct(Rate(g))} over {g.Count()} battles, starter deck {g.First().DeckSize} cards");
+                md.AppendLine(
+                    $"- **{g.Key}**: {Pct(Rate(g))} {Range(Wilson(g))} over {g.Count()} battles, starter deck {g.First().DeckSize} cards"
+                );
         }
 
         private static void RoomOverTime(StringBuilder md, List<BattleRecord> all)
@@ -429,15 +433,29 @@ namespace Crookedile.EditorTools.Playtest
                 );
 
             md.AppendLine()
-                .AppendLine($"**Win-rate swing** — win rate in battles where the card was played, vs {Pct(overall)} overall (10+ battles):")
+                .AppendLine(
+                    $"**Win-rate swing** — win rate in battles where the card was played, vs {Pct(overall)} overall. "
+                        + "Only cards whose 95% interval clears the overall rate, ranked by how far it clears it:"
+                )
                 .AppendLine();
             var swings = wonWhenPlayed
-                .Where(kv => kv.Value.total >= 10)
-                .Select(kv => (card: kv.Key, lift: (float)kv.Value.won / kv.Value.total - overall, n: kv.Value.total))
-                .OrderByDescending(x => Math.Abs(x.lift))
-                .Take(12);
+                .Select(kv =>
+                {
+                    var (lo, hi) = Wilson(kv.Value.won, kv.Value.total);
+                    // Distance from the overall rate to the near edge of the interval: 0 = could be chance.
+                    float margin = lo > overall ? lo - overall : hi < overall ? hi - overall : 0f;
+                    return (card: kv.Key, lift: (float)kv.Value.won / kv.Value.total - overall, margin, lo, hi, n: kv.Value.total);
+                })
+                .Where(x => x.margin != 0f)
+                .OrderByDescending(x => Math.Abs(x.margin))
+                .Take(12)
+                .ToList();
+            if (swings.Count == 0)
+                md.AppendLine("- No card's win rate differs from the overall rate by more than chance.");
             foreach (var s in swings)
-                md.AppendLine($"- {s.card}: {(s.lift >= 0 ? "+" : "")}{s.lift * 100:0} pts ({s.n} battles)");
+                md.AppendLine(
+                    $"- {s.card}: {(s.lift >= 0 ? "+" : "")}{s.lift * 100:0} pts, {Range((s.lo, s.hi))} ({s.n} battles)"
+                );
 
             var dead = plays.Where(kv => kv.Value >= 10 && delta[kv.Key] <= 0).Select(kv => kv.Key).ToList();
             if (dead.Count > 0)
@@ -474,9 +492,13 @@ namespace Crookedile.EditorTools.Playtest
                     : $"**Moves never used** (condition never met, stance never reached, or crowded out):\n\n- {string.Join("\n- ", unused.Distinct())}"
             );
 
-            md.AppendLine().AppendLine("**Hardest rosters to beat** (player win rate, 10+ battles):").AppendLine();
-            foreach (var g in battles.GroupBy(b => b.Enemies).Where(g => g.Count() >= 10).OrderBy(g => Rate(g)).Take(8))
-                md.AppendLine($"- {g.Key}: {Pct(Rate(g))} ({g.Count()} battles, avg {g.Average(b => b.DamageToPlayer):0} Opinion taken)");
+            md.AppendLine()
+                .AppendLine("**Hardest rosters to beat** (player win rate, ranked by the top of its 95% interval — surely hard first):")
+                .AppendLine();
+            foreach (var g in battles.GroupBy(b => b.Enemies).OrderBy(g => Wilson(g).hi).Take(8))
+                md.AppendLine(
+                    $"- {g.Key}: {Pct(Rate(g))} {Range(Wilson(g))} ({g.Count()} battles, avg {g.Average(b => b.DamageToPlayer):0} Opinion taken)"
+                );
         }
 
         private static void Campaigns(StringBuilder md, List<CampaignRecord> runs, EncounterPoolData pool)
@@ -553,6 +575,31 @@ namespace Crookedile.EditorTools.Playtest
             var list = rows.ToList();
             return list.Count == 0 ? 0f : (float)list.Count(b => b.Win) / list.Count;
         }
+
+        /// <summary>
+        /// Wilson score interval for <paramref name="wins"/> out of <paramref name="total"/> at
+        /// 95% confidence: where the true win rate plausibly lies. Unlike the plain ratio it stays
+        /// honest at small samples — 3 of 3 gives roughly 44%–100%, not 100%.
+        /// </summary>
+        public static (float lo, float hi) Wilson(int wins, int total)
+        {
+            if (total <= 0)
+                return (0f, 1f);
+            const double z = 1.96;
+            double p = (double)wins / total;
+            double denom = 1 + z * z / total;
+            double centre = p + z * z / (2 * total);
+            double spread = z * Math.Sqrt(p * (1 - p) / total + z * z / (4.0 * total * total));
+            return ((float)Math.Max(0, (centre - spread) / denom), (float)Math.Min(1, (centre + spread) / denom));
+        }
+
+        private static (float lo, float hi) Wilson(IEnumerable<BattleRecord> rows)
+        {
+            var list = rows.ToList();
+            return Wilson(list.Count(b => b.Win), list.Count);
+        }
+
+        private static string Range((float lo, float hi) b) => $"({Pct(b.lo)}–{Pct(b.hi)})";
 
         private static string Pct(float f) => (f * 100f).ToString("0", CultureInfo.InvariantCulture) + "%";
 
