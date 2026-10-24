@@ -22,21 +22,24 @@ namespace Crookedile.Data.Cards
         /// </summary>
         public const string UniversalTag = "universal";
 
-        /// <summary>
-        /// Rarity weights used for reward card selection.
-        /// Adjust values here to tune drop rates; add a new entry when adding a new CardRarity.
-        /// </summary>
-        private static readonly Dictionary<CardRarity, float> RewardWeights = new Dictionary<
-            CardRarity,
-            float
-        >
-        {
-            [CardRarity.Basic] = 70f,
-            [CardRarity.Enhanced] = 25f,
-            [CardRarity.Rare] = 5f,
-        };
-
         #endregion
+
+        [Tooltip(
+            "Rarity weights, offer count and rare pity for every card reward and random card."
+        )]
+        [SerializeField]
+        private RewardConfig _rewardConfig;
+
+        private RewardConfig _fallbackRewardConfig;
+
+        /// <summary>
+        /// The assigned reward config, or one at <see cref="RewardConfig"/>'s field defaults when
+        /// none is assigned, so the numbers live in one place either way.
+        /// </summary>
+        public RewardConfig Rewards =>
+            _rewardConfig != null ? _rewardConfig
+            : _fallbackRewardConfig != null ? _fallbackRewardConfig
+            : _fallbackRewardConfig = CreateInstance<RewardConfig>();
 
         /// <summary>
         /// Gets the unique ID from a CardData item.
@@ -102,8 +105,7 @@ namespace Crookedile.Data.Cards
         #region Random Selection
 
         /// <summary>
-        /// Gets a random acquirable card weighted by rarity.
-        /// Basic: 70% chance, Enhanced: 25%, Rare: 5%
+        /// Gets a random acquirable card weighted by <see cref="Rewards"/>' rarity weights (no pity).
         /// </summary>
         /// <returns>Randomly selected card based on rarity weights</returns>
         /// <param name="rng">
@@ -118,7 +120,7 @@ namespace Crookedile.Data.Cards
             float total = 0f;
             foreach (var card in allCards)
             {
-                float weight = RewardWeights.TryGetValue(card.Rarity, out float w) ? w : 1f;
+                float weight = Rewards.WeightFor(card.Rarity);
                 weights.Add(weight);
                 total += weight;
             }
@@ -275,11 +277,12 @@ namespace Crookedile.Data.Cards
         ///   - <paramref name="typeFilter"/> restricts all picks to one <see cref="CardType"/>;
         ///     pass <c>null</c> to draw from the full eligible pool.
         ///   - The same card is never returned twice in one offer.
-        ///   - Weighted rarity draw: Basic 70 % / Enhanced 25 % / Rare 5 %.
+        ///   - Weighted rarity draw from <see cref="Rewards"/>, with the rare weight raised by its
+        ///     pity step per card in <paramref name="cardsSinceRare"/>.
         ///     If the chosen rarity bucket is empty the method falls back to any non-empty bucket.
         /// </summary>
         /// <param name="origin">Player's current run origin (used to filter Pressure/Rhetoric cards).</param>
-        /// <param name="count">Number of cards to offer (default 3).</param>
+        /// <param name="count">Number of cards to offer; null = the config's offer count.</param>
         /// <param name="typeFilter">Restrict to a single <see cref="CardType"/>; <c>null</c> = any type.</param>
         /// <returns>
         /// List of unique <see cref="CardData"/> offers. May be shorter than <paramref name="count"/>
@@ -290,13 +293,20 @@ namespace Crookedile.Data.Cards
         /// same offers. Null falls back to <c>UnityEngine.Random</c>, which keeps editor tools
         /// and any non-run caller working unchanged.
         /// </param>
+        /// <param name="cardsSinceRare">
+        /// Non-rare cards offered since the last rare — pass <c>RunState.Current.CardsSinceRare</c>
+        /// and report the result back with <c>RunState.NoteRewardOffer</c>.
+        /// </param>
         public List<CardData> GenerateRewardOffer(
             OriginType origin,
-            int count = 3,
+            int? count = null,
             CardType? typeFilter = null,
-            System.Random rng = null
+            System.Random rng = null,
+            int cardsSinceRare = 0
         )
         {
+            var config = Rewards;
+            int offerCount = count ?? config.DefaultOfferCount;
             string originTag = origin.ToString().ToLower();
 
             // Build the candidate pool ─────────────────────────────────────────────────
@@ -352,9 +362,9 @@ namespace Crookedile.Data.Cards
             var enhancedBucket = candidates.Where(c => c.Rarity == CardRarity.Enhanced).ToList();
             var rareBucket = candidates.Where(c => c.Rarity == CardRarity.Rare).ToList();
 
-            var result = new List<CardData>(count);
+            var result = new List<CardData>(offerCount);
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < offerCount; i++)
             {
                 if (basicBucket.Count == 0 && enhancedBucket.Count == 0 && rareBucket.Count == 0)
                     break; // pool exhausted
@@ -362,11 +372,11 @@ namespace Crookedile.Data.Cards
                 // Weighted pick among non-empty buckets
                 List<CardData> bucket = PickWeightedBucket(
                     basicBucket,
-                    RewardWeights[CardRarity.Basic],
+                    config.BasicWeight,
                     enhancedBucket,
-                    RewardWeights[CardRarity.Enhanced],
+                    config.EnhancedWeight,
                     rareBucket,
-                    RewardWeights[CardRarity.Rare],
+                    config.RareWeightWithPity(cardsSinceRare),
                     rng
                 );
 

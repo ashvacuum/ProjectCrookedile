@@ -36,11 +36,18 @@ namespace Crookedile.EditorTools.Playtest
         {
             var rng = new System.Random(seed);
             RunState.Clear();
-            RunState.Create(origin, cards.GetStarterDeck(origin), null, isCampaignRun: true, seed: seed);
+            RunState.Create(
+                origin,
+                cards.GetStarterDeck(origin),
+                null,
+                isCampaignRun: true,
+                seed: seed
+            );
             var state = RunState.Current;
             state.ConfigureTravel(pool.Travel);
 
-            int visitsToday = 0, dayOfVisits = state.Day;
+            int visitsToday = 0,
+                dayOfVisits = state.Day;
             while (rec.EndReason == null)
             {
                 if (state.Day > pool.Days)
@@ -73,15 +80,28 @@ namespace Crookedile.EditorTools.Playtest
                     if (state.TodaysLocationsDay != state.Day)
                         state.SetTodaysLocations(
                             state.Day,
-                            pool.DrawForDay(state.Day, locationsPerDay, state.Seed, state.VisitedLocationIds, state)
+                            pool.DrawForDay(
+                                state.Day,
+                                locationsPerDay,
+                                state.Seed,
+                                state.VisitedLocationIds,
+                                state
+                            )
                         );
                     foreach (var loc in state.TodaysLocations)
                         rec.Offered.Add(loc.name);
 
                     foreach (var loc in state.TodaysLocations.Where(l => !Playable(l)))
-                        Note(rec, $"'{loc.name}' has no battle session — the map refuses to enter it.");
-                    var enterable = state.TodaysLocations.Where(l => Playable(l) && state.PlanVisit(l).CanEnter).ToList();
-                    var boss = state.TodaysLocations.FirstOrDefault(l => l is BattleEncounterData b && b.IsBoss);
+                        Note(
+                            rec,
+                            $"'{loc.name}' has no battle session — the map refuses to enter it."
+                        );
+                    var enterable = state
+                        .TodaysLocations.Where(l => Playable(l) && state.PlanVisit(l).CanEnter)
+                        .ToList();
+                    var boss = state.TodaysLocations.FirstOrDefault(l =>
+                        l is BattleEncounterData b && b.IsBoss
+                    );
                     if (boss != null && !Playable(boss))
                     {
                         // The map turns End Day into "Face the boss" while one is on offer; an
@@ -126,7 +146,15 @@ namespace Crookedile.EditorTools.Playtest
                 {
                     rec.Battles++;
                     bool won = false;
-                    yield return FightEncounter(battle, bot, originPassives, rng, rec, battleRecords, w => won = w);
+                    yield return FightEncounter(
+                        battle,
+                        bot,
+                        originPassives,
+                        rng,
+                        rec,
+                        battleRecords,
+                        w => won = w
+                    );
                     if (!won)
                     {
                         rec.EndReason = "Defeated";
@@ -134,7 +162,12 @@ namespace Crookedile.EditorTools.Playtest
                         break;
                     }
                     rec.BattlesWon++;
-                    var offers = cards.GenerateRewardOffer(origin, 3, null, state.Rng);
+                    var offers = cards.GenerateRewardOffer(
+                        origin,
+                        rng: state.Rng,
+                        cardsSinceRare: state.CardsSinceRare
+                    );
+                    state.NoteRewardOffer(offers);
                     var reward = bot.ChooseReward(offers, rng);
                     if (reward != null)
                         state.AddCardToDeck(reward);
@@ -152,7 +185,9 @@ namespace Crookedile.EditorTools.Playtest
                     }
                     if (available.Count == 0)
                     {
-                        rec.Errors.Add($"'{evt.name}' had no available option (player trapped in the panel).");
+                        rec.Errors.Add(
+                            $"'{evt.name}' had no available option (player trapped in the panel)."
+                        );
                         continue;
                     }
                     var chosen = bot.ChooseOption(state, available, rng);
@@ -163,10 +198,14 @@ namespace Crookedile.EditorTools.Playtest
                     }
                     catch (Exception ex)
                     {
-                        rec.Errors.Add($"'{evt.name} / {chosen.Label}' threw {ex.GetType().Name}: {ex.Message}");
+                        rec.Errors.Add(
+                            $"'{evt.name} / {chosen.Label}' threw {ex.GetType().Name}: {ex.Message}"
+                        );
                     }
                     if (state.PendingCardChoice != null)
-                        state.ResolveCardChoice(bot.ChooseFromDeck(state.PendingCardChoice.Candidates, rng));
+                        state.ResolveCardChoice(
+                            bot.ChooseFromDeck(state.PendingCardChoice.Candidates, rng)
+                        );
                 }
 
                 yield return null;

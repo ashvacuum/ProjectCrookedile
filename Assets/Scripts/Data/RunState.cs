@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Crookedile.Data.Campaign;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
@@ -356,6 +357,22 @@ namespace Crookedile.Data
             int amount = NextBattleHostility;
             NextBattleHostility = 0;
             return amount;
+        }
+
+        /// <summary>
+        /// Non-rare cards offered since a reward offer last showed a rare: the rare pity timer
+        /// <c>CardDatabase.GenerateRewardOffer</c> reads.
+        /// </summary>
+        public int CardsSinceRare { get; private set; }
+
+        /// <summary>Advances the pity timer past <paramref name="offers"/>, or resets it if one is rare.</summary>
+        public void NoteRewardOffer(IReadOnlyCollection<CardData> offers)
+        {
+            if (offers == null)
+                return;
+            CardsSinceRare = offers.Any(c => c != null && c.Rarity == CardRarity.Rare)
+                ? 0
+                : CardsSinceRare + offers.Count;
         }
 
         /// <summary>Marks a map location as resolved so a non-repeatable one won't re-offer.</summary>

@@ -144,7 +144,6 @@ namespace Crookedile.EditorTools
         /// BattleManager's passive array / intent theme / overlay text slots / BattleTestStarter
         /// session — can't be asset-scanned; verify those in the scene.)
         /// </summary>
-
         internal sealed class ReadinessProvider : IContentProvider
         {
             public string Category => "Readiness";
@@ -303,8 +302,7 @@ namespace Crookedile.EditorTools
                     var groups = cards
                         .Select(c => (card: c, sig: Signature(pick(c))))
                         .Where(x =>
-                            x.sig != null
-                            && (label == "base" || x.sig != Signature(x.card.Effects))
+                            x.sig != null && (label == "base" || x.sig != Signature(x.card.Effects))
                         )
                         .GroupBy(x => x.sig)
                         .Where(g => g.Count() > 1)
@@ -627,7 +625,7 @@ namespace Crookedile.EditorTools
                 {
                     yield return new Row(
                         "(none)",
-                        "rewards use hardcoded weights in CardDatabase",
+                        "CardDatabase uses RewardConfig field defaults",
                         null,
                         new List<AuditIssue>
                         {

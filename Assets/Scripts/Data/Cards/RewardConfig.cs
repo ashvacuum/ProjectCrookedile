@@ -5,10 +5,8 @@ using UnityEngine;
 namespace Crookedile.Data.Cards
 {
     /// <summary>
-    /// Central, tunable configuration for post-battle card rewards: the rarity weights and default
-    /// offer count currently hardcoded in <c>CardDatabase.GenerateRewardOffer</c> (Basic 70 / Enhanced
-    /// 25 / Rare 5). Additive for now — wire <c>CardDatabase</c> to read weights from here later
-    /// (replace the static RewardWeights lookup with <see cref="WeightFor"/>). The Database window's Checks tab
+    /// Tunable configuration for card rewards: rarity weights, offer count and the rare pity
+    /// timer. <c>CardDatabase</c> reads the one assigned to it. The Database window's Checks tab
     /// validates the weights are usable.
     ///
     /// Create via: Assets → Create → Crookedile → Cards → Reward Config
@@ -44,10 +42,24 @@ namespace Crookedile.Data.Cards
         [SerializeField]
         private int _defaultOfferCount = 3;
 
+        [Header("Rare pity")]
+        [Min(0f)]
+        [Tooltip(
+            "Rare weight added for every non-rare card offered since the last rare appeared. Resets when a "
+                + "reward offer shows a rare. 0 turns the pity timer off."
+        )]
+        [SerializeField]
+        private float _rarePityStep = 1f;
+
         public float BasicWeight => _basicWeight;
         public float EnhancedWeight => _enhancedWeight;
         public float RareWeight => _rareWeight;
         public int DefaultOfferCount => _defaultOfferCount;
+        public float RarePityStep => _rarePityStep;
+
+        /// <summary>Rare weight once <paramref name="cardsSinceRare"/> non-rare offers have gone by.</summary>
+        public float RareWeightWithPity(int cardsSinceRare) =>
+            _rareWeight + _rarePityStep * System.Math.Max(0, cardsSinceRare);
 
         /// <summary>Relative draw weight for a rarity bucket.</summary>
         public float WeightFor(CardRarity rarity) =>

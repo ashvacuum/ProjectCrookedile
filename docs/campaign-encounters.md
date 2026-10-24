@@ -1,6 +1,6 @@
 # Campaign Encounters
 
-> **Kind:** Systems · **Status:** Built · **Updated:** 2026-10-03
+> **Kind:** Systems · **Status:** Built · **Updated:** 2026-10-24
 >
 > **Summary:** How encounters are typed, authored, scheduled and drawn, with every field, outcome, requirement and default: battles, events, chaining, flags, pools, travel, enemy moves, statuses, run state, rewards and the editor tools.
 >
@@ -146,7 +146,7 @@ inspector).
 | `AdjustCredibilityPercentOutcome` | `Percent` (signed) | Credibility ± a percentage of the origin's *starting* Credibility, so one asset means the same to every archetype |
 | `RecruitAllyOutcome` | `Ally` | Adds an ally. Duplicates ignored (unique per run); its passives register into every battle |
 | `GainCardOutcome` | `Card`, `Count` (≥1) | Adds N copies to the deck. How an event hands you a curse |
-| `GainRandomCardOutcome` | `Scope` (Any / PlayerOrigin / Colorless), `RestrictType` + `Type`, `RestrictRarity` + `Rarity`, `Count` | Random card(s) from the chosen slice of the pool. Unrestricted rarity = rolls the reward weights (70/25/5). Skips cards the run hasn't unlocked |
+| `GainRandomCardOutcome` | `Scope` (Any / PlayerOrigin / Colorless), `RestrictType` + `Type`, `RestrictRarity` + `Rarity`, `Count` | Random card(s) from the chosen slice of the pool. Unrestricted rarity = rolls `RewardConfig`'s weights (70/25/5, no pity). Skips cards the run hasn't unlocked |
 | `GainCardFromPoolOutcome` | `Pool` (card list), `Count` | Random card from a hand-picked shortlist: "one of *these*", not "something" |
 | `RemoveCardOutcome` | `Card` | Removes one copy. No-op if not held |
 | `RemoveRandomCardOutcome` | `RestrictType` + `Type`, `Count` | Removes N random cards, each rolled from what's left. The cost side of a bargain |
@@ -623,8 +623,9 @@ Post-battle, on victory → Continue:
 
 | Knob | Where | Default |
 |---|---|---|
-| Offer count | `PostBattleFlow` (hardcoded) / `RewardConfig.DefaultOfferCount` | **3** |
-| Rarity weights | `CardDatabase.GenerateRewardOffer` / `RewardConfig` | Basic **70** / Enhanced **25** / Rare **5** |
+| Offer count | `RewardConfig.DefaultOfferCount` (the one assigned to `CardDatabase`: `Data/Cards/DefaultRewardConfig`) | **3** |
+| Rarity weights | `RewardConfig`, read by `CardDatabase.GenerateRewardOffer` | Basic **70** / Enhanced **25** / Rare **5** |
+| Rare pity | `RewardConfig.RarePityStep` × `RunState.CardsSinceRare` added to the Rare weight; resets when an offer shows a rare. Saved with the run | **+1** per non-rare card offered |
 | RNG | `RunState.Rng` | Seeded per run |
 
 Rewards are a **pick-1-of-3 card, or skip**. Nothing else drops yet: no Funds, no allies, no

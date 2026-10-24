@@ -15,7 +15,10 @@ namespace Crookedile.Tests
         [SetUp]
         public void SetUp()
         {
-            _root = Path.Combine(Path.GetTempPath(), "crookedile-save-tests-" + Guid.NewGuid().ToString("N"));
+            _root = Path.Combine(
+                Path.GetTempPath(),
+                "crookedile-save-tests-" + Guid.NewGuid().ToString("N")
+            );
         }
 
         [TearDown]
@@ -50,7 +53,9 @@ namespace Crookedile.Tests
             byte[] file = SaveEnvelope.Wrap(SaveKind.Run, 1, new byte[] { 10, 20, 30 });
             file[file.Length - 1] ^= 0x01;
 
-            Assert.Throws<SaveCorruptException>(() => SaveEnvelope.Unwrap(file, SaveKind.Run, out _));
+            Assert.Throws<SaveCorruptException>(() =>
+                SaveEnvelope.Unwrap(file, SaveKind.Run, out _)
+            );
         }
 
         [Test]
@@ -58,7 +63,9 @@ namespace Crookedile.Tests
         {
             byte[] file = SaveEnvelope.Wrap(SaveKind.Profile, 1, new byte[] { 1 });
 
-            Assert.Throws<SaveCorruptException>(() => SaveEnvelope.Unwrap(file, SaveKind.Run, out _));
+            Assert.Throws<SaveCorruptException>(() =>
+                SaveEnvelope.Unwrap(file, SaveKind.Run, out _)
+            );
         }
 
         [Test]
@@ -67,7 +74,9 @@ namespace Crookedile.Tests
             byte[] file = SaveEnvelope.Wrap(SaveKind.Run, 1, new byte[] { 1, 2, 3 });
             Array.Resize(ref file, file.Length - 2);
 
-            Assert.Throws<SaveCorruptException>(() => SaveEnvelope.Unwrap(file, SaveKind.Run, out _));
+            Assert.Throws<SaveCorruptException>(() =>
+                SaveEnvelope.Unwrap(file, SaveKind.Run, out _)
+            );
         }
 
         [Test]
@@ -77,7 +86,12 @@ namespace Crookedile.Tests
             byte[] file = SaveEnvelope.Wrap(SaveKind.Run, 1, new byte[] { 9 });
 
             store.Write("a/run.sav", file);
-            bool ok = store.TryRead("a/run.sav", f => SaveEnvelope.Unwrap(f, SaveKind.Run, out _), out var payload, out bool usedBackup);
+            bool ok = store.TryRead(
+                "a/run.sav",
+                f => SaveEnvelope.Unwrap(f, SaveKind.Run, out _),
+                out var payload,
+                out bool usedBackup
+            );
 
             Assert.IsTrue(ok);
             Assert.IsFalse(usedBackup);
@@ -93,7 +107,12 @@ namespace Crookedile.Tests
             store.Write("run.sav", SaveEnvelope.Wrap(SaveKind.Run, 1, new byte[] { 2 }));
             File.WriteAllBytes(store.PathOf("run.sav"), new byte[] { 0, 1, 2 });
 
-            bool ok = store.TryRead("run.sav", f => SaveEnvelope.Unwrap(f, SaveKind.Run, out _), out var payload, out bool usedBackup);
+            bool ok = store.TryRead(
+                "run.sav",
+                f => SaveEnvelope.Unwrap(f, SaveKind.Run, out _),
+                out var payload,
+                out bool usedBackup
+            );
 
             Assert.IsTrue(ok);
             Assert.IsTrue(usedBackup);
@@ -223,8 +242,13 @@ namespace Crookedile.Tests
                 NextEncounterId = null,
                 OpenEventId = "event",
                 NextBattleHostility = 2,
-                BattleQueue = new List<List<string>> { new List<string> { "e1", "e2" }, new List<string>() },
+                BattleQueue = new List<List<string>>
+                {
+                    new List<string> { "e1", "e2" },
+                    new List<string>(),
+                },
                 CurrentBattleIndex = 1,
+                CardsSinceRare = 7,
             };
             run.Deck.Add(new RunSaveData.CardEntry { Id = "c1", Upgraded = false });
             run.Deck.Add(new RunSaveData.CardEntry { Id = "c2", Upgraded = true });
@@ -266,6 +290,25 @@ namespace Crookedile.Tests
             Assert.AreEqual(1, back.CurrentBattleIndex);
             CollectionAssert.AreEqual(new[] { "trust-fund" }, back.UnlockedContent);
             Assert.AreEqual(4, back.RunCounters["battles_won"]);
+            Assert.AreEqual(7, back.CardsSinceRare);
+        }
+
+        [Test]
+        public void RunSave_Version1LoadsWithNoPity()
+        {
+            // A v1 payload is the v2 one without its trailing CardsSinceRare int.
+            byte[] v2 = SaveEnvelope.Unwrap(
+                new RunSaveData { Funds = 5, CardsSinceRare = 9 }.ToBytes(),
+                SaveKind.Run,
+                out _
+            );
+            byte[] v1 = new byte[v2.Length - sizeof(int)];
+            Array.Copy(v2, v1, v1.Length);
+
+            var back = RunSaveData.FromBytes(SaveEnvelope.Wrap(SaveKind.Run, 1, v1));
+
+            Assert.AreEqual(5, back.Funds);
+            Assert.AreEqual(0, back.CardsSinceRare);
         }
 
         [Test]
