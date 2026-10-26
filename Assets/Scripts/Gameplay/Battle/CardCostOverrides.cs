@@ -17,8 +17,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Sentinel reduction meaning "this card costs 0 AP this battle".</summary>
         public const int FreeSentinel = int.MaxValue;
 
-        private readonly Dictionary<CardData, int> _reductions =
-            new Dictionary<CardData, int>();
+        private readonly Dictionary<CardData, int> _reductions = new Dictionary<CardData, int>();
 
         // Non-null only while a "next-play-only" free-all pass is active.
         private Dictionary<CardData, int> _snapshot;
@@ -39,8 +38,15 @@ namespace Crookedile.Gameplay.Battle
             return _increasesThisTurn[card];
         }
 
-        /// <summary>Makes the card cost 0 AP until the turn ends (wins over any increase).</summary>
+        /// <summary>
+        /// Makes the card's next play this turn cost 0 AP (wins over any increase). Playing it
+        /// uses the free cost up (<see cref="ConsumeFreeThisTurn"/>), so a card that returns to
+        /// hand pays its stacked increases rather than looping for free.
+        /// </summary>
         public void MakeFreeThisTurn(CardData card) => _freeThisTurn.Add(card);
+
+        /// <summary>Uses up the card's free-this-turn price once it's been played.</summary>
+        public void ConsumeFreeThisTurn(CardData card) => _freeThisTurn.Remove(card);
 
         /// <summary>The card's turn-scoped cost increase; 0 if none.</summary>
         public int GetIncreaseThisTurn(CardData card) =>
@@ -71,8 +77,7 @@ namespace Crookedile.Gameplay.Battle
         /// Total reduction applied to this card this battle; 0 if none,
         /// <see cref="FreeSentinel"/> if the card was made free.
         /// </summary>
-        public int GetReduction(CardData card) =>
-            _reductions.TryGetValue(card, out int r) ? r : 0;
+        public int GetReduction(CardData card) => _reductions.TryGetValue(card, out int r) ? r : 0;
 
         /// <summary>
         /// Captures the current reductions. Safe to call with a snapshot already active

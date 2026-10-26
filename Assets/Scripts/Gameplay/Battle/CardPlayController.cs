@@ -467,6 +467,7 @@ namespace Crookedile.Gameplay.Battle
                 }
             }
             LastEnergyPaid = paid;
+            _mgr.PlayerDeck?.ConsumeFreeThisTurn(card);
 
             // Turn-scoped price breaks apply to the next card played, whatever it costs.
             if (_freePlays > 0)

@@ -58,7 +58,9 @@ namespace Crookedile.Gameplay.Battle
         }
 
         private CardData ResolveToken(CardData card) =>
-            card != null && _tokenReplacements.TryGetValue(card.ID, out var replacement) ? replacement : card;
+            card != null && _tokenReplacements.TryGetValue(card.ID, out var replacement)
+                ? replacement
+                : card;
 
         /// <summary>Reserves the selected draw-pile copy so ordinary draws cannot take it before next turn.</summary>
         public bool BookForNextTurn(CardData card)
@@ -174,7 +176,13 @@ namespace Crookedile.Gameplay.Battle
         /// Note: allocates a new list; use the individual zone properties for repeated access.
         /// </summary>
         public IReadOnlyList<CardData> AllCards =>
-            _deck.Concat(_hand).Concat(_discard).Concat(_exhaust).Concat(_bookedCards).ToList().AsReadOnly();
+            _deck
+                .Concat(_hand)
+                .Concat(_discard)
+                .Concat(_exhaust)
+                .Concat(_bookedCards)
+                .ToList()
+                .AsReadOnly();
 
         #endregion
 
@@ -681,7 +689,7 @@ namespace Crookedile.Gameplay.Battle
             );
         }
 
-        /// <summary>Makes this card cost 0 AP until the turn ends.</summary>
+        /// <summary>Makes this card's next play this turn cost 0 AP.</summary>
         public void MakeCardFreeThisTurn(CardData card)
         {
             if (card == null)
@@ -694,7 +702,7 @@ namespace Crookedile.Gameplay.Battle
         public int GetCostIncreaseThisTurn(CardData card) =>
             card == null ? 0 : _costOverrides.GetIncreaseThisTurn(card);
 
-        /// <summary>True if this card was made free until the turn ends.</summary>
+        /// <summary>True if this card's next play this turn is free.</summary>
         public bool IsFreeThisTurn(CardData card) =>
             card != null && _costOverrides.IsFreeThisTurn(card);
 
@@ -750,6 +758,13 @@ namespace Crookedile.Gameplay.Battle
             GameLogger.LogInfo<DeckManager>($"{_ownerName} shuffled deck ({_deck.Count} cards)");
         }
 
+        /// <summary>Uses up a free-this-turn price once the card is played.</summary>
+        public void ConsumeFreeThisTurn(CardData card)
+        {
+            if (card != null)
+                _costOverrides.ConsumeFreeThisTurn(card);
+        }
+
         /// <summary>
         /// Moves all cards from discard pile to deck and shuffles.
         /// </summary>
@@ -792,7 +807,8 @@ namespace Crookedile.Gameplay.Battle
                 return false;
 
             // Locate the card: draw pile first, then discard. Hand/exhaust are not sources.
-            List<CardData> source = _deck.Contains(card) ? _deck
+            List<CardData> source =
+                _deck.Contains(card) ? _deck
                 : _discard.Contains(card) ? _discard
                 : null;
             if (source == null)
