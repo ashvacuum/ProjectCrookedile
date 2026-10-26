@@ -103,5 +103,10 @@ namespace Crookedile.EditorTools.Playtest
         public readonly Dictionary<string, int> OptionsChosen = new();
         public readonly HashSet<string> OptionsSeenLocked = new();
         public readonly List<string> Errors = new();
+
+        // Credibility is the run's HP. Lost is keyed by encounter, gained by "event / option".
+        public readonly Dictionary<string, (int total, int times)> CredibilityLost = new();
+        public readonly Dictionary<string, (int total, int times)> CredibilityGained = new();
+        public readonly List<int> CredibilityByDay = new(); // at the start of each day reached, day 1 first
     }
 }

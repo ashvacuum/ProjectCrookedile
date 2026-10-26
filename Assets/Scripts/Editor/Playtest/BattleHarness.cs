@@ -147,6 +147,14 @@ namespace Crookedile.EditorTools.Playtest
                             int roomBefore = RoomHostilitySum(bm);
                             float roomAvgBefore = RoomHostilityAvg(bm);
                             Guard(rec, () => bm.RequestPlayCard(card, pick));
+                            // Answer the card's own prompts (Blow the Allowance's burn pick) before
+                            // measuring, or what they do lands after the delta and on no card.
+                            for (int prompts = 0; pendingChoice != null && prompts < 8; prompts++)
+                            {
+                                var choice = pendingChoice;
+                                pendingChoice = null;
+                                Guard(rec, () => choice.OnConfirmed?.Invoke(bot.AnswerChoice(choice, rng)));
+                            }
 
                             if (bm.CardsPlayedThisTurn > playedBefore)
                             {

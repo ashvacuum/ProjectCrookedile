@@ -50,6 +50,8 @@ namespace Crookedile.EditorTools.Playtest
                 dayOfVisits = state.Day;
             while (rec.EndReason == null)
             {
+                while (rec.CredibilityByDay.Count < Math.Min(state.Day, pool.Days))
+                    rec.CredibilityByDay.Add(state.Credibility);
                 if (state.Day > pool.Days)
                 {
                     rec.EndReason = "Completed";
@@ -146,6 +148,7 @@ namespace Crookedile.EditorTools.Playtest
                 {
                     rec.Battles++;
                     bool won = false;
+                    int credBefore = state.Credibility;
                     yield return FightEncounter(
                         battle,
                         bot,
@@ -155,8 +158,24 @@ namespace Crookedile.EditorTools.Playtest
                         battleRecords,
                         w => won = w
                     );
+                    TallyCredibility(rec, credBefore, state.Credibility, battle.name);
                     if (!won)
                     {
+                        // FightEncounter already charged the Credibility; the run goes on while any
+                        // is left, with the consolation pick PostBattleFlow offers.
+                        if (state.Credibility > 0)
+                        {
+                            if (cards.DefeatRewards != null)
+                            {
+                                var consolation = bot.ChooseReward(
+                                    cards.GenerateRewardOffer(origin, rng: state.Rng, config: cards.DefeatRewards),
+                                    rng
+                                );
+                                if (consolation != null)
+                                    state.AddCardToDeck(consolation);
+                            }
+                            continue;
+                        }
                         rec.EndReason = "Defeated";
                         rec.DefeatedBy = battle.name;
                         break;
@@ -192,6 +211,7 @@ namespace Crookedile.EditorTools.Playtest
                     }
                     var chosen = bot.ChooseOption(state, available, rng);
                     Bump(rec.OptionsChosen, $"{evt.name} / {chosen.Label}");
+                    int credBefore = state.Credibility;
                     try
                     {
                         chosen.Apply(state);
@@ -206,6 +226,13 @@ namespace Crookedile.EditorTools.Playtest
                         state.ResolveCardChoice(
                             bot.ChooseFromDeck(state.PendingCardChoice.Candidates, rng)
                         );
+                    TallyCredibility(rec, credBefore, state.Credibility, $"{evt.name} / {chosen.Label}");
+                    if (state.Credibility <= 0)
+                    {
+                        rec.EndReason = "Defeated";
+                        rec.DefeatedBy = evt.name;
+                        break;
+                    }
                 }
 
                 yield return null;
@@ -217,6 +244,16 @@ namespace Crookedile.EditorTools.Playtest
             rec.DeckSize = state.Deck.Count;
             rec.Allies = state.Allies.Count;
             RunState.Clear();
+        }
+
+        /// <summary>Books one visit's Credibility change against its source, as a loss or a gain.</summary>
+        private static void TallyCredibility(CampaignRecord rec, int before, int after, string source)
+        {
+            if (after == before)
+                return;
+            var book = after < before ? rec.CredibilityLost : rec.CredibilityGained;
+            var (total, times) = book.TryGetValue(source, out var t) ? t : (0, 0);
+            book[source] = (total + Math.Abs(after - before), times + 1);
         }
 
         /// <summary>A battle the map can start: it has a session with at least one round.</summary>
@@ -284,6 +321,7 @@ namespace Crookedile.EditorTools.Playtest
 
                 if (!rec.Win)
                 {
+                    state.RecordBattleDefeat(rec.FinalOpinion, setup.maxOpinion ?? 100);
                     onDone(false);
                     yield break;
                 }
