@@ -139,9 +139,11 @@ namespace Crookedile.Data
         HostileEnemyCount, // 8 — number of living enemies past their NeutralZone into Hostile
         ReceptiveEnemyCount, // 9 — number of living enemies past their NeutralZone into Receptive
         ConversionsThisTurn, // 10 — Faith Leader pacify conversions made this player turn (Sermon harvest)
+
         // 11 is retired (was CurrentPatronage); never reuse it — ordinals are serialized.
         ScandalsInHand = 12, // 12 — Scandal cards currently clogging the player's hand (Celebrity Scandal line)
         ScandalsDrawnThisTurn, // 13 — Scandal cards drawn so far this turn (Celebrity on-draw payoffs)
+
         // 14 is retired (was CurrentAttention); never reuse it — ordinals are serialized.
         LastHostilityGained = 15, // 15 — hostility actually ADDED by this card's effects (post Fanatic/Devotion/Ward)
         LastHostilityLost, // 16 — hostility actually REMOVED by this card's effects (post Hardened/Ward)
@@ -160,5 +162,7 @@ namespace Crookedile.Data
         CardsBurnedByThisCard, // 29 — cards this card's Burn effects exhausted from hand
         TurnedReceptiveByThisCard, // 30 — enemies this card's effects pushed into Receptive
         LastDamageTaken, // 31 — Opinion the triggering enemy push took off the meter past Support
+        EnergyPaidForCard, // 32 — Energy actually paid for the card resolving now: X on an X-cost card
+        LastBurnedPrintedCost, // 33 — printed cost of the card a Burn effect just exhausted (per-burned-card effects)
     }
 }

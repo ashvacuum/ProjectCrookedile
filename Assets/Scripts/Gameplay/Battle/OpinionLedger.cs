@@ -51,6 +51,12 @@ namespace Crookedile.Gameplay.Battle
         public int CurrentDenial => _denial;
 
         /// <summary>
+        /// When set (Friends in High Places), the player's Support no longer expires at the start
+        /// of their turn, so it carries over and stacks. Lasts the battle: the ledger is per battle.
+        /// </summary>
+        public bool SupportPersists { get; set; }
+
+        /// <summary>
         /// Called with the leaked amount whenever a hit on the player gets past Support (Celebrity
         /// Scrutiny). Never fired for non-hit shifts such as unpaid Debt.
         /// </summary>
@@ -78,9 +84,7 @@ namespace Crookedile.Gameplay.Battle
             if (amount <= 0)
                 return;
 
-            int remaining = toPlayer
-                ? AbsorbThroughSupport(amount)
-                : AbsorbThroughDenial(amount);
+            int remaining = toPlayer ? AbsorbThroughSupport(amount) : AbsorbThroughDenial(amount);
             int applied = toPlayer ? Lower(remaining) : Raise(remaining);
 
             EventBus.Publish(
@@ -209,7 +213,10 @@ namespace Crookedile.Gameplay.Battle
         public void DecaySupportAndDenial(bool isPlayerTurn)
         {
             if (isPlayerTurn)
-                ConsumeAllSupport();
+            {
+                if (!SupportPersists)
+                    ConsumeAllSupport();
+            }
             else
                 ConsumeAllDenial();
         }
