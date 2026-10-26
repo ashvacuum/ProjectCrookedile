@@ -133,6 +133,16 @@ namespace Crookedile.Data
             public int StartingCredibility;
 
             [BoxGroup("Origin/Right/Campaign")]
+            [Tooltip(
+                "Credibility cap: heals can't raise it past this. 0 = the starting Credibility."
+            )]
+            [LabelText(
+                "@MaxCredibility == 0 ? \"Max Credibility (= start)\" : \"Max Credibility\""
+            )]
+            [MinValue(0)]
+            public int MaxCredibility;
+
+            [BoxGroup("Origin/Right/Campaign")]
             [Tooltip("Hours per campaign day. 0 falls back to the run’s default.")]
             [LabelText("@MaxHours == 0 ? \"Hours/day (default 8)\" : \"Hours/day\"")]
             public int MaxHours;
@@ -140,7 +150,8 @@ namespace Crookedile.Data
             /// <summary>Row label for the entries list, so origins read without expanding.</summary>
             private string Summary =>
                 $"{(string.IsNullOrEmpty(DisplayName) ? Type.ToString() : DisplayName)}"
-                + $"  —  {StartingFunds}F / {StartingCredibility}C / {(MaxHours == 0 ? RunState.DEFAULT_MAX_HOURS : MaxHours)}h";
+                + $"  —  {StartingFunds}F / {StartingCredibility}"
+                + $"{(MaxCredibility > 0 ? $"(max {MaxCredibility})" : "")}C / {(MaxHours == 0 ? RunState.DEFAULT_MAX_HOURS : MaxHours)}h";
         }
 
         // BuildMap assigns by Type, so a second row for the same origin silently replaces the
@@ -244,6 +255,36 @@ namespace Crookedile.Data
             TryGet(type, out var e)
                 ? (e.StartingFunds, e.StartingCredibility, e.MaxHours)
                 : (0, 0, 0);
+
+        /// <summary>The Credibility cap for <paramref name="type"/>; 0 (no cap) when the origin has no entry.</summary>
+        public int GetMaxCredibility(OriginType type) =>
+            TryGet(type, out var e)
+                ? (e.MaxCredibility > 0 ? e.MaxCredibility : e.StartingCredibility)
+                : 0;
+
+        [Title("Campaign defeat", "A lost battle costs Credibility; at 0 the run is over.")]
+        [Tooltip("Credibility lost when a battle ends just short of the win line.")]
+        [MinValue(0)]
+        [SerializeField]
+        private int _narrowLossCredibility = 5;
+
+        [Tooltip("Credibility lost when Opinion collapses to 0. Losses in between scale linearly.")]
+        [MinValue(0)]
+        [SerializeField]
+        private int _crushingLossCredibility = 20;
+
+        /// <summary>
+        /// Credibility a lost battle costs, scaled by how far below the win line (half the
+        /// meter) Opinion ended: just short costs the narrow amount, 0 Opinion the crushing one.
+        /// </summary>
+        public int DefeatCredibilityCost(int finalOpinion, int maxOpinion)
+        {
+            int winLine = Mathf.Max(1, maxOpinion / 2);
+            float shortfall = Mathf.Clamp01((winLine - finalOpinion) / (float)winLine);
+            return Mathf.RoundToInt(
+                Mathf.Lerp(_narrowLossCredibility, _crushingLossCredibility, shortfall)
+            );
+        }
 
         #endregion
     }

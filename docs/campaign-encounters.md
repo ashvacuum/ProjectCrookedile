@@ -1,6 +1,6 @@
 # Campaign Encounters
 
-> **Kind:** Systems · **Status:** Built · **Updated:** 2026-10-24
+> **Kind:** Systems · **Status:** Built · **Updated:** 2026-10-26
 >
 > **Summary:** How encounters are typed, authored, scheduled and drawn, with every field, outcome, requirement and default: battles, events, chaining, flags, pools, travel, enemy moves, statuses, run state, rewards and the editor tools.
 >
@@ -575,7 +575,7 @@ count and a duration type.
 | Value | Start | Changed by | Notes |
 |---|---|---|---|
 | `Funds` | per origin | `AdjustFundsOutcome` | Clamped at 0, no ceiling |
-| `Credibility` | per origin | `AdjustCredibility(Percent)Outcome` | Clamped at 0, no ceiling. **Meta only — battle never reads it** |
+| `Credibility` | per origin | `AdjustCredibility(Percent)Outcome`, lost battles | Clamped between 0 and the origin's **Max Credibility** (`OriginDatabase` entry; 0 = the starting value), so heals can't bank above it. **The run's HP:** a lost battle costs 5 (just short of the win line) to 30 (Opinion collapsed to 0), scaling linearly with the shortfall — tunable on `OriginDatabase` (Campaign defeat). Reaching 0 by any route, a lost battle or an event choice, ends the run. HQ's Ad Spend restores it. Battle itself never reads it |
 | Time (`MinutesRemaining`) | `MaxHours` × 60 | visits (travel + duration), `SpendTimeOutcome`, Wait | Refills on day end; the day also ends at midnight |
 | `Day` | 1 | End Day, `AdvanceDayOutcome` | Run ends past `pool.Days` |
 | `Deck` | starter deck | card outcomes + post-battle rewards | Holds SO refs; upgrades store clones |
@@ -627,6 +627,11 @@ Post-battle, on victory → Continue:
 | Rarity weights | `RewardConfig`, read by `CardDatabase.GenerateRewardOffer` | Basic **70** / Enhanced **25** / Rare **5** |
 | Rare pity | `RewardConfig.RarePityStep` × `RunState.CardsSinceRare` added to the Rare weight; resets when an offer shows a rare. Saved with the run | **+1** per non-rare card offered |
 | RNG | `RunState.Rng` | Seeded per run |
+
+After a **lost** campaign battle the run survives (Credibility still above 0), Continue offers a
+consolation pick from `CardDatabase`'s defeat config (`Data/Cards/DefeatRewardConfig`): **2** cards at
+Basic **85** / Enhanced **15** / Rare **0**, no pity, and the offer doesn't feed the rare pity timer.
+Unassign it to give nothing after a loss.
 
 Rewards are a **pick-1-of-3 card, or skip**. Nothing else drops yet: no Funds, no allies, no
 boss reward. The offer skips cards the run hasn't unlocked, and Policies tagged with another

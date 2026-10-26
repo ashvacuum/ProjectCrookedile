@@ -56,28 +56,58 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
-        /// Fired by <see cref="BattleResultPanel.OnContinueClicked"/> after a victory.
-        /// Generates a reward offer and opens the reward screen.
-        /// On defeat (or if reward infrastructure isn't set up yet) clears the run and reloads.
+        /// Fired by <see cref="BattleResultPanel.OnContinueClicked"/>. A victory opens the reward
+        /// screen. A defeat costs Credibility: at 0 the run ends, otherwise a campaign run gets the
+        /// smaller consolation offer (<see cref="CardDatabase.DefeatRewards"/>) and goes back to the map.
         /// </summary>
         private void OnResultContinueClicked()
         {
-            if (
-                _lastResult == null
-                || !_lastResult.isVictory
-                || _cardDatabase == null
-                || _rewardScreen == null
-            )
+            var run = RunState.Current;
+            if (_lastResult == null || !_lastResult.isVictory)
             {
-                // Defeat, or victory with reward infra not wired up. Only a genuine defeat
-                // ends the run — otherwise a missing reward screen would silently wipe a
-                // campaign that the player was actually winning.
-                bool defeated = _lastResult == null || !_lastResult.isVictory;
-                ReturnToCampaignOrRestart(runEnded: defeated);
+                bool survived =
+                    run?.RecordBattleDefeat(
+                        _lastResult?.finalOpinion ?? 0,
+                        Battle?.Opinion?.MaxOpinion ?? 100
+                    ) == true;
+                if (
+                    survived
+                    && run.IsCampaignRun
+                    && _cardDatabase?.DefeatRewards != null
+                    && _rewardScreen != null
+                )
+                {
+                    // Not reported to NoteRewardOffer: a consolation offer shouldn't feed the rare pity timer.
+                    var consolation = _cardDatabase.GenerateRewardOffer(
+                        Battle != null ? Battle.PlayerOrigin : default,
+                        rng: run.Rng,
+                        config: _cardDatabase.DefeatRewards
+                    );
+                    _rewardScreen.OpenSingle(
+                        "Salvage Something",
+                        consolation,
+                        "Take Card",
+                        picked =>
+                        {
+                            if (picked != null)
+                                run.AddCardToDeck(picked);
+                            ReturnToCampaignOrRestart(runEnded: false);
+                        }
+                    );
+                    return;
+                }
+                ReturnToCampaignOrRestart(runEnded: !survived);
                 return;
             }
 
-            var run = RunState.Current;
+            // Victory with reward infra not wired up: never end the run over a missing screen,
+            // or it would silently wipe a campaign the player was actually winning.
+            if (_cardDatabase == null || _rewardScreen == null)
+            {
+                ReturnToCampaignOrRestart(runEnded: false);
+                return;
+            }
+
             var offers = _cardDatabase.GenerateRewardOffer(
                 Battle != null ? Battle.PlayerOrigin : default,
                 rng: run?.Rng,
@@ -115,8 +145,8 @@ namespace Crookedile.UI.Battle
         /// or a fresh reload of the current (test) scene otherwise.
         /// </summary>
         /// <param name="runEnded">
-        /// True only when the run is genuinely over (defeat). A campaign run that merely
-        /// *finished an encounter* must keep its RunState — clearing it would wipe the deck,
+        /// True only when the run is genuinely over (a defeat that took Credibility to 0). A campaign
+        /// run that merely *finished an encounter*, won or lost, must keep its RunState — clearing it would wipe the deck,
         /// Funds, Credibility, allies, and the day counter, dropping the player onto the map
         /// with a brand new run. Non-campaign (test) runs clear either way, unchanged.
         /// </param>
@@ -130,7 +160,7 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
-            // Campaign defeat ends the run: the profile records it, the run save is deleted,
+            // Out of Credibility ends the run: the profile records it, the run save is deleted,
             // and the map scene shows its "run ended" state with a fresh run on offer.
             if (runEnded)
                 Crookedile.Data.Save.SaveSystem.EndRun(victory: false);

@@ -81,3 +81,5 @@ MonoBehaviour:
     StartingFunds: 250
     StartingCredibility: 79
     MaxHours: 8
+  _narrowLossCredibility: 5
+  _crushingLossCredibility: 30
