@@ -16,6 +16,8 @@ MonoBehaviour:
   - label: Radio Commentator
     enemies:
     - {fileID: 11400000, guid: ea1fd02b94a30a3197ca28e01af8ca7f, type: 2}
+    - {fileID: 11400000, guid: 1ffd97c0bdc887634bf53b5dafd24875, type: 2}
+    - {fileID: 11400000, guid: 1ffd97c0bdc887634bf53b5dafd24875, type: 2}
     maxTurns: 10
     maxOpinion: 100
     startingOpinion: 50

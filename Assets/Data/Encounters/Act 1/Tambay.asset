@@ -16,6 +16,8 @@ MonoBehaviour:
   - label: Tambay
     enemies:
     - {fileID: 11400000, guid: a111c8a040e426af9c435902a6dcbff6, type: 2}
+    - {fileID: 11400000, guid: 1ffd97c0bdc887634bf53b5dafd24875, type: 2}
+    - {fileID: 11400000, guid: 1ffd97c0bdc887634bf53b5dafd24875, type: 2}
     maxTurns: 10
     maxOpinion: 100
     startingOpinion: 50

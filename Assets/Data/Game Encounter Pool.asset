@@ -264,9 +264,9 @@ MonoBehaviour:
     _boostIf: []
     _boostMultiplier: 2
   - _encounter: {fileID: 11400000, guid: 93f4a7cc4dc9cd7932864d7b5b73bdcb, type: 2}
-    _firstDay: 1
-    _lastDay: 4
-    _weight: 2
+    _firstDay: 3
+    _lastDay: 6
+    _weight: 1
     _oncePerRun: 1
     _guaranteed: 0
     _requirements: []

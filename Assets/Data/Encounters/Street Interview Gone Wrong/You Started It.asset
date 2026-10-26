@@ -16,6 +16,8 @@ MonoBehaviour:
   - label: The Jeepney Stop
     enemies:
     - {fileID: 11400000, guid: f2760c6f1c00650438b4042308fcc23a, type: 2}
+    - {fileID: 11400000, guid: d5405064066c0604eaf6030507f67e3b, type: 2}
+    - {fileID: 11400000, guid: 4b967ad9bf26a25b2bbf9ee9cf76a63f, type: 2}
     maxTurns: 10
     maxOpinion: 100
     startingOpinion: 50

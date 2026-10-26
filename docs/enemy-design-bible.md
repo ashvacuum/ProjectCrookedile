@@ -1,6 +1,6 @@
 # Crookedile — Enemy Design Bible (v2, shared-meter model)
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-23
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-26
 >
 > **Summary:** The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete.
 >
@@ -64,20 +64,20 @@
 
 ## 4. Act 1 — Barangay Politics (encounter compositions)
 
-Enemies are conditions → the QUESTION lives in the role combo.
+Enemies are conditions → the QUESTION lives in the role combo. Every room has at least two enemies at the start, so the state mix (and the echo chamber) is always in play; an elite may open alone only when its own summons fill the row (The Dynast).
 
 | ID | Slot | Encounter | Members (animal — roles — key moves & targets) | The Question | Clock | vs Nepo | vs Faith | vs Celeb |
 |---|---|---|---|---|---|---|---|---|
-| E01 | Easy | Tambay | 1x Askal — Pusher — Sway-down [MTR], light Smear | Push vs block on the meter? | Push +1 every 2 turns | Easy | Easy | Easy |
+| E01 | Easy | Tambay | 1x Askal — Pusher — Sway-down [MTR], light Smear + 2x Rat hangers-on (weak Pushers) | Push vs block on the meter? | Push +1 every 2 turns | Easy | Easy | Easy |
 | E02 | Easy | Chismosa Pair | 2x Maya — Pusher + Amplifier — Tita-lite: one pushes, one buffs her | Do you see priority (buffer first)? | Amplified pushes stack | Easy | Easy | Easy |
-| E03 | Easy | Barangay Tanod | 1x Carabao — Pusher/Escalator — ramps while Hostile; flipping Receptive stops ramp | Do you use states, not just pushes? | +1 push/turn while Hostile | Easy | Easy (his engine) | Med |
-| E04 | Easy | Vlogger | 1x Parrot — Inflictor — telegraphs big Heckle dump [deck], avoidable if answered | Do you read voice intents? | Heckles accumulate if ignored | Easy | Med | Easy (fuel-ish) |
+| EL4 | Elite | Barangay Tanod | 1x Carabao — Pusher/Escalator — ramps while Hostile; flipping Receptive stops ramp + 1x Devotee (sings while Receptive; over-calming the room springs the echo chamber) | Do you use states, not just pushes? | +1 push/turn while Hostile | Hard | Med (his engine) | Med |
+| E04 | Easy | Vlogger | 1x Parrot — Inflictor — telegraphs big Heckle dump [deck], avoidable if answered + 2x Uwak live chat (small Support-piercing hits, Heckles) | Do you read voice intents? | Heckles accumulate if ignored | Easy | Med | Easy (fuel-ish) |
 | N01 | Normal | Troll Farm | 4x Rat — all Pushers, weak — swarm math | Do you have wide answers (AoE status / wide flips)? | Each un-pacified rat = +1 push/turn | Hard (slots contested) | Med | Easy (Attention AoE) |
 | N02 | Normal | The Tita | 1x Cat Tita — Amplifier/Converter + 1x Askal Pusher — Tita buffs AND drags Receptives back Hostile | Silence/pacify the engine or race the output? | Amplified pushes ramp | Med | Med | Med |
-| N03 | Normal | Tabloid Reporter | 1x Musang — Inflictor/Escalator — Scandal injection [deck] + self-ramp | Can your deck absorb permanent pollution? | 1 Scandal every 2 turns | Hard | Hard | EASY (fuel!) |
+| N03 | Normal | Tabloid Reporter | 1x Musang — Inflictor/Escalator — Scandal injection [deck] + self-ramp + 2x Uwak amplifiers (Heckles on top of Scandals) | Can your deck absorb permanent pollution? | 1 Scandal every 2 turns | Hard | Hard | EASY (fuel!) |
 | N04 | Normal | Fence-Sitters | 3x Butiki — Pushers with meter DECAY aura | Can you commit and close (tempo)? | Meter decays 15%/turn | Med | Hard (setup-heavy) | Easy |
 | N05 | Normal | Bouncer & Handler | Bayawak Pusher/heavy Credibility hits + Ahas PROTECTOR warding him | Do you answer wards (burn stacks / pacify Protector)? | Bayawak Smears ramp | Med | Med | Hard |
-| N06 | Normal | Radio Commentator | 1x Tandang — Shielder/Escalator — stacks up-shields + Airtime | Can you strip shields or burst through? | Airtime +1/turn | Med | Easy (Fanatic burst) | Med |
+| N06 | Normal | Radio Commentator | 1x Tandang — Shielder/Escalator — stacks up-shields + Airtime + 2x Rat spam callers | Can you strip shields or burst through? | Airtime +1/turn | Med | Easy (Fanatic burst) | Med |
 | EL1 | Elite | The Televangelist | 1x Peacock — Converter(inverted)/Shielder — pushes YOUR enemies Receptive to force Echo Chamber penalty on you | Manage the state MIX, not just flip everything friendly? | Echo Chamber decay while all-Receptive | Med | Hard (mirrors yours) | Med |
 | EL2 | Elite | The Dynast | 1x Agila — Pusher/Amplifier + summons proxy allies — summons occupy row, warded | Handle summon pressure + wards? | New proxy every 3 turns | Hard (proxies refill the room faster than Calm can settle it) | Med | Med |
 | EL3 | Elite | The Comment Section | 3x Uwak — Inflictors, CHAIN-adjacent — alternate Heckle floods + Smears | Purge/cycle through temporary pollution? | Heckle flood scales | Med | Hard | Easy |
