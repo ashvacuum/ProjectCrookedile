@@ -59,7 +59,7 @@ namespace Crookedile.EditorTools.Playtest
         private static string CampaignsCsv(List<CampaignRecord> rows)
         {
             var sb = new StringBuilder(
-                "id,bot,origin,seed,end,day_reached,defeated_by,funds,credibility,deck,allies,battles,battles_won,events,idle_days,errors,route\n"
+                "id,bot,origin,seed,end,day_reached,defeated_by,funds,credibility,deck,allies,battles,battles_won,events,idle_days,errors,credibility_by_day,route\n"
             );
             foreach (var r in rows)
                 sb.AppendLine(
@@ -67,7 +67,8 @@ namespace Crookedile.EditorTools.Playtest
                         ",",
                         Q(r.Id), Q(r.Bot), Q(r.Origin), r.Seed, Q(r.EndReason), r.DayReached, Q(r.DefeatedBy),
                         r.Funds, r.Credibility, r.DeckSize, r.Allies, r.Battles, r.BattlesWon, r.Events,
-                        r.DaysWithNothingToDo, r.Errors.Count, Q(string.Join(" > ", r.Visited))
+                        r.DaysWithNothingToDo, r.Errors.Count, Q(string.Join(" ", r.CredibilityByDay)),
+                        Q(string.Join(" > ", r.Visited))
                     )
                 );
             return sb.ToString();
@@ -214,12 +215,13 @@ namespace Crookedile.EditorTools.Playtest
             md.AppendLine(
                 "Win rate per bot, standalone battles with starter decks. **Too easy** = Random wins 60%+. "
                     + "**Too hard** = no bot reaches 20%. **Always goes the distance** = 90%+ end on the turn limit. "
+                    + "**Skill gap** = best of Scored/Greedy minus Random; **no skill gap** = under 10 pts, so careless play does as well as careful play. "
                     + "A flag ending in **?** could be noise: the 95% interval still reaches the other side of its threshold."
             );
             var bots = battles.Select(b => b.Bot).Distinct().OrderBy(b => b).ToList();
             md.AppendLine()
-                .AppendLine($"| Encounter | {string.Join(" | ", bots)} | Avg turns | Flag |")
-                .AppendLine($"|---|{string.Concat(bots.Select(_ => "---:|"))}---:|---|");
+                .AppendLine($"| Encounter | {string.Join(" | ", bots)} | Skill gap | Avg turns | Flag |")
+                .AppendLine($"|---|{string.Concat(bots.Select(_ => "---:|"))}---:|---:|---|");
             foreach (var g in battles.GroupBy(b => b.Encounter).OrderBy(g => g.Key))
             {
                 var rates = bots.ToDictionary(bot => bot, bot => Rate(g.Where(b => b.Bot == bot)));
@@ -231,8 +233,12 @@ namespace Crookedile.EditorTools.Playtest
                     flags.Add(bounds.Values.All(b => b.hi < 0.2f) ? "too hard" : "too hard?");
                 if (g.Count(b => b.Judgment) >= 0.9f * g.Count())
                     flags.Add("always goes the distance");
+                float? gap = SkillGap(rates);
+                if (gap < 0.1f)
+                    flags.Add("no skill gap");
                 md.AppendLine(
                     $"| {g.Key} | {string.Join(" | ", bots.Select(bot => Pct(rates[bot])))} | "
+                        + $"{(gap.HasValue ? $"{gap.Value * 100:+0;-0;0} pts" : "—")} | "
                         + $"{g.Average(b => b.Turns):0.0} | {string.Join(", ", flags)} |"
                 );
             }
@@ -246,6 +252,15 @@ namespace Crookedile.EditorTools.Playtest
                 md.AppendLine(
                     $"- **{g.Key}**: {Pct(Rate(g))} {Range(Wilson(g))} over {g.Count()} battles, starter deck {g.First().DeckSize} cards"
                 );
+        }
+
+        /// <summary>Best careful bot (Scored/Greedy) minus Random; null when either side didn't play.</summary>
+        private static float? SkillGap(Dictionary<string, float> rates)
+        {
+            var careful = new[] { "Scored", "Greedy" }.Where(rates.ContainsKey).Select(b => rates[b]).ToList();
+            if (careful.Count == 0 || !rates.TryGetValue("Random", out float random))
+                return null;
+            return careful.Max() - random;
         }
 
         private static void RoomOverTime(StringBuilder md, List<BattleRecord> all)
@@ -521,6 +536,8 @@ namespace Crookedile.EditorTools.Playtest
                     md.AppendLine($"- {g.Key}: {g.Count()} defeats");
             }
 
+            CredibilityFlow(md, runs);
+
             if (pool != null)
             {
                 var enders = new HashSet<string>(
@@ -568,6 +585,68 @@ namespace Crookedile.EditorTools.Playtest
             foreach (var kv in runs.SelectMany(r => r.OptionsChosen).GroupBy(kv => kv.Key)
                          .Select(g => (g.Key, n: g.Sum(kv => kv.Value))).OrderByDescending(x => x.n).Take(10))
                 md.AppendLine($"- {kv.Key}: {kv.n}");
+        }
+
+        /// <summary>Credibility as run HP: where it drains, where it's restored, and how it trends by day.</summary>
+        private static void CredibilityFlow(StringBuilder md, List<CampaignRecord> runs)
+        {
+            if (runs.All(r => r.CredibilityByDay.Count == 0))
+                return;
+            md.AppendLine().AppendLine("### Credibility (run HP)");
+            md.AppendLine(
+                "Average Credibility at the start of each day, over runs still alive that day (run count in brackets). "
+                    + "A healthy run dips after losses and recovers at HQ. A steady slide means losses outpace heals."
+            );
+
+            var origins = runs.Select(r => r.Origin).Distinct().OrderBy(o => o).ToList();
+            int days = runs.Max(r => r.CredibilityByDay.Count);
+            md.AppendLine()
+                .AppendLine($"| Day | {string.Join(" | ", origins)} |")
+                .AppendLine($"|---:|{string.Concat(origins.Select(_ => "---:|"))}");
+            for (int d = 0; d < days; d++)
+                md.AppendLine(
+                    $"| {d + 1} | "
+                        + string.Join(
+                            " | ",
+                            origins.Select(o =>
+                            {
+                                var alive = runs.Where(r => r.Origin == o && r.CredibilityByDay.Count > d).ToList();
+                                return alive.Count == 0 ? "—" : $"{alive.Average(r => r.CredibilityByDay[d]):0} ({alive.Count})";
+                            })
+                        )
+                        + " |"
+                );
+
+            static IEnumerable<(string source, int total, int times)> Sum(
+                IEnumerable<Dictionary<string, (int total, int times)>> books
+            ) =>
+                books
+                    .SelectMany(b => b)
+                    .GroupBy(kv => kv.Key)
+                    .Select(g => (g.Key, g.Sum(kv => kv.Value.total), g.Sum(kv => kv.Value.times)))
+                    .OrderByDescending(x => x.Item2);
+
+            var lost = Sum(runs.Select(r => r.CredibilityLost)).Take(10).ToList();
+            if (lost.Count > 0)
+            {
+                md.AppendLine().AppendLine("**Biggest drains** (total Credibility lost, times it cost any, average per hit):").AppendLine();
+                foreach (var (source, total, times) in lost)
+                    md.AppendLine($"- {source}: {total} over {times}× (avg {(float)total / times:0.0})");
+            }
+
+            var gained = Sum(runs.Select(r => r.CredibilityGained)).Take(10).ToList();
+            md.AppendLine()
+                .AppendLine(
+                    gained.Count == 0
+                        ? "**Heals taken:** none — no run regained Credibility."
+                        : "**Heals taken** (total Credibility regained, times taken, average per heal):"
+                );
+            if (gained.Count > 0)
+            {
+                md.AppendLine();
+                foreach (var (source, total, times) in gained)
+                    md.AppendLine($"- {source}: {total} over {times}× (avg {(float)total / times:0.0})");
+            }
         }
 
         private static float Rate(IEnumerable<BattleRecord> rows)

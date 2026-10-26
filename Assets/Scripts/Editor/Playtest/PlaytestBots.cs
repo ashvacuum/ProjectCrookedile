@@ -367,10 +367,10 @@ namespace Crookedile.EditorTools.Playtest
                 outcome.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(outcome);
             int Amount() => Field("_amount") is int a ? a : 0;
 
-            // Credibility does nothing in battle yet, so a heal is only worth its full points
-            // when the run is actually hurting; at or above the starting value, an upgrade wins.
+            // Credibility is the run's HP: a heal is worth its points once losses have cut into it,
+            // and nothing at the cap. Percent heals scale off the starting value.
             int baseline = OriginDatabase.Shared?.GetCampaignStart(s.Origin).credibility ?? 0;
-            float need = s.Credibility < baseline ? 1f : 0.25f;
+            float need = s.MaxCredibility <= 0 || s.Credibility < s.MaxCredibility ? 1f : 0f;
             return outcome switch
             {
                 AdjustFundsOutcome => Amount() * 0.5f,
