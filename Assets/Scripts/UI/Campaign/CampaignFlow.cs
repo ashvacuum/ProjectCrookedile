@@ -105,7 +105,10 @@ namespace Crookedile.UI.Campaign
             if (RunState.Current != null)
                 return;
 
-            if (SaveSystem.HasRunInProgress && SaveSystem.ContinueRun(_pool, out var openEvent) != null)
+            if (
+                SaveSystem.HasRunInProgress
+                && SaveSystem.ContinueRun(_pool, out var openEvent) != null
+            )
             {
                 _openEvent = openEvent;
                 _pendingResultText = null;
@@ -294,11 +297,17 @@ namespace Crookedile.UI.Campaign
         /// Closes the event overlay. If the chosen option carried a <c>GoToEncounterOutcome</c>
         /// it already wrote <c>RunState.NextEncounter</c>, which
         /// <see cref="ResolveChainOrRefresh"/> picks up; otherwise this returns to the map.
+        /// A choice that left Credibility at 0 ends the run instead, the same as a lost battle.
         /// </summary>
         private void CloseEvent()
         {
             _openEvent = null;
             _pendingResultText = null;
+            if (RunState.Current is { Credibility: <= 0 })
+            {
+                SaveSystem.EndRun(victory: false);
+                return;
+            }
             ResolveChainOrRefresh();
         }
 
@@ -323,7 +332,7 @@ namespace Crookedile.UI.Campaign
                     : $"Day {state.Day}   {CampaignTravelData.FormatTime(state.ClockMinute)}   "
                         + $"Time left {state.MinutesRemaining / 60}h {state.MinutesRemaining % 60}m   "
                         + $"District: {(state.CurrentDistrict != null ? state.CurrentDistrict.DisplayName : "Local")}   "
-                        + $"Funds {state.Funds}   Credibility {state.Credibility}   "
+                        + $"Funds {state.Funds}   Credibility {state.Credibility}/{state.MaxCredibility}   "
                         + $"Deck {state.Deck.Count}   Allies {state.Allies.Count}   Seed {state.Seed}",
                 GUI.skin.box
             );
@@ -451,11 +460,7 @@ namespace Crookedile.UI.Campaign
                 if (RunState.Current == state)
                     SaveSystem.EndRun(victory: true);
 
-                panel.Add(
-                    new Label($"Campaign complete — survived all {_pool.Days} days.")
-                    {
-                        }
-                );
+                panel.Add(new Label($"Campaign complete — survived all {_pool.Days} days.") { });
                 var summary = new Label(
                     $"Funds {state.Funds}   Credibility {state.Credibility}   "
                         + $"Deck {state.Deck.Count}   Allies {state.Allies.Count}"
@@ -510,7 +515,9 @@ namespace Crookedile.UI.Campaign
             var boss = UnresolvedBoss(state);
             if (boss != null)
             {
-                string bossName = string.IsNullOrEmpty(boss.DisplayName) ? boss.name : boss.DisplayName;
+                string bossName = string.IsNullOrEmpty(boss.DisplayName)
+                    ? boss.name
+                    : boss.DisplayName;
                 var bossButton = new Button(() =>
                 {
                     Enter(boss, chargeHours: false);

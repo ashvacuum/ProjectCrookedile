@@ -1,6 +1,6 @@
 # Metagame — The Campaign Map
 
-> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-10-24
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-10-26
 >
 > **Summary:** The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases.
 >
@@ -283,10 +283,11 @@ in M1–M3; decide during playtests.
 ## 5. Open questions (⚑ roll-up)
 
 1. Overworld resource: final name, amount per day, refresh rules.
-2. HQ verbs: rest = heal what? (no HP — opinion doesn't persist… so what does HQ restore?
-   Deck edits? Card removal? Shop?)
+2. ~~HQ verbs: rest = heal what?~~ **Decided 2026-10-26:** Credibility is the run's HP. HQ restores
+   it (Ad Spend Against Scandals) or upgrades a card (Focus on your speech).
 3. Campaign end condition + boss cadence (how many bosses per campaign?).
 4. Event content voice/tone + how many events v1 needs (guess: 5–8).
-5. Do encounters cost more hours than events? Does losing a battle cost extra time
-   instead of ending the run?
+5. Do encounters cost more hours than events? ~~Does losing a battle end the run?~~ **Decided
+   2026-10-26:** a loss costs Credibility scaled by how badly you lost (5 narrow, 30 crushing);
+   the run ends at 0 Credibility, whether a battle or an event choice took it there.
 6. "Win well" metric weights — converted vs hostiles-left vs margin.

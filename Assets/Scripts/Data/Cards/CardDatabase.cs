@@ -30,6 +30,16 @@ namespace Crookedile.Data.Cards
         [SerializeField]
         private RewardConfig _rewardConfig;
 
+        [Tooltip(
+            "The consolation offer after a campaign battle the run survives losing: fewer cards and a "
+                + "worse rarity spread than a win. Unassigned = no offer after a loss."
+        )]
+        [SerializeField]
+        private RewardConfig _defeatRewardConfig;
+
+        /// <summary>The consolation reward config after a survived loss, or null when there is none.</summary>
+        public RewardConfig DefeatRewards => _defeatRewardConfig;
+
         private RewardConfig _fallbackRewardConfig;
 
         /// <summary>
@@ -297,15 +307,17 @@ namespace Crookedile.Data.Cards
         /// Non-rare cards offered since the last rare — pass <c>RunState.Current.CardsSinceRare</c>
         /// and report the result back with <c>RunState.NoteRewardOffer</c>.
         /// </param>
+        /// <param name="config">Weights and count to draw with; null = <see cref="Rewards"/>.</param>
         public List<CardData> GenerateRewardOffer(
             OriginType origin,
             int? count = null,
             CardType? typeFilter = null,
             System.Random rng = null,
-            int cardsSinceRare = 0
+            int cardsSinceRare = 0,
+            RewardConfig config = null
         )
         {
-            var config = Rewards;
+            config ??= Rewards;
             int offerCount = count ?? config.DefaultOfferCount;
             string originTag = origin.ToString().ToLower();
 

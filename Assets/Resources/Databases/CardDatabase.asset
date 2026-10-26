@@ -163,3 +163,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e987bec8393da0247ae9073cf68dfc71, type: 2}
   - {fileID: 11400000, guid: 16d903f22cd0aad45b20e562957a3e3d, type: 2}
   _rewardConfig: {fileID: 11400000, guid: 9a99d3fe42114f1c903e4bbc0bc73616, type: 2}
+  _defeatRewardConfig: {fileID: 11400000, guid: 5282454114f24c7fac88399a27406223, type: 2}

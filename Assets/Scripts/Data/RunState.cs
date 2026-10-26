@@ -209,10 +209,25 @@ namespace Crookedile.Data
         public int Funds { get; private set; }
 
         /// <summary>
-        /// Standing with the public — the meta axis event choices trade against Funds.
-        /// A meta stat only: battle reads Opinion, never this (see the enemy-bible audit).
+        /// Standing with the public, and the run's HP: event choices trade it against Funds, a
+        /// lost battle costs some (<see cref="RecordBattleDefeat"/>), and at 0 the run is over.
+        /// Battle itself reads Opinion, never this.
         /// </summary>
         public int Credibility { get; private set; }
+
+        /// <summary>
+        /// Charges a lost battle's Credibility cost (<see cref="OriginDatabase.DefeatCredibilityCost"/>).
+        /// Returns true while the run survives it.
+        /// </summary>
+        public bool RecordBattleDefeat(int finalOpinion, int maxOpinion)
+        {
+            int cost =
+                OriginDatabase.Shared != null
+                    ? OriginDatabase.Shared.DefeatCredibilityCost(finalOpinion, maxOpinion)
+                    : Credibility;
+            AdjustCredibility(-cost);
+            return Credibility > 0;
+        }
 
         /// <summary>
         /// The encounter chosen on the campaign map, waiting to be consumed by the battle
@@ -290,10 +305,18 @@ namespace Crookedile.Data
         /// </summary>
         public void AdjustFunds(int delta) => Funds = Mathf.Max(0, Funds + delta);
 
-        /// <summary>Applies a signed change to Credibility, clamped at zero.</summary>
-        // ponytail: floor only, no ceiling. Add a max if Credibility ever drives a threshold
-        // that unbounded growth would trivialise.
-        public void AdjustCredibility(int delta) => Credibility = Mathf.Max(0, Credibility + delta);
+        /// <summary>
+        /// The run's Credibility cap (its max HP), from the origin. Derived rather than saved, so
+        /// retuning it in <see cref="OriginDatabase"/> applies to runs already in progress. 0 = no cap.
+        /// </summary>
+        public int MaxCredibility => OriginDatabase.Shared?.GetMaxCredibility(Origin) ?? 0;
+
+        /// <summary>Applies a signed change to Credibility, clamped between zero and <see cref="MaxCredibility"/>.</summary>
+        public void AdjustCredibility(int delta)
+        {
+            int max = MaxCredibility;
+            Credibility = Mathf.Clamp(Credibility + delta, 0, max > 0 ? max : int.MaxValue);
+        }
 
         /// <summary>Ends the day: advances <see cref="Day"/> and refills <see cref="Hours"/>.</summary>
         public void AdvanceDay()
