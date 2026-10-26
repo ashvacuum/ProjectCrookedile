@@ -16,6 +16,7 @@ MonoBehaviour:
   - label: Barangay Tanod
     enemies:
     - {fileID: 11400000, guid: 86947a62100d205ecd8fb3ab3652a552, type: 2}
+    - {fileID: 11400000, guid: 07cfcc95147f1c4f7cb824b32787ec72, type: 2}
     maxTurns: 10
     maxOpinion: 100
     startingOpinion: 50

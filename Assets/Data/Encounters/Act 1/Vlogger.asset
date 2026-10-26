@@ -16,6 +16,8 @@ MonoBehaviour:
   - label: Vlogger
     enemies:
     - {fileID: 11400000, guid: 37862e41b622b4864afcecb35181c18d, type: 2}
+    - {fileID: 11400000, guid: b8a4c6c49fc5919340445b77c099f6c3, type: 2}
+    - {fileID: 11400000, guid: b8a4c6c49fc5919340445b77c099f6c3, type: 2}
     maxTurns: 10
     maxOpinion: 100
     startingOpinion: 50

@@ -16,6 +16,7 @@ MonoBehaviour:
   - label: The Compound
     enemies:
     - {fileID: 11400000, guid: 7e3fba2cf7e33ab4795a943451970686, type: 2}
+    - {fileID: 11400000, guid: ae5d1ba53d25faf4daed62e21c4ba8c6, type: 2}
     maxTurns: 10
     maxOpinion: 100
     startingOpinion: 50

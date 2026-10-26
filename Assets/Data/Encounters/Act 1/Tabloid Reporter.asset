@@ -16,6 +16,8 @@ MonoBehaviour:
   - label: Tabloid Reporter
     enemies:
     - {fileID: 11400000, guid: 699c59b1f9023cae9c4b1dcf33f6d941, type: 2}
+    - {fileID: 11400000, guid: b8a4c6c49fc5919340445b77c099f6c3, type: 2}
+    - {fileID: 11400000, guid: b8a4c6c49fc5919340445b77c099f6c3, type: 2}
     maxTurns: 10
     maxOpinion: 100
     startingOpinion: 50
