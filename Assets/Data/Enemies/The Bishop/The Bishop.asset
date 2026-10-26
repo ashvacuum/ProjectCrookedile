@@ -30,7 +30,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 04086544edd1068418ad36986e2192ef, type: 2}
   _neutralMoves:
   - {fileID: 11400000, guid: 1492cc83d55793f47aa3df2b46ed8da7, type: 2}
-  _receptiveMoves: []
+  _receptiveMoves:
+  - {fileID: 11400000, guid: d406049f2fff484c9e4366f602f751bb, type: 2}
   references:
     version: 2
     RefIds:
