@@ -1,6 +1,6 @@
 # Nepo Baby: Burn / Return / Calm class spec (v0.1)
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-05
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-27
 >
 > **Summary:** The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders.
 >
@@ -89,10 +89,10 @@ everything".
 
 | Qty | Card | Type | Cost | Effect |
 |---|---|---|---|---|
-| 2 | Name Drop | Pressure | 1 | Sway attack. Pitched above Faith Leader/Celebrity baseline (config multiplier) |
+| 4 | Name Drop | Pressure | 1 | Sway attack. Pitched above Faith Leader/Celebrity baseline (config multiplier) |
 | 1 | **Pull Rank** (aggravator) | Pressure | 0 | Deal 4 Sway to target, then raise that enemy's Hostility by 1. Single target |
-| 3 | Daddy's Lawyer | Shield | 1 | Support, light. Pitched below other classes' (config multiplier) |
-| 3 | I'm Just Like You | Hostility-reducer | 1 | Reduce target Hostility by a flat amount. If it converts the target to Receptive, draw a card, otherwise reduce a random card in hand's cost by 1 (floor 1) |
+| 2 | Daddy's Lawyer | Shield | 1 | Support, light. Pitched below other classes' (config multiplier) |
+| 2 | I'm Just Like You | Hostility-reducer | 1 | Reduce target Hostility by a flat amount. If it converts the target to Receptive, draw a card, otherwise reduce a random card in hand's cost by 1 (floor 1) |
 | 1 | **Blow the Allowance** (seed) | Rhetoric | 1 | Burn a non-Policy card from hand. Play it for free, and deal Sway equal to its printed energy cost. Enhanced: cost 0 and damage doubled |
 
 - **Passive (Nepotism):** once per battle, a full-hand Mulligan (discard hand, redraw fresh), offered on the opening
@@ -115,13 +115,38 @@ everything".
   Hostility on all enemies by 1. Locked behind a future unlock system (section 7).
 - **Encore** (Rhetoric, 1, exhaust): replay the last non-Policy card you played; raise Hostility on all enemies by 1.
 - **Born Into It** (Pressure, 0, exhaust): deal Sway per card exhausted this combat, with a config cap.
-- **Inheritance** (Rhetoric, 1): burn up to 2 cards from hand; gain Support per card burned.
+- **Tax Shelter** (Policy, Enhanced, persistent, 1): whenever you exhaust a card (a burn, or any exhaust), gain 3
+  Support. Upgraded: 5. The burn lane's shield.
+- **Family Foundation** (Policy, Enhanced, persistent, 1): whenever you exhaust a card, deal 2 Sway to the focused
+  enemy. Upgraded: 3. Tax Shelter's attacking twin.
+- **Cash Burn** (Policy, Rare, persistent, 2): whenever you exhaust a card, gain 1 energy. Upgraded: cost 1. Note a
+  played Policy exhausts too, so it refunds Policies (including itself); burns are bounded by the hand.
+- **Clearance Sale** (Rhetoric, Basic, 1): burn up to 2 cards; for each, deal 3 Sway and gain 3 Support. Upgraded: 4/4.
+- **Old Money Talks** (Pressure, Enhanced, 1): burn a card; deal Sway and gain Support, each 3x its printed cost.
+  Upgraded: 4x. A 0-cost burn pays nothing.
+- **Scorched Earth** (Pressure, Rare, 2, exhaust): deal 2 Sway and gain 2 Support per card in your exhaust pile.
+  Upgraded: 3/3. The late-fight finisher.
 - **Spin Doctor** (Rhetoric, 1): burn a Heckle or Scandal from hand and lower target Hostility by 1.
 - **Golden Parachute** (Policy, one-shot, 1, exhaust): burn a Heckle or Scandal from hand and draw 2.
 - **Silver Spoon** (Policy, persistent): at the start of your turn, if your hand has no Heckles or Scandals, gain 1
   energy.
 - **Old Boys' Club** (Policy, persistent, Enhanced, 1): the first Rhetoric card you play each turn refunds 1 energy, up
   to the energy actually paid (0-cost cards give nothing). Replays do not count and never trigger it.
+
+### Shields (plain)
+- **Security Detail** (Pressure, Basic, 1): gain 7 Support. Upgraded: 10. No condition, so the pool always has a
+  shield that works on turn one; Daddy's Lawyer is the starter version (4). Both pass through the class's Support
+  multiplier (`NepoBabyConfig`, 0.8), so the glass cannon stays thin, just not empty-handed.
+- **Inheritance** (Rhetoric, Basic, 2): gain 20 Support. Upgraded: 26. The big one-off wall.
+- **Daddy's Influence** (Policy, Enhanced, persistent, 2): at the start of each of your turns, gain 5 Support.
+  Upgraded: 7. The recurring shield.
+- **Friends in High Places** (Policy, Rare, 2, exhaust): for the rest of the battle your Support no longer expires
+  at the start of your turn, so it carries over and stacks. Upgraded: cost 1. Pairs with Daddy's Influence and
+  Tax Shelter; watch that pairing in playtests, since stacked Support has no ceiling.
+
+### X-cost Sway (X = energy actually paid)
+- **Blank Cheque** (Pressure, Enhanced, X): deal 5 Sway per energy spent. Upgraded: 7.
+- **Black Card** (Rhetoric, Basic, X): deal 3 Sway and gain 3 Support per energy spent. Upgraded: 4/4.
 
 ### Pull and scan (paid in Hostility)
 - **I Have All the Cards** (Pressure/Arsenal capstone): pull any number of cards from the deck; each pull raises
@@ -140,7 +165,9 @@ everything".
 - **I Know a Guy** (Rhetoric, 1): retrieve the last Rhetoric card played from the discard. Enhanced: any Rhetoric card,
   player's choice. (No extra exhaust on the retrieved card. The in-turn cost rule is the brake.)
 - **Heirloom** (Pressure, 2): deal 10 Sway, then return this card to hand. It costs 1 more for the rest of the turn.
-- **Family Seat** (Shield, 2): gain 8 Support, then return this card to hand at +1 cost this turn.
+- **Family Seat** (Shield, 1): gain 2 Support per card played this turn (counting this one), then return this card
+  to hand at +1 cost this turn, stacking with each return. Upgraded: 3 Support per card played. A free-this-turn
+  price (Call in a Favor) covers one play only, so the returns still climb.
 - **Hand-Me-Downs** (Policy, persistent): once per turn, a card with printed cost 2+ that would go to discard returns to
   hand instead; raise Hostility on all enemies by 1.
 - **Stacked Deck** (Rhetoric, 1): put up to 2 cards from hand on top of the draw pile.

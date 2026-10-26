@@ -1,6 +1,6 @@
 # Crookedile — Core Design Doc
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-09
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-26
 >
 > **Summary:** The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions.
 >
@@ -273,7 +273,7 @@ So each deck = ~4 offense + ~3 defense + 1 hostility + identity cards.
 
 ### Nepo Baby — *burn for a big swing*
 
-The full starter (Name Drop ×2, Pull Rank, Daddy's Lawyer ×3, I'm Just Like You ×3, Blow the Allowance) and its rulings
+The full starter (Name Drop ×4, Pull Rank, Daddy's Lawyer ×2, I'm Just Like You ×2, Blow the Allowance) and its rulings
 are in [`nepo-baby-class.md`](nepo-baby-class.md) §5. It follows the standard shape with a glass-cannon tilt: pressure
 pitched above the other classes, shields below.
 

@@ -62,10 +62,7 @@ namespace Crookedile.Gameplay.Battle
 
             var candidates = new List<CardData>();
             foreach (var card in ctx.Deck.Hand)
-                if (
-                    NepoBabyRules.CanBurn(card)
-                    && (_filter == BurnFilter.AnyCard || card.IsJunk)
-                )
+                if (NepoBabyRules.CanBurn(card) && (_filter == BurnFilter.AnyCard || card.IsJunk))
                     candidates.Add(card);
 
             ResolveCardSelection(
@@ -83,6 +80,7 @@ namespace Crookedile.Gameplay.Battle
                             continue;
                         burned++;
                         ctx.CardsBurned++;
+                        ctx.LastBurnedPrintedCost = card.PrintedCost;
                         if (card.PrintedCost >= _perCardMinimumCost)
                             ExecuteAll(_perBurnedCard, ctx);
                     }
@@ -126,8 +124,10 @@ namespace Crookedile.Gameplay.Battle
 #if UNITY_EDITOR
         public override IEnumerable<string> GetConfigurationIssues()
         {
-            if ((_perBurnedCard == null || _perBurnedCard.Count == 0)
-                && (_afterBurn == null || _afterBurn.Count == 0))
+            if (
+                (_perBurnedCard == null || _perBurnedCard.Count == 0)
+                && (_afterBurn == null || _afterBurn.Count == 0)
+            )
                 yield return "Burn has no follow-up effects — the burned card buys nothing.";
         }
 #endif

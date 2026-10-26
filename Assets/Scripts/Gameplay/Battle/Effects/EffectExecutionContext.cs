@@ -115,6 +115,9 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Cards this card's Burn effects exhausted from hand.</summary>
         public int CardsBurned { get; set; }
 
+        /// <summary>Printed cost of the card a Burn effect most recently exhausted. Set by BurnEffect.</summary>
+        public int LastBurnedPrintedCost { get; set; }
+
         /// <summary>Enemies this card's effects pushed from non-Receptive into Receptive.</summary>
         public int TurnedReceptive { get; set; }
 
@@ -279,7 +282,12 @@ namespace Crookedile.Gameplay.Battle
 
                 case TargetType.Adjacent:
                     // Focused enemy + immediate living neighbours (the player has no row neighbours).
-                    if (IsPlayerCard && AllEnemies != null && Target != null && Target.OwnerEnemyIndex >= 0)
+                    if (
+                        IsPlayerCard
+                        && AllEnemies != null
+                        && Target != null
+                        && Target.OwnerEnemyIndex >= 0
+                    )
                     {
                         int idx = Target.OwnerEnemyIndex;
                         AddEnemyAt(pairs, idx - 1);
@@ -460,8 +468,8 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.PolicyPlayedThisTurn => BattleManager?.CountPlayedThisTurn(
                     CardType.Policy
                 ) ?? 0,
-                EffectContextValue.HostilityGainedThisTurn => BattleManager
-                    ?.HostilityGainedThisTurn ?? 0,
+                EffectContextValue.HostilityGainedThisTurn => BattleManager?.HostilityGainedThisTurn
+                    ?? 0,
                 EffectContextValue.HostilityLostThisTurn => BattleManager?.HostilityLostThisTurn
                     ?? 0,
                 EffectContextValue.CurrentGlamour => BattleManager?.CurrentGlamour ?? 0,
@@ -474,6 +482,9 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.CardsBurnedByThisCard => CardsBurned,
                 EffectContextValue.TurnedReceptiveByThisCard => TurnedReceptive,
                 EffectContextValue.LastDamageTaken => LastDamageTaken,
+                EffectContextValue.EnergyPaidForCard => BattleManager?.CardPlay?.LastEnergyPaid
+                    ?? 0,
+                EffectContextValue.LastBurnedPrintedCost => LastBurnedPrintedCost,
                 _ => 0, // FixedAmount / None — use authored value
             };
 
