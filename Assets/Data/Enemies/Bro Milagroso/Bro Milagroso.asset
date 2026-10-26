@@ -39,7 +39,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d10e58ae7f3af985750580b3594780a2, type: 2}
   _receptiveMoves:
   - {fileID: 11400000, guid: 0d7babafd255472d709a2d64f2317ff1, type: 2}
-  - {fileID: 11400000, guid: fb93dd4b1d0bf4892577e2df61503203, type: 2}
   references:
     version: 2
     RefIds:

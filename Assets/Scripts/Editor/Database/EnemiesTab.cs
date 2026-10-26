@@ -88,6 +88,8 @@ namespace Crookedile.Editor.Database
                         yield return Issue.Error($"{stance} move [{i}] is empty.");
                 if (moves.Count == 0 && CanReach(enemy, stance))
                     yield return Issue.Info($"Can turn {stance} but has no {stance} moves; it falls back to its other moves.");
+                if (moves.Count == 1 && CanReach(enemy, stance))
+                    yield return Issue.Warning($"Only one {stance} move: it repeats the same move every {stance} turn.");
             }
 
             foreach (var move in all.Where(m => m != null).Distinct())

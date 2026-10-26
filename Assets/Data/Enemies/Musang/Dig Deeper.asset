@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
   _moveName: Dig Deeper
   _moveType: 4
-  _intentDescription: "Digs deeper: -2 Opinion, +1 Strength"
+  _intentDescription: "Digs deeper: -3 Opinion, +1 Strength"
   _effects:
   - rid: 1
   - rid: 2
@@ -32,7 +32,7 @@ MonoBehaviour:
     - rid: 1
       type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _amount: 2
+        _amount: 3
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
