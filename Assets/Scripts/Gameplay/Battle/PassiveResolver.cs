@@ -472,7 +472,17 @@ namespace Crookedile.Gameplay.Battle
                 execCtx.TriggeringEnemyIndex = eventEnemyIndex;
                 // The card the event names — the target of TriggeringCard effects.
                 execCtx.TriggeringCard = evtCtx.GetCard();
+                // Bracket a card passive so listeners (the playtest report) can credit what it
+                // does to the card that installed it. Notification only.
+                if (ownerCard != null)
+                    EventBus.Publish(
+                        new CardPassiveFiringEvent { Card = ownerCard, Starting = true }
+                    );
                 passive.TryFire(evtCtx, evalCtx, execCtx);
+                if (ownerCard != null)
+                    EventBus.Publish(
+                        new CardPassiveFiringEvent { Card = ownerCard, Starting = false }
+                    );
             }
         }
 

@@ -53,9 +53,9 @@ namespace Crookedile.Gameplay.Battle
                 && _manager.PlayerTurnsElapsed >= _manager.MaxTurns
             )
             {
-                // Judgment — outcome decided by majority opinion
+                // Judgment — the player needs the win line (a tunable share of the meter)
                 var ledger = _manager.Opinion;
-                int threshold = ledger.MaxOpinion / 2;
+                int threshold = _manager.JudgmentWinLine;
                 bool isVictory = ledger.CurrentOpinion >= threshold;
 
                 _manager.SetBattleResult(
@@ -67,6 +67,7 @@ namespace Crookedile.Gameplay.Battle
                         finalPlayerHostility = _manager.PlayerStats.CurrentHostility,
                         finalOpinion = ledger.CurrentOpinion,
                         wasJudgmentVictory = isVictory,
+                        winLine = threshold,
                     }
                 );
 

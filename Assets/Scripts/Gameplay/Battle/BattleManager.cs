@@ -45,6 +45,14 @@ namespace Crookedile.Gameplay.Battle
         private int _echoChamberDecayPerTurn = 5;
 
         [Tooltip(
+            "Share of the Opinion meter needed to win when the turn limit ends the battle (judgment). "
+                + "Above half, scraping past the voter is a loss. Filling the meter still wins outright and 0 still loses."
+        )]
+        [Range(1, 100)]
+        [SerializeField]
+        private int _judgmentWinPercent = 60;
+
+        [Tooltip(
             "Support gained at the start of the player turn per receptive enemy (reading a friendly "
                 + "room — the mirror to hostile enemies granting bonus draws). 0 disables."
         )]
@@ -183,6 +191,10 @@ namespace Crookedile.Gameplay.Battle
         // Opinion Meter + session shields — owned by OpinionLedger; these expose it read-only.
         /// <summary>The shared opinion/Support/Denial ledger. Effects call this directly for opinion pressure.</summary>
         public OpinionLedger Opinion => _opinion;
+
+        /// <summary>Opinion needed to win at judgment (the turn limit): <c>_judgmentWinPercent</c> of the meter.</summary>
+        public int JudgmentWinLine =>
+            Mathf.CeilToInt((_opinion?.MaxOpinion ?? 100) * _judgmentWinPercent / 100f);
         public int CurrentOpinion => _opinion?.CurrentOpinion ?? 0;
         public int MaxOpinion => _opinion?.MaxOpinion ?? 0;
         public int MaxTurns => _maxTurns;
@@ -872,6 +884,7 @@ namespace Crookedile.Gameplay.Battle
                 finalPlayerHostility = _playerStats.CurrentHostility,
                 finalOpinion = _opinion.CurrentOpinion,
                 wasJudgmentVictory = false,
+                winLine = JudgmentWinLine,
             };
 
             GameLogger.LogInfo(
@@ -915,6 +928,10 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Runs start-of-turn effects for the current combatant(s).</summary>
         public void StartTurn()
         {
+            // Collateral sets last turn's Support aside for this turn's Debt before it expires.
+            if (_isPlayerTurn)
+                Celebrity.HoldSupportForDebt(_opinion);
+
             // The current side's stale Support/Denial decays (Support at player turn start, Denial
             // at enemy turn start) so each protects through one full opposing turn.
             _opinion.DecaySupportAndDenial(_isPlayerTurn);

@@ -51,7 +51,13 @@ namespace Crookedile.EditorTools.Playtest
             while (rec.EndReason == null)
             {
                 while (rec.CredibilityByDay.Count < Math.Min(state.Day, pool.Days))
+                {
                     rec.CredibilityByDay.Add(state.Credibility);
+                    rec.DeckByDay.Add(state.Deck.Count);
+                    rec.RaresByDay.Add(
+                        state.Deck.Count(c => c != null && c.Rarity == CardRarity.Rare)
+                    );
+                }
                 if (state.Day > pool.Days)
                 {
                     rec.EndReason = "Completed";
@@ -162,13 +168,17 @@ namespace Crookedile.EditorTools.Playtest
                     if (!won)
                     {
                         // FightEncounter already charged the Credibility; the run goes on while any
-                        // is left, with the consolation pick PostBattleFlow offers.
-                        if (state.Credibility > 0)
+                        // is left, with the consolation pick PostBattleFlow offers. A boss loss ends it.
+                        if (state.Credibility > 0 && !battle.IsBoss)
                         {
                             if (cards.DefeatRewards != null)
                             {
                                 var consolation = bot.ChooseReward(
-                                    cards.GenerateRewardOffer(origin, rng: state.Rng, config: cards.DefeatRewards),
+                                    cards.GenerateRewardOffer(
+                                        origin,
+                                        rng: state.Rng,
+                                        config: cards.DefeatRewards
+                                    ),
                                     rng
                                 );
                                 if (consolation != null)
@@ -181,15 +191,33 @@ namespace Crookedile.EditorTools.Playtest
                         break;
                     }
                     rec.BattlesWon++;
+                    // Mirrors PostBattleFlow: the reward tier follows the encounter's last round.
+                    var last = battleRecords[battleRecords.Count - 1];
+                    var tier = cards.RewardsForWin(
+                        last.FinalOpinion,
+                        last.MaxOpinion,
+                        bossFight: battle.IsBoss
+                    );
+                    bool guaranteeRare = last.FinalOpinion >= last.MaxOpinion;
+                    if (tier != cards.Rewards)
+                        rec.StrongOffers++;
+                    if (guaranteeRare)
+                        rec.RareGuarantees++;
                     var offers = cards.GenerateRewardOffer(
                         origin,
                         rng: state.Rng,
-                        cardsSinceRare: state.CardsSinceRare
+                        cardsSinceRare: state.CardsSinceRare,
+                        config: tier,
+                        guaranteeRare: guaranteeRare
                     );
                     state.NoteRewardOffer(offers);
                     var reward = bot.ChooseReward(offers, rng);
                     if (reward != null)
+                    {
                         state.AddCardToDeck(reward);
+                        if (reward.Rarity == CardRarity.Rare)
+                            rec.RaresTaken++;
+                    }
                 }
                 else if (next is EventEncounterData evt)
                 {
@@ -226,7 +254,12 @@ namespace Crookedile.EditorTools.Playtest
                         state.ResolveCardChoice(
                             bot.ChooseFromDeck(state.PendingCardChoice.Candidates, rng)
                         );
-                    TallyCredibility(rec, credBefore, state.Credibility, $"{evt.name} / {chosen.Label}");
+                    TallyCredibility(
+                        rec,
+                        credBefore,
+                        state.Credibility,
+                        $"{evt.name} / {chosen.Label}"
+                    );
                     if (state.Credibility <= 0)
                     {
                         rec.EndReason = "Defeated";
@@ -247,7 +280,12 @@ namespace Crookedile.EditorTools.Playtest
         }
 
         /// <summary>Books one visit's Credibility change against its source, as a loss or a gain.</summary>
-        private static void TallyCredibility(CampaignRecord rec, int before, int after, string source)
+        private static void TallyCredibility(
+            CampaignRecord rec,
+            int before,
+            int after,
+            string source
+        )
         {
             if (after == before)
                 return;
@@ -315,13 +353,14 @@ namespace Crookedile.EditorTools.Playtest
                     Origin = state.Origin.ToString(),
                     Encounter = battle.name,
                     Seed = rng.Next(),
+                    Day = state.Day,
                 };
                 battleRecords.Add(rec);
                 yield return BattleHarness.Run(setup, bot.BattleBot, originPassives, rec.Seed, rec);
 
                 if (!rec.Win)
                 {
-                    state.RecordBattleDefeat(rec.FinalOpinion, setup.maxOpinion ?? 100);
+                    state.RecordBattleDefeat(rec.FinalOpinion, rec.WinLine);
                     onDone(false);
                     yield break;
                 }

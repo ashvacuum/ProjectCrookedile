@@ -40,6 +40,42 @@ namespace Crookedile.Data.Cards
         /// <summary>The consolation reward config after a survived loss, or null when there is none.</summary>
         public RewardConfig DefeatRewards => _defeatRewardConfig;
 
+        [Tooltip(
+            "The better offer for a dominant win: Opinion at or above Strong Win Percent of the meter. "
+                + "Unassigned = dominant wins use the normal config."
+        )]
+        [SerializeField]
+        private RewardConfig _strongWinRewardConfig;
+
+        [Tooltip(
+            "Share of the meter a win must reach for the strong-win offer. A maxed meter also guarantees a Rare."
+        )]
+        [Range(1, 100)]
+        [SerializeField]
+        private int _strongWinPercent = 80;
+
+        [Tooltip(
+            "The offer for maxing the meter in a boss fight (4 Rares, pick 1). Unassigned = the strong-win tier."
+        )]
+        [SerializeField]
+        private RewardConfig _bossMaxedRewardConfig;
+
+        /// <summary>
+        /// The reward config a win earns: the boss config for a maxed meter in a boss fight, the
+        /// strong-win config at <c>_strongWinPercent</c> of the meter or above, otherwise <see cref="Rewards"/>.
+        /// Tiers apply only when their config is assigned.
+        /// </summary>
+        public RewardConfig RewardsForWin(int finalOpinion, int maxOpinion, bool bossFight = false)
+        {
+            if (bossFight && _bossMaxedRewardConfig != null && finalOpinion >= maxOpinion)
+                return _bossMaxedRewardConfig;
+            return
+                _strongWinRewardConfig != null
+                && finalOpinion * 100 >= _strongWinPercent * Mathf.Max(1, maxOpinion)
+                ? _strongWinRewardConfig
+                : Rewards;
+        }
+
         private RewardConfig _fallbackRewardConfig;
 
         /// <summary>
@@ -155,15 +191,15 @@ namespace Crookedile.Data.Cards
         /// <summary>
         /// Cards a run can actually be handed. Collects <see cref="GenerateRewardOffer"/>'s
         /// exclusions in one place so a random-gain outcome can't slip the player a starter
-        /// card, an upgraded duplicate, an artless work-in-progress, a battle-only token, or a
-        /// card still locked behind progression.
+        /// card, an upgraded duplicate, a battle-only token, a card with no upgrade authored
+        /// (unfinished; Heckles and Scandals are exempt), or a card still locked behind progression.
         /// </summary>
         public static bool IsAcquirable(CardData card) =>
             card != null
             && !card.IsStarterCard
             && !card.IsUpgraded
-            && !card.IsInDevelopment
             && !card.IsGeneratedOnly
+            && (card.CanUpgrade || card.IsJunk)
             && Unlocks.UnlockRules.IsAvailableThisRun(card);
 
         /// <summary>
@@ -308,13 +344,15 @@ namespace Crookedile.Data.Cards
         /// and report the result back with <c>RunState.NoteRewardOffer</c>.
         /// </param>
         /// <param name="config">Weights and count to draw with; null = <see cref="Rewards"/>.</param>
+        /// <param name="guaranteeRare">Swap the last pick for a Rare when the draw found none (a maxed-meter win).</param>
         public List<CardData> GenerateRewardOffer(
             OriginType origin,
             int? count = null,
             CardType? typeFilter = null,
             System.Random rng = null,
             int cardsSinceRare = 0,
-            RewardConfig config = null
+            RewardConfig config = null,
+            bool guaranteeRare = false
         )
         {
             config ??= Rewards;
@@ -336,10 +374,10 @@ namespace Crookedile.Data.Cards
                     continue;
                 if (card.IsUpgraded)
                     continue; // offer base version only
-                if (card.IsInDevelopment)
-                    continue; // no artwork — not ready for play
                 if (card.IsGeneratedOnly)
                     continue; // battle-generated token — never in acquisition pools
+                if (!card.CanUpgrade && !card.IsJunk)
+                    continue; // no upgrade authored — not finished, so not offered
                 if (!Unlocks.UnlockRules.IsAvailableThisRun(card))
                     continue; // locked: not unlocked when this run started
 
@@ -400,6 +438,19 @@ namespace Crookedile.Data.Cards
                 bucket.RemoveAt(idx); // prevent duplicates
 
                 result.Add(pick);
+            }
+
+            if (
+                guaranteeRare
+                && rareBucket.Count > 0
+                && !result.Exists(c => c.Rarity == CardRarity.Rare)
+            )
+            {
+                var rare = rareBucket[NextIndex(rng, rareBucket.Count)];
+                if (result.Count == 0)
+                    result.Add(rare);
+                else
+                    result[result.Count - 1] = rare;
             }
 
             return result;

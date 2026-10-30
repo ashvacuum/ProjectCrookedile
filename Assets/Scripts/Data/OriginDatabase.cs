@@ -274,12 +274,12 @@ namespace Crookedile.Data
         private int _crushingLossCredibility = 20;
 
         /// <summary>
-        /// Credibility a lost battle costs, scaled by how far below the win line (half the
-        /// meter) Opinion ended: just short costs the narrow amount, 0 Opinion the crushing one.
+        /// Credibility a lost battle costs, scaled by how far below <paramref name="winLine"/> (the
+        /// Opinion the battle required) it ended: just short costs the narrow amount, 0 the crushing one.
         /// </summary>
-        public int DefeatCredibilityCost(int finalOpinion, int maxOpinion)
+        public int DefeatCredibilityCost(int finalOpinion, int winLine)
         {
-            int winLine = Mathf.Max(1, maxOpinion / 2);
+            winLine = Mathf.Max(1, winLine);
             float shortfall = Mathf.Clamp01((winLine - finalOpinion) / (float)winLine);
             return Mathf.RoundToInt(
                 Mathf.Lerp(_narrowLossCredibility, _crushingLossCredibility, shortfall)

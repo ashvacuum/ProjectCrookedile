@@ -67,6 +67,9 @@ namespace Crookedile.Gameplay.Battle
         public int finalOpinion;
         public bool wasJudgmentVictory;
 
+        /// <summary>Opinion the turn limit required to win (BattleManager.JudgmentWinLine).</summary>
+        public int winLine;
+
         // TODO: Add rewards when reward system exists
     }
 }

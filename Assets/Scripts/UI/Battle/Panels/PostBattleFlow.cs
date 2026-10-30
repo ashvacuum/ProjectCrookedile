@@ -57,7 +57,7 @@ namespace Crookedile.UI.Battle
 
         /// <summary>
         /// Fired by <see cref="BattleResultPanel.OnContinueClicked"/>. A victory opens the reward
-        /// screen. A defeat costs Credibility: at 0 the run ends, otherwise a campaign run gets the
+        /// screen. A defeat costs Credibility: at 0, or in a boss debate, the run ends; otherwise a campaign run gets the
         /// smaller consolation offer (<see cref="CardDatabase.DefeatRewards"/>) and goes back to the map.
         /// </summary>
         private void OnResultContinueClicked()
@@ -68,8 +68,11 @@ namespace Crookedile.UI.Battle
                 bool survived =
                     run?.RecordBattleDefeat(
                         _lastResult?.finalOpinion ?? 0,
-                        Battle?.Opinion?.MaxOpinion ?? 100
+                        _lastResult?.winLine ?? 0
                     ) == true;
+                // Losing a boss debate (the election) ends the run whatever Credibility is left.
+                if (Battle?.Boss != null)
+                    survived = false;
                 if (
                     survived
                     && run.IsCampaignRun
@@ -108,10 +111,18 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
+            // A dominant win draws from the better pool; a maxed meter guarantees a Rare (4 Rares in a boss fight).
+            int maxOpinion = Battle?.Opinion?.MaxOpinion ?? 100;
             var offers = _cardDatabase.GenerateRewardOffer(
                 Battle != null ? Battle.PlayerOrigin : default,
                 rng: run?.Rng,
-                cardsSinceRare: run?.CardsSinceRare ?? 0
+                cardsSinceRare: run?.CardsSinceRare ?? 0,
+                config: _cardDatabase.RewardsForWin(
+                    _lastResult.finalOpinion,
+                    maxOpinion,
+                    bossFight: Battle?.Boss != null
+                ),
+                guaranteeRare: _lastResult.finalOpinion >= maxOpinion
             );
             run?.NoteRewardOffer(offers);
             _rewardScreen.OpenSingle("Choose a Card", offers, "Take Card", OnRewardChosen);

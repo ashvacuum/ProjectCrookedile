@@ -64,7 +64,9 @@ namespace Crookedile.Data.Cards
 
             // Character_ sprites not used by any other card.
             var candidates = new List<Sprite>();
-            foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:Sprite", new[] { charDir }))
+            foreach (
+                var guid in UnityEditor.AssetDatabase.FindAssets("t:Sprite", new[] { charDir })
+            )
             {
                 if (used.Contains(guid))
                     continue;
@@ -92,7 +94,9 @@ namespace Crookedile.Data.Cards
         [ShowInInspector]
         [ReadOnly]
         [MultiLineProperty(4)]
-        [PropertyTooltip("Live preview of the auto-generated description (from the effect list). Fill the override below to replace it with something shorter.")]
+        [PropertyTooltip(
+            "Live preview of the auto-generated description (from the effect list). Fill the override below to replace it with something shorter."
+        )]
         private string AutoDescriptionPreview
         {
             get
@@ -194,7 +198,9 @@ namespace Crookedile.Data.Cards
         private List<BattlePassive> _upgradedPassives = new List<BattlePassive>();
 
         [FoldoutGroup("Upgrade")]
-        [Tooltip("Overridden Innate Retain when this card is upgraded. Base retain is used otherwise.")]
+        [Tooltip(
+            "Overridden Innate Retain when this card is upgraded. Base retain is used otherwise."
+        )]
         [SerializeField]
         private bool _upgradedInnateRetain = false;
 
@@ -333,11 +339,13 @@ namespace Crookedile.Data.Cards
 
         /// <summary>
         /// Can this card be upgraded? True if it is not already upgraded and has at least one
-        /// upgraded field defined (costs, effects, passives, or retain).
+        /// upgraded field defined (costs, effects, passives, or retain). Generated-only tokens
+        /// never upgrade; effects transform them instead.
         /// </summary>
         public bool CanUpgrade =>
             _cardType != CardType.Scandal
             && _cardType != CardType.Heckle
+            && !_isGeneratedOnly
             && !_isUpgraded
             && (
                 // Null-tolerant: older assets deserialize with null upgraded lists.
@@ -421,8 +429,8 @@ namespace Crookedile.Data.Cards
         public string ConfigurationNotes => _configurationNotes;
 
         /// <summary>
-        /// True if this card has no artwork assigned and is therefore not yet ready for gameplay.
-        /// Cards in development are excluded from reward pools and card-choice panels.
+        /// True if this card has no artwork assigned yet. Art-only: the card is still offered and
+        /// played (a blank frame); the Database's Cards tab lists these as art to generate.
         /// </summary>
         public bool IsInDevelopment => _artwork == null;
 

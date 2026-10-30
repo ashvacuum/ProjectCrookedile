@@ -260,10 +260,10 @@ namespace Crookedile.Gameplay.Battle
             if (card.IsActivatedPassive)
                 _mgr.Passives?.ActivateCardPassives(card);
 
-            // If any effect flagged exhaust — or this is an activated-passive card — move it from
-            // discard → exhaust pile now (PlayCardAtIndex already moved it hand → discard).
+            // If any effect flagged exhaust — or this is an activated-passive card — move it to
+            // the exhaust pile now (PlayCardAtIndex moved it hand → discard; effects may have moved it on).
             if (ctx.ShouldExhaust || card.IsActivatedPassive)
-                _mgr.PlayerDeck.ExhaustFromDiscard(card);
+                _mgr.PlayerDeck.ExhaustPlayedCard(card);
 
             // The crowd reacts: policy/single-target hostility shifts + echo-chamber refresh.
             _mgr.Crowd.OnCardPlayed(card, _mgr.FocusedEnemy, _mgr.FocusedEnemyIndex);

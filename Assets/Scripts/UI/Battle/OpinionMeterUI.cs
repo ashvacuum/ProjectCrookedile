@@ -71,7 +71,9 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private float _ghostDelay = 0.35f;
 
-        [Tooltip("Seconds the ghost takes to drain, and the value label to count to its new number.")]
+        [Tooltip(
+            "Seconds the ghost takes to drain, and the value label to count to its new number."
+        )]
         [SerializeField]
         private float _ghostDuration = 0.45f;
 
@@ -93,7 +95,7 @@ namespace Crookedile.UI.Battle
         private Color _flashColor = Color.white;
 
         [Header("Overlays")]
-        [Tooltip("RectTransform pinned at 50% of bar width — marks the Judgment win threshold.")]
+        [Tooltip("Marks the Judgment win line; Refresh moves it to BattleManager.JudgmentWinLine.")]
         [SerializeField]
         private RectTransform _thresholdMarker;
 
@@ -181,6 +183,21 @@ namespace Crookedile.UI.Battle
 
             float pct = maxOpinion > 0 ? Mathf.Clamp01((float)currentOpinion / maxOpinion) : 0f;
 
+            // The marker sits on the Judgment win line, not the scene's authored 50%.
+            if (
+                _thresholdMarker != null
+                && maxOpinion > 0
+                && Crookedile.Gameplay.Battle.BattleManager.Current != null
+            )
+            {
+                float line = Mathf.Clamp01(
+                    (float)Crookedile.Gameplay.Battle.BattleManager.Current.JudgmentWinLine
+                        / maxOpinion
+                );
+                _thresholdMarker.anchorMin = new Vector2(line, _thresholdMarker.anchorMin.y);
+                _thresholdMarker.anchorMax = new Vector2(line, _thresholdMarker.anchorMax.y);
+            }
+
             // Fill = full current opinion; Support/Denial bars live in the unfilled region to its right.
             float barFillWidth = pct * total;
             float unfilled = total - barFillWidth;
@@ -251,7 +268,8 @@ namespace Crookedile.UI.Battle
             if (_valueText != null)
             {
                 _valueText.transform.DOComplete();
-                _valueText.transform.DOPunchScale(Vector3.one * 0.25f * strength, 0.3f)
+                _valueText
+                    .transform.DOPunchScale(Vector3.one * 0.25f * strength, 0.3f)
                     .SetLink(gameObject);
             }
         }

@@ -54,7 +54,12 @@ namespace Crookedile.Gameplay.Battle
                 for (int i = 0; i < allEnemies.Count; i++)
                     if (allEnemies[i].Stats == opponentStats)
                     {
-                        SetFocusedOpponent(opponentStats, allEnemies[i].StatusEffects, i, allEnemies[i].EnemyData.EnemyName);
+                        SetFocusedOpponent(
+                            opponentStats,
+                            allEnemies[i].StatusEffects,
+                            i,
+                            allEnemies[i].EnemyData.EnemyName
+                        );
                         break;
                     }
             }
@@ -154,11 +159,10 @@ namespace Crookedile.Gameplay.Battle
             // Effects know the card they're printed on (CardSelectionMode.ThisCard,
             // MoveOwnerCardEffect). Passive dispatches set this separately in PassiveResolver.
             execCtx.OwnerCard = card;
+            // An armed Sway multiplier (Overpromise) waits for the next card that deals Sway.
+            int armedSway = 1;
             if (isPlayerCard && _battleManager != null)
-            {
-                execCtx.SwayMultiplier = _battleManager.Celebrity.NextSwayMultiplier;
-                _battleManager.Celebrity.NextSwayMultiplier = 1;
-            }
+                execCtx.SwayMultiplier = armedSway = _battleManager.Celebrity.NextSwayMultiplier;
 
             // Honour the card's upgrade state — GetNewEffects returns the upgraded effect list when
             // the card is upgraded (and one is authored), else the base list. Identical to .Effects
@@ -176,6 +180,14 @@ namespace Crookedile.Gameplay.Battle
                         : null;
                 effects[j].Execute(execCtx, overrideAmount);
             }
+
+            // Spent once this card dealt Sway with it, unless the card armed a new one.
+            if (
+                armedSway > 1
+                && execCtx.LastDamageDealt > 0
+                && _battleManager.Celebrity.NextSwayMultiplier == armedSway
+            )
+                _battleManager.Celebrity.NextSwayMultiplier = 1;
 
             return execCtx;
         }
@@ -239,6 +251,6 @@ namespace Crookedile.Gameplay.Battle
                 if (EffectStepDelay > 0)
                     await UniTask.WaitForSeconds(EffectStepDelay, cancellationToken: ct);
             }
-}
+        }
     }
 }
