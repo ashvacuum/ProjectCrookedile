@@ -8,7 +8,9 @@ namespace Crookedile.Gameplay.Battle
     [Serializable]
     public sealed class OverpromiseEffect : BattleEffect
     {
-        [Tooltip("Sway multiplier for the next card played this turn.")]
+        [Tooltip(
+            "Sway multiplier for the next card this turn that deals Sway; cards without Sway don't spend it."
+        )]
         [MinValue(1)]
         [SerializeField]
         private int _swayMultiplier = 3;
@@ -22,7 +24,7 @@ namespace Crookedile.Gameplay.Battle
         }
 
         public override string GetDescription() =>
-            $"The next card this turn deals {_swayMultiplier} times its Sway";
+            $"Your next Sway card this turn deals {_swayMultiplier} times its Sway";
 
 #if UNITY_EDITOR
         public override IEnumerable<string> GetConfigurationIssues()

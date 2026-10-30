@@ -53,14 +53,74 @@ namespace Crookedile.EditorTools.Playtest
             void OnEnded(BattleEndedEvent e) => result = e.Result;
             void OnChoice(CardChoiceRequest e) => pendingChoice = e;
             bm.CardChoicePrompt = OnChoice;
-            void OnActing(EnemyActingEvent e) => Bump(rec.EnemyMoves, e.Move != null ? e.Move.name : "(none)");
+            void OnActing(EnemyActingEvent e) =>
+                Bump(rec.EnemyMoves, e.Move != null ? e.Move.name : "(none)");
             void OnBossActing(BossActingEvent e) => Bump(rec.EnemyMoves, "Boss: " + e.Move.name);
+            void OnBossPlan(BossIntentsDeclaredEvent e) =>
+                Bump(rec.BossBundles, e.Boss?.BundleName ?? "(no plan)");
+            rec.Boss = setup.boss != null ? setup.boss.DisplayName : null;
+
+            // Utility credit goes to the card being played, or to the card whose passive is firing.
+            string playing = null;
+            var firingPassives = new Stack<string>();
+            string Source() => firingPassives.Count > 0 ? firingPassives.Peek() : playing;
+            // ponytail: FIFO lots; Support from untracked sources (origin, receptive rule) isn't lotted,
+            // so tracked cards can be credited with absorbs it covered. Fine for ranking cards.
+            var supportLots = new List<(string card, int left)>();
+            var energyLots = new List<(string card, int left)>();
+            void OnPassive(CardPassiveFiringEvent e)
+            {
+                if (e.Starting)
+                    firingPassives.Push(e.Card.CardName);
+                else if (firingPassives.Count > 0)
+                    firingPassives.Pop();
+            }
+            void OnSupport(SupportChangedEvent e)
+            {
+                if (e.IsDecay)
+                {
+                    supportLots.Clear();
+                    return;
+                }
+                int gained = e.NewValue - e.OldValue;
+                string src = Source();
+                if (gained <= 0 || src == null)
+                    return;
+                Bump(rec.SupportGained, src, gained);
+                supportLots.Add((src, gained));
+            }
+            void OnHit(DamageDealtEvent e)
+            {
+                if (!e.IsToPlayer || e.Absorbed <= 0)
+                    return;
+                int left = e.Absorbed;
+                for (int i = 0; i < supportLots.Count && left > 0; i++)
+                {
+                    int take = Math.Min(supportLots[i].left, left);
+                    Bump(rec.DamagePrevented, supportLots[i].card, take);
+                    supportLots[i] = (supportLots[i].card, supportLots[i].left - take);
+                    left -= take;
+                }
+                supportLots.RemoveAll(l => l.left <= 0);
+            }
+            void OnEnergy(ActionPointsChangedEvent e)
+            {
+                int gained = e.NewValue - e.OldValue;
+                string src = Source();
+                if (!e.IsPlayer || gained <= 0 || src == null) // the turn refill has no source
+                    return;
+                Bump(rec.EnergyGained, src, gained);
+                energyLots.Add((src, gained));
+            }
+            void OnTurnEnded(TurnEndedEvent e) => energyLots.Clear(); // unspent bonus energy is gone
             // Every drop of the meter, not DamageDealtEvent: smears go straight through the ledger
             // and never publish one, and they are exactly the hits worth counting.
             void OnOpinion(OpinionChangedEvent e)
             {
                 if (e.NewValue < e.OldValue)
                     rec.DamageToPlayer += e.OldValue - e.NewValue;
+                else if (firingPassives.Count > 0)
+                    Bump(rec.PassiveOpinion, firingPassives.Peek(), e.NewValue - e.OldValue);
             }
             void OnLog(string message, string stack, LogType type)
             {
@@ -73,7 +133,13 @@ namespace Crookedile.EditorTools.Playtest
             EventBus.Subscribe<BattleEndedEvent>(OnEnded);
             EventBus.Subscribe<EnemyActingEvent>(OnActing);
             EventBus.Subscribe<BossActingEvent>(OnBossActing);
+            EventBus.Subscribe<BossIntentsDeclaredEvent>(OnBossPlan);
             EventBus.Subscribe<OpinionChangedEvent>(OnOpinion);
+            EventBus.Subscribe<CardPassiveFiringEvent>(OnPassive);
+            EventBus.Subscribe<SupportChangedEvent>(OnSupport);
+            EventBus.Subscribe<DamageDealtEvent>(OnHit);
+            EventBus.Subscribe<ActionPointsChangedEvent>(OnEnergy);
+            EventBus.Subscribe<TurnEndedEvent>(OnTurnEnded);
             Application.logMessageReceived += OnLog;
 
             try
@@ -88,7 +154,10 @@ namespace Crookedile.EditorTools.Playtest
             {
                 rec.StartOpinion = bm.CurrentOpinion;
 
-                int frames = 0, stuckFrames = 0, playsThisTurn = 0, turnSeen = -1;
+                int frames = 0,
+                    stuckFrames = 0,
+                    playsThisTurn = 0,
+                    turnSeen = -1;
                 var lastState = bm.CurrentState;
                 while (result == null && rec.Errors.Count < 20)
                 {
@@ -110,7 +179,11 @@ namespace Crookedile.EditorTools.Playtest
                         pendingChoice = null;
                         Guard(rec, () => choice.OnConfirmed?.Invoke(bot.AnswerChoice(choice, rng)));
                     }
-                    else if (bm.CurrentState == BattleState.PlayerTurn && bm.IsPlayerTurn && !bm.IsCardResolving)
+                    else if (
+                        bm.CurrentState == BattleState.PlayerTurn
+                        && bm.IsPlayerTurn
+                        && !bm.IsCardResolving
+                    )
                     {
                         stuckFrames = 0;
                         if (bm.CurrentTurn != turnSeen)
@@ -126,7 +199,10 @@ namespace Crookedile.EditorTools.Playtest
                             if (bm.CanPlayCard(hand[i]))
                                 playable.Add(i);
 
-                        int pick = playsThisTurn >= MaxPlaysPerTurn ? -1 : bot.ChooseCard(bm, playable, rng);
+                        int pick =
+                            playsThisTurn >= MaxPlaysPerTurn
+                                ? -1
+                                : bot.ChooseCard(bm, playable, rng);
                         if (pick < 0 || pick >= hand.Count)
                         {
                             Guard(rec, bm.RequestEndTurn);
@@ -141,11 +217,15 @@ namespace Crookedile.EditorTools.Playtest
                             var target = bm.FocusedEnemy;
                             int targetHostility = target?.Stats.CurrentHostility ?? 0;
                             var targetMood =
-                                target == null || (!target.Stats.IsHostile && !target.Stats.IsReceptive) ? Mood.Neutral
+                                target == null
+                                || (!target.Stats.IsHostile && !target.Stats.IsReceptive)
+                                    ? Mood.Neutral
                                 : target.Stats.IsHostile ? Mood.Hostile
                                 : Mood.Receptive;
                             int roomBefore = RoomHostilitySum(bm);
                             float roomAvgBefore = RoomHostilityAvg(bm);
+                            int lotsBefore = energyLots.Count; // energy banked before this card was paid for
+                            playing = card.CardName;
                             Guard(rec, () => bm.RequestPlayCard(card, pick));
                             // Answer the card's own prompts (Blow the Allowance's burn pick) before
                             // measuring, or what they do lands after the delta and on no card.
@@ -153,7 +233,33 @@ namespace Crookedile.EditorTools.Playtest
                             {
                                 var choice = pendingChoice;
                                 pendingChoice = null;
-                                Guard(rec, () => choice.OnConfirmed?.Invoke(bot.AnswerChoice(choice, rng)));
+                                Guard(
+                                    rec,
+                                    () => choice.OnConfirmed?.Invoke(bot.AnswerChoice(choice, rng))
+                                );
+                            }
+                            playing = null;
+                            if (bm.CardsPlayedThisTurn > playedBefore)
+                            {
+                                // Bonus energy banked earlier paid for this card: credit its source with a play.
+                                int owed = cost;
+                                var enabledBy = new HashSet<string>();
+                                for (
+                                    int i = 0;
+                                    i < lotsBefore && i < energyLots.Count && owed > 0;
+                                    i++
+                                )
+                                {
+                                    int take = Math.Min(energyLots[i].left, owed);
+                                    if (take <= 0)
+                                        continue;
+                                    enabledBy.Add(energyLots[i].card);
+                                    energyLots[i] = (energyLots[i].card, energyLots[i].left - take);
+                                    owed -= take;
+                                }
+                                energyLots.RemoveAll(l => l.left <= 0);
+                                foreach (var src in enabledBy)
+                                    Bump(rec.CardsEnabled, src, 1);
                             }
 
                             if (bm.CardsPlayedThisTurn > playedBefore)
@@ -165,7 +271,9 @@ namespace Crookedile.EditorTools.Playtest
                                 Bump(rec.CardPlays, card.CardName);
                                 Bump(rec.CardOpinionDelta, card.CardName, delta);
                                 rec.CardBestPlay[card.CardName] = Math.Max(
-                                    rec.CardBestPlay.TryGetValue(card.CardName, out int best) ? best : int.MinValue,
+                                    rec.CardBestPlay.TryGetValue(card.CardName, out int best)
+                                        ? best
+                                        : int.MinValue,
                                     delta
                                 );
                                 rec.Plays.Add(
@@ -207,6 +315,8 @@ namespace Crookedile.EditorTools.Playtest
                 rec.Snapshots.Add(final);
                 if (result != null)
                     rec.Win = result.isVictory;
+                rec.WinLine = result.winLine;
+                rec.MaxOpinion = bm.MaxOpinion;
                 rec.Judgment = setup.maxTurns.HasValue && rec.Turns >= setup.maxTurns.Value;
             }
             finally
@@ -216,7 +326,13 @@ namespace Crookedile.EditorTools.Playtest
                 EventBus.Unsubscribe<BattleEndedEvent>(OnEnded);
                 EventBus.Unsubscribe<EnemyActingEvent>(OnActing);
                 EventBus.Unsubscribe<BossActingEvent>(OnBossActing);
+                EventBus.Unsubscribe<BossIntentsDeclaredEvent>(OnBossPlan);
                 EventBus.Unsubscribe<OpinionChangedEvent>(OnOpinion);
+                EventBus.Unsubscribe<CardPassiveFiringEvent>(OnPassive);
+                EventBus.Unsubscribe<SupportChangedEvent>(OnSupport);
+                EventBus.Unsubscribe<DamageDealtEvent>(OnHit);
+                EventBus.Unsubscribe<ActionPointsChangedEvent>(OnEnergy);
+                EventBus.Unsubscribe<TurnEndedEvent>(OnTurnEnded);
                 Application.logMessageReceived -= OnLog;
 
                 // OnDestroy disposes the passive resolver and crowd, taking their bus subscriptions
@@ -259,7 +375,9 @@ namespace Crookedile.EditorTools.Playtest
         private static float RoomHostilityAvg(BattleManager bm)
         {
             var living = bm.Enemies.Where(e => !e.IsDefeated).ToList();
-            return living.Count == 0 ? 0f : (float)living.Sum(e => e.Stats.CurrentHostility) / living.Count;
+            return living.Count == 0
+                ? 0f
+                : (float)living.Sum(e => e.Stats.CurrentHostility) / living.Count;
         }
 
         private static void Guard(BattleRecord rec, Action action)

@@ -69,13 +69,17 @@ namespace Crookedile.UI.Battle
             On<TurnStartedEvent>(evt =>
             {
                 EndGroup();
-                AddEntry($"--- Turn {evt.TurnNumber}: {(evt.IsPlayerTurn ? "Player" : "Opponent")} ---");
+                AddEntry(
+                    $"--- Turn {evt.TurnNumber}: {(evt.IsPlayerTurn ? "Player" : "Opponent")} ---"
+                );
             });
             On<TurnEndedEvent>(_ => EndGroup());
             On<CardPlayedEvent>(evt =>
             {
                 EndGroup();
-                AddEntry($"{(evt.IsPlayer ? "You" : "Opponent")} played <b>{evt.Card.CardName}</b>");
+                AddEntry(
+                    $"{(evt.IsPlayer ? "You" : "Opponent")} played <b>{evt.Card.CardName}</b>"
+                );
                 _group = Group.Card;
                 _groupCard = evt.Card;
             });
@@ -87,9 +91,10 @@ namespace Crookedile.UI.Battle
             On<EnemyActingEvent>(evt =>
             {
                 EndGroup();
-                string move = evt.Move != null && !string.IsNullOrEmpty(evt.Move.MoveName)
-                    ? $" uses <b>{evt.Move.MoveName}</b>"
-                    : " acts";
+                string move =
+                    evt.Move != null && !string.IsNullOrEmpty(evt.Move.MoveName)
+                        ? $" uses <b>{evt.Move.MoveName}</b>"
+                        : " acts";
                 AddEntry($"{EnemyName(evt.EnemyIndex)}{move}");
                 _group = Group.Enemy;
             });
@@ -222,7 +227,9 @@ namespace Crookedile.UI.Battle
                 )
             );
             On<EnemyTurncoatEvent>(evt =>
-                AddOutcome($"{EnemyName(evt.EnemyIndex)} turned on you! They'll hit harder for a turn.")
+                AddOutcome(
+                    $"{EnemyName(evt.EnemyIndex)} turned on you! They'll hit harder for a turn."
+                )
             );
             On<EnemyDefeatedEvent>(evt => AddOutcome($"{evt.EnemyName} defeated!"));
             On<EnemySummonedEvent>(evt => AddOutcome($"{evt.EnemyData.EnemyName} was summoned!"));
@@ -238,7 +245,7 @@ namespace Crookedile.UI.Battle
             {
                 EndGroup();
                 AddEntry(
-                    $"=== JUDGMENT: Opinion {evt.FinalOpinion} / {evt.Threshold * 2} — {(evt.IsVictory ? "VICTORY" : "DEFEAT")} ==="
+                    $"=== JUDGMENT: Opinion {evt.FinalOpinion}, needed {evt.Threshold} — {(evt.IsVictory ? "VICTORY" : "DEFEAT")} ==="
                 );
             });
             On<BattleEndedEvent>(evt =>

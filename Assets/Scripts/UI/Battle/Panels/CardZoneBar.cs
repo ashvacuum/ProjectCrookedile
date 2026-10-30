@@ -98,7 +98,7 @@ namespace Crookedile.UI.Battle
         private void OnCardExhausted(CardExhaustedEvent evt)
         {
             // Ensure exhaust count is always up-to-date regardless of trigger source
-            // (ExhaustFromDiscard does not pass through CardPlayedEvent → stats refresh).
+            // (ExhaustPlayedCard does not pass through CardPlayedEvent → stats refresh).
             if (!evt.IsPlayer)
                 return;
             RefreshCounts();

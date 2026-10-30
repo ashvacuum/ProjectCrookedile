@@ -628,7 +628,13 @@ namespace Crookedile.Editor
             }
             foreach (HostilityKind kind in System.Enum.GetValues(typeof(HostilityKind)))
             {
-                if (GUILayout.Toggle(filterByHostility == kind, kind.ToString(), SirenixGUIStyles.MiniButton))
+                if (
+                    GUILayout.Toggle(
+                        filterByHostility == kind,
+                        kind.ToString(),
+                        SirenixGUIStyles.MiniButton
+                    )
+                )
                 {
                     if (filterByHostility != kind)
                     {
@@ -653,7 +659,9 @@ namespace Crookedile.Editor
             foreach (CardFantasy fantasy in System.Enum.GetValues(typeof(CardFantasy)))
             {
                 string label = fantasy == CardFantasy.None ? "Unassigned" : fantasy.ToString();
-                if (GUILayout.Toggle(filterByFantasy == fantasy, label, SirenixGUIStyles.MiniButton))
+                if (
+                    GUILayout.Toggle(filterByFantasy == fantasy, label, SirenixGUIStyles.MiniButton)
+                )
                 {
                     if (filterByFantasy != fantasy)
                     {
@@ -860,8 +868,8 @@ namespace Crookedile.Editor
                     new Rect(xOffset, contentRect.y, 60, 18),
                     string.Join(
                         " ",
-                        System.Enum
-                            .GetValues(typeof(CardFantasy))
+                        System
+                            .Enum.GetValues(typeof(CardFantasy))
                             .Cast<CardFantasy>()
                             .Where(f => f != CardFantasy.None && card.Fantasies.HasFlag(f))
                             .Select(f => f.ToString()[0])
@@ -936,7 +944,11 @@ namespace Crookedile.Editor
             {
                 var wanted = filterByFantasy.Value;
                 filteredCards = filteredCards
-                    .Where(c => wanted == CardFantasy.None ? c.Fantasies == CardFantasy.None : c.Fantasies.HasFlag(wanted))
+                    .Where(c =>
+                        wanted == CardFantasy.None
+                            ? c.Fantasies == CardFantasy.None
+                            : c.Fantasies.HasFlag(wanted)
+                    )
                     .ToList();
             }
 
@@ -1360,12 +1372,13 @@ namespace Crookedile.Editor
             if (!hasEffects && !hasPassives && !card.IsUnplayable)
                 issues.Add("No effects or passives — card has no behavior when played");
 
-            // Every base card needs an authored upgrade to be shippable. Scandal/Heckle junk
-            // can't upgrade by design, and upgraded variants are complete by definition.
+            // Every base card needs an authored upgrade to be shippable. Scandal/Heckle junk and
+            // generated-only tokens can't upgrade by design; upgraded variants are complete by definition.
             if (
                 !card.IsUpgraded
                 && card.CardType != Crookedile.Data.CardType.Scandal
                 && card.CardType != Crookedile.Data.CardType.Heckle
+                && !card.IsGeneratedOnly
                 && !card.CanUpgrade
             )
                 issues.Add("No upgrade authored — base card is incomplete");

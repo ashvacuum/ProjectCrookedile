@@ -292,6 +292,17 @@ namespace Crookedile.Gameplay.Battle
     }
 
     /// <summary>
+    /// Published by <c>PassiveResolver</c> before (<see cref="Starting"/> true) and after (false) a
+    /// card-owned passive fires, so listeners can credit what it does to the card that installed it.
+    /// Notification only: nothing in the game rules reads it.
+    /// </summary>
+    public struct CardPassiveFiringEvent : IGameEvent
+    {
+        public CardData Card;
+        public bool Starting;
+    }
+
+    /// <summary>
     /// Published by <c>DeckManager.AddCardToDeck()</c>, <c>AddCardsToDeck()</c>,
     /// <c>AddCardToDiscard()</c>, and <c>AddCardsToDiscard()</c> when a card is granted
     /// directly into the draw pile or discard pile during battle.
@@ -558,7 +569,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Opinion value at the moment judgment was called.</summary>
         public int FinalOpinion;
 
-        /// <summary>The threshold opinion must exceed for a victory (MaxOpinion / 2).</summary>
+        /// <summary>The Opinion needed for a victory (BattleManager.JudgmentWinLine).</summary>
         public int Threshold;
 
         /// <summary>True = opinion exceeded the threshold (player wins); false = player loses.</summary>

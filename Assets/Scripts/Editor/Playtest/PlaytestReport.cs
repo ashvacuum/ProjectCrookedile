@@ -47,10 +47,26 @@ namespace Crookedile.EditorTools.Playtest
                 sb.AppendLine(
                     string.Join(
                         ",",
-                        Q(r.Context), Q(r.Bot), Q(r.Origin), Q(r.Encounter), Q(r.Enemies), r.Seed, r.DeckSize,
-                        B(r.Win), B(r.Judgment), B(r.TimedOut), B(r.Softlock), r.Turns, r.StartOpinion,
-                        r.FinalOpinion, r.CardsPlayed, r.MaxCardsOneTurn, r.RejectedPlays, r.DamageToPlayer,
-                        r.Errors.Count, r.Warnings.Count
+                        Q(r.Context),
+                        Q(r.Bot),
+                        Q(r.Origin),
+                        Q(r.Encounter),
+                        Q(r.Enemies),
+                        r.Seed,
+                        r.DeckSize,
+                        B(r.Win),
+                        B(r.Judgment),
+                        B(r.TimedOut),
+                        B(r.Softlock),
+                        r.Turns,
+                        r.StartOpinion,
+                        r.FinalOpinion,
+                        r.CardsPlayed,
+                        r.MaxCardsOneTurn,
+                        r.RejectedPlays,
+                        r.DamageToPlayer,
+                        r.Errors.Count,
+                        r.Warnings.Count
                     )
                 );
             return sb.ToString();
@@ -65,9 +81,23 @@ namespace Crookedile.EditorTools.Playtest
                 sb.AppendLine(
                     string.Join(
                         ",",
-                        Q(r.Id), Q(r.Bot), Q(r.Origin), r.Seed, Q(r.EndReason), r.DayReached, Q(r.DefeatedBy),
-                        r.Funds, r.Credibility, r.DeckSize, r.Allies, r.Battles, r.BattlesWon, r.Events,
-                        r.DaysWithNothingToDo, r.Errors.Count, Q(string.Join(" ", r.CredibilityByDay)),
+                        Q(r.Id),
+                        Q(r.Bot),
+                        Q(r.Origin),
+                        r.Seed,
+                        Q(r.EndReason),
+                        r.DayReached,
+                        Q(r.DefeatedBy),
+                        r.Funds,
+                        r.Credibility,
+                        r.DeckSize,
+                        r.Allies,
+                        r.Battles,
+                        r.BattlesWon,
+                        r.Events,
+                        r.DaysWithNothingToDo,
+                        r.Errors.Count,
+                        Q(string.Join(" ", r.CredibilityByDay)),
                         Q(string.Join(" > ", r.Visited))
                     )
                 );
@@ -84,9 +114,21 @@ namespace Crookedile.EditorTools.Playtest
                 sb.AppendLine(
                     string.Join(
                         ",",
-                        Q(r.Context), Q(r.Bot), Q(r.Origin), Q(r.Encounter), r.Seed, s.Turn < 0 ? "end" : s.Turn.ToString(),
-                        s.Opinion, s.MaxOpinion, F(s.AvgHostility), s.Hostile, s.Neutral, s.Receptive, s.Support,
-                        s.Denial, B(s.EchoChamber)
+                        Q(r.Context),
+                        Q(r.Bot),
+                        Q(r.Origin),
+                        Q(r.Encounter),
+                        r.Seed,
+                        s.Turn < 0 ? "end" : s.Turn.ToString(),
+                        s.Opinion,
+                        s.MaxOpinion,
+                        F(s.AvgHostility),
+                        s.Hostile,
+                        s.Neutral,
+                        s.Receptive,
+                        s.Support,
+                        s.Denial,
+                        B(s.EchoChamber)
                     )
                 );
             return sb.ToString();
@@ -102,8 +144,20 @@ namespace Crookedile.EditorTools.Playtest
                 sb.AppendLine(
                     string.Join(
                         ",",
-                        Q(r.Context), Q(r.Bot), Q(r.Origin), Q(r.Encounter), r.Seed, p.Turn, Q(p.Card), p.Cost,
-                        p.TargetMood, p.TargetHostility, F(p.RoomHostility), p.OpinionDelta, p.RoomHostilityDelta, B(r.Win)
+                        Q(r.Context),
+                        Q(r.Bot),
+                        Q(r.Origin),
+                        Q(r.Encounter),
+                        r.Seed,
+                        p.Turn,
+                        Q(p.Card),
+                        p.Cost,
+                        p.TargetMood,
+                        p.TargetHostility,
+                        F(p.RoomHostility),
+                        p.OpinionDelta,
+                        p.RoomHostilityDelta,
+                        B(r.Win)
                     )
                 );
             return sb.ToString();
@@ -146,17 +200,28 @@ namespace Crookedile.EditorTools.Playtest
             RoomOverTime(md, battles);
             CardsByHostility(md, battles);
             Cards(md, battles);
+            Utility(md, battles);
             Enemies(md, battles);
             if (campaigns.Count > 0)
+            {
                 Campaigns(md, campaigns, pool);
+                Progression(md, campaigns, battles);
+            }
+            Bosses(md, battles, campaigns);
             return md.ToString();
         }
 
-        private static void Bugs(StringBuilder md, List<BattleRecord> battles, List<CampaignRecord> campaigns)
+        private static void Bugs(
+            StringBuilder md,
+            List<BattleRecord> battles,
+            List<CampaignRecord> campaigns
+        )
         {
             md.AppendLine().AppendLine("## Bugs and hangs");
             var errors = battles
-                .SelectMany(b => b.Errors.Select(e => (e, where: $"{b.Encounter} ({b.Bot}, {b.Origin})")))
+                .SelectMany(b =>
+                    b.Errors.Select(e => (e, where: $"{b.Encounter} ({b.Bot}, {b.Origin})"))
+                )
                 .Concat(campaigns.SelectMany(c => c.Errors.Select(e => (e, where: $"run {c.Id}"))))
                 .GroupBy(x => x.e)
                 .OrderByDescending(g => g.Count())
@@ -178,7 +243,9 @@ namespace Crookedile.EditorTools.Playtest
                     : $"**{hangs.Count} battles hung** (softlock = stopped advancing outside your turn; timeout = frame budget):"
             );
             foreach (var g in hangs.GroupBy(h => (h.Encounter, h.Softlock)).Take(15))
-                md.AppendLine($"- {g.Key.Encounter}: {g.Count()}× {(g.Key.Softlock ? "softlock" : "timeout")}");
+                md.AppendLine(
+                    $"- {g.Key.Encounter}: {g.Count()}× {(g.Key.Softlock ? "softlock" : "timeout")}"
+                );
 
             var rejected = battles.Where(b => b.RejectedPlays > 0).ToList();
             if (rejected.Count > 0)
@@ -188,18 +255,33 @@ namespace Crookedile.EditorTools.Playtest
                             + "the rules said a card was playable, then refused it."
                     );
 
-            var combos = battles.Where(b => b.MaxCardsOneTurn >= 8).OrderByDescending(b => b.MaxCardsOneTurn).ToList();
+            var combos = battles
+                .Where(b => b.MaxCardsOneTurn >= 8)
+                .OrderByDescending(b => b.MaxCardsOneTurn)
+                .ToList();
             if (combos.Count > 0)
             {
-                md.AppendLine().AppendLine("**Long turns** (8+ cards in one turn — possible infinite or free-card loop):");
+                md.AppendLine()
+                    .AppendLine(
+                        "**Long turns** (8+ cards in one turn — possible infinite or free-card loop):"
+                    );
                 foreach (var b in combos.Take(10))
-                    md.AppendLine($"- {b.MaxCardsOneTurn} cards: {b.Origin} vs {b.Encounter} ({b.Bot}, seed {b.Seed})");
+                    md.AppendLine(
+                        $"- {b.MaxCardsOneTurn} cards: {b.Origin} vs {b.Encounter} ({b.Bot}, seed {b.Seed})"
+                    );
             }
 
-            var warnings = battles.SelectMany(b => b.Warnings).GroupBy(w => w).OrderByDescending(g => g.Count()).Take(10).ToList();
+            var warnings = battles
+                .SelectMany(b => b.Warnings)
+                .GroupBy(w => w)
+                .OrderByDescending(g => g.Count())
+                .Take(10)
+                .ToList();
             if (warnings.Count > 0)
             {
-                md.AppendLine().AppendLine("<details><summary>Most frequent warnings</summary>").AppendLine();
+                md.AppendLine()
+                    .AppendLine("<details><summary>Most frequent warnings</summary>")
+                    .AppendLine();
                 foreach (var g in warnings)
                     md.AppendLine($"- {g.Count()}× {Cell(g.Key)}");
                 md.AppendLine().AppendLine("</details>");
@@ -220,12 +302,17 @@ namespace Crookedile.EditorTools.Playtest
             );
             var bots = battles.Select(b => b.Bot).Distinct().OrderBy(b => b).ToList();
             md.AppendLine()
-                .AppendLine($"| Encounter | {string.Join(" | ", bots)} | Skill gap | Avg turns | Flag |")
+                .AppendLine(
+                    $"| Encounter | {string.Join(" | ", bots)} | Skill gap | Avg turns | Flag |"
+                )
                 .AppendLine($"|---|{string.Concat(bots.Select(_ => "---:|"))}---:|---:|---|");
             foreach (var g in battles.GroupBy(b => b.Encounter).OrderBy(g => g.Key))
             {
                 var rates = bots.ToDictionary(bot => bot, bot => Rate(g.Where(b => b.Bot == bot)));
-                var bounds = bots.ToDictionary(bot => bot, bot => Wilson(g.Where(b => b.Bot == bot)));
+                var bounds = bots.ToDictionary(
+                    bot => bot,
+                    bot => Wilson(g.Where(b => b.Bot == bot))
+                );
                 var flags = new List<string>();
                 if (rates.TryGetValue("Random", out float r) && r >= 0.6f)
                     flags.Add(bounds["Random"].lo >= 0.6f ? "too easy" : "too easy?");
@@ -243,21 +330,55 @@ namespace Crookedile.EditorTools.Playtest
                 );
             }
 
-            md.AppendLine().AppendLine("Win rate by bot (all encounters and origins):").AppendLine();
+            md.AppendLine()
+                .AppendLine("Win rate by bot (all encounters and origins):")
+                .AppendLine();
             foreach (var g in battles.GroupBy(b => b.Bot).OrderByDescending(g => Rate(g)))
-                md.AppendLine($"- **{g.Key}**: {Pct(Rate(g))} {Range(Wilson(g))} over {g.Count()} battles");
+                md.AppendLine(
+                    $"- **{g.Key}**: {Pct(Rate(g))} {Range(Wilson(g))} over {g.Count()} battles"
+                );
 
             md.AppendLine().AppendLine("Win rate by origin (all bots):").AppendLine();
             foreach (var g in battles.GroupBy(b => b.Origin))
                 md.AppendLine(
                     $"- **{g.Key}**: {Pct(Rate(g))} {Range(Wilson(g))} over {g.Count()} battles, starter deck {g.First().DeckSize} cards"
                 );
+
+            md.AppendLine()
+                .AppendLine(
+                    "**Win margins** (share of battles). 80%+ earns the strong reward pool and a maxed meter a guaranteed "
+                        + "Rare; a narrow loss ended within 10 points of the win line. Careful play should cluster at the top, "
+                        + "careless play near the line."
+                )
+                .AppendLine()
+                .AppendLine(
+                    "| Bot | Won | Won at 80%+ | Maxed meter | Narrow loss | Collapsed to 0 |"
+                )
+                .AppendLine("|---|---:|---:|---:|---:|---:|");
+            foreach (var g in battles.GroupBy(b => b.Bot).OrderByDescending(g => Rate(g)))
+            {
+                var list = g.ToList();
+                float Share(Func<BattleRecord, bool> f) => (float)list.Count(f) / list.Count;
+                md.AppendLine(
+                    $"| {g.Key} | {Pct(Rate(list))} | {Pct(Share(b => b.Win && StrongWin(b)))} | "
+                        + $"{Pct(Share(b => b.Win && b.FinalOpinion >= b.MaxOpinion))} | "
+                        + $"{Pct(Share(b => !b.Win && b.FinalOpinion > 0 && b.FinalOpinion >= b.WinLine - 10))} | "
+                        + $"{Pct(Share(b => !b.Win && b.FinalOpinion <= 0))} |"
+                );
+            }
         }
+
+        // ponytail: mirrors CardDatabase's default 80% strong-win line; read CardDatabase.Shared if it gets retuned often.
+        private static bool StrongWin(BattleRecord b) =>
+            b.FinalOpinion * 100 >= 80 * Math.Max(1, b.MaxOpinion);
 
         /// <summary>Best careful bot (Scored/Greedy) minus Random; null when either side didn't play.</summary>
         private static float? SkillGap(Dictionary<string, float> rates)
         {
-            var careful = new[] { "Scored", "Greedy" }.Where(rates.ContainsKey).Select(b => rates[b]).ToList();
+            var careful = new[] { "Scored", "Greedy" }
+                .Where(rates.ContainsKey)
+                .Select(b => rates[b])
+                .ToList();
             if (careful.Count == 0 || !rates.TryGetValue("Random", out float random))
                 return null;
             return careful.Max() - random;
@@ -275,9 +396,17 @@ namespace Crookedile.EditorTools.Playtest
                     + "A healthy fight climbs while the room is managed — not a flat line, and not a cliff."
             );
             md.AppendLine()
-                .AppendLine("| Turn | Battles | Opinion | Room hostility | Hostile / Neutral / Receptive | Echo chamber | Support | Denial |")
+                .AppendLine(
+                    "| Turn | Battles | Opinion | Room hostility | Hostile / Neutral / Receptive | Echo chamber | Support | Denial |"
+                )
                 .AppendLine("|---:|---:|---:|---:|---|---:|---:|---:|");
-            foreach (var g in battles.SelectMany(b => b.Snapshots.Where(s => s.Turn > 0)).GroupBy(s => s.Turn).OrderBy(g => g.Key).Take(12))
+            foreach (
+                var g in battles
+                    .SelectMany(b => b.Snapshots.Where(s => s.Turn > 0))
+                    .GroupBy(s => s.Turn)
+                    .OrderBy(g => g.Key)
+                    .Take(12)
+            )
                 md.AppendLine(
                     $"| {g.Key} | {g.Count()} | {Pct(g.Average(OpinionPct))} | {g.Average(s => s.AvgHostility):+0.0;-0.0;0} | "
                         + $"{g.Average(s => s.Hostile):0.0} / {g.Average(s => s.Neutral):0.0} / {g.Average(s => s.Receptive):0.0} | "
@@ -288,17 +417,25 @@ namespace Crookedile.EditorTools.Playtest
             if (standalone.Count == 0)
                 return;
             md.AppendLine()
-                .AppendLine("Per encounter (standalone battles). **Opinion falls** = ends lower than it started; "
-                    + "**room never calms** = ends at least as hostile as turn 1; **echo trap** = 30%+ of turns in the echo chamber.")
+                .AppendLine(
+                    "Per encounter (standalone battles). **Opinion falls** = ends lower than it started; "
+                        + "**room never calms** = ends at least as hostile as turn 1; **echo trap** = 30%+ of turns in the echo chamber."
+                )
                 .AppendLine()
-                .AppendLine("| Encounter | Opinion T1 → T3 → end | Room hostility T1 → end | Echo turns | Flag |")
+                .AppendLine(
+                    "| Encounter | Opinion T1 → T3 → end | Room hostility T1 → end | Echo turns | Flag |"
+                )
                 .AppendLine("|---|---|---|---:|---|");
             foreach (var g in standalone.GroupBy(b => b.Encounter).OrderBy(g => g.Key))
             {
-                float o1 = AvgAt(g, 1, OpinionPct), o3 = AvgAt(g, 3, OpinionPct), oEnd = AvgAt(g, -1, OpinionPct);
-                float h1 = AvgAt(g, 1, s => s.AvgHostility), hEnd = AvgAt(g, -1, s => s.AvgHostility);
+                float o1 = AvgAt(g, 1, OpinionPct),
+                    o3 = AvgAt(g, 3, OpinionPct),
+                    oEnd = AvgAt(g, -1, OpinionPct);
+                float h1 = AvgAt(g, 1, s => s.AvgHostility),
+                    hEnd = AvgAt(g, -1, s => s.AvgHostility);
                 var turns = g.SelectMany(b => b.Snapshots.Where(s => s.Turn > 0)).ToList();
-                float echo = turns.Count == 0 ? 0f : (float)turns.Count(s => s.EchoChamber) / turns.Count;
+                float echo =
+                    turns.Count == 0 ? 0f : (float)turns.Count(s => s.EchoChamber) / turns.Count;
                 var flags = new List<string>();
                 if (oEnd < o1)
                     flags.Add("opinion falls");
@@ -312,10 +449,15 @@ namespace Crookedile.EditorTools.Playtest
             }
         }
 
-        private static float OpinionPct(TurnSnapshot s) => s.MaxOpinion > 0 ? (float)s.Opinion / s.MaxOpinion : 0f;
+        private static float OpinionPct(TurnSnapshot s) =>
+            s.MaxOpinion > 0 ? (float)s.Opinion / s.MaxOpinion : 0f;
 
         /// <summary>Average of <paramref name="pick"/> over the snapshots taken on <paramref name="turn"/> (-1 = end of battle).</summary>
-        private static float AvgAt(IEnumerable<BattleRecord> battles, int turn, Func<TurnSnapshot, float> pick)
+        private static float AvgAt(
+            IEnumerable<BattleRecord> battles,
+            int turn,
+            Func<TurnSnapshot, float> pick
+        )
         {
             var snaps = battles.SelectMany(b => b.Snapshots.Where(s => s.Turn == turn)).ToList();
             return snaps.Count == 0 ? 0f : snaps.Average(pick);
@@ -331,15 +473,19 @@ namespace Crookedile.EditorTools.Playtest
             var plays = battles.SelectMany(b => b.Plays).ToList();
             if (plays.Count == 0)
                 return;
-            const int MinOverall = 10, MinBucket = 8;
+            const int MinOverall = 10,
+                MinBucket = 8;
             var moods = new[] { Mood.Hostile, Mood.Neutral, Mood.Receptive };
 
             float Score(IEnumerable<CardPlaySample> ps)
             {
                 var list = ps.ToList();
-                return list.Count == 0 ? float.NaN : (float)list.Sum(p => p.OpinionDelta) / list.Sum(p => Math.Max(1, p.Cost));
+                return list.Count == 0
+                    ? float.NaN
+                    : (float)list.Sum(p => p.OpinionDelta) / list.Sum(p => Math.Max(1, p.Cost));
             }
-            string S(float f) => float.IsNaN(f) ? "—" : f.ToString("+0.0;-0.0;0", CultureInfo.InvariantCulture);
+            string S(float f) =>
+                float.IsNaN(f) ? "—" : f.ToString("+0.0;-0.0;0", CultureInfo.InvariantCulture);
 
             md.AppendLine().AppendLine("## Card scores by hostility");
             md.AppendLine(
@@ -350,7 +496,12 @@ namespace Crookedile.EditorTools.Playtest
             md.AppendLine()
                 .AppendLine(
                     "Plays went into: "
-                        + string.Join(", ", moods.Select(m => $"{m.ToString().ToLower()} {Pct((float)plays.Count(p => p.TargetMood == m) / plays.Count)}"))
+                        + string.Join(
+                            ", ",
+                            moods.Select(m =>
+                                $"{m.ToString().ToLower()} {Pct((float)plays.Count(p => p.TargetMood == m) / plays.Count)}"
+                            )
+                        )
                 );
 
             var cards = plays
@@ -361,7 +512,13 @@ namespace Crookedile.EditorTools.Playtest
                     Card = g.Key,
                     N = g.Count(),
                     Overall = Score(g),
-                    ByMood = moods.ToDictionary(m => m, m => g.Count(p => p.TargetMood == m) >= MinBucket ? Score(g.Where(p => p.TargetMood == m)) : float.NaN),
+                    ByMood = moods.ToDictionary(
+                        m => m,
+                        m =>
+                            g.Count(p => p.TargetMood == m) >= MinBucket
+                                ? Score(g.Where(p => p.TargetMood == m))
+                                : float.NaN
+                    ),
                     Calm = (float)g.Average(p => p.RoomHostilityDelta),
                 })
                 .ToList();
@@ -372,12 +529,19 @@ namespace Crookedile.EditorTools.Playtest
             }
 
             md.AppendLine()
-                .AppendLine("| Rank | Card | Score | vs Hostile | vs Neutral | vs Receptive | Calm | Plays | Best into |")
+                .AppendLine(
+                    "| Rank | Card | Score | vs Hostile | vs Neutral | vs Receptive | Calm | Plays | Best into |"
+                )
                 .AppendLine("|---:|---|---:|---:|---:|---:|---:|---:|---|");
             int rank = 0;
             foreach (var c in cards.OrderByDescending(c => c.Overall).Take(20))
             {
-                var best = c.ByMood.Where(kv => !float.IsNaN(kv.Value)).OrderByDescending(kv => kv.Value).Select(kv => kv.Key.ToString().ToLower()).FirstOrDefault() ?? "—";
+                var best =
+                    c.ByMood.Where(kv => !float.IsNaN(kv.Value))
+                        .OrderByDescending(kv => kv.Value)
+                        .Select(kv => kv.Key.ToString().ToLower())
+                        .FirstOrDefault()
+                    ?? "—";
                 md.AppendLine(
                     $"| {++rank} | {c.Card} | {S(c.Overall)} | {S(c.ByMood[Mood.Hostile])} | {S(c.ByMood[Mood.Neutral])} | "
                         + $"{S(c.ByMood[Mood.Receptive])} | {c.Calm:+0.00;-0.00;0} | {c.N} | {best} |"
@@ -387,29 +551,53 @@ namespace Crookedile.EditorTools.Playtest
             md.AppendLine().AppendLine("**Best card into each mood:**").AppendLine();
             foreach (var m in moods)
             {
-                var top = cards.Where(c => !float.IsNaN(c.ByMood[m])).OrderByDescending(c => c.ByMood[m]).Take(5).ToList();
+                var top = cards
+                    .Where(c => !float.IsNaN(c.ByMood[m]))
+                    .OrderByDescending(c => c.ByMood[m])
+                    .Take(5)
+                    .ToList();
                 if (top.Count > 0)
-                    md.AppendLine($"- **{m}:** {string.Join(", ", top.Select(c => $"{c.Card} ({S(c.ByMood[m])})"))}");
+                    md.AppendLine(
+                        $"- **{m}:** {string.Join(", ", top.Select(c => $"{c.Card} ({S(c.ByMood[m])})"))}"
+                    );
             }
 
             var swingy = cards
-                .Select(c => (c.Card, scores: c.ByMood.Where(kv => !float.IsNaN(kv.Value)).ToList()))
+                .Select(c =>
+                    (c.Card, scores: c.ByMood.Where(kv => !float.IsNaN(kv.Value)).ToList())
+                )
                 .Where(x => x.scores.Count >= 2)
-                .Select(x => (x.Card, gap: x.scores.Max(kv => kv.Value) - x.scores.Min(kv => kv.Value),
-                    hi: x.scores.OrderByDescending(kv => kv.Value).First().Key, lo: x.scores.OrderBy(kv => kv.Value).First().Key))
+                .Select(x =>
+                    (
+                        x.Card,
+                        gap: x.scores.Max(kv => kv.Value) - x.scores.Min(kv => kv.Value),
+                        hi: x.scores.OrderByDescending(kv => kv.Value).First().Key,
+                        lo: x.scores.OrderBy(kv => kv.Value).First().Key
+                    )
+                )
                 .OrderByDescending(x => x.gap)
                 .Take(8)
                 .ToList();
             if (swingy.Count > 0)
             {
-                md.AppendLine().AppendLine("**Most hostility-dependent** (biggest gap between best and worst mood — situational cards, or a mood bonus doing too much):").AppendLine();
+                md.AppendLine()
+                    .AppendLine(
+                        "**Most hostility-dependent** (biggest gap between best and worst mood — situational cards, or a mood bonus doing too much):"
+                    )
+                    .AppendLine();
                 foreach (var x in swingy)
-                    md.AppendLine($"- {x.Card}: {x.gap:0.0} per AP better into {x.hi.ToString().ToLower()} than {x.lo.ToString().ToLower()}");
+                    md.AppendLine(
+                        $"- {x.Card}: {x.gap:0.0} per AP better into {x.hi.ToString().ToLower()} than {x.lo.ToString().ToLower()}"
+                    );
             }
 
             md.AppendLine().AppendLine("**Room movers:**").AppendLine();
-            md.AppendLine($"- Calms the room most: {string.Join(", ", cards.Where(c => c.Calm < 0).OrderBy(c => c.Calm).Take(5).Select(c => $"{c.Card} ({c.Calm:0.00})"))}");
-            md.AppendLine($"- Riles the room most: {string.Join(", ", cards.Where(c => c.Calm > 0).OrderByDescending(c => c.Calm).Take(5).Select(c => $"{c.Card} (+{c.Calm:0.00})"))}");
+            md.AppendLine(
+                $"- Calms the room most: {string.Join(", ", cards.Where(c => c.Calm < 0).OrderBy(c => c.Calm).Take(5).Select(c => $"{c.Card} ({c.Calm:0.00})"))}"
+            );
+            md.AppendLine(
+                $"- Riles the room most: {string.Join(", ", cards.Where(c => c.Calm > 0).OrderByDescending(c => c.Calm).Take(5).Select(c => $"{c.Card} (+{c.Calm:0.00})"))}"
+            );
         }
 
         private static void Cards(StringBuilder md, List<BattleRecord> battles)
@@ -439,9 +627,13 @@ namespace Crookedile.EditorTools.Playtest
             }
             float overall = Rate(battles);
 
-            md.AppendLine("**Biggest single plays** — the most Opinion one card moved in one play:").AppendLine();
-            md.AppendLine("| Card | Best play | Avg per play | Plays | Win rate when played |").AppendLine("|---|---:|---:|---:|---:|");
-            foreach (var card in best.OrderByDescending(kv => kv.Value).Take(12).Select(kv => kv.Key))
+            md.AppendLine("**Biggest single plays** — the most Opinion one card moved in one play:")
+                .AppendLine();
+            md.AppendLine("| Card | Best play | Avg per play | Plays | Win rate when played |")
+                .AppendLine("|---|---:|---:|---:|---:|");
+            foreach (
+                var card in best.OrderByDescending(kv => kv.Value).Take(12).Select(kv => kv.Key)
+            )
                 md.AppendLine(
                     $"| {card} | {best[card]:+#;-#;0} | {(float)delta[card] / plays[card]:+0.0;-0.0;0} | {plays[card]} | "
                         + $"{Pct((float)wonWhenPlayed[card].won / wonWhenPlayed[card].total)} |"
@@ -458,21 +650,36 @@ namespace Crookedile.EditorTools.Playtest
                 {
                     var (lo, hi) = Wilson(kv.Value.won, kv.Value.total);
                     // Distance from the overall rate to the near edge of the interval: 0 = could be chance.
-                    float margin = lo > overall ? lo - overall : hi < overall ? hi - overall : 0f;
-                    return (card: kv.Key, lift: (float)kv.Value.won / kv.Value.total - overall, margin, lo, hi, n: kv.Value.total);
+                    float margin =
+                        lo > overall ? lo - overall
+                        : hi < overall ? hi - overall
+                        : 0f;
+                    return (
+                        card: kv.Key,
+                        lift: (float)kv.Value.won / kv.Value.total - overall,
+                        margin,
+                        lo,
+                        hi,
+                        n: kv.Value.total
+                    );
                 })
                 .Where(x => x.margin != 0f)
                 .OrderByDescending(x => Math.Abs(x.margin))
                 .Take(12)
                 .ToList();
             if (swings.Count == 0)
-                md.AppendLine("- No card's win rate differs from the overall rate by more than chance.");
+                md.AppendLine(
+                    "- No card's win rate differs from the overall rate by more than chance."
+                );
             foreach (var s in swings)
                 md.AppendLine(
                     $"- {s.card}: {(s.lift >= 0 ? "+" : "")}{s.lift * 100:0} pts, {Range((s.lo, s.hi))} ({s.n} battles)"
                 );
 
-            var dead = plays.Where(kv => kv.Value >= 10 && delta[kv.Key] <= 0).Select(kv => kv.Key).ToList();
+            var dead = plays
+                .Where(kv => kv.Value >= 10 && delta[kv.Key] <= 0)
+                .Select(kv => kv.Key)
+                .ToList();
             if (dead.Count > 0)
                 md.AppendLine()
                     .AppendLine(
@@ -483,21 +690,32 @@ namespace Crookedile.EditorTools.Playtest
             var neverPlayed = inDecks.Where(c => !plays.ContainsKey(c)).ToList();
             if (neverPlayed.Count > 0)
                 md.AppendLine()
-                    .AppendLine($"**In decks but never played** (unplayable, unaffordable, or no bot wanted it): {string.Join(", ", neverPlayed)}");
+                    .AppendLine(
+                        $"**In decks but never played** (unplayable, unaffordable, or no bot wanted it): {string.Join(", ", neverPlayed)}"
+                    );
         }
 
         private static void Enemies(StringBuilder md, List<BattleRecord> battles)
         {
             md.AppendLine().AppendLine("## Enemies");
             var used = new HashSet<string>(battles.SelectMany(b => b.EnemyMoves.Keys));
-            var enemyNames = new HashSet<string>(battles.SelectMany(b => (b.Enemies ?? "").Split(" + ")));
+            var enemyNames = new HashSet<string>(
+                battles.SelectMany(b => (b.Enemies ?? "").Split(" + "))
+            );
             var unused = new List<string>();
             foreach (var guid in AssetDatabase.FindAssets("t:EnemyData"))
             {
-                var enemy = AssetDatabase.LoadAssetAtPath<EnemyData>(AssetDatabase.GUIDToAssetPath(guid));
+                var enemy = AssetDatabase.LoadAssetAtPath<EnemyData>(
+                    AssetDatabase.GUIDToAssetPath(guid)
+                );
                 if (enemy == null || !enemyNames.Contains(enemy.EnemyName))
                     continue;
-                foreach (var move in enemy.AggressiveMoves.Concat(enemy.NeutralMoves).Concat(enemy.ReceptiveMoves).Distinct())
+                foreach (
+                    var move in enemy
+                        .AggressiveMoves.Concat(enemy.NeutralMoves)
+                        .Concat(enemy.ReceptiveMoves)
+                        .Distinct()
+                )
                     if (move != null && !used.Contains(move.name))
                         unused.Add($"{enemy.EnemyName}: {move.name}");
             }
@@ -508,7 +726,9 @@ namespace Crookedile.EditorTools.Playtest
             );
 
             md.AppendLine()
-                .AppendLine("**Hardest rosters to beat** (player win rate, ranked by the top of its 95% interval — surely hard first):")
+                .AppendLine(
+                    "**Hardest rosters to beat** (player win rate, ranked by the top of its 95% interval — surely hard first):"
+                )
                 .AppendLine();
             foreach (var g in battles.GroupBy(b => b.Enemies).OrderBy(g => Wilson(g).hi).Take(8))
                 md.AppendLine(
@@ -516,10 +736,16 @@ namespace Crookedile.EditorTools.Playtest
                 );
         }
 
-        private static void Campaigns(StringBuilder md, List<CampaignRecord> runs, EncounterPoolData pool)
+        private static void Campaigns(
+            StringBuilder md,
+            List<CampaignRecord> runs,
+            EncounterPoolData pool
+        )
         {
             md.AppendLine().AppendLine("## Campaign runs");
-            md.AppendLine("| Bot | Origin | Runs | Completed | Defeated | Stuck | Avg day reached | Avg funds | Avg cred | Avg deck |")
+            md.AppendLine(
+                    "| Bot | Origin | Runs | Completed | Defeated | Stuck | Avg day reached | Avg funds | Avg cred | Avg deck |"
+                )
                 .AppendLine("|---|---|---:|---:|---:|---:|---:|---:|---:|---:|");
             foreach (var g in runs.GroupBy(r => (r.Bot, r.Origin)))
                 md.AppendLine(
@@ -528,7 +754,10 @@ namespace Crookedile.EditorTools.Playtest
                         + $"{g.Average(r => r.DayReached):0.0} | {g.Average(r => r.Funds):0} | {g.Average(r => r.Credibility):0} | {g.Average(r => r.DeckSize):0} |"
                 );
 
-            var killers = runs.Where(r => r.DefeatedBy != null).GroupBy(r => r.DefeatedBy).OrderByDescending(g => g.Count()).ToList();
+            var killers = runs.Where(r => r.DefeatedBy != null)
+                .GroupBy(r => r.DefeatedBy)
+                .OrderByDescending(g => g.Count())
+                .ToList();
             if (killers.Count > 0)
             {
                 md.AppendLine().AppendLine("**What ends runs:**").AppendLine();
@@ -541,7 +770,8 @@ namespace Crookedile.EditorTools.Playtest
             if (pool != null)
             {
                 var enders = new HashSet<string>(
-                    pool.Entries.Where(e => CampaignHarness.IsDayEnder(e.Encounter)).Select(e => e.Encounter.name)
+                    pool.Entries.Where(e => CampaignHarness.IsDayEnder(e.Encounter))
+                        .Select(e => e.Encounter.name)
                 );
                 var hqPicks = runs.SelectMany(r => r.OptionsChosen)
                     .Where(kv => enders.Contains(kv.Key.Split(" / ")[0]))
@@ -557,13 +787,22 @@ namespace Crookedile.EditorTools.Playtest
 
             var idle = runs.Sum(r => r.DaysWithNothingToDo);
             if (idle > 0)
-                md.AppendLine().AppendLine($"**{idle} days** across all runs had nothing enterable but the day still had time left.");
+                md.AppendLine()
+                    .AppendLine(
+                        $"**{idle} days** across all runs had nothing enterable but the day still had time left."
+                    );
 
             if (pool != null)
             {
                 var offered = new HashSet<string>(runs.SelectMany(r => r.Offered));
-                var entered = new HashSet<string>(runs.SelectMany(r => r.Visited.Select(v => v.Substring(v.IndexOf(':') + 1))));
-                var neverOffered = pool.Entries.Where(e => e.Encounter != null && !offered.Contains(e.Encounter.name)).Select(e => e.Encounter.name).Distinct().ToList();
+                var entered = new HashSet<string>(
+                    runs.SelectMany(r => r.Visited.Select(v => v.Substring(v.IndexOf(':') + 1)))
+                );
+                var neverOffered = pool
+                    .Entries.Where(e => e.Encounter != null && !offered.Contains(e.Encounter.name))
+                    .Select(e => e.Encounter.name)
+                    .Distinct()
+                    .ToList();
                 var offeredNotTaken = offered.Where(o => !entered.Contains(o)).ToList();
                 md.AppendLine();
                 md.AppendLine(
@@ -572,18 +811,32 @@ namespace Crookedile.EditorTools.Playtest
                         : $"**Pool entries never offered** (gate never passes, window too narrow, or weight crowded out): {string.Join(", ", neverOffered)}"
                 );
                 if (offeredNotTaken.Count > 0)
-                    md.AppendLine().AppendLine($"**Offered but never entered:** {string.Join(", ", offeredNotTaken)}");
+                    md.AppendLine()
+                        .AppendLine(
+                            $"**Offered but never entered:** {string.Join(", ", offeredNotTaken)}"
+                        );
             }
 
-            var lockedForever = runs.SelectMany(r => r.OptionsSeenLocked).Distinct()
+            var lockedForever = runs.SelectMany(r => r.OptionsSeenLocked)
+                .Distinct()
                 .Where(o => !runs.Any(r => r.OptionsChosen.ContainsKey(o)))
                 .ToList();
             if (lockedForever.Count > 0)
-                md.AppendLine().AppendLine($"**Options that were locked every time they were seen:** {string.Join("; ", lockedForever)}");
+                md.AppendLine()
+                    .AppendLine(
+                        $"**Options that were locked every time they were seen:** {string.Join("; ", lockedForever)}"
+                    );
 
-            md.AppendLine().AppendLine("**Most-picked options** (what the bots found worth taking):").AppendLine();
-            foreach (var kv in runs.SelectMany(r => r.OptionsChosen).GroupBy(kv => kv.Key)
-                         .Select(g => (g.Key, n: g.Sum(kv => kv.Value))).OrderByDescending(x => x.n).Take(10))
+            md.AppendLine()
+                .AppendLine("**Most-picked options** (what the bots found worth taking):")
+                .AppendLine();
+            foreach (
+                var kv in runs.SelectMany(r => r.OptionsChosen)
+                    .GroupBy(kv => kv.Key)
+                    .Select(g => (g.Key, n: g.Sum(kv => kv.Value)))
+                    .OrderByDescending(x => x.n)
+                    .Take(10)
+            )
                 md.AppendLine($"- {kv.Key}: {kv.n}");
         }
 
@@ -610,8 +863,13 @@ namespace Crookedile.EditorTools.Playtest
                             " | ",
                             origins.Select(o =>
                             {
-                                var alive = runs.Where(r => r.Origin == o && r.CredibilityByDay.Count > d).ToList();
-                                return alive.Count == 0 ? "—" : $"{alive.Average(r => r.CredibilityByDay[d]):0} ({alive.Count})";
+                                var alive = runs.Where(r =>
+                                        r.Origin == o && r.CredibilityByDay.Count > d
+                                    )
+                                    .ToList();
+                                return alive.Count == 0
+                                    ? "—"
+                                    : $"{alive.Average(r => r.CredibilityByDay[d]):0} ({alive.Count})";
                             })
                         )
                         + " |"
@@ -629,9 +887,15 @@ namespace Crookedile.EditorTools.Playtest
             var lost = Sum(runs.Select(r => r.CredibilityLost)).Take(10).ToList();
             if (lost.Count > 0)
             {
-                md.AppendLine().AppendLine("**Biggest drains** (total Credibility lost, times it cost any, average per hit):").AppendLine();
+                md.AppendLine()
+                    .AppendLine(
+                        "**Biggest drains** (total Credibility lost, times it cost any, average per hit):"
+                    )
+                    .AppendLine();
                 foreach (var (source, total, times) in lost)
-                    md.AppendLine($"- {source}: {total} over {times}× (avg {(float)total / times:0.0})");
+                    md.AppendLine(
+                        $"- {source}: {total} over {times}× (avg {(float)total / times:0.0})"
+                    );
             }
 
             var gained = Sum(runs.Select(r => r.CredibilityGained)).Take(10).ToList();
@@ -645,8 +909,184 @@ namespace Crookedile.EditorTools.Playtest
             {
                 md.AppendLine();
                 foreach (var (source, total, times) in gained)
-                    md.AppendLine($"- {source}: {total} over {times}× (avg {(float)total / times:0.0})");
+                    md.AppendLine(
+                        $"- {source}: {total} over {times}× (avg {(float)total / times:0.0})"
+                    );
             }
+        }
+
+        /// <summary>Does the run get stronger? Deck and Rares by day, wins by day, and the reward tiers earned.</summary>
+        private static void Progression(
+            StringBuilder md,
+            List<CampaignRecord> runs,
+            List<BattleRecord> battles
+        )
+        {
+            if (runs.All(r => r.DeckByDay.Count == 0))
+                return;
+            md.AppendLine().AppendLine("### Progression");
+            md.AppendLine(
+                "Deck size and Rares at the start of each day (runs alive that day), and the campaign win rate on that "
+                    + "day. Progression shows as decks and Rares growing while the win rate holds as fights get harder."
+            );
+            var origins = runs.Select(r => r.Origin).Distinct().OrderBy(o => o).ToList();
+            var campaignFights = battles.Where(b => b.Context != "battle" && b.Day > 0).ToList();
+            int days = runs.Max(r => r.DeckByDay.Count);
+            md.AppendLine()
+                .AppendLine(
+                    $"| Day | {string.Join(" | ", origins.Select(o => o + " deck · Rares"))} | Campaign win rate |"
+                )
+                .AppendLine($"|---:|{string.Concat(origins.Select(_ => "---:|"))}---:|");
+            for (int d = 0; d < days; d++)
+            {
+                var cells = origins.Select(o =>
+                {
+                    var alive = runs.Where(r => r.Origin == o && r.DeckByDay.Count > d).ToList();
+                    return alive.Count == 0
+                        ? "—"
+                        : $"{alive.Average(r => r.DeckByDay[d]):0} · {alive.Average(r => r.RaresByDay[d]):0.0}";
+                });
+                var fights = campaignFights.Where(b => b.Day == d + 1).ToList();
+                string winRate = fights.Count == 0 ? "—" : $"{Pct(Rate(fights))} of {fights.Count}";
+                md.AppendLine($"| {d + 1} | {string.Join(" | ", cells)} | {winRate} |");
+            }
+
+            md.AppendLine().AppendLine("**Rewards earned per run** (averages):").AppendLine();
+            md.AppendLine(
+                    "| Bot | Origin | Battles won | Strong-pool offers | Guaranteed Rares | Rares taken | Final deck |"
+                )
+                .AppendLine("|---|---|---:|---:|---:|---:|---:|");
+            foreach (var g in runs.GroupBy(r => (r.Bot, r.Origin)))
+                md.AppendLine(
+                    $"| {g.Key.Bot} | {g.Key.Origin} | {g.Average(r => r.BattlesWon):0.0} | {g.Average(r => r.StrongOffers):0.0} | "
+                        + $"{g.Average(r => r.RareGuarantees):0.0} | {g.Average(r => r.RaresTaken):0.0} | {g.Average(r => r.DeckSize):0} |"
+                );
+        }
+
+        /// <summary>Boss debates: standalone results, the bundles the boss chose, and how campaign runs arrive and fare.</summary>
+        private static void Bosses(
+            StringBuilder md,
+            List<BattleRecord> battles,
+            List<CampaignRecord> runs
+        )
+        {
+            var bossFights = battles.Where(b => !string.IsNullOrEmpty(b.Boss)).ToList();
+            if (bossFights.Count == 0)
+                return;
+            md.AppendLine().AppendLine("## Bosses");
+            var byRun = runs.ToDictionary(r => "campaign:" + r.Id);
+            foreach (var boss in bossFights.GroupBy(b => b.Boss).OrderBy(g => g.Key))
+            {
+                md.AppendLine().AppendLine($"### {boss.Key}");
+                var standalone = boss.Where(b => b.Context == "battle").ToList();
+                if (standalone.Count > 0)
+                {
+                    md.AppendLine().AppendLine("Standalone (starter decks):").AppendLine();
+                    foreach (
+                        var g in standalone.GroupBy(b => b.Bot).OrderByDescending(g => Rate(g))
+                    )
+                        md.AppendLine(
+                            $"- **{g.Key}**: {Pct(Rate(g))} over {g.Count()}, ends at {g.Average(b => b.FinalOpinion):0} Opinion, "
+                                + $"took {g.Average(b => b.DamageToPlayer):0}"
+                        );
+                }
+
+                var plans = boss.SelectMany(b => b.BossBundles)
+                    .GroupBy(kv => kv.Key)
+                    .Select(g => (name: g.Key, n: g.Sum(kv => kv.Value)))
+                    .OrderByDescending(x => x.n)
+                    .ToList();
+                int planTotal = plans.Sum(p => p.n);
+                if (planTotal > 0)
+                    md.AppendLine()
+                        .AppendLine(
+                            "Bundles chosen: "
+                                + string.Join(
+                                    ", ",
+                                    plans.Select(p => $"{p.name} {Pct((float)p.n / planTotal)}")
+                                )
+                                + ". A bundle that never shows up means its branch never fires."
+                        );
+
+                var campaign = boss.Where(b => b.Context != "battle").ToList();
+                if (campaign.Count == 0)
+                    continue;
+                int OnDay(BattleRecord b, Func<CampaignRecord, List<int>> column)
+                {
+                    if (!byRun.TryGetValue(b.Context, out var run))
+                        return 0;
+                    var values = column(run);
+                    return values.Count == 0 ? 0 : values[Math.Clamp(b.Day, 1, values.Count) - 1];
+                }
+                md.AppendLine()
+                    .AppendLine("In campaign runs (the playthrough that reaches him):")
+                    .AppendLine();
+                md.AppendLine(
+                        "| Bot | Origin | Runs | Reached him | Won | Credibility coming in | Deck coming in | Ends at Opinion |"
+                    )
+                    .AppendLine("|---|---|---:|---:|---:|---:|---:|---:|");
+                // Grouped by the campaign bot that owns the run (RandomRun fights as Tempo, so the battle bot won't do).
+                foreach (
+                    var g in campaign.GroupBy(b =>
+                        (Bot: byRun.TryGetValue(b.Context, out var r) ? r.Bot : b.Bot, b.Origin)
+                    )
+                )
+                {
+                    var list = g.ToList();
+                    var fought = new HashSet<string>(list.Select(b => b.Context));
+                    var groupRuns = runs.Where(r => r.Origin == g.Key.Origin && r.Bot == g.Key.Bot)
+                        .ToList();
+                    md.AppendLine(
+                        $"| {g.Key.Bot} | {g.Key.Origin} | {groupRuns.Count} | {fought.Count} | {Pct(Rate(list))} | "
+                            + $"{list.Average(b => OnDay(b, r => r.CredibilityByDay)):0} | {list.Average(b => OnDay(b, r => r.DeckByDay)):0} | "
+                            + $"{list.Average(b => b.FinalOpinion):0} |"
+                    );
+                }
+            }
+        }
+
+        /// <summary>What cards do besides their own Opinion: shields, hits absorbed, energy and the plays it bought.</summary>
+        private static void Utility(StringBuilder md, List<BattleRecord> battles)
+        {
+            int Sum(Func<BattleRecord, Dictionary<string, int>> col, string card) =>
+                battles.Sum(b => col(b).TryGetValue(card, out int v) ? v : 0);
+            var cards = battles
+                .SelectMany(b =>
+                    b.SupportGained.Keys.Concat(b.EnergyGained.Keys).Concat(b.PassiveOpinion.Keys)
+                )
+                .Distinct()
+                .Select(card =>
+                    (
+                        card,
+                        plays: Math.Max(1, Sum(b => b.CardPlays, card)),
+                        support: Sum(b => b.SupportGained, card),
+                        prevented: Sum(b => b.DamagePrevented, card),
+                        energy: Sum(b => b.EnergyGained, card),
+                        enabled: Sum(b => b.CardsEnabled, card),
+                        passive: Sum(b => b.PassiveOpinion, card)
+                    )
+                )
+                .OrderByDescending(x => (float)(x.prevented + x.passive + 5 * x.enabled) / x.plays)
+                .ToList();
+            if (cards.Count == 0)
+                return;
+            md.AppendLine().AppendLine("## Utility");
+            md.AppendLine(
+                "What cards do besides their own Opinion, per play, including what their passives do later (a persistent "
+                    + "Policy is played once, so its numbers are per battle). **Prevented** = its Support that absorbed an "
+                    + "enemy hit; Support that expired unused counts as gained, not prevented. **Extra plays** = later cards "
+                    + "paid for with the energy it gave. Ranked by prevented + passive Opinion + 5 per extra play, per play."
+            );
+            md.AppendLine()
+                .AppendLine(
+                    "| Card | Plays | Support gained | Prevented | Energy | Extra plays | Passive Opinion |"
+                )
+                .AppendLine("|---|---:|---:|---:|---:|---:|---:|");
+            foreach (var x in cards.Take(30))
+                md.AppendLine(
+                    $"| {x.card} | {x.plays} | {(float)x.support / x.plays:0.0} | {(float)x.prevented / x.plays:0.0} | "
+                        + $"{(float)x.energy / x.plays:0.0} | {(float)x.enabled / x.plays:0.00} | {(float)x.passive / x.plays:0.0} |"
+                );
         }
 
         private static float Rate(IEnumerable<BattleRecord> rows)
@@ -669,7 +1109,10 @@ namespace Crookedile.EditorTools.Playtest
             double denom = 1 + z * z / total;
             double centre = p + z * z / (2 * total);
             double spread = z * Math.Sqrt(p * (1 - p) / total + z * z / (4.0 * total * total));
-            return ((float)Math.Max(0, (centre - spread) / denom), (float)Math.Min(1, (centre + spread) / denom));
+            return (
+                (float)Math.Max(0, (centre - spread) / denom),
+                (float)Math.Min(1, (centre + spread) / denom)
+            );
         }
 
         private static (float lo, float hi) Wilson(IEnumerable<BattleRecord> rows)
@@ -680,7 +1123,8 @@ namespace Crookedile.EditorTools.Playtest
 
         private static string Range((float lo, float hi) b) => $"({Pct(b.lo)}–{Pct(b.hi)})";
 
-        private static string Pct(float f) => (f * 100f).ToString("0", CultureInfo.InvariantCulture) + "%";
+        private static string Pct(float f) =>
+            (f * 100f).ToString("0", CultureInfo.InvariantCulture) + "%";
 
         private static string Cell(string s) => (s ?? "").Replace("|", "\\|").Replace("\n", " ");
 

@@ -485,6 +485,10 @@ namespace Crookedile.Gameplay.Battle
                 EffectContextValue.EnergyPaidForCard => BattleManager?.CardPlay?.LastEnergyPaid
                     ?? 0,
                 EffectContextValue.LastBurnedPrintedCost => LastBurnedPrintedCost,
+                EffectContextValue.RoomFullyReceptive => BattleManager != null
+                && BattleManager.IsEchoChamber
+                    ? 1
+                    : 0,
                 _ => 0, // FixedAmount / None — use authored value
             };
 

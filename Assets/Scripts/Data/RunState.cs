@@ -219,11 +219,11 @@ namespace Crookedile.Data
         /// Charges a lost battle's Credibility cost (<see cref="OriginDatabase.DefeatCredibilityCost"/>).
         /// Returns true while the run survives it.
         /// </summary>
-        public bool RecordBattleDefeat(int finalOpinion, int maxOpinion)
+        public bool RecordBattleDefeat(int finalOpinion, int winLine)
         {
             int cost =
                 OriginDatabase.Shared != null
-                    ? OriginDatabase.Shared.DefeatCredibilityCost(finalOpinion, maxOpinion)
+                    ? OriginDatabase.Shared.DefeatCredibilityCost(finalOpinion, winLine)
                     : Credibility;
             AdjustCredibility(-cost);
             return Credibility > 0;

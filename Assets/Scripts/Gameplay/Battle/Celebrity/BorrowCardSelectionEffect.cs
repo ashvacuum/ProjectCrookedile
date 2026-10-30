@@ -19,6 +19,13 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private int _debt = 1;
 
+        [Tooltip(
+            "Energy discount on the turn the borrowed card reaches your hand: 0 = none, -1 = free, N = costs N less."
+        )]
+        [Min(-1)]
+        [SerializeField]
+        private int _costReduction;
+
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             if (
@@ -58,18 +65,29 @@ namespace Crookedile.Gameplay.Battle
 
                         resolved = true;
                         bool moved = _nextTurn
-                            ? ctx.Deck.BookForNextTurn(selected[0])
+                            ? ctx.Deck.BookForNextTurn(selected[0], _costReduction)
                             : ctx.Deck.MoveFromDiscardToHand(selected[0]);
-                        if (moved)
-                            ctx.BattleManager.Celebrity.GainDebt(_debt, ctx.Deck);
+                        if (!moved)
+                            return;
+                        if (!_nextTurn)
+                            ctx.Deck.DiscountThisTurn(selected[0], _costReduction);
+                        ctx.BattleManager.Celebrity.GainDebt(_debt, ctx.Deck);
                     },
                 }
             );
         }
 
         public override string GetDescription() =>
-            _nextTurn
-                ? $"Choose a non-Exhaust card from your draw pile to receive next turn. Take {_debt} Debt"
-                : $"Return a non-Exhaust card from discard to hand. Take {_debt} Debt";
+            (
+                _nextTurn
+                    ? "Choose a non-Exhaust card from your draw pile to receive next turn"
+                    : "Return a non-Exhaust card from discard to hand"
+            )
+            + (
+                _costReduction < 0 ? ". It costs 0 that turn"
+                : _costReduction > 0 ? $". It costs {_costReduction} less that turn"
+                : ""
+            )
+            + $". Take {_debt} Debt";
     }
 }

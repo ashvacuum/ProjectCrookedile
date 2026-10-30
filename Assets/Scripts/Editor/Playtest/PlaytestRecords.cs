@@ -55,6 +55,10 @@ namespace Crookedile.EditorTools.Playtest
 
         public bool Win;
         public bool Judgment; // ended on the turn limit rather than a full/empty meter
+        public int WinLine; // Opinion the turn limit required (BattleManager.JudgmentWinLine)
+        public int MaxOpinion = 100; // the meter's size, for win-margin tiers
+        public int Day; // campaign day the fight happened on; 0 for standalone battles
+        public string Boss; // the rival's name in a boss debate; null in a standard fight
         public bool TimedOut; // hit the frame budget
         public bool Softlock; // stopped advancing outside the player's turn
         public int Turns;
@@ -70,6 +74,14 @@ namespace Crookedile.EditorTools.Playtest
         public readonly Dictionary<string, int> CardBestPlay = new();
         public readonly HashSet<string> DeckCards = new();
         public readonly Dictionary<string, int> EnemyMoves = new();
+        public readonly Dictionary<string, int> BossBundles = new(); // bundle the boss committed to, per turn
+
+        // Utility per card, credited to the card played or the card whose passive fired.
+        public readonly Dictionary<string, int> SupportGained = new();
+        public readonly Dictionary<string, int> DamagePrevented = new(); // its Support that absorbed an enemy hit
+        public readonly Dictionary<string, int> EnergyGained = new(); // mid-turn energy, not the turn refill
+        public readonly Dictionary<string, int> CardsEnabled = new(); // later plays that spent that energy
+        public readonly Dictionary<string, int> PassiveOpinion = new(); // Opinion its passives raised later
         public readonly List<TurnSnapshot> Snapshots = new();
         public readonly List<CardPlaySample> Plays = new();
         public readonly List<string> Errors = new();
@@ -108,5 +120,10 @@ namespace Crookedile.EditorTools.Playtest
         public readonly Dictionary<string, (int total, int times)> CredibilityLost = new();
         public readonly Dictionary<string, (int total, int times)> CredibilityGained = new();
         public readonly List<int> CredibilityByDay = new(); // at the start of each day reached, day 1 first
+        public readonly List<int> DeckByDay = new(); // deck size at the start of each day reached
+        public readonly List<int> RaresByDay = new(); // Rare cards in the deck at the start of each day reached
+        public int StrongOffers; // win rewards drawn from the strong-win pool (80%+)
+        public int RareGuarantees; // win rewards with a guaranteed Rare (maxed meter)
+        public int RaresTaken; // Rare cards the bot picked from any reward
     }
 }

@@ -204,7 +204,7 @@ namespace Crookedile.Tests
         }
 
         [UnityTest]
-        public IEnumerator OverpromiseTriplesOnlyTheNextCardsSway()
+        public IEnumerator OverpromiseTriplesTheNextSwayCardOnly()
         {
             var overpromise = new BattleEffect[]
             {
@@ -213,6 +213,7 @@ namespace Crookedile.Tests
             };
             Play(overpromise);
             Assert.AreEqual(3, _battle.Celebrity.Debt);
+            Play(GainGlamour(1)); // no Sway: leaves the triple armed
             Assert.AreEqual(6, Play(_soundbite).LastDamageDealt);
             Assert.AreEqual(2, Play(_soundbite).LastDamageDealt);
             Play(overpromise);
@@ -333,6 +334,59 @@ namespace Crookedile.Tests
         }
 
         [UnityTest]
+        public IEnumerator IfHasStatusBranchesOnTheTargetsStacks()
+        {
+            _battle.Enemies[0].Stats.SetHostility(-5);
+            var ifThreeTurns = Make<IfHasStatusEffect>(
+                ("_check", StatusHolder.Target),
+                ("_status", new StarstruckStatus()),
+                ("_minStacks", 3),
+                ("_then", new List<BattleEffect> { GainGlamour(5) }),
+                ("_else", new List<BattleEffect> { GainGlamour(1) })
+            );
+
+            Play(ifThreeTurns);
+            Assert.AreEqual(1, _battle.CurrentGlamour, "No Starstruck: Else runs.");
+
+            // A status applied earlier on the same card counts.
+            Play(Starstruck(3), ifThreeTurns);
+            Assert.AreEqual(6, _battle.CurrentGlamour, "3 Starstruck meets 3+: Then runs.");
+
+            _battle.Enemies[0].StatusEffects.RemoveStacksNotify<StarstruckStatus>(1);
+            Play(ifThreeTurns);
+            Assert.AreEqual(7, _battle.CurrentGlamour, "2 Starstruck misses 3+: Else runs.");
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator IfHasStatusBranchesOnYourOwnStacks()
+        {
+            var ifTwoGlamour = Make<IfHasStatusEffect>(
+                ("_check", StatusHolder.You),
+                ("_status", new GlamourStatus()),
+                ("_minStacks", 2),
+                ("_then", new List<BattleEffect> { Make<GainSupportEffect>(("_amount", 5)) })
+            );
+
+            int support = _battle.CurrentSupport;
+            Glamour(1);
+            Play(ifTwoGlamour);
+            Assert.AreEqual(support, _battle.CurrentSupport, "1 Glamour misses 2+.");
+
+            // The enemy's statuses don't count for You.
+            _battle
+                .Enemies[0]
+                .StatusEffects.ApplyStatus(new GlamourStatus(), 5, StatusDurationType.Permanent);
+            Play(ifTwoGlamour);
+            Assert.AreEqual(support, _battle.CurrentSupport, "The target's Glamour is not yours.");
+
+            Glamour(1);
+            Play(ifTwoGlamour);
+            Assert.AreEqual(support + 5, _battle.CurrentSupport, "2 Glamour meets 2+: Then runs.");
+            yield return null;
+        }
+
+        [UnityTest]
         public IEnumerator EmptyPromiseSoothesNowAndAggravatesNextTurn()
         {
             var enemy = _battle.Enemies[0];
@@ -381,6 +435,49 @@ namespace Crookedile.Tests
                 _battle.PlayerDeck.DeliverBookedCards();
                 Assert.AreEqual(hand + 1, _battle.PlayerDeck.HandCount);
                 Assert.AreEqual(total, _battle.PlayerDeck.AllCards.Count);
+            }
+            finally
+            {
+                _battle.CardChoicePrompt = null;
+            }
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator BorrowDiscountAppliesOnTheTurnItArrives()
+        {
+            CardChoiceRequest choice = null;
+            _battle.CardChoicePrompt = e => choice = e;
+            try
+            {
+                var discarded = Card(_objects, "Pricey", CardType.Rhetoric, 2);
+                _battle.PlayerDeck.AddCardToDiscard(discarded);
+                Play(
+                    Make<BorrowCardSelectionEffect>(
+                        ("_nextTurn", false),
+                        ("_debt", 1),
+                        ("_costReduction", 1)
+                    )
+                );
+                choice.OnConfirmed(new List<CardData> { discarded });
+                Assert.AreEqual(
+                    -1,
+                    _battle.PlayerDeck.GetCostIncreaseThisTurn(discarded),
+                    "recovered now, 1 less"
+                );
+
+                choice = null;
+                Play(
+                    Make<BorrowCardSelectionEffect>(
+                        ("_nextTurn", true),
+                        ("_debt", 1),
+                        ("_costReduction", -1)
+                    )
+                );
+                choice.OnConfirmed(new List<CardData> { _pressure });
+                _battle.PlayerDeck.StartTurn(0);
+                _battle.PlayerDeck.DeliverBookedCards();
+                Assert.IsTrue(_battle.PlayerDeck.IsFreeThisTurn(_pressure), "booked arrives free");
             }
             finally
             {

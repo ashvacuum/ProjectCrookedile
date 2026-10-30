@@ -164,5 +164,6 @@ namespace Crookedile.Data
         LastDamageTaken, // 31 — Opinion the triggering enemy push took off the meter past Support
         EnergyPaidForCard, // 32 — Energy actually paid for the card resolving now: X on an X-cost card
         LastBurnedPrintedCost, // 33 — printed cost of the card a Burn effect just exhausted (per-burned-card effects)
+        RoomFullyReceptive, // 34 — 1 while every living enemy is Receptive (the echo chamber), else 0
     }
 }

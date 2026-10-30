@@ -11,9 +11,9 @@ namespace Crookedile.Tests
         public void CostScalesWithHowBadlyYouLost()
         {
             var db = ScriptableObject.CreateInstance<OriginDatabase>(); // defaults: narrow 5, crushing 20
-            Assert.AreEqual(5, db.DefeatCredibilityCost(finalOpinion: 49, maxOpinion: 100));
-            Assert.AreEqual(20, db.DefeatCredibilityCost(finalOpinion: 0, maxOpinion: 100));
-            Assert.AreEqual(14, db.DefeatCredibilityCost(finalOpinion: 20, maxOpinion: 100));
+            Assert.AreEqual(5, db.DefeatCredibilityCost(finalOpinion: 59, winLine: 60));
+            Assert.AreEqual(20, db.DefeatCredibilityCost(finalOpinion: 0, winLine: 60));
+            Assert.AreEqual(14, db.DefeatCredibilityCost(finalOpinion: 24, winLine: 60));
             Object.DestroyImmediate(db);
         }
 

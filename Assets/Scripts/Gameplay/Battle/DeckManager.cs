@@ -44,6 +44,7 @@ namespace Crookedile.Gameplay.Battle
         private readonly CardCostOverrides _costOverrides = new CardCostOverrides();
         private readonly Dictionary<string, CardData> _tokenReplacements = new();
         private readonly List<CardData> _bookedCards = new();
+        private readonly Dictionary<CardData, int> _discountOnArrival = new();
 
         /// <summary>Transforms current tokens in every zone and all future generated copies for this battle.</summary>
         public void InstallTokenReplacement(CardData source, CardData replacement)
@@ -63,13 +64,24 @@ namespace Crookedile.Gameplay.Battle
                 : card;
 
         /// <summary>Reserves the selected draw-pile copy so ordinary draws cannot take it before next turn.</summary>
-        public bool BookForNextTurn(CardData card)
+        public bool BookForNextTurn(CardData card, int discountOnArrival = 0)
         {
             if (!_deck.Remove(card))
                 return false;
 
             _bookedCards.Add(card);
+            if (discountOnArrival != 0)
+                _discountOnArrival[card] = discountOnArrival;
             return true;
+        }
+
+        /// <summary>Discounts a card until the turn ends: 0 = none, -1 = free, N = costs N less.</summary>
+        public void DiscountThisTurn(CardData card, int discount)
+        {
+            if (discount < 0)
+                MakeCardFreeThisTurn(card);
+            else
+                ReduceCostThisTurn(card, discount);
         }
 
         /// <summary>Delivers booked cards after normal draws; overflow goes to discard rather than being lost.</summary>
@@ -80,9 +92,14 @@ namespace Crookedile.Gameplay.Battle
                 if (!AddCardToHand(card))
                     AddCardToDiscard(card);
                 else
+                {
+                    if (_discountOnArrival.TryGetValue(card, out int discount))
+                        DiscountThisTurn(card, discount);
                     EventBus.Publish(new CardRecoveredEvent { Card = card, IsPlayer = _isPlayer });
+                }
             }
             _bookedCards.Clear();
+            _discountOnArrival.Clear();
         }
 
         public void ReduceCostThisTurn(CardData card, int amount)
@@ -223,6 +240,7 @@ namespace Crookedile.Gameplay.Battle
             _retain.Reset();
             _tokenReplacements.Clear();
             _bookedCards.Clear();
+            _discountOnArrival.Clear();
 
             _deck.AddRange(cards);
             Shuffle();
@@ -412,25 +430,50 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Exhausts a card from discard pile.
+        /// Exhausts a just-played card. It sits in discard while its effects resolve, so a
+        /// reshuffling draw or a take-from-discard effect may have moved it to the draw pile or hand.
+        /// ponytail: played cards have no limbo zone; add one if more effects trip over this.
         /// </summary>
-        public bool ExhaustFromDiscard(CardData card)
+        public bool ExhaustPlayedCard(CardData card)
         {
-            int idx = _discard.IndexOf(card);
-            if (idx < 0)
+            List<CardData> source =
+                _discard.Contains(card) ? _discard
+                : _deck.Contains(card) ? _deck
+                : null;
+            if (source == null && _hand.Contains(card))
+                return ExhaustCard(card); // publishes CardExhaustedEvent so the hand view drops it
+            if (source == null)
             {
                 GameLogger.LogWarning<DeckManager>(
-                    $"{_ownerName} cannot exhaust card - not in discard"
+                    $"{_ownerName} cannot exhaust {card.CardName} - not in discard, draw pile or hand"
                 );
                 return false;
             }
 
-            _discard.RemoveAt(idx);
+            source.Remove(card);
             _exhaust.Add(card);
 
             GameLogger.LogInfo<DeckManager>(
                 $"{_ownerName} exhausted card from discard: {card.CardName}"
             );
+            return true;
+        }
+
+        /// <summary>
+        /// Moves a specific card from the exhaust pile back into the hand.
+        /// Returns false if the card is not in the exhaust pile or the hand is full.
+        /// </summary>
+        public bool MoveFromExhaustToHand(CardData card)
+        {
+            if (card == null || IsHandFull)
+                return false;
+            if (!_exhaust.Remove(card))
+                return false;
+            _hand.Add(card);
+            GameLogger.LogInfo<DeckManager>(
+                $"{_ownerName}: took {card.CardName} back from exhaust"
+            );
+            EventBus.Publish(new CardRecoveredEvent { Card = card, IsPlayer = _isPlayer });
             return true;
         }
 
@@ -706,6 +749,13 @@ namespace Crookedile.Gameplay.Battle
         public bool IsFreeThisTurn(CardData card) =>
             card != null && _costOverrides.IsFreeThisTurn(card);
 
+        /// <summary>Uses up a free-this-turn price once the card is played.</summary>
+        public void ConsumeFreeThisTurn(CardData card)
+        {
+            if (card != null)
+                _costOverrides.ConsumeFreeThisTurn(card);
+        }
+
         /// <summary>
         /// Captures a snapshot of all current cost reductions so they can be restored later.
         /// Called by <see cref="MakeAllCardsFreeNextPlayEffect"/> before applying its transient
@@ -756,13 +806,6 @@ namespace Crookedile.Gameplay.Battle
             }
 
             GameLogger.LogInfo<DeckManager>($"{_ownerName} shuffled deck ({_deck.Count} cards)");
-        }
-
-        /// <summary>Uses up a free-this-turn price once the card is played.</summary>
-        public void ConsumeFreeThisTurn(CardData card)
-        {
-            if (card != null)
-                _costOverrides.ConsumeFreeThisTurn(card);
         }
 
         /// <summary>

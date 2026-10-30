@@ -6,8 +6,8 @@ using System.Reflection;
 using Crookedile.Data;
 using Crookedile.Data.Battle;
 using Crookedile.Data.Cards;
-using Crookedile.Gameplay.Battle;
 using Crookedile.EditorTools;
+using Crookedile.Gameplay.Battle;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,7 +17,34 @@ namespace Crookedile.Editor.Database
     public sealed class CardsTab : ContentTab<CardData>
     {
         private const string CardsRoot = "Assets/Data/Cards/";
-        private const BindingFlags Fields = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        private const BindingFlags Fields =
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        private const string PlaceholderPrefix = "Character_";
+
+        private const string NoArtIssue =
+            "No artwork yet: generate it. (Still offered; the card shows a blank frame.)";
+
+        // Every card still uses a Character_NN placeholder; the ones that share one ran out of unique
+        // placeholders, so they are the next to get generated art.
+        private const string SharedArtIssue = "Shares art";
+        private const string NoUpgradeIssue =
+            "No upgrade authored, so it is never offered as a reward.";
+        private const string UnusedUpgradeIssue =
+            "Generated-only, so its upgraded effects are never used.";
+        private static readonly HashSet<string> ArtAndUpgradeIssues = new HashSet<string>
+        {
+            NoArtIssue,
+            NoUpgradeIssue,
+            UnusedUpgradeIssue,
+        };
+
+        /// <summary>What a card's issues are about, for the Problem filter.</summary>
+        private enum Problem
+        {
+            Art,
+            Upgrade,
+            Config,
+        }
 
         private CardType? _type;
         private CardRarity? _rarity;
@@ -25,13 +52,16 @@ namespace Crookedile.Editor.Database
         private CardFantasy? _fantasy;
         private string _class;
         private bool _starterOnly;
-        private bool _noArtOnly;
+        private Problem? _problem;
 
         private List<string> _classes = new List<string>();
         private HashSet<string> _duplicateNames = new HashSet<string>();
         private StatusEffectIconMapSO _iconMap;
-        private readonly Dictionary<CardData, CardHostility> _hostilityCache = new Dictionary<CardData, CardHostility>();
+        private readonly Dictionary<CardData, CardHostility> _hostilityCache =
+            new Dictionary<CardData, CardHostility>();
         private readonly Dictionary<CardData, string> _classOf = new Dictionary<CardData, string>();
+        private Dictionary<Sprite, List<CardData>> _cardsByArt =
+            new Dictionary<Sprite, List<CardData>>();
 
         public override string Title => "Cards";
 
@@ -45,12 +75,30 @@ namespace Crookedile.Editor.Database
         {
             yield return new Column("Card", 170, null, c => DisplayName(c));
             yield return new Column("Class", 78, ClassOf, c => ClassOf(c));
-            yield return new Column("Type", 70, c => c.CardType.ToString(), c => c.CardType, c => TypeColor(c.CardType));
-            yield return new Column("Rarity", 66, c => c.Rarity.ToString(), c => c.Rarity, c => RarityColor(c.Rarity));
+            yield return new Column(
+                "Type",
+                70,
+                c => c.CardType.ToString(),
+                c => c.CardType,
+                c => TypeColor(c.CardType)
+            );
+            yield return new Column(
+                "Rarity",
+                66,
+                c => c.Rarity.ToString(),
+                c => c.Rarity,
+                c => RarityColor(c.Rarity)
+            );
             yield return new Column("Cost", 38, CostLabel, c => CostOf(c));
             yield return new Column("Sway", 42, c => Blank(MaxSway(c)), c => MaxSway(c));
             yield return new Column("Supp.", 42, c => Blank(Support(c)), c => Support(c));
-            yield return new Column("Hostility", 92, c => HostilityOf(c).Label(), c => HostilityOf(c).Kind, HostilityColor);
+            yield return new Column(
+                "Hostility",
+                92,
+                c => HostilityOf(c).Label(),
+                c => HostilityOf(c).Kind,
+                HostilityColor
+            );
             yield return new Column("Fantasy", 52, FantasyInitials, c => (int)c.Fantasies);
             yield return new Column("Flags", 52, Flags, c => Flags(c));
         }
@@ -65,12 +113,24 @@ namespace Crookedile.Editor.Database
         {
             _hostilityCache.Clear();
             _classOf.Clear();
+            _cardsByArt = all.Where(c => c.Artwork != null)
+                .GroupBy(c => c.Artwork)
+                .ToDictionary(g => g.Key, g => g.ToList());
             _classes = all.Select(ClassOf).Distinct().OrderBy(c => c).ToList();
             _duplicateNames = new HashSet<string>(
-                all.GroupBy(c => c.CardName).Where(g => g.Count() > 1 && !string.IsNullOrEmpty(g.Key)).Select(g => g.Key)
+                all.GroupBy(c => c.CardName)
+                    .Where(g => g.Count() > 1 && !string.IsNullOrEmpty(g.Key))
+                    .Select(g => g.Key)
             );
-            string guid = AssetDatabase.FindAssets("t:" + nameof(StatusEffectIconMapSO)).FirstOrDefault();
-            _iconMap = guid == null ? null : AssetDatabase.LoadAssetAtPath<StatusEffectIconMapSO>(AssetDatabase.GUIDToAssetPath(guid));
+            string guid = AssetDatabase
+                .FindAssets("t:" + nameof(StatusEffectIconMapSO))
+                .FirstOrDefault();
+            _iconMap =
+                guid == null
+                    ? null
+                    : AssetDatabase.LoadAssetAtPath<StatusEffectIconMapSO>(
+                        AssetDatabase.GUIDToAssetPath(guid)
+                    );
         }
 
         // ---- Filters --------------------------------------------------------------------
@@ -81,26 +141,36 @@ namespace Crookedile.Editor.Database
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.Label("Class", EditorStyles.miniLabel, GUILayout.Width(62));
-                if (GUILayout.Toggle(_class == null, "All", EditorStyles.miniButtonLeft) && _class != null)
+                if (
+                    GUILayout.Toggle(_class == null, "All", EditorStyles.miniButtonLeft)
+                    && _class != null
+                )
                 {
                     _class = null;
                     changed = true;
                 }
                 foreach (var cls in _classes)
-                    if (GUILayout.Toggle(_class == cls, cls, EditorStyles.miniButtonMid) && _class != cls)
+                    if (
+                        GUILayout.Toggle(_class == cls, cls, EditorStyles.miniButtonMid)
+                        && _class != cls
+                    )
                     {
                         _class = cls;
                         changed = true;
                     }
                 GUILayout.Space(12);
                 changed |= Toggle(ref _starterOnly, "Starter only");
-                changed |= Toggle(ref _noArtOnly, "No art only");
                 GUILayout.FlexibleSpace();
             }
             changed |= EnumFilter("Type", ref _type);
             changed |= EnumFilter("Rarity", ref _rarity);
             changed |= EnumFilter("Hostility", ref _hostility);
-            changed |= EnumFilter("Fantasy", ref _fantasy, f => f == CardFantasy.None ? "Unassigned" : f.ToString());
+            changed |= EnumFilter(
+                "Fantasy",
+                ref _fantasy,
+                f => f == CardFantasy.None ? "Unassigned" : f.ToString()
+            );
+            changed |= EnumFilter("Problem", ref _problem);
             return changed;
         }
 
@@ -109,9 +179,39 @@ namespace Crookedile.Editor.Database
             && (!_type.HasValue || card.CardType == _type.Value)
             && (!_rarity.HasValue || card.Rarity == _rarity.Value)
             && (!_hostility.HasValue || HostilityOf(card).Kind == _hostility.Value)
-            && (!_fantasy.HasValue || (_fantasy.Value == CardFantasy.None ? card.Fantasies == CardFantasy.None : card.Fantasies.HasFlag(_fantasy.Value)))
+            && (
+                !_fantasy.HasValue
+                || (
+                    _fantasy.Value == CardFantasy.None
+                        ? card.Fantasies == CardFantasy.None
+                        : card.Fantasies.HasFlag(_fantasy.Value)
+                )
+            )
             && (!_starterOnly || card.IsStarterCard)
-            && (!_noArtOnly || card.IsInDevelopment);
+            && (!_problem.HasValue || HasProblem(card, _problem.Value));
+
+        private bool HasProblem(CardData card, Problem problem) =>
+            problem switch
+            {
+                Problem.Art => NeedsArt(card),
+                Problem.Upgrade => IssuesOf(card)
+                    .Any(i => i.Text == NoUpgradeIssue || i.Text == UnusedUpgradeIssue),
+                _ => IssuesOf(card)
+                    .Any(i =>
+                        !ArtAndUpgradeIssues.Contains(i.Text) && !i.Text.StartsWith(SharedArtIssue)
+                    ),
+            };
+
+        private static bool HasPlaceholderArt(CardData card) =>
+            card.Artwork != null && card.Artwork.name.StartsWith(PlaceholderPrefix);
+
+        /// <summary>No art, or art another card also uses: the cards to generate art for next.</summary>
+        private bool NeedsArt(CardData card) => card.IsInDevelopment || SharesArt(card);
+
+        private bool SharesArt(CardData card) =>
+            card.Artwork != null
+            && _cardsByArt.TryGetValue(card.Artwork, out var users)
+            && users.Count > 1;
 
         // ---- Audit ----------------------------------------------------------------------
 
@@ -148,41 +248,69 @@ namespace Crookedile.Editor.Database
                         continue;
                     }
                     if (passive.Trigger == null)
-                        yield return Issue.Error($"Passive [{i}] has no trigger, so it never fires.");
+                        yield return Issue.Error(
+                            $"Passive [{i}] has no trigger, so it never fires."
+                        );
                     if (passive.Effects == null || passive.Effects.Count == 0)
                         yield return Issue.Warning($"Passive '{passive.Name}' has no effects.");
                     else
                         foreach (var effect in passive.Effects)
                             if (effect == null)
-                                yield return Issue.Error($"Passive '{passive.Name}' has an empty effect.");
+                                yield return Issue.Error(
+                                    $"Passive '{passive.Name}' has an empty effect."
+                                );
                             else
                                 foreach (var problem in effect.GetConfigurationIssues())
-                                    yield return Issue.Warning($"Passive '{passive.Name}' {effect.GetType().Name}: {problem}");
+                                    yield return Issue.Warning(
+                                        $"Passive '{passive.Name}' {effect.GetType().Name}: {problem}"
+                                    );
                 }
 
             foreach (var status in StatusesUsed(card))
             {
-                if (_iconMap == null || !_iconMap.TryGet(status.Id, out var icon, out _, out var name, out _))
-                    yield return Issue.Warning($"Uses status '{status.DisplayName}', which has no icon-map entry (seed it from the Statuses data).");
+                if (
+                    _iconMap == null
+                    || !_iconMap.TryGet(status.Id, out var icon, out _, out var name, out _)
+                )
+                    yield return Issue.Warning(
+                        $"Uses status '{status.DisplayName}', which has no icon-map entry (seed it from the Statuses data)."
+                    );
                 else
                 {
                     if (icon == null)
-                        yield return Issue.Warning($"Uses status '{status.DisplayName}', which has no icon.");
+                        yield return Issue.Warning(
+                            $"Uses status '{status.DisplayName}', which has no icon."
+                        );
                     if (string.IsNullOrEmpty(name))
-                        yield return Issue.Info($"Uses status '{status.DisplayName}', which has no display name.");
+                        yield return Issue.Info(
+                            $"Uses status '{status.DisplayName}', which has no display name."
+                        );
                 }
             }
 
             if (card.IsInDevelopment && !card.IsGeneratedOnly)
-                yield return Issue.Warning("No artwork, so it is never offered as a reward.");
+                yield return Issue.Warning(NoArtIssue);
+            else if (SharesArt(card))
+                yield return Issue.Warning(
+                    $"{SharedArtIssue} '{card.Artwork.name}' with: "
+                        + string.Join(
+                            ", ",
+                            _cardsByArt[card.Artwork].Where(c => c != card).Select(c => c.CardName)
+                        )
+                        + ". Generate its own art."
+                );
             if (card.NeedsConfiguration)
                 yield return Issue.Warning("Has leftover configuration notes.");
             if (!card.IsJunk && (card.Costs == null || card.Costs.Count == 0))
                 yield return Issue.Info("No cost entry.");
-            if (!card.IsJunk && !card.IsUpgraded && !card.CanUpgrade)
-                yield return Issue.Info("No upgrade authored.");
+            if (!card.IsJunk && !card.IsGeneratedOnly && !card.IsUpgraded && !card.CanUpgrade)
+                yield return Issue.Warning(NoUpgradeIssue);
+            if (card.IsGeneratedOnly && card.UpgradedEffects is { Count: > 0 })
+                yield return Issue.Info(UnusedUpgradeIssue);
             if (card.IsUnlockable && card.UnlockCondition == null)
-                yield return Issue.Info("Unlockable with no condition: only an event grant unlocks it.");
+                yield return Issue.Info(
+                    "Unlockable with no condition: only an event grant unlocks it."
+                );
         }
 
         // ---- Appearance -----------------------------------------------------------------
@@ -194,21 +322,40 @@ namespace Crookedile.Editor.Database
                 Picture(card.Artwork, 150);
                 using (new EditorGUILayout.VerticalScope())
                 {
-                    EditorGUILayout.LabelField($"{DisplayName(card)}   ·   {CostLabel(card)}", EditorStyles.boldLabel);
-                    EditorGUILayout.LabelField($"{card.CardType} · {card.Rarity} · {ClassOf(card)}{(card.IsStarterCard ? " · starter" : "")}", EditorStyles.miniLabel);
-                    EditorGUILayout.LabelField(SafeDescription(card), EditorStyles.wordWrappedLabel);
+                    EditorGUILayout.LabelField(
+                        $"{DisplayName(card)}   ·   {CostLabel(card)}",
+                        EditorStyles.boldLabel
+                    );
+                    EditorGUILayout.LabelField(
+                        $"{card.CardType} · {card.Rarity} · {ClassOf(card)}{(card.IsStarterCard ? " · starter" : "")}",
+                        EditorStyles.miniLabel
+                    );
+                    EditorGUILayout.LabelField(
+                        SafeDescription(card),
+                        EditorStyles.wordWrappedLabel
+                    );
                     if (card.CanUpgrade)
-                        EditorGUILayout.LabelField("Upgraded: " + SafeDescription(card, upgraded: true), EditorStyles.wordWrappedMiniLabel);
+                        EditorGUILayout.LabelField(
+                            "Upgraded: " + SafeDescription(card, upgraded: true),
+                            EditorStyles.wordWrappedMiniLabel
+                        );
                     if (!string.IsNullOrEmpty(card.FlavorText))
                         EditorGUILayout.LabelField(card.FlavorText, ItalicMini);
 
                     var hostility = HostilityOf(card);
-                    string line = string.Join("   ", new[]
-                    {
-                        hostility.Kind != HostilityKind.None ? "Hostility: " + hostility.Label() : null,
-                        card.Fantasies != CardFantasy.None ? "Fantasy: " + card.Fantasies : null,
-                        card.Tags.Count > 0 ? "Tags: " + string.Join(", ", card.Tags) : null,
-                    }.Where(s => s != null));
+                    string line = string.Join(
+                        "   ",
+                        new[]
+                        {
+                            hostility.Kind != HostilityKind.None
+                                ? "Hostility: " + hostility.Label()
+                                : null,
+                            card.Fantasies != CardFantasy.None
+                                ? "Fantasy: " + card.Fantasies
+                                : null,
+                            card.Tags.Count > 0 ? "Tags: " + string.Join(", ", card.Tags) : null,
+                        }.Where(s => s != null)
+                    );
                     if (line.Length > 0)
                         EditorGUILayout.LabelField(line, EditorStyles.wordWrappedMiniLabel);
 
@@ -216,13 +363,24 @@ namespace Crookedile.Editor.Database
                     if (statuses.Count > 0)
                         using (new EditorGUILayout.HorizontalScope())
                         {
-                            GUILayout.Label("Statuses:", EditorStyles.miniLabel, GUILayout.Width(52));
+                            GUILayout.Label(
+                                "Statuses:",
+                                EditorStyles.miniLabel,
+                                GUILayout.Width(52)
+                            );
                             foreach (var status in statuses)
                             {
                                 Sprite icon = null;
                                 _iconMap?.TryGet(status.Id, out icon, out _);
-                                var content = new GUIContent(status.DisplayName, icon != null ? AssetPreview.GetAssetPreview(icon) : null);
-                                GUILayout.Label(content, EditorStyles.miniLabel, GUILayout.Height(18));
+                                var content = new GUIContent(
+                                    status.DisplayName,
+                                    icon != null ? AssetPreview.GetAssetPreview(icon) : null
+                                );
+                                GUILayout.Label(
+                                    content,
+                                    EditorStyles.miniLabel,
+                                    GUILayout.Height(18)
+                                );
                             }
                             GUILayout.FlexibleSpace();
                         }
@@ -234,7 +392,10 @@ namespace Crookedile.Editor.Database
 
         protected override void DrawSummary(IReadOnlyList<CardData> all)
         {
-            EditorGUILayout.LabelField($"{all.Count} cards. Select one to see and edit it.", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField(
+                $"{all.Count} cards. Select one to see and edit it.",
+                EditorStyles.miniLabel
+            );
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("By class", EditorStyles.boldLabel);
             foreach (var group in all.GroupBy(ClassOf).OrderBy(g => g.Key))
@@ -248,15 +409,35 @@ namespace Crookedile.Editor.Database
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("State", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField($"No artwork (never offered): {all.Count(c => c.IsInDevelopment && !c.IsGeneratedOnly)}");
-            EditorGUILayout.LabelField($"Leftover configuration notes: {all.Count(c => c.NeedsConfiguration)}");
+            EditorGUILayout.LabelField(
+                $"No artwork (generate): {all.Count(c => c.IsInDevelopment && !c.IsGeneratedOnly)}"
+            );
+            EditorGUILayout.LabelField($"Shares art (generate next): {all.Count(SharesArt)}");
+            EditorGUILayout.LabelField(
+                $"Placeholder art (Character_NN): {all.Count(HasPlaceholderArt)}"
+            );
+            EditorGUILayout.LabelField(
+                $"Leftover configuration notes: {all.Count(c => c.NeedsConfiguration)}"
+            );
             EditorGUILayout.LabelField($"Unlockable: {all.Count(c => c.IsUnlockable)}");
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Notable", EditorStyles.boldLabel);
-            Notable("Biggest Sway", all.OrderByDescending(MaxSway).FirstOrDefault(), c => $"{MaxSway(c)} Sway");
-            Notable("Most Support", all.OrderByDescending(Support).FirstOrDefault(), c => $"+{Support(c)} Support");
-            Notable("Most effects", all.OrderByDescending(c => c.Effects?.Count ?? 0).FirstOrDefault(), c => $"{c.Effects?.Count ?? 0} effects");
+            Notable(
+                "Biggest Sway",
+                all.OrderByDescending(MaxSway).FirstOrDefault(),
+                c => $"{MaxSway(c)} Sway"
+            );
+            Notable(
+                "Most Support",
+                all.OrderByDescending(Support).FirstOrDefault(),
+                c => $"+{Support(c)} Support"
+            );
+            Notable(
+                "Most effects",
+                all.OrderByDescending(c => c.Effects?.Count ?? 0).FirstOrDefault(),
+                c => $"{c.Effects?.Count ?? 0} effects"
+            );
         }
 
         private void Notable(string label, CardData card, Func<CardData, string> detail)
@@ -305,7 +486,11 @@ namespace Crookedile.Editor.Database
             var costs = card.GetCosts(false);
             if (costs == null || costs.Count == 0)
                 return 0;
-            return costs.Where(c => c.CostType == CostType.ActionPoints).Select(c => c.BaseAmount).DefaultIfEmpty(0).Min();
+            return costs
+                .Where(c => c.CostType == CostType.ActionPoints)
+                .Select(c => c.BaseAmount)
+                .DefaultIfEmpty(0)
+                .Min();
         }
 
         private static string CostLabel(CardData card)
@@ -325,7 +510,12 @@ namespace Crookedile.Editor.Database
             {
                 var preview = effect?.GetDamagePreview();
                 if (preview.HasValue)
-                    best = Mathf.Max(best, preview.Value.Type == DamagePreviewType.Random ? preview.Value.MaxAmount : preview.Value.Amount);
+                    best = Mathf.Max(
+                        best,
+                        preview.Value.Type == DamagePreviewType.Random
+                            ? preview.Value.MaxAmount
+                            : preview.Value.Amount
+                    );
             }
             return best;
         }
@@ -334,12 +524,19 @@ namespace Crookedile.Editor.Database
             card.Effects?.OfType<GainSupportEffect>().Sum(e => e.PreviewSupportAmount) ?? 0;
 
         private static string FantasyInitials(CardData card) =>
-            string.Join(" ", Enum.GetValues(typeof(CardFantasy)).Cast<CardFantasy>()
-                .Where(f => f != CardFantasy.None && card.Fantasies.HasFlag(f))
-                .Select(f => f.ToString().Substring(0, 1)));
+            string.Join(
+                " ",
+                Enum.GetValues(typeof(CardFantasy))
+                    .Cast<CardFantasy>()
+                    .Where(f => f != CardFantasy.None && card.Fantasies.HasFlag(f))
+                    .Select(f => f.ToString().Substring(0, 1))
+            );
 
         private static string Flags(CardData card) =>
-            (card.IsStarterCard ? "S" : "") + (card.IsUnlockable ? "U" : "") + (card.IsGeneratedOnly ? "G" : "") + (card.IsUpgraded ? "+" : "");
+            (card.IsStarterCard ? "S" : "")
+            + (card.IsUnlockable ? "U" : "")
+            + (card.IsGeneratedOnly ? "G" : "")
+            + (card.IsUpgraded ? "+" : "");
 
         private static string Blank(int value) => value == 0 ? "" : value.ToString();
 
@@ -385,10 +582,12 @@ namespace Crookedile.Editor.Database
                 foreach (var field in node.GetType().GetFields(Fields))
                 {
                     var type = field.FieldType;
-                    if (typeof(StatusBehavior).IsAssignableFrom(type)
+                    if (
+                        typeof(StatusBehavior).IsAssignableFrom(type)
                         || typeof(BattleEffect).IsAssignableFrom(type)
                         || typeof(BattlePassive).IsAssignableFrom(type)
-                        || (typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string)))
+                        || (typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string))
+                    )
                         Walk(field.GetValue(node));
                 }
             }
@@ -440,6 +639,9 @@ namespace Crookedile.Editor.Database
         private static GUIStyle _italicMini;
 
         private static GUIStyle ItalicMini =>
-            _italicMini ??= new GUIStyle(EditorStyles.wordWrappedMiniLabel) { fontStyle = FontStyle.Italic };
+            _italicMini ??= new GUIStyle(EditorStyles.wordWrappedMiniLabel)
+            {
+                fontStyle = FontStyle.Italic,
+            };
     }
 }

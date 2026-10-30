@@ -62,6 +62,11 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Too Big to Fail: upcoming unpaid-Debt damage instances negated.</summary>
         public int DebtWaivers { get; set; }
 
+        /// <summary>Collateral: Support pays the Debt energy cannot, before the meter does.</summary>
+        public bool SupportPaysDebt { get; set; }
+
+        private int _heldSupport;
+
         /// <summary>Bailout: Soundbite added per unpaid-Debt damage, up to the per-turn cap.</summary>
         public CardData BailoutCard { get; set; }
         public int BailoutCapPerTurn { get; set; }
@@ -146,6 +151,8 @@ namespace Crookedile.Gameplay.Battle
         {
             Debt = 0;
             LineOfCreditReduction = SettlementsDelayed = DebtWaivers = 0;
+            SupportPaysDebt = false;
+            _heldSupport = 0;
             BailoutCard = null;
             BailoutCapPerTurn = 0;
             MediaTrainingCost = MediaTrainingDraw = 0;
@@ -215,6 +222,17 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
+        /// Sets aside last turn's Support (up to the Debt) before it expires, for the coming
+        /// settlement to use after energy. A delayed settlement holds nothing.
+        /// </summary>
+        public void HoldSupportForDebt(OpinionLedger ledger)
+        {
+            // ponytail: the Support bar drops before energy pays; settle before Support expiry if that reads wrong.
+            if (SupportPaysDebt && SettlementsDelayed == 0)
+                _heldSupport = ledger.SpendSupport(Debt);
+        }
+
+        /// <summary>
         /// Start-of-player-turn settlement: Debt eats starting energy (floor 0), the rest becomes
         /// Opinion damage. Not an enemy "hit", so it never strips Glamour.
         /// </summary>
@@ -235,6 +253,7 @@ namespace Crookedile.Gameplay.Battle
             Debt = 0;
 
             Collect(owed, ledger, player, addToHand);
+            _heldSupport = 0; // unused held Support would have expired anyway
         }
 
         private void Collect(
@@ -249,8 +268,16 @@ namespace Crookedile.Gameplay.Battle
 
             var paid = Mathf.Min(owed, player.CurrentActionPoints);
             player.GainActionPoints(-paid);
+            owed -= paid;
 
-            var damage = (owed - paid) * CelebrityRules.DebtToOpinionRate;
+            if (SupportPaysDebt)
+            {
+                int held = Mathf.Min(owed, _heldSupport);
+                _heldSupport -= held;
+                owed -= held + ledger.SpendSupport(owed - held);
+            }
+
+            var damage = owed * CelebrityRules.DebtToOpinionRate;
             if (damage > 0 && DebtWaivers > 0)
             {
                 DebtWaivers--; // Too Big to Fail
