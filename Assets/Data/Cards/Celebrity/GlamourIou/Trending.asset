@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Trending
   _cardType: 2
   _rarity: 2
-  _artwork: {fileID: 0}
-  _description:
-  _flavorText:
+  _artwork: {fileID: 21300000, guid: aef4b0b0a210dfd4db8fcb688c64dc81, type: 3}
+  _description: 
+  _flavorText: 
   _costs:
   - _costType: 1
     _baseAmount: 2
@@ -33,7 +33,9 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685916146034540656
+  - rid: 2685916146034540657
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -54,6 +56,18 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 2685916146034540656
+      type: {class: GainGlamourEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 3
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+    - rid: 2685916146034540657
+      type: {class: AddCardToHandEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _card: {fileID: 11400000, guid: 54fb8f7b991f812449043e05cae2e2f7, type: 2}
+        _amount: 3
     - rid: 5000000000000000001
       type: {class: GainGlamourEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

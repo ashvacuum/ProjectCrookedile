@@ -33,8 +33,7 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects:
-  - rid: 2685915787672158214
+  _upgradedEffects: []
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -55,13 +54,6 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 2685915787672158214
-      type: {class: GainGlamourEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _amount: 1
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1
     - rid: 5000000000000000001
       type: {class: GainGlamourEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

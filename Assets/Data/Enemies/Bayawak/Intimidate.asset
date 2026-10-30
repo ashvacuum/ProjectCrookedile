@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
   _moveName: Intimidate
   _moveType: 4
-  _intentDescription: "Intimidates: -5 Opinion ignoring Support, +1 Strength"
+  _intentDescription: "Intimidates: -5 Opinion, +1 Strength"
   _effects:
   - rid: 1
   - rid: 2
@@ -37,7 +37,7 @@ MonoBehaviour:
         _perXSource: 7
         _multiplier: 1
         _target: 1
-        _bypassSupport: 1
+        _bypassSupport: 0
     - rid: 2
       type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

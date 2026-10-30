@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Not My Problem
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'Have you met my associate?'
+  _artwork: {fileID: 21300000, guid: 277c333ebb78a3a4089f05158f1f07d9, type: 3}
+  _description: 
+  _flavorText: Have you met my associate?
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -32,7 +32,8 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685916122315751536
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -41,15 +42,23 @@ MonoBehaviour:
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2685916122315751536
+      type: {class: MoveHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 5
     - rid: 7000000000000000000
       type: {class: MoveHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _amount: 2
+        _amount: 3

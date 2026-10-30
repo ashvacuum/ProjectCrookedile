@@ -62,10 +62,10 @@ MonoBehaviour:
     - rid: 7000000000000000000
       type: {class: BurnAndPlayEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _swayPerPrintedCost: 1
+        _swayPerPrintedCost: 3
         _swayMultiplier: 1
     - rid: 7000000000000000001
       type: {class: BurnAndPlayEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _swayPerPrintedCost: 1
-        _swayMultiplier: 2
+        _swayPerPrintedCost: 5
+        _swayMultiplier: 1

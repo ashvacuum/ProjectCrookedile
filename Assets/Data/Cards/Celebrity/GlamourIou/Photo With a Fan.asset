@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Photo With a Fan
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 21300000, guid: 11dda9187956ace4d9bf3875a197d823, type: 3}
+  _artwork: {fileID: 21300000, guid: 182769dc325c0954f934085cb5d5c48b, type: 3}
   _description: 
   _flavorText: 
   _costs:

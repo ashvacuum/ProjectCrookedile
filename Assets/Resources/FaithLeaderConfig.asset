@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: FaithLeaderConfig
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.FaithLeaderConfig
   _conversionThreshold: 3
-  _followSwayPerFanatic: 2
-  _followSupportPerFanatic: 2
+  _followSwayPerFanatic: 4
+  _followSupportPerFanatic: 3
   _silenceMinConversions: 2
   _silenceStacks: 1
   _jadedOnDisillusion: 1

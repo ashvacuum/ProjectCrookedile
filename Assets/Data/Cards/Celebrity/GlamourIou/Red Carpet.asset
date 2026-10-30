@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Red Carpet
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 21300000, guid: 11dda9187956ace4d9bf3875a197d823, type: 3}
+  _artwork: {fileID: 21300000, guid: 21e2ed8fbb5e0b741852ac7395a3c95c, type: 3}
   _description: 
   _flavorText: 
   _costs:

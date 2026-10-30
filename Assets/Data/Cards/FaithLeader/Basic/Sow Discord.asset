@@ -83,7 +83,7 @@ MonoBehaviour:
         _multiplier: 1
         _duration: 0
     - rid: 5004226271355076630
-      type: {class: DoubtStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
     - rid: 5004226271355076631
       type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
@@ -107,5 +107,5 @@ MonoBehaviour:
         _multiplier: 1
         _duration: 0
     - rid: 5004226271355076633
-      type: {class: DoubtStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 

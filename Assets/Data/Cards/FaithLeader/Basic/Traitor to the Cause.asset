@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Traitor to the Cause
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 21300000, guid: 6d0a4f17c76454c48b66176d60d04bdb, type: 3}
+  _artwork: {fileID: 0}
   _description: 
   _flavorText: 
   _costs:
@@ -70,5 +70,5 @@ MonoBehaviour:
         _multiplier: 1
         _duration: 0
     - rid: 5004226267226833034
-      type: {class: ShameStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 

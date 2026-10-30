@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Settle Up
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 0}
-  _description:
-  _flavorText:
+  _artwork: {fileID: 21300000, guid: 62a4405f69deffa479a7c5718c7dd1a2, type: 3}
+  _description: 
+  _flavorText: 
   _costs:
   - _costType: 1
     _baseAmount: 0

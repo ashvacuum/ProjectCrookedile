@@ -17,22 +17,23 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 0
   _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'He doesn''t share. He never had to.'
+  _description: 
+  _flavorText: He doesn't share. He never had to.
   _costs:
   - _costType: 1
-    _baseAmount: 2
+    _baseAmount: 1
     _isXCost: 0
     _costChangePerTurn: 0
     _minimumCost: 0
     _maximumCost: 99
   _costReductionPerX: 7
   _effects:
-  - rid: 7000000000000000000
+  - rid: 2685916190939807862
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685916190939807863
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -40,21 +41,25 @@ MonoBehaviour:
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 7000000000000000000
-      type: {class: CleanseStatusEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 2685916190939807862
+      type: {class: TakeBackFromExhaustEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _target: 1
-        _mode: 2
-        _behavior:
-          rid: -2
-        _maxStatuses: 1
+        _count: 1
+        _hostilityPerCard: 8
+    - rid: 2685916190939807863
+      type: {class: TakeBackFromExhaustEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _count: 1
+        _hostilityPerCard: 5

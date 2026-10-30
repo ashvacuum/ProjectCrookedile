@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Smile and Wave
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 9210c0b0248ac9048a6de663d5f4cd18, type: 3}
   _description: 
   _flavorText: 
   _costs:

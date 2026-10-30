@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
   _moveName: Mano Po
   _moveType: 0
-  _intentDescription: "Mano po: -6 Opinion, ignores Support"
+  _intentDescription: "Mano po: -6 Opinion"
   _effects:
   - rid: 1
   _moveVFX: {fileID: 0}
@@ -36,4 +36,4 @@ MonoBehaviour:
         _perXSource: 7
         _multiplier: 1
         _target: 1
-        _bypassSupport: 1
+        _bypassSupport: 0

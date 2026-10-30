@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
   _moveName: Hedge
   _moveType: 0
-  _intentDescription: "Hedges: the meter slips -3, ignores Support"
+  _intentDescription: 'Hedges: the meter slips -3, ignores Support'
   _effects:
   - rid: 1
   _moveVFX: {fileID: 0}
@@ -36,4 +36,5 @@ MonoBehaviour:
         _perXSource: 7
         _multiplier: 1
         _target: 1
-        _bypassSupport: 1
+        _bypassSupport: 0
+        _maxAmount: 0

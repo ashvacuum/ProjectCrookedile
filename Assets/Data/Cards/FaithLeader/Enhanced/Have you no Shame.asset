@@ -88,5 +88,5 @@ MonoBehaviour:
         _multiplier: 1
         _duration: 0
     - rid: 5004226267226833025
-      type: {class: ShameStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 

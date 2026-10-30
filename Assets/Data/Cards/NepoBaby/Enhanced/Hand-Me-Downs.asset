@@ -33,7 +33,8 @@ MonoBehaviour:
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
-  _upgradedPassives: []
+  _upgradedPassives:
+  - rid: 2685916190939807837
   _upgradedInnateRetain: 0
   _tags:
   - nepobaby
@@ -52,6 +53,39 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 2685916190939807837
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 2685916190939807838
+        _conditions:
+        - rid: 2685916190939807839
+        _oneShot: 0
+        _oncePerTurn: 1
+        _effects:
+        - rid: 2685916190939807840
+    - rid: 2685916190939807838
+      type: {class: CardResolvedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _filterByType: 0
+        _filterType: 0
+    - rid: 2685916190939807839
+      type: {class: TriggeringCardCostCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _comparison: 0
+        _value: 1
+    - rid: 2685916190939807840
+      type: {class: ReturnToHandEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _source: 1
+        _cardType: 1
+        _applyReturnBrake: 0
+        _onReturned:
+        - rid: 2685916190939807841
+    - rid: 2685916190939807841
+      type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 1
     - rid: 7000000000000000000
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
@@ -78,7 +112,7 @@ MonoBehaviour:
       data:
         _source: 1
         _cardType: 1
-        _applyReturnBrake: 1
+        _applyReturnBrake: 0
         _onReturned:
         - rid: 7000000000000000004
     - rid: 7000000000000000004

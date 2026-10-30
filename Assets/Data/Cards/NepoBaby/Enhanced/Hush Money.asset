@@ -33,7 +33,9 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685916190939807842
+  - rid: 2685916190939807843
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -53,6 +55,20 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 2685916190939807842
+      type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 16
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _target: 1
+        _bypassSupport: 0
+        _maxAmount: 0
+    - rid: 2685916190939807843
+      type: {class: RaiseAllOpponentsHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 2
     - rid: 7000000000000000000
       type: {class: ApplyOpinionEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

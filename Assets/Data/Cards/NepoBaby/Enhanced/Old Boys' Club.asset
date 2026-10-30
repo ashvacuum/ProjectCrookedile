@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Old Boys' Club
   _cardType: 2
   _rarity: 1
-  _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'Membership has its privileges.'
+  _artwork: {fileID: 21300000, guid: 14a18c4c16d8e3644b5886f394992fac, type: 3}
+  _description: 
+  _flavorText: Membership has its privileges.
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -33,21 +33,45 @@ MonoBehaviour:
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
-  _upgradedPassives: []
+  _upgradedPassives:
+  - rid: 2685916122315751537
   _upgradedInnateRetain: 0
   _tags:
   - nepobaby
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2685916122315751537
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 2685916122315751538
+        _conditions: []
+        _oneShot: 0
+        _oncePerTurn: 1
+        _effects:
+        - rid: 2685916122315751539
+    - rid: 2685916122315751538
+      type: {class: CardPlayedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _filterByType: 1
+        _filterType: 1
+    - rid: 2685916122315751539
+      type: {class: RefundEnergyEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 2
     - rid: 7000000000000000000
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

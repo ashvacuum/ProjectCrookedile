@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Smooth Things Over
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'Drinks are on him. Again.'
+  _artwork: {fileID: 21300000, guid: 6fce330b8a4466e439467d568ec0dac1, type: 3}
+  _description: 
+  _flavorText: Drinks are on him. Again.
   _costs:
   - _costType: 1
     _baseAmount: 2
@@ -32,7 +32,8 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685916146034540653
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -40,18 +41,31 @@ MonoBehaviour:
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2685916146034540653
+      type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 4
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _target: 4
+        _stopAtNeutral: 0
     - rid: 7000000000000000000
       type: {class: ReduceHostilityEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _amount: 1
+        _amount: 2
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
