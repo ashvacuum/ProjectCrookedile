@@ -71,7 +71,7 @@ MonoBehaviour:
         _multiplier: 1
         _duration: 0
     - rid: 5004226271355076624
-      type: {class: DoubtStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
     - rid: 5004226271355076625
       type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
@@ -91,5 +91,5 @@ MonoBehaviour:
         _multiplier: 1
         _duration: 0
     - rid: 5004226271355076627
-      type: {class: DoubtStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 

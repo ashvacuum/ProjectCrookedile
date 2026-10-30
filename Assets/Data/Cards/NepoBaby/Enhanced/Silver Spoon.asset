@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Silver Spoon
   _cardType: 2
   _rarity: 1
-  _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'Clean hands, full plate.'
+  _artwork: {fileID: 21300000, guid: 2004b7f1970ebeb4ca283c58d294d6a3, type: 3}
+  _description: 
+  _flavorText: Clean hands, full plate.
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -33,42 +33,67 @@ MonoBehaviour:
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
-  _upgradedPassives: []
+  _upgradedPassives:
+  - rid: 2685916190939807847
   _upgradedInnateRetain: 0
   _tags:
   - nepobaby
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2685916190939807845
+      type: {class: HandHasNoCostlyCardCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _minimumPrintedCost: 3
+    - rid: 2685916190939807846
+      type: {class: TakeRandomCostlyCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _minimumPrintedCost: 2
+    - rid: 2685916190939807847
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 2685916190939807848
+        _conditions:
+        - rid: 2685916190939807849
+        _oneShot: 0
+        _oncePerTurn: 1
+        _effects:
+        - rid: 2685916190939807850
+    - rid: 2685916190939807848
+      type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 2685916190939807849
+      type: {class: HandHasNoCostlyCardCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _minimumPrintedCost: 2
+    - rid: 2685916190939807850
+      type: {class: TakeRandomCostlyCardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _minimumPrintedCost: 2
     - rid: 7000000000000000000
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _trigger:
           rid: 7000000000000000001
         _conditions:
-        - rid: 7000000000000000002
+        - rid: 2685916190939807845
         _oneShot: 0
-        _oncePerTurn: 0
+        _oncePerTurn: 1
         _effects:
-        - rid: 7000000000000000003
+        - rid: 2685916190939807846
     - rid: 7000000000000000001
       type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 7000000000000000002
-      type: {class: HandHasNoJunkCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 7000000000000000003
-      type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-        _amount: 1
-        _amountSource: 0
-        _perXSource: 7
-        _multiplier: 1

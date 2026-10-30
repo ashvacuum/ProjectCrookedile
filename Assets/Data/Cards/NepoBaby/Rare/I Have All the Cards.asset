@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: b1cf29c415cd47b3ad61449168aae28a
   _cardName: I Have All the Cards
-  _cardType: 0
+  _cardType: 1
   _rarity: 2
   _artwork: {fileID: 21300000, guid: c10366479992e324e8440566ab865845, type: 3}
   _description: 

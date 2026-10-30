@@ -77,7 +77,7 @@ MonoBehaviour:
         _amountSource: 17
         _perXSource: 7
         _multiplier: 2
-        _maxAmount: 0
+        _maxAmount: 1
     - rid: 7000000000000000001
       type: {class: ReturnToHandEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:

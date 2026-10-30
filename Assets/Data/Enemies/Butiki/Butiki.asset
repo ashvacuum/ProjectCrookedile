@@ -19,17 +19,18 @@ MonoBehaviour:
   _maxHostility: 4
   _minHostility: -4
   _neutralZone: 0
-  _demographicClass: 0
-  _demographicValues: 0
   _startingEffects: []
   _passives: []
-  _movePattern: 0
+  _movePattern: 2
   _aggressiveMoves:
   - {fileID: 11400000, guid: 43fb34895c63358b2eba4da426c9448f, type: 2}
+  - {fileID: 11400000, guid: 44ba88abd87f82c4c8716002ae637551, type: 2}
   _neutralMoves:
   - {fileID: 11400000, guid: 019722689dd5fe3add7befc47c4aa261, type: 2}
+  - {fileID: 11400000, guid: 9f0e6fef21938ed4682455c2c0034e99, type: 2}
   _receptiveMoves:
   - {fileID: 11400000, guid: d22c4510061526bd42c8c435a0b95c5d, type: 2}
+  - {fileID: 11400000, guid: 5d87351b144a22945a8c1b772d04e068, type: 2}
   references:
     version: 2
     RefIds: []

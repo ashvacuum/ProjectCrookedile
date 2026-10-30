@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: No Comment
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 446b66875da070a4fa9ad00a672c838c, type: 3}
   _description: 
   _flavorText: 
   _costs:
@@ -32,7 +32,8 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685916122315751528
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -57,6 +58,14 @@ MonoBehaviour:
       type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _amount: 7
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _maxAmount: 0
+    - rid: 2685916122315751528
+      type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 12
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1

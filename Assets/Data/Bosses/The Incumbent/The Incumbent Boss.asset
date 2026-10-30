@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86b992bf36aaf884daef32caefd49ffd, type: 3}
+  m_Name: The Incumbent Boss
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Boss.BossData
+  _displayName: The Incumbent
+  _portrait: {fileID: 0}
+  _behavior: {fileID: 11400000, guid: 4519b6c8d7e4360408c81ccb109e0840, type: 2}
+  _bundles:
+  - _name: Opening statements
+    _moves:
+    - {fileID: 11400000, guid: 07efb5f68ee84cf6be124c3c9acab916, type: 2}
+    - {fileID: 11400000, guid: f5fd3911b15346db99e073ef8ea73a2d, type: 2}
+    _cooldownTurns: 0
+  - _name: Win them back
+    _moves:
+    - {fileID: 11400000, guid: da92bf0b788e44b7aa0ddf18ff5c0b3f, type: 2}
+    - {fileID: 11400000, guid: 31881faa41e34af785b6f3039eb27b37, type: 2}
+    - {fileID: 11400000, guid: f5fd3911b15346db99e073ef8ea73a2d, type: 2}
+    _cooldownTurns: 1
+  - _name: Protect the lead
+    _moves:
+    - {fileID: 11400000, guid: 94ca623218a34385800b81b73156e176, type: 2}
+    - {fileID: 11400000, guid: 89bb4b53e27248a18ff60bba0a9d6c60, type: 2}
+    - {fileID: 11400000, guid: f5fd3911b15346db99e073ef8ea73a2d, type: 2}
+    _cooldownTurns: 1
+  _fallbackBundleIndex: 0

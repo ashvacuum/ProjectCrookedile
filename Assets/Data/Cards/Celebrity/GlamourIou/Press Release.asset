@@ -16,9 +16,9 @@ MonoBehaviour:
   _cardName: Press Release
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 0}
-  _description:
-  _flavorText:
+  _artwork: {fileID: 21300000, guid: b6986b130c352b74d8b105a2b3444c9d, type: 3}
+  _description: 
+  _flavorText: 
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -82,7 +82,7 @@ MonoBehaviour:
       data:
         _value: 23
         _comparison: 0
-        _threshold: 6
+        _threshold: 4
         _then:
         - rid: 5000000000000000003
         _else: []

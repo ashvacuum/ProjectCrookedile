@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 1
   _rarity: 0
   _artwork: {fileID: 0}
-  _description:
-  _flavorText: 'The game was decided before you sat down.'
+  _description: 
+  _flavorText: The game was decided before you sat down.
   _costs:
   - _costType: 1
     _baseAmount: 1
@@ -32,7 +32,8 @@ MonoBehaviour:
   _passives: []
   _isUpgraded: 0
   _upgradedCosts: []
-  _upgradedEffects: []
+  _upgradedEffects:
+  - rid: 2685916146034540660
   _upgradedPassives: []
   _upgradedInnateRetain: 0
   _tags:
@@ -40,15 +41,23 @@ MonoBehaviour:
   _fantasies: 0
   _isStarterCard: 0
   _isUnlockable: 0
+  _unlockCondition:
+    rid: -2
   _isGeneratedOnly: 0
   _isUnplayable: 0
   _innateRetain: 0
   _cardVFX: {fileID: 0}
-  _configurationNotes:
+  _configurationNotes: 
   references:
     version: 2
     RefIds:
-    - rid: 7000000000000000000
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2685916146034540660
       type: {class: PutHandCardsOnTopEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _count: 2
+    - rid: 7000000000000000000
+      type: {class: PutHandCardsOnTopEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _count: 1

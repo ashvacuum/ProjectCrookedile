@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: NepoBabyConfig
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.NepoBabyConfig
   _modifiers:
-    SwayMultiplier: 1.15
-    ComposureMultiplier: 0.8
+    SwayMultiplier: 1
+    ComposureMultiplier: 1
   _policiesBurnable: 0
   _seedCanTargetJunk: 0
   _replaysRaiseHostilityByDefault: 0

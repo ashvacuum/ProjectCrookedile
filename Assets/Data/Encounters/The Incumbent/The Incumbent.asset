@@ -13,12 +13,16 @@ MonoBehaviour:
   m_Name: The Incumbent Session
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.BattleSession
   rounds:
-  - label: The Incumbent
+  - boss: {fileID: 11400000, guid: 14c015eec432478e9e77a152e4095f46, type: 2}
+    label: The Incumbent
     enemies:
-    - {fileID: 11400000, guid: db87f831eb2314243ad00dbd3ac46f28, type: 2}
+    - {fileID: 11400000, guid: 628c20c44b592fc4b80177c4e0a4f2af, type: 2}
+    - {fileID: 11400000, guid: d5405064066c0604eaf6030507f67e3b, type: 2}
+    - {fileID: 11400000, guid: ea1fd02b94a30a3197ca28e01af8ca7f, type: 2}
+    - {fileID: 11400000, guid: 07cfcc95147f1c4f7cb824b32787ec72, type: 2}
     maxTurns: 10
-    maxOpinion: 100
-    startingOpinion: 50
+    maxOpinion: 150
+    startingOpinion: 75
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
