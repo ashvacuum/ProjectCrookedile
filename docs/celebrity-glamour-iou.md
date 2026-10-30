@@ -1,6 +1,6 @@
 # Celebrity: Glamour / IOU / Promises
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-22
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-24
 >
 > **Summary:** Celebrity banks and spends Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points.
 >
@@ -47,10 +47,15 @@ Setup-turn plays and ordinary effect replays do not count. One qualifying play f
 A missed commitment collects at the end of that next turn, using remaining energy first, then Opinion.
 Fresh Debt keeps its normal deadline. Settle Up can remove ordinary or reserved Debt.
 
+A Collateral Policy (SupportPaysDebtEffect) makes Support pay what energy cannot, before Opinion, for the rest of the battle.
+Normal settlement uses the Support left over from last turn, set aside just before it expires; missed Promises use current Support.
+A delayed settlement spends no Support.
+
 ### Tokens, draws, and recovery
 
 Soundbite: 0 energy, 2 Sway, Exhaust. Movie Quote: 0 energy, gain 1 Glamour, Exhaust.
-Both are Rhetoric tokens excluded from acquisition pools.
+Both are Rhetoric tokens excluded from acquisition pools. Generated-only cards never upgrade (not by the Actor's first play,
+upgrade effects, or campaign upgrades); effects such as Signature Catchphrase transform them instead.
 Signature Catchphrase transforms existing Soundbites in every zone and future generated copies for this battle.
 It never changes the campaign deck or source assets.
 
@@ -60,7 +65,8 @@ The button is hidden when Glamour is insufficient, the hand is full, or draw and
 Playing the Policy does not open the current turn's window; extra copies do not grant extra activations.
 
 Second Take and Advance Booking charge Debt only when selection successfully moves a non-Exhaust card.
-Recovery preserves its normal energy cost and does not access Exhaust.
+Recovery preserves its normal energy cost unless the effect sets a cost reduction (-1 = free, N = N less, floor 0),
+which lasts the turn the card reaches hand (now for recovery, next turn for booking). Recovery does not access Exhaust.
 Booked cards arrive after next turn's normal draws; hand overflow goes to discard rather than losing the card.
 
 ### Starstruck
@@ -104,10 +110,10 @@ Charm Offensive is the rare hybrid exception to the four core defensive card typ
 - **Signature Catchphrase:** Rare Policy, 1 energy. All Soundbites become Movie Quotes for this battle.
 - **Victim Narrative:** Enhanced Rhetoric, 0 energy. Lose 5 Opinion bypassing Support; double Glamour. Exhaust.
 - **Disarming Charm:** Enhanced Rhetoric, 1 energy. Spend 2 Glamour to apply 3 Weakened to a hostile opponent.
-- **Overpromise:** Rare Rhetoric, 1 energy. Take 3 Debt; the next card this turn deals triple its Sway. Exhaust. Other effects are not tripled.
+- **Overpromise:** Rare Rhetoric, 1 energy. Take 3 Debt; the next card this turn that deals Sway deals triple its Sway (cards without Sway leave it armed; it lapses at your next turn). Exhaust. Other effects are not tripled.
 - **Payment Holiday:** Enhanced Rhetoric, 0 energy. Defer the next normal settlement; take 1 Debt. Exhaust.
 - **Paid-Off Promises:** Enhanced Rhetoric, 0 energy. Reserve up to 3 Debt; next turn's printed-cost-2+ play cancels it. Exhaust.
-- **Second Take:** Enhanced Rhetoric, 0 energy. Recover a non-Exhaust discard card; take 1 Debt.
+- **Second Take:** Enhanced Rhetoric, 0 energy. Recover a non-Exhaust discard card; take 1 Debt. Upgraded: the recovered card costs 0 this turn.
 - **Advance Booking:** Enhanced Rhetoric, 0 energy. Reserve a non-Exhaust draw-pile card for next turn; take 2 Debt.
 - **Never Meet Your Heroes:** Enhanced Rhetoric, 1 energy. Apply Starstruck to a non-hostile opponent.
 - **Charm Offensive:** Rare Pressure, X energy. Deal 2X Sway, gain 2X Support, reduce Hostility by X, in that order. X is energy actually spent; ordinary modifiers and subsequent crowd reaction apply.
@@ -142,7 +148,7 @@ Unlisted existing cards retain their existing values. New cards reuse Soundbite'
 Effects use the existing SerializeReference model, visible in the Database window's Building blocks tab.
 Each mechanic has its own effect type: MediaTrainingEffect, SignatureCatchphraseEffect, LineOfCreditEffect,
 OverpromiseEffect, PaidOffPromisesEffect, DisarmingCharmEffect, and CharmOffensiveEffect.
-Debt policies likewise use BailoutEffect, DebtWaiverEffect, and DelayDebtSettlementEffect.
+Debt policies likewise use BailoutEffect, DebtWaiverEffect, DelayDebtSettlementEffect, and SupportPaysDebtEffect.
 Unpaid Debt publishes DebtUnpaidEvent after the meter takes the hit; DebtUnpaidTrigger lets any passive react (Promissory Note).
 Choose the mechanic through the effect type picker; each exposes only its own named
 tuning fields. Enums may configure a single mechanic's target, source, filter, or amount formula; they must

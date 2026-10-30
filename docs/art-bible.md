@@ -1,6 +1,6 @@
 # Crookedile — Art Bible & Handoff Spec
 
-> **Kind:** Art · **Status:** Canonical · **Updated:** 2026-10-09
+> **Kind:** Art · **Status:** Canonical · **Updated:** 2026-10-31
 >
 > **Summary:** Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Database window's tabs are the live blank-slot checker.
 >
@@ -24,7 +24,7 @@
 >
 > **The campaign map wears this same look, in 2:1 isometric.** Same palette, same flat cel shading, same thin lines — only the projection differs. Spec: §9. Prompt: `docs/reference/iso-tile-prompt.md`.
 
-> **Card illustration is the exception (2026-10-02).** Card art is read at hand size, where Odd Taxi detail turns to clutter. Cards use the **icon style** in §3: one object, bold silhouette, flat colour blocks, one accent colour, plain background. Portraits, battle scene, map and UI keep the Odd Taxi direction above. `docs/reference/style-mock-prompt.md` still governs those; it no longer governs cards. Prompts live in `docs/crookedile-card-art-prompts.xlsx`.
+> **Cards use this look too (2026-10-26).** Card art is an Odd Taxi still-life vignette, not the one-object icon style used from 2026-10-02: a few ordinary objects that imply a moment, sometimes one quiet impossible detail, figures sparingly. Rules in §3; prompts live in `docs/crookedile-card-art-prompts.xlsx`.
 
 **Rendering style:** flat cel shading, even soft lighting, thin clean line work. Dusty warm palette over grey neutrals. No digital-oil rendering, no low-key vignette, no grain — flatness is the point, and the liveliness comes from colour and posture, not from lighting drama.
 
@@ -157,64 +157,19 @@ Per origin, shown face-down. `_defaultCardBack`, `_faithLeaderCardBack` (religio
 
 The `Character_NN` sprites are **placeholders** (random assignment). Real per-card art is authored **full-bleed 1500×2148, portrait**, subject framed in the **art-window safe zone**: roughly `x: 105–1395, y: 165–1200` (upper-center; the old 1000×1432 window scaled ×1.5). Keep critical detail out of the bottom ~45% (textbox) and the top ~8% (nameplate). Confirm the exact window against the frame PSD before final crops.
 
-### Card art style: icon, not scene
+### Card art style: Odd Taxi still life
 
-The art carries the card's meaning so the description text can stay small. Reference point: Deadlock's ability icons.
+The art carries the card's meaning so the description text can stay small. Reference prompt that set the direction: *an empty church pew, a single lit candle, a neatly folded barong draped over the backrest, nobody in the room.*
 
-- **One object + one verb.** One focal object whose shape or motion shows the effect. Two elements maximum, nothing behind them.
-- **Silhouette first.** It must read as a solid shape at hand size. If it needs detail to be understood, simplify it.
-- **Flat colour blocks** with a clean thick inked outline. No texture, gradients, glows or soft shadows.
-- **Palette:** three base colours plus **one saturated accent** per card (gold for Faith Leader, hot pink for Celebrity, emerald green for Nepo Baby). Frame colour already encodes type; the art does not repeat it.
-- **Plain solid background**, centred subject.
-- **Effect to shape:** damage = the object moving toward a target (thrust, motion arcs); defense = an enclosing or blocking shape (shield, ring, closed hand); draw = a fan of cards or one card sliding out; status = the object that stands for it; Flock / group = repeated identical silhouettes (3 or more); delayed = a still, waiting object.
-- **Avoid:** scenes, crowds of distinct people, faces carrying the meaning, fine detail that vanishes at card size.
+- **Still life.** Two to four ordinary objects that imply a moment: someone just left, something is about to happen. The room tells the joke; nothing explains it.
+- **One quiet twist** on about a third of cards: one impossible detail played straight (a shadow that kneels, steam shaped like sheep). Magical realism, never fantasy: no wands, sparkles, runes or creatures.
+- **Figures** on about a third of cards, one or two at most: plain silhouettes, hands at the frame edge, or grounded anthropomorphic animals in ordinary clothes. Never a crowd, never the focus.
+- **Odd Taxi rendering:** thin even linework, flat cel shading, subtle paper grain, the muted warm palette above, soft even light.
+- **Accent:** the only saturated colour, per class: gold Faith Leader, hot pink Celebrity, emerald green Nepo Baby, purple Heckle, crimson Scandal.
+- **Framing:** subject in the upper centre two thirds; the lower 45% stays quiet for the textbox.
+- **Check at hand size** (~650px tall). If the moment doesn't read there, cut an object.
 
-### Art briefs — Faith Leader (all 38 built cards)
-
-One brief per card, from `Assets/Data/Cards/FaithLeader`. The mechanic summary comes from each card's effect list; the Midjourney-ready version of each brief is in `docs/crookedile-card-art-prompts.xlsx`.
-
-| Card | Rarity | Type | Brief |
-|---|---|---|---|
-| Sermon | Basic | Pressure | a single raised open palm thrust forward with three motion arcs, one gold accent |
-| Pressure | Basic | Pressure | one clenched fist pressing down onto a flat slab, one gold accent |
-| Guilt | Basic | Pressure | one heavy weight hanging from a thin chain, one gold accent |
-| Sow Discord | Basic | Pressure | one pointing finger above a single question mark, one gold accent |
-| Drown out the Haters | Basic | Pressure | one megaphone with thick sound arcs pushing outward, one gold accent |
-| Holier Than Thou | Basic | Pressure | one raised chin and pointing nose above a halo ring, one gold accent |
-| Impenetrable Belief | Basic | Pressure | one thick round shield with a cross cut into its face, one gold accent |
-| Quiet Reflection | Basic | Rhetoric | one closed eye above a still ripple ring, one gold accent |
-| Shepherd's Joy | Basic | Rhetoric | one shepherd's crook with a single smiling sheep, one gold accent |
-| Silent Majority | Basic | Rhetoric | one closed mouth with a finger pressed to its lips, one gold accent |
-| Stir the Flock | Basic | Rhetoric | one wooden spoon stirring a swirl of identical sheep, one gold accent |
-| Support | Basic | Rhetoric | one open hand holding up a single gold star |
-| Traitor to the Cause | Basic | Rhetoric | one broken chain link with a dagger through it, one gold accent |
-| Absolve Sins | Enhanced | Pressure | one hand releasing a chain of broken links upward, one gold accent |
-| Blessed are the Persecuted | Enhanced | Pressure | one thorn crown glowing with a halo, one gold accent |
-| I am speaking | Enhanced | Pressure | one raised palm in front of a crossed-out mouth, one gold accent |
-| Name and Shame | Enhanced | Pressure | one pointing finger with a single speech bubble cracked in half, one gold accent |
-| Preach | Enhanced | Pressure | one lectern with a megaphone fused on top, one gold accent |
-| Quiet the Haters | Enhanced | Pressure | one hand over a row of three silenced mouths, one gold accent |
-| Retribution | Enhanced | Pressure | one gavel striking down with impact lines, one gold accent |
-| Sacrificial Lamb | Enhanced | Pressure | one lamb on an altar, one gold glow |
-| The Other Cheek | Enhanced | Pressure | one cheek turned toward a stopped slapping hand, one gold accent |
-| United Faith | Enhanced | Pressure | three identical hands clasped in a ring, one gold accent |
-| Word is Law | Enhanced | Pressure | one open book stamped by a single gavel, one gold accent |
-| Call out the Wicked | Enhanced | Rhetoric | one pointing finger aimed at a single dark silhouette, one gold accent |
-| Congregation | Enhanced | Rhetoric | five identical silhouettes filing toward one gold doorway |
-| Faith | Enhanced | Rhetoric | one steady flame inside a lantern, one gold accent |
-| God's Chosen | Enhanced | Rhetoric | one gold crown floating above a single raised hand |
-| Hallelujah | Enhanced | Rhetoric | two arms thrown up with gold light above |
-| Insinuate | Enhanced | Rhetoric | one raised eyebrow above a sideways glance, one gold accent |
-| Persecution Complex | Enhanced | Rhetoric | one pointing finger turned back at its own chest, one gold accent |
-| Praise | Enhanced | Rhetoric | two hands clapping with a gold spark between them |
-| Fruits of Conversion | Enhanced | Policy | one fruit branch with a single gold fruit |
-| Gospel | Enhanced | Policy | one open book radiating a single beam of light, one gold accent |
-| Have you no Shame? | Enhanced | Policy | one pointing finger above a bowed head, one gold accent |
-| The World Is Against Us | Rare | Rhetoric | one small circle of figures facing out, shielded by a thick ring, one gold accent |
-| Us vs Them | Rare | Policy | one thick vertical line dividing two identical silhouettes, one gold accent |
-| Zealotry | Rare | Policy | one burning torch held aloft, one gold accent |
-
-*(Card-art prompts for all three classes are in `crookedile-card-art-prompts.xlsx` (Nepo Baby tab added 2026-10-03, emerald green accent). Nepo Baby & Celebrity briefs are not written yet. Their card lists now exist — Nepo Baby's 42 cards in `nepo-baby-class.md` §5–6, Celebrity's Glamour/IOU set in `celebrity-glamour-iou.md` — so both are ready for the same template. Until art lands, Nepo cards can't appear in reward offers: cards without artwork are skipped.)*
+Per-card subjects, the style block and the assembled prompts are in `docs/crookedile-card-art-prompts.xlsx` (Settings, Art Rules, one tab per class).
 
 ---
 
@@ -224,10 +179,10 @@ Flat / single-color silhouette style, readable at a ~32px badge. Author white-on
 
 - **Player debuffs:** Weakened, Vulnerable, Frail, Entangled, Exposed, Confused, Silenced, Stunned, Rattled, Smear
 - **Player buffs:** Strength, Dexterity, Focus, Energized, Plated, Regeneration, Intangible, Thorns, Ritual, Momentum, Echo
-- **Faith Leader pacify:** Guilt, Shame, Doubt, Jaded
+- **Faith Leader pacify:** Guilt, Jaded (Shame and Doubt retired 2026-10-31; no icons needed)
 - **Hostility flags (on enemies):** Hardened, Fanatic, Devotion, Turncoat
 
-Suggested motifs for the FL-relevant ones (these drive readability of our lead class): **Guilt** = downcast weight/chain; **Shame** = face-cover/blush mask; **Doubt** = wavering question mark; **Jaded** = cracked halo / rolling eyes; **Hardened** = stone wall; **Fanatic** = wide-eyed flame; **Turncoat** = flipped/two-face.
+Suggested motifs for the FL-relevant ones (these drive readability of our lead class): **Guilt** = downcast weight/chain; **Jaded** = cracked halo / rolling eyes; **Hardened** = stone wall; **Fanatic** = wide-eyed flame; **Turncoat** = flipped/two-face.
 
 ---
 
@@ -263,7 +218,7 @@ Square bust, head-and-shoulders, facing camera from slightly below (they sit at 
 | Swing Voter | receptive | Turncoats if provoked | A soft-spoken chameleon in an ordinary polo, eyes drifting to one side, hopeful and wary at once |
 | The Fixer | neutral | Summons muscle | A watchful monitor lizard *(bayawak)* holding a phone low under the desk, eyes up on you the whole time |
 | Curious Student ⚑ | — *(no casting yet)* | — | **Proposed:** a young maya (sparrow) in a university lanyard and plain shirt, notebook open, actually listening — the only face in the row that isn't performing |
-| The Incumbent ⚑ | hostile (15, range 10…60) · final boss | Rigged room; no moves authored | **Proposed:** an old, heavy crocodile in a perfectly tailored barong with a sash, three decades of campaign posters behind him; your own species thirty years further in — flat, patient, utterly unimpressed |
+| The Incumbent ⚑ | rival boss above the row · final boss | Rigged room: his machine (2 Loyal Partisans, Swing Voter, Tandang); moves in `boss-brain.md` | **Proposed:** an old, heavy crocodile in a perfectly tailored barong with a sash, three decades of campaign posters behind him; your own species thirty years further in — flat, patient, utterly unimpressed |
 
 `docs/enemy-design-bible.md` §4 specifies a **different, animal-named roster** (Askal, Maya, Carabao, Parrot, Rat, Cat Tita, Musang, Butiki, Bayawak, Ahas, Tandang, Peacock, Agila, Uwak, Gagamba) across 15 encounters. The nine assets above are the older generic set. Docs are canonical, so **do not commission the nine as final** until the roster question is settled — otherwise you pay for portraits the encounter tables never call. See §10.5.
 
@@ -282,10 +237,10 @@ Small icons rendered next to the cost number. Author white/tintable.
 ## 8. Priority order for the artist (highest leverage first)
 1. **3 rarity overlays** — currently identical; biggest readability win, tiny scope.
 2. **5 distinct type frames** — only 3 exist; the color taxonomy is core to reading a hand.
-3. **FL pacify status icons** (Guilt/Shame/Doubt/Jaded) + the 26 others — gameplay legibility for our lead class.
+3. **FL pacify status icons** (Guilt/Jaded) + the 26 others — gameplay legibility for our lead class.
 4. **10 intent icons** — needed to read the enemy turn.
 5. **7 prototype enemy portraits.**
-6. **Per-card illustrations** — Faith Leader 15 first (briefs in §3), others as their lists lock.
+6. **Per-card illustrations** — Faith Leader 15 first (subjects in the card-art workbook), others as their lists lock.
 7. **Campaign-map iso set** (§9) — starts when the campaign layer needs to look like anything; the HQ anchor first, then ground/road tiles, then buildings. Greybox is acceptable until then, so this stays last.
 
 ---
@@ -452,7 +407,7 @@ read in a relic tray at ~48 px.
 1. **The enemy roster is two different sets** (§6). It decides whether you commission 9 portraits or ~15.
 2. **Three "Enhanced" cards are authored as Basic rarity**: Holier Than Thou, Impenetrable Belief and Sermon sit in
    `Cards/FaithLeader/Enhanced/` with `_rarity: 0`, so they'd get the plain overlay.
-3. **The Incumbent** (final boss) has no portrait, no moves and no casting; it needs a design pass first.
+3. **The Incumbent** (final boss) has moves and a room now (`boss-brain.md`) but no portrait or casting yet.
 4. **The reference of record** `docs/design/crookedile-style-v4-oddtaxi.png` is not in the repo (§0.1).
 
 ---

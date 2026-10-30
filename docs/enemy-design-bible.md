@@ -1,6 +1,6 @@
 # Crookedile — Enemy Design Bible (v2, shared-meter model)
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-26
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-31
 >
 > **Summary:** The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete.
 >
@@ -16,14 +16,14 @@
 |---|--------|--------|--------|
 | P1 | Win axis: the shared Opinion Meter | ONE meter per room. Player pushes it up (Sway); enemies push it down / block it. Fill it = win the room. Directional shields: enemies place up-block shields, player places down-block shields. | LOCKED (core design) |
 | P2 | Loss axis: player Credibility | Player Credibility hits 0 = run over. Enemy attacks (Smears/Exposés/Red-tags) damage Credibility. Support = the block analog. | ~~LOCKED~~ → META resource, parked (2026-07-08) |
-| P3 | Enemies are conditions, not HP bars | Not "killed." Managed: statused (Guilt/Shame/Doubt), Silenced, state-flipped, converted (Fanatic), corrupted. Room ends when the METER fills. | LOCKED (core design) |
+| P3 | Enemies are conditions, not HP bars | Not "killed." Managed: statused (Guilt), Silenced, state-flipped, converted (Fanatic), corrupted. Room ends when the METER fills. | LOCKED (core design) |
 | P4 | Hostile / Receptive states + Echo Chamber | Per-enemy states modify behavior and card effectiveness. ECHO CHAMBER: if ALL enemies are Receptive, meter gains are HALVED and the meter decays. Keep ≥1 non-receptive enemy — managing the mix IS the game. | LOCKED (needs design pass on UI/holdout) |
 | P5 | Role × Stance variety engine | 7 roles: Pusher, Shielder, Amplifier, Converter, Inflictor, Escalator, Protector. Variety from role combos + stances, not bespoke stat blocks. | LOCKED |
 | P6 | One question per encounter | Each encounter composition asks one deck question — usually in the COMBO of roles, not a single enemy. | LOCKED |
 | P7 | Every room has a clock | Meter decay, enemy ramp (Escalator), shield stacking, Credibility chip, deck pollution. No free turtling. | LOCKED |
 | P8 | Readable intents (voice intents) | Telegraphed via the 21-glyph set. Conditional intents allowed ("Counter-Argues IF you play Rhetoric"). Constrained randomness in move pools. | LOCKED |
 | P9 | Bosses = rigged rooms | Separate, untargetable rival candidates contest the same meter through committed bundles of 2–3 revealed moves. Rivals never count toward Echo Chamber or audience effects. Phases use Opinion, turns and audience changes. Incumbent = final boss. | LOCKED (core design §5) |
-| P10 | Archetype asymmetry | Rate encounters vs Nepo Baby (burn / pull / replay, Hostility as his clock, rot-sensitive), Faith Leader (Guilt/Shame/Doubt→Fanatic engine, Jaded escalator), Celebrity (Glamour / IOU: Scrutiny punishes leaked hits, Debt bills land next turn). No encounter uniformly hard. | IN PROGRESS |
+| P10 | Archetype asymmetry | Rate encounters vs Nepo Baby (burn / pull / replay, Hostility as his clock, rot-sensitive), Faith Leader (Guilt→Fanatic engine, Jaded escalator), Celebrity (Glamour / IOU: Scrutiny punishes leaked hits, Debt bills land next turn). No encounter uniformly hard. | IN PROGRESS |
 | P11 | Theme & act framing | Anthro Filipino animals + mythological creatures, Spiritfarer-adjacent painterly register. Wardrobe = class satire. Acts: Barangay → City → National (proposed). Metagame: 30-day campaign, Debate milestone boss. | LOCKED / PROPOSED |
 
 ## 2. Room Anatomy — shared meter model
@@ -34,7 +34,7 @@
 | Directional shields | Blockers on the meter. Enemy shields block UP; player shields block DOWN. | Player places down-block shields (Support/Rhetoric tools); can strip enemy up-shields. | Shielder role places/refreshes up-shields. |
 | Player Credibility | *(META resource — campaign layer, parked)* | Guard with Support; heal rarely. | Smear/Exposé/Red-tag moves chip it. Which roles carry Credibility attacks = D8. |
 | Enemy states (Hostile/Receptive) | Per-enemy behavior modes. | Flip states via cards/statuses; MANAGE the mix — all-Receptive triggers Echo Chamber penalty. | Converters drag Receptives back to Hostile; some (Televangelist) weaponize Echo Chamber deliberately. |
-| Statuses on enemies | Guilt, Shame, Doubt (pacify trio), Silence, Devotion, Jaded, Hardened, Fanatic, Turncoat, Warded. | FL engine: stack G/S/D to 3+Jaded → consume → Fanatic follows your attacks and defends while the buff lasts → reverts with Jaded. Jaded = permanent per-enemy escalator (anti-milking). | Hardened resists statuses; Protectors guard allies via Warded stacks. |
+| Statuses on enemies | Guilt (the pacify status; Shame and Doubt retired 2026-10-31), Silence, Devotion, Jaded, Hardened, Fanatic, Turncoat, Warded. | FL engine: stack Guilt to 3+Jaded → consume → Fanatic follows your attacks and defends while the buff lasts → reverts with Jaded. Jaded = permanent per-enemy escalator (anti-milking). | Hardened resists statuses; Protectors guard allies via Warded stacks. |
 | The row | Ordered enemy positions. Adjacency matters (Praise). | Target selection, positional cards, enemy summons occupy slots. | Amplifier/Converter range limits (proposed D10), summon insertion (bosses). |
 | Clocks | Anti-stall pressure. | Race or control. | Escalator ramps, meter decay, shield stacking, pollution, Credibility chip. |
 
@@ -64,7 +64,7 @@
 
 ## 4. Act 1 — Barangay Politics (encounter compositions)
 
-Enemies are conditions → the QUESTION lives in the role combo. Every room has at least two enemies at the start, so the state mix (and the echo chamber) is always in play; an elite may open alone only when its own summons fill the row (The Dynast).
+Enemies are conditions → the QUESTION lives in the role combo. Every enemy push goes through Support (2026-10-30): no move ignores it, so shields always matter; heavy hits come from bigger numbers, not from bypassing defence. Every room has at least two enemies at the start, so the state mix (and the echo chamber) is always in play; an elite may open alone only when its own summons fill the row (The Dynast).
 
 | ID | Slot | Encounter | Members (animal — roles — key moves & targets) | The Question | Clock | vs Nepo | vs Faith | vs Celeb |
 |---|---|---|---|---|---|---|---|---|

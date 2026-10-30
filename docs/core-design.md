@@ -1,6 +1,6 @@
 # Crookedile — Core Design Doc
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-26
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-31
 >
 > **Summary:** The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions.
 >
@@ -31,6 +31,12 @@ There are **no enemy HP pools**. Shields exist purely to guard the opinion meter
 
 The meter is **live** — it adjusts in real time during both the player action phase and the enemy action phase, so every card play and every enemy intent visibly moves it.
 
+**Winning (2026-10-27):** filling the meter wins immediately and emptying it loses immediately. At the turn limit
+(Judgment) you win only at or above the **win line, 60% of the meter** (`BattleManager` Judgment Win Percent).
+Edging past half is a loss: the room wants a clear verdict, so a good setup pays off and a careless one fails.
+Margin also shapes the reward: a win at **80%+** draws from a better card pool, and a **maxed meter guarantees at
+least one Rare** (see `campaign-encounters.md` §10).
+
 ---
 
 ## 3. Hostility
@@ -51,9 +57,9 @@ Hostile enemies are **not purely a problem** — they are a resource. You want t
 Both are **statuses** (can be applied and potentially removed), not fixed enemy types. Each archetype relates differently: Faith Leader is frustrated by Hardened (conversion kit fails), Celebrity loves Hardened (free permanent villain), Nepo Baby barely notices it (his calming stops at Neutral anyway, so Hardened only blocks reducers that convert incidentally).
 
 ### Status list (working)
-Guilt · Shame · Doubt · Silence · Devotion · Jaded · Hardened · Fanatic · Turncoat · Glamour (Celebrity, on the player)
+Guilt · Silence · Devotion · Jaded · Hardened · Fanatic · Turncoat · Glamour (Celebrity, on the player)
 
-*Faith Leader's core statuses:* **Guilt** (weakens enemy push), **Shame** (drops enemy shield), **Doubt** (soft reluctance to act) are *pacify statuses* (count toward conversion, consumed on convert). **Jaded** is a *threshold status* (permanent, stacks, raises pacify cost, never consumed). See §7 Faith Leader.
+*Faith Leader's core status:* **Guilt** (weakens enemy push) is her one *pacify status* (counts toward conversion, consumed on convert). Shame and Doubt were retired on 2026-10-31. **Jaded** is a *threshold status* (permanent, stacks, raises pacify cost, never consumed). See §7 Faith Leader.
 
 ---
 
@@ -82,7 +88,7 @@ A rival candidate is a separate entity above the audience row. The rival has no 
 
 At each player-turn start, Behaviour Designer selects one named bundle containing **two or three moves**. All moves reveal together in numbered execution order. The bundle stays committed throughout card play; randomly selected hostile/receptive audience targets also reveal and remain committed even if their stance changes. A target absent at reveal stays absent for that move. Group effects resolve against the live audience.
 
-The opponent phase resolves the rival's moves in their displayed order, then audience modifier intents, then audience direct intents. Reaching full Opinion wins immediately; reaching zero loses immediately. Timed Judgment uses the existing majority rule, after the final opponent response in a boss debate. Standard fights retain their existing Judgment timing.
+The opponent phase resolves the rival's moves in their displayed order, then audience modifier intents, then audience direct intents. Reaching full Opinion wins immediately; reaching zero loses immediately. Timed Judgment uses the win line (60% of the meter), after the final opponent response in a boss debate. Standard fights retain their existing Judgment timing.
 
 The planning tree runs only during intent declaration and stops before player input. Its conditions can inspect Opinion, audience stance counts, player turn, Support and Denial. Bundle cooldowns prevent repetitive plans; a valid two/three-move bundle with no cooldown is the fallback. Effects use the existing move/effect system. Player delayed-effect wrappers are unsupported for rival moves; represent later threats with future planning bundles.
 
@@ -192,23 +198,20 @@ status and a number that live on cards, not a separate class meter.
 ### Faith Leader — *the converter* (status specialist)
 **Spine (as concrete as Nepo Baby's burn):**
 
-> **Stack statuses (Guilt / Shame / Doubt, any mix) on an enemy to the pacify threshold. This consumes the statuses and converts them. Normal enemy → becomes a Fanatic, a loyal follower that copies your attacks and defends for as long as the Fanatic buff lasts, then is disillusioned and reverts to neutral. Hardened enemy → silenced instead (can't be converted, but can be shut up).**
+> **Stack Guilt on an enemy to the pacify threshold. This consumes the Guilt and converts them. Normal enemy → becomes a Fanatic, a loyal follower that copies your attacks and defends for as long as the Fanatic buff lasts, then is disillusioned and reverts to neutral. Hardened enemy → silenced instead (can't be converted, but can be shut up).**
 >
 > **Pacify threshold = 3 + the enemy's Jaded stacks.** Each time an enemy is fanaticized they gain a stack of **Jaded** (permanent for the fight, never consumed), raising their future conversion cost by 1. So a fresh enemy converts at 3; a once-burned backslider at 4; twice at 5; etc. **This is the anti-milking brake** — re-converting the same person hits diminishing returns, pushing you to win *new* converts rather than farm one target. On-fantasy: a believer who's already lapsed is harder to inspire again.
 
 **Two status categories (keep distinct):**
-- **Pacify statuses** (Guilt / Shame / Doubt) — *you* apply them, they count toward the threshold, **consumed on conversion**.
+- **Pacify status** (Guilt) — *you* apply it, it counts toward the threshold, **consumed on conversion**.
 - **Threshold status** (Jaded) — applied *automatically* on each fanaticization, **modifies** the requirement, **permanent & never consumed**, does **NOT** count toward its own threshold. Stacks. Visible on the enemy so the player reads conversion cost directly off the Jaded count.
 
-**The status kit** — each status blunts one specific enemy behavior *while* counting toward the pacify threshold (so the climb is self-protecting):
-
-| Status | Blunts | Note |
-|---|---|---|
-| **Guilt** (≈Weakened) | Enemy's *push* on the meter (offense) | softens their Condemn |
-| **Shame** | Enemy's *shielding* of the meter (Rebuke/defense) | they can't defend opinion |
-| **Doubt** | Enemy's *willingness to act* (soft, partial reluctance) | distinct from Preach's hard guaranteed silence |
-
-All three count equally toward conversion: **any 3 = pacify.**
+**One status: Guilt *(2026-10-31)*.** Guilt (≈Weakened) blunts the enemy's *push* on the meter *while* counting
+toward the pacify threshold, so the climb is self-protecting: **3 Guilt = pacify** (plus Jaded). Shame and Doubt were
+retired: three interchangeable statuses split her payoff cards three ways (draw the wrong setup and the payoff was
+dead) and crowded the enemy with markers. Every setup card now feeds every payoff card; variety lives in what the
+payoffs give, not in which status they need. Guilt was kept because blunting the push answers her real weakness,
+damage taken.
 
 **Lifecycle:** stack to threshold (3 + Jaded) → consume pacify statuses → the enemy becomes a **Fanatic**, your loyal follower, for as long as the Fanatic buff lasts → when it runs out the follower is **disillusioned**: it **reverts to neutral** + gains a **Jaded** stack. No permanent emitters. The class is **relentlessly active** — every turn is spent either stacking toward the next conversion or using the followers you have. Kills auto-pilot; you can never coast on a built board, and you can't infinitely milk one target (Jaded escalation).
 
@@ -222,8 +225,8 @@ config.*
   length: through the end of your next turn, so a Fanatic converted by your last play still follows a full turn), and
   cards can extend it. When it runs out the follower is **disillusioned**: it reverts to neutral and gains Jaded.
 - **It follows your plays.** Each time you play a card:
-  - that pushes the meter (an **attack**), every Fanatic also pushes: **+2 Opinion each**;
-  - that gains Support (a **defend**), every Fanatic adds to it: **+2 Support each**;
+  - that pushes the meter (an **attack**), every Fanatic also pushes: **+4 Opinion each** (`FaithLeaderConfig`, raised from 2 on 2026-10-30);
+  - that gains Support (a **defend**), every Fanatic adds to it: **+3 Support each** (raised from 2);
   - that does both, both happen.
 - **If you do neither, they shout the room down.** At the end of your turn, if you played no attack and no defend card
   and converted **2 or more** enemies this turn, each Fanatic **Silences** one non-Fanatic enemy (most hostile first)
@@ -236,6 +239,31 @@ config.*
 - **Harvest cards** (Sermon) scale off Fanatics present or conversions this turn.
 
 **Echo-chamber immunity (emergent):** because converts revert to *neutral* (not receptive), Faith Leader's core engine can't accidentally fill the row with permanent receptives — so playing their identity doesn't self-trigger the all-receptive penalty. The other two classes make *lasting* allies and genuinely risk the echo chamber; Faith Leader's allies are momentary, so they're naturally immune. (On non-converting turns they still want a hostile present — the **Hardened-enemy-as-permanent-villain** interaction handles this: can't convert them, so they reliably keep you out of the echo chamber; silence them only if too loud.)
+
+**Status engine *(2026-10-30, Guilt-only 2026-10-31)*.** Placeholder cards, all keyed to Guilt:
+
+- *Setup.* **Confession** (Rhetoric, Basic, 1): 2 Guilt on a target; upgraded 3, a full conversion in one card. **Force
+  Majeure** (Rhetoric, Rare, 2): 1 Guilt on every hostile enemy (2 upgraded); the angrier the room, the wider it lands.
+  **Still Small Voice** (Policy, Enhanced, 1; upgraded 0): whenever an enemy turns hostile, it gains 1 Guilt, so riling
+  the room feeds conversion.
+- *Payoff while Guilt sits on enemies,* so setup turns aren't dead turns: **Searching Souls** (Rhetoric, Basic, 1;
+  upgraded 0): draw 1 per guilty enemy. **Public Penance** (Pressure, Basic, 1): 4 Opinion against each guilty enemy
+  (6 upgraded). **Heavy Conscience** (Rhetoric, Basic, 1): 4 Support per guilty enemy (6 upgraded). **Fire and
+  Brimstone** (Rhetoric, Enhanced, 2; upgraded 1): for each guilty enemy, gain 1 Strength until end of turn, so every
+  Opinion hit that turn deals +1 per guilty enemy.
+- *Conversion payoff.* Her 3-cost payoffs (Us vs Them, Zealotry, The World Is Against Us, Gospel, Hallelujah, Faith) cost
+  1 less per enemy converted this turn, so a conversion turn is a payoff turn.
+
+The starter swaps one Support for Confession (Pressure ×5, Support ×4, Guilt, Traitor to the Cause, Confession).
+
+**Full house: energy for courting the echo chamber *(2026-10-30)*.** A second, deliberately risky lane beside
+conversion. Calming (not converting) can turn the *whole* room receptive, which is the echo chamber: gains halved and the
+meter decaying. Faith Leader is paid for taking that risk in **energy**, the resource she otherwise lacks, so a full
+house funds the big plays that break it again. Placeholder cards: **Tithe** (Policy, Enhanced, 1; upgraded 0): at the
+start of your turn, if every enemy is receptive, gain 2 energy (3 upgraded). **Altar Call** (Rhetoric, Basic, 1): reduce
+a target's Hostility by 3 (4 upgraded); then if every enemy is receptive, gain 1 energy. **Answered Prayer** (Pressure,
+Basic, 1): 4 Opinion (6 upgraded); then if every enemy is receptive, gain 1 energy. The check is the room's state when
+the card resolves (`RoomFullyReceptive`), so the energy comes once per play.
 
 **Hard counter / fear:** a row of **Hardened** enemies starves Faith Leader (can't be pacified). On-fantasy: the preacher is powerless against true non-believers. **Leash:** disruption — losing setup or being rushed before reaching 3 stacks.
 
@@ -299,12 +327,10 @@ The engine and status kit are in §7.
 | Rebuke (offense) | 3 | 1e | Small opinion push | basic |
 | Pray (defense) | 2 | 1e | Small opinion shield **+ draw a card** | basic *(elevated — setup class needs hand fuel)* |
 | Call Out Sin | 1 | 1e | Push one receptive enemy toward hostile | hostility / echo-chamber escape |
-| **Guilt** | 2 | 1e | Apply Guilt (weakens push) + counts toward pacify | **identity (stacker)** |
-| **Shame** | 2 | 1e | Apply Shame (drops shield) + counts toward pacify | **identity (stacker)** |
-| **Doubt** | 1 | 1e | Apply Doubt (soft reluctance) + counts toward pacify | **identity (stacker)** |
+| **Guilt** | 5 | 1e | Apply Guilt (weakens push) + counts toward pacify | **identity (stacker)** |
 | **Sermon** | 1 | 2e | Harvest: scales with Fanatics present / conversions this turn | **identity (payoff + villain-wanting)** |
 
-**Why this set:** all three status types are present so the player learns the **any-3-to-convert** rule directly, and each status visibly does a *defensive* job too (so stacking never feels wasted). A first-timer stacks two statuses, sees the enemy isn't converting yet, adds a third, watches them flip to a Fanatic that joins their next attack — the whole engine taught in one sequence. Sermon shows the harvest/payoff and wants a villain present.
+**Why this set:** Guilt is present enough that the player learns the **3-Guilt-to-convert** rule directly, and it visibly does a *defensive* job too (so stacking never feels wasted). A first-timer stacks two Guilt, sees the enemy isn't converting yet, adds a third, watches them flip to a Fanatic that joins their next attack — the whole engine taught in one sequence. Sermon shows the harvest/payoff and wants a villain present.
 
 **Echo-chamber immunity:** converts revert to *neutral*, so Faith Leader's engine never floods the row with permanent receptives → can't self-trigger the all-receptive penalty. (Still wants a hostile present on non-converting turns; a Hardened enemy is the ideal permanent villain.)
 
@@ -326,7 +352,7 @@ Once starters feel right, sketch the **subset of directions** each class's *rewa
 
 - **Nepo Baby** — three lanes plus valves (full card list in `nepo-baby-class.md` section 6): **Burn** (Executive Privilege, Dynasty, Legacy Admission, Encore, Born Into It, Bail Out; Trust Fund as an unlock-gated Rare), **Pull and scan** paid in Hostility (Inside Information, Background Check, Call in a Favor, Special Order), a deliberately sparse **Return** lane (I Know a Guy, Heirloom, Family Seat, Hand-Me-Downs), a slow **Calm** lane capped at Neutral (Apology Tour, Smooth Things Over, Smooth Operator), and **valves** that each cost something (Skip the Line, VIP Access, Do-Over, Not My Problem). Cap valves per reward screen so he stays a glass cannon.
 - **Celebrity** — bank and spend **Glamour** (Iconic Line, Media Training, Victim Narrative, Disarming Charm), borrow **Debt** for tempo (Cash Advance, Fine Print, Second Take, Line of Credit, Overpromise), and earn relief through **Promises** (Paid-Off Promises). Pick villains with **Aggravate** (Callout, Rage Bait, Feud, Tell-All Interview, Settle the Score, Manufactured Outrage) and pay for **Soothe** with Glamour or Debt (Photo With a Fan, Empty Promise, Red Carpet, Star Power, NDA, Beloved). Soundbites connect the engines; Signature Catchphrase turns them into Movie Quotes. Full list in `celebrity-glamour-iou.md`.
-- **Faith Leader** — **multi-status-per-card** cards (apply 2 statuses at once, so conversion isn't always 3 turns — a priority), bigger **harvest payoffs** that scale off Fanatics present (Sermon, Crusade), over-stacking past 3 for a bigger burst, Preach-style hard-silence tools, cards that exploit the *defensive* side of statuses (e.g. punish a Shamed enemy harder). Status-interaction *texture* (Guilt+Shame combos differently) lives here, not in core.
+- **Faith Leader** — **multi-Guilt** cards (apply 2+ Guilt at once, so conversion isn't always 3 turns — a priority), bigger **harvest payoffs** that scale off Fanatics present (Sermon, Crusade), over-stacking past 3 for a bigger burst, Preach-style hard-silence tools, cards that exploit the *defensive* side of Guilt (e.g. punish a guilty enemy harder). Texture comes from what Guilt payoffs give, not from status combinations.
 
 This is where each class's *potential* lives. Starters only teach the verb; rewards reveal the ceiling.
 
