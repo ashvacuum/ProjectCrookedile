@@ -1,6 +1,6 @@
 # Boss Brain — Authoring and Runtime
 
-> **Kind:** Systems · **Status:** Built · **Updated:** 2026-10-04
+> **Kind:** Systems · **Status:** Built · **Updated:** 2026-10-30
 >
 > **Summary:** Author Behaviour Designer boss plans, tune ordered move bundles, and understand commitment, cooldowns, targeting and fallback behavior.
 >
@@ -62,6 +62,24 @@ The supplied [Rival Planning subtree](../Assets/Data/Bosses/Debate%20Prototype/R
 A higher-priority branch on cooldown also falls through to the next branch. For example, Protect the lead can be selected on turn 1, then Win them back can be selected on turn 2 if the defensive bundle is unavailable and the audience condition passes.
 
 Tune **when** a plan appears through tree thresholds and branch priority. Tune **how often** it appears through bundle cooldown. Tune **what it does** through move effects and their order. Tune the overall fight through audience composition, Opinion settings and the turn limit. The prototype is a starting point for playtesting, not a balanced difficulty target.
+
+## The Incumbent (final boss)
+
+[`The Incumbent Boss`](../Assets/Data/Bosses/The%20Incumbent/The%20Incumbent%20Boss.asset) reuses the prototype's Rival
+Planning subtree: its three bundles carry the same names, so the same branches pick them.
+
+| Bundle | Moves | Cooldown |
+|---|---|---:|
+| Opening statements (fallback) | Machine Politics (already-hostile audience +1 Hostility) → Record of Service (−6 Opinion through Support) | 0 |
+| Win them back (2+ receptive) | Pork Barrel (revealed receptive +6 Hostility) → Patronage (revealed hostile +1 Ward) → Record of Service | 1 |
+| Protect the lead (Opinion 75%+) | Incumbency (+6 Denial) → Red-Tagging (−8 Opinion through Support) → Record of Service | 1 |
+
+Losing to him ends the run, whatever Credibility is left. His room is his machine: a Loyal Partisan, a Devotee, a Swing Voter (the prize, starts receptive) and Tandang
+(Denial). Machine Politics only hardens members already hostile, so anyone you win over stays won and his Win them
+back bundle has a reason to fire. His meter is **150, starting at 75**, so no single burst ends the fight (his
+turn-limit line is 90, the strong-reward tier 120, and maxing it, 150, offers 4 Rares to pick from). Ten turns. The day-1–7 sheet asks for three phases gated on Opinion; the shared tree gates one
+branch on Opinion and one on the receptive count. For true Opinion phases, use **Database → Bosses → Duplicate boss,
+tree and moves** and retune the copy's thresholds in Behaviour Designer.
 
 ## Cooldowns and fallback
 

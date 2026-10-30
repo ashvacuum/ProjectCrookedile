@@ -1,6 +1,6 @@
 # Nepo Baby: Burn / Return / Calm class spec (v0.1)
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-27
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-28
 >
 > **Summary:** The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders.
 >
@@ -128,8 +128,8 @@ everything".
   Upgraded: 3/3. The late-fight finisher.
 - **Spin Doctor** (Rhetoric, 1): burn a Heckle or Scandal from hand and lower target Hostility by 1.
 - **Golden Parachute** (Policy, one-shot, 1, exhaust): burn a Heckle or Scandal from hand and draw 2.
-- **Silver Spoon** (Policy, persistent): at the start of your turn, if your hand has no Heckles or Scandals, gain 1
-  energy.
+- **Silver Spoon** (Policy, persistent): at the start of your turn, if your hand has no card costing 2+, take a random
+  card costing 2+ from your draw pile (a Pull), or from your discard pile if the draw pile has none.
 - **Old Boys' Club** (Policy, persistent, Enhanced, 1): the first Rhetoric card you play each turn refunds 1 energy, up
   to the energy actually paid (0-cost cards give nothing). Replays do not count and never trigger it.
 
@@ -187,7 +187,8 @@ everything".
 - **Do-Over** (2, not exhaust): discard your hand and draw that many cards; raise Hostility on all enemies by 1. A paid,
   weaker Mulligan, so the passive stays valuable.
 - **Bail Out** (0, exhaust): burn up to 3 cards from hand; gain 2 energy per burned card with printed cost 2+.
-- **That Was Supposed to Be Mine** (2): remove a buff from target enemy.
+- **That Was Supposed to Be Mine** (1, exhaust): take a card from your exhaust pile back into hand (not Heckles or
+  Scandals); raise Hostility on all enemies by 2. The Burn lane's only way back.
 - **Not My Problem** (1, once per turn): move up to 2 Hostility from one enemy to another.
 - **I Know You Are But What Am I** (1): this turn, the first time Opinion damage gets through Support, gain Sway equal
   to that damage.
@@ -326,8 +327,10 @@ Audited 2026-10-03. Items marked **Resolved** are settled; the rest are still op
 9. **Calm caps at Neutral.** **Resolved:** `ReduceHostilityEffect` has a stop-at-Neutral option.
 10. **Missing effects.** **Resolved:** see section 13.
 11. **Starter deck slot.** **Resolved:** the Nepo Baby origin entry lists the 10-card starter.
-12. **Cards without art are never offered.** Still open: no Nepo card has art, so none appears in reward offers.
-    Starter cards are unaffected. Use the `addcard` dev-console command to test pool cards.
+12. **Cards without art are never offered.** **Resolved (2026-10-28):** art no longer gates rewards; a card without
+    art is offered with a blank frame, and the Database Cards tab's Art filter lists it as art to generate. What
+    gates the pool instead is an authored upgrade: a card without one is unfinished and never offered (Heckles,
+    Scandals and generated-only cards are exempt).
 13. **Policies leaked across classes.** **Resolved:** `GenerateRewardOffer` offered every Policy to every class.
     A Policy tagged with another origin is now kept out of that class's offers; untagged Policies stay universal.
 14. **Upgraded costs were ignored.** **Resolved:** card play read the base cost list even on upgraded cards. It now

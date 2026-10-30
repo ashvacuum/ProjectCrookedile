@@ -55,7 +55,7 @@ LINK_RE = re.compile(r"(?<!!)\[[^\]]*\]\(([^)\s]+)\)|!\[[^\]]*\]\(([^)\s]+)\)")
 TABS = {"FaithLeader": "Faith Leader", "Status": "Faith Leader", "Curses": "Faith Leader", "Celebrity": "Celebrity", "NepoBaby": "Nepo Baby"}
 CARD_TYPES = ["Pressure", "Rhetoric", "Policy", "Heckle", "Scandal"]
 RARITIES = ["Basic", "Enhanced", "Rare"]
-PROMPT_FORMULA = '=Settings!$B$2&" - "&E{r}&", "&Settings!$B$5&" "&Settings!$B$3&IF(Settings!$B$4<>""," --sref "&Settings!$B$4,"")'
+PROMPT_FORMULA = '=Settings!$B$2&" SUBJECT: "&E{r}&" "&Settings!$B$3'
 
 
 def format_header(kind, status, updated, summary, source, related):
