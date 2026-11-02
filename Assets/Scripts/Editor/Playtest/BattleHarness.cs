@@ -113,6 +113,66 @@ namespace Crookedile.EditorTools.Playtest
                 energyLots.Add((src, gained));
             }
             void OnTurnEnded(TurnEndedEvent e) => energyLots.Clear(); // unspent bonus energy is gone
+
+            // Setup credit: a Fanatic's follow pushes are shared among the plays that made it (the
+            // Guilt fuel and the conversion), so setup cards score for the payoff they bought.
+            // ponytail: keyed by enemy index (a mid-battle summon shifts it) and a re-Fanatic'd
+            // enemy keeps its old makers unless it converts again; per-enemy ids if that matters.
+            var lastRow = new Dictionary<string, int>(); // card -> its latest play's row
+            var fuelRows = new Dictionary<int, List<int>>(); // enemy -> rows that Guilted it
+            var fanaticRows = new Dictionary<int, List<int>>(); // enemy -> rows that made it a Fanatic
+            var setupCredit = new Dictionary<int, int>(); // row -> Opinion credited
+            int SourceRow()
+            {
+                if (firingPassives.Count > 0)
+                    return lastRow.TryGetValue(firingPassives.Peek(), out int row) ? row : -1;
+                // The play in progress takes the next row once it lands.
+                return playing != null ? rec.Plays.Count : -1;
+            }
+            void OnStatus(StatusEffectAppliedEvent e)
+            {
+                if (e.IsToPlayer || e.Stacks <= 0)
+                    return;
+                int row = SourceRow();
+                if (row < 0)
+                    return;
+                if (e.Behavior != null && e.Behavior.CountsTowardPacify)
+                {
+                    if (!fuelRows.TryGetValue(e.EnemyIndex, out var rows))
+                        fuelRows[e.EnemyIndex] = rows = new List<int>();
+                    rows.Add(row);
+                }
+                else if (e.Behavior is FanaticStatus && !fanaticRows.ContainsKey(e.EnemyIndex))
+                    fanaticRows[e.EnemyIndex] = new List<int> { row }; // made a Fanatic without converting
+            }
+            void OnConverted(EnemyConvertedEvent e)
+            {
+                fuelRows.Remove(e.EnemyIndex, out var fuel);
+                if (e.WasSilenced)
+                    return;
+                var rows = fuel ?? new List<int>();
+                int converter = SourceRow();
+                if (converter >= 0)
+                    rows.Add(converter);
+                fanaticRows[e.EnemyIndex] = rows.Distinct().ToList();
+            }
+            void OnFanaticPush(DamageDealtEvent e)
+            {
+                if (
+                    e.IsToPlayer
+                    || e.AttackerName != "Fanatic"
+                    || e.Applied <= 0
+                    || !fanaticRows.TryGetValue(e.SourceEnemyIndex, out var rows)
+                    || rows.Count == 0
+                )
+                    return;
+                for (int i = 0; i < rows.Count; i++)
+                {
+                    // Even split; the first maker takes the remainder.
+                    int share = e.Applied / rows.Count + (i == 0 ? e.Applied % rows.Count : 0);
+                    setupCredit[rows[i]] = (setupCredit.TryGetValue(rows[i], out int c) ? c : 0) + share;
+                }
+            }
             // Every drop of the meter, not DamageDealtEvent: smears go straight through the ledger
             // and never publish one, and they are exactly the hits worth counting.
             void OnOpinion(OpinionChangedEvent e)
@@ -140,6 +200,9 @@ namespace Crookedile.EditorTools.Playtest
             EventBus.Subscribe<DamageDealtEvent>(OnHit);
             EventBus.Subscribe<ActionPointsChangedEvent>(OnEnergy);
             EventBus.Subscribe<TurnEndedEvent>(OnTurnEnded);
+            EventBus.Subscribe<StatusEffectAppliedEvent>(OnStatus);
+            EventBus.Subscribe<EnemyConvertedEvent>(OnConverted);
+            EventBus.Subscribe<DamageDealtEvent>(OnFanaticPush);
             Application.logMessageReceived += OnLog;
 
             try
@@ -222,6 +285,7 @@ namespace Crookedile.EditorTools.Playtest
                                     ? Mood.Neutral
                                 : target.Stats.IsHostile ? Mood.Hostile
                                 : Mood.Receptive;
+                            int fanatics = FanaticCount(bm);
                             int roomBefore = RoomHostilitySum(bm);
                             float roomAvgBefore = RoomHostilityAvg(bm);
                             int lotsBefore = energyLots.Count; // energy banked before this card was paid for
@@ -287,8 +351,10 @@ namespace Crookedile.EditorTools.Playtest
                                         OpinionDelta = delta,
                                         RoomHostilityDelta = RoomHostilitySum(bm) - roomBefore,
                                         Turn = bm.PlayerTurnsElapsed + 1,
+                                        Fanatics = fanatics,
                                     }
                                 );
+                                lastRow[card.CardName] = rec.Plays.Count - 1;
                             }
                             else
                             {
@@ -318,6 +384,15 @@ namespace Crookedile.EditorTools.Playtest
                 rec.WinLine = result.winLine;
                 rec.MaxOpinion = bm.MaxOpinion;
                 rec.Judgment = setup.maxTurns.HasValue && rec.Turns >= setup.maxTurns.Value;
+
+                foreach (var (row, credit) in setupCredit)
+                {
+                    if (row >= rec.Plays.Count)
+                        continue; // credited to a play that never landed
+                    var sample = rec.Plays[row];
+                    sample.SetupOpinion += credit;
+                    rec.Plays[row] = sample;
+                }
             }
             finally
             {
@@ -333,6 +408,9 @@ namespace Crookedile.EditorTools.Playtest
                 EventBus.Unsubscribe<DamageDealtEvent>(OnHit);
                 EventBus.Unsubscribe<ActionPointsChangedEvent>(OnEnergy);
                 EventBus.Unsubscribe<TurnEndedEvent>(OnTurnEnded);
+                EventBus.Unsubscribe<StatusEffectAppliedEvent>(OnStatus);
+                EventBus.Unsubscribe<EnemyConvertedEvent>(OnConverted);
+                EventBus.Unsubscribe<DamageDealtEvent>(OnFanaticPush);
                 Application.logMessageReceived -= OnLog;
 
                 // OnDestroy disposes the passive resolver and crowd, taking their bus subscriptions
@@ -342,6 +420,10 @@ namespace Crookedile.EditorTools.Playtest
             yield return null;
             onDone?.Invoke(result);
         }
+
+        /// <summary>Living Fanatics in the room (Silenced or Stunned ones included).</summary>
+        public static int FanaticCount(BattleManager bm) =>
+            bm.Enemies.Count(e => !e.IsDefeated && e.StatusEffects.HasStatus<FanaticStatus>());
 
         private static TurnSnapshot Snapshot(BattleManager bm)
         {

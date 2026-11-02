@@ -9,8 +9,8 @@ using Crookedile.Utilities;
 namespace Crookedile.Gameplay.Battle
 {
     /// <summary>
-    /// Owns how the room (the enemy crowd) reacts during a battle:
-    ///   • hostility shifts from played cards (singling someone out),
+    /// Owns how the room (the enemy crowd) reacts during a battle (playing a card never shifts
+    /// Hostility by itself; every raise or drop is an explicit effect on the card):
     ///   • the Echo Chamber rule (all-receptive → halved gains + decay),
     ///   • the Turncoat cascade (a receptive enemy flipping hostile).
     ///
@@ -142,62 +142,6 @@ namespace Crookedile.Gameplay.Battle
                     $"Echo chamber decay: -{_echoChamberDecayPerTurn} opinion"
                 );
             }
-        }
-
-        #endregion
-
-        #region Card reactions
-
-        /// <summary>
-        /// Applies the room's reaction to a played card: the single-target "singling someone out"
-        /// hostility bump and an echo-chamber refresh. Policy cards author their hostility
-        /// shifts as explicit effects — no implicit demographic reaction.
-        /// </summary>
-        public void OnCardPlayed(CardData card, EnemyController focusedEnemy, int focusedIndex)
-        {
-            ApplySingleTargetHostilityRaise(card, focusedEnemy, focusedIndex);
-            RefreshEchoChamberState();
-        }
-
-        /// <summary>
-        /// If the played card has any effect targeting a single enemy (<see cref="TargetType.Opponent"/>),
-        /// raises the focused enemy's Hostility by 1 — the escalation of singling someone out.
-        /// Does not apply to AoE or self-targeting cards.
-        /// </summary>
-        private void ApplySingleTargetHostilityRaise(
-            CardData card,
-            EnemyController focusedEnemy,
-            int focusedIndex
-        )
-        {
-            bool isSingleTarget = false;
-            if (card.Effects != null)
-            {
-                foreach (var effect in card.Effects)
-                {
-                    if (effect.Target == TargetType.Opponent)
-                    {
-                        isSingleTarget = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!isSingleTarget)
-                return;
-            if (focusedEnemy == null || focusedEnemy.IsDefeated)
-                return;
-
-            // BattleStats publishes the indexed HostilityChangedEvent itself.
-            int old = focusedEnemy.Stats.CurrentHostility;
-            focusedEnemy.Stats.GainHostility(1);
-            focusedEnemy.CheckBecameHostile();
-
-            if (focusedEnemy.Stats.CurrentHostility != old)
-                GameLogger.LogInfo<CrowdReactions>(
-                    $"Single-target card '{card.CardName}' raised hostility on [{focusedIndex}] "
-                        + $"{focusedEnemy.EnemyData.EnemyName}: {old} → {focusedEnemy.Stats.CurrentHostility}"
-                );
         }
 
         #endregion

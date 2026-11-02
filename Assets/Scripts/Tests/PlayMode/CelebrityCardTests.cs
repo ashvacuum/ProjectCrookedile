@@ -565,8 +565,8 @@ namespace Crookedile.Tests
             Assert.AreEqual(3, _battle.CardPlay.LastEnergyPaid);
             Assert.AreEqual(0, _battle.Celebrity.PromisedDebt);
             Assert.AreEqual(6, _battle.CurrentSupport);
-            // The ordinary crowd reaction raises Hostility by one after the card's -3.
-            Assert.AreEqual(3, _battle.Enemies[0].Stats.CurrentHostility);
+            // The card's -3 is the only Hostility change: playing a card shifts none by itself.
+            Assert.AreEqual(2, _battle.Enemies[0].Stats.CurrentHostility);
             yield return null;
         }
 

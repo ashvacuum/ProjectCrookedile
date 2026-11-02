@@ -44,7 +44,8 @@ least one Rare** (see `campaign-encounters.md` §10).
 Hostility is the heart of the game. It exists as both:
 
 1. **An enemy stance** — enemies start outwardly hostile, neutral, or meek/receptive.
-2. **A card element** — cards can seed, manage, redirect, or amplify hostility deliberately.
+2. **A card element** — cards can seed, manage, redirect, or amplify hostility deliberately. Playing a card never
+   shifts Hostility by itself (ruling 2026-11-02): every raise or drop is an explicit effect on the card.
 
 **Hostility sets behaviour, never numbers (ruling 2026-09-29).** An enemy's hostility decides its stance, and the stance decides which of its authored move lists it draws from (hostile / neutral / receptive). A hostile enemy hits harder only because its hostile moves are authored harder — hostility is never a damage multiplier. (An earlier `1 + 0.5 × hostility` multiplier on enemy pushes was removed: it turned every riling card into a compounding damage spiral.)
 

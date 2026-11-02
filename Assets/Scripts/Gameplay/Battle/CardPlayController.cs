@@ -12,7 +12,7 @@ namespace Crookedile.Gameplay.Battle
     /// <summary>
     /// Owns the player card-play pipeline, extracted from BattleManager: cost
     /// validation/payment, the Celebrity first-card-upgraded passive, the VFX handshake,
-    /// effect resolution side-effects (crowd reaction, Momentum, Echo replay), and the
+    /// effect resolution side-effects (echo-chamber refresh, Momentum, Echo replay), and the
     /// Confused hand-override bookkeeping.
     ///
     /// BattleManager owns the battle flow and decides WHEN a card may be played
@@ -265,8 +265,7 @@ namespace Crookedile.Gameplay.Battle
             if (ctx.ShouldExhaust || card.IsActivatedPassive)
                 _mgr.PlayerDeck.ExhaustPlayedCard(card);
 
-            // The crowd reacts: policy/single-target hostility shifts + echo-chamber refresh.
-            _mgr.Crowd.OnCardPlayed(card, _mgr.FocusedEnemy, _mgr.FocusedEnemyIndex);
+            _mgr.Crowd.RefreshEchoChamberState();
             foreach (var enemy in _mgr.Enemies)
                 enemy.CheckBecameHostile();
             _mgr.CheckAndAdvanceFocusAfterCardPlay();
@@ -334,8 +333,8 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Resolves <paramref name="card"/>'s effects again without it leaving its pile — a
         /// replay. Not a play: it publishes <see cref="CardReplayedEvent"/>, never
-        /// <see cref="CardPlayedEvent"/>, so "first card each turn" effects ignore it, and it adds
-        /// no single-target Hostility. Policies never replay (their passives would re-activate).
+        /// <see cref="CardPlayedEvent"/>, so "first card each turn" effects ignore it. Policies
+        /// never replay (their passives would re-activate).
         /// Returns false when nothing replayed (no card, a Policy, or the battle ended).
         /// </summary>
         public bool ReplayCard(CardData card)
@@ -386,7 +385,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>
         /// Plays a card that is no longer in hand (Blow the Allowance's burned card) for free. It
         /// IS a play — counted, and published as <see cref="CardPlayedEvent"/> so play triggers
-        /// fire — but it adds no single-target Hostility and pays no energy. The card stays in
+        /// fire — but it pays no energy. The card stays in
         /// whatever pile it is in.
         /// </summary>
         public void PlayOutOfHand(CardData card)
@@ -413,8 +412,7 @@ namespace Crookedile.Gameplay.Battle
 
         /// <summary>
         /// The room settles after extra effects resolve: stance transitions, echo chamber,
-        /// focus. The single-target Hostility bump is deliberately absent (that belongs to
-        /// playing a card from hand).
+        /// focus.
         /// </summary>
         private void SettleAfterResolution()
         {

@@ -103,7 +103,7 @@ namespace Crookedile.Gameplay.Battle
                         fanatic.StatusEffects.ModifyDamageDealt(config.FollowSwayPerFanatic + bonus),
                         toPlayer: false,
                         attackerName: "Fanatic",
-                        sourceEnemyIndex: -1,
+                        sourceEnemyIndex: fanatic.Stats.OwnerEnemyIndex,
                         targetEnemyIndex: -1
                     );
                 if (defend)
