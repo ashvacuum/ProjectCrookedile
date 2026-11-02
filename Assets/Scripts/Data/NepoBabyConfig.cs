@@ -45,11 +45,12 @@ namespace Crookedile.Data
 
         [Title("Replays")]
         [Tooltip(
-            "Open question 8.4. Does every replay raise Hostility on all enemies by 1? Off: only "
-                + "cards that say so (Encore, Dynasty, Trust Fund) charge Hostility for a replay."
+            "Open question 8.4. Hostility every replay raises on all enemies. 0: only cards that "
+                + "say so (Encore, Dynasty, Trust Fund) charge Hostility for a replay."
         )]
+        [MinValue(0)]
         [SerializeField]
-        private bool _replaysRaiseHostilityByDefault = false;
+        private int _replayHostilityPerEnemy = 0;
 
         [Title("Energy refunds")]
         [Tooltip(
@@ -71,7 +72,7 @@ namespace Crookedile.Data
         public ClassModifiers Modifiers => _modifiers;
         public bool PoliciesBurnable => _policiesBurnable;
         public bool SeedCanTargetJunk => _seedCanTargetJunk;
-        public bool ReplaysRaiseHostilityByDefault => _replaysRaiseHostilityByDefault;
+        public int ReplayHostilityPerEnemy => _replayHostilityPerEnemy;
         public bool RefundCappedAtEnergyPaid => _refundCappedAtEnergyPaid;
         public int ReturnInTurnCostIncrease => _returnInTurnCostIncrease;
 

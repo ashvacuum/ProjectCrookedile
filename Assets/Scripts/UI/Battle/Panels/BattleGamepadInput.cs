@@ -72,6 +72,13 @@ namespace Crookedile.UI.Battle
             if (_active && MouseMoved())
                 Release();
 
+            // Off-turn and while a picker is up, the result panel or the picker owns the pad.
+            if (Battle == null || !Battle.IsPlayerTurn || CardPickerPanel.IsOpen)
+            {
+                FocusCard(null);
+                return;
+            }
+
             if (!_active)
             {
                 if (step == 0 && !submit && !cancel && !endTurn)
@@ -79,12 +86,6 @@ namespace Crookedile.UI.Battle
                 // A mouse click leaves its button selected; Submit must not also press it.
                 EventSystem.current?.SetSelectedGameObject(null);
                 _active = true;
-            }
-
-            if (Battle == null || !Battle.IsPlayerTurn)
-            {
-                FocusCard(null);
-                return;
             }
 
             if (_hand == null)

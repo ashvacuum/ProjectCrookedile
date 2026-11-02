@@ -74,16 +74,10 @@ MonoBehaviour:
         _target: 4
         _statusesToConvert:
         - rid: 5004226247261945866
-        - rid: 5004226247261945867
-        - rid: 5004226247261945868
         _bufferStatus:
           rid: 5004226247261945961
         _stacksPerAward: 1
         _awards:
-        - Behavior:
-            rid: 5004226247261945962
-          Stacks: 1
-          Duration: 2
         - Behavior:
             rid: 5004226247261945963
           Stacks: 1
@@ -97,16 +91,7 @@ MonoBehaviour:
     - rid: 5004226247261945866
       type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 5004226247261945867
-      type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 5004226247261945868
-      type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
     - rid: 5004226247261945961
-      type: {class: JadedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 5004226247261945962
       type: {class: JadedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
     - rid: 5004226247261945963

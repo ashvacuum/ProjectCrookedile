@@ -72,6 +72,7 @@ MonoBehaviour:
           rid: 5004226315283595266
         _effects:
         - rid: 5004226315283595267
+        - rid: 5004226315283595290
     - rid: 5004226315283595266
       type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
@@ -102,6 +103,7 @@ MonoBehaviour:
           rid: 5004226315283595271
         _effects:
         - rid: 5004226315283595272
+        - rid: 5004226315283595292
     - rid: 5004226315283595271
       type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
@@ -118,4 +120,32 @@ MonoBehaviour:
         _duration: 0
     - rid: 5004226315283595273
       type: {class: StrengthStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226315283595290
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _target: 11
+        _behavior:
+          rid: 5004226315283595291
+        _stacks: 1
+        _stacksSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _duration: 0
+    - rid: 5004226315283595291
+      type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 5004226315283595292
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _target: 11
+        _behavior:
+          rid: 5004226315283595293
+        _stacks: 1
+        _stacksSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _duration: 0
+    - rid: 5004226315283595293
+      type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 

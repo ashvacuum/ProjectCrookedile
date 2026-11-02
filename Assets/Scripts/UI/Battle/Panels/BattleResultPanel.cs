@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Crookedile.UI.Battle
@@ -57,6 +58,9 @@ namespace Crookedile.UI.Battle
             if (defeatPanel != null)
                 defeatPanel.SetActive(!isVictory);
             PushAsPopup();
+            // Selected so a gamepad's Submit presses Continue; a mouse click works as before.
+            if (_continueButton != null && _continueButton.gameObject.activeInHierarchy)
+                EventSystem.current?.SetSelectedGameObject(_continueButton.gameObject);
         }
 
         /// <summary>Hides the popup and both faces.</summary>

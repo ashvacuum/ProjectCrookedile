@@ -17,6 +17,6 @@ MonoBehaviour:
     ComposureMultiplier: 1
   _policiesBurnable: 0
   _seedCanTargetJunk: 0
-  _replaysRaiseHostilityByDefault: 0
+  _replayHostilityPerEnemy: 0
   _refundCappedAtEnergyPaid: 1
   _returnInTurnCostIncrease: 1

@@ -12,13 +12,18 @@ namespace Crookedile.Gameplay.Battle
     /// <see cref="OnPlayerTurnEnd"/> before statuses tick. A card that pushed the meter makes
     /// every Fanatic push; a card that gained Support makes every Fanatic add Support. A turn with
     /// neither, and enough conversions, ends with each Fanatic Silencing an enemy. A Silenced or
-    /// Stunned Fanatic doesn't follow. Numbers come from <see cref="FaithLeaderConfig"/>.
+    /// Stunned Fanatic doesn't follow. A Fanatic whose conversion consumed pacify stacks past the
+    /// threshold follows harder (over-stacking), and a Fanatic's Strength adds to its push.
+    /// Numbers come from <see cref="FaithLeaderConfig"/>.
     /// </summary>
     [Debuggable("PacifyConversion", LogLevel.Info)]
     public class FanaticFollowers
     {
         private readonly OpinionLedger _opinion;
         private readonly IReadOnlyList<EnemyController> _enemies;
+
+        // Pacify stacks each converted enemy's conversion consumed past the threshold.
+        private readonly Dictionary<BattleStats, int> _stacksPastThreshold = new();
 
         public FanaticFollowers(OpinionLedger opinion, IReadOnlyList<EnemyController> enemies)
         {
@@ -36,6 +41,25 @@ namespace Crookedile.Gameplay.Battle
         {
             AttacksThisTurn = 0;
             DefendsThisTurn = 0;
+            // ponytail: a converted enemy keeps its over-stack until the turn after it stops
+            // being a Fanatic, so one re-made Fanatic the same turn inherits it.
+            foreach (
+                var stats in _stacksPastThreshold
+                    .Keys.Where(s =>
+                        !_enemies.Any(e => e.Stats == s && e.StatusEffects.HasStatus<FanaticStatus>())
+                    )
+                    .ToList()
+            )
+                _stacksPastThreshold.Remove(stats);
+        }
+
+        /// <summary>A conversion consumed this many pacify stacks past its threshold.</summary>
+        public void RecordConversion(BattleStats enemy, int stacksPastThreshold)
+        {
+            if (stacksPastThreshold > 0)
+                _stacksPastThreshold[enemy] = stacksPastThreshold;
+            else
+                _stacksPastThreshold.Remove(enemy);
         }
 
         /// <summary>
@@ -52,6 +76,16 @@ namespace Crookedile.Gameplay.Battle
                 AttacksThisTurn++;
             if (defend)
                 DefendsThisTurn++;
+            Follow(attack, defend);
+        }
+
+        /// <summary>
+        /// Every following Fanatic pushes (<paramref name="attack"/>) and/or adds Support
+        /// (<paramref name="defend"/>). Command cards call this directly; it doesn't count as you
+        /// playing an attack or a defend.
+        /// </summary>
+        public void Follow(bool attack, bool defend)
+        {
             if (!attack && !defend)
                 return;
 
@@ -60,21 +94,25 @@ namespace Crookedile.Gameplay.Battle
             foreach (var fanatic in Followers())
             {
                 followers++;
+                _stacksPastThreshold.TryGetValue(fanatic.Stats, out int extra);
+                int bonus = extra * config.FollowBonusPerExtraStack;
+                // The push is the Fanatic's own pressure, so its outgoing statuses (Strength,
+                // Weakened) apply to it.
                 if (attack)
                     _opinion.ApplyOpinionShift(
-                        config.FollowSwayPerFanatic,
+                        fanatic.StatusEffects.ModifyDamageDealt(config.FollowSwayPerFanatic + bonus),
                         toPlayer: false,
                         attackerName: "Fanatic",
                         sourceEnemyIndex: -1,
                         targetEnemyIndex: -1
                     );
                 if (defend)
-                    _opinion.GainSupport(config.FollowSupportPerFanatic);
+                    _opinion.GainSupport(config.FollowSupportPerFanatic + bonus);
             }
 
             if (followers > 0)
                 GameLogger.LogInfo<FanaticFollowers>(
-                    $"{followers} Fanatic(s) followed your card"
+                    $"{followers} Fanatic(s) followed"
                         + $"{(attack ? " — push" : "")}{(defend ? " — Support" : "")}"
                 );
         }

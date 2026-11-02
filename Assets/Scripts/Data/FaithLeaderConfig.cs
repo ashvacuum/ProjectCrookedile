@@ -40,6 +40,14 @@ namespace Crookedile.Data
         private int _followSupportPerFanatic = 2;
 
         [Tooltip(
+            "Over-stacking: extra Opinion and Support a Fanatic follows with for each pacify stack "
+                + "its conversion consumed past the threshold."
+        )]
+        [MinValue(0)]
+        [SerializeField]
+        private int _followBonusPerExtraStack = 1;
+
+        [Tooltip(
             "Conversions you must make in a turn, playing no attack and no defend card, before "
                 + "each Fanatic Silences an enemy at the end of your turn."
         )]
@@ -60,6 +68,7 @@ namespace Crookedile.Data
         public int ConversionThreshold => _conversionThreshold;
         public int FollowSwayPerFanatic => _followSwayPerFanatic;
         public int FollowSupportPerFanatic => _followSupportPerFanatic;
+        public int FollowBonusPerExtraStack => _followBonusPerExtraStack;
         public int SilenceMinConversions => _silenceMinConversions;
         public int SilenceStacks => _silenceStacks;
         public int JadedOnDisillusion => _jadedOnDisillusion;

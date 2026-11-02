@@ -1,6 +1,6 @@
 # Nepo Baby: Burn / Return / Calm class spec (v0.1)
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-28
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-11-02
 >
 > **Summary:** The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders.
 >
@@ -231,7 +231,7 @@ Hostility) live on its card asset, where the Database window audits them. Asset:
 | | Support multiplier | 0.8 | Every Support Nepo Baby's cards grant |
 | Burn | Policies burnable | false | Decided. Checked by `NepoBabyRules.CanBurn`, the one Burn check |
 | | Seed can target junk | false | Open question 8.1 |
-| Replays | Replays raise Hostility by default | false | Open question 8.4 |
+| Replays | Hostility every replay raises on all enemies (`ReplayHostilityPerEnemy`) | 0 | Open question 8.4 |
 | Energy refunds | Refund capped at energy paid | true | Old Boys' Club |
 | Return lane | Return in-turn cost increase | 1 | Applied by every Return-lane effect; stacks per return |
 

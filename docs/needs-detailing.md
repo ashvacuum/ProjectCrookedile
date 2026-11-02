@@ -1,6 +1,6 @@
 # Needs Detailing — design questions awaiting a decision
 
-> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-10-23
+> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-11-02
 >
 > **Summary:** Design questions awaiting a call, ordered by how much they block. Read before authoring content.
 >
@@ -30,25 +30,23 @@ Still to detail, all with a placeholder in the ruling:
 **Built (2026-10-23):** follow-on-attack, follow-on-defend, the quiet-turn Silence, skipping its action against you,
 and disillusion (neutral + Jaded) run in `FanaticFollowers` and `FanaticStatus`, with every placeholder in
 `Resources/FaithLeaderConfig`. Conversion pays no burst. Attack/defend is read off what the card did (pushed the
-meter / gained Support). **Not built:** command cards, over-stacking (+1 follow per stack past the threshold), and
-cards that extend the buff. **Open:** Gospel and God's Chosen still award Jaded at conversion, so a converted enemy
-now pays Jaded twice (once from the card, once on disillusion).
+meter / gained Support). **Built (2026-11-02):** over-stacking (each pacify stack a conversion consumed past its threshold adds
+`FollowBonusPerExtraStack` to that Fanatic's push and Support), command cards **Lead the Charge** (`FanaticsPushEffect`)
+and **Close Ranks** (`FanaticsSupportEffect`) next to the existing silence-now card **Shun the Infidels**, and buff
+extension by composition (`ForEachEnemyWithStatus` Fanatic → apply Fanatic to `TriggeringEnemy`; Hallelujah adds 1
+turn). A Fanatic's Strength adds to its push. Gospel and God's Chosen no longer award Jaded at conversion: it arrives once, on disillusion.
 
-## 2. Intent vocabulary (blocks: enemy roster authoring)
-
-Code uses `EnemyMoveType` (Attack/Defend/DefendOpinion/RileOthers/...); the design doc uses Rally/Rebuke/Sway/Condemn/Murmur. Pick one vocabulary before authoring 6–8 enemies, or every enemy asset gets touched twice. Also detail Sway (convert receptive→hostile) and Murmur (low-impact presence) — both specified, neither has a concrete effect list.
-
-## 3. Celebrity class passive (blocks: nothing — the class plays without one)
+## 2. Celebrity class passive (blocks: nothing — the class plays without one)
 
 Glamour / IOU is the Celebrity (2026-10-03). The "first card each battle is played upgraded" passive was locked for
 the old Celebrity and nobody has ruled whether it carries over; the code points the Actor origin at a Nepo-style
 mulligan placeholder (`Daddy's Gifts`). Decide: keep the upgraded first card, or a passive that touches Glamour or Debt.
 
-## 4. Nepo Baby open questions (blocks: Nepo build)
+## 3. Nepo Baby open questions (blocks: Nepo build)
 
 The class was redesigned (2026-10-03, `nepo-baby-class.md`): no Patronage, no summons. Open questions with their defaults are in that doc's section 8 (seed vs junk, "I'm Just Like You" type, whether replays raise Hostility, Hostility-scaled junk injection, Friends in High Places). Section 12 lists the conflicts with the old code and how each was resolved; Patronage is removed, and the summon effect stays for enemy content.
 
-## 5. CardType colour taxonomy carries no meaning as authored
+## 4. CardType colour taxonomy carries no meaning as authored
 
 Pressure (green, persuade) vs Rhetoric (red, aggressive) is applied at random: draw-only cards
 sit in Rhetoric, and pressure is split across both. The colours are load-bearing for the player
@@ -59,7 +57,10 @@ stop pretending to be one.
 
 ## Resolved
 
-- **Card highlight** (2026-10-09, not built): a card in hand glows when **a condition on it is met** right now
+- **Intent vocabulary** (2026-11-02): players see the core-design words (Condemn / Rebuke / Rally / Turn / Murmur, plus
+  Summon / Ward / Counter). `EnemyMoveType` is unchanged; the mapping and each word's effects are in
+  `naming-glossary.md` §C. The enemy "Sway" became **Turn** so it doesn't clash with the player's Sway.
+- **Card highlight** (2026-10-09, built in `CardButton`'s Condition Highlight): a card in hand glows when **a condition on it is met** right now
   (target is Hostile, Debt is owed, the enemy has a status). Boosted numbers are not a highlight; they belong on
   the card's own numbers, once damage, Aggravate and Soothe preview per target. Combos are out: there's no clear
   rule for when one is "ready".

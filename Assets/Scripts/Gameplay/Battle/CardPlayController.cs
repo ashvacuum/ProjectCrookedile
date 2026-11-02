@@ -372,13 +372,11 @@ namespace Crookedile.Gameplay.Battle
                 _replayDepth--;
             }
 
-            if (
-                _mgr.PlayerOrigin == OriginType.NepoBaby
-                && NepoBabyConfig.Current.ReplaysRaiseHostilityByDefault
-            )
+            int replayHostility = NepoBabyConfig.Current.ReplayHostilityPerEnemy;
+            if (_mgr.PlayerOrigin == OriginType.NepoBaby && replayHostility > 0)
                 foreach (var enemy in _mgr.Enemies)
                     if (!enemy.IsDefeated)
-                        enemy.Stats.GainHostility(1);
+                        enemy.Stats.GainHostility(replayHostility);
 
             SettleAfterResolution();
             EventBus.Publish(new CardReplayedEvent { Card = card, ReplayNumber = replayNumber });

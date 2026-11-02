@@ -267,6 +267,8 @@ namespace Crookedile.UI.Battle
                 }
                 entries.Insert(0, (move.MoveName, string.Join("\n", damageLines)));
             }
+            var (intent, intentMeaning) = move.Intent;
+            entries.Insert(0, (intent, intentMeaning));
             return entries;
         }
 

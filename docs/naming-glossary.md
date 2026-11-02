@@ -1,6 +1,6 @@
 # Crookedile — Naming Glossary (combat → "working a crowd")
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-05
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-11-02
 >
 > **Summary:** Combat vocabulary mapped to "working a crowd" vocabulary. Read before naming anything.
 >
@@ -123,12 +123,22 @@ Cheapest section left: no assets serialize these names, so it's a pure rename.
 
 ## C. Enemy intents — code categories vs. design vocabulary
 
-**Status: NOT DONE, and blocked on a design call.** `EnemyMoveType` is unchanged across 8 files.
-This is the same decision tracked as `needs-detailing.md` §4 ("Intent vocabulary") — resolve it
-there, not here, then record the mapping in this table.
+**Status: DONE (2026-11-02).** The player sees the core-design words (`core-design.md` §5). `EnemyMoveType` keeps
+its names so move assets keep their serialized values; `EnemyMoveData.Intent` maps each to its label, shown as the
+first box of the intent tooltip.
 
-| Current `EnemyMoveType` | Doc intent (approx) | Proposed | Decision | Notes |
-|---|---|---|---|---|
+| `EnemyMoveType` | Player label | What it does |
+|---|---|---|
+| `Attack`, `OffensiveBuff`, `DebuffAttack` | **Condemn** | Pushes the meter down (with a self-buff or a debuff riding along). |
+| `Defend`, `DefendOpinion` | **Rebuke** | Puts up Denial, the upward shield on the meter. |
+| `RileOthers` with condition `AnyAllyReceptive` | **Turn** | Drags a receptive enemy back toward hostile (`RaiseAlliesHostilityEffect`). Was "Sway" in older docs; renamed because the player's push is Sway. |
+| `Buff`, `RileOthers` | **Rally** | Buffs itself or raises its neighbours' Hostility. |
+| `Debuff`, `Idle` | **Murmur** | Low impact: no meter push this turn, at most a light debuff on the player. |
+| `SummonMinion` | **Summon** | Enemy-only summon. |
+| `Ward` | **Ward** | Applies Warded stacks to allies. |
+| `Counter` | **Counter** | Punishes the player if they play the move's Counter Card Type this turn, else idles. |
+
+---|---|---|---|---|
 | `Attack` | Condemn | | | Pushes the meter down. |
 | `DefendOpinion` | Rebuke | | | Gains Denial. |
 | `RileOthers` | Rally | | | Boosts neighbours' hostility. |
