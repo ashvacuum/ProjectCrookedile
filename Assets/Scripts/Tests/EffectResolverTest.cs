@@ -20,7 +20,6 @@ namespace Crookedile.Tests
         private BattleStats playerStats;
         private BattleStats opponentStats;
         private DeckManager playerDeck;
-        private DeckManager opponentDeck;
         private EffectResolver effectResolver;
 
         private void Start()
@@ -38,10 +37,6 @@ namespace Crookedile.Tests
 
             SetupTestBattle();
 
-            TestBasicDamage();
-            TestSupportAbsorption();
-            TestStatusEffectDamageModifiers();
-            TestSupportGainWithModifiers();
             TestCardCostModifiers();
             TestTurnBasedStatusEffects();
 
@@ -52,7 +47,6 @@ namespace Crookedile.Tests
         {
             Debug.Log("--- Setting up test battle ---");
 
-            // Initialize stats â€” resolve removed; use opinion-meter model
             playerStats = new BattleStats(maxActionPoints: 3, isPlayer: true);
             opponentStats = new BattleStats(maxActionPoints: 3, isPlayer: false);
 
@@ -65,41 +59,6 @@ namespace Crookedile.Tests
 
             Debug.Log($"Player: {playerStats.GetStatusString()}");
             Debug.Log($"Opponent: {opponentStats.GetStatusString()}");
-        }
-
-        // TODO: Rewrite damage tests for the opinion-meter model.
-        // Cards shift the opinion meter via DamageDealtEvent â†’ BattleManager.
-        // Tests need a BattleManager mock or an EventBus listener to assert opinion changes.
-
-        [ContextMenu("Test: Basic Damage")]
-        public void TestBasicDamage()
-        {
-            Debug.Log("\n--- TEST: Basic Damage (TODO: update for opinion model) ---");
-        }
-
-        [ContextMenu("Test: Support Absorption")]
-        public void TestSupportAbsorption()
-        {
-            // Support/Denial are now session-level on BattleManager, not per-BattleStats.
-            // This test requires a full BattleManager instance â€” stub for now.
-            Debug.Log(
-                "\n--- TEST: Support/Denial absorption â€” requires BattleManager, skipped in unit tester ---"
-            );
-        }
-
-        [ContextMenu("Test: Status Effect Damage Modifiers")]
-        public void TestStatusEffectDamageModifiers()
-        {
-            Debug.Log("\n--- TEST: Status Effect Damage Modifiers (TODO: opinion model) ---");
-        }
-
-        [ContextMenu("Test: Support Gain With Modifiers")]
-        public void TestSupportGainWithModifiers()
-        {
-            // Support is now session-level on BattleManager â€” requires BattleManager instance to test.
-            Debug.Log(
-                "\n--- TEST: Support gain with modifiers â€” requires BattleManager, skipped in unit tester ---"
-            );
         }
 
         [ContextMenu("Test: Card Cost Modifiers")]
@@ -128,7 +87,7 @@ namespace Crookedile.Tests
             Debug.Log($"Expected: 3 AP (2 base + 1 Entangled) | Actual: {modifiedCost} AP");
             Debug.Assert(modifiedCost == 3, "Entangled cost test failed!");
 
-            Debug.Log("âœ“ PASSED");
+            Debug.Log("PASSED");
         }
 
         [ContextMenu("Test: Turn-Based Status Effects")]
@@ -143,8 +102,6 @@ namespace Crookedile.Tests
             // Apply Regeneration (heal at end of turn)
             effectResolver.PlayerStatusEffects.ApplyStatus(new RegenerationStatus(), 2);
 
-            // Support/Denial are session-level â€” no per-stat shield to set up.
-
             Debug.Log($"Before turn end: {playerStats.GetStatusString()}");
 
             // Trigger end of turn
@@ -153,7 +110,7 @@ namespace Crookedile.Tests
             Debug.Log($"After turn end: {playerStats.GetStatusString()}");
             Debug.Log(
                 "Smear/Regeneration opinion effects are applied by BattleManager (OpinionLedger), "
-                    + "not by StatusEffectManager â€” this unit tester only decrements their stacks."
+                    + "not by StatusEffectManager; this unit tester only decrements their stacks."
             );
 
             // Test Ritual (gain Support at start of turn)
@@ -162,60 +119,10 @@ namespace Crookedile.Tests
 
             Debug.Log($"After turn start: {playerStats.GetStatusString()}");
             Debug.Log(
-                "Ritual now grants Support (session-level) â€” verify via BattleManager.CurrentSupport"
+                "Ritual grants Support (session-level); verify via BattleManager.CurrentSupport"
             );
 
-            Debug.Log("âœ“ PASSED");
+            Debug.Log("PASSED");
         }
-
-        #region Helper Methods
-
-        private BattleEffect CreateDamageEffect(int amount)
-        {
-            var effect = new ApplyOpinionEffect();
-            var amountField = typeof(ApplyOpinionEffect).GetField(
-                "_amount",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
-            );
-            amountField?.SetValue(effect, amount);
-            return effect;
-        }
-
-        private BattleEffect CreateSupportEffect(int amount)
-        {
-            var effect = new GainSupportEffect();
-            var amountField = typeof(GainSupportEffect).GetField(
-                "_amount",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
-            );
-            amountField?.SetValue(effect, amount);
-            return effect;
-        }
-
-        private CardData CreateTestCard(string name, params BattleEffect[] effects)
-        {
-            CardData card = ScriptableObject.CreateInstance<CardData>();
-
-            var nameField = typeof(CardData).GetField(
-                "_cardName",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
-            );
-            var effectsField = typeof(CardData).GetField(
-                "_effects",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
-            );
-            var costsField = typeof(CardData).GetField(
-                "_costs",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
-            );
-
-            nameField?.SetValue(card, name);
-            effectsField?.SetValue(card, new List<BattleEffect>(effects));
-            costsField?.SetValue(card, new List<CardCost>());
-
-            return card;
-        }
-
-        #endregion
     }
 }

@@ -66,6 +66,14 @@ namespace Crookedile.Gameplay.Battle
             Converted = 2, // full conversion: reverted to neutral, ready for awards
         }
 
+        /// <summary>
+        /// Pacify stacks the enemy needs to convert: the config threshold + its stacks of the
+        /// buffer (escalator) status. Null buffer = Jaded.
+        /// </summary>
+        public static int Threshold(StatusEffectManager mgr, StatusBehavior bufferStatus) =>
+            FaithLeaderConfig.Current.ConversionThreshold
+            + mgr.GetStacks(bufferStatus ?? StatusRegistry.Get<JadedStatus>());
+
         /// <param name="bufferStatus">
         /// The escalator status: the threshold is the config threshold + the target's stacks of it.
         /// Null = the default Jaded. The CALLER is responsible for awarding it on success —
@@ -86,18 +94,13 @@ namespace Crookedile.Gameplay.Battle
 
             if (statuses == null || statuses.Count == 0)
                 statuses = DefaultPacifyStatuses;
-            if (bufferStatus == null)
-                bufferStatus = StatusRegistry.Get<JadedStatus>();
 
             int total = 0;
             foreach (var status in statuses)
                 if (status != null)
                     total += mgr.GetStacks(status);
 
-            // The buffer status is the escalator: its stacks raise this conversion's cost.
-            int threshold =
-                FaithLeaderConfig.Current.ConversionThreshold + mgr.GetStacks(bufferStatus);
-            if (total < threshold)
+            if (total < Threshold(mgr, bufferStatus))
                 return Outcome.NotReady;
 
             int idx = enemyStats.OwnerEnemyIndex;

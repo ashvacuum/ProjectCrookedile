@@ -167,6 +167,198 @@ namespace Crookedile.Tests
             );
         }
 
+        [UnityTest]
+        public IEnumerator ConvertedFanaticGainsJadedOnlyOnDisillusion()
+        {
+            var convert = ConvertCard();
+            var enemy = _battle.Enemies[1];
+            enemy.StatusEffects.ApplyStatus(
+                StatusRegistry.Get<GuiltStatus>(),
+                FaithLeaderConfig.Current.ConversionThreshold,
+                StatusDurationType.Permanent
+            );
+            PlayFromHand(convert);
+            Assert.IsTrue(enemy.StatusEffects.HasStatus<FanaticStatus>());
+            Assert.AreEqual(0, enemy.StatusEffects.GetStacks<JadedStatus>());
+
+            _battle.RequestEndTurn();
+            yield return WaitForPlayerTurn();
+            Assert.IsFalse(enemy.StatusEffects.HasStatus<FanaticStatus>());
+            Assert.AreEqual(
+                FaithLeaderConfig.Current.JadedOnDisillusion,
+                enemy.StatusEffects.GetStacks<JadedStatus>()
+            );
+        }
+
+        [UnityTest]
+        public IEnumerator OverStackedFanaticFollowsHarder()
+        {
+            var config = FaithLeaderConfig.Current;
+            _battle
+                .Enemies[1]
+                .StatusEffects.ApplyStatus(
+                    StatusRegistry.Get<GuiltStatus>(),
+                    config.ConversionThreshold + 2,
+                    StatusDurationType.Permanent
+                );
+            PlayFromHand(ConvertCard());
+            CollectionAssert.AreEqual(
+                new[] { config.FollowSwayPerFanatic + 2 * config.FollowBonusPerExtraStack },
+                FanaticPushes(() => PlayFromHand(_attack))
+            );
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator FanaticStrengthAddsToItsPush()
+        {
+            MakeFanatic(1, 2);
+            _battle
+                .Enemies[1]
+                .StatusEffects.ApplyStatus(
+                    StatusRegistry.Get<StrengthStatus>(),
+                    2,
+                    StatusDurationType.Permanent
+                );
+            CollectionAssert.AreEqual(
+                new[] { FaithLeaderConfig.Current.FollowSwayPerFanatic + 2 },
+                FanaticPushes(() => PlayFromHand(_attack))
+            );
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator CommandCardsMakeEveryFanaticActNow()
+        {
+            var config = FaithLeaderConfig.Current;
+            MakeFanatic(0, 2);
+            MakeFanatic(1, 2);
+            var push = TestContent.Card(
+                _objects,
+                "Push now",
+                CardType.Pressure,
+                1,
+                new FanaticsPushEffect()
+            );
+            CollectionAssert.AreEqual(
+                new[] { config.FollowSwayPerFanatic, config.FollowSwayPerFanatic },
+                FanaticPushes(() => PlayFromHand(push))
+            );
+
+            var defend = TestContent.Card(
+                _objects,
+                "Defend now",
+                CardType.Pressure,
+                1,
+                new FanaticsSupportEffect()
+            );
+            int before = _battle.CurrentSupport;
+            PlayFromHand(defend);
+            Assert.AreEqual(
+                2 * config.FollowSupportPerFanatic,
+                _battle.CurrentSupport - before
+            );
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator SilenceCommandSilencesAHostileEnemyPerFanatic()
+        {
+            MakeFanatic(1, 2);
+            var hostile = _battle.Enemies[0];
+            hostile.Stats.SetHostility(5);
+            var silence = TestContent.Card(
+                _objects,
+                "Silence now",
+                CardType.Pressure,
+                1,
+                ForEachFanatic(
+                    TestContent.Make<ApplyStatusBehaviorEffect>(
+                        ("_target", TargetType.RandomHostile),
+                        ("_behavior", StatusRegistry.Get<SilencedStatus>()),
+                        ("_stacks", 1)
+                    )
+                )
+            );
+            PlayFromHand(silence);
+            Assert.IsTrue(hostile.StatusEffects.HasStatus<SilencedStatus>());
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator ExtendingTheBuffKeepsAFanaticFollowing()
+        {
+            var enemy = _battle.Enemies[1];
+            MakeFanatic(1, 1);
+            var extend = TestContent.Card(
+                _objects,
+                "Extend",
+                CardType.Pressure,
+                1,
+                ForEachFanatic(
+                    TestContent.Make<ApplyStatusBehaviorEffect>(
+                        ("_target", TargetType.TriggeringEnemy),
+                        ("_behavior", StatusRegistry.Get<FanaticStatus>()),
+                        ("_stacks", 1)
+                    )
+                )
+            );
+            PlayFromHand(extend);
+            _battle.RequestEndTurn();
+            yield return WaitForPlayerTurn();
+            Assert.IsTrue(enemy.StatusEffects.HasStatus<FanaticStatus>());
+            Assert.AreEqual(0, enemy.StatusEffects.GetStacks<JadedStatus>());
+        }
+
+        private CardData ConvertCard() =>
+            TestContent.Card(
+                _objects,
+                "Convert",
+                CardType.Pressure,
+                1,
+                TestContent.Make<ConvertPacifiedEffect>(
+                    ("_target", TargetType.AllOpponents),
+                    (
+                        "_awards",
+                        new List<ConvertPacifiedEffect.AwardEntry>
+                        {
+                            new()
+                            {
+                                Behavior = StatusRegistry.Get<FanaticStatus>(),
+                                Stacks = 1,
+                                Duration = StatusDurationType.DecreasePerTurn,
+                            },
+                        }
+                    )
+                )
+            );
+
+        private static ForEachEnemyWithStatusEffect ForEachFanatic(BattleEffect effect) =>
+            TestContent.Make<ForEachEnemyWithStatusEffect>(
+                ("_filterStatus", StatusRegistry.Get<FanaticStatus>()),
+                ("_effects", new List<BattleEffect> { effect })
+            );
+
+        private static List<int> FanaticPushes(System.Action play)
+        {
+            var pushes = new List<int>();
+            void OnDamage(DamageDealtEvent e)
+            {
+                if (e.AttackerName == "Fanatic")
+                    pushes.Add(e.Amount);
+            }
+            EventBus.Subscribe<DamageDealtEvent>(OnDamage);
+            try
+            {
+                play();
+            }
+            finally
+            {
+                EventBus.Unsubscribe<DamageDealtEvent>(OnDamage);
+            }
+            return pushes;
+        }
+
         private void MakeFanatic(int enemyIndex, int stacks) =>
             _battle
                 .Enemies[enemyIndex]

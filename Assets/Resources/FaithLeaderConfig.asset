@@ -15,6 +15,7 @@ MonoBehaviour:
   _conversionThreshold: 3
   _followSwayPerFanatic: 4
   _followSupportPerFanatic: 3
+  _followBonusPerExtraStack: 1
   _silenceMinConversions: 2
   _silenceStacks: 1
   _jadedOnDisillusion: 1

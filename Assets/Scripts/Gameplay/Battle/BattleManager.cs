@@ -785,11 +785,20 @@ namespace Crookedile.Gameplay.Battle
             consumed = 0;
             if (_pacify == null)
                 return PacifyConversionEngine.Outcome.NotReady;
-            return _pacify.TryConvert(enemyStats, mgr, statuses, bufferStatus, out consumed);
+            // Read before converting: conversion consumes the fuel but leaves the buffer status.
+            int threshold = PacifyConversionEngine.Threshold(mgr, bufferStatus);
+            var outcome = _pacify.TryConvert(enemyStats, mgr, statuses, bufferStatus, out consumed);
+            if (outcome == PacifyConversionEngine.Outcome.Converted)
+                _fanatics?.RecordConversion(enemyStats, consumed - threshold);
+            return outcome;
         }
 
         /// <summary>Fanatics follow a card the player just played (called by CardPlayController).</summary>
         internal void FanaticsFollow(EffectExecutionContext ctx) => _fanatics?.OnCardResolved(ctx);
+
+        /// <summary>Command cards: every following Fanatic pushes and/or adds Support now.</summary>
+        internal void CommandFanatics(bool attack, bool defend) =>
+            _fanatics?.Follow(attack, defend);
 
         #endregion
 

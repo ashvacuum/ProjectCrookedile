@@ -1,6 +1,6 @@
 # Crookedile — Core Design Doc
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-31
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-11-02
 >
 > **Summary:** The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions.
 >
@@ -105,9 +105,12 @@ Enemies have **no HP**. Instead they have:
 Intents are **revealed and visible from the start of the turn** so the player can assess the room before acting. Working set of intents:
 - **Rally** — boost hostility of adjacent enemies
 - **Rebuke** — place upward shield on the meter
-- **Sway** — try to convert a receptive enemy to hostile
+- **Turn** — try to turn a receptive enemy back to hostile (named Sway in older notes; the player's push is Sway)
 - **Condemn** — heavy downward push on the meter
-- **Murmur** — low impact, maintains presence
+- **Murmur** — low impact, maintains presence: no meter push, at most a light debuff
+
+Plus **Summon**, **Ward** and **Counter** for the enemies that need them. The code-name to label mapping is in
+[`naming-glossary.md`](naming-glossary.md) §C.
 
 ### Row & adjacency
 Enemies sit in a **single static row** (no positioning/movement — moving people around breaks the rally-crowd fantasy). Adjacency still matters: rally/influence effects ripple to the **closest** enemies first. Instead of moving people, cards manipulate **targeting patterns** and **reach**.
@@ -138,7 +141,7 @@ Losing a receptive ally should *hurt* — painful, memorable, but recoverable. P
 
 1. **Start of turn** — all enemy intents visible; player assesses the room.
 2. **Player action phase** — 3 energy; play cards in any order (order matters, esp. Faith Leader); meter is **live** and reacts as you play. Silencing an enemy removes its intent immediately.
-3. **Enemy action phase** — remaining intents execute; meter stays **live**. Modifier intents (Rally/Sway) resolve **first**, then direct intents (Condemn/Rebuke) **left to right**.
+3. **Enemy action phase** — remaining intents execute; meter stays **live**. Modifier intents (Rally/Turn) resolve **first**, then direct intents (Condemn/Rebuke) **left to right**.
 4. **End of turn** — statuses tick/compound; new intents revealed; viral-moment check.
 
 Energy is **3 per turn**.

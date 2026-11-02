@@ -40,11 +40,11 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
 | [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) | Built | 2026-10-24 | Celebrity banks and spends Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points. | this doc; values in [`Data/Cards/Celebrity/GlamourIou/`](Assets/Data/Cards/Celebrity/GlamourIou), shared rules in [`GlamourIou.cs`](Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs), effects in [`Celebrity/`](Assets/Scripts/Gameplay/Battle/Celebrity) |
-| [`core-design.md`](docs/core-design.md) | Canonical | 2026-10-31 | The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions. | this doc |
-| [`enemy-design-bible.md`](docs/enemy-design-bible.md) | Canonical | 2026-10-31 | The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete. | this doc |
+| [`core-design.md`](docs/core-design.md) | Canonical | 2026-11-02 | The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions. | this doc |
+| [`enemy-design-bible.md`](docs/enemy-design-bible.md) | Canonical | 2026-11-02 | The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete. | this doc |
 | [`metagame-campaign.md`](docs/metagame-campaign.md) | Partly built | 2026-10-29 | The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases. | this doc |
-| [`naming-glossary.md`](docs/naming-glossary.md) | Canonical | 2026-10-05 | Combat vocabulary mapped to "working a crowd" vocabulary. Read before naming anything. | this doc |
-| [`nepo-baby-class.md`](docs/nepo-baby-class.md) | Built | 2026-10-28 | The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders. | this doc; built in [`Data/Cards/NepoBaby/`](Assets/Data/Cards/NepoBaby) and [`NepoBabyConfig`](Assets/Resources/NepoBabyConfig.asset) |
+| [`naming-glossary.md`](docs/naming-glossary.md) | Canonical | 2026-11-02 | Combat vocabulary mapped to "working a crowd" vocabulary. Read before naming anything. | this doc |
+| [`nepo-baby-class.md`](docs/nepo-baby-class.md) | Built | 2026-11-02 | The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders. | this doc; built in [`Data/Cards/NepoBaby/`](Assets/Data/Cards/NepoBaby) and [`NepoBabyConfig`](Assets/Resources/NepoBabyConfig.asset) |
 | [`unlocks.md`](docs/unlocks.md) | Canonical | 2026-10-03 | What unlocks (classes, cards, allies, events, campaigns), what earns each one, how fast, and how the player sees it. Achievements and unlocks are one system. Everything is unlocked for now. | this doc |
 
 ### Systems — code reference
@@ -60,7 +60,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`needs-detailing.md`](docs/needs-detailing.md) | Living | 2026-10-23 | Design questions awaiting a call, ordered by how much they block. Read before authoring content. | this doc |
+| [`needs-detailing.md`](docs/needs-detailing.md) | Living | 2026-11-02 | Design questions awaiting a call, ordered by how much they block. Read before authoring content. | this doc |
 | [`ui-elements.md`](docs/ui-elements.md) | Living | 2026-10-09 | The battle UI broken into reusable prefabs, smallest first, as a checklist to build against. | this doc |
 
 ### Art
@@ -122,6 +122,7 @@ Engine: **Unity 6 (URP 17), C#**. Dependencies: DOTween, Odin Inspector, UniTask
 > - `Databases/CardDatabase.asset` — loaded only through `CardDatabase.Shared` (card outcomes, the save system, test starters)
 > - `Databases/{EnemyDatabase,AllyDatabase,OriginDatabase}.asset` — the save system resolves saved IDs through them; `OriginDatabase.Shared` reads starting values
 > - `NepoBabyConfig.asset` — Nepo Baby's class rules (`NepoBabyConfig.Current`)
+> - `FaithLeaderConfig.asset` — Faith Leader's conversion and Fanatic rules (`FaithLeaderConfig.Current`)
 > - `UI/CampaignMap.uss`, `UI/DefaultRuntimeTheme.tss` — the campaign screen's runtime-built UI
 >
 > Authored content is referenced by direct GUID reference and belongs in `Assets/Data/`. **Do not add assets to `Resources/` unless something loads them by string path.**

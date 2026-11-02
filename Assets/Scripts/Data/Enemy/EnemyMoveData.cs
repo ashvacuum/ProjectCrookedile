@@ -213,6 +213,30 @@ namespace Crookedile.Data.Enemy
         public int ConditionCount => _conditionCount;
         public int ConditionPercent => _conditionPercent;
         public CardType CounterCardType => _counterCardType;
+
+        /// <summary>
+        /// The player-facing intent word and what it means (naming-glossary.md section C). The
+        /// enum stays as is so move assets keep their serialized values; only the label changes.
+        /// </summary>
+        public (string label, string meaning) Intent =>
+            _moveType switch
+            {
+                EnemyMoveType.Attack or EnemyMoveType.OffensiveBuff or EnemyMoveType.DebuffAttack =>
+                    ("Condemn", "Pushes the meter down."),
+                EnemyMoveType.Defend or EnemyMoveType.DefendOpinion =>
+                    ("Rebuke", "Puts up Denial to block your pushes."),
+                EnemyMoveType.RileOthers when _condition == EnemyMoveCondition.AnyAllyReceptive =>
+                    ("Turn", "Tries to turn a receptive enemy back to hostile."),
+                EnemyMoveType.Buff or EnemyMoveType.RileOthers =>
+                    ("Rally", "Builds up itself or riles the enemies around it."),
+                EnemyMoveType.Debuff or EnemyMoveType.Idle =>
+                    ("Murmur", "Low impact: no push on the meter this turn."),
+                EnemyMoveType.SummonMinion => ("Summon", "Calls someone new into the room."),
+                EnemyMoveType.Ward => ("Ward", "Shields an ally from your hostility shifts."),
+                EnemyMoveType.Counter =>
+                    ("Counter", $"Punishes you if you play {_counterCardType} this turn."),
+                _ => (_moveType.ToString(), string.Empty),
+            };
         #endregion
     }
 }

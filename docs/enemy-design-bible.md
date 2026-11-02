@@ -1,6 +1,6 @@
 # Crookedile — Enemy Design Bible (v2, shared-meter model)
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-10-31
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-11-02
 >
 > **Summary:** The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete.
 >
@@ -110,19 +110,19 @@ v1 wrongly modeled per-enemy Opinion ripple links. Actual system: the group puzz
 
 ## 6. Voice Intents — 21-glyph mapping
 
-| Intent category | Meaning | Example moves | Conditional? | Code mapping (EnemyMoveType) |
-|---|---|---|---|---|
-| Push (meter) | Sways the meter down by shown amount | Rally the Base, Block Walk | No | Attack / DebuffAttack |
-| Shield (meter) | Places/refreshes up-block shields | Stonewall, Talking Points | No | DefendOpinion |
-| Smear (Credibility) | Damages player Credibility | Callout, Exposé, Red-tag | No | *(meta layer, parked)* |
-| Buff (ally) | Amplifies an ally (show WHO via row arrow) | Chika, Endorsement | No | RileOthers / Buff |
-| Convert (state) | Drags a Receptive back to Hostile (show WHO) | Sermon, Guilt Trip | No | RileOthers |
-| Inflict (deck) | Injects Scandal (permanent) or Heckle (temp) | Fake News, Front Page | No | Debuff + AddCardToDeckEffect |
-| Ramp (self) | Escalator stack incoming | Airtime | No | Buff + turn-gated condition |
-| Ward (guard) | Wards an ally (Warded stacks) | Human Shield | No | **Ward = 10** (built) |
-| Counter (conditional) | Punishes IF player does X this turn | "Counter-Argue if Rhetoric played" | YES | **Counter = 11** (built; fizzles to idle) |
-| Threshold (conditional) | Triggers at meter % / turn count | Phase/room changes, Padrino wake | YES | **OpinionAtOrAbove/Below conditions** (built) |
-| Unknown (?) | Hidden intent proposal | — | Not used by boss debates: all rival moves reveal before player input | not built |
+| Intent category | Player label | Meaning | Example moves | Conditional? | Code mapping (EnemyMoveType) |
+|---|---|---|---|---|---|
+| Push (meter) | Condemn | Sways the meter down by shown amount | Rally the Base, Block Walk | No | Attack / DebuffAttack |
+| Shield (meter) | Rebuke | Places/refreshes up-block shields | Stonewall, Talking Points | No | DefendOpinion |
+| Smear (Credibility) | — | Damages player Credibility | Callout, Exposé, Red-tag | No | *(meta layer, parked)* |
+| Buff (ally) | Rally | Amplifies an ally (show WHO via row arrow) | Chika, Endorsement | No | RileOthers / Buff |
+| Convert (state) | Turn | Drags a Receptive back to Hostile (show WHO) | Sermon, Guilt Trip | No | RileOthers + AnyAllyReceptive |
+| Inflict (deck) | Murmur | Injects Scandal (permanent) or Heckle (temp) | Fake News, Front Page | No | Debuff + AddCardToDeckEffect |
+| Ramp (self) | Rally | Escalator stack incoming | Airtime | No | Buff + turn-gated condition |
+| Ward (guard) | Ward | Wards an ally (Warded stacks) | Human Shield | No | **Ward = 10** (built) |
+| Counter (conditional) | Counter | Punishes IF player does X this turn | "Counter-Argue if Rhetoric played" | YES | **Counter = 11** (built; fizzles to idle) |
+| Threshold (conditional) | (any) | Triggers at meter % / turn count | Phase/room changes, Padrino wake | YES | **OpinionAtOrAbove/Below conditions** (built) |
+| Unknown (?) | — | Hidden intent proposal | — | Not used by boss debates: all rival moves reveal before player input | not built |
 
 Pattern rules: audience move pools use constraints (no repeat x2 unless scripted; threshold/room-change moves override pool). Bosses use a Behaviour Designer planning subtree selecting named, cooldown-controlled bundles of two or three existing move assets. Reveal the whole ordered bundle and its selected audience targets before player input. Boss execution precedes both audience passes. See [core design §5](core-design.md#5-enemies--voice-intents) for the runtime and authoring rules.
 

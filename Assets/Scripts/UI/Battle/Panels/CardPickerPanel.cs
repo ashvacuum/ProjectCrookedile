@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Crookedile.Data.Cards;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Crookedile.UI.Battle
@@ -19,6 +21,11 @@ namespace Crookedile.UI.Battle
     ///
     /// Attach to a panel that is inactive by default; <c>cardContainer</c> should use a GridLayoutGroup.
     /// Opens as a router popup (dimmer + input blocking) when the router is wired.
+    ///
+    /// Gamepad: left/right walks a highlight along the cards and Submit toggles the focused one
+    /// (a single pick confirms at once); down moves to the Confirm/Cancel buttons, which the
+    /// EventSystem then drives, and up comes back; Cancel skips when there is a cancel button.
+    /// Moving the mouse hands control back, as in battle (<see cref="BattleGamepadInput"/>).
     /// </summary>
     public class CardPickerPanel : UIView
     {
@@ -41,6 +48,32 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private Button cancelButton;
 
+        [Tooltip("Stick or d-pad deflection (0-1) that counts as one gamepad step.")]
+        [Range(0.1f, 1f)]
+        [SerializeField]
+        private float _stepThreshold = 0.5f;
+
+        [Tooltip("Mouse movement in pixels per frame that hands control back to the mouse.")]
+        [SerializeField]
+        private float _mouseTakeoverPixels = 2f;
+
+        private static CardPickerPanel _open;
+        private static int _closedFrame = -1;
+
+        /// <summary>
+        /// A picker is open, or closed this frame, so other gamepad input must not also act on
+        /// the press that closed it.
+        /// </summary>
+        public static bool IsOpen => _open != null || _closedFrame == Time.frameCount;
+
+        private InputAction _navigate;
+        private InputAction _submit;
+        private InputAction _cancel;
+        private bool _gamepad; // true from the first gamepad press until the mouse moves
+        private Vector2Int _lastStep;
+        private int _focusIndex;
+        private CardButton _focused;
+
         private readonly List<CardData> _selected = new List<CardData>();
         private readonly List<CardButton> _spawned = new List<CardButton>();
 
@@ -53,7 +86,76 @@ namespace Crookedile.UI.Battle
         {
             confirmButton?.onClick.AddListener(OnConfirmClicked);
             cancelButton?.onClick.AddListener(OnCancelClicked);
+            InputActionAsset actions = InputSystem.actions;
+            _navigate = actions?.FindAction("UI/Navigate");
+            _submit = actions?.FindAction("UI/Submit");
+            _cancel = actions?.FindAction("UI/Cancel");
             gameObject.SetActive(false);
+        }
+
+        private void Update()
+        {
+            if (_navigate == null || _submit == null || _cancel == null || _spawned.Count == 0)
+                return;
+
+            Vector2 stick = _navigate.ReadValue<Vector2>();
+            var step = new Vector2Int(Step(stick.x, _lastStep.x), Step(stick.y, _lastStep.y));
+            _lastStep = new Vector2Int(Dir(stick.x), Dir(stick.y));
+            bool submit = _submit.WasPressedThisFrame();
+            bool cancel = _cancel.WasPressedThisFrame();
+
+            if (_gamepad && MouseMoved())
+            {
+                _gamepad = false;
+                FocusCard(null);
+            }
+            if (!_gamepad)
+            {
+                if (step == Vector2Int.zero && !submit && !cancel)
+                    return;
+                // The press that wakes the gamepad only shows where focus is.
+                _gamepad = true;
+                EventSystem.current?.SetSelectedGameObject(null);
+                FocusCard(_spawned[Mathf.Clamp(_focusIndex, 0, _spawned.Count - 1)]);
+                return;
+            }
+
+            if (cancel && cancelButton != null && cancelButton.isActiveAndEnabled)
+            {
+                OnCancelClicked();
+                return;
+            }
+
+            // On the button row the EventSystem navigates and submits; up returns to the cards.
+            if (EventSystem.current?.currentSelectedGameObject != null)
+            {
+                if (step.y > 0)
+                {
+                    EventSystem.current.SetSelectedGameObject(null);
+                    FocusCard(_spawned[_focusIndex]);
+                }
+                return;
+            }
+
+            if (step.y < 0)
+            {
+                Button target =
+                    confirmButton != null && confirmButton.interactable ? confirmButton : cancelButton;
+                if (target != null && target.isActiveAndEnabled)
+                {
+                    FocusCard(null);
+                    EventSystem.current?.SetSelectedGameObject(target.gameObject);
+                }
+                return;
+            }
+
+            _focusIndex = Mathf.Clamp(_focusIndex + step.x, 0, _spawned.Count - 1);
+            FocusCard(_spawned[_focusIndex]);
+            if (!submit || _focused == null)
+                return;
+            _focused.TryPlay(); // picker mode: toggles the selection
+            if (_maxCount == 1 && _selected.Count == 1)
+                OnConfirmClicked();
         }
 
         /// <summary>
@@ -82,6 +184,8 @@ namespace Crookedile.UI.Battle
             ClearCards();
             SpawnCards(choices);
             RefreshConfirmButton();
+            _open = this;
+            _focusIndex = 0;
             PushAsPopup();
         }
 
@@ -107,6 +211,7 @@ namespace Crookedile.UI.Battle
         /// <summary>Hides the picker and returns all spawned buttons to the pool.</summary>
         public void Close()
         {
+            MarkClosed();
             ClearCards();
             _onConfirmed = null;
             _selected.Clear();
@@ -206,9 +311,45 @@ namespace Crookedile.UI.Battle
         {
             var callback = _onConfirmed;
             _onConfirmed = null;
+            MarkClosed();
             ClearCards();
             callback?.Invoke(new List<CardData>());
         }
+
+        private void MarkClosed()
+        {
+            if (_open != this)
+                return;
+            _open = null;
+            _closedFrame = Time.frameCount;
+        }
+
+        private void FocusCard(CardButton card)
+        {
+            if (card == _focused)
+                return;
+            if (_focused != null && _focused.isActiveAndEnabled)
+                _focused.Unfocus();
+            _focused = card;
+            if (card != null)
+                card.Focus();
+        }
+
+        /// <summary>
+        /// -1 or +1 on the frame the stick or d-pad crosses the threshold, else 0.
+        /// ponytail: one step per press, no hold-to-repeat, same as the battle hand.
+        /// </summary>
+        private int Step(float axis, int last) => Dir(axis) != last ? Dir(axis) : 0;
+
+        private int Dir(float axis) =>
+            axis > _stepThreshold ? 1
+            : axis < -_stepThreshold ? -1
+            : 0;
+
+        private bool MouseMoved() =>
+            Mouse.current != null
+            && Mouse.current.delta.ReadValue().sqrMagnitude
+                > _mouseTakeoverPixels * _mouseTakeoverPixels;
 
         private void RefreshConfirmButton()
         {
@@ -229,6 +370,7 @@ namespace Crookedile.UI.Battle
 
         private void ClearCards()
         {
+            FocusCard(null);
             foreach (var btn in _spawned)
                 if (btn != null)
                     BattlePoolManager.Instance?.ReturnCard(btn);
