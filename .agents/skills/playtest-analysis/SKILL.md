@@ -16,13 +16,16 @@ options and let the user decide; they give explicit permission before anything i
 
 The design goal is **a good setup pays off and a bad one fails**, not raw difficulty. So:
 
-- **Skill gap is the headline**: best of Scored/Greedy minus Random. The target is **40+ points**; around 20
+- **Skill gap is the headline**: best of Scored/Greedy/Convert minus Random. The target is **40+ points**; around 20
   reads as a coin toss. A high win rate for careful play is fine; a high Random win rate means careless play
   isn't failing; 0% for every bot means even good play doesn't pay.
 - **The win line is 60% of the meter** at the turn limit (tunable on `BattleManager`). Battles start at half,
   so doing nothing loses. "Narrow loss" (within 10 of the line) should belong to careless play.
 - **Bots are heuristics, not players.** Greedy and Scored chase Opinion each turn; none plans a stance mix.
-  RandomRun's battles are played by the Tempo bot. Say this when a conclusion leans on bot behaviour.
+  RandomRun's battles are played by the Tempo bot. **Convert** (and its campaign twin ConvertRun) plays only
+  Faith Leader and plays the conversion build on purpose: Gospel first, Guilt onto the cheapest enemy to convert,
+  then attacks, defends and command cards for its Fanatics. It is the careful Faith Leader player, so read her skill
+  gap through it. Say this when a conclusion leans on bot behaviour.
 - **Hostility reducers are scarce on purpose.** Never propose more or bigger reducers to "balance" raisers.
 - **Mechanic numbers must stay tunable data.** When you recommend a change, name the asset or field to tune.
 
@@ -88,7 +91,9 @@ class's Basic cards that deal Opinion) and joins the report's Utility table:
 - **WEAK RARITY**: an Enhanced or Rare below the Basic curve with no utility; players will skip it.
 - **NOTHING MEASURED**: no Opinion, Support or energy. Read its hostility per play first (calming cards show a
   negative number and are doing their job), then its asset: draws, statuses, card moves and setup effects aren't
-  measured, so open it before calling it dead.
+  measured, so open it before calling it dead. Faith Leader Guilt and conversion cards are the exception:
+  `card_plays.csv`'s `setup_opinion` credits them a share of the later pushes of every Fanatic they fuelled or
+  converted, and the card scores include it.
 - **UTILITY**: Support that blocked real hits (prevented), energy and the extra plays it bought, and passive
   Opinion. This is how shields, energy cards and persistent Policies are judged.
 - **NEVER PLAYED**: not offered or never picked. Remember the reward rules: a card with no upgrade authored is

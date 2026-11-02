@@ -39,6 +39,14 @@ namespace Crookedile.EditorTools.Playtest
         public int OpinionDelta;
         public int RoomHostilityDelta; // summed over living enemies: negative = calmed the room
         public int Turn;
+        public int Fanatics; // following Fanatics in the room before the play
+
+        // Opinion later pushed by Fanatics this play helped make: its share of every follow from an
+        // enemy it put Guilt on or converted. Lands after the play, so OpinionDelta misses it.
+        public int SetupOpinion;
+
+        /// <summary>Everything this play is worth: its own Opinion plus the Fanatic follows it set up.</summary>
+        public int TotalOpinion => OpinionDelta + SetupOpinion;
     }
 
     /// <summary>What one bot-played battle did. One row of battles.csv.</summary>

@@ -137,7 +137,7 @@ namespace Crookedile.EditorTools.Playtest
         private static string PlaysCsv(List<BattleRecord> rows)
         {
             var sb = new StringBuilder(
-                "context,bot,origin,encounter,seed,turn,card,cost,target_mood,target_hostility,room_hostility,opinion_delta,room_hostility_delta,won_battle\n"
+                "context,bot,origin,encounter,seed,turn,card,cost,target_mood,target_hostility,room_hostility,opinion_delta,room_hostility_delta,won_battle,fanatics,setup_opinion\n"
             );
             foreach (var r in rows)
             foreach (var p in r.Plays)
@@ -157,7 +157,9 @@ namespace Crookedile.EditorTools.Playtest
                         F(p.RoomHostility),
                         p.OpinionDelta,
                         p.RoomHostilityDelta,
-                        B(r.Win)
+                        B(r.Win),
+                        p.Fanatics,
+                        p.SetupOpinion
                     )
                 );
             return sb.ToString();
@@ -297,7 +299,7 @@ namespace Crookedile.EditorTools.Playtest
             md.AppendLine(
                 "Win rate per bot, standalone battles with starter decks. **Too easy** = Random wins 60%+. "
                     + "**Too hard** = no bot reaches 20%. **Always goes the distance** = 90%+ end on the turn limit. "
-                    + "**Skill gap** = best of Scored/Greedy minus Random; **no skill gap** = under 10 pts, so careless play does as well as careful play. "
+                    + "**Skill gap** = best of Scored/Greedy/Convert (Faith Leader only) minus Random; **no skill gap** = under 10 pts, so careless play does as well as careful play. "
                     + "A flag ending in **?** could be noise: the 95% interval still reaches the other side of its threshold."
             );
             var bots = battles.Select(b => b.Bot).Distinct().OrderBy(b => b).ToList();
@@ -372,10 +374,10 @@ namespace Crookedile.EditorTools.Playtest
         private static bool StrongWin(BattleRecord b) =>
             b.FinalOpinion * 100 >= 80 * Math.Max(1, b.MaxOpinion);
 
-        /// <summary>Best careful bot (Scored/Greedy) minus Random; null when either side didn't play.</summary>
+        /// <summary>Best careful bot (Scored/Greedy/Convert) minus Random; null when either side didn't play.</summary>
         private static float? SkillGap(Dictionary<string, float> rates)
         {
-            var careful = new[] { "Scored", "Greedy" }
+            var careful = new[] { "Scored", "Greedy", "Convert" }
                 .Where(rates.ContainsKey)
                 .Select(b => rates[b])
                 .ToList();
@@ -482,7 +484,7 @@ namespace Crookedile.EditorTools.Playtest
                 var list = ps.ToList();
                 return list.Count == 0
                     ? float.NaN
-                    : (float)list.Sum(p => p.OpinionDelta) / list.Sum(p => Math.Max(1, p.Cost));
+                    : (float)list.Sum(p => p.TotalOpinion) / list.Sum(p => Math.Max(1, p.Cost));
             }
             string S(float f) =>
                 float.IsNaN(f) ? "—" : f.ToString("+0.0;-0.0;0", CultureInfo.InvariantCulture);
@@ -490,6 +492,7 @@ namespace Crookedile.EditorTools.Playtest
             md.AppendLine().AppendLine("## Card scores by hostility");
             md.AppendLine(
                 "**Score** = Opinion moved per AP spent (0-cost counts as 1), split by the target's mood when the card was played. "
+                    + "Opinion includes setup credit: a share of the later pushes of every Fanatic the play put Guilt on or converted. "
                     + "**Calm** = average change in the room's total hostility per play (negative calms the room, positive riles it). "
                     + $"Mood columns need {MinBucket}+ plays to show."
             );

@@ -1,6 +1,6 @@
 # Celebrity: Glamour / IOU / Promises
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-10-24
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-11-02
 >
 > **Summary:** Celebrity banks and spends Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points.
 >
@@ -82,7 +82,7 @@ Celebrity wants a villain on camera. Aggravate feeds Glamour; Soothe costs Glamo
 Hostility guards gate the best rates: Loan Shark only lends against a hostile target; They Love Me pays per receptive enemy. The echo chamber caps soothing everyone.
 Manufactured Outrage turns every enemy that goes hostile into 1 Glamour. Feud locks hostile enemies as Hardened.
 Empty Promise soothes one enemy and puts off the next normal Debt settlement (spent even on a turn with no Debt); at the start of your next turn every enemy Aggravates 2.
-Single-target cards still add the crowd's +1 Hostility.
+Playing a card never shifts Hostility by itself; only a card's own effects raise or lower it.
 
 ## Retained defensive cards
 

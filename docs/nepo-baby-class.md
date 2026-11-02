@@ -352,11 +352,12 @@ not variants selected through a shared mechanic enum.
 `TriggeringCardCostCondition` conditions; once-per-turn gating on `BattlePassive`; the `onceperturn` card tag.
 
 **Replays** resolve the card's effects again and publish `CardReplayedEvent`, never `CardPlayedEvent`, so replays never
-count as plays and add no single-target Hostility. Policies never replay. Nested replays are capped at 3.
+count as plays. Policies never replay. Nested replays are capped at 3.
 
 **Deliberate readings of the spec:**
-- Pull Rank's "+1 Hostility on the target" is the existing core rule that every single-target Sway raises the target's
-  Hostility by 1. Name Drop and the other single-target attacks do the same.
+- Pull Rank's "+1 Hostility on the target" was the old core rule that every single-target Sway raised the target's
+  Hostility by 1. That rule is gone (2026-11-02): playing a card never shifts Hostility by itself, so Pull Rank, Name Drop
+  and the other single-target attacks raise it only if an effect on the card says so.
 - The class modifiers apply to every Sway and Support Nepo Baby's cards produce, not only the starter basics.
 - Executive Privilege offers its burn at the start of each turn; the next non-Policy card played that turn replays.
 - Hand-Me-Downs returns a card once it finishes resolving. Its Hostility is charged only if the card actually returns.

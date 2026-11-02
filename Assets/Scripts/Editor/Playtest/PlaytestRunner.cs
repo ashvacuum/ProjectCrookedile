@@ -26,8 +26,8 @@ namespace Crookedile.EditorTools.Playtest
         public string PoolPath;
         public string EncounterPath;
         public List<string> Origins = new() { "FaithLeader", "NepoBaby", "Actor" };
-        public List<string> BattleBots = new() { "Random", "Greedy", "Tempo", "Hoarder", "Scored" };
-        public List<string> CampaignBots = new() { "RandomRun", "GreedyRun" };
+        public List<string> BattleBots = new() { "Random", "Greedy", "Tempo", "Hoarder", "Scored", "Convert" };
+        public List<string> CampaignBots = new() { "RandomRun", "GreedyRun", "ConvertRun" };
         public int BaseSeed = 1000;
     }
 
@@ -107,10 +107,10 @@ namespace Crookedile.EditorTools.Playtest
                     )
                     .OrderBy(e => e.name)
                     .ToList();
-                int total = encounters.Count * origins.Count * battleBots.Count * config.SeedsPerMatchup, done = 0;
+                int total = encounters.Count * origins.Sum(o => battleBots.Count(b => b.Plays(o))) * config.SeedsPerMatchup, done = 0;
                 foreach (var encounter in encounters)
                 foreach (var origin in origins)
-                foreach (var bot in battleBots)
+                foreach (var bot in battleBots.Where(b => b.Plays(origin)))
                 for (int s = 0; s < config.SeedsPerMatchup && !cancelled; s++)
                 {
                     cancelled = EditorUtility.DisplayCancelableProgressBar(
@@ -154,9 +154,9 @@ namespace Crookedile.EditorTools.Playtest
                     Debug.LogError("[Playtest] No EncounterPoolData found — skipping campaign runs.");
                 else
                 {
-                    int total = campaignBots.Count * origins.Count * config.RunsPerCampaignBot, done = 0;
+                    int total = origins.Sum(o => campaignBots.Count(b => b.Plays(o))) * config.RunsPerCampaignBot, done = 0;
                     foreach (var bot in campaignBots)
-                    foreach (var origin in origins)
+                    foreach (var origin in origins.Where(o => bot.Plays(o)))
                     for (int r = 0; r < config.RunsPerCampaignBot && !cancelled; r++)
                     {
                         cancelled = EditorUtility.DisplayCancelableProgressBar(
@@ -247,10 +247,11 @@ namespace Crookedile.EditorTools.Playtest
 
         public static IEnumerable<IBattleBot> AllBattleBots() =>
             new IBattleBot[] { new RandomBot(), new GreedyBot(), new TempoBot(), new HoarderBot(), new ScoredBot(),
+                new ConvertBot(),
             };
 
         public static IEnumerable<ICampaignBot> AllCampaignBots() =>
-            new ICampaignBot[] { new RandomCampaignBot(), new GreedyCampaignBot() };
+            new ICampaignBot[] { new RandomCampaignBot(), new GreedyCampaignBot(), new ConvertCampaignBot() };
 
         private static IEnumerable<T> Find<T>()
             where T : UnityEngine.Object =>

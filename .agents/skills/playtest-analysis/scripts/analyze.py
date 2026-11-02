@@ -14,7 +14,7 @@ import collections as C
 import os
 import sys
 
-CAREFUL, CARELESS = ("Scored", "Greedy"), "Random"
+CAREFUL, CARELESS = ("Scored", "Greedy", "Convert"), "Random"
 BURST = 30  # a single play worth this much Opinion is a burst
 
 
@@ -55,7 +55,7 @@ def coverage(battles, campaigns):
 
 
 def skill_gap(battles, prev):
-    section("Skill gap (best of Scored/Greedy minus Random), target 40+")
+    section("Skill gap (best of Scored/Greedy/Convert minus Random), target 40+")
     for label, rows in (("now", standalone(battles)), ("previous", standalone(prev))):
         if not rows:
             continue
