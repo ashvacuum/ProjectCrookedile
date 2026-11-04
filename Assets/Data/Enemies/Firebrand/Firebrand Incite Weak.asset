@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
   m_Name: Firebrand Incite Weak
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Firebrand Incite
+  _moveName: Firebrand Incite Weak
   _moveType: 0
   _intentDescription: 'Incites: -3 Opinion'
   _effects:
@@ -24,6 +24,7 @@ MonoBehaviour:
   _condition: 0
   _conditionTurn: 1
   _conditionPercent: 50
+  _conditionCount: 1
   references:
     version: 2
     RefIds:
@@ -35,3 +36,5 @@ MonoBehaviour:
         _perXSource: 7
         _multiplier: 1
         _target: 1
+        _bypassSupport: 0
+        _maxAmount: 0

@@ -413,6 +413,7 @@ MonoBehaviour:
   _opponentTurnDelay: 1
   _perEnemyAttackDelay: 0.5
   _echoChamberDecayPerTurn: 5
+  _judgmentWinPercent: 60
   _supportPerReceptiveEnemy: 1
   _supportOnBecomingReceptive: 2
   _turncoatStacks: 2

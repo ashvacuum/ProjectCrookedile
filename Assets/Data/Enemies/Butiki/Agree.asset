@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
   m_Name: Agree
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Shrug
+  _moveName: It is what it is
   _moveType: 0
   _intentDescription: 'Shrugs: the meter slips -2'
   _effects:
