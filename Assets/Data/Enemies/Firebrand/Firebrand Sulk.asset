@@ -12,15 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
   m_Name: Firebrand Sulk
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: Firebrand Sulk
+  _moveName: Sulk
   _moveType: 7
   _intentDescription: Sulks quietly
   _effects: []
   _moveVFX: {fileID: 0}
+  _counterCardType: 1
   _minionToSummon: {fileID: 0}
   _minionCount: 1
   _condition: 0
   _conditionTurn: 1
+  _conditionPercent: 50
+  _conditionCount: 1
   references:
     version: 2
     RefIds: []

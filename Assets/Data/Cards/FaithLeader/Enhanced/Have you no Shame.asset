@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Have you no Shame
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Cards.CardData
   _id: ded3fb0fcb7126a41a55052db43b0ee5
-  _cardName: Have you no Shame?
+  _cardName: Have you no Shame
   _cardType: 2
   _rarity: 1
   _artwork: {fileID: 21300000, guid: 9f7e960cb7976bc4b9d708118f7f8bd9, type: 3}

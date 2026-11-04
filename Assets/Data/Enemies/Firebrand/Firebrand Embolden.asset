@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b4b6a571634c7f46b38ca485c6b6401, type: 3}
   m_Name: Firebrand Embolden
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyMoveData
-  _moveName: 
+  _moveName: Embolden
   _moveType: 0
   _intentDescription: 
   _effects:
@@ -24,13 +24,14 @@ MonoBehaviour:
   _condition: 0
   _conditionTurn: 1
   _conditionPercent: 50
+  _conditionCount: 1
   references:
     version: 2
     RefIds:
     - rid: 1430661995083595872
       type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _target: 1
+        _target: 6
         _behavior:
           rid: 1430661995083595873
         _stacks: 2
