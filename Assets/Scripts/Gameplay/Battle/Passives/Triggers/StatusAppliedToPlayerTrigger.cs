@@ -29,6 +29,8 @@ namespace Crookedile.Gameplay.Battle
             var e = ctx.As<StatusEffectAppliedEvent>();
             if (!e.IsToPlayer)
                 return false;
+            if (e.Stacks <= 0)
+                return false; // removals publish the same event with negative stacks
             if (_filterByStatus && _filterStatus != null && e.StatusId != _filterStatus.Id)
                 return false;
             return true;

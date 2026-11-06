@@ -70,14 +70,9 @@ MonoBehaviour:
         _effects:
         - rid: 5004226267226833027
     - rid: 5004226247261945865
-      type: {class: StatusAppliedToEnemyTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: EnemyConvertedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _filterByStatus: 1
-        _filterStatus:
-          rid: 5004226267226833026
-    - rid: 5004226267226833026
-      type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
+        _convertedOnly: 1
     - rid: 5004226267226833027
       type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
