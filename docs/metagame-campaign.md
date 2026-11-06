@@ -1,6 +1,6 @@
 # Metagame — The Campaign Map
 
-> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-10-29
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-06
 >
 > **Summary:** The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases.
 >
@@ -289,5 +289,5 @@ in M1–M3; decide during playtests.
 4. Event content voice/tone + how many events v1 needs (guess: 5–8).
 5. Do encounters cost more hours than events? ~~Does losing a battle end the run?~~ **Decided
    2026-10-26:** a loss costs Credibility scaled by how badly you lost (5 narrow, 30 crushing);
-   the run ends at 0 Credibility, whether a battle or an event choice took it there, and a lost boss fight ends it outright.
+   the run ends at 0 Credibility, whether a battle or an event choice took it there, and a lost boss fight ends it outright. **Decided 2026-11-06:** a won boss fight restores Credibility to full for the next week, and a boss day has no HQ: it ends by facing the boss.
 6. "Win well" metric weights — converted vs hostiles-left vs margin.

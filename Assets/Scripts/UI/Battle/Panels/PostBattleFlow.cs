@@ -103,6 +103,10 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
+            // Winning a boss debate sends you into the next week at full Credibility.
+            if (Battle?.Boss != null)
+                run?.RestoreCredibility();
+
             // Victory with reward infra not wired up: never end the run over a missing screen,
             // or it would silently wipe a campaign the player was actually winning.
             if (_cardDatabase == null || _rewardScreen == null)

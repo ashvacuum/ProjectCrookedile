@@ -287,6 +287,12 @@ namespace Crookedile.Data
             TodaysLocations = locations ?? new List<EncounterData>();
         }
 
+        /// <summary>The boss still on today's offering, or null once it's been entered.</summary>
+        public EncounterData UnresolvedBoss =>
+            TodaysLocationsDay == Day
+                ? TodaysLocations.Find(l => l is BattleEncounterData { IsBoss: true })
+                : null;
+
         /// <summary>Drops a location from the current offering once it's been resolved.</summary>
         public void RemoveTodaysLocation(EncounterData encounter) =>
             TodaysLocations.Remove(encounter);
@@ -318,9 +324,31 @@ namespace Crookedile.Data
             Credibility = Mathf.Clamp(Credibility + delta, 0, max > 0 ? max : int.MaxValue);
         }
 
-        /// <summary>Ends the day: advances <see cref="Day"/> and refills <see cref="Hours"/>.</summary>
+        /// <summary>
+        /// Refills Credibility to <see cref="MaxCredibility"/>: a boss win sends you into the next
+        /// week at full strength. Does nothing for an origin with no cap.
+        /// </summary>
+        public void RestoreCredibility()
+        {
+            if (MaxCredibility > 0)
+                Credibility = MaxCredibility;
+        }
+
+        /// <summary>
+        /// Ends the day: advances <see cref="Day"/> and refills <see cref="Hours"/>. While today's
+        /// boss is unresolved, ending the day is facing the boss instead: the boss becomes
+        /// <see cref="NextEncounter"/> and the day stays. Every day-ender (the End Day button, an
+        /// HQ option, any <c>AdvanceDayOutcome</c>) comes through here, so none can skip it.
+        /// </summary>
         public void AdvanceDay()
         {
+            var boss = UnresolvedBoss;
+            if (boss != null)
+            {
+                SetNextEncounter(boss);
+                return;
+            }
+
             Day++;
             ElapsedMinutes = 0;
             MinutesRemaining = Mathf.Min(

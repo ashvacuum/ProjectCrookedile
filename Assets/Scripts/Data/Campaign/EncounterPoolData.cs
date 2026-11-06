@@ -468,6 +468,10 @@ namespace Crookedile.Data.Campaign
                 takenThisDay.Add(pick.Id);
                 drawn.Add(pick.Encounter);
             }
+
+            // A boss day has no ending it at HQ: the day ends by facing the boss.
+            if (drawn.Exists(e => e is BattleEncounterData { IsBoss: true }))
+                drawn.RemoveAll(e => e is EventEncounterData { EndsDay: true });
             return drawn;
         }
 

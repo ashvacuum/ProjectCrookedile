@@ -315,7 +315,7 @@ namespace Crookedile.UI.Campaign
         {
             RunState.Current?.AdvanceDay();
             GameLogger.LogInfo("Campaign", $"Day advanced to {RunState.Current?.Day}.", this);
-            RefreshLocations();
+            ResolveChainOrRefresh(); // ending a boss day chains into the boss
         }
 
         #endregion
@@ -512,7 +512,7 @@ namespace Crookedile.UI.Campaign
             // On a boss day there is no ending the day — ending it IS facing the boss. Without
             // this the finale is skippable: End Day rolls you to the next day and, on the last
             // one, straight to "campaign complete" without the fight ever happening.
-            var boss = UnresolvedBoss(state);
+            var boss = state.UnresolvedBoss;
             if (boss != null)
             {
                 string bossName = string.IsNullOrEmpty(boss.DisplayName)
@@ -613,17 +613,6 @@ namespace Crookedile.UI.Campaign
             }
 
             return string.Join("\n", lines);
-        }
-
-        /// <summary>
-        /// The boss still on offer today, or null. Drives the End Day → Face the boss swap.
-        /// </summary>
-        private static EncounterData UnresolvedBoss(RunState state)
-        {
-            foreach (var loc in state.TodaysLocations)
-                if (loc is BattleEncounterData battle && battle.IsBoss)
-                    return loc;
-            return null;
         }
 
         /// <summary>
