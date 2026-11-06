@@ -788,6 +788,8 @@ namespace Crookedile.EditorTools.Playtest
                     );
             }
 
+            TravelAndTime(md, runs);
+
             var idle = runs.Sum(r => r.DaysWithNothingToDo);
             if (idle > 0)
                 md.AppendLine()
@@ -841,6 +843,49 @@ namespace Crookedile.EditorTools.Playtest
                     .Take(10)
             )
                 md.AppendLine($"- {kv.Key}: {kv.n}");
+        }
+
+        /// <summary>Where the daily hours go, and what kept offered locations from being entered.</summary>
+        private static void TravelAndTime(StringBuilder md, List<CampaignRecord> runs)
+        {
+            int visits = runs.Sum(r => r.PaidVisits);
+            int days = runs.Sum(r => r.DaysEnded);
+            if (visits == 0 || days == 0)
+                return;
+            float PerDay(Func<CampaignRecord, int> f) => (float)runs.Sum(f) / days;
+            float PerVisit(Func<CampaignRecord, int> f) => (float)runs.Sum(f) / visits;
+
+            md.AppendLine().AppendLine("### Travel and time");
+            md.AppendLine(
+                "Minutes per day (and per paid visit) across all runs. Traffic is travel beyond the clear-road time; "
+                    + "waiting is arriving before an encounter opens. Chains and HQ are free and not counted."
+            );
+            md.AppendLine().AppendLine("| | Per day | Per visit |").AppendLine("|---|---:|---:|");
+            md.AppendLine($"| Paid visits | {(float)visits / days:0.0} | |");
+            md.AppendLine($"| Encounter | {PerDay(r => r.EncounterMinutes):0} | {PerVisit(r => r.EncounterMinutes):0} |");
+            md.AppendLine($"| Travel | {PerDay(r => r.TravelMinutes):0} | {PerVisit(r => r.TravelMinutes):0} |");
+            md.AppendLine($"| of which traffic | {PerDay(r => r.TrafficMinutes):0} | {PerVisit(r => r.TrafficMinutes):0} |");
+            md.AppendLine($"| Waiting | {PerDay(r => r.WaitMinutes):0} | {PerVisit(r => r.WaitMinutes):0} |");
+            md.AppendLine($"| Left unused at day end | {PerDay(r => r.MinutesLeftAtDayEnd):0} | |");
+
+            var left = runs.SelectMany(r => r.LeftUnvisited)
+                .GroupBy(kv => kv.Key)
+                .Select(g => (reason: g.Key, n: g.Sum(kv => kv.Value)))
+                .OrderByDescending(x => x.n)
+                .ToList();
+            if (left.Count == 0)
+                return;
+            md.AppendLine()
+                .AppendLine(
+                    $"**Offered but not entered when the day ended** ({left.Sum(x => x.n)} over {days} days):"
+                )
+                .AppendLine();
+            foreach (var (reason, n) in left)
+                md.AppendLine($"- {reason}: {n}");
+            md.AppendLine()
+                .AppendLine(
+                    $"**Blocked by traffic:** {runs.Sum(r => r.BlockedByTraffic)} of those would have fit on clear roads."
+                );
         }
 
         /// <summary>Credibility as run HP: where it drains, where it's restored, and how it trends by day.</summary>
