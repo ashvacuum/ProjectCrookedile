@@ -33,7 +33,8 @@ MonoBehaviour:
   _isUpgraded: 0
   _upgradedCosts: []
   _upgradedEffects: []
-  _upgradedPassives: []
+  _upgradedPassives:
+  - rid: 2888599713893580800
   _upgradedInnateRetain: 0
   _tags:
   - faithleader
@@ -60,7 +61,7 @@ MonoBehaviour:
         _conditions:
         - rid: 2685916282754957314
         _oneShot: 0
-        _oncePerTurn: 0
+        _oncePerTurn: 1
         _effects:
         - rid: 2685916282754957315
     - rid: 2685916282754957313
@@ -79,6 +80,36 @@ MonoBehaviour:
       type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
         _amount: 1
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+    - rid: 2888599713893580800
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 2888599713893580801
+        _conditions:
+        - rid: 2888599713893580802
+        _oneShot: 0
+        _oncePerTurn: 1
+        _effects:
+        - rid: 2888599713893580803
+    - rid: 2888599713893580801
+      type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 2888599713893580802
+      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 2888599713893580803
+      type: {class: HostilityGuardEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _condition: 6
+        _effects:
+        - rid: 2888599713893580804
+    - rid: 2888599713893580804
+      type: {class: GainActionPointsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 2
         _amountSource: 0
         _perXSource: 7
         _multiplier: 1
