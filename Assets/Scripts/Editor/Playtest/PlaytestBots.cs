@@ -669,21 +669,25 @@ namespace Crookedile.EditorTools.Playtest
             int Amount() => Field("_amount") is int a ? a : 0;
 
             // Credibility is the run's HP: a heal is worth its points once losses have cut into it,
-            // and nothing at the cap. Percent heals scale off the starting value.
+            // and nothing at the cap; a loss always costs its points. Percent changes scale off the
+            // starting value.
             int baseline = OriginDatabase.Shared?.GetCampaignStart(s.Origin).credibility ?? 0;
             float need = s.MaxCredibility <= 0 || s.Credibility < s.MaxCredibility ? 1f : 0f;
+            float Cred(float delta) => delta < 0f ? delta : delta * need;
             return outcome switch
             {
                 AdjustFundsOutcome => Amount() * 0.5f,
-                AdjustCredibilityOutcome => Amount() * need,
-                AdjustCredibilityPercentOutcome => (Field("_percent") is float p ? p : 0f) / 100f * baseline * need,
+                AdjustCredibilityOutcome => Cred(Amount()),
+                AdjustCredibilityPercentOutcome => Cred((Field("_percent") is float p ? p : 0f) / 100f * baseline),
                 GainCardOutcome or GainRandomCardOutcome or GainCardFromPoolOutcome => 6f,
                 UpgradeRandomCardOutcome or UpgradeChosenCardOutcome => 8f,
                 RemoveChosenCardOutcome => 5f,
                 RecruitAllyOutcome => 12f,
                 NextBattleHostilityOutcome => -3f * Amount(),
                 SpendTimeOutcome => -4f,
-                GoToEncounterOutcome => -1f,
+                // ponytail: a fight is worth its card reward, ignoring the chance of losing it; weigh
+                // in the bot's win rate on that encounter if the bots start walking into fights they lose.
+                GoToEncounterOutcome go => go.Target is BattleEncounterData ? 6f : 0f,
                 _ => 0f,
             };
         }
