@@ -30,7 +30,6 @@ namespace Crookedile.EditorTools.Playtest
         public static IEnumerator Run(
             BattleSetup setup,
             IBattleBot bot,
-            OriginPassive[] originPassives,
             int seed,
             BattleRecord rec,
             Action<BattleResult> onDone = null
@@ -46,7 +45,8 @@ namespace Crookedile.EditorTools.Playtest
 
             var go = new GameObject("PlaytestBattle");
             var bm = go.AddComponent<BattleManager>();
-            bm.ConfigureForSimulation(originPassives);
+            // No allies passed: the run's allies, or the origin's starting ally for a standalone fight.
+            bm.ConfigureForSimulation(null);
 
             BattleResult result = null;
             CardChoiceRequest pendingChoice = null;

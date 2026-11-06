@@ -7,7 +7,7 @@ namespace Crookedile.Gameplay.Battle
     /// <summary>
     /// Nepo Baby's starter passive ("the mulligan" — privilege, starts ahead). Lets the player
     /// discard ANY number of cards from hand and redraw that many. Authored on a battle-start
-    /// OriginPassive so it fires once the opening hand is dealt. No-op when the hand is empty.
+    /// starting ally so it fires once the opening hand is dealt. No-op when the hand is empty.
     ///
     /// Uses the player-choice picker in "up to" mode (select 0..hand size, confirm with any number).
     /// </summary>

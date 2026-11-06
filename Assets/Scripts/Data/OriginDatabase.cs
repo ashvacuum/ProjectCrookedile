@@ -8,8 +8,8 @@ namespace Crookedile.Data
     /// <summary>
     /// Central registry of per-archetype (<see cref="OriginType"/>) configuration that is otherwise
     /// scattered across passive assets, tag conventions and code: display name, description, color,
-    /// icon, unique resource, starter-deck tag, and the origin's <see cref="OriginPassive"/>.
-    /// The single source of truth for per-origin battle data (AP, portrait, passive, resource);
+    /// icon, unique resource, starter-deck tag, and the origin's starting <see cref="AllyData"/>.
+    /// The single source of truth for per-origin battle data (AP, portrait, starting ally, resource);
     /// replaced the old OriginStats asset. The Database window's Origins tab validates it.
     ///
     /// Create via: Assets → Create → Crookedile → Database → Origin Database
@@ -79,9 +79,12 @@ namespace Crookedile.Data
             public Color Color;
 
             [BoxGroup("Origin/Right/Battle", LabelText = "Battle")]
-            [Required("Without a passive this origin plays as a plain deck with no identity.")]
-            [Tooltip("The origin's starter passive asset.")]
-            public OriginPassive Passive;
+            [Required("Without a starting ally this origin plays as a plain deck with no identity.")]
+            [Tooltip(
+                "The ally every run of this origin starts with: the class's innate passive. Also "
+                    + "applied to battles started without a run."
+            )]
+            public AllyData StartingAlly;
 
             [BoxGroup("Origin/Right/Battle")]
             [Tooltip(
@@ -223,8 +226,8 @@ namespace Crookedile.Data
             return _map.TryGetValue(type, out entry);
         }
 
-        public OriginPassive GetPassive(OriginType type) =>
-            TryGet(type, out var e) ? e.Passive : null;
+        public AllyData GetStartingAlly(OriginType type) =>
+            TryGet(type, out var e) ? e.StartingAlly : null;
 
         #region Campaign start
         private const string ResourcePath = "Databases/OriginDatabase";

@@ -8,7 +8,7 @@ namespace Crookedile.Gameplay.Battle
     /// <summary>
     /// Discards the player's entire hand and draws the same number of cards back.
     ///
-    /// Designed for use in the Actor's <c>OriginPassive._passives</c> list.
+    /// Designed for use in the Actor's starting ally passives.
     /// The trigger and OneShot settings on the BattlePassive entry control
     /// when and how often this fires (e.g. TurnStartTrigger each turn).
     /// </summary>

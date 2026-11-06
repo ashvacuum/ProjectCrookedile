@@ -247,7 +247,7 @@ campaign checkpoints (`meta-progression.md`).
 1. `RunState.Relics` + `AddRelic()`.
 2. `PassiveResolver` takes optional run-level passives, folded into `_allPassives`;
    `BattleManager` passes `RunState.Current` relic passives at construction. Relics then
-   ARE origin passives mechanically — zero new behavior code.
+   ARE passives mechanically — zero new behavior code. (Since 2026-11-06 the class's innate passive is itself a starting ally; see `allies.md` §4.1.)
 3. Prototype relic generator (reflection pattern like `EnemyRosterGenerator`) → 4–6 relics
    + `RelicDatabase` asset. The Database window's Allies tab already audits them.
 4. Debug visibility only (overlay text). HUD relic bar = user-wired panel, later.

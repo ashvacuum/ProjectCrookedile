@@ -9,7 +9,7 @@ namespace Crookedile.Data
     /// <summary>
     /// Someone recruited into the campaign, who stays with the run and changes how battles play
     /// — the StS relic slot, framed as a person. Reuses <see cref="BattlePassive"/> the same way
-    /// <c>OriginPassive</c> does, so behaviour is data-authored.
+    /// cards do (the class's starting ally is one too), so behaviour is data-authored.
     ///
     /// Wired end to end: <c>RecruitAllyOutcome</c> → <c>RunState.Allies</c> → <c>BattleManager</c>
     /// registers the passives each battle. Only content is missing.

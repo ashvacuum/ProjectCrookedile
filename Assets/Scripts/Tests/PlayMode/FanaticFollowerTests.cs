@@ -52,7 +52,7 @@ namespace Crookedile.Tests
             var host = new GameObject("Fanatic follower test");
             _objects.Add(host);
             _battle = host.AddComponent<BattleManager>();
-            _battle.ConfigureForSimulation(new OriginPassive[0]);
+            _battle.ConfigureForSimulation(System.Array.Empty<AllyData>());
             _battle.StartBattle(
                 new BattleSetup
                 {

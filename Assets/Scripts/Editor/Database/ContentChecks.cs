@@ -87,7 +87,7 @@ namespace Crookedile.EditorTools
                 new EnemyMovesProvider(),
                 new BossesProvider(),
                 new EncounterPoolsProvider(),
-                new OriginPassivesProvider(),
+                new StartingAlliesProvider(),
                 new SharedArtProvider(),
                 new DuplicateEffectsProvider(),
                 new CardVisualsProvider(),
@@ -151,8 +151,6 @@ namespace Crookedile.EditorTools
             public IEnumerable<Row> Rows()
             {
                 var cards = LoadAll<CardData>();
-                var passives = LoadAll<OriginPassive>();
-
                 foreach (OriginType origin in Enum.GetValues(typeof(OriginType)))
                 {
                     // The deck a run actually starts with: OriginDatabase's authored deck, or
@@ -180,21 +178,21 @@ namespace Crookedile.EditorTools
                         deckIssues
                     );
 
-                    var p = passives.FirstOrDefault(x => x.Origin == origin);
+                    var p = OriginDatabase.Shared?.GetStartingAlly(origin);
                     var passIssues = new List<AuditIssue>();
                     if (p == null)
                         passIssues.Add(
                             new AuditIssue(
                                 Severity.Warning,
-                                "No OriginPassive asset for this origin."
+                                "No starting ally for this origin (set it on OriginDatabase)."
                             )
                         );
                     else if (p.Passives == null || p.Passives.Count == 0)
                         passIssues.Add(
-                            new AuditIssue(Severity.Warning, "OriginPassive has no passives wired.")
+                            new AuditIssue(Severity.Warning, "Starting ally has no passives wired.")
                         );
                     yield return new Row(
-                        $"{origin} passive",
+                        $"{origin} starting ally",
                         p != null ? p.name : "(none)",
                         p,
                         passIssues
@@ -1097,29 +1095,32 @@ namespace Crookedile.EditorTools
         }
 
         /// <summary>
-        /// Origin passives: validates each OriginPassive asset is wired (has passives, each with a
-        /// trigger and at least one effect), and surfaces the known Faith Leader timing caveat.
+        /// Starting allies: validates each origin's starting ally (OriginDatabase) is wired (has
+        /// passives, each with a trigger and at least one effect), and surfaces the known Support
+        /// timing caveat.
         /// </summary>
-        internal sealed class OriginPassivesProvider : IContentProvider
+        internal sealed class StartingAlliesProvider : IContentProvider
         {
-            public string Category => "Origin passives";
+            public string Category => "Starting allies";
 
             public IEnumerable<Row> Rows()
             {
-                var passives = LoadAll<OriginPassive>();
-                if (passives.Count == 0)
+                foreach (OriginType origin in Enum.GetValues(typeof(OriginType)))
                 {
-                    yield return new Row(
-                        "(none)",
-                        "no OriginPassive assets",
-                        null,
-                        new List<AuditIssue> { new AuditIssue(Severity.Warning, "None found.") }
-                    );
-                    yield break;
-                }
-
-                foreach (var op in passives.OrderBy(p => p.Origin))
-                {
+                    var op = OriginDatabase.Shared?.GetStartingAlly(origin);
+                    if (op == null)
+                    {
+                        yield return new Row(
+                            $"{origin}",
+                            "no starting ally",
+                            OriginDatabase.Shared,
+                            new List<AuditIssue>
+                            {
+                                new AuditIssue(Severity.Warning, "Set one on OriginDatabase."),
+                            }
+                        );
+                        continue;
+                    }
                     var issues = new List<AuditIssue>();
                     var list = op.Passives;
                     if (list == null || list.Count == 0)
@@ -1170,8 +1171,8 @@ namespace Crookedile.EditorTools
                     }
 
                     yield return new Row(
-                        string.IsNullOrWhiteSpace(op.PassiveName) ? op.name : op.PassiveName,
-                        $"{op.Origin} — {list?.Count ?? 0} passive(s)",
+                        string.IsNullOrWhiteSpace(op.AllyName) ? op.name : op.AllyName,
+                        $"{origin} — {list?.Count ?? 0} passive(s)",
                         op,
                         issues,
                         op.Icon

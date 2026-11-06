@@ -564,7 +564,8 @@ namespace Crookedile.Data
                 Credibility = start.credibility,
                 Origin = origin,
                 Deck = starterDeck != null ? new List<CardData>(starterDeck) : new List<CardData>(),
-                Allies = new List<AllyData>(),
+                // The class's innate passive is its starting ally.
+                Allies = StartingAllies(origin),
                 CurrentBattleIndex = 0,
                 BattleQueue = battleQueue,
                 IsCampaignRun = isCampaignRun,
@@ -645,6 +646,19 @@ namespace Crookedile.Data
             }
 
             return results;
+        }
+
+        /// <summary>
+        /// The allies <paramref name="origin"/> starts with: its <c>OriginDatabase</c> starting
+        /// ally, or none when the database or entry is missing.
+        /// </summary>
+        public static List<AllyData> StartingAllies(OriginType origin)
+        {
+            var allies = new List<AllyData>();
+            var ally = OriginDatabase.Shared?.GetStartingAlly(origin);
+            if (ally != null)
+                allies.Add(ally);
+            return allies;
         }
 
         /// <summary>

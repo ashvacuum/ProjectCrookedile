@@ -506,7 +506,7 @@ Encounters don't own abilities; enemies do. Values you can set per `EnemyData`:
 | `MinHostility` | **-3** | Floor (most receptive) |
 | `NeutralZone` | **0** | Buffer around 0 that must be crossed to commit to a side. `2` = must exceed +2 to go Aggressive, below -2 to go Receptive |
 | `StartingEffects` | empty | Statuses applied at battle start: behavior + `Stacks` + `Duration` |
-| `Passives` | empty | Reactive trigger/condition/effect abilities, same system as card and origin passives |
+| `Passives` | empty | Reactive trigger/condition/effect abilities, same system as card and ally passives |
 | `MovePattern` | Sequential | `Sequential` / `Random` / `RandomSequential` (random start offset, then in order) |
 | `AggressiveMoves` / `NeutralMoves` / `ReceptiveMoves` | empty | **The move list is chosen by current stance** — an enemy's options are driven entirely by how it feels about the player |
 
