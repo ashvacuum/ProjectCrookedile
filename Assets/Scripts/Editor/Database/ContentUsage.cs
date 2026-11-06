@@ -26,7 +26,6 @@ namespace Crookedile.Editor.Database
             typeof(Data.Cards.CardData),
             typeof(Data.Enemy.EnemyMoveData),
             typeof(Data.Enemy.EnemyData),
-            typeof(Data.OriginPassive),
             typeof(Data.AllyData),
             typeof(EncounterData),
             typeof(EncounterPoolData),

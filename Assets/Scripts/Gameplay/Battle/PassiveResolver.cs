@@ -11,7 +11,7 @@ namespace Crookedile.Gameplay.Battle
     /// Evaluates and fires passive abilities at the correct battle moments.
     ///
     /// Supports any number of <see cref="BattlePassive"/> entries registered from:
-    ///   • OriginPassive._passives (populated per origin)
+    ///   • the run's allies (AllyData passives, the class's starting ally included)
     ///   • CardData._passives (every card in the player's starting deck contributes its passives)
     ///
     /// Passives use fully polymorphic triggers (<see cref="PassiveTriggerBase"/>),
@@ -22,7 +22,6 @@ namespace Crookedile.Gameplay.Battle
     /// </summary>
     public class PassiveResolver : IDisposable
     {
-        private readonly OriginPassive _passive;
         private readonly IReadOnlyList<BattlePassive> _runPassives;
         private readonly BattleStats _playerStats;
         private DeckManager _deck;
@@ -66,9 +65,8 @@ namespace Crookedile.Gameplay.Battle
 
         #region Constructor
         /// <summary>
-        /// Creates a PassiveResolver for the given origin passive and player state.
+        /// Creates a PassiveResolver for the player state; ally passives come in as <paramref name="runPassives"/>.
         /// </summary>
-        /// <param name="passive">The origin's passive ScriptableObject (may be null).</param>
         /// <param name="playerStats">Player's battle statistics.</param>
         /// <param name="effectResolver">Creates <see cref="EffectExecutionContext"/> for BattleEffect execution.</param>
         /// <param name="enemies">All active enemies (for condition evaluation).</param>
@@ -76,7 +74,6 @@ namespace Crookedile.Gameplay.Battle
         private BattleManager _battleManager;
 
         public PassiveResolver(
-            OriginPassive passive,
             BattleStats playerStats,
             EffectResolver effectResolver,
             IReadOnlyList<EnemyController> enemies = null,
@@ -86,7 +83,6 @@ namespace Crookedile.Gameplay.Battle
             IReadOnlyList<BattlePassive> runPassives = null
         )
         {
-            _passive = passive;
             _playerStats = playerStats;
             _effectResolver = effectResolver;
             _enemies = enemies ?? Array.Empty<EnemyController>();
@@ -179,15 +175,7 @@ namespace Crookedile.Gameplay.Battle
             _temporaryPassives.Clear();
             _untilNextTurnPassives.Clear();
 
-            // Origin passive — new-system entries (when present)
-            if (_passive?.Passives != null)
-            {
-                foreach (var bp in _passive.Passives)
-                    if (bp != null)
-                        _allPassives.Add(bp);
-            }
-
-            // Run-level passives (allies) — persist across battles on RunState, re-registered
+            // Run-level passives (allies, the starting ally included) — persist across battles on RunState, re-registered
             // fresh each battle so their one-shot/fire-count state resets like any other passive.
             if (_runPassives != null)
             {

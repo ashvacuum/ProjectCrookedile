@@ -9,14 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4cafe87c1348d646a71da0cf440dbd3, type: 3}
+  m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
   m_Name: Nepotism
-  m_EditorClassIdentifier: 
-  _passiveName: Nepotism
-  _origin: 1
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
+  _id: 355a1499f47d2924ea3661bf9cef3c7e
+  _allyName: Nepotism
   _description: Once per battle, on your opening hand, you may discard your whole
     hand and draw a fresh one.
   _icon: {fileID: 0}
+  _rarity: 0
   _passives:
   - rid: 4738608336531357833
   references:

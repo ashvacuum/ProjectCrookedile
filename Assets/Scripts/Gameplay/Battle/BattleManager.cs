@@ -85,10 +85,9 @@ namespace Crookedile.Gameplay.Battle
         [SerializeField]
         private int _turncoatAdjacentNudge = 1;
 
-        [Header("Origin Passives")]
-        [Tooltip("Assign all three OriginPassive assets here (FaithLeader, NepoBaby, Actor).")]
-        [SerializeField]
-        private OriginPassive[] _originPassives;
+        // Allies for a battle started without a run; null = the origin's starting ally from
+        // OriginDatabase. Set by ConfigureForSimulation.
+        private IReadOnlyList<AllyData> _standaloneAllies;
 
         // State Machine
         private StateMachine<BattleState> _stateMachine;
@@ -352,18 +351,14 @@ namespace Crookedile.Gameplay.Battle
             // Card-play pipeline — owns cost payment, VFX handshake, Confused/Momentum/Echo.
             _cards = new CardPlayController(this);
 
-            // Passive resolver — find the asset matching this run's origin (null-safe: no passive if asset missing)
-            var passive =
-                _originPassives != null
-                    ? System.Array.Find(
-                        _originPassives,
-                        p => p != null && p.Origin == _playerOrigin
-                    )
-                    : null;
-            // Ally passives — run-level, pulled from the active run (null when battles are
-            // started standalone, e.g. BattleTestStarter without a run).
+            // Ally passives — the run's allies, starting ally included. A battle with no run
+            // (the playtest bot's standalone fights) uses the configured standalone allies, else
+            // the origin's starting ally.
             List<BattlePassive> allyPassives = null;
-            var runAllies = RunState.Current?.Allies;
+            IReadOnlyList<AllyData> runAllies =
+                RunState.Current?.Allies
+                ?? _standaloneAllies
+                ?? RunState.StartingAllies(_playerOrigin);
             if (runAllies != null && runAllies.Count > 0)
             {
                 allyPassives = new List<BattlePassive>();
@@ -386,7 +381,6 @@ namespace Crookedile.Gameplay.Battle
             // effects would fire once per battle ever started.
             _passiveResolver?.Dispose();
             _passiveResolver = new PassiveResolver(
-                passive,
                 _playerStats,
                 _effectResolver,
                 _enemies,
@@ -559,13 +553,14 @@ namespace Crookedile.Gameplay.Battle
         /// Ignored while a card play is still resolving or outside the player turn.
         /// </summary>
         /// <summary>
-        /// Headless setup for tools that play battles without a scene (the playtest bot): every
-        /// pacing delay goes to zero and the origin passives normally wired in the scene are
-        /// supplied directly. Call before <see cref="StartBattle"/>.
+        /// Headless setup for tools that play battles without a scene (the playtest bot, play-mode
+        /// tests): every pacing delay goes to zero. <paramref name="standaloneAllies"/> are the
+        /// allies a battle with no run fights with; null means the origin's starting ally, an
+        /// empty list means none. A run's own allies always win. Call before <see cref="StartBattle"/>.
         /// </summary>
-        public void ConfigureForSimulation(OriginPassive[] originPassives)
+        public void ConfigureForSimulation(IReadOnlyList<AllyData> standaloneAllies)
         {
-            _originPassives = originPassives;
+            _standaloneAllies = standaloneAllies;
             _opponentTurnDelay = 0f;
             _perEnemyAttackDelay = 0f;
             _instantResolution = true;

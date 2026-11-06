@@ -37,7 +37,10 @@ The design goal is **a good setup pays off and a bad one fails**, not raw diffic
    is then in the campaigns.
 2. **Read `report.md`** for the headline sections: Bugs and hangs (long turns of 8+ cards can be free-play
    loops), Encounter difficulty with the Skill gap column and Win margins, Card scores, Utility, Campaign runs
-   with Credibility (run HP) and Progression, and Bosses.
+   with Credibility (run HP), Travel and time, Allies and Progression, and Bosses. **Travel and time** shows where
+   the 8-hour day goes and how often traffic blocked a visit (traffic is meant to shape picks and routes).
+   **Allies** lists starting allies and each recruited ally's runs, day joined, source and battle win rate lift
+   against runs of the same bot and origin without it; the lift is confounded by the route that led there.
 3. **Run the bundled script** for the cuts the report doesn't make, passing the previous run to get deltas:
 
    ```

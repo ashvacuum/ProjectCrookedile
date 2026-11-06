@@ -45,7 +45,7 @@ namespace Crookedile.Editor.Database
         protected override IEnumerable<Column> BuildColumns()
         {
             yield return new Column("Origin", 120, null, o => DisplayName(o));
-            yield return new Column("Passive", 120, o => PassiveName(o) ?? "—", o => PassiveName(o) ?? "");
+            yield return new Column("Starting ally", 120, o => PassiveName(o) ?? "—", o => PassiveName(o) ?? "");
             yield return new Column("Deck", 44, o => DeckSize(o).ToString(), o => DeckSize(o));
             yield return new Column("AP", 32, o => o.HasEntry ? o.Entry.MaxActionPoints.ToString() : "", o => o.Entry.MaxActionPoints);
             yield return new Column("Funds", 46, o => o.HasEntry ? o.Entry.StartingFunds.ToString() : "", o => o.Entry.StartingFunds);
@@ -69,8 +69,8 @@ namespace Crookedile.Editor.Database
                 yield return Issue.Warning("No display name.");
             if (string.IsNullOrWhiteSpace(e.Description))
                 yield return Issue.Info("No description.");
-            if (e.Passive == null)
-                yield return Issue.Warning("No class passive linked.");
+            if (e.StartingAlly == null)
+                yield return Issue.Warning("No starting ally linked.");
             if (e.Portrait == null)
                 yield return Issue.Info("No portrait.");
             if (e.StarterDeck == null || e.StarterDeck.Count == 0)
@@ -92,7 +92,7 @@ namespace Crookedile.Editor.Database
                     EditorGUILayout.LabelField(DisplayName(origin), EditorStyles.boldLabel);
                     EditorGUILayout.LabelField(e.Description ?? "", EditorStyles.wordWrappedLabel);
                     EditorGUILayout.LabelField(
-                        $"Passive: {(e.Passive != null ? e.Passive.PassiveName : "none")} · {e.MaxActionPoints} AP · starts with {e.StartingFunds} Funds, {e.StartingCredibility} Credibility",
+                        $"Starting ally: {(e.StartingAlly != null ? e.StartingAlly.AllyName : "none")} · {e.MaxActionPoints} AP · starts with {e.StartingFunds} Funds, {e.StartingCredibility} Credibility",
                         EditorStyles.wordWrappedMiniLabel
                     );
                 }
@@ -112,6 +112,6 @@ namespace Crookedile.Editor.Database
                 : 0;
 
         private static string PassiveName(Origin origin) =>
-            origin.HasEntry && origin.Entry.Passive != null ? origin.Entry.Passive.PassiveName : null;
+            origin.HasEntry && origin.Entry.StartingAlly != null ? origin.Entry.StartingAlly.AllyName : null;
     }
 }

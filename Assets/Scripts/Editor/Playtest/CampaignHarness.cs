@@ -27,7 +27,6 @@ namespace Crookedile.EditorTools.Playtest
             CardDatabase cards,
             OriginType origin,
             ICampaignBot bot,
-            OriginPassive[] originPassives,
             int seed,
             int locationsPerDay,
             CampaignRecord rec,
@@ -45,6 +44,7 @@ namespace Crookedile.EditorTools.Playtest
             );
             var state = RunState.Current;
             state.ConfigureTravel(pool.Travel);
+            NoteNewAllies(state, rec, 0, "starting ally");
 
             int visitsToday = 0,
                 dayOfVisits = state.Day;
@@ -169,7 +169,6 @@ namespace Crookedile.EditorTools.Playtest
                     yield return FightEncounter(
                         battle,
                         bot,
-                        originPassives,
                         rng,
                         rec,
                         battleRecords,
@@ -256,6 +255,7 @@ namespace Crookedile.EditorTools.Playtest
                     try
                     {
                         chosen.Apply(state);
+                        NoteNewAllies(state, rec, state.Day, $"{evt.name} / {chosen.Label}");
                     }
                     catch (Exception ex)
                     {
@@ -347,6 +347,19 @@ namespace Crookedile.EditorTools.Playtest
             }
         }
 
+        /// <summary>Appends any ally the run holds that isn't recorded yet.</summary>
+        private static void NoteNewAllies(RunState state, CampaignRecord rec, int day, string source)
+        {
+            foreach (var ally in state.Allies)
+            {
+                if (ally == null)
+                    continue;
+                string name = string.IsNullOrEmpty(ally.AllyName) ? ally.name : ally.AllyName;
+                if (!rec.AlliesGained.Any(g => g.ally == name))
+                    rec.AlliesGained.Add((name, day, source));
+            }
+        }
+
         /// <summary>Records a problem once per run, however many days it recurs.</summary>
         private static void Note(CampaignRecord rec, string message)
         {
@@ -369,7 +382,6 @@ namespace Crookedile.EditorTools.Playtest
         private static IEnumerator FightEncounter(
             BattleEncounterData battle,
             ICampaignBot bot,
-            OriginPassive[] originPassives,
             System.Random rng,
             CampaignRecord run,
             List<BattleRecord> battleRecords,
@@ -402,7 +414,7 @@ namespace Crookedile.EditorTools.Playtest
                     Day = state.Day,
                 };
                 battleRecords.Add(rec);
-                yield return BattleHarness.Run(setup, bot.BattleBot, originPassives, rec.Seed, rec);
+                yield return BattleHarness.Run(setup, bot.BattleBot, rec.Seed, rec);
 
                 if (!rec.Win)
                 {

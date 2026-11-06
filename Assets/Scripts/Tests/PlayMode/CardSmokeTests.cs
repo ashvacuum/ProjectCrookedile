@@ -87,7 +87,7 @@ namespace Crookedile.Tests
                 _battleObject = new GameObject("CardSmokeBattle");
                 var bm = _battleObject.AddComponent<BattleManager>();
                 bm.CardChoicePrompt = OnChoice;
-                bm.ConfigureForSimulation(new OriginPassive[0]);
+                bm.ConfigureForSimulation(System.Array.Empty<AllyData>());
                 bm.StartBattle(
                     new BattleSetup
                     {

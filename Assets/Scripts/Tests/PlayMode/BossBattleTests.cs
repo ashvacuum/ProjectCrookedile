@@ -39,7 +39,7 @@ namespace Crookedile.Tests
             var host = new GameObject("Planning graph test");
             _objects.Add(host);
             var battle = host.AddComponent<BattleManager>();
-            battle.ConfigureForSimulation(new OriginPassive[0]);
+            battle.ConfigureForSimulation(System.Array.Empty<AllyData>());
             battle.StartBattle(
                 new BattleSetup
                 {
@@ -93,7 +93,7 @@ namespace Crookedile.Tests
             var host = new GameObject("Boss test");
             _objects.Add(host);
             var battle = host.AddComponent<BattleManager>();
-            battle.ConfigureForSimulation(new OriginPassive[0]);
+            battle.ConfigureForSimulation(System.Array.Empty<AllyData>());
             var order = new List<string>();
             void BossActing(BossActingEvent e) => order.Add(e.Move.MoveName);
             void EnemyActing(EnemyActingEvent e) => order.Add("Audience");

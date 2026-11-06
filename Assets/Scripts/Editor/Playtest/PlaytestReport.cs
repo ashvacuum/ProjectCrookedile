@@ -75,7 +75,7 @@ namespace Crookedile.EditorTools.Playtest
         private static string CampaignsCsv(List<CampaignRecord> rows)
         {
             var sb = new StringBuilder(
-                "id,bot,origin,seed,end,day_reached,defeated_by,funds,credibility,deck,allies,battles,battles_won,events,idle_days,errors,credibility_by_day,route\n"
+                "id,bot,origin,seed,end,day_reached,defeated_by,funds,credibility,deck,allies,battles,battles_won,events,idle_days,errors,credibility_by_day,route,ally_list\n"
             );
             foreach (var r in rows)
                 sb.AppendLine(
@@ -98,7 +98,8 @@ namespace Crookedile.EditorTools.Playtest
                         r.DaysWithNothingToDo,
                         r.Errors.Count,
                         Q(string.Join(" ", r.CredibilityByDay)),
-                        Q(string.Join(" > ", r.Visited))
+                        Q(string.Join(" > ", r.Visited)),
+                        Q(string.Join(" > ", r.AlliesGained.Select(g => $"D{g.day}:{g.ally}")))
                     )
                 );
             return sb.ToString();
@@ -789,6 +790,7 @@ namespace Crookedile.EditorTools.Playtest
             }
 
             TravelAndTime(md, runs);
+            Allies(md, runs);
 
             var idle = runs.Sum(r => r.DaysWithNothingToDo);
             if (idle > 0)
@@ -843,6 +845,59 @@ namespace Crookedile.EditorTools.Playtest
                     .Take(10)
             )
                 md.AppendLine($"- {kv.Key}: {kv.n}");
+        }
+
+        /// <summary>
+        /// Which allies runs recruited, when and from where, and how runs holding one fared against
+        /// runs of the same bot and origin without it.
+        /// </summary>
+        private static void Allies(StringBuilder md, List<CampaignRecord> runs)
+        {
+            var gains = runs.SelectMany(r => r.AlliesGained.Select(g => (run: r, g.ally, g.day, g.source))).ToList();
+            if (gains.Count == 0)
+                return;
+            static float WinRate(CampaignRecord r) => r.Battles > 0 ? (float)r.BattlesWon / r.Battles : 0f;
+
+            md.AppendLine().AppendLine("### Allies");
+            var starting = gains.Where(g => g.day == 0)
+                .GroupBy(g => (g.ally, g.run.Origin))
+                .Select(g => $"{g.Key.ally} ({g.Key.Origin}, {g.Count()} runs)");
+            md.AppendLine($"**Starting allies:** {string.Join(", ", starting)}.");
+
+            var recruited = gains.Where(g => g.day > 0).GroupBy(g => g.ally).ToList();
+            if (recruited.Count == 0)
+            {
+                md.AppendLine().AppendLine("No run recruited an ally beyond its starting one.");
+                return;
+            }
+            md.AppendLine(
+                "Recruited allies. **Battle win rate lift** compares runs holding the ally with runs of the same bot "
+                    + "and origin without it (points, weighted by runs holding it). It is confounded by the route that "
+                    + "led to the ally, so read it as a hint, not a measurement."
+            );
+            md.AppendLine()
+                .AppendLine("| Ally | Runs | Share of runs | Avg day joined | Battle win rate lift | Main source |")
+                .AppendLine("|---|---:|---:|---:|---:|---|");
+            foreach (var g in recruited.OrderByDescending(g => g.Count()))
+            {
+                var holders = new HashSet<CampaignRecord>(g.Select(x => x.run));
+                float lift = 0f;
+                int weight = 0;
+                foreach (var group in runs.GroupBy(r => (r.Bot, r.Origin)))
+                {
+                    var with = group.Where(holders.Contains).ToList();
+                    var without = group.Where(r => !holders.Contains(r)).ToList();
+                    if (with.Count == 0 || without.Count == 0)
+                        continue;
+                    lift += (with.Average(WinRate) - without.Average(WinRate)) * with.Count;
+                    weight += with.Count;
+                }
+                string liftText = weight > 0 ? $"{100f * lift / weight:+0;-0;0} pts" : "—";
+                string source = g.GroupBy(x => x.source).OrderByDescending(s => s.Count()).First().Key;
+                md.AppendLine(
+                    $"| {g.Key} | {holders.Count} | {100f * holders.Count / runs.Count:0}% | {g.Average(x => x.day):0.0} | {liftText} | {source} |"
+                );
+            }
         }
 
         /// <summary>Where the daily hours go, and what kept offered locations from being entered.</summary>

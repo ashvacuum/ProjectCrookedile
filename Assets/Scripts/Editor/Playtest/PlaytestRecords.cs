@@ -146,5 +146,9 @@ namespace Crookedile.EditorTools.Playtest
         // Offered locations still unvisited when the day ended, by why they weren't entered.
         public readonly Dictionary<string, int> LeftUnvisited = new();
         public int BlockedByTraffic; // blocked, but the same visit fits on clear roads
+
+        // Allies the run gained, in order, with the day each joined (0 = the starting ally) and
+        // the event option that recruited it.
+        public readonly List<(string ally, int day, string source)> AlliesGained = new();
     }
 }

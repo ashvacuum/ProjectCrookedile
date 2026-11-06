@@ -78,7 +78,6 @@ namespace Crookedile.EditorTools.Playtest
             GameLogger.SetGlobalLevel(LogLevel.Warning);
 
             var cards = CardDatabase.Shared;
-            var passives = Find<OriginPassive>().ToArray();
             var pool = string.IsNullOrEmpty(config.PoolPath)
                 ? Find<EncounterPoolData>().FirstOrDefault()
                 : AssetDatabase.LoadAssetAtPath<EncounterPoolData>(config.PoolPath);
@@ -140,7 +139,7 @@ namespace Crookedile.EditorTools.Playtest
                     };
                     battles.Add(rec);
                     if (setup.enemies.Count > 0)
-                        yield return Safe(BattleHarness.Run(setup, bot, passives, rec.Seed, rec), ex => rec.Errors.Add("Harness crashed: " + Describe(ex)));
+                        yield return Safe(BattleHarness.Run(setup, bot, rec.Seed, rec), ex => rec.Errors.Add("Harness crashed: " + Describe(ex)));
                     else
                         rec.Errors.Add("Round 0 has no enemies.");
                     done++;
@@ -173,7 +172,7 @@ namespace Crookedile.EditorTools.Playtest
                         };
                         campaigns.Add(rec);
                         yield return Safe(
-                            CampaignHarness.Run(pool, cards, origin, bot, passives, rec.Seed, config.LocationsPerDay, rec, battles),
+                            CampaignHarness.Run(pool, cards, origin, bot, rec.Seed, config.LocationsPerDay, rec, battles),
                             ex =>
                             {
                                 rec.EndReason = "Error";
