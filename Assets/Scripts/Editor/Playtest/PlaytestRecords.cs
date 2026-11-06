@@ -133,5 +133,18 @@ namespace Crookedile.EditorTools.Playtest
         public int StrongOffers; // win rewards drawn from the strong-win pool (80%+)
         public int RareGuarantees; // win rewards with a guaranteed Rare (maxed meter)
         public int RaresTaken; // Rare cards the bot picked from any reward
+
+        // Time on the map, over paid visits (chains are free and HQ ends the day).
+        public int PaidVisits;
+        public int TravelMinutes; // includes TrafficMinutes
+        public int TrafficMinutes; // travel beyond the clear-road time
+        public int WaitMinutes; // arrived before the encounter opened
+        public int EncounterMinutes;
+        public int DaysEnded;
+        public int MinutesLeftAtDayEnd; // summed over DaysEnded
+
+        // Offered locations still unvisited when the day ended, by why they weren't entered.
+        public readonly Dictionary<string, int> LeftUnvisited = new();
+        public int BlockedByTraffic; // blocked, but the same visit fits on clear roads
     }
 }

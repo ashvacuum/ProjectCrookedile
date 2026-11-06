@@ -126,6 +126,8 @@ namespace Crookedile.EditorTools.Playtest
                     // button, so every bot stops there when it can and lets its strategy pick.
                     if (next == null)
                         next = enterable.FirstOrDefault(IsDayEnder);
+                    if (next == null || IsDayEnder(next))
+                        NoteDayEnd(state, rec);
                     if (next == null)
                     {
                         if (enterable.Count == 0)
@@ -142,11 +144,20 @@ namespace Crookedile.EditorTools.Playtest
                     Note(rec, $"Chain into '{next.name}' skipped — it has no battle session.");
                     continue;
                 }
+                var plan = charge ? state.PlanVisit(next) : default;
                 if (charge ? !state.TryVisit(next) : !MarkFree(state, next))
                 {
                     rec.Errors.Add($"Could not enter '{next.name}' on day {state.Day}.");
                     state.AdvanceDay();
                     continue;
+                }
+                if (charge && !IsDayEnder(next))
+                {
+                    rec.PaidVisits++;
+                    rec.TravelMinutes += plan.TravelMinutes;
+                    rec.TrafficMinutes += TrafficMinutes(plan);
+                    rec.WaitMinutes += plan.WaitMinutes;
+                    rec.EncounterMinutes += plan.EncounterMinutes;
                 }
                 rec.Visited.Add($"D{state.Day}:{next.name}");
 
@@ -191,6 +202,8 @@ namespace Crookedile.EditorTools.Playtest
                         break;
                     }
                     rec.BattlesWon++;
+                    if (battle.IsBoss)
+                        state.RestoreCredibility(); // mirrors PostBattleFlow
                     // Mirrors PostBattleFlow: the reward tier follows the encounter's last round.
                     var last = battleRecords[battleRecords.Count - 1];
                     var tier = cards.RewardsForWin(
@@ -299,6 +312,41 @@ namespace Crookedile.EditorTools.Playtest
             encounter is not BattleEncounterData battle
             || (battle.Session != null && battle.Session.RoundCount > 0);
 
+        /// <summary>Travel minutes beyond the clear-road time (ally reductions are already in the plan).</summary>
+        private static int TrafficMinutes(CampaignVisitPlan plan) =>
+            plan.TrafficMultiplier > 1f
+                ? plan.TravelMinutes - UnityEngine.Mathf.RoundToInt(plan.TravelMinutes / plan.TrafficMultiplier)
+                : 0;
+
+        /// <summary>
+        /// The day is about to end: tally the minutes left and why each offered location went
+        /// unvisited, flagging blocks that the same visit would have cleared on empty roads.
+        /// </summary>
+        private static void NoteDayEnd(RunState state, CampaignRecord rec)
+        {
+            rec.DaysEnded++;
+            rec.MinutesLeftAtDayEnd += state.MinutesRemaining;
+            foreach (var loc in state.TodaysLocations)
+            {
+                if (IsDayEnder(loc) || (loc is BattleEncounterData b && b.IsBoss))
+                    continue;
+                var plan = state.PlanVisit(loc);
+                string reason = !Playable(loc) ? "No battle session"
+                    : plan.CanEnter ? "Enterable, bot ended the day"
+                    : plan.BlockedReason;
+                Bump(rec.LeftUnvisited, reason);
+                // ponytail: "clear roads" removes traffic from this one trip only; earlier trips'
+                // traffic that ate into the day isn't credited. Log per-day traffic if that matters.
+                int clearFinish = plan.FinishMinute - TrafficMinutes(plan);
+                int clearStart = plan.StartMinute - TrafficMinutes(plan);
+                bool fitsClear =
+                    UnityEngine.Mathf.Max(clearStart, loc.OpeningMinute) < loc.ClosingMinute
+                    && clearFinish - state.ClockMinute <= state.MinutesRemaining;
+                if (!plan.CanEnter && Playable(loc) && TrafficMinutes(plan) > 0 && fitsClear)
+                    rec.BlockedByTraffic++;
+            }
+        }
+
         /// <summary>Records a problem once per run, however many days it recurs.</summary>
         private static void Note(CampaignRecord rec, string message)
         {
@@ -308,9 +356,7 @@ namespace Crookedile.EditorTools.Playtest
 
         /// <summary>An HQ-like stop: an event whose every option ends the day.</summary>
         public static bool IsDayEnder(EncounterData encounter) =>
-            encounter is EventEncounterData evt
-            && evt.Options.Count > 0
-            && evt.Options.All(o => o.Outcomes.Any(x => x is AdvanceDayOutcome));
+            encounter is EventEncounterData { EndsDay: true };
 
         private static bool MarkFree(RunState state, EncounterData encounter)
         {
