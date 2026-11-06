@@ -31,7 +31,7 @@ MonoBehaviour:
     - rid: 1430661995083595872
       type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _target: 6
+        _target: 0
         _behavior:
           rid: 1430661995083595873
         _stacks: 2
