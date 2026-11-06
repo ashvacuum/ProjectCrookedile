@@ -1,6 +1,6 @@
 # Crookedile — Core Design Doc
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-11-02
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-11-06
 >
 > **Summary:** The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions.
 >
@@ -401,7 +401,7 @@ The game is a card game wrapped in an overworld metagame, not a full campaign RP
 
 ## Open Threads
 - Full enemy roster & complete voice-intent set
-- Relic design space (where build variety lives)
+- Relic design space (where build variety lives) → proposal in [`allies.md`](allies.md) (2026-11-06)
 - Finalizing Faith Leader's starter passive trigger
 - What receptive enemies grant (mirror to the hostile-draw reward)
 - Whether the default hostility card is removable
