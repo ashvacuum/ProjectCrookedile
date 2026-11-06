@@ -121,5 +121,32 @@ namespace Crookedile.Data.Campaign
 
         public string Body => _body;
         public IReadOnlyList<EventOption> Options => _options;
+
+        /// <summary>
+        /// An HQ-like stop: every option ends the day. The daily draw leaves these off the map
+        /// while a boss is on offer.
+        /// </summary>
+        public bool EndsDay
+        {
+            get
+            {
+                if (_options.Count == 0)
+                    return false;
+                foreach (var option in _options)
+                    if (!EndsTheDay(option))
+                        return false;
+                return true;
+            }
+        }
+
+        private static bool EndsTheDay(EventOption option)
+        {
+            if (option?.Outcomes == null)
+                return false;
+            foreach (var outcome in option.Outcomes)
+                if (outcome is AdvanceDayOutcome)
+                    return true;
+            return false;
+        }
     }
 }

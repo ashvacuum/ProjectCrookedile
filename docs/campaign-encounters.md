@@ -1,6 +1,6 @@
 # Campaign Encounters
 
-> **Kind:** Systems · **Status:** Built · **Updated:** 2026-10-29
+> **Kind:** Systems · **Status:** Built · **Updated:** 2026-11-06
 >
 > **Summary:** How encounters are typed, authored, scheduled and drawn, with every field, outcome, requirement and default: battles, events, chaining, flags, pools, travel, enemy moves, statuses, run state, rewards and the editor tools.
 >
@@ -79,7 +79,7 @@ over months — not where that risk belongs.
 | Field | Type | Default | What it does |
 |---|---|---|---|
 | `Session` | `BattleSession` | none | The fight. **Should be exactly one round** — multi-round can only chain battle→battle |
-| `IsBoss` | bool | false | The finale. On a day it's offered, the map shows only "Face <boss>" (no travel or time cost) and the day can't end without it. The ally reward on victory (M3) isn't built |
+| `IsBoss` | bool | false | The finale. On a day it's offered, the map shows only "Face <boss>" (no travel or time cost), HQ and other day-ending stops (`EventEncounterData.EndsDay`) are left off the draw, and any way of ending the day (`RunState.AdvanceDay`) chains into the boss instead. Winning it restores full Credibility for the next week (`RunState.RestoreCredibility`). The ally reward on victory (M3) isn't built |
 | `RewardOverride` | `RewardConfig` | none | Per-encounter reward weights. **Authored but not yet consumed** — `PostBattleFlow` still calls `GenerateRewardOffer(count: 3)` with the database's built-in weights |
 
 ### 2.1 `BattleSession.BattleRound` — the tuning values for a fight

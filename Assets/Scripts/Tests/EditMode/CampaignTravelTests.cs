@@ -250,6 +250,30 @@ namespace Crookedile.Tests
         }
 
         [Test]
+        public void EndingABossDayFacesTheBoss()
+        {
+            var boss = Make<BattleEncounterData>();
+            Set(boss, "_id", "boss-check");
+            Set(boss, "_isBoss", true);
+            var state = (RunState)Activator.CreateInstance(typeof(RunState), true);
+            Property(state, "MaxHours", 8);
+            Property(state, "Day", 7);
+            Property(state, "VisitedLocationIds", new HashSet<string>());
+            state.SetTodaysLocations(7, new List<EncounterData> { encounter, boss });
+
+            new AdvanceDayOutcome().Apply(state); // what an HQ option does
+            Require(
+                state.Day == 7 && state.NextEncounter == boss,
+                "Ending the day with the boss unresolved must chain into the boss, not skip it."
+            );
+
+            state.ClearNextEncounter();
+            state.RemoveTodaysLocation(boss); // the boss was entered
+            state.AdvanceDay();
+            Require(state.Day == 8 && state.NextEncounter == null, "Once the boss is resolved the day ends.");
+        }
+
+        [Test]
         public void AllyBonuses()
         {
             var driver = Make<AllyData>();
