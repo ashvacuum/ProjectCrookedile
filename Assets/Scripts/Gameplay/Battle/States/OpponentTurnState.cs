@@ -137,27 +137,6 @@ namespace Crookedile.Gameplay.Battle
                 return;
             }
 
-            // Doubt (pacify): a doubting enemy may hold back its action (soft skip, 25% per stack).
-            int doubt = enemy.StatusEffects.GetStacks<DoubtStatus>();
-            if (doubt > 0)
-            {
-                float doubtSkip = Mathf.Clamp01(doubt * 0.25f);
-                if (Random.value < doubtSkip)
-                {
-                    GameLogger.LogInfo<BattleManager>(
-                        $"Enemy [{i}] {enemy.EnemyData.EnemyName} hesitates (Doubt skip {doubtSkip:P0})"
-                    );
-                    EventBus.Publish(
-                        new EnemySkippedTurnEvent
-                        {
-                            EnemyIndex = i,
-                            EnemyName = enemy.EnemyData.EnemyName,
-                        }
-                    );
-                    return;
-                }
-            }
-
             // Receptive enemies have a chance to hold back (20% per negative hostility stack).
             if (enemy.Stats.IsReceptive)
             {

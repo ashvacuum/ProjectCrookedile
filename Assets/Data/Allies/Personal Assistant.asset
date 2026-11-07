@@ -10,37 +10,33 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
-  m_Name: Daddy's Gifts
+  m_Name: Personal Assistant
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
-  _id: 9fe225578fe293c4ba31c366dd76670b
-  _allyName: Daddy's Gifts
-  _description: Once every battle, at the start of your turn you can discard any
-    number of cards and draw the same number back.
+  _id: 355a1499f47d2924ea3661bf9cef3c7e
+  _allyName: Personal Assistant
+  _description: Once per battle, on your opening hand, you may discard your whole
+    hand and draw a fresh one.
   _icon: {fileID: 0}
   _rarity: 0
   _passives:
-  - rid: 4738608336531357838
+  - rid: 4738608336531357833
   references:
     version: 2
     RefIds:
-    - rid: 4738608336531357838
+    - rid: 4738608336531357833
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: New Passive
         _trigger:
-          rid: 4738608336531357845
-        _conditions:
-        - rid: 4738608336531357840
+          rid: 4738608336531357834
+        _conditions: []
         _oneShot: 1
+        _oncePerTurn: 0
         _effects:
-        - rid: 4823698462508580958
-    - rid: 4738608336531357840
-      type: {class: AlwaysCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data: 
-    - rid: 4738608336531357845
+        - rid: 4738608336531357837
+    - rid: 4738608336531357834
       type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 
-    - rid: 4823698462508580958
-      type: {class: MulliganEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+    - rid: 4738608336531357837
+      type: {class: RedrawHandEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _name: 
+        _asOptionalOffer: 1

@@ -14,7 +14,7 @@ namespace Crookedile.Gameplay.Battle
     ///
     /// The replacement executes on the enemy's turn through the normal pipeline, so author
     /// its effects knowing the enemy is the caster (RaiseOpinion works in your favor; the
-    /// enemy's own skip checks — Stunned/Silenced/Doubt — still apply). The intent badge
+    /// enemy's own skip checks — Stunned/Silenced — still apply). The intent badge
     /// updates immediately. Combine with <see cref="ForEachEnemyWithStatusEffect"/> and
     /// target TriggeringEnemy to command every Fanatic.
     /// </summary>

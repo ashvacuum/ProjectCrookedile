@@ -80,6 +80,53 @@ namespace Crookedile.Data.Campaign
     }
 
     /// <summary>
+    /// Raises or lowers the run's max Credibility. A raise also heals by the same amount; a cut
+    /// clamps current Credibility to the new max. Max never drops below 1, so a cut alone
+    /// never ends a run.
+    /// </summary>
+    [Serializable]
+    public class AdjustMaxCredibilityOutcome : RunOutcome
+    {
+        [Tooltip(
+            "Signed change to max Credibility. Positive also heals that much; negative lowers the cap and clamps current Credibility to it."
+        )]
+        [SerializeField]
+        private int _amount = 10;
+
+        public override void Apply(RunState state) => state.AdjustMaxCredibility(_amount);
+
+        public override string GetDescription() =>
+            _amount >= 0 ? $"+{_amount} max Credibility" : $"{_amount} max Credibility";
+    }
+
+    /// <summary>
+    /// Heals a percentage of the run's max Credibility. An ally with
+    /// <see cref="StrongerCredibilityHealPassive"/> raises the percentage to its own when that is
+    /// higher; with several such allies, the largest wins.
+    /// </summary>
+    [Serializable]
+    public class HealPercentOfMaxCredibilityOutcome : RunOutcome
+    {
+        [Tooltip(
+            "Percent of max Credibility healed, rounded up. An ally with Stronger Credibility Heal raises it to the ally's percent when that is higher."
+        )]
+        [Range(0f, 100f)]
+        [SerializeField]
+        private float _percent = 10f;
+
+        /// <summary>The amount this heal would restore right now, after ally passives.</summary>
+        public int HealAmount(RunState state)
+        {
+            float percent = Mathf.Max(_percent, StrongerCredibilityHealPassive.BestPercent(state.Allies));
+            return Mathf.CeilToInt(Mathf.Max(0f, state.MaxCredibility * percent * 0.01f));
+        }
+
+        public override void Apply(RunState state) => state.AdjustCredibility(HealAmount(state));
+
+        public override string GetDescription() => $"Heal {_percent:0.##}% of max Credibility";
+    }
+
+    /// <summary>
     /// Adjusts Credibility by a percentage of the origin's <em>starting</em> Credibility, so
     /// "restore a quarter of your standing" means the same thing to every archetype without
     /// authoring a per-origin number.
@@ -356,7 +403,7 @@ namespace Crookedile.Data.Campaign
 
     /// <summary>
     /// Removes one copy of a specific card from the deck. Use for cleansing events — "confess,
-    /// and lose a Doubt". No-op when the deck holds no copy.
+    /// and lose a Scandal". No-op when the deck holds no copy.
     /// </summary>
     /// <remarks>For "remove any card" use <see cref="RemoveChosenCardOutcome"/>.</remarks>
     [Serializable]

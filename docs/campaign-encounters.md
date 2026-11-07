@@ -1,6 +1,6 @@
 # Campaign Encounters
 
-> **Kind:** Systems · **Status:** Built · **Updated:** 2026-11-06
+> **Kind:** Systems · **Status:** Built · **Updated:** 2026-11-07
 >
 > **Summary:** How encounters are typed, authored, scheduled and drawn, with every field, outcome, requirement and default: battles, events, chaining, flags, pools, travel, enemy moves, statuses, run state, rewards and the editor tools.
 >
@@ -80,7 +80,7 @@ over months — not where that risk belongs.
 |---|---|---|---|
 | `Session` | `BattleSession` | none | The fight. **Should be exactly one round** — multi-round can only chain battle→battle |
 | `IsBoss` | bool | false | The finale. On a day it's offered, the map shows only "Face <boss>" (no travel or time cost), HQ and other day-ending stops (`EventEncounterData.EndsDay`) are left off the draw, and any way of ending the day (`RunState.AdvanceDay`) chains into the boss instead. Winning it restores full Credibility for the next week (`RunState.RestoreCredibility`). The ally reward on victory (M3) isn't built |
-| `RewardOverride` | `RewardConfig` | none | Per-encounter reward weights. **Authored but not yet consumed** — `PostBattleFlow` still calls `GenerateRewardOffer(count: 3)` with the database's built-in weights |
+| `RewardOverride` | `RewardConfig` | none | The encounter's base reward tier, replacing the database default. A strong win or a maxed boss meter still earns its own tier (`CardDatabase.RewardsForWin`) |
 
 ### 2.1 `BattleSession.BattleRound` — the tuning values for a fight
 
@@ -144,6 +144,8 @@ inspector).
 | `AdjustFundsOutcome` | `Amount` (signed, default 10) | Funds ± amount, **clamped at 0** |
 | `AdjustCredibilityOutcome` | `Amount` (signed, default 5) | Credibility ± amount, clamped at 0 |
 | `AdjustCredibilityPercentOutcome` | `Percent` (signed) | Credibility ± a percentage of the origin's *starting* Credibility, so one asset means the same to every archetype |
+| `HealPercentOfMaxCredibilityOutcome` | `Percent` (default 10) | Heals that percentage of *max* Credibility, rounded up. An ally with `StrongerCredibilityHealPassive` (the Spin Doctor, 20%) raises it to the ally's percentage when higher. HQ's Ad Spend uses it |
+| `AdjustMaxCredibilityOutcome` | `Amount` (signed, default 10) | Raises or lowers max Credibility for the rest of the run (saved). A raise also heals that much; a cut clamps current Credibility to the new max. Max never drops below 1 |
 | `RecruitAllyOutcome` | `Ally` | Adds an ally. Duplicates ignored (unique per run); its passives register into every battle |
 | `GainCardOutcome` | `Card`, `Count` (≥1) | Adds N copies to the deck. How an event hands you a curse |
 | `GainRandomCardOutcome` | `Scope` (Any / PlayerOrigin / Colorless), `RestrictType` + `Type`, `RestrictRarity` + `Rarity`, `Count` | Random card(s) from the chosen slice of the pool. Unrestricted rarity = rolls `RewardConfig`'s weights (70/25/5, no pity). Skips cards the run hasn't unlocked |
@@ -575,7 +577,7 @@ count and a duration type.
 | Value | Start | Changed by | Notes |
 |---|---|---|---|
 | `Funds` | per origin | `AdjustFundsOutcome` | Clamped at 0, no ceiling |
-| `Credibility` | per origin | `AdjustCredibility(Percent)Outcome`, lost battles | Clamped between 0 and the origin's **Max Credibility** (`OriginDatabase` entry; 0 = the starting value), so heals can't bank above it. **The run's HP:** a lost battle costs 5 (just short of the win line) to 30 (Opinion collapsed to 0), scaling linearly with the shortfall — tunable on `OriginDatabase` (Campaign defeat). Reaching 0 by any route, a lost battle or an event choice, ends the run, and losing a boss fight (the election) ends it whatever Credibility is left. HQ's Ad Spend restores it. Battle itself never reads it |
+| `Credibility` | per origin | `AdjustCredibility(Percent)Outcome`, `HealPercentOfMaxCredibilityOutcome`, lost battles | Clamped between 0 and **max Credibility**: the origin's Max Credibility (`OriginDatabase` entry; 0 = the starting value) plus any `AdjustMaxCredibilityOutcome` changes this run, so heals can't bank above it. **The run's HP:** a lost battle costs 5 (just short of the win line) to 30 (Opinion collapsed to 0), scaling linearly with the shortfall — tunable on `OriginDatabase` (Campaign defeat). Reaching 0 by any route, a lost battle or an event choice, ends the run, and losing a boss fight (the election) ends it whatever Credibility is left. HQ's Ad Spend heals 10% of max Credibility (20% with the Spin Doctor). Battle itself never reads it |
 | Time (`MinutesRemaining`) | `MaxHours` × 60 | visits (travel + duration), `SpendTimeOutcome`, Wait | Refills on day end; the day also ends at midnight |
 | `Day` | 1 | End Day, `AdvanceDayOutcome` | Run ends past `pool.Days` |
 | `Deck` | starter deck | card outcomes + post-battle rewards | Holds SO refs; upgrades store clones |
@@ -640,8 +642,8 @@ Unassign it to give nothing after a loss.
 Rewards are a **pick-1-of-3 card, or skip**. Nothing else drops yet: no Funds, no allies, no
 boss reward. The offer skips cards the run hasn't unlocked and cards with no upgrade authored (unfinished; Heckles and
 Scandals are exempt). Art doesn't gate it: a card without art is offered with a blank frame. It also skips Policies tagged with another
-origin (class Policies stay in their class; untagged ones are universal). `BattleEncounterData.RewardOverride` and `IsBoss` are authored fields that
-nothing consumes — wiring `GenerateRewardOffer` to read `RewardConfig` is the open task.
+origin (class Policies stay in their class; untagged ones are universal). The offer's `RewardConfig` is the win's tier: a maxed boss
+meter, then a strong win, then the encounter's `RewardOverride`, then the database default.
 
 ---
 
@@ -709,7 +711,6 @@ rather than recursion, so a cyclic authoring mistake settles instead of blowing 
 
 ## 12. Gaps and known shortcuts
 
-- **`RewardOverride` is inert.** Set it for future-proofing; it doesn't change a run today.
 - **Battle rewards are cards only.** An event outcome is currently the only way to hand out Funds, Credibility, or an ally.
 - **No per-day weight curve.** An encounter's odds vary only because the *eligible set* varies.
 - **The campaign screen is a playtest UI.** `CampaignFlow` builds a UI Toolkit list at runtime plus an IMGUI stat strip; it is a harness for judging the loop, not the shipping map.

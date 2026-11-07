@@ -208,10 +208,11 @@ namespace Crookedile.EditorTools.Playtest
                     var tier = cards.RewardsForWin(
                         last.FinalOpinion,
                         last.MaxOpinion,
-                        bossFight: battle.IsBoss
+                        bossFight: battle.IsBoss,
+                        encounterOverride: battle.RewardOverride
                     );
                     bool guaranteeRare = last.FinalOpinion >= last.MaxOpinion;
-                    if (tier != cards.Rewards)
+                    if (tier != (battle.RewardOverride != null ? battle.RewardOverride : cards.Rewards))
                         rec.StrongOffers++;
                     if (guaranteeRare)
                         rec.RareGuarantees++;

@@ -124,7 +124,8 @@ namespace Crookedile.UI.Battle
                 config: _cardDatabase.RewardsForWin(
                     _lastResult.finalOpinion,
                     maxOpinion,
-                    bossFight: Battle?.Boss != null
+                    bossFight: Battle?.Boss != null,
+                    encounterOverride: run?.CurrentEncounter?.RewardOverride
                 ),
                 guaranteeRare: _lastResult.finalOpinion >= maxOpinion
             );

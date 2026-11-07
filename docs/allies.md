@@ -1,6 +1,6 @@
 # Allies — the run's build-warping layer
 
-> **Kind:** Design · **Status:** Proposal · **Updated:** 2026-11-06
+> **Kind:** Design · **Status:** Proposal · **Updated:** 2026-11-07
 >
 > **Summary:** What allies are for, where a run gets them (a starting ally per class, events, elite wins, boss wins), how they're lost, class pools, and a starter roster. Proposal: the sources, loss rules and roster below are not built yet.
 >
@@ -78,9 +78,9 @@ same save path, and a boss ally can be designed to upgrade or replace it.
 
 | Class | Starting ally | Note |
 |---|---|---|
-| Faith Leader | Discipline (+1 energy on your first turn) | |
-| Nepo Baby | Nepotism (redraw the opening hand) | |
-| Celebrity | Daddy's Gifts (a once-per-battle mulligan) | Placeholder borrowed from Nepo Baby; the real one is open (`needs-detailing.md` §2) |
+| Faith Leader | The Deacon (+1 energy on your first turn) | |
+| Nepo Baby | Personal Assistant (redraw the opening hand) | |
+| Celebrity | Publicist (every enemy starts Exposed: the first hit on each deals double) | Charm lowers the room's defenses on entrance |
 
 `OriginDatabase` names each class's `StartingAlly`; `RunState.Create` recruits it, so it sits in `RunState.Allies`
 with every other ally and saves the same way. A battle with no run (the playtest bot's standalone fights) uses the
@@ -131,6 +131,8 @@ Both compose from existing blocks: `BattleStartTrigger` with `GainGlamourEffect`
 | Campaign Manager | Boss | Card rewards show 4 choices instead of 3 | none |
 | Party Machine | Boss | +1 energy each turn | Each battle starts with one random enemy at +2 Hostility |
 | Dark Money Donor | Boss | +100 Funds now | −10 max Credibility |
+| Spin Doctor (built) | Unassigned | HQ's heal restores 20% of max Credibility instead of 10% | none |
+| Speechwriter (built) | Unassigned | Once per battle, at your turn start, discard any number of cards and draw that many | none |
 
 ### Existing story allies
 

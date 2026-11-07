@@ -1,6 +1,6 @@
 # Needs Detailing — design questions awaiting a decision
 
-> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-11-02
+> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-11-07
 >
 > **Summary:** Design questions awaiting a call, ordered by how much they block. Read before authoring content.
 >
@@ -36,17 +36,11 @@ and **Close Ranks** (`FanaticsSupportEffect`) next to the existing silence-now c
 extension by composition (`ForEachEnemyWithStatus` Fanatic → apply Fanatic to `TriggeringEnemy`; Hallelujah adds 1
 turn). A Fanatic's Strength adds to its push. Gospel and God's Chosen no longer award Jaded at conversion: it arrives once, on disillusion.
 
-## 2. Celebrity class passive (blocks: nothing — the class plays without one)
-
-Glamour / IOU is the Celebrity (2026-10-03). The "first card each battle is played upgraded" passive was locked for
-the old Celebrity and nobody has ruled whether it carries over; the code points the Actor origin at a Nepo-style
-mulligan placeholder (`Daddy's Gifts`). Decide: keep the upgraded first card, or a passive that touches Glamour or Debt.
-
-## 3. Nepo Baby open questions (blocks: Nepo build)
+## 2. Nepo Baby open questions (blocks: Nepo build)
 
 The class was redesigned (2026-10-03, `nepo-baby-class.md`): no Patronage, no summons. Open questions with their defaults are in that doc's section 8 (seed vs junk, "I'm Just Like You" type, whether replays raise Hostility, Hostility-scaled junk injection, Friends in High Places). Section 12 lists the conflicts with the old code and how each was resolved; Patronage is removed, and the summon effect stays for enemy content.
 
-## 4. CardType colour taxonomy carries no meaning as authored
+## 3. CardType colour taxonomy carries no meaning as authored
 
 Pressure (green, persuade) vs Rhetoric (red, aggressive) is applied at random: draw-only cards
 sit in Rhetoric, and pressure is split across both. The colours are load-bearing for the player
@@ -57,6 +51,9 @@ stop pretending to be one.
 
 ## Resolved
 
+- **Celebrity starting ally** (2026-11-07): the **Publicist**: at battle start every enemy is Exposed, so the
+  first hit on each deals double. Charm disarms the room on entrance; the old "first card upgraded" passive and the
+  borrowed mulligan (now the Speechwriter, a shared ally) are both dropped for Celebrity (`celebrity-glamour-iou.md`, `allies.md` §4.1).
 - **Intent vocabulary** (2026-11-02): players see the core-design words (Condemn / Rebuke / Rally / Turn / Murmur, plus
   Summon / Ward / Counter). `EnemyMoveType` is unchanged; the mapping and each word's effects are in
   `naming-glossary.md` §C. The enemy "Sway" became **Turn** so it doesn't clash with the player's Sway.

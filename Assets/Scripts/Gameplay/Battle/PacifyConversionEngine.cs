@@ -43,12 +43,10 @@ namespace Crookedile.Gameplay.Battle
         public static bool IsPacifyStatus(StatusBehavior behavior) =>
             behavior != null && behavior.CountsTowardPacify;
 
-        /// <summary>The default conversion fuel: the Guilt/Shame/Doubt trio.</summary>
+        /// <summary>The default conversion fuel: Guilt, Faith Leader's one pacify status.</summary>
         private static readonly StatusBehavior[] DefaultPacifyStatuses =
         {
             StatusRegistry.Get<GuiltStatus>(),
-            StatusRegistry.Get<ShameStatus>(),
-            StatusRegistry.Get<DoubtStatus>(),
         };
 
         /// <summary>
@@ -56,7 +54,7 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         /// <param name="statuses">
         /// Which statuses count toward (and are consumed by) this conversion. Null/empty =
-        /// the default pacify trio (Guilt/Shame/Doubt).
+        /// the default pacify fuel (Guilt).
         /// </param>
         /// <summary>What a conversion attempt did — the caller applies awards on Converted.</summary>
         public enum Outcome

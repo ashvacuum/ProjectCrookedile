@@ -35,5 +35,5 @@ MonoBehaviour:
         _stacks: 1
         _duration: 0
     - rid: 4823698825199485094
-      type: {class: DoubtStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: WeakenedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data: 

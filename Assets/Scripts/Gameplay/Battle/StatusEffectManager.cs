@@ -513,7 +513,7 @@ namespace Crookedile.Gameplay.Battle
         }
 
         /// <summary>
-        /// Modifies Denial an enemy gains (Shame drops the enemy's shield).
+        /// Modifies Denial an enemy gains, through its statuses' ModifyDenialGained.
         /// </summary>
         public int ModifyDenialGained(int baseDenial)
         {

@@ -50,6 +50,7 @@ namespace Crookedile.Data
                 UnlockedContent = new List<string>(UnlockedContent),
                 RunCounters = new Dictionary<string, int>(RunCounters),
                 CardsSinceRare = CardsSinceRare,
+                MaxCredibilityBonus = MaxCredibilityBonus,
             };
 
             foreach (var card in Deck)
@@ -117,6 +118,7 @@ namespace Crookedile.Data
                 UnlockedContent = new HashSet<string>(data.UnlockedContent),
                 RunCounters = new Dictionary<string, int>(data.RunCounters),
                 CardsSinceRare = data.CardsSinceRare,
+                MaxCredibilityBonus = data.MaxCredibilityBonus,
             };
 
             foreach (var entry in data.Deck)
@@ -152,7 +154,11 @@ namespace Crookedile.Data
             }
             run.SetTodaysLocations(data.TodaysLocationsDay, todays);
 
-            run.PendingBattle = Resolve<BattleEncounterData>(content, data.PendingBattleId, lost);
+            run.PendingBattle = run.CurrentEncounter = Resolve<BattleEncounterData>(
+                content,
+                data.PendingBattleId,
+                lost
+            );
             run.NextEncounter = Resolve<EncounterData>(content, data.NextEncounterId, lost);
             openEvent = Resolve<EventEncounterData>(content, data.OpenEventId, lost);
 

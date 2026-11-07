@@ -1,6 +1,6 @@
 # Boss Brain — Authoring and Runtime
 
-> **Kind:** Systems · **Status:** Built · **Updated:** 2026-10-30
+> **Kind:** Systems · **Status:** Built · **Updated:** 2026-11-07
 >
 > **Summary:** Author Behaviour Designer boss plans, tune ordered move bundles, and understand commitment, cooldowns, targeting and fallback behavior.
 >
@@ -77,9 +77,8 @@ Planning subtree: its three bundles carry the same names, so the same branches p
 Losing to him ends the run, whatever Credibility is left. His room is his machine: a Loyal Partisan, a Devotee, a Swing Voter (the prize, starts receptive) and Tandang
 (Denial). Machine Politics only hardens members already hostile, so anyone you win over stays won and his Win them
 back bundle has a reason to fire. His meter is **150, starting at 75**, so no single burst ends the fight (his
-turn-limit line is 90, the strong-reward tier 120, and maxing it, 150, offers 4 Rares to pick from). Ten turns. The day-1–7 sheet asks for three phases gated on Opinion; the shared tree gates one
-branch on Opinion and one on the receptive count. For true Opinion phases, use **Database → Bosses → Duplicate boss,
-tree and moves** and retune the copy's thresholds in Behaviour Designer.
+turn-limit line is 90, the strong-reward tier 120, and maxing it, 150, offers 4 Rares to pick from). Ten turns. He keeps the shared tree on purpose (decided 2026-11-07): one branch gated on Opinion and one on the
+receptive count is enough plan variety for a fight that is already hard, so there are no separate Opinion phases.
 
 ## Cooldowns and fallback
 

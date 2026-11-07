@@ -10,7 +10,7 @@ namespace Crookedile.Data.Save
     /// </summary>
     public class RunSaveData
     {
-        public const ushort SchemaVersion = 2;
+        public const ushort SchemaVersion = 3;
 
         public struct CardEntry
         {
@@ -55,6 +55,9 @@ namespace Crookedile.Data.Save
 
         /// <summary>Rare pity timer (v2+; v1 saves load as 0).</summary>
         public int CardsSinceRare;
+
+        /// <summary>Signed change to the origin's Credibility cap (v3+; older saves load as 0).</summary>
+        public int MaxCredibilityBonus;
 
         public byte[] ToBytes() =>
             SaveEnvelope.Wrap(SaveKind.Run, SchemaVersion, SaveBinary.ToBytes(Write));
@@ -113,6 +116,7 @@ namespace Crookedile.Data.Save
             w.WriteStrings(UnlockedContent);
             w.WriteCounters(RunCounters);
             w.Write(CardsSinceRare);
+            w.Write(MaxCredibilityBonus);
         }
 
         private static RunSaveData Read(BinaryReader r, ushort version)
@@ -163,6 +167,8 @@ namespace Crookedile.Data.Save
             data.RunCounters = r.ReadCounters();
             if (version >= 2)
                 data.CardsSinceRare = r.ReadInt32();
+            if (version >= 3)
+                data.MaxCredibilityBonus = r.ReadInt32();
             return data;
         }
     }

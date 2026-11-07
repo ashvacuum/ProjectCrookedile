@@ -14,20 +14,14 @@ namespace Crookedile.Gameplay.Battle
             foreach (var enemies in ctx.AllEnemies)
             {
                 var guilt = enemies.StatusEffects.GetStacks<GuiltStatus>();
-                var shame = enemies.StatusEffects.GetStacks<ShameStatus>();
-                var doubt = enemies.StatusEffects.GetStacks<DoubtStatus>();
-
-                damage += guilt + shame + doubt;
-
+                damage += guilt;
                 enemies.StatusEffects.RemoveStacks<GuiltStatus>(guilt);
-                enemies.StatusEffects.RemoveStacks<ShameStatus>(shame);
-                enemies.StatusEffects.RemoveStacks<DoubtStatus>(doubt);
             }
 
             ApplyOpinion(ctx.Target, ctx.Caster, damage, ctx);
         }
 
         public override string GetDescription() =>
-            "Remove All Guilt, Shame and Doubt from all enemies and increase the opinion";
+            "Remove all Guilt from all enemies and increase the opinion";
     }
 }

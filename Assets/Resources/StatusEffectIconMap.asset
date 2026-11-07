@@ -68,16 +68,6 @@ MonoBehaviour:
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
-  - id: shame
-    icon: {fileID: -371255345, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
-    color: {r: 1, g: 1, b: 1, a: 1}
-    effectName: 
-    description: 
-  - id: doubt
-    icon: {fileID: 113071119, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
-    color: {r: 1, g: 1, b: 1, a: 1}
-    effectName: 
-    description: Provides 3 Shield at the end of turn.
   - id: jaded
     icon: {fileID: 610889023, guid: 246e2a1f0000dd94da8610c87bb4f416, type: 3}
     color: {r: 1, g: 1, b: 1, a: 1}
