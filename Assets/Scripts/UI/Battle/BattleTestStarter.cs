@@ -132,9 +132,11 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void StartTestBattle()
         {
-            // A campaign-chosen encounter overrides the inspector session; consume it
-            // immediately so a stray reload can't replay the same encounter twice.
-            BattleSession effectiveSession = RunState.Current?.PendingBattle?.Session ?? battleSession;
+            // A campaign encounter overrides the inspector session for every round, not just the
+            // first: CurrentEncounter outlives the scene reloads between rounds. PendingBattle is
+            // consumed immediately so a stray reload can't replay the same encounter twice.
+            BattleSession effectiveSession =
+                RunState.Current?.CurrentEncounter?.Session ?? battleSession;
             RunState.Current?.ClearPendingBattle();
 
             if (effectiveSession == null || effectiveSession.RoundCount == 0)

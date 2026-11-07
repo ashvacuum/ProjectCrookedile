@@ -59,9 +59,8 @@ These are averaged samples; re-sample against the source file before committing 
 
 ### Prompts in other files
 
-The card, portrait, map and battle prompts all use the ink block in §10.1 (2026-11-07). One copy lives outside the
-repo: the card-art workbook's style block comes from the Google Sheet (§10.5). The music prompt keeps its own jazz
-direction; it borrows a soundtrack's mood, not a visual style.
+The card, portrait, map and battle prompts all use the ink block in §10.1, and so does the card-art workbook's style
+block (2026-11-07). The music prompt keeps its own jazz direction; it borrows a soundtrack's mood, not a visual style.
 
 ---
 
@@ -419,8 +418,8 @@ read in a relic tray at ~48 px.
 2. **Three "Enhanced" cards are authored as Basic rarity**: Holier Than Thou, Impenetrable Belief and Sermon sit in
    `Cards/FaithLeader/Enhanced/` with `_rarity: 0`, so they'd get the plain overlay.
 3. **The Incumbent** (final boss) has moves and a room now (`boss-brain.md`) but no portrait or casting yet.
-4. **The card-art workbook's style block** (Settings and Art Rules tabs) still describes the flat look. It is pulled
-   from the Google Sheet, so change it there: replace it with the §10.1 ink block, and the rendering rule with §3's.
+4. **Card mechanic text:** the workbook's Mechanic column for Have you no Shame still says it applies Shame, which was
+   retired; that column comes from the Google Sheet, so correct it there.
 
 ---
 
