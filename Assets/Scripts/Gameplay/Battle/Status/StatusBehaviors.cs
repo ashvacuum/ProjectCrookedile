@@ -30,20 +30,6 @@ namespace Crookedile.Gameplay.Battle
             $"Pacify: deals {stacks} less Opinion. Counts toward conversion.";
     }
 
-    /// <summary>Pacify status — drops the enemy's shield: gains X less Denial per stack.</summary>
-    [Serializable]
-    public sealed class ShameStatus : StatusBehavior
-    {
-        public override string Id => "shame";
-        public override string DisplayName => "Shame";
-        public override bool IsDebuff => true;
-        public override StatusCategory Category => StatusCategory.Pacify;
-        public override bool CountsTowardPacify => true;
-        public override int ModifyDenialGained(int denial, int stacks) => Math.Max(0, denial - stacks);
-        public override string Describe(int stacks) =>
-            $"Pacify: gains {stacks} less Denial. Counts toward conversion.";
-    }
-
     /// <summary>Won't listen to reason — hostility reductions are no-ops (the permanent villain).</summary>
     [Serializable]
     public sealed class HardenedStatus : StatusBehavior

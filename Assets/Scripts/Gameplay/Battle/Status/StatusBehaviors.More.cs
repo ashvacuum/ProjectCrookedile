@@ -109,19 +109,6 @@ namespace Crookedile.Gameplay.Battle
             $"Takes bonus Opinion = attacker Hostility x {stacks}.";
     }
 
-    /// <summary>Pacify status — soft chance to hold back its action per stack (skip read by type).</summary>
-    [Serializable]
-    public sealed class DoubtStatus : StatusBehavior
-    {
-        public override string Id => "doubt";
-        public override string DisplayName => "Doubt";
-        public override bool IsDebuff => true;
-        public override StatusCategory Category => StatusCategory.Pacify;
-        public override bool CountsTowardPacify => true;
-        public override string Describe(int stacks) =>
-            $"Pacify: ~{stacks * 25}% chance to hold back. Counts toward conversion.";
-    }
-
     /// <summary>Threshold status — raises this enemy's pacify cost by 1 per stack (read by type).</summary>
     [Serializable]
     public sealed class JadedStatus : StatusBehavior

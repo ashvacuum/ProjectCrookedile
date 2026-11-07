@@ -1,6 +1,6 @@
 # Celebrity: Glamour / IOU / Promises
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-11-02
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-11-07
 >
 > **Summary:** Celebrity banks and spends Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points.
 >
@@ -19,6 +19,10 @@ Sway means an ordinary Opinion push through Denial and the existing modifiers.
 This revision supersedes the earlier defensive v0.2 proposals. There is no blanket Glamour damage bonus.
 Enemy debuffs, hostility changes, and limited card recovery are now explicit parts of this kit.
 Celebrity has no separate conversion mechanic; these effects use normal stance and Opinion rules.
+
+**Starting ally: the Publicist** (decided 2026-11-07). At battle start every enemy is Exposed: the first hit on
+each one deals double, then the status is spent. His charm and persona lower the room's defenses on entrance;
+the Glamour engine carries the rest of the fight. Asset: [`Publicist`](../Assets/Data/Allies/Publicist.asset).
 
 ## Shared rules
 

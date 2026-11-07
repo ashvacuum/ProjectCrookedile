@@ -39,21 +39,21 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`allies.md`](docs/allies.md) | Proposal | 2026-11-06 | What allies are for, where a run gets them (a starting ally per class, events, elite wins, boss wins), how they're lost, class pools, and a starter roster. Proposal: the sources, loss rules and roster below are not built yet. | this doc |
-| [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) | Built | 2026-11-02 | Celebrity banks and spends Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points. | this doc; values in [`Data/Cards/Celebrity/GlamourIou/`](Assets/Data/Cards/Celebrity/GlamourIou), shared rules in [`GlamourIou.cs`](Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs), effects in [`Celebrity/`](Assets/Scripts/Gameplay/Battle/Celebrity) |
+| [`allies.md`](docs/allies.md) | Proposal | 2026-11-07 | What allies are for, where a run gets them (a starting ally per class, events, elite wins, boss wins), how they're lost, class pools, and a starter roster. Proposal: the sources, loss rules and roster below are not built yet. | this doc |
+| [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) | Built | 2026-11-07 | Celebrity banks and spends Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points. | this doc; values in [`Data/Cards/Celebrity/GlamourIou/`](Assets/Data/Cards/Celebrity/GlamourIou), shared rules in [`GlamourIou.cs`](Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs), effects in [`Celebrity/`](Assets/Scripts/Gameplay/Battle/Celebrity) |
 | [`core-design.md`](docs/core-design.md) | Canonical | 2026-11-06 | The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions. | this doc |
 | [`enemy-design-bible.md`](docs/enemy-design-bible.md) | Canonical | 2026-11-02 | The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete. | this doc |
-| [`metagame-campaign.md`](docs/metagame-campaign.md) | Partly built | 2026-11-06 | The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases. | this doc |
+| [`metagame-campaign.md`](docs/metagame-campaign.md) | Partly built | 2026-11-07 | The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases. | this doc |
 | [`naming-glossary.md`](docs/naming-glossary.md) | Canonical | 2026-11-02 | Combat vocabulary mapped to "working a crowd" vocabulary. Read before naming anything. | this doc |
-| [`nepo-baby-class.md`](docs/nepo-baby-class.md) | Built | 2026-11-02 | The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders. | this doc; built in [`Data/Cards/NepoBaby/`](Assets/Data/Cards/NepoBaby) and [`NepoBabyConfig`](Assets/Resources/NepoBabyConfig.asset) |
+| [`nepo-baby-class.md`](docs/nepo-baby-class.md) | Built | 2026-11-07 | The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders. | this doc; built in [`Data/Cards/NepoBaby/`](Assets/Data/Cards/NepoBaby) and [`NepoBabyConfig`](Assets/Resources/NepoBabyConfig.asset) |
 | [`unlocks.md`](docs/unlocks.md) | Canonical | 2026-10-03 | What unlocks (classes, cards, allies, events, campaigns), what earns each one, how fast, and how the player sees it. Achievements and unlocks are one system. Everything is unlocked for now. | this doc |
 
 ### Systems — code reference
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`boss-brain.md`](docs/boss-brain.md) | Built | 2026-10-30 | Author Behaviour Designer boss plans, tune ordered move bundles, and understand commitment, cooldowns, targeting and fallback behavior. | [`BossBrain.cs`](Assets/Scripts/Gameplay/Battle/Boss/BossBrain.cs), [`BossController.cs`](Assets/Scripts/Gameplay/Battle/Boss/BossController.cs), [`BossData.cs`](Assets/Scripts/Data/Boss/BossData.cs) |
-| [`campaign-encounters.md`](docs/campaign-encounters.md) | Built | 2026-11-06 | How encounters are typed, authored, scheduled and drawn, with every field, outcome, requirement and default: battles, events, chaining, flags, pools, travel, enemy moves, statuses, run state, rewards and the editor tools. | [`Data/Campaign/`](Assets/Scripts/Data/Campaign), [`EncounterDesignerWindow.cs`](Assets/Scripts/Editor/EncounterDesignerWindow.cs) |
+| [`boss-brain.md`](docs/boss-brain.md) | Built | 2026-11-07 | Author Behaviour Designer boss plans, tune ordered move bundles, and understand commitment, cooldowns, targeting and fallback behavior. | [`BossBrain.cs`](Assets/Scripts/Gameplay/Battle/Boss/BossBrain.cs), [`BossController.cs`](Assets/Scripts/Gameplay/Battle/Boss/BossController.cs), [`BossData.cs`](Assets/Scripts/Data/Boss/BossData.cs) |
+| [`campaign-encounters.md`](docs/campaign-encounters.md) | Built | 2026-11-07 | How encounters are typed, authored, scheduled and drawn, with every field, outcome, requirement and default: battles, events, chaining, flags, pools, travel, enemy moves, statuses, run state, rewards and the editor tools. | [`Data/Campaign/`](Assets/Scripts/Data/Campaign), [`EncounterDesignerWindow.cs`](Assets/Scripts/Editor/EncounterDesignerWindow.cs) |
 | [`meta-progression.md`](docs/meta-progression.md) | Partly built | 2026-10-05 | Profiles, the binary save format, run save/continue, unlocks and the save debugging tools. Achievements and Steam are designed, not built. | [`Data/Save/`](Assets/Scripts/Data/Save), [`Data/Unlocks/`](Assets/Scripts/Data/Unlocks) |
 | [`ui-vfx.md`](docs/ui-vfx.md) | Built | 2026-10-03 | Canvas-space VFX: flipbooks, card shine, fly trails, and when UIParticle is warranted. | [`UI/VFX/`](Assets/Scripts/UI/VFX), [`CardShine.cs`](Assets/Scripts/UI/Battle/CardShine.cs) |
 
@@ -61,23 +61,24 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`needs-detailing.md`](docs/needs-detailing.md) | Living | 2026-11-02 | Design questions awaiting a call, ordered by how much they block. Read before authoring content. | this doc |
+| [`needs-detailing.md`](docs/needs-detailing.md) | Living | 2026-11-07 | Design questions awaiting a call, ordered by how much they block. Read before authoring content. | this doc |
 | [`ui-elements.md`](docs/ui-elements.md) | Living | 2026-10-09 | The battle UI broken into reusable prefabs, smallest first, as a checklist to build against. | this doc |
 
 ### Art
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`art-bible.md`](docs/art-bible.md) | Canonical | 2026-10-31 | Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Database window's tabs are the live blank-slot checker. | this doc |
+| [`art-bible.md`](docs/art-bible.md) | Canonical | 2026-11-07 | Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Database window's tabs are the live blank-slot checker. | this doc |
 
 ### Generation prompts
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
 | [`reference/battle-ui-mock-prompt.md`](docs/reference/battle-ui-mock-prompt.md) | Draft | 2026-10-09 | Image-edit prompt for the battle screen UI, built on the committee-hearing battle mock rather than a new layout. | this doc |
-| [`reference/iso-tile-prompt.md`](docs/reference/iso-tile-prompt.md) | Canonical | 2026-10-03 | Campaign-map generation prompt: 2:1 dimetric tiles and buildings, plus the acceptance check every sprite has to pass. | this doc; grid guide [`iso-grid-guide-256x128.png`](docs/reference/iso-grid-guide-256x128.png) |
+| [`reference/iso-tile-prompt.md`](docs/reference/iso-tile-prompt.md) | Canonical | 2026-11-07 | Campaign-map generation prompt: 2:1 dimetric tiles and buildings, plus the acceptance check every sprite has to pass. | this doc; grid guide [`iso-grid-guide-256x128.png`](docs/reference/iso-grid-guide-256x128.png) |
 | [`reference/music-prompt.md`](docs/reference/music-prompt.md) | Canonical | 2026-10-03 | BGM prompts. | this doc |
-| [`reference/style-mock-prompt.md`](docs/reference/style-mock-prompt.md) | Canonical | 2026-10-03 | Style-mock generation prompt (v4 Odd Taxi, the locked look). | this doc |
+| [`reference/style-mock-prompt.md`](docs/reference/style-mock-prompt.md) | Canonical | 2026-11-07 | Style-mock generation prompt: v5 detailed ink (current); v4 Odd Taxi and older kept as history. | this doc |
+| [`reference/ui-look-prompts.md`](docs/reference/ui-look-prompts.md) | Stale | 2026-11-07 | Image prompts for the battle screen: three UI directions in the locked style, and three alternative art styles to test against it, and the favoured hand-drawn satire blend in three weights. | this doc |
 | [`reference/ui-sprite-sheet-prompt.md`](docs/reference/ui-sprite-sheet-prompt.md) | Draft | 2026-10-10 | Image prompts for the battle UI sprite sheets (frames, buttons, badges, bars, icons), built from the battle UI reference. | this doc |
 
 <!-- docs-map:end -->

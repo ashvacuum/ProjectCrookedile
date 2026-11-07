@@ -6,7 +6,7 @@ namespace Crookedile.Gameplay.Battle
     /// <summary>
     /// Fires whenever an enemy's hostility value changes, with an optional direction filter —
     /// the generic sibling of the threshold triggers (BecameHostile/BecameReceptive/etc.).
-    /// Pairs with TargetType.TriggeringEnemy ("whoever was just riled gets Shame") and the
+    /// Pairs with TargetType.TriggeringEnemy ("whoever was just riled gets Guilt") and the
     /// LastHostilityGained/Lost amount sources (stacks equal to the shift).
     /// </summary>
     [Serializable]

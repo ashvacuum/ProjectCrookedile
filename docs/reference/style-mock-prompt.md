@@ -1,8 +1,8 @@
 # Style-mock generation prompt (edit of the original "Speech & Support" prompt)
 
-> **Kind:** Reference · **Status:** Canonical · **Updated:** 2026-10-03
+> **Kind:** Reference · **Status:** Canonical · **Updated:** 2026-11-07
 >
-> **Summary:** Style-mock generation prompt (v4 Odd Taxi, the locked look).
+> **Summary:** Style-mock generation prompt: v5 detailed ink (current); v4 Odd Taxi and older kept as history.
 >
 > **Source of truth:** this doc · **Related:** [`art-bible.md`](../art-bible.md) · [`iso-tile-prompt.md`](iso-tile-prompt.md)
 
@@ -39,7 +39,30 @@ celebrity in designer sunglasses.
 
 ---
 
-## v4 — Odd Taxi style: flat, muted, deadpan anthro satire (CURRENT DIRECTION)
+## v5 — detailed ink illustration (CURRENT DIRECTION, 2026-11-07)
+
+*Reference of record: `docs/design/battle-ui-reference.png`. Attach it to every generation and keep the text
+short; this block names what the image already shows. Rules: `art-bible.md` §0.1.*
+
+Project Crookedile — a Filipino political-satire persuasion-battler. You stand at a podium, back to camera,
+working a committee hearing: a row of opponents behind a raised wooden panel, a packed public gallery behind
+them in shadow with hand-painted protest signs.
+
+Detailed ink illustration in the manner of a dark editorial cartoon: confident dark linework with
+fine hatching and cross-hatching for shadow and texture; fabric weave, wrinkles, scales and feathers
+drawn in. Colour laid in warm, muted, slightly desaturated washes under the ink: mustard gold, brick
+red, olive, slate teal, parchment, deep umber. Warm low light from the front; edges fall into brown
+shadow, never pure black. Filipino political satire: grounded, characterful anthropomorphic animals
+on human bodies in real clothes (barongs, suits, jackets, vestments), faces with attitude: smug,
+tired, suspicious, defiant. Not cute, not mascots, not anime, not flat vector, not glossy 3D, not oil
+painting.
+
+UI: near-black warm panels with thin muted-gold borders, one condensed sans-serif in caps, a mustard-gold
+Opinion bar meeting brick-red chevrons, cards with muted brick, olive and slate frames and parchment text panels.
+
+---
+
+## v4 — Odd Taxi style: flat, muted, deadpan anthro satire (SUPERSEDED 2026-11-07 — the battle reference is ink, not flat)
 
 *Touchstone: the anime **Odd Taxi**. Corrects both prior swings — v2 was too dark/painterly-menacing, v3 overcorrected into bright slapstick. Odd Taxi sits between: flat, muted, sophisticated, understated. Grounded anthro characters played deadpan, not exaggerated. The dry, cynical, adult tone fits political satire perfectly — the comedy is in the restraint.*
 

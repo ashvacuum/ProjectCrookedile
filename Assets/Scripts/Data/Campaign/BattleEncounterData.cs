@@ -29,7 +29,9 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private bool _isBoss;
 
-        [Tooltip("Overrides the default reward weights for this encounter's card offer (M3). Optional.")]
+        [Tooltip(
+            "Base reward tier for winning this encounter, replacing the database default. A strong win or a maxed boss meter still earns its own tier. Optional."
+        )]
         [SerializeField]
         private RewardConfig _rewardOverride;
 

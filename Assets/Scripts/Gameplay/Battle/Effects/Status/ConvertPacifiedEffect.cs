@@ -10,8 +10,8 @@ namespace Crookedile.Gameplay.Battle
     /// Explicitly attempts the Faith Leader pacify conversion on the chosen targets —
     /// the authored replacement for the old hidden auto-convert. The whole recipe lives here:
     ///
-    ///   FUEL: the statuses that count toward the threshold and are consumed (empty = the
-    ///   Guilt/Shame/Doubt trio). Threshold = FaithLeaderConfig.ConversionThreshold + the
+    ///   FUEL: the statuses that count toward the threshold and are consumed (empty =
+    ///   Guilt). Threshold = FaithLeaderConfig.ConversionThreshold + the
     ///   target's Buffer Status stacks.
     ///
     ///   AWARDS: statuses stamped on the enemy after a successful conversion, e.g. Jaded
@@ -49,7 +49,7 @@ namespace Crookedile.Gameplay.Battle
 
         [Tooltip(
             "FUEL: statuses that count toward the threshold and are consumed (in this order). "
-                + "Leave EMPTY for the default Guilt/Shame/Doubt trio."
+                + "Leave EMPTY for the default, Guilt."
         )]
         [SerializeReference]
         private List<StatusBehavior> _statusesToConvert = new List<StatusBehavior>();
@@ -159,7 +159,7 @@ namespace Crookedile.Gameplay.Battle
             foreach (var status in statuses)
                 if (status != null)
                     names.Add(status.DisplayName);
-            return names.Count > 0 ? string.Join("/", names) : "Guilt/Shame/Doubt";
+            return names.Count > 0 ? string.Join("/", names) : "Guilt";
         }
     }
 }

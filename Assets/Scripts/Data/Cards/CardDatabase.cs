@@ -62,10 +62,16 @@ namespace Crookedile.Data.Cards
 
         /// <summary>
         /// The reward config a win earns: the boss config for a maxed meter in a boss fight, the
-        /// strong-win config at <c>_strongWinPercent</c> of the meter or above, otherwise <see cref="Rewards"/>.
+        /// strong-win config at <c>_strongWinPercent</c> of the meter or above, otherwise the base
+        /// tier: <paramref name="encounterOverride"/> when the encounter sets one, else <see cref="Rewards"/>.
         /// Tiers apply only when their config is assigned.
         /// </summary>
-        public RewardConfig RewardsForWin(int finalOpinion, int maxOpinion, bool bossFight = false)
+        public RewardConfig RewardsForWin(
+            int finalOpinion,
+            int maxOpinion,
+            bool bossFight = false,
+            RewardConfig encounterOverride = null
+        )
         {
             if (bossFight && _bossMaxedRewardConfig != null && finalOpinion >= maxOpinion)
                 return _bossMaxedRewardConfig;
@@ -73,6 +79,7 @@ namespace Crookedile.Data.Cards
                 _strongWinRewardConfig != null
                 && finalOpinion * 100 >= _strongWinPercent * Mathf.Max(1, maxOpinion)
                 ? _strongWinRewardConfig
+                : encounterOverride != null ? encounterOverride
                 : Rewards;
         }
 

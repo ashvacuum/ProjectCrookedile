@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
-  m_Name: Discipline
+  m_Name: The Deacon
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
   _id: 1c444f8d41faab941946d3b7ac62f5f8
-  _allyName: Discipline
+  _allyName: The Deacon
   _description: Gain 1 extra AP on your first turn.
   _icon: {fileID: 0}
   _rarity: 0

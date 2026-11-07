@@ -1,6 +1,6 @@
 # Nepo Baby: Burn / Return / Calm class spec (v0.1)
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-11-02
+> **Kind:** Design · **Status:** Built · **Updated:** 2026-11-07
 >
 > **Summary:** The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders.
 >
@@ -95,7 +95,7 @@ everything".
 | 2 | I'm Just Like You | Hostility-reducer | 1 | Reduce target Hostility by a flat amount. If it converts the target to Receptive, draw a card, otherwise reduce a random card in hand's cost by 1 (floor 1) |
 | 1 | **Blow the Allowance** (seed) | Rhetoric | 1 | Burn a non-Policy card from hand. Play it for free, and deal Sway equal to its printed energy cost. Enhanced: cost 0 and damage doubled |
 
-- **Passive (Nepotism):** once per battle, a full-hand Mulligan (discard hand, redraw fresh), offered on the opening
+- **Starting ally (Personal Assistant):** once per battle, a full-hand Mulligan (discard hand, redraw fresh), offered on the opening
   hand.
 - Seed rulings: printed cost, not current cost. The seed goes to discard normally so it recurs. A burned card played
   this way is a play for triggers (Old Boys' Club) but does NOT add Hostility by itself. A card with no valid play (some
@@ -294,9 +294,9 @@ Audited 2026-10-03. Items marked **Resolved** are settled; the rest are still op
 3. **Echo chamber.** Section 1 says all-Receptive decays Opinion. Canon (`core-design.md` section 4, `CrowdReactions`)
    is decay **and** halved gains. The spec's wording is incomplete, not a change.
 4. **Starter passive.** `core-design.md` section 9: start of battle, discard any number of cards and redraw that many.
-   This spec: once per battle, a full-hand Mulligan at any time. The existing `Nepotism` passive asset is neither: the
+   This spec: once per battle, a full-hand Mulligan at any time. The old passive asset was neither: the
    first card played each battle reduces a random card's cost by 1. **Resolved in docs:** core-design section 9 now
-   states this spec's version. The `Nepotism` asset still needs replacing (B8).
+   states this spec's version. The asset has since been replaced (item 8).
 5. **Roster names.** "First Impressions", "The Receptive Trap", the Bodyguard and "Ardent Fan" are not in
    `enemy-design-bible.md`, `campaign-encounters.md` or `Assets/Data`. Only the Heckler exists. Section 10's encounter
    tests cannot run until these exist or are mapped onto current encounter IDs.
@@ -321,9 +321,9 @@ Audited 2026-10-03. Items marked **Resolved** are settled; the rest are still op
 5. **Policies exhaust on play.** No change needed. "Persistent" Policies carry passives, "one-shot" ones only effects.
 6. **Burn.** **Resolved:** `BurnEffect` / `BurnAndPlayEffect`, with the Policy rule in `NepoBabyRules.CanBurn`.
 7. **Scandals are unplayable.** Blow the Allowance skips unplayable cards by default (8.1).
-8. **Mulligan.** **Resolved:** `Nepotism.asset` (the passive the Nepo Baby origin points at) is now an opt-in
-   full-hand redraw. Still open: `Daddy's Gifts.asset`, tagged as Nepo Baby's, is wired to the **Celebrity** origin
-   and gives Celebrity a battle-start mulligan. Left as is pending a ruling.
+8. **Mulligan.** **Resolved:** the Personal Assistant (`Personal Assistant.asset`, Nepo Baby's starting ally) is an
+   opt-in full-hand redraw. The old Celebrity mulligan is now the Speechwriter, a shared ally; Celebrity starts with
+   the Publicist (`celebrity-glamour-iou.md`).
 9. **Calm caps at Neutral.** **Resolved:** `ReduceHostilityEffect` has a stop-at-Neutral option.
 10. **Missing effects.** **Resolved:** see section 13.
 11. **Starter deck slot.** **Resolved:** the Nepo Baby origin entry lists the 10-card starter.

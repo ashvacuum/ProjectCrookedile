@@ -249,6 +249,7 @@ namespace Crookedile.Tests
                 },
                 CurrentBattleIndex = 1,
                 CardsSinceRare = 7,
+                MaxCredibilityBonus = -5,
             };
             run.Deck.Add(new RunSaveData.CardEntry { Id = "c1", Upgraded = false });
             run.Deck.Add(new RunSaveData.CardEntry { Id = "c2", Upgraded = true });
@@ -291,19 +292,38 @@ namespace Crookedile.Tests
             CollectionAssert.AreEqual(new[] { "trust-fund" }, back.UnlockedContent);
             Assert.AreEqual(4, back.RunCounters["battles_won"]);
             Assert.AreEqual(7, back.CardsSinceRare);
+            Assert.AreEqual(-5, back.MaxCredibilityBonus);
+        }
+
+        [Test]
+        public void RunSave_Version2LoadsWithNoMaxCredibilityBonus()
+        {
+            // A v2 payload is the v3 one without its trailing MaxCredibilityBonus int.
+            byte[] v3 = SaveEnvelope.Unwrap(
+                new RunSaveData { CardsSinceRare = 4, MaxCredibilityBonus = 12 }.ToBytes(),
+                SaveKind.Run,
+                out _
+            );
+            byte[] v2 = new byte[v3.Length - sizeof(int)];
+            Array.Copy(v3, v2, v2.Length);
+
+            var back = RunSaveData.FromBytes(SaveEnvelope.Wrap(SaveKind.Run, 2, v2));
+
+            Assert.AreEqual(4, back.CardsSinceRare);
+            Assert.AreEqual(0, back.MaxCredibilityBonus);
         }
 
         [Test]
         public void RunSave_Version1LoadsWithNoPity()
         {
-            // A v1 payload is the v2 one without its trailing CardsSinceRare int.
-            byte[] v2 = SaveEnvelope.Unwrap(
+            // A v1 payload is the v3 one without its trailing CardsSinceRare and MaxCredibilityBonus ints.
+            byte[] v3 = SaveEnvelope.Unwrap(
                 new RunSaveData { Funds = 5, CardsSinceRare = 9 }.ToBytes(),
                 SaveKind.Run,
                 out _
             );
-            byte[] v1 = new byte[v2.Length - sizeof(int)];
-            Array.Copy(v2, v1, v1.Length);
+            byte[] v1 = new byte[v3.Length - 2 * sizeof(int)];
+            Array.Copy(v3, v1, v1.Length);
 
             var back = RunSaveData.FromBytes(SaveEnvelope.Wrap(SaveKind.Run, 1, v1));
 

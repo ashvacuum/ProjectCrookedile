@@ -15,8 +15,8 @@ MonoBehaviour:
   _entries:
   - Type: 0
     DisplayName: Faith Leader
-    Description: The converter. Stack pacify statuses (Guilt/Shame/Doubt) to convert
-      enemies into Fanatics who follow your lead until they're disillusioned.
+    Description: The converter. Stack Guilt to convert enemies into Fanatics who follow
+      your lead until they're disillusioned.
     Color: {r: 1, g: 1, b: 1, a: 1}
     Icon: {fileID: 0}
     Portrait: {fileID: 0}
@@ -68,7 +68,7 @@ MonoBehaviour:
     Color: {r: 1, g: 1, b: 1, a: 1}
     Icon: {fileID: 0}
     Portrait: {fileID: 0}
-    StartingAlly: {fileID: 11400000, guid: 9fe225578fe293c4ba31c366dd76670b, type: 2}
+    StartingAlly: {fileID: 11400000, guid: 7d55726fafd14e10a75bf2603918990b, type: 2}
     StarterTag: actor
     StarterDeck:
     - Card: {fileID: 11400000, guid: be9805520df828a409f296641a64a68d, type: 2}

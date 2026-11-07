@@ -312,10 +312,33 @@ namespace Crookedile.Data
         public void AdjustFunds(int delta) => Funds = Mathf.Max(0, Funds + delta);
 
         /// <summary>
-        /// The run's Credibility cap (its max HP), from the origin. Derived rather than saved, so
-        /// retuning it in <see cref="OriginDatabase"/> applies to runs already in progress. 0 = no cap.
+        /// The run's Credibility cap (its max HP): the origin's cap plus <see cref="MaxCredibilityBonus"/>,
+        /// never below 1. The origin part is derived rather than saved, so retuning it in
+        /// <see cref="OriginDatabase"/> applies to runs already in progress. 0 = no cap.
         /// </summary>
-        public int MaxCredibility => OriginDatabase.Shared?.GetMaxCredibility(Origin) ?? 0;
+        public int MaxCredibility
+        {
+            get
+            {
+                int origin = OriginDatabase.Shared?.GetMaxCredibility(Origin) ?? 0;
+                return origin > 0 ? Mathf.Max(1, origin + MaxCredibilityBonus) : 0;
+            }
+        }
+
+        /// <summary>Signed change to the origin's Credibility cap this run, from event outcomes.</summary>
+        public int MaxCredibilityBonus { get; private set; }
+
+        /// <summary>
+        /// Raises or lowers the Credibility cap. A raise heals by the same amount; a cut only
+        /// clamps current Credibility to the new cap. The cap never drops below 1.
+        /// </summary>
+        public void AdjustMaxCredibility(int delta)
+        {
+            int before = MaxCredibility;
+            MaxCredibilityBonus += delta;
+            int gained = MaxCredibility - before;
+            AdjustCredibility(gained > 0 ? gained : 0);
+        }
 
         /// <summary>Applies a signed change to Credibility, clamped between zero and <see cref="MaxCredibility"/>.</summary>
         public void AdjustCredibility(int delta)
@@ -369,8 +392,16 @@ namespace Crookedile.Data
             CurrentBattleIndex = 0;
         }
 
+        /// <summary>
+        /// The battle encounter being fought, kept through every round of it (unlike
+        /// <see cref="PendingBattle"/>, which the battle scene clears on load). Its reward
+        /// override sets the base reward tier. Null for a battle not started from the campaign.
+        /// </summary>
+        public BattleEncounterData CurrentEncounter { get; private set; }
+
         /// <summary>Sets the encounter the battle scene should consume on load.</summary>
-        public void SetPendingBattle(BattleEncounterData data) => PendingBattle = data;
+        public void SetPendingBattle(BattleEncounterData data) =>
+            PendingBattle = CurrentEncounter = data;
 
         /// <summary>Clears <see cref="PendingBattle"/> — call once it's been consumed.</summary>
         public void ClearPendingBattle() => PendingBattle = null;

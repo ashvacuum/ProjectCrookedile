@@ -128,7 +128,7 @@ namespace Crookedile.Data.Save
                     + $"Elapsed {run.ElapsedMinutes}m   Max hours {run.MaxHours}   District: {run.DistrictName ?? "(none)"}"
             );
             sb.AppendLine(
-                $"    Funds {run.Funds}   Credibility {run.Credibility}   Next-battle Hostility +{run.NextBattleHostility}   Cards since rare {run.CardsSinceRare}"
+                $"    Funds {run.Funds}   Credibility {run.Credibility} (max bonus {run.MaxCredibilityBonus:+0;-0;+0})   Next-battle Hostility +{run.NextBattleHostility}   Cards since rare {run.CardsSinceRare}"
             );
 
             sb.AppendLine($"    Deck ({run.Deck.Count}):");

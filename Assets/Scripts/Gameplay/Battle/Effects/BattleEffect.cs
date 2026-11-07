@@ -318,8 +318,7 @@
         {
             if (ctx.BattleManager == null)
                 return;
-            // Shame (pacify status): a shamed enemy can't defend the meter — its own statuses fold
-            // the Denial it gains (ModifyDenialGained). Counts toward the pacify threshold.
+            // The caster's own statuses fold the Denial it gains (ModifyDenialGained).
             if (ctx.CasterStatusEffects != null)
                 amount = ctx.CasterStatusEffects.ModifyDenialGained(amount);
             ctx.BattleManager.GainDenial(amount);

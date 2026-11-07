@@ -39,9 +39,9 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 1430662042425753695
-      type: {class: AdjustCredibilityPercentOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      type: {class: HealPercentOfMaxCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
       data:
-        _percent: 15
+        _percent: 10
     - rid: 1430662042425753697
       type: {class: AdvanceDayOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
       data: 

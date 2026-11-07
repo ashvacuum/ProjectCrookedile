@@ -1,6 +1,6 @@
 # Crookedile — Art Bible & Handoff Spec
 
-> **Kind:** Art · **Status:** Canonical · **Updated:** 2026-10-31
+> **Kind:** Art · **Status:** Canonical · **Updated:** 2026-11-07
 >
 > **Summary:** Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Database window's tabs are the live blank-slot checker.
 >
@@ -12,49 +12,56 @@
 
 ---
 
-## 0.1 Style reference (LOCKED — confirmed 2026-09-06)
+## 0.1 Style reference (LOCKED — updated 2026-11-07)
 
-> **Rendering direction: the anime _Odd Taxi_, played livelier** — flat, muted, sophisticated, deadpan; grounded anthropomorphic cast with dry restraint. *Lively* is the one deliberate departure: Odd Taxi's stillness is the wrong read for a room you are actively working, so keep its flatness and its palette but not its inertia — more colour saturation in the accents, more posture and gesture in the cast, faces that are reacting rather than observing. Full generation prompt: `docs/reference/style-mock-prompt.md` (v4).
+> **Reference of record: [`docs/design/battle-ui-reference.png`](design/battle-ui-reference.png).** The look is this image:
+> a detailed ink illustration in a dark, warm committee hall. When words and the image disagree, the image wins:
+> attach it to every generation (edit, image-to-image or style reference) and describe only what changes.
 >
-> **Reference of record: `docs/design/crookedile-style-v4-oddtaxi.png`** (approved 2026-07-03 — the flat muted committee-hall mock). This is the look to match: flat cel shading, dusty warm palette (mustard/teal/brick/cream/olive), thin clean lines, deadpan grounded animal-people, even soft lighting. The earlier dark-painterly mock is superseded.
+> **Supersedes the flat *Odd Taxi* direction** (locked 2026-09-06, reference `crookedile-style-v4-oddtaxi.png`). Side by
+> side, the battle reference read best, and it is not flat. Every prompt in the repo now uses the ink block (§10.1);
+> the one copy outside it is listed under "Prompts in other files" below.
 
-> **Battle UI reference: [`docs/design/battle-ui-reference.png`](design/battle-ui-reference.png)** — the battle screen layout to build toward: Opinion bar with Support and Denial, a row of opponents with one intent tag, a stance tag and a hostility track each, the player at the podium with the class resource tray above a fanned hand, Energy/Draw/Discard bottom left, End Turn bottom right. Edit prompt: `docs/reference/battle-ui-mock-prompt.md`.
->
-> ⚑ **That file is not in the repo.** `docs/design/` holds two PNGs under GUID filenames — rename whichever is the approved v4 mock to the path above, and delete or clearly label the other, or this pointer stays dead for anyone the file is handed to.
->
-> **The campaign map wears this same look, in 2:1 isometric.** Same palette, same flat cel shading, same thin lines — only the projection differs. Spec: §9. Prompt: `docs/reference/iso-tile-prompt.md`.
+**Rendering style:** detailed ink illustration, like an engraved editorial cartoon. Confident dark linework with fine
+hatching and cross-hatching for shadow and texture; fabric weave, wrinkles, scales and feathers drawn in, not
+smoothed out. Colour is laid in warm, muted, slightly desaturated washes under the ink. No digital-oil blending, no
+glossy 3D, no flat vector, no anime cel shading.
 
-> **Cards use this look too (2026-10-26).** Card art is an Odd Taxi still-life vignette, not the one-object icon style used from 2026-10-02: a few ordinary objects that imply a moment, sometimes one quiet impossible detail, figures sparingly. Rules in §3; prompts live in `docs/crookedile-card-art-prompts.xlsx`.
+**Light and mood:** a dark, warm, sepia room. The officials and the speaker are lit from the front by warm light; the
+public gallery behind them falls into brown shadow, and the corners go dark. Serious and a little grimy, never black
+voids and never bright.
 
-**Rendering style:** flat cel shading, even soft lighting, thin clean line work. Dusty warm palette over grey neutrals. No digital-oil rendering, no low-key vignette, no grain — flatness is the point, and the liveliness comes from colour and posture, not from lighting drama.
+**Characters:** grounded, characterful anthropomorphic animals from Filipino political slang on human bodies in real
+clothes (barong, suits, jackets, vestments). Faces carry attitude: smug, tired, suspicious, defiant. Satire through
+expression and costume detail, not cartoon exaggeration. Not cute, not mascots.
 
-**Composition (battle scene):** over-the-shoulder podium view — the player is IN the shot, back to camera, facing a raised row of opponent bust-portraits behind desks (committee-hearing framing). The crowd reads as a flat mass of shapes rather than rendered individuals. This is the "work the room" fantasy rendered literally.
+**Composition (battle scene):** over-the-shoulder podium view — the player is IN the shot, back to camera, facing a
+raised row of opponents behind a wooden panel (committee-hearing framing). **Behind them is the crowd:** a packed public
+gallery in shadow with hand-painted protest signs, never a bare wall. It is the audience the Opinion Meter measures.
 
-**Palette anchors:**
-
-> ⚑ **These values are still the superseded dark-painterly palette** — a near-black base is the
-> opposite of the dusty mustard/teal/brick/cream/olive the locked direction calls for. The accent
-> hues below (green/red/gold) survive the change in role; the base and chrome rows do not.
-> Pull real values off the approved mock rather than guessing them here.
+**Palette anchors** (sampled from the reference image, 2026-11-07):
 
 | Role | Color |
 |---|---|
-| Base / panels | ⚑ near-black charcoal & dark walnut `#141210` / `#2A2018` — **stale, needs the flat warm base** |
-| Parchment accents (tips, notes) | cream `#E8D9B0`, torn-paper edges, tape |
-| Approval/positive | toxic green `#7FBF3F` |
-| Hostile/danger | ember red-orange `#C43B2A` |
-| Receptive/support | gold-amber `#D9A33B` |
+| UI panels, top bar | near-black warm charcoal `#1C1B16` |
+| Opinion fill, primary buttons, gold accents | mustard gold `#D39A3B` (End Turn `#C78F35`) |
+| Crowd in shadow | deep brown-red `#4F291C` |
+| Lower background | dark umber `#31281D` |
+| Wood (desk, panel) | warm tan `#8F7B5E` |
+| Card frame: Rhetoric | muted brick `#733526` |
+| Card frame: Pressure | muted olive `#4B5334` |
+| Card frame: Policy | muted slate teal `#344951` |
+| Card text panel | warm parchment `#A3927C` |
+| Hostile / danger accent | brick red (the Denial chevrons and HOSTILE tags) |
 | Chrome lines / dividers | thin muted gold `#8A7448` |
 
-**UI furniture (copy these patterns):**
-- **Opinion meter** = top-center horizontal bar ("Audience Approval 62/100"), faction icons capping each end (gold=yours, red=theirs), flavor line beneath.
-- **Enemy slot** = nameplate w/ role icon → **signed aggression bar** (blue→green negative / red positive, numeric ±value) → portrait → **intent panel below** (icon + plain-words effect). Matches our hostility axis + revealed intents 1:1.
-- **Hand** = fanned at bottom-center; card = cost gem (top-left, blue octagon), name banner, painterly art, target line ("TARGET 1" / "ALL OPPONENTS"), effect text on dark panel.
-- **Card frame color = function**: red aggressive / green calm-empathy / gold religious-unity / blue neutral-facts / dark gray passive. Confirms §2a's color taxonomy.
-- **Callout cards** (Risk & Reward, How It Works) = parchment scraps with handwriting + crocodile doodle — use this for tutorial/tooltip voice.
-- Right rail: Turn counter, Energy (3/3 as lightning gems), Draw/Discard counts. End Turn = big gold-trimmed dark button with flavor text.
+These are averaged samples; re-sample against the source file before committing final UI art.
 
-**Vocabulary note (feeds the text pass):** the mock's player-facing terms — **Audience Approval** (opinion meter), **Aggression** (hostility), **Energy** — read instantly. Consider adopting them as the display vocabulary when we purge "Resolve damage."
+### Prompts in other files
+
+The card, portrait, map and battle prompts all use the ink block in §10.1 (2026-11-07). One copy lives outside the
+repo: the card-art workbook's style block comes from the Google Sheet (§10.5). The music prompt keeps its own jazz
+direction; it borrows a soundtrack's mood, not a visual style.
 
 ---
 
@@ -157,14 +164,16 @@ Per origin, shown face-down. `_defaultCardBack`, `_faithLeaderCardBack` (religio
 
 The `Character_NN` sprites are **placeholders** (random assignment). Real per-card art is authored **full-bleed 1500×2148, portrait**, subject framed in the **art-window safe zone**: roughly `x: 105–1395, y: 165–1200` (upper-center; the old 1000×1432 window scaled ×1.5). Keep critical detail out of the bottom ~45% (textbox) and the top ~8% (nameplate). Confirm the exact window against the frame PSD before final crops.
 
-### Card art style: Odd Taxi still life
+### Card art style: ink still life
 
 The art carries the card's meaning so the description text can stay small. Reference prompt that set the direction: *an empty church pew, a single lit candle, a neatly folded barong draped over the backrest, nobody in the room.*
 
 - **Still life.** Two to four ordinary objects that imply a moment: someone just left, something is about to happen. The room tells the joke; nothing explains it.
 - **One quiet twist** on about a third of cards: one impossible detail played straight (a shadow that kneels, steam shaped like sheep). Magical realism, never fantasy: no wands, sparkles, runes or creatures.
 - **Figures** on about a third of cards, one or two at most: plain silhouettes, hands at the frame edge, or grounded anthropomorphic animals in ordinary clothes. Never a crowd, never the focus.
-- **Odd Taxi rendering:** thin even linework, flat cel shading, subtle paper grain, the muted warm palette above, soft even light.
+- **Ink rendering:** the §0.1 look: detailed ink linework with hatching, warm muted washes, low warm light. Objects and
+  silhouettes must still read as bold shapes at hand size, like the reference image's cards (a pointing hand, a candle
+  between praying hands, figures silhouetted in a doorway).
 - **Accent:** the only saturated colour, per class: gold Faith Leader, hot pink Celebrity, emerald green Nepo Baby, purple Heckle, crimson Scandal.
 - **Framing:** subject in the upper centre two thirds; the lower 45% stays quiet for the textbox.
 - **Check at hand size** (~650px tall). If the moment doesn't read there, cut an object.
@@ -248,7 +257,8 @@ Small icons rendered next to the cost number. Author white/tintable.
 ## 9. Campaign map — 2:1 isometric tiles & buildings *(LOCKED 2026-09-18)*
 
 The campaign overworld is a 2D sprite city on a 2:1 isometric grid (`metagame-campaign.md`
-§1.5 for why; this section is the authoring spec). Generation prompt + acceptance check:
+§1.5 for why; this section is the authoring spec). It wears the §0.1 ink look: linework with light hatching and
+warm muted washes, drawn to the one projection below. Generation prompt + acceptance check:
 `docs/reference/iso-tile-prompt.md`.
 
 ### Projection — one angle, no exceptions
@@ -333,23 +343,24 @@ Paste the style block first, then the subject line. Card illustrations are not h
 subject line are in [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx) (Settings tab + one tab per
 class), following the rules in §3.
 
-### 10.1 Portraits (Odd Taxi block)
+### 10.1 Portraits (ink block)
 
 Paste this base block, then the portrait ending below it.
 
 ```
-Flat 2D anime illustration in the style of the anime Odd Taxi: clean uniform thin linework,
-limited flat cel shading, almost no gradients, subtle paper-grain texture over flat color.
-Muted sophisticated palette — dusty mustard, muted teal, brick red, cream, faded olive, warm
-greys — low saturation but warm; never grey-grimdark, never candy-bright. Even soft lighting,
-no chiaroscuro, no black voids. Filipino political satire, deadpan and adult: the cast are
-grounded anthropomorphic animals — naturalistic simplified animal heads on ordinary human
-bodies in ordinary clothes (plain barongs, unremarkable suits, campaign shirts), calm restrained
-expressions, understated body language. People who happen to be animals — not cartoon mascots,
-not realistic beasts, not cute, not photoreal, not oil painting. The humor is in the restraint.
+Detailed ink illustration in the manner of a dark editorial cartoon: confident dark linework with
+fine hatching and cross-hatching for shadow and texture; fabric weave, wrinkles, scales and feathers
+drawn in. Colour laid in warm, muted, slightly desaturated washes under the ink: mustard gold, brick
+red, olive, slate teal, parchment, deep umber. Warm low light from the front; edges fall into brown
+shadow, never pure black. Filipino political satire: grounded, characterful anthropomorphic animals
+on human bodies in real clothes (barongs, suits, jackets, vestments), faces with attitude: smug,
+tired, suspicious, defiant. Not cute, not mascots, not anime, not flat vector, not glossy 3D, not oil
+painting.
 Portrait composition, subject in the upper-centre two-thirds, lower 45% quiet and uncluttered
 (a textbox sits there). No text, no letters, no logos, no watermark, no UI frame.
 ```
+
+Attach `docs/design/battle-ui-reference.png` as a style reference with it wherever the tool allows.
 
 *Midjourney tail:* `--ar 7:10 --style raw --s 150 --no text,letters,watermark,frame`
 *Gemini / ChatGPT tail:* `Render at 1500x2148 px, portrait, PNG.`
@@ -358,7 +369,7 @@ Swap its last two sentences (composition + "No text...") for:
 
 ```
 Square bust portrait, head-and-shoulders, facing camera from slightly below (they sit at a
-raised committee panel). Plain flat muted background, no scenery. The role reads on the face.
+raised committee panel). Plain warm umber background fading to shadow, no scenery. The role reads on the face.
 ```
 
 *Midjourney tail:* `--ar 1:1 --style raw --s 150` · *target 1024x1024.*
@@ -408,7 +419,8 @@ read in a relic tray at ~48 px.
 2. **Three "Enhanced" cards are authored as Basic rarity**: Holier Than Thou, Impenetrable Belief and Sermon sit in
    `Cards/FaithLeader/Enhanced/` with `_rarity: 0`, so they'd get the plain overlay.
 3. **The Incumbent** (final boss) has moves and a room now (`boss-brain.md`) but no portrait or casting yet.
-4. **The reference of record** `docs/design/crookedile-style-v4-oddtaxi.png` is not in the repo (§0.1).
+4. **The card-art workbook's style block** (Settings and Art Rules tabs) still describes the flat look. It is pulled
+   from the Google Sheet, so change it there: replace it with the §10.1 ink block, and the rendering rule with §3's.
 
 ---
 

@@ -7,7 +7,7 @@ namespace Crookedile.Gameplay.Battle
     {
         Debuff,
         Buff,
-        Pacify, // Faith Leader: counts toward conversion (Guilt/Shame/Doubt)
+        Pacify, // Faith Leader: counts toward conversion (Guilt)
         Threshold, // Faith Leader: Jaded
         HostilityFlag, // Hardened/Fanatic/Turncoat/Devotion
         Special,
@@ -37,7 +37,7 @@ namespace Crookedile.Gameplay.Battle
         public virtual StatusCategory Category =>
             IsDebuff ? StatusCategory.Debuff : StatusCategory.Buff;
 
-        /// <summary>True if this status counts toward the Faith Leader pacify threshold (Guilt/Shame/Doubt).</summary>
+        /// <summary>True if this status counts toward the Faith Leader pacify threshold (Guilt).</summary>
         public virtual bool CountsTowardPacify => false;
 
         /// <summary>False rejects the application outright, before Ward is consumed.</summary>
@@ -64,7 +64,7 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Adjusts Support gained by the player (Dexterity/Frail).</summary>
         public virtual int ModifySupportGained(int support, int stacks) => support;
 
-        /// <summary>Adjusts Denial gained by an enemy (Shame drops the enemy's Denial).</summary>
+        /// <summary>Adjusts Denial gained by the status's owner.</summary>
         public virtual int ModifyDenialGained(int denial, int stacks) => denial;
 
         /// <summary>Adjusts card AP cost (Focus/Energized/Entangled).</summary>
