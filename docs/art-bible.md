@@ -12,55 +12,65 @@
 
 ---
 
-## 0.1 Style reference (LOCKED — updated 2026-11-07)
+## 0.1 Style reference (LOCKED 2026-11-07)
 
-> **Reference of record: [`docs/design/battle-ui-reference.png`](design/battle-ui-reference.png).** The look is this image:
-> a detailed ink illustration in a dark, warm committee hall. When words and the image disagree, the image wins:
-> attach it to every generation (edit, image-to-image or style reference) and describe only what changes.
+> **Reference of record: [`docs/design/crookedile-style-g1.webp`](design/crookedile-style-g1.webp)**, the battle screen generated from the G1 prompt in
+> [`ui-look-prompts.md`](reference/ui-look-prompts.md). When words and the image disagree, the image wins: attach it to
+> every generation (edit, image-to-image or style reference) and describe only what changes.
 >
-> **Supersedes the flat *Odd Taxi* direction** (locked 2026-09-06, reference `crookedile-style-v4-oddtaxi.png`). Side by
-> side, the battle reference read best, and it is not flat. Every prompt in the repo now uses the ink block (§10.1);
-> the one copy outside it is listed under "Prompts in other files" below.
+> **History:** the flat *Odd Taxi* look (locked 2026-09-06) and then the dark detailed-ink battle reference
+> (`battle-ui-reference.png`, briefly the reference on 2026-11-07) were both replaced by this. Every image prompt in the
+> repo uses the style block below.
 
-**Rendering style:** detailed ink illustration, like an engraved editorial cartoon. Confident dark linework with fine
-hatching and cross-hatching for shadow and texture; fabric weave, wrinkles, scales and feathers drawn in, not
-smoothed out. Colour is laid in warm, muted, slightly desaturated washes under the ink. No digital-oil blending, no
-glossy 3D, no flat vector, no anime cel shading.
+**Style block** (paste verbatim into every generation, before the subject):
 
-**Light and mood:** a dark, warm, sepia room. The officials and the speaker are lit from the front by warm light; the
-public gallery behind them falls into brown shadow, and the corners go dark. Serious and a little grimy, never black
-voids and never bright.
+```
+Hand-drawn 2D: confident thick ink outlines with varied weight, characters drawn like an animated cartoon
+with strong expressive acting and clear silhouettes, set against softly painted atmospheric backgrounds with
+visible brushwork. Rounded, appealing anthropomorphic animals with a sly satirical edge: likeable on the
+surface, shady underneath. Warm lighting, rich but slightly muted colour: mustard, teal, brick red, cream,
+olive. Filipino political satire.
+```
 
-**Characters:** grounded, characterful anthropomorphic animals from Filipino political slang on human bodies in real
-clothes (barong, suits, jackets, vestments). Faces carry attitude: smug, tired, suspicious, defiant. Satire through
-expression and costume detail, not cartoon exaggeration. Not cute, not mascots.
+Negative: `NOT photoreal, NOT 3D, NOT anime, NOT flat vector, NOT grimdark.`
 
-**Composition (battle scene):** over-the-shoulder podium view — the player is IN the shot, back to camera, facing a
-raised row of opponents behind a wooden panel (committee-hearing framing). **Behind them is the crowd:** a packed public
-gallery in shadow with hand-painted protest signs, never a bare wall. It is the audience the Opinion Meter measures.
+**What it means in practice:**
 
-**Palette anchors** (sampled from the reference image, 2026-11-07):
+- **Line:** thick, confident ink outlines with varied weight. Silhouettes read at a glance.
+- **Characters:** acted like animation: clear poses and expressions (accusing, arms crossed, a sideways glance).
+  Rounded and appealing, with the satire in the details. Our crocodile stays heavy-set, older, deadpan, in a plain
+  barong, never a cute mascot.
+- **Backgrounds:** softly painted with visible brushwork, looser than the characters.
+- **Light and colour:** warm, rich but slightly muted: mustard, teal, brick red, cream, olive.
+- **Composition (battle scene):** over-the-shoulder podium view, the player back to camera, the opponents behind a
+  raised wooden panel. **Behind them is the crowd:** a packed public gallery, painted looser and softer so it reads as a
+  crowd, never a bare wall.
+- **UI:** clean and slightly illustrated, one bold condensed sans-serif.
 
-| Role | Color |
+**Palette** (read off the reference image; it is WebP, so exact values still need sampling in an image editor):
+
+| Role | Colour in the reference |
 |---|---|
-| UI panels, top bar | near-black warm charcoal `#1C1B16` |
-| Opinion fill, primary buttons, gold accents | mustard gold `#D39A3B` (End Turn `#C78F35`) |
-| Crowd in shadow | deep brown-red `#4F291C` |
-| Lower background | dark umber `#31281D` |
-| Wood (desk, panel) | warm tan `#8F7B5E` |
-| Card frame: Rhetoric | muted brick `#733526` |
-| Card frame: Pressure | muted olive `#4B5334` |
-| Card frame: Policy | muted slate teal `#344951` |
-| Card text panel | warm parchment `#A3927C` |
-| Hostile / danger accent | brick red (the Denial chevrons and HOSTILE tags) |
-| Chrome lines / dividers | thin muted gold `#8A7448` |
+| Support, Draw counter, the player's side of the Opinion bar | teal |
+| Denial, Discard counter, the hostile side of the bar, HOSTILE tags | brick red |
+| Energy counter, End Turn, intent number badges | mustard |
+| UI pills, name plates, cards | cream with dark ink outlines |
+| Neutral tags | warm grey; receptive tags green |
+| Desks, gallery rails | warm painted wood |
+| Light | soft warm daylight from above; the back of the gallery is lighter, not shadowed |
 
-These are averaged samples; re-sample against the source file before committing final UI art.
+**Known misses to prompt against** (both appeared in the reference render):
+
+- **Literal sign text:** the model painted prompt words on the crowd's signs ("FANS", "HOMEMADE SIGNS"). Ask for signs
+  with short Filipino campaign slogans, or blank signs, and never quote describing words near "signs".
+- **Humans in the cast:** the swing voter and several of the crowd came out human. Say "every character, officials and
+  crowd alike, is an anthropomorphic animal".
 
 ### Prompts in other files
 
-The card, portrait, map and battle prompts all use the ink block in §10.1, and so does the card-art workbook's style
-block (2026-11-07). The music prompt keeps its own jazz direction; it borrows a soundtrack's mood, not a visual style.
+The card, portrait, map, UI sprite and battle prompts all use the §0.1 style block, and so does the card-art
+workbook's style block (2026-11-07). The music prompt keeps its own jazz direction; it is a sound reference, not
+a visual one.
 
 ---
 
@@ -163,17 +173,22 @@ Per origin, shown face-down. `_defaultCardBack`, `_faithLeaderCardBack` (religio
 
 The `Character_NN` sprites are **placeholders** (random assignment). Real per-card art is authored **full-bleed 1500×2148, portrait**, subject framed in the **art-window safe zone**: roughly `x: 105–1395, y: 165–1200` (upper-center; the old 1000×1432 window scaled ×1.5). Keep critical detail out of the bottom ~45% (textbox) and the top ~8% (nameplate). Confirm the exact window against the frame PSD before final crops.
 
-### Card art style: ink still life
+### Card art style: hand-drawn still life
 
-The art carries the card's meaning so the description text can stay small. Reference prompt that set the direction: *an empty church pew, a single lit candle, a neatly folded barong draped over the backrest, nobody in the room.*
+**Reference of record: the cards in `docs/design/crookedile-style-g1.webp`** (2026-11-07). Follow their small hand-drawn
+illustrations inside ink-outlined frames. Those cards carry no type colour, and that is fine: the game applies type
+colour on the frame (`CardVisualSettings`), so the art itself never needs to.
+
+The art carries the card's meaning so the description text can stay small. Earlier reference prompt: *an empty church pew, a single lit candle, a neatly folded barong draped over the backrest, nobody in the room.*
 
 - **Still life.** Two to four ordinary objects that imply a moment: someone just left, something is about to happen. The room tells the joke; nothing explains it.
 - **One quiet twist** on about a third of cards: one impossible detail played straight (a shadow that kneels, steam shaped like sheep). Magical realism, never fantasy: no wands, sparkles, runes or creatures.
 - **Figures** on about a third of cards, one or two at most: plain silhouettes, hands at the frame edge, or grounded anthropomorphic animals in ordinary clothes. Never a crowd, never the focus.
-- **Ink rendering:** the §0.1 look: detailed ink linework with hatching, warm muted washes, low warm light. Objects and
-  silhouettes must still read as bold shapes at hand size, like the reference image's cards (a pointing hand, a candle
-  between praying hands, figures silhouetted in a doorway).
-- **Accent:** the only saturated colour, per class: gold Faith Leader, hot pink Celebrity, emerald green Nepo Baby, purple Heckle, crimson Scandal.
+- **Rendering:** pen-and-ink line drawing on cream paper, like the reference cards: confident outlines, light hatching,
+  no colour fill. Colour lives only on the frame and the cost circle. Objects and silhouettes must read as bold shapes
+  at hand size.
+- **Accent:** the class colour goes on the frame and cost circle, not in the drawing: gold Faith Leader, hot pink
+  Celebrity, emerald green Nepo Baby, purple Heckle, crimson Scandal.
 - **Framing:** subject in the upper centre two thirds; the lower 45% stays quiet for the textbox.
 - **Check at hand size** (~650px tall). If the moment doesn't read there, cut an object.
 
@@ -256,8 +271,8 @@ Small icons rendered next to the cost number. Author white/tintable.
 ## 9. Campaign map — 2:1 isometric tiles & buildings *(LOCKED 2026-09-18)*
 
 The campaign overworld is a 2D sprite city on a 2:1 isometric grid (`metagame-campaign.md`
-§1.5 for why; this section is the authoring spec). It wears the §0.1 ink look: linework with light hatching and
-warm muted washes, drawn to the one projection below. Generation prompt + acceptance check:
+§1.5 for why; this section is the authoring spec). It wears the §0.1 look: thick ink outlines and softly painted
+fills, drawn to the one projection below. Generation prompt + acceptance check:
 `docs/reference/iso-tile-prompt.md`.
 
 ### Projection — one angle, no exceptions
@@ -342,24 +357,21 @@ Paste the style block first, then the subject line. Card illustrations are not h
 subject line are in [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx) (Settings tab + one tab per
 class), following the rules in §3.
 
-### 10.1 Portraits (ink block)
+### 10.1 Portraits (style block)
 
 Paste this base block, then the portrait ending below it.
 
 ```
-Detailed ink illustration in the manner of a dark editorial cartoon: confident dark linework with
-fine hatching and cross-hatching for shadow and texture; fabric weave, wrinkles, scales and feathers
-drawn in. Colour laid in warm, muted, slightly desaturated washes under the ink: mustard gold, brick
-red, olive, slate teal, parchment, deep umber. Warm low light from the front; edges fall into brown
-shadow, never pure black. Filipino political satire: grounded, characterful anthropomorphic animals
-on human bodies in real clothes (barongs, suits, jackets, vestments), faces with attitude: smug,
-tired, suspicious, defiant. Not cute, not mascots, not anime, not flat vector, not glossy 3D, not oil
-painting.
+Hand-drawn 2D: confident thick ink outlines with varied weight, characters drawn like an animated cartoon
+with strong expressive acting and clear silhouettes, set against softly painted atmospheric backgrounds with
+visible brushwork. Rounded, appealing anthropomorphic animals with a sly satirical edge: likeable on the
+surface, shady underneath. Warm lighting, rich but slightly muted colour: mustard, teal, brick red, cream,
+olive. Filipino political satire.
 Portrait composition, subject in the upper-centre two-thirds, lower 45% quiet and uncluttered
 (a textbox sits there). No text, no letters, no logos, no watermark, no UI frame.
 ```
 
-Attach `docs/design/battle-ui-reference.png` as a style reference with it wherever the tool allows.
+Attach `docs/design/crookedile-style-g1.webp` as a style reference with it wherever the tool allows.
 
 *Midjourney tail:* `--ar 7:10 --style raw --s 150 --no text,letters,watermark,frame`
 *Gemini / ChatGPT tail:* `Render at 1500x2148 px, portrait, PNG.`
@@ -368,7 +380,7 @@ Swap its last two sentences (composition + "No text...") for:
 
 ```
 Square bust portrait, head-and-shoulders, facing camera from slightly below (they sit at a
-raised committee panel). Plain warm umber background fading to shadow, no scenery. The role reads on the face.
+raised committee panel). Plain softly painted warm background, no scenery. The role reads on the face.
 ```
 
 *Midjourney tail:* `--ar 1:1 --style raw --s 150` · *target 1024x1024.*

@@ -1,12 +1,12 @@
 # UI sprite sheet prompts
 
-> **Kind:** Reference · **Status:** Draft · **Updated:** 2026-10-10
+> **Kind:** Reference · **Status:** Draft · **Updated:** 2026-11-07
 >
 > **Summary:** Image prompts for the battle UI sprite sheets (frames, buttons, badges, bars, icons), built from the battle UI reference.
 >
 > **Source of truth:** this doc · **Related:** [`battle-ui-mock-prompt.md`](battle-ui-mock-prompt.md) · [`../ui-elements.md`](../ui-elements.md) · [`../art-bible.md`](../art-bible.md)
 
-Attach `docs/design/battle-ui-reference.png` as the style reference for every sheet. Each sheet covers one group of
+Attach `docs/design/crookedile-style-g1.webp` as the style reference for every sheet. Each sheet covers one group of
 [`ui-elements.md`](../ui-elements.md); generating them separately keeps the shapes consistent within a sheet. Every
 prompt is self-contained: paste one whole block per generation. Drop results beside this file as `ui-sheet-a.png` …
 `ui-sheet-d.png`.
@@ -45,8 +45,8 @@ stay fully transparent.
 
 ## Sheet A: frames and buttons
 
-> Create a game UI sprite sheet for Project Crookedile, matching the attached battle screen exactly in style: flat
-> cel shading, thin clean line work, a dusty muted palette, dark walnut panels with a fine gold edge. This is a
+> Create a game UI sprite sheet for Project Crookedile, matching the attached battle screen exactly in style:
+> thick confident ink outlines, softly painted fills, warm and slightly muted mustard, teal, brick, cream and olive. This is a
 > production asset sheet, not an illustration.
 >
 > **Canvas and grid.** The image is exactly 2048 × 768 pixels with a fully transparent background (alpha 0) everywhere
@@ -88,8 +88,8 @@ Feeds: Panel Frame, tray, Button / Primary, Button / Secondary.
 
 ## Sheet B: round pieces
 
-> Create a game UI sprite sheet for Project Crookedile, matching the attached battle screen exactly in style: flat
-> cel shading, thin clean line work, a dusty muted palette, dark walnut with a fine gold edge. This is a production
+> Create a game UI sprite sheet for Project Crookedile, matching the attached battle screen exactly in style:
+> thick confident ink outlines, softly painted fills, warm and slightly muted mustard, teal, brick, cream and olive. This is a production
 > asset sheet, not an illustration.
 >
 > **Canvas and grid.** The image is exactly 1024 × 512 pixels with a fully transparent background (alpha 0) everywhere
@@ -131,8 +131,8 @@ Feeds: Counter, Chip, the Support and Denial badges, the End Turn pips, the enem
 
 ## Sheet C: bars and tags
 
-> Create a game UI sprite sheet for Project Crookedile, matching the attached battle screen exactly in style: flat
-> cel shading, thin clean line work, a dusty muted palette, dark walnut with a fine gold edge. This is a production
+> Create a game UI sprite sheet for Project Crookedile, matching the attached battle screen exactly in style:
+> thick confident ink outlines, softly painted fills, warm and slightly muted mustard, teal, brick, cream and olive. This is a production
 > asset sheet, not an illustration.
 >
 > **Canvas and grid.** The image is exactly 2048 × 512 pixels with a fully transparent background (alpha 0) everywhere

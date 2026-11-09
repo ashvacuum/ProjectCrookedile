@@ -1,16 +1,16 @@
 # UI look prompts
 
-> **Kind:** Reference · **Status:** Stale · **Updated:** 2026-11-07
+> **Kind:** Reference · **Status:** Draft · **Updated:** 2026-11-07
 >
-> **Summary:** Image prompts for the battle screen: three UI directions in the locked style, and three alternative art styles to test against it, and the favoured hand-drawn satire blend in three weights.
+> **Summary:** Image prompts for the battle screen: UI directions A to C, art styles D to F, and two reference blends (G, and H, the current candidate).
 >
 > **Source of truth:** this doc · **Related:** [`battle-ui-mock-prompt.md`](battle-ui-mock-prompt.md) · [`style-mock-prompt.md`](style-mock-prompt.md) · [`ui-sprite-sheet-prompt.md`](ui-sprite-sheet-prompt.md) · [`art-bible.md`](../art-bible.md)
 
-**Decision (2026-11-07):** the existing reference image, `docs/design/battle-ui-reference.png`, still reads best.
-It is a detailed ink illustration, not the flat look these prompts assume; the art bible (section 0.1) now describes it.
-These explorations are kept for reference; new screens are built as edits of that image (`battle-ui-mock-prompt.md`).
+**Decision (2026-11-07): G1 is the look.** Its result is the reference of record, saved as `docs/design/crookedile-style-g1.webp`;
+the art bible (section 0.1) and every other image prompt now use its style block. The other directions stay
+here as history.
 
-Each prompt draws the same battle screen in the locked *Odd Taxi* style; only what the interface is made of
+Each prompt draws the same battle screen in the ink style of the reference image; only what the interface is made of
 changes. Generate each at 16:9 (1920×1080). Optionally attach `docs/design/battle-ui-reference.png` as a
 composition reference. Drop results beside this file as `ui-look-a-1.png`, `ui-look-b-1.png` and so on, then
 note what worked under the matching direction below.
@@ -25,9 +25,9 @@ The hearing is being televised. The UI is a TV news graphics package: the Opinio
 graphic, names are lower-thirds, intents are captions. Satire through the medium.
 
 ```text
-A 16:9 video game battle screen, rendered in the style of the anime Odd Taxi: flat 2D, clean thin uniform
-linework, limited flat cel shading, a muted warm palette of dusty mustard, muted teal, brick red, cream,
-faded olive and warm greys, subtle paper grain, even soft lighting.
+A 16:9 video game battle screen, rendered as a detailed ink illustration: confident dark linework with fine
+hatching, warm muted washes under the ink (mustard gold, brick red, olive, slate teal, parchment, umber),
+warm low light from the front, edges falling into brown shadow.
 
 Scene: a Filipino legislative committee hearing. A composed crocodile politician in a plain barong stands
 with his back to camera at a wooden podium with a microphone, lower centre. Facing him, three grounded,
@@ -64,9 +64,9 @@ The UI is campaign print: tarpaulin banners, sticker chips, rubber stamps, starb
 election-season graphics, but still flat and muted.
 
 ```text
-A 16:9 video game battle screen, rendered in the style of the anime Odd Taxi: flat 2D, clean thin uniform
-linework, limited flat cel shading, a muted warm palette of dusty mustard, muted teal, brick red, cream,
-faded olive and warm greys, subtle paper grain, even soft lighting.
+A 16:9 video game battle screen, rendered as a detailed ink illustration: confident dark linework with fine
+hatching, warm muted washes under the ink (mustard gold, brick red, olive, slate teal, parchment, umber),
+warm low light from the front, edges falling into brown shadow.
 
 Scene: a Filipino legislative committee hearing. A composed crocodile politician in a plain barong stands
 with his back to camera at a wooden podium with a microphone, lower centre. Facing him, three grounded,
@@ -105,9 +105,9 @@ The UI is government paperwork: manila folders, typed labels, rubber stamps, car
 receipt-paper log. Dry, bureaucratic, deadpan, closest to the tone of the satire.
 
 ```text
-A 16:9 video game battle screen, rendered in the style of the anime Odd Taxi: flat 2D, clean thin uniform
-linework, limited flat cel shading, a muted warm palette of dusty mustard, muted teal, brick red, cream,
-faded olive and warm greys, subtle paper grain, even soft lighting.
+A 16:9 video game battle screen, rendered as a detailed ink illustration: confident dark linework with fine
+hatching, warm muted washes under the ink (mustard gold, brick red, olive, slate teal, parchment, umber),
+warm low light from the front, edges falling into brown shadow.
 
 Scene: a Filipino legislative committee hearing. A composed crocodile politician in a plain barong stands
 with his back to camera at a wooden podium with a microphone, lower centre. Facing him, three grounded,
@@ -141,8 +141,8 @@ NOT oil painting, NOT photoreal, NOT grimy, NOT 3D, NOT bright slapstick.
 
 # Alternative art styles (exploration)
 
-The art bible locks the *Odd Taxi* look. These three test other base styles for the same screen, so the lock
-can be confirmed or replaced on evidence. The UI in each is deliberately plain (thin dark panels, one
+These three test other base styles against the ink reference image, so the look can be confirmed or replaced
+on evidence. The UI in each is deliberately plain (thin dark panels, one
 condensed sans-serif) so the comparison is about the art, not the interface. Save results as
 `ui-style-d-1.png` and so on.
 
@@ -249,7 +249,7 @@ not a cute mascot.
 **The background is the crowd:** the officials sit in front of a packed public gallery, never a bare wall.
 The crowd is the audience the Opinion Meter measures, so it should always be visible behind them.
 
-## G1. Even blend
+## G1. Even blend (CHOSEN)
 
 ```text
 A 16:9 video game battle screen, hand-drawn 2D: confident thick ink outlines with varied weight, characters
@@ -337,6 +337,112 @@ NEUTRAL, RECEPTIVE) and a "GUILT 2/3" chip. Above the hand, a small tray: "GUILT
 three round counters: ENERGY 2/3, DRAW 9, DISCARD 4. Along the bottom, four fanned cards with rounded
 frames, cost circles, titles in caps (CONFESSION, HEAVY CONSCIENCE, ALTAR CALL, FIRE AND BRIMSTONE) and small
 cute illustrations. Bottom right a large mustard "END TURN" button.
+
+NOT photoreal, NOT 3D, NOT anime, NOT chibi, NOT grimdark.
+```
+
+**Notes:**
+
+
+---
+
+# H. Ink noir, graphic shapes, election satire (2026-11-07)
+
+The reference trio picked on 2026-11-07: **Blacksad** for rendering (watercolour washes over confident ink, cinematic
+warm light, animals with weight and real facial acting), **Root** for graphic clarity (bold simple silhouettes, flat
+shapes, one strong colour per faction), and **Political Animals** for tone (Filipino election satire, appealing
+anthros who are shady underneath). The prompts describe those qualities instead of naming the works. Three weights;
+save results as `ui-style-h1-1.png` and so on.
+
+**Keep it ours:** our crocodile is a heavy-set older politician in a plain barong with a deadpan face, not a cute
+mascot (Political Animals also has a crocodile candidate). **The background is the crowd**, never a wall.
+
+## H1. Even blend
+
+```text
+A 16:9 video game battle screen. Characters and scene: confident ink linework with loose watercolour washes, warm
+cinematic light, anthropomorphic animals with believable anatomy and weight, real facial acting and detailed
+clothing. Shapes kept bold and simple so every figure reads as a clear silhouette. Appealing on the surface,
+shady underneath: Filipino election satire. Palette of warm muted washes (mustard gold, brick red, olive, slate
+teal, parchment, umber), with each faction carrying one strong flat accent colour.
+
+Scene: a Filipino legislative committee hearing. A heavy-set older crocodile politician in a plain barong stands
+with his back to camera at a wooden podium with a microphone, lower centre, one hand raised mid-speech. Facing
+him, three anthropomorphic animal officials sit behind a raised wooden panel, each acting clearly: a radio
+commentator leaning in to accuse, a barangay tanod with arms crossed, a swing voter glancing sideways. Behind
+and above the panel, filling the whole background, a packed public gallery of animal citizens in tiered seats
+with hand-painted signs, washed in looser and darker than the officials so they read as a crowd, not a wall.
+
+Game interface in flat graphic shapes like a modern board game: bold simple icons, clear colour coding, thin
+dark outlines, one condensed sans-serif in caps. Top centre an Opinion bar labelled "OPINION 62" with a tick at
+60, a gold "SUPPORT 8" badge on the left end and a brick "DENIAL 4" badge on the right; top right "TURN 4 ·
+JUDGMENT IN 6". Above each official a small intent tag ("CONDEMN 6", "REBUKE +4", "MURMUR"); under each a name
+plate, a stance tag in its faction colour (HOSTILE brick, NEUTRAL grey, RECEPTIVE teal) and a "GUILT 2/3"
+chip. Above the hand, a small tray: "GUILT IN THE ROOM 3". Bottom left three round counters: ENERGY 2/3, DRAW
+9, DISCARD 4. Along the bottom, four fanned cards with flat coloured frames, cost circles, titles in caps
+(CONFESSION, HEAVY CONSCIENCE, ALTAR CALL, FIRE AND BRIMSTONE) and small ink-and-wash illustrations. Bottom
+right a large mustard "END TURN" button.
+
+NOT photoreal, NOT 3D, NOT anime, NOT chibi, NOT grimdark.
+```
+
+**Notes:**
+
+## H2. Leaning noir and cinematic
+
+```text
+A 16:9 video game battle screen. Characters and scene: rich ink linework under layered watercolour, dramatic
+warm key light from tall windows, deep but warm shadows, noir mood. Anthropomorphic animals drawn with
+believable anatomy, heavy bodies and expressive faces: smug, tired, suspicious. Detailed barongs, suits and
+uniforms. Silhouettes still bold and readable. Filipino political satire played like a crime story. Palette of
+warm muted washes (amber, brick red, olive, slate teal, parchment, deep umber).
+
+Scene: a Filipino legislative committee hearing late in the afternoon, light slanting through dusty air. A
+heavy-set older crocodile politician in a plain barong stands with his back to camera at a wooden podium with a
+microphone, lower centre. Facing him, three anthropomorphic animal officials sit behind a raised wooden panel: a
+radio commentator leaning in to accuse, a barangay tanod with arms crossed, a swing voter glancing sideways.
+Behind and above the panel, filling the whole background, a packed public gallery of animal citizens half-lit
+by the slanting light, painted looser and darker so they read as a crowd, not a wall.
+
+Game interface in flat graphic shapes over dark warm panels with thin gold edges, bold simple icons, one
+condensed sans-serif in caps. Top centre an Opinion bar labelled "OPINION 62" with a tick at 60, a gold
+"SUPPORT 8" badge on the left end and a brick "DENIAL 4" badge on the right; top right "TURN 4 · JUDGMENT IN
+6". Above each official a small intent tag ("CONDEMN 6", "REBUKE +4", "MURMUR"); under each a name plate, a
+stance tag (HOSTILE brick, NEUTRAL grey, RECEPTIVE teal) and a "GUILT 2/3" chip. Above the hand, a small tray:
+"GUILT IN THE ROOM 3". Bottom left three round counters: ENERGY 2/3, DRAW 9, DISCARD 4. Along the bottom, four
+fanned cards with flat coloured frames, cost circles, titles in caps (CONFESSION, HEAVY CONSCIENCE, ALTAR CALL,
+FIRE AND BRIMSTONE) and small ink-and-wash illustrations. Bottom right a large mustard "END TURN" button.
+
+NOT photoreal, NOT 3D, NOT anime, NOT neon, NOT pure black voids.
+```
+
+**Notes:**
+
+## H3. Leaning graphic and board-game
+
+```text
+A 16:9 video game battle screen. Characters and scene: flat graphic illustration with bold simple shapes and
+clean confident outlines, light ink texture and a soft wash for depth, like a modern board game's box art.
+Anthropomorphic animals with chunky readable silhouettes, charming but sly, each faction in one strong flat
+colour. Filipino election satire: likeable on the surface, shady underneath (a wad of cash in a pocket, a
+too-wide smile). Palette of flat warm colours: mustard, brick red, olive, teal, cream, with umber shadow shapes.
+
+Scene: a Filipino legislative committee hearing at midday. A heavy-set older crocodile politician in a plain
+barong stands with his back to camera at a wooden podium with a microphone, lower centre. Facing him, three
+anthropomorphic animal officials sit behind a raised wooden panel: a radio commentator leaning in to accuse, a
+barangay tanod with arms crossed, a swing voter glancing sideways. Behind and above the panel, filling the
+whole background, a packed public gallery of animal citizens drawn as simple flat shapes with signs and flags,
+so they read as a crowd, not a wall.
+
+Game interface in flat board-game graphics: chunky icons, strong colour coding, thick dark outlines, one bold
+condensed sans-serif in caps. Top centre an Opinion bar labelled "OPINION 62" with a tick at 60, a gold
+"SUPPORT 8" badge on the left end and a brick "DENIAL 4" badge on the right; top right "TURN 4 · JUDGMENT IN
+6". Above each official a small intent tag ("CONDEMN 6", "REBUKE +4", "MURMUR"); under each a name plate, a
+stance tag in its faction colour (HOSTILE brick, NEUTRAL grey, RECEPTIVE teal) and a "GUILT 2/3" chip. Above
+the hand, a small tray: "GUILT IN THE ROOM 3". Bottom left three round counters: ENERGY 2/3, DRAW 9, DISCARD 4.
+Along the bottom, four fanned cards with flat coloured frames, cost circles, titles in caps (CONFESSION, HEAVY
+CONSCIENCE, ALTAR CALL, FIRE AND BRIMSTONE) and small flat illustrations. Bottom right a large mustard "END
+TURN" button.
 
 NOT photoreal, NOT 3D, NOT anime, NOT chibi, NOT grimdark.
 ```

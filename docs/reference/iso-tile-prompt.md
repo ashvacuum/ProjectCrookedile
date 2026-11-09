@@ -6,7 +6,7 @@
 >
 > **Source of truth:** this doc; grid guide [`iso-grid-guide-256x128.png`](iso-grid-guide-256x128.png) · **Related:** [`metagame-campaign.md`](../metagame-campaign.md) · [`art-bible.md`](../art-bible.md) · [`style-mock-prompt.md`](style-mock-prompt.md)
 
-*Companion to `style-mock-prompt.md` (v5 ink, the current look; `art-bible.md` §0.1). That prompt makes battle
+*Companion to `style-mock-prompt.md` (v6, the current look; `art-bible.md` §0.1). That prompt makes battle
 art; this one makes the campaign map's tiles and buildings — `metagame-campaign.md` §1.5,
 sizes and import settings in `art-bible.md` §9. Drop generated images beside this file.*
 
@@ -44,16 +44,15 @@ free; it is a standard 2D-iso production route, not a betrayal of the sprite loo
 > foreshortening** — the far edge of the roof is exactly as long as the near edge. Vertical
 > edges are perfectly vertical in the image. Single object, centered, complete and unclipped,
 > on a **fully transparent background**. Fixed key light from the **upper left**, soft and even;
-> ink linework with light hatching and at most two wash tones per surface; no cast shadow on the ground, no ambient
-> occlusion pooling outside the footprint. Confident dark outline. Sprite-sheet asset, not
+> thick ink outlines and at most two painted tones per surface; no cast shadow on the ground, no ambient
+> occlusion pooling outside the footprint. Confident thick ink outline. Sprite-sheet asset, not
 > a scene.
 
 ## 2. The style block (paste verbatim, unchanged — this is the locked look)
 
-> Detailed ink illustration in the manner of a dark editorial cartoon: confident dark linework,
-> light hatching for shade and texture (corrugated metal, weathered paint, wood grain drawn in),
-> colour in warm, muted, slightly desaturated washes — mustard gold, brick red, olive, slate teal,
-> parchment, umber. Warm and lived-in, never pure black and never bright. Filipino urban flavor kept understated and lived-in: corrugated
+> Hand-drawn 2D: confident thick ink outlines with varied weight and clear silhouettes, softly
+> painted surfaces with visible brushwork, warm lighting, rich but slightly muted colour: mustard,
+> teal, brick red, cream, olive. Appealing and lived-in. Filipino urban flavor kept understated and lived-in: corrugated
 > tin roofing, hand-painted signage, a campaign tarpaulin zip-tied to a fence, tangled overhead
 > wires, a sari-sari store's hanging sachets — texture, not clutter.
 

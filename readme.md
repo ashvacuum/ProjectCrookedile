@@ -74,12 +74,13 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`reference/battle-ui-mock-prompt.md`](docs/reference/battle-ui-mock-prompt.md) | Draft | 2026-10-09 | Image-edit prompt for the battle screen UI, built on the committee-hearing battle mock rather than a new layout. | this doc |
+| [`reference/aspirational-screen-prompts.md`](docs/reference/aspirational-screen-prompts.md) | Draft | 2026-11-07 | Image prompts for the target look of six more screens, each built on the G1 battle reference. | this doc |
+| [`reference/battle-ui-mock-prompt.md`](docs/reference/battle-ui-mock-prompt.md) | Draft | 2026-11-07 | Image-edit prompt for the battle screen UI, built on the committee-hearing battle mock rather than a new layout. | this doc |
 | [`reference/iso-tile-prompt.md`](docs/reference/iso-tile-prompt.md) | Canonical | 2026-11-07 | Campaign-map generation prompt: 2:1 dimetric tiles and buildings, plus the acceptance check every sprite has to pass. | this doc; grid guide [`iso-grid-guide-256x128.png`](docs/reference/iso-grid-guide-256x128.png) |
 | [`reference/music-prompt.md`](docs/reference/music-prompt.md) | Canonical | 2026-10-03 | BGM prompts. | this doc |
-| [`reference/style-mock-prompt.md`](docs/reference/style-mock-prompt.md) | Canonical | 2026-11-07 | Style-mock generation prompt: v5 detailed ink (current); v4 Odd Taxi and older kept as history. | this doc |
-| [`reference/ui-look-prompts.md`](docs/reference/ui-look-prompts.md) | Stale | 2026-11-07 | Image prompts for the battle screen: three UI directions in the locked style, and three alternative art styles to test against it, and the favoured hand-drawn satire blend in three weights. | this doc |
-| [`reference/ui-sprite-sheet-prompt.md`](docs/reference/ui-sprite-sheet-prompt.md) | Draft | 2026-10-10 | Image prompts for the battle UI sprite sheets (frames, buttons, badges, bars, icons), built from the battle UI reference. | this doc |
+| [`reference/style-mock-prompt.md`](docs/reference/style-mock-prompt.md) | Canonical | 2026-11-07 | Style-mock generation prompt: v6 hand-drawn satire, the current look. | this doc |
+| [`reference/ui-look-prompts.md`](docs/reference/ui-look-prompts.md) | Draft | 2026-11-07 | Image prompts for the battle screen: UI directions A to C, art styles D to F, and two reference blends (G, and H, the current candidate). | this doc |
+| [`reference/ui-sprite-sheet-prompt.md`](docs/reference/ui-sprite-sheet-prompt.md) | Draft | 2026-11-07 | Image prompts for the battle UI sprite sheets (frames, buttons, badges, bars, icons), built from the battle UI reference. | this doc |
 
 <!-- docs-map:end -->
 

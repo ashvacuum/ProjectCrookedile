@@ -1,12 +1,12 @@
 # Battle UI mock prompt
 
-> **Kind:** Reference · **Status:** Draft · **Updated:** 2026-10-09
+> **Kind:** Reference · **Status:** Draft · **Updated:** 2026-11-07
 >
 > **Summary:** Image-edit prompt for the battle screen UI, built on the committee-hearing battle mock rather than a new layout.
 >
 > **Source of truth:** this doc · **Related:** [`style-mock-prompt.md`](style-mock-prompt.md) · [`art-bible.md`](../art-bible.md)
 
-Attach `docs/design/battle-ui-reference.png` as the image reference and use the prompt
+Attach `docs/design/crookedile-style-g1.webp` as the image reference and use the prompt
 below as an edit of it. The scene, cast and framing stay; only the interface is tightened. Drop results
 beside this file.
 
@@ -15,16 +15,17 @@ beside this file.
 Edit of the attached Project Crookedile battle mock. Keep the scene exactly: a warm, muted committee
 hearing hall in a Filipino legislature, a composed crocodile politician (buwaya) in a plain barong with
 his back to camera at a wooden podium with a microphone and a glass of water, and a single row of eight
-anthropomorphic animal opponents seated behind a raised wooden panel, campaign tarpaulins on the back
-wall. Same cast, same flat muted illustration, same dusty mustard, brick, teal, olive and cream palette,
-same even soft lighting. Do not repaint the characters or the room.
+anthropomorphic animal opponents seated behind a raised wooden panel, a packed public gallery in shadow
+behind them with hand-painted protest signs. Same cast, same hand-drawn style: thick ink outlines, cartoon
+acting, softly painted background, warm and slightly muted mustard, teal, brick red, cream and olive.
+Do not repaint the characters or the room.
 
 Tighten the interface so it reads at a glance and every element earns its space:
 
 - Top: one Opinion bar across the width. Gold fill from the left for the player, dark from the right,
   chevrons at the meeting point showing the last push. A round gold Support badge with its number at
   the left end, a round brick Denial badge with its number at the right end. Above the bar, small text
-  "OPINION 62", "win at 100, lose at 0, hold 50 at Judgment". Top right: "TURN 4 · JUDGMENT IN 8" and
+  "OPINION 62", "win at 100, lose at 0, win line 60 at Judgment". Top right: "TURN 4 · JUDGMENT IN 8" and
   a small LOG button. Top left: the carried items as small round chips.
 - Each opponent: a name plate on the panel edge, one stance tag under it (HOSTILE brick, NEUTRAL olive,
   RECEPTIVE teal), a thin hostility track under the tag with a marker, and at most two small status
