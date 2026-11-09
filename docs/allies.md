@@ -145,7 +145,22 @@ Both compose from existing blocks: `BattleStartTrigger` with `GainGlamourEffect`
 | Youth Pastor (built) | Elite | First turn: draw 2 | none |
 | Church Bulletin (built) | Elite | Battle start: scry 3 | none |
 | Bible Study Group (built) | Elite | Every 4th card you play draws 1 | none |
-| Chief of Staff | Elite | −25% encounter time | none |
+| Chief of Staff (built) | Elite | −25% encounter time | none |
+| Coffee Run (built) | Elite | Every 3rd turn: +1 AP | none |
+| Advance Team (built) | Elite | Turn 2: +1 AP | none |
+| Teleprompter (built) | Elite | First turn: the next non-Policy card resolves twice | none |
+| Closer (built) | Elite | When an enemy leaves the fight: +1 AP | none |
+| Bodyguard (built) | Elite | The first time your Support drops each battle: gain 4 Support | none |
+| Lawyer (built) | Elite | The first time the meter moves against you each turn: gain 2 Support | none |
+| Pollster (built) | Elite | Turn start at or below half Opinion: gain 3 Support | none |
+| Security Detail (built) | Elite | From turn 3, Support no longer expires between turns | none |
+| Note Taker (built) | Elite | The first card you discard each turn draws 1 | none |
+| Oppo Researcher (built) | Elite | Turn 3: return a card from discard to hand | none |
+| Copy Editor (built) | Elite | First turn: upgrade a card in hand for this battle | none |
+| Social Media Manager (built) | Elite | Every 5th card you play: raise Opinion by 2 | none |
+| Warm-Up Act (built) | Elite | Battle start: +1 Strength for the battle | none |
+| Debate Coach (built) | Elite | Each Pressure you play: gain 1 Support | none |
+| Hot Mic (built) | Elite | When an enemy turns hostile: +1 Strength until end of turn | none |
 | Campaign Manager | Boss | Card rewards show 4 choices instead of 3 | none |
 | Party Machine | Boss | +1 energy each turn | Each battle starts with one random enemy at +2 Hostility |
 | Dark Money Donor | Boss | +100 Funds now | −10 max Credibility |

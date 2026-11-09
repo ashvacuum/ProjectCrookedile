@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
+  m_Name: Note Taker
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
+  _id: 1bb3ed41ff1b4c79b601ccbb9592850b
+  _icon: {fileID: 0}
+  _allyName: Note Taker
+  _description: The first card you discard each turn draws 1.
+  _rarity: 1
+  _pool: 2
+  _hasOrigin: 0
+  _origin: 0
+  _hasCost: 0
+  _passives:
+  - rid: 100
+  _overworldPassives: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 100
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _oneShot: 0
+        _oncePerTurn: 1
+        _trigger:
+          rid: 101
+        _conditions: []
+        _effects:
+        - rid: 102
+    - rid: 101
+      type: {class: CardDiscardedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 102
+      type: {class: IfContextValueEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _value: 28
+        _comparison: 0
+        _threshold: 1
+        _else: []
+        _then:
+        - rid: 103
+    - rid: 103
+      type: {class: DrawCardsEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 1
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1

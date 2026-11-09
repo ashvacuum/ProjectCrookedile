@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
+  m_Name: Pollster
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
+  _id: de11e343f1db40df8a42fd58c39e1d63
+  _icon: {fileID: 0}
+  _allyName: Pollster
+  _description: At the start of your turn, if Opinion is at or below half, gain 3 Support.
+  _rarity: 1
+  _pool: 2
+  _hasOrigin: 0
+  _origin: 0
+  _hasCost: 0
+  _passives:
+  - rid: 100
+  _overworldPassives: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 100
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _oneShot: 0
+        _oncePerTurn: 0
+        _trigger:
+          rid: 101
+        _conditions:
+        - rid: 102
+        _effects:
+        - rid: 103
+    - rid: 101
+      type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 102
+      type: {class: OpinionBelowCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _percentThreshold: 50
+    - rid: 103
+      type: {class: GainSupportEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _amount: 3
+        _amountSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _maxAmount: 0
