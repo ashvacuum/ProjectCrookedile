@@ -528,6 +528,13 @@ namespace Crookedile.EditorTools
                         issues.Add(new AuditIssue(Severity.Warning, "No display name."));
                     if (ally.Icon == null)
                         issues.Add(new AuditIssue(Severity.Info, "No icon."));
+                    if (!ally.HasAuthoredDescription)
+                        issues.Add(
+                            new AuditIssue(
+                                Severity.Warning,
+                                "No authored description (players see the generated text)."
+                            )
+                        );
 
                     // Id must be unique — AllyDatabase indexes by it (last one wins silently).
                     if (string.IsNullOrEmpty(ally.Id))

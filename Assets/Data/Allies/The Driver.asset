@@ -17,6 +17,10 @@ MonoBehaviour:
   _allyName: The Driver
   _description: 
   _rarity: 2
+  _pool: 2
+  _hasOrigin: 0
+  _origin: 0
+  _hasCost: 0
   _passives: []
   _overworldPassives:
   - rid: 4020939796018102360

@@ -44,4 +44,5 @@ MonoBehaviour:
   _dropWeight: 1
   _session: {fileID: -5913372280947561217}
   _isBoss: 0
+  _isElite: 1
   _rewardOverride: {fileID: 0}

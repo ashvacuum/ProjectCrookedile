@@ -17,6 +17,10 @@ MonoBehaviour:
   _allyName: Opposition File
   _description:
   _rarity: 0
+  _pool: 1
+  _hasOrigin: 0
+  _origin: 0
+  _hasCost: 0
   _passives:
   - rid: 100
   references:

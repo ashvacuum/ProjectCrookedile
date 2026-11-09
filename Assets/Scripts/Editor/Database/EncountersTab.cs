@@ -19,6 +19,7 @@ namespace Crookedile.Editor.Database
         {
             Event,
             Battle,
+            Elite,
             Boss,
         }
 
@@ -131,7 +132,7 @@ namespace Crookedile.Editor.Database
         }
 
         private static Kind KindOf(EncounterData encounter) =>
-            encounter is BattleEncounterData battle ? (battle.IsBoss ? Kind.Boss : Kind.Battle) : Kind.Event;
+            encounter is BattleEncounterData battle ? (battle.IsBoss ? Kind.Boss : battle.IsElite ? Kind.Elite : Kind.Battle) : Kind.Event;
 
         private static string Duration(int minutes) => minutes % 60 == 0 ? $"{minutes / 60}h" : $"{minutes / 60}h{minutes % 60:00}";
 

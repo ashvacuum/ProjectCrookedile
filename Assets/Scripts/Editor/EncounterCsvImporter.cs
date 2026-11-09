@@ -172,7 +172,10 @@ namespace Crookedile.EditorTools
             SetInt(so, "_hourCost", header.Get(row, "hour cost"));
             SetFloat(so, "_dropWeight", header.Get(row, "drop weight"));
             if (isBattle)
+            {
                 SetBool(so, "_isBoss", header.Get(row, "is boss"));
+                SetBool(so, "_isElite", header.Get(row, "is elite"));
+            }
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 

@@ -30,6 +30,13 @@ namespace Crookedile.Data.Campaign
         private bool _isBoss;
 
         [Tooltip(
+            "A hard optional fight. Winning one offers a pick of allies from the elite pool for the player's class."
+        )]
+        [ValidateInput("@!(_isElite && _isBoss)", "An encounter is a boss or an elite, not both.")]
+        [SerializeField]
+        private bool _isElite;
+
+        [Tooltip(
             "Base reward tier for winning this encounter, replacing the database default. A strong win or a maxed boss meter still earns its own tier. Optional."
         )]
         [SerializeField]
@@ -37,6 +44,7 @@ namespace Crookedile.Data.Campaign
 
         public BattleSession Session => _session;
         public bool IsBoss => _isBoss;
+        public bool IsElite => _isElite;
         public RewardConfig RewardOverride => _rewardOverride;
 
 #if UNITY_EDITOR

@@ -18,6 +18,10 @@ MonoBehaviour:
     number of cards and draw the same number back.
   _icon: {fileID: 0}
   _rarity: 0
+  _pool: 1
+  _hasOrigin: 0
+  _origin: 0
+  _hasCost: 0
   _passives:
   - rid: 4738608336531357838
   references:

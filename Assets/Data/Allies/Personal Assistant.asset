@@ -18,6 +18,10 @@ MonoBehaviour:
     hand and draw a fresh one.
   _icon: {fileID: 0}
   _rarity: 0
+  _pool: 0
+  _hasOrigin: 1
+  _origin: 1
+  _hasCost: 0
   _passives:
   - rid: 4738608336531357833
   references:

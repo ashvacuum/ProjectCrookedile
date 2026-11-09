@@ -12,6 +12,7 @@ namespace Crookedile.Editor.Database
     /// <summary>Every <see cref="AllyData"/>, the game's relics: what it does in battle and on the map.</summary>
     public sealed class AlliesTab : ContentTab<AllyData>
     {
+        private AllyPool? _pool;
         private CardRarity? _rarity;
         private Dictionary<Object, List<Issue>> _issues;
 
@@ -28,15 +29,19 @@ namespace Crookedile.Editor.Database
         protected override IEnumerable<Column> BuildColumns()
         {
             yield return new Column("Ally", 160, null, a => DisplayName(a));
+            yield return new Column("Pool", 64, a => a.Pool.ToString(), a => a.Pool);
+            yield return new Column("Class", 80, a => a.Origin?.ToString() ?? "shared", a => a.Origin.HasValue ? (int)a.Origin.Value : -1);
+            yield return new Column("Cost", 40, a => a.HasCost ? "✓" : "", a => a.HasCost);
             yield return new Column("Rarity", 70, a => a.Rarity.ToString(), a => a.Rarity);
             yield return new Column("Battle", 50, a => Blank(a.Passives.Count), a => a.Passives.Count);
             yield return new Column("Map", 44, a => Blank(a.OverworldPassives.Count), a => a.OverworldPassives.Count);
             yield return new Column("Icon", 40, a => a.Icon != null ? "✓" : "—", a => a.Icon != null);
         }
 
-        protected override bool DrawFilters() => EnumFilter("Rarity", ref _rarity);
+        protected override bool DrawFilters() => EnumFilter("Pool", ref _pool) | EnumFilter("Rarity", ref _rarity);
 
-        protected override bool PassesFilters(AllyData ally) => !_rarity.HasValue || ally.Rarity == _rarity.Value;
+        protected override bool PassesFilters(AllyData ally) =>
+            (!_pool.HasValue || ally.Pool == _pool.Value) && (!_rarity.HasValue || ally.Rarity == _rarity.Value);
 
         protected override IEnumerable<Issue> Audit(AllyData ally) => ProviderAudit.For(_issues, ally);
 

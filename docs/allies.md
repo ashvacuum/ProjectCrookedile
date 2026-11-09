@@ -1,6 +1,6 @@
 # Allies — the run's build-warping layer
 
-> **Kind:** Design · **Status:** Proposal · **Updated:** 2026-11-07
+> **Kind:** Design · **Status:** Proposal · **Updated:** 2026-11-09
 >
 > **Summary:** What allies are for, where a run gets them (a starting ally per class, events, elite wins, boss wins), how they're lost, class pools, and a starter roster. Proposal: the sources, loss rules and roster below are not built yet.
 >
@@ -44,8 +44,8 @@ Every ally does one of three jobs:
 | Elite win | Pick 1 of 2 | Elite pool for your class, minus allies you hold | Not built |
 | Boss win | Pick 1 of 3, on top of the full Credibility restore | Boss pool for your class: a **mix** of pure and costly allies | Not built |
 
-- **Elites** are the hard optional fights: today the Televangelist, the Dynast and Barangay Tanod. "Elite" is only a
-  label so far; it needs an `IsElite` flag on `BattleEncounterData`, next to `IsBoss`.
+- **Elites** are the hard optional fights: today the Televangelist, the Dynast and Barangay Tanod, marked by
+  `BattleEncounterData.IsElite` (next to `IsBoss`; the encounter CSV's `is elite` column sets it).
 - **Boss offers mix pure and costly allies.** Of the three offered, at least one is pure and at least one carries a
   cost when the pool allows it, so the pick is a real decision rather than an obvious one.
 - Offers never repeat an ally the run holds. An empty pool offers fewer choices, never a duplicate.
@@ -164,11 +164,12 @@ Demo target: about 15–18 allies across the pools.
 
 ## 7. What building it takes
 
-- `AllyData`: an origin tag (untagged = shared), a pool (starting, story, elite, boss), and a has-cost flag the
-  boss offer reads.
-- `BattleEncounterData`: an `IsElite` flag.
+- **Built:** `AllyData.Pool` (Starting, Story, Elite, Boss), `AllyData.Origin` (null = shared) and `HasCost`, which the
+  boss offer reads; `BattleEncounterData.IsElite`. Story allies await their class tags, and Spin Doctor and
+  Speechwriter sit in Story until they get a source.
 - An ally pick after elite and boss wins, reusing the card-pick screen; the bot harness mirrors it.
 - `LoseAllyOutcome` (named or random); saves already store allies by ID, so a removal needs no schema change.
 - New effects only where the building blocks fall short: "a Policy starts in play", "card rewards show +N", the two
   Fanatic tweaks. Every other ally above composes from existing triggers, conditions and effects.
-- The Database window's Allies tab grows a pool column and audits an empty description.
+- **Built:** the Database window's Allies tab shows pool, class and cost columns, filters by pool, and warns on an
+  empty authored description.

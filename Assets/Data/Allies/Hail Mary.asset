@@ -17,6 +17,10 @@ MonoBehaviour:
   _allyName: Hail Mary
   _description: 
   _rarity: 2
+  _pool: 1
+  _hasOrigin: 0
+  _origin: 0
+  _hasCost: 0
   _passives:
   - rid: 4020939570431393890
   references:

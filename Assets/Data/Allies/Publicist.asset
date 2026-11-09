@@ -17,6 +17,10 @@ MonoBehaviour:
   _description: 
   _icon: {fileID: 0}
   _rarity: 0
+  _pool: 0
+  _hasOrigin: 1
+  _origin: 2
+  _hasCost: 0
   _passives:
   - rid: 100
   references:

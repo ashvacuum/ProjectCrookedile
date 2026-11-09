@@ -17,6 +17,10 @@ MonoBehaviour:
   _description: Gain 1 extra AP on your first turn.
   _icon: {fileID: 0}
   _rarity: 0
+  _pool: 0
+  _hasOrigin: 1
+  _origin: 0
+  _hasCost: 0
   _passives:
   - rid: 4738608336531357826
   references:

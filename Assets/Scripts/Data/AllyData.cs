@@ -6,6 +6,15 @@ using UnityEngine;
 
 namespace Crookedile.Data
 {
+    /// <summary>Where a run can get an ally (docs/allies.md §2).</summary>
+    public enum AllyPool
+    {
+        Starting, // a class's innate passive, recruited by RunState.Create
+        Story, // hand-wired to an event by RecruitAllyOutcome; never offered at random
+        Elite, // offered after an elite win
+        Boss, // offered after a boss win
+    }
+
     /// <summary>
     /// Someone recruited into the campaign, who stays with the run and changes how battles play
     /// — the StS relic slot, framed as a person. Reuses <see cref="BattlePassive"/> the same way
@@ -52,6 +61,30 @@ namespace Crookedile.Data
         [EnumToggleButtons]
         [SerializeField]
         private CardRarity _rarity = CardRarity.Basic;
+
+        [VerticalGroup("Ally/Details")]
+        [Tooltip("Where a run can get this ally. Elite and Boss allies are offered after those wins; Story allies only come from the event that names them.")]
+        [EnumToggleButtons]
+        [SerializeField]
+        private AllyPool _pool = AllyPool.Story;
+
+        [VerticalGroup("Ally/Details")]
+        [Tooltip("On: only that class's runs can be offered this ally. Off: shared by every class.")]
+        [LabelText("Class Ally")]
+        [SerializeField]
+        private bool _hasOrigin;
+
+        [VerticalGroup("Ally/Details")]
+        [ShowIf(nameof(_hasOrigin))]
+        [Tooltip("The class whose pool this ally belongs to.")]
+        [SerializeField]
+        private OriginType _origin;
+
+        [VerticalGroup("Ally/Details")]
+        [ShowIf(nameof(_pool), AllyPool.Boss)]
+        [Tooltip("This ally's upside comes with a political downside. Boss offers mix costly and pure allies.")]
+        [SerializeField]
+        private bool _hasCost;
 
         [LabelText("Battle Passives")]
         [Tooltip("Battle abilities this ally grants. Same hierarchy as card/origin passives; overworld abilities are authored separately below.")]
@@ -101,6 +134,14 @@ namespace Crookedile.Data
         public string AllyName => _allyName;
         public Sprite Icon => _icon;
         public CardRarity Rarity => _rarity;
+        public AllyPool Pool => _pool;
+
+        /// <summary>The class this ally belongs to; null for a shared ally.</summary>
+        public OriginType? Origin => _hasOrigin ? _origin : (OriginType?)null;
+
+        public bool HasCost => _hasCost;
+
+        public bool HasAuthoredDescription => !string.IsNullOrWhiteSpace(_description);
         public IReadOnlyList<BattlePassive> Passives => _passives;
 
         /// <summary>
