@@ -17,7 +17,7 @@ MonoBehaviour:
   _allyName: Spin Doctor
   _description: 
   _rarity: 2
-  _pool: 1
+  _pool: 2
   _hasOrigin: 0
   _origin: 0
   _hasCost: 0

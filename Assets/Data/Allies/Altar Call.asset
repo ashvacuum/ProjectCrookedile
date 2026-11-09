@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
+  m_Name: Altar Call
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
+  _id: e70d14d6db7d479fa6f2efac721a2818
+  _icon: {fileID: 0}
+  _allyName: Altar Call
+  _description: When an enemy turns receptive, gain +1 Strength until end of turn.
+  _rarity: 1
+  _pool: 2
+  _hasOrigin: 0
+  _origin: 0
+  _hasCost: 0
+  _passives:
+  - rid: 100
+  _overworldPassives: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 100
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _trigger:
+          rid: 101
+        _conditions: []
+        _oneShot: 0
+        _oncePerTurn: 0
+        _effects:
+        - rid: 102
+    - rid: 101
+      type: {class: EnemyBecameReceptiveTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 102
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _target: 0
+        _behavior:
+          rid: 103
+        _stacks: 1
+        _stacksSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _duration: 1
+    - rid: 103
+      type: {class: StrengthStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

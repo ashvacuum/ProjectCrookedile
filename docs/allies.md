@@ -92,14 +92,20 @@ resumes without its starting ally.
 
 Faith Leader first. Names and numbers are placeholders to tune.
 
-### Faith Leader — elite pool
+### Faith Leader — elite pool (built)
+
+Only allies that touch a Faith Leader pillar (Guilt, Fanatics, conversion) carry the class tag; generic ones sit in
+the shared elite pool below.
 
 | Ally | Effect | Job |
 |---|---|---|
-| Choir Director | Each conversion gives that Fanatic +1 stack, so it follows a turn longer | Setup payoff |
-| Prayer Circle | At battle start, the most hostile enemy gains 1 Guilt | Setup payoff |
-| Confessor | Applying Guilt to a hostile enemy gains you 1 Support | Setup payoff |
-| Altar Server | Your first Policy each battle costs 0 | Setup payoff |
+| Prayer Circle | At battle start, a random hostile enemy gains 1 Guilt | Setup payoff |
+| Choir Director | Each enemy you convert gains 1 Strength for the battle, so that Fanatic pushes harder | Setup payoff |
+| Collection Plate | Each conversion: gain 3 Support | Setup payoff |
+| Testimony | Each conversion: raise Opinion by 3 | Setup payoff |
+
+Choir Director stands in for "the Fanatic follows a turn longer" until the Fanatic numbers settle (§6.2). Cut for now:
+Confessor (Guilt on a hostile enemy gains 1 Support) and Altar Server (first Policy each battle costs 0).
 
 ### Faith Leader — boss pool (mixed)
 
@@ -127,11 +133,22 @@ Both compose from existing blocks: `BattleStartTrigger` with `GainGlamourEffect`
 | Ally | Pool | Effect | Cost |
 |---|---|---|---|
 | The Driver | Elite | −25% travel time | none |
+| Spin Doctor (built) | Elite | HQ's heal restores 20% of max Credibility instead of 10% | none |
+| Hype Man (built) | Elite | Each Rhetoric you play: +1 Strength until end of turn | none |
+| Pulpit (built) | Elite | Your first Pressure each turn: +2 Strength until end of turn | none |
+| Sermon Notes (built) | Elite | First turn: +2 Strength until end of turn | none |
+| Altar Call (built) | Elite | When an enemy turns receptive: +1 Strength until end of turn | none |
+| Usher (built) | Elite | Battle start: gain 4 Support | none |
+| Sunday School Teacher (built) | Elite | Each Policy you play: gain 2 Support | none |
+| Sexton (built) | Elite | Each card you exhaust: gain 2 Support | none |
+| Hymnal (built) | Elite | End your turn with an empty hand: gain 3 Support | none |
+| Youth Pastor (built) | Elite | First turn: draw 2 | none |
+| Church Bulletin (built) | Elite | Battle start: scry 3 | none |
+| Bible Study Group (built) | Elite | Every 4th card you play draws 1 | none |
 | Chief of Staff | Elite | −25% encounter time | none |
 | Campaign Manager | Boss | Card rewards show 4 choices instead of 3 | none |
 | Party Machine | Boss | +1 energy each turn | Each battle starts with one random enemy at +2 Hostility |
 | Dark Money Donor | Boss | +100 Funds now | −10 max Credibility |
-| Spin Doctor (built) | Unassigned | HQ's heal restores 20% of max Credibility instead of 10% | none |
 | Speechwriter (built) | Unassigned | Once per battle, at your turn start, discard any number of cards and draw that many | none |
 
 ### Existing story allies
@@ -165,8 +182,8 @@ Demo target: about 15–18 allies across the pools.
 ## 7. What building it takes
 
 - **Built:** `AllyData.Pool` (Starting, Story, Elite, Boss), `AllyData.Origin` (null = shared) and `HasCost`, which the
-  boss offer reads; `BattleEncounterData.IsElite`. Story allies await their class tags, and Spin Doctor and
-  Speechwriter sit in Story until they get a source.
+  boss offer reads; `BattleEncounterData.IsElite`. Story allies await their class tags, and Speechwriter sits in
+  Story until it gets a source.
 - An ally pick after elite and boss wins, reusing the card-pick screen; the bot harness mirrors it.
 - `LoseAllyOutcome` (named or random); saves already store allies by ID, so a removal needs no schema change.
 - New effects only where the building blocks fall short: "a Policy starts in play", "card rewards show +N", the two
