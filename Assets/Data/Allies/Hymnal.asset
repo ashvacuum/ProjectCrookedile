@@ -15,7 +15,7 @@ MonoBehaviour:
   _id: 9ae9a5bc9aca4946a3bb19625b4cffba
   _icon: {fileID: 0}
   _allyName: Hymnal
-  _description: End your turn with an empty hand: gain 3 Support.
+  _description: 'End your turn with an empty hand: gain 3 Support.'
   _rarity: 1
   _pool: 2
   _hasOrigin: 0

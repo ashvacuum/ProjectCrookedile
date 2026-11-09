@@ -15,7 +15,7 @@ MonoBehaviour:
   _id: 980e013843eb44149f4351bb23d6d8ae
   _icon: {fileID: 0}
   _allyName: Debate Coach
-  _description: Each Pressure you play: gain 1 Support.
+  _description: 'Each Pressure you play: gain 1 Support.'
   _rarity: 1
   _pool: 2
   _hasOrigin: 0

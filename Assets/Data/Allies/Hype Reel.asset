@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
+  m_Name: Hype Reel
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
+  _id: 0442f2d884fc47e8979b5df41dac1c05
+  _icon: {fileID: 0}
+  _allyName: Hype Reel
+  _description: 'Every 3rd card you play adds a Soundbite to your hand.'
+  _rarity: 1
+  _pool: 2
+  _hasOrigin: 1
+  _origin: 2
+  _hasCost: 0
+  _passives:
+  - rid: 100
+  _overworldPassives: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 100
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _oneShot: 0
+        _oncePerTurn: 0
+        _trigger:
+          rid: 101
+        _conditions:
+        - rid: 102
+        _effects:
+        - rid: 103
+    - rid: 101
+      type: {class: CardPlayedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _filterByType: 0
+        _filterType: 0
+    - rid: 102
+      type: {class: NthEventCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _n: 3
+    - rid: 103
+      type: {class: AddCardToHandEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _card: {fileID: 11400000, guid: 54fb8f7b991f812449043e05cae2e2f7, type: 2}
+        _amount: 1

@@ -15,7 +15,7 @@ MonoBehaviour:
   _id: 4c631119046845508fff7b638d89d79c
   _icon: {fileID: 0}
   _allyName: Testimony
-  _description: Each conversion: raise Opinion by 3.
+  _description: 'Each conversion: raise Opinion by 3.'
   _rarity: 1
   _pool: 2
   _hasOrigin: 1

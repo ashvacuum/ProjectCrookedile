@@ -43,6 +43,7 @@ namespace Crookedile.Gameplay.Battle
         // Per-card AP cost reductions this battle (+ snapshot/restore for transient passes).
         private readonly CardCostOverrides _costOverrides = new CardCostOverrides();
         private readonly Dictionary<string, CardData> _tokenReplacements = new();
+        private int _extraTokenCopies;
         private readonly List<CardData> _bookedCards = new();
         private readonly Dictionary<CardData, int> _discountOnArrival = new();
 
@@ -57,6 +58,15 @@ namespace Crookedile.Gameplay.Battle
                 for (int i = 0; i < zone.Count; i++)
                     zone[i] = ResolveToken(zone[i]);
         }
+
+        /// <summary>
+        /// Each time a generated token (Soundbite, Movie Quote; never junk) is created this battle,
+        /// this many extra copies come with it.
+        /// </summary>
+        public void AddExtraTokenCopies(int extra) => _extraTokenCopies += extra;
+
+        private int WithExtraTokens(CardData card, int count) =>
+            count > 0 && card.IsGeneratedOnly && !card.IsJunk ? count + _extraTokenCopies : count;
 
         private CardData ResolveToken(CardData card) =>
             card != null && _tokenReplacements.TryGetValue(card.ID, out var replacement)
@@ -239,6 +249,7 @@ namespace Crookedile.Gameplay.Battle
             _exhaust.Clear();
             _retain.Reset();
             _tokenReplacements.Clear();
+            _extraTokenCopies = 0;
             _bookedCards.Clear();
             _discountOnArrival.Clear();
 
@@ -999,6 +1010,7 @@ namespace Crookedile.Gameplay.Battle
                 GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to deck");
                 return;
             }
+            count = WithExtraTokens(card, count);
 
             for (int i = 0; i < count; i++)
                 _deck.Add(card);
@@ -1031,6 +1043,7 @@ namespace Crookedile.Gameplay.Battle
                 GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to hand");
                 return 0;
             }
+            count = WithExtraTokens(card, count);
 
             int cardsAdded = 0;
             for (int i = 0; i < count && !IsHandFull; i++)
@@ -1065,6 +1078,7 @@ namespace Crookedile.Gameplay.Battle
                 GameLogger.LogWarning<DeckManager>($"{_ownerName} cannot add null card to discard");
                 return;
             }
+            count = WithExtraTokens(card, count);
 
             for (int i = 0; i < count; i++)
                 _discard.Add(card);

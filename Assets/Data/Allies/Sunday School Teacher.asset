@@ -15,7 +15,7 @@ MonoBehaviour:
   _id: 6d7ecd4ee51d455892903497f05589de
   _icon: {fileID: 0}
   _allyName: Sunday School Teacher
-  _description: Each Policy you play: gain 2 Support.
+  _description: 'Each Policy you play: gain 2 Support.'
   _rarity: 1
   _pool: 2
   _hasOrigin: 0

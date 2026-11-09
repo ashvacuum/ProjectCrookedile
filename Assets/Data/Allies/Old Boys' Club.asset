@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
+  m_Name: Old Boys' Club
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
+  _id: ad5abcb70ddd4372a9bd9908cedac921
+  _icon: {fileID: 0}
+  _allyName: Old Boys' Club
+  _description: 'Exhausting a card with printed cost 3 or more gives 1 Strength until end of turn.'
+  _rarity: 1
+  _pool: 2
+  _hasOrigin: 1
+  _origin: 1
+  _hasCost: 0
+  _passives:
+  - rid: 100
+  _overworldPassives: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 100
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _oneShot: 0
+        _oncePerTurn: 0
+        _trigger:
+          rid: 101
+        _conditions:
+        - rid: 102
+        _effects:
+        - rid: 103
+    - rid: 101
+      type: {class: CardExhaustedTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 102
+      type: {class: TriggeringCardCostCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _comparison: 0
+        _value: 3
+    - rid: 103
+      type: {class: ApplyStatusBehaviorEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _target: 0
+        _stacks: 1
+        _stacksSource: 0
+        _perXSource: 7
+        _multiplier: 1
+        _duration: 1
+        _behavior:
+          rid: 104
+    - rid: 104
+      type: {class: StrengthStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 

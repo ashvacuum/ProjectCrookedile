@@ -15,11 +15,11 @@ MonoBehaviour:
   _id: 12b832dca5314df2a93648bd767a3c22
   _icon: {fileID: 0}
   _allyName: Sexton
-  _description: Each card you exhaust: gain 2 Support.
+  _description: 'Each card you exhaust: gain 2 Support.'
   _rarity: 1
   _pool: 2
-  _hasOrigin: 0
-  _origin: 0
+  _hasOrigin: 1
+  _origin: 1
   _hasCost: 0
   _passives:
   - rid: 100

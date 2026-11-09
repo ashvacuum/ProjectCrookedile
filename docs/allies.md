@@ -119,14 +119,39 @@ Confessor (Guilt on a hostile enemy gains 1 Support) and Altar Server (first Pol
 Revival Tent deliberately bends the rule that conversion happens only while a conversion Policy is in play. It is a
 boss reward, so the exception is earned; drop it if the rule should hold everywhere.
 
-### Celebrity
+### Celebrity — elite pool (built)
 
-| Ally | Pool | Effect | Job |
-|---|---|---|---|
-| Paparazzi | Elite | Battle start: +3 Glamour | Setup payoff: the Glamour engine starts warm |
-| Manager | Elite | Battle start: draw 1 | Setup payoff: a wider opening hand |
+Glamour, Debt and Soundbite payoffs.
 
-Both compose from existing blocks: `BattleStartTrigger` with `GainGlamourEffect` or `DrawCardsEffect`.
+| Ally | Effect |
+|---|---|
+| Paparazzi | Battle start: gain 3 Glamour |
+| Fan Club | Every 3rd turn: gain 2 Glamour |
+| Stylist | When an enemy turns hostile: gain 1 Glamour |
+| Red Carpet | First turn: gain 2 Glamour and draw 1 |
+| Ghostwriter | First turn: add a Soundbite to your hand |
+| Hype Reel | Every 3rd card you play adds a Soundbite to your hand |
+| Viral Team | Each token-generating effect (Soundbite, Movie Quote) creates one more (`ExtraTokenCopiesEffect`) |
+| Business Manager | Turn start with Debt: gain 2 Support |
+| Bail Bondsman | When Debt goes unpaid: gain 3 Support |
+
+Viral Team adds one copy per generating effect, not per card, so an effect that makes two Soundbites makes three.
+Junk (Scandals, Heckles) is never copied.
+
+### Nepo Baby — elite pool (built)
+
+Burn, Replay, Pull, Return and Calm payoffs. None reward Hostility, and none reduce it (`nepo-baby-class.md` §3).
+
+| Ally | Effect |
+|---|---|
+| Trust Fund | The first card you exhaust each turn draws 1 |
+| Yacht Club | Exhausting a printed-cost 2+ card: gain 1 AP, once per turn |
+| Old Boys' Club | Exhausting a printed-cost 3+ card: +1 Strength until end of turn |
+| Sexton | Each card you exhaust: gain 2 Support |
+| Old Money | Every 3rd turn: the next non-Policy card resolves twice |
+| Butler | First turn: pull a card of your choice from the draw pile, no Hostility cost |
+| Legacy Admission | Turn 4: take a card back from exhaust; every enemy gains 2 Hostility |
+| Family Office | Turn start with no hostile enemy: gain 3 Support |
 
 ### Shared pool
 
@@ -140,7 +165,6 @@ Both compose from existing blocks: `BattleStartTrigger` with `GainGlamourEffect`
 | Altar Call (built) | Elite | When an enemy turns receptive: +1 Strength until end of turn | none |
 | Usher (built) | Elite | Battle start: gain 4 Support | none |
 | Sunday School Teacher (built) | Elite | Each Policy you play: gain 2 Support | none |
-| Sexton (built) | Elite | Each card you exhaust: gain 2 Support | none |
 | Hymnal (built) | Elite | End your turn with an empty hand: gain 3 Support | none |
 | Youth Pastor (built) | Elite | First turn: draw 2 | none |
 | Church Bulletin (built) | Elite | Battle start: scry 3 | none |

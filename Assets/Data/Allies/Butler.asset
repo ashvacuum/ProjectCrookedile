@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
+  m_Name: Butler
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
+  _id: 8720b4c0eb084f8aaf6598a7e42c59e5
+  _icon: {fileID: 0}
+  _allyName: Butler
+  _description: 'On your first turn, take a card of your choice from your draw pile into your hand, at no Hostility cost.'
+  _rarity: 1
+  _pool: 2
+  _hasOrigin: 1
+  _origin: 1
+  _hasCost: 0
+  _passives:
+  - rid: 100
+  _overworldPassives: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 100
+      type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _oneShot: 0
+        _oncePerTurn: 0
+        _trigger:
+          rid: 101
+        _conditions:
+        - rid: 102
+        _effects:
+        - rid: 103
+    - rid: 101
+      type: {class: TurnStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data: 
+    - rid: 102
+      type: {class: TurnNumberCondition, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _comparison: 1
+        _turnNumber: 1
+    - rid: 103
+      type: {class: PullFromDrawPileEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      data:
+        _source: 0
+        _lookAt: 5
+        _count: 1
+        _upTo: 0
+        _minimumPrintedCost: 0
+        _freeThisTurn: 0
+        _hostilityPerPull: 0
+        _hostilityScale: 0
+        _hostilityTarget: 4

@@ -15,7 +15,7 @@ MonoBehaviour:
   _id: 82a85a6baf7f407c926c5ded4d87f234
   _icon: {fileID: 0}
   _allyName: Collection Plate
-  _description: Each conversion: gain 3 Support.
+  _description: 'Each conversion: gain 3 Support.'
   _rarity: 1
   _pool: 2
   _hasOrigin: 1
