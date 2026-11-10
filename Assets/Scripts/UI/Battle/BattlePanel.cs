@@ -1,36 +1,32 @@
-using System;
-using System.Collections.Generic;
-using Crookedile.Core;
 using Crookedile.Gameplay.Battle;
-using UnityEngine;
 
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// A piece of battle UI that wires itself. Subscriptions made with <see cref="On{T}"/> end in
-    /// <see cref="OnDisable"/>, and <see cref="Battle"/> is the scene's battle, so a new panel needs
-    /// no BattleUI field and no Bind call: drop it under the battle canvas.
+    /// A <see cref="UIPanel"/> in the battle scene. <see cref="Battle"/> is the scene's battle, so a
+    /// new panel needs no BattleUI field and no Bind call: drop it under the battle canvas.
     /// </summary>
-    public abstract class BattlePanel : MonoBehaviour
+    public abstract class BattlePanel : UIPanel
     {
-        private readonly List<Action> _unsubscribers = new List<Action>();
-
         /// <summary>The running battle; null before the BattleManager wakes.</summary>
         protected BattleManager Battle => BattleManager.Current;
 
-        /// <summary>Subscribes until this panel is disabled.</summary>
-        protected void On<T>(Action<T> handler)
-            where T : IGameEvent
+        /// <summary>
+        /// Queues a <see cref="UIPanel.Refresh"/> on every event that can move a number a battle
+        /// panel shows. One list for all of them, so a panel that paints from <see cref="Battle"/>
+        /// cannot miss a change another panel sees.
+        /// </summary>
+        protected void RefreshOnBattleChanges()
         {
-            EventBus.Subscribe(handler);
-            _unsubscribers.Add(() => EventBus.Unsubscribe(handler));
-        }
-
-        protected virtual void OnDisable()
-        {
-            foreach (var unsubscribe in _unsubscribers)
-                unsubscribe();
-            _unsubscribers.Clear();
+            RefreshOn<BattleStartedEvent>();
+            RefreshOn<BattleStateChangedEvent>();
+            RefreshOn<CardPlayedEvent>();
+            RefreshOn<EnemySummonedEvent>();
+            RefreshOn<SupportChangedEvent>();
+            RefreshOn<DenialChangedEvent>();
+            RefreshOn<StatusEffectAppliedEvent>();
+            RefreshOn<OpinionChangedEvent>();
+            RefreshOn<TurnLimitUpdatedEvent>();
         }
     }
 }

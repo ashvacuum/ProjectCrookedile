@@ -12,42 +12,28 @@ using UnityEngine.UI;
 namespace Crookedile.UI.Battle
 {
     /// <summary>
-    /// Thin FSM coordinator for the battle screen UI.
+    /// The battle screen's turn controls and its anchor directory. Every other panel wires and
+    /// repaints itself (see <see cref="BattlePanel"/>); nothing is pushed from here.
     ///
-    /// Responsibilities:
-    ///  - Holds references to all panel components and the BattleManager.
-    ///  - Subscribes to EventBus events and translates them into FSM state transitions.
-    ///  - Manages enemy slot instantiation and card zone viewer overlays.
-    ///  - Owns stats / battle-info text updates (small, centralised).
-    ///
-    /// Hand display, battle log, and result panels are delegated to their own
-    /// MonoBehaviour components (HandPanel, BattleLogPanel, BattleResultPanel).
-    /// Structural UI changes are driven by <see cref="BattleStateChangedEvent"/> via <c>ConfigureForBattleState</c>.
+    ///  - Turn controls: End Turn, Media Training, the turn/phase label.
+    ///  - Card choices: answers <see cref="BattleManager.CardChoicePrompt"/> with the picker,
+    ///    one at a time, and locks the turn controls while one is open.
+    ///  - Anchors: where VFX and floating text aim (player slot, enemy slots, boss, meter).
     /// </summary>
     public class BattleUI : BattlePanel
     {
-        #region Panels (extracted subsystems)
+        #region Panels
         [Header("Panels")]
-        [Tooltip("Manages card hand display and object pool.")]
-        [SerializeField]
-        [Required]
-        private HandPanel handPanel;
-
-        [Tooltip("Battle log text + auto-scroll.")]
+        [Tooltip("Battle log; records the player ending their turn.")]
         [SerializeField]
         [Required]
         private BattleLogPanel logPanel;
 
-        [Tooltip("Victory / defeat result panels.")]
-        [SerializeField]
-        [Required]
-        private BattleResultPanel resultPanel;
-
         #endregion
 
-        #region Enemy Slots
-        [Header("Enemy Slots")]
-        [Tooltip("Self-subscribing enemy row — owns slot spawning and per-slot event reactions.")]
+        #region Anchors
+        [Header("Anchors")]
+        [Tooltip("Enemy row; its slots are the VFX anchors for enemies.")]
         [SerializeField]
         [Required]
         private EnemyRowPanel enemyRow;
@@ -141,20 +127,7 @@ namespace Crookedile.UI.Battle
 
         #endregion
 
-        #region Card Zone Bar
-        [Header("Card Zone Bar")]
-        [Tooltip(
-            "Self-subscribing zone bar — owns deck/discard/exhaust buttons, counts, and grant animations."
-        )]
-        [SerializeField]
-        [Required]
-        private CardZoneBar cardZoneBar;
-
-        #endregion
-
         #region Runtime
-        private BattleManager battleManager;
-        private BattleResult _lastBattleResult;
         private bool _cardChoiceActive;
         private CardChoiceRequest _pendingCardChoice;
 
@@ -163,9 +136,6 @@ namespace Crookedile.UI.Battle
         private readonly Queue<CardChoiceRequest> _queuedCardChoices =
             new Queue<CardChoiceRequest>();
         private Sequence _battleInfoFadeSeq;
-
-        /// <summary>One-frame coalescing flag — see <see cref="RequestStatsRefresh"/>.</summary>
-        private bool _statsRefreshQueued;
 
         #endregion
 
@@ -227,43 +197,34 @@ namespace Crookedile.UI.Battle
 
         private void OnMediaTrainingClicked()
         {
-            if (!_cardChoiceActive && battleManager != null)
-                battleManager.TryUseMediaTraining();
+            if (!_cardChoiceActive && Battle != null)
+                Battle.TryUseMediaTraining();
         }
 
-        private void OnEnable() => SubscribeToEvents();
+        private void OnEnable()
+        {
+            // The battle may not have woken yet when this enables; BattleStartedEvent is published
+            // before the first state runs, so the prompt is in place before any choice is asked.
+            ClaimCardChoicePrompt();
+            On<BattleStartedEvent>(_ => ClaimCardChoicePrompt());
+            On<BattleStateChangedEvent>(OnBattleStateChanged);
+            // A choice still waiting belongs to the finished battle.
+            On<BattleEndedEvent>(_ => _queuedCardChoices.Clear());
+            RefreshOnBattleChanges();
+        }
 
         protected override void OnDisable()
         {
-            if (battleManager != null && battleManager.CardChoicePrompt == OnCardChoiceRequested)
-                battleManager.CardChoicePrompt = null;
+            if (Battle != null && Battle.CardChoicePrompt == OnCardChoiceRequested)
+                Battle.CardChoicePrompt = null;
             base.OnDisable();
         }
 
-        private void SubscribeToEvents()
+        /// <summary>Takes the prompt only when nobody holds it: a test or playtest hook keeps its claim.</summary>
+        private void ClaimCardChoicePrompt()
         {
-            On<BattleStateChangedEvent>(OnBattleStateChanged);
-            On<BattleStartedEvent>(OnBattleStarted);
-            On<CardPlayedEvent>(OnCardPlayed);
-            On<BattleEndedEvent>(OnBattleEnded);
-            On<EnemySummonedEvent>(OnEnemySummoned);
-            On<SupportChangedEvent>(OnSupportChanged);
-            On<DenialChangedEvent>(OnDenialChanged);
-            On<StatusEffectAppliedEvent>(OnStatusEffectApplied);
-            On<OpinionChangedEvent>(OnOpinionChanged);
-            On<TurnLimitUpdatedEvent>(OnTurnLimitUpdated);
-        }
-
-        /// <summary>
-        /// Called by BattleTestStarter once the battle is ready; the UI configures itself once
-        /// <see cref="BattleStateChangedEvent"/> fires from BattleManager.
-        /// </summary>
-        public void Initialize(BattleManager manager)
-        {
-            battleManager = manager;
-            manager.CardChoicePrompt = OnCardChoiceRequested;
-
-            RequestStatsRefresh();
+            if (Battle != null)
+                Battle.CardChoicePrompt ??= OnCardChoiceRequested;
         }
 
         #endregion
@@ -272,80 +233,11 @@ namespace Crookedile.UI.Battle
 
         private void OnBattleStateChanged(BattleStateChangedEvent evt)
         {
-            ConfigureForBattleState(evt.Current);
-        }
-
-        private void ConfigureForBattleState(BattleState state)
-        {
-            switch (state)
-            {
-                case BattleState.Initialize:
-                    RequestStatsRefresh();
-                    break;
-
-                case BattleState.TurnStart:
-                    handPanel?.ClearHand();
-                    if (endTurnButton != null)
-                        endTurnButton.interactable = false;
-                    RequestStatsRefresh();
-                    break;
-
-                case BattleState.PlayerTurn:
-                    handPanel?.RequestHandRefresh();
-                    if (endTurnButton != null)
-                        endTurnButton.interactable = !_cardChoiceActive;
-                    RequestStatsRefresh();
-                    UpdateBattleInfo();
-                    break;
-
-                case BattleState.OpponentTurn:
-                    handPanel?.DiscardHandAnimated();
-                    if (endTurnButton != null)
-                        endTurnButton.interactable = false;
-                    UpdateBattleInfo();
-                    break;
-
-                case BattleState.TurnEnd:
-                    if (endTurnButton != null)
-                        endTurnButton.interactable = false;
-                    RequestStatsRefresh();
-                    break;
-
-                case BattleState.BattleEnd:
-                    handPanel?.ClearHand();
-                    if (endTurnButton != null)
-                        endTurnButton.interactable = false;
-                    resultPanel?.Show(_lastBattleResult.isVictory);
-                    RequestStatsRefresh();
-                    break;
-            }
-        }
-
-        private void OnBattleStarted(BattleStartedEvent evt)
-        {
-            _playerSlotUI?.Initialize(battleManager, evt.Setup.GetPlayerPortrait());
-            // Enemy slots build themselves — EnemyRowPanel subscribes to BattleStartedEvent.
-            RequestStatsRefresh();
-        }
-
-        private void OnCardPlayed(CardPlayedEvent evt)
-        {
-            // Narration → BattleLogPanel; hand choreography → HandPanel (both self-subscribe).
-            RequestStatsRefresh();
-        }
-
-        private void OnEnemySummoned(EnemySummonedEvent evt)
-        {
-            // Slot spawn handled by EnemyRowPanel; this just repaints stats/focus.
-            RequestStatsRefresh();
-        }
-
-        private void OnBattleEnded(BattleEndedEvent evt)
-        {
-            // Kept only for resultPanel.Show on BattleState.BattleEnd; run progression
-            // (RunState victory record, rewards, reload) lives in PostBattleFlow.
-            _lastBattleResult = evt.Result;
-            _queuedCardChoices.Clear(); // a choice still waiting belongs to the finished battle
+            if (endTurnButton != null)
+                endTurnButton.interactable =
+                    evt.Current == BattleState.PlayerTurn && !_cardChoiceActive;
+            if (evt.Current == BattleState.PlayerTurn || evt.Current == BattleState.OpponentTurn)
+                UpdateBattleInfo();
         }
 
         private void OnCardChoiceRequested(CardChoiceRequest evt)
@@ -362,7 +254,7 @@ namespace Crookedile.UI.Battle
         {
             _pendingCardChoice = evt;
             _cardChoiceActive = true;
-            RequestStatsRefresh(); // Media Training locks while a choice is open
+            QueueRefresh(); // Media Training locks while a choice is open
             if (endTurnButton != null)
                 endTurnButton.interactable = false;
             cardChoicePanel?.Open(
@@ -380,7 +272,7 @@ namespace Crookedile.UI.Battle
             var confirmed = _pendingCardChoice;
             _pendingCardChoice = null;
             _cardChoiceActive = false;
-            RequestStatsRefresh();
+            QueueRefresh();
             cardChoicePanel?.Close();
             if (endTurnButton != null)
                 endTurnButton.interactable = true;
@@ -390,110 +282,53 @@ namespace Crookedile.UI.Battle
                 OpenCardChoice(_queuedCardChoices.Dequeue());
         }
 
-        private void OnSupportChanged(SupportChangedEvent evt) => RequestStatsRefresh();
-
-        private void OnDenialChanged(DenialChangedEvent evt) => RequestStatsRefresh();
-
-        private void OnStatusEffectApplied(StatusEffectAppliedEvent evt) => RequestStatsRefresh();
-
-        private void OnOpinionChanged(OpinionChangedEvent evt) => RequestStatsRefresh();
-
-        private void OnTurnLimitUpdated(TurnLimitUpdatedEvent evt) => RequestStatsRefresh();
-
-        private void RefreshOpinionMeter()
-        {
-            if (_opinionMeterUI == null || battleManager == null)
-                return;
-            _opinionMeterUI.Refresh(
-                battleManager.CurrentOpinion,
-                battleManager.MaxOpinion,
-                battleManager.PlayerTurnsElapsed,
-                battleManager.MaxTurns,
-                battleManager.CurrentSupport,
-                battleManager.CurrentDenial
-            );
-        }
-
         #endregion
 
-        #region UI Updates (stats + battle-info text; kept in BattleUI for direct field access)
-
-        /// <summary>
-        /// Queues a stats refresh for the end of this frame. Several events often land in
-        /// one resolution (damage + status + AP); coalescing in LateUpdate runs the full
-        /// refresh — and its bar tweens — once instead of once per event.
-        /// </summary>
-        internal void RequestStatsRefresh() => _statsRefreshQueued = true;
-
-        private void LateUpdate()
-        {
-            if (!_statsRefreshQueued)
-                return;
-            _statsRefreshQueued = false;
-            UpdateStatsDisplay();
-            RefreshMediaTraining();
-        }
+        #region Turn controls
 
         /// <summary>
         /// Shows the Media Training button only while it can be used (player turn, before any card
-        /// play, enough Glamour, something to draw, no card choice open). Its inputs all request a
-        /// stats refresh, so this runs with it rather than every frame.
+        /// play, enough Glamour, something to draw, no card choice open). Its inputs all queue a
+        /// refresh, so this runs with it rather than every frame.
         /// </summary>
-        private void RefreshMediaTraining()
+        protected override void Refresh()
         {
             if (_mediaTrainingButton == null)
                 return;
             bool available =
-                battleManager != null && !_cardChoiceActive && battleManager.CanUseMediaTraining;
+                Battle != null && !_cardChoiceActive && Battle.CanUseMediaTraining;
             if (_mediaTrainingButton.gameObject.activeSelf != available)
                 _mediaTrainingButton.gameObject.SetActive(available);
             if (
                 available
                 && _mediaTrainingLabel != null
                 && (
-                    _displayedGlamourCost != battleManager.Celebrity.MediaTrainingCost
-                    || _displayedDrawCount != battleManager.Celebrity.MediaTrainingDraw
+                    _displayedGlamourCost != Battle.Celebrity.MediaTrainingCost
+                    || _displayedDrawCount != Battle.Celebrity.MediaTrainingDraw
                 )
             )
             {
-                _displayedGlamourCost = battleManager.Celebrity.MediaTrainingCost;
-                _displayedDrawCount = battleManager.Celebrity.MediaTrainingDraw;
+                _displayedGlamourCost = Battle.Celebrity.MediaTrainingCost;
+                _displayedDrawCount = Battle.Celebrity.MediaTrainingDraw;
                 _mediaTrainingLabel.text =
-                    $"Spend {battleManager.Celebrity.MediaTrainingCost} Glamour: Draw {battleManager.Celebrity.MediaTrainingDraw}";
+                    $"Spend {Battle.Celebrity.MediaTrainingCost} Glamour: Draw {Battle.Celebrity.MediaTrainingDraw}";
             }
         }
 
-        private void UpdateStatsDisplay()
+        private void UpdateBattleInfo()
         {
-            if (battleManager == null)
-                return;
-
-            _playerSlotUI?.Refresh();
-
-            // Enemy slots — refresh + focus highlight (owned by EnemyRowPanel)
-            enemyRow?.RefreshAll(battleManager.FocusedEnemyIndex);
-
-            // Card zone counts (owned by CardZoneBar)
-            cardZoneBar?.RefreshCounts();
-
-            // Refresh opinion meter so Support/Denial shields stay in sync.
-            RefreshOpinionMeter();
-        }
-
-        internal void UpdateBattleInfo()
-        {
-            if (battleManager == null)
+            if (Battle == null)
                 return;
 
             if (turnNumberText != null)
             {
-                turnNumberText.text = $"Turn: {battleManager.CurrentTurn}";
+                turnNumberText.text = $"Turn: {Battle.CurrentTurn}";
                 turnNumberText.alpha = 1f;
             }
 
             if (phaseText != null)
             {
-                phaseText.text = battleManager.IsPlayerTurn ? "Your Turn" : "Opponent's Turn";
+                phaseText.text = Battle.IsPlayerTurn ? "Your Turn" : "Opponent's Turn";
                 phaseText.alpha = 1f;
             }
 
@@ -546,10 +381,10 @@ namespace Crookedile.UI.Battle
 
         private void OnEndTurnClicked()
         {
-            if (battleManager != null && battleManager.IsPlayerTurn)
+            if (Battle != null && Battle.IsPlayerTurn)
             {
                 logPanel?.AddEntry("Player ended turn");
-                battleManager.RequestEndTurn();
+                Battle.RequestEndTurn();
             }
         }
 

@@ -33,8 +33,6 @@ namespace Crookedile.UI.Battle
         /// <summary>Card pulled from hand on CardPlayedEvent, held until VFX resolves before flying to discard.</summary>
         private CardButton _pendingDiscardButton;
 
-        private bool _rebuildQueued;
-
         #region Setup / events
 
         private void OnEnable()
@@ -43,6 +41,25 @@ namespace Crookedile.UI.Battle
             On<CardPlayResolvedEvent>(OnCardPlayResolved);
             On<CardDrawnEvent>(OnCardDrawn);
             On<ActionPointsChangedEvent>(OnActionPointsChanged);
+            On<BattleStateChangedEvent>(OnBattleStateChanged);
+        }
+
+        /// <summary>The hand exists only on the player turn: dealt in, flown out, cleared between.</summary>
+        private void OnBattleStateChanged(BattleStateChangedEvent evt)
+        {
+            switch (evt.Current)
+            {
+                case BattleState.TurnStart:
+                case BattleState.BattleEnd:
+                    ClearHand();
+                    break;
+                case BattleState.PlayerTurn:
+                    RequestHandRefresh();
+                    break;
+                case BattleState.OpponentTurn:
+                    DiscardHandAnimated();
+                    break;
+            }
         }
 
         private void OnCardClicked(CardData card, int handIndex)
@@ -123,16 +140,13 @@ namespace Crookedile.UI.Battle
 
         /// <summary>
         /// Marks the hand dirty. Every change in a frame (PlayerTurn start, a batch of draws,
-        /// a resolved discard) coalesces into one rebuild in <see cref="LateUpdate"/>. Plain
+        /// a resolved discard) coalesces into one rebuild in <see cref="Refresh"/>. Plain
         /// dirty flag — no async, so it can't get stuck if a continuation is cancelled.
         /// </summary>
-        public void RequestHandRefresh() => _rebuildQueued = true;
+        private void RequestHandRefresh() => QueueRefresh();
 
-        private void LateUpdate()
+        protected override void Refresh()
         {
-            if (!_rebuildQueued)
-                return;
-            _rebuildQueued = false;
             RebuildHand();
             RefreshHighlights();
         }
@@ -169,7 +183,7 @@ namespace Crookedile.UI.Battle
                 return;
             }
             if (BattlePoolManager.Instance == null || !Battle.IsPlayerTurn)
-                return; // not our turn → BattleUI drives ClearHand / DiscardHandAnimated instead
+                return; // not our turn → OnBattleStateChanged clears or discards the hand instead
 
             ValidateLayoutContainerOnce();
 
@@ -248,10 +262,10 @@ namespace Crookedile.UI.Battle
 
         #endregion
 
-        #region Display API (BattleUI)
+        #region Hand teardown
 
         /// <summary>Flies every card in hand to the discard pile, returning each button to the pool as it lands.</summary>
-        public void DiscardHandAnimated()
+        private void DiscardHandAnimated()
         {
             if (CardFlyAnimator.Instance == null)
             {
@@ -271,7 +285,7 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>Returns all active card buttons to the pool and clears the list.</summary>
-        public void ClearHand()
+        private void ClearHand()
         {
             // Stop any staggered draw first so it can't re-touch buttons we're about to pool.
             CardFlyAnimator.Instance?.CancelDraw();

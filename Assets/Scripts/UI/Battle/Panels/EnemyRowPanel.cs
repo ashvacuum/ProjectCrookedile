@@ -11,9 +11,8 @@ namespace Crookedile.UI.Battle
     /// (intent badges, hostility pulses, defeat teardown, summon spawns, acting signals,
     /// status refreshes, turncoat pulses). Extracted from BattleUI.
     ///
-    /// Self-subscribes to enemy events; BattleUI only drives the coalesced
-    /// <see cref="RefreshAll"/> (stats + focus highlight) and reads
-    /// <see cref="GetSlotTransform"/> for VFX aiming.
+    /// Self-subscribes to enemy events and repaints every slot (stats + focus highlight) on
+    /// battle changes; <see cref="GetSlotTransform"/> serves VFX aiming.
     /// </summary>
     public class EnemyRowPanel : BattlePanel
     {
@@ -35,6 +34,7 @@ namespace Crookedile.UI.Battle
             On<EnemyActingEvent>(OnEnemyActing);
             On<StatusEffectAppliedEvent>(OnStatusEffectApplied);
             On<EnemyTurncoatEvent>(OnEnemyTurncoat);
+            RefreshOnBattleChanges();
         }
 
         private void OnIntentDeclared(EnemyIntentDeclaredEvent evt)
@@ -108,12 +108,12 @@ namespace Crookedile.UI.Battle
         /// <summary>Slots by enemy index; an entry is null once that enemy is defeated.</summary>
         public IReadOnlyList<EnemySlotUI> Slots => _slots;
 
-        /// <summary>
-        /// Refreshes every slot and applies the focus highlight. Called from BattleUI's
-        /// coalesced stats refresh so multiple events in one resolution repaint once.
-        /// </summary>
-        public void RefreshAll(int focusedEnemyIndex)
+        /// <summary>Refreshes every slot and applies the focus highlight.</summary>
+        protected override void Refresh()
         {
+            if (Battle == null)
+                return;
+            int focusedEnemyIndex = Battle.FocusedEnemyIndex;
             for (int i = 0; i < _slots.Count; i++)
             {
                 _slots[i]?.Refresh();

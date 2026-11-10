@@ -17,7 +17,7 @@ namespace Crookedile.UI.Battle
     ///
     /// HorizontalLayoutGroup on _barContainer must have childControlWidth and childForceExpandWidth disabled.
     /// </summary>
-    public class OpinionMeterUI : MonoBehaviour
+    public class OpinionMeterUI : BattlePanel
     {
         [Header("Bar Container")]
         [Tooltip(
@@ -154,11 +154,24 @@ namespace Crookedile.UI.Battle
             : _barContainer != null ? _barContainer
             : (RectTransform)transform;
 
-        /// <summary>
-        /// Recalculates all three element widths (tweened) and updates text labels.
-        /// Call from BattleUI in response to opinion / Support / Denial / turn events.
-        /// </summary>
-        public void Refresh(
+        private void OnEnable() => RefreshOnBattleChanges();
+
+        protected override void Refresh()
+        {
+            if (Battle == null)
+                return;
+            Paint(
+                Battle.CurrentOpinion,
+                Battle.MaxOpinion,
+                Battle.PlayerTurnsElapsed,
+                Battle.MaxTurns,
+                Battle.CurrentSupport,
+                Battle.CurrentDenial
+            );
+        }
+
+        /// <summary>Recalculates all three element widths (tweened) and updates text labels.</summary>
+        private void Paint(
             int currentOpinion,
             int maxOpinion,
             int turnsElapsed,
@@ -236,7 +249,7 @@ namespace Crookedile.UI.Battle
         /// <summary>
         /// One-shot impact for an Opinion shift: shake on a drop, punch on a gain, fill flash,
         /// value-label punch. Strength scales with the shift relative to max Opinion. The bar
-        /// widths themselves move through <see cref="Refresh"/>.
+        /// widths themselves move through <see cref="Paint"/>.
         /// </summary>
         public void Kick(int oldValue, int newValue, int maxValue)
         {

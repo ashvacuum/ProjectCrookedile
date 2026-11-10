@@ -3,7 +3,6 @@ using System.Linq;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
-using Crookedile.UI.Battle;
 using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
@@ -45,9 +44,6 @@ namespace Crookedile.Gameplay.Battle
         [Header("Scene References")]
         [SerializeField]
         private BattleManager battleManager;
-
-        [SerializeField]
-        private BattleUI battleUI;
 
         [Header("Session")]
         [Tooltip(
@@ -154,10 +150,6 @@ namespace Crookedile.Gameplay.Battle
             BattleSetup setup = BuildSetup(playerDeck, effectiveSession);
             if (setup == null)
                 return;
-
-            // Wire BattleUI before starting (BattleUI needs the BattleManager reference).
-            if (battleUI != null)
-                battleUI.Initialize(battleManager);
 
             battleManager.StartBattle(setup);
         }

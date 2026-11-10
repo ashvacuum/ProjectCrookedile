@@ -8,12 +8,8 @@ namespace Crookedile.UI.Battle
     /// <summary>
     /// Owns the victory and defeat panel GameObjects.
     ///
-    /// Extracted from <c>BattleUI</c> (and replaces the duplicate fields in
-    /// <c>BattleStatsOverlay</c>).  Wire to a single shared instance in the scene so
-    /// both scripts reference the same component.
-    ///
     /// The <see cref="OnContinueClicked"/> event fires when the player presses Continue
-    /// on the victory panel. BattleUI subscribes to this to trigger the reward screen.
+    /// on either face. <c>PostBattleFlow</c> opens this panel and runs what follows Continue.
     /// </summary>
     public class BattleResultPanel : UIView
     {

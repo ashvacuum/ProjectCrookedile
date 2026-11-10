@@ -35,6 +35,13 @@ namespace Crookedile.UI.Battle
         private void OnEnable()
         {
             On<BattleEndedEvent>(OnBattleEnded);
+            // The result opens once the battle has settled into its end state, not on the
+            // BattleEndedEvent that precedes it.
+            On<BattleStateChangedEvent>(evt =>
+            {
+                if (evt.Current == BattleState.BattleEnd)
+                    resultPanel?.Show(_lastResult?.isVictory == true);
+            });
             if (resultPanel != null)
                 resultPanel.OnContinueClicked += OnResultContinueClicked;
         }

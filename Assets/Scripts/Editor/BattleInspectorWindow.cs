@@ -11,7 +11,7 @@ namespace Crookedile.EditorTools
     /// Play-mode live battle inspector — a read-only dashboard of the active <see cref="BattleManager"/>:
     /// opinion / Support / Denial, the Celebrity's Glamour and Debt, action points,
     /// deck pile counts, active player statuses, and every enemy's hostility / intent / statuses.
-    /// Richer than the in-game BattleStatsOverlay and a natural companion to the Cheats window.
+    /// A natural companion to the Cheats window.
     ///
     /// Menu: Crookedile → Battle Inspector. Repaints itself each editor tick while in Play mode.
     /// </summary>

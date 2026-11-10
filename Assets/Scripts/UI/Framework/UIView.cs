@@ -5,8 +5,9 @@ namespace Crookedile.UI
     /// <summary>
     /// Base class for anything the UIRouter can push/pop — full screens and popups alike.
     /// Default Show/Hide is SetActive; override for tweened transitions later.
+    /// A <see cref="UIPanel"/>, so a popup subscribes with <c>On&lt;T&gt;</c> like any other panel.
     /// </summary>
-    public abstract class UIView : MonoBehaviour
+    public abstract class UIView : UIPanel
     {
         [Tooltip(
             "Scene router. Modal views push/pop themselves through it (dimmer + input "

@@ -15,8 +15,7 @@ namespace Crookedile.UI.Battle
     /// card-granted flight animation with its count punch, and the zone-viewer popups.
     /// Extracted from BattleUI.
     ///
-    /// Self-subscribes to CardGranted/CardExhausted; BattleUI drives the coalesced
-    /// <see cref="RefreshCounts"/> from its stats refresh.
+    /// Self-subscribes to its card events and repaints the counts on battle changes.
     /// </summary>
     public class CardZoneBar : BattlePanel
     {
@@ -82,7 +81,10 @@ namespace Crookedile.UI.Battle
             On<CardDrawnEvent>(OnCardDrawn);
             On<DrawnCardLaunchedEvent>(OnDrawnCardLaunched);
             On<DeckReshuffledEvent>(OnDeckReshuffled);
+            RefreshOnBattleChanges();
         }
+
+        protected override void Refresh() => RefreshCounts();
 
         private void OnCardGranted(CardGrantedEvent evt)
         {
@@ -142,10 +144,10 @@ namespace Crookedile.UI.Battle
         #region Public API
 
         /// <summary>
-        /// Repaints the three zone counters. Called from BattleUI's coalesced stats
-        /// refresh and after grant/exhaust events land.
+        /// Repaints the three zone counters. Runs from the coalesced refresh and directly
+        /// after grant/exhaust/launch events land.
         /// </summary>
-        public void RefreshCounts()
+        private void RefreshCounts()
         {
             DeckManager deck = Battle?.PlayerDeck;
             if (deck == null)

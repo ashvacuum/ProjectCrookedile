@@ -13,12 +13,10 @@ namespace Crookedile.UI.Battle
     /// Provides <see cref="SlotRect"/> as a stable <see cref="RectTransform"/> anchor
     /// so VFXManager and FloatingTextManager can position effects at the player's on-screen location.
     ///
-    /// Setup:
-    ///   1. Add to a PlayerSlotPrefab and assign references in the Inspector.
-    ///   2. Place the prefab in the battle scene UI and wire it to <see cref="BattleUI"/>.
-    ///   3. <see cref="BattleUI"/> calls <see cref="Initialize"/> on BattleStartedEvent.
+    /// Self-wiring: takes its portrait from <see cref="BattleStartedEvent"/> and repaints from
+    /// <see cref="BattlePanel.Battle"/> whenever battle state changes.
     /// </summary>
-    public class PlayerSlotUI : MonoBehaviour
+    public class PlayerSlotUI : BattlePanel
     {
         [Header("Display")]
         [Tooltip("Character portrait image for the active player origin.")]
@@ -31,56 +29,40 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private StatusEffectPanelUI _statusEffectPanel;
 
-        #region Runtime State
-
-        private BattleManager _battleManager;
-
         /// <summary>
         /// The root RectTransform of this slot.
         /// Used by VFXManager and FloatingTextManager as the spawn anchor for effects targeted at the player.
         /// </summary>
         public RectTransform SlotRect => (RectTransform)transform;
 
-        #endregion
-
-        #region Initialization
-
-        /// <summary>
-        /// Called by <see cref="BattleUI"/> on BattleStartedEvent.
-        /// Stores the manager reference, sets the portrait sprite, and performs the initial refresh.
-        /// </summary>
-        public void Initialize(BattleManager manager, Sprite portrait)
+        private void OnEnable()
         {
-            _battleManager = manager;
-
-            if (_portrait != null && portrait != null)
-                _portrait.sprite = portrait;
-
-            Refresh();
+            On<BattleStartedEvent>(OnBattleStarted);
+            On<ActionPointsChangedEvent>(evt =>
+            {
+                if (evt.IsPlayer)
+                    QueueRefresh();
+            });
+            RefreshOnBattleChanges();
         }
 
-        #endregion
-
-        #region Public API
-
-        /// <summary>
-        /// Reads the latest stats from BattleManager and updates all display elements.
-        /// Called by <see cref="BattleUI"/> each time player stats change.
-        /// </summary>
-        public void Refresh()
+        private void OnBattleStarted(BattleStartedEvent evt)
         {
-            if (_battleManager == null)
-                return;
-            var stats = _battleManager.PlayerStats;
+            Sprite portrait = evt.Setup.GetPlayerPortrait();
+            if (_portrait != null && portrait != null)
+                _portrait.sprite = portrait;
+        }
+
+        protected override void Refresh()
+        {
+            var stats = Battle?.PlayerStats;
             if (stats == null)
                 return;
 
             if (_apText != null)
                 _apText.SetText($"{stats.CurrentActionPoints}/{stats.MaxActionPoints}");
 
-            _statusEffectPanel?.Refresh(_battleManager.PlayerStatusEffects);
+            _statusEffectPanel?.Refresh(Battle.PlayerStatusEffects);
         }
-
-        #endregion
     }
 }
