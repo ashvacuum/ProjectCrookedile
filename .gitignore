@@ -100,3 +100,7 @@ InitTestScene*.unity*
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 # Playtest bot output
 /Playtests/
+
+# Embedded packages are licensed third-party content (e.g. Opsive Behavior Designer).
+# Import your own copy; only manifest.json and packages-lock.json are tracked.
+/[Pp]ackages/*/
