@@ -97,3 +97,6 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+# Embedded packages are licensed third-party content (e.g. Opsive Behavior Designer).
+# Import your own copy; only manifest.json and packages-lock.json are tracked.
+/[Pp]ackages/*/
