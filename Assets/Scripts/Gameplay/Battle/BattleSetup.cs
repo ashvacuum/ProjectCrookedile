@@ -37,6 +37,12 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Maximum Opinion Meter value. Defaults to 100.</summary>
         public int? maxOpinion;
 
+        /// <summary>
+        /// Seed for <see cref="BattleRandom"/>. A run passes a draw from its own stream so the
+        /// battle replays from the run seed; null takes one from Unity's stream instead.
+        /// </summary>
+        public int? seed;
+
         /// <summary>Max AP per turn for the player's origin. Defaults to 3 when unconfigured.</summary>
         public int GetPlayerMaxActionPoints()
         {

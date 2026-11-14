@@ -75,7 +75,7 @@ namespace Crookedile.Gameplay.Battle
                         toRemove.Add(effect);
                 }
                 while (_maxStatuses > 0 && toRemove.Count > _maxStatuses)
-                    toRemove.RemoveAt(RandomHelper.Range(0, toRemove.Count));
+                    toRemove.RemoveAt(BattleRandom.Range(0, toRemove.Count));
 
                 foreach (var effect in toRemove)
                     statusMgr.RemoveStatusNotify(effect.Behavior);

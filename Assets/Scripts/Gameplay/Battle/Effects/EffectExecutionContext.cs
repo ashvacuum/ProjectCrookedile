@@ -229,7 +229,7 @@ namespace Crookedile.Gameplay.Battle
                                 if (!e.IsDefeated)
                                     living.Add((e.Stats, e.StatusEffects));
                             if (living.Count > 0)
-                                pairs.Add(living[Random.Range(0, living.Count)]);
+                                pairs.Add(living[BattleRandom.Range(0, living.Count)]);
                         }
                     }
                     else
@@ -405,7 +405,7 @@ namespace Crookedile.Gameplay.Battle
                     matches.Add(enemy);
             if (matches.Count == 0)
                 return;
-            var chosen = matches[Random.Range(0, matches.Count)];
+            var chosen = matches[BattleRandom.Range(0, matches.Count)];
             pairs.Add((chosen.Stats, chosen.StatusEffects));
         }
 

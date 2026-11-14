@@ -123,7 +123,7 @@ namespace Crookedile.Gameplay.Battle
                     targets[target] =
                         candidates.Count == 0
                             ? -1
-                            : candidates[UnityEngine.Random.Range(0, candidates.Count)];
+                            : candidates[BattleRandom.Range(0, candidates.Count)];
                 }
                 _audienceTargets.Add(targets);
             }

@@ -288,6 +288,16 @@ namespace Crookedile.Data.Save
 
             var profile = ActiveProfile;
             var cards = CardDatabase.Shared;
+
+            // A cheated run ends like any other but leaves the profile exactly as it found it.
+            if (run.Cheated && Cheats.Enforced)
+            {
+                Store.Delete(RunPath(profile.Id));
+                RunState.Clear();
+                GameLogger.LogInfo("Save", "Run ended with cheats used: no profile progress recorded.");
+                return unlocked;
+            }
+
             var before = new HashSet<string>(UnlockedIds(profile, cards));
 
             if (victory)

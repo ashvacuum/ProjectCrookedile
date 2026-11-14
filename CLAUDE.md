@@ -44,6 +44,9 @@ docs win; say so rather than quietly following the code.
   (auto-unsubscribed on disable; override `OnDisable` only to call `base.OnDisable()`). Battle panels subclass
   `BattlePanel`, which adds `Battle` (`BattleManager.Current`). No BattleUI field or Bind call. `UIView` popups
   are `UIPanel`s too and find their `UIRouter` themselves.
+- **Battle rules roll on `BattleRandom`** (`Gameplay/Battle/BattleRandom.cs`), never `UnityEngine.Random` or
+  `RandomHelper`: it is seeded per battle from `BattleSetup.seed` (a draw from the run's `Rng`), so a battle
+  replays from the run seed. `UnityEngine.Random` is for cosmetics only (audio pitch, VFX).
 - **Saves go through `SaveSystem`** (`Data/Save`): binary save classes with a schema version, content stored by
   asset-GUID ID. A new `RunState` field that must survive a reload also goes in `RunSaveData` and
   `RunState.Save.cs`. See `docs/meta-progression.md`.
@@ -85,7 +88,14 @@ docs win; say so rather than quietly following the code.
   console has the same tools as `save*` commands (`saveinfo`, `savesnap`, `saveload`, `savewipe`, …).
 - Backquote (`` ` ``) opens the in-game dev console: `[CheatCommand]` methods plus log control
   (`logs`, `log <category> <level>`, `filter`). Cheats need the `CHEATS_ENABLED` define
-  (Ctrl+Shift+C).
+  (Ctrl+Shift+C) to be compiled in, and `Cheats.Enabled` to run: on in the editor and development
+  builds, otherwise turned on by the `-cheats` launch argument or by typing `Cheats.EnableCode`.
+- **A cheat command acts directly** on `RunState`, `BattleManager.Current` or `SaveSystem`, never through an
+  EventBus event. Mark one that only reads or changes debug output `Safe = true`; any other flags the run as
+  cheated (`RunState.Cheated`), and where `Cheats.Enforced` such a run earns no profile progress. Gate Steam
+  achievement and stat writes on `SteamManager.ProgressAllowed`. `Code = "..."` gives a command a typed cheat code.
+- Runtime `OnGUI` receives no input here (Input System only), so IMGUI is draw-only: fine for a read-out,
+  useless for anything clickable.
 
 ## Known soft spots
 

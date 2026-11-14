@@ -23,7 +23,7 @@ namespace Crookedile.Gameplay.Battle
             int discarded = 0;
             for (int i = 0; i < amount && ctx.Deck.HandCount > 0; i++)
             {
-                int idx = RandomHelper.Range(0, ctx.Deck.HandCount);
+                int idx = BattleRandom.Range(0, ctx.Deck.HandCount);
                 if (ctx.Deck.DiscardCard(ctx.Deck.Hand[idx]))
                     discarded++;
             }

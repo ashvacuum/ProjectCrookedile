@@ -138,6 +138,65 @@ namespace Crookedile.UI
             SetVisible(false);
         }
 
+        #region Cheat codes
+
+        private const int CodeBufferLength = 32;
+        private string _typed = "";
+
+        // ponytail: listens to the keyboard present at startup; one plugged in later is not
+        // heard until restart. Move to InputSystem.onDeviceChange if that ever matters. Keyboard
+        // only: a gamepad sequence would need its own buffer of button presses.
+        private void OnEnable()
+        {
+            if (Keyboard.current != null)
+                Keyboard.current.onTextInput += OnTextInput;
+        }
+
+        private void OnDisable()
+        {
+            if (Keyboard.current != null)
+                Keyboard.current.onTextInput -= OnTextInput;
+        }
+
+        /// <summary>
+        /// Matches what the player types outside the console against the enable code and every
+        /// command's <see cref="CheatCommandAttribute.Code"/>. The enable code works with cheats
+        /// off; command codes only once they are on.
+        /// </summary>
+        private void OnTextInput(char c)
+        {
+            if (IsVisible || !char.IsLetterOrDigit(c))
+                return;
+
+            _typed += char.ToLowerInvariant(c);
+            if (_typed.Length > CodeBufferLength)
+                _typed = _typed.Substring(_typed.Length - CodeBufferLength);
+
+            if (!Cheats.Enabled)
+            {
+                if (!string.IsNullOrEmpty(Cheats.EnableCode) && _typed.EndsWith(Cheats.EnableCode))
+                {
+                    Cheats.Enabled = true;
+                    _typed = "";
+                    Print("Cheats enabled. Press ` for the console.");
+                    GameLogger.LogInfo("Console", "Cheats enabled by code");
+                }
+                return;
+            }
+
+            foreach (var cmd in _commands.Values)
+            {
+                if (string.IsNullOrEmpty(cmd.Code) || !_typed.EndsWith(cmd.Code))
+                    continue;
+                _typed = "";
+                Print($"> {cmd.Name} (code)");
+                Execute(cmd.Name);
+                return;
+            }
+        }
+
+        #endregion
+
         private void OnDestroy()
         {
             GameLogger.OnLogAdded -= OnLogAdded;
@@ -162,6 +221,9 @@ namespace Crookedile.UI
 
             if (keyboard.backquoteKey.wasPressedThisFrame)
             {
+                // Closing always works; opening needs cheats on (launch argument or enable code).
+                if (!IsVisible && !Cheats.Enabled)
+                    return;
                 SetVisible(!IsVisible);
                 return;
             }
@@ -260,7 +322,12 @@ namespace Crookedile.UI
                 _history.RemoveAt(_history.Count - 1);
 
             Print($"> {raw}");
+            Execute(raw);
+        }
 
+        /// <summary>Runs one command line. Shared by the input field and cheat codes.</summary>
+        private void Execute(string raw)
+        {
             string[] parts = raw.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             string name = parts[0];
 
@@ -282,17 +349,56 @@ namespace Crookedile.UI
                 return;
             }
 
+            if (!cmd.Safe && !Cheats.Enabled)
+            {
+                Print($"{name}: cheats are off.", LogLevel.Error);
+                return;
+            }
+
+            // The target is found now, not at discovery: scene objects come and go under a
+            // console that outlives every scene.
+            object target = null;
+            if (!cmd.Method.IsStatic)
+            {
+                target =
+                    cmd.Owner == GetType()
+                        ? this
+                        : FindFirstObjectByType(cmd.Owner, FindObjectsInactive.Include);
+                if (target == null)
+                {
+                    Print($"{name}: needs a {cmd.Owner.Name} in the scene.", LogLevel.Error);
+                    return;
+                }
+            }
+
             try
             {
                 object[] args = ParseArgs(parts.Skip(1).ToArray(), cmd.Parameters);
-                object result = cmd.Method.Invoke(cmd.Target, args);
+                object result = cmd.Method.Invoke(target, args);
                 if (result != null)
                     Print(result.ToString());
+                if (!cmd.Safe)
+                    NoteCheatUsed();
             }
             catch (Exception e)
             {
                 Print($"{name}: {e.InnerException?.Message ?? e.Message}", LogLevel.Error);
             }
+        }
+
+        /// <summary>
+        /// Records a cheat against the session and the run in progress. Says so once per run
+        /// where it costs the player something.
+        /// </summary>
+        private void NoteCheatUsed()
+        {
+            Cheats.MarkUsed();
+            var run = Crookedile.Data.RunState.Current;
+            if (run == null || run.Cheated)
+                return;
+            run.MarkCheated();
+            if (Cheats.Enforced)
+                Print("This run is now flagged as cheated: it earns no profile or Steam progress.", LogLevel.Warning);
         }
 
         private void ShowHelp()
@@ -388,7 +494,7 @@ namespace Crookedile.UI
         #endregion
 
         #region Debug commands
-        [CheatCommand("logs", "List debug categories and their levels", Category = "Debug")]
+        [CheatCommand("logs", "List debug categories and their levels", Category = "Debug", Safe = true)]
         private string CmdLogs()
         {
             foreach (string category in GameLogger.KnownCategories.OrderBy(c => c))
@@ -403,7 +509,7 @@ namespace Crookedile.UI
             return $"global: {GameLogger.GlobalLevel}";
         }
 
-        [CheatCommand("log", "Set a category's level: log Battle verbose | log Battle off", Category = "Debug")]
+        [CheatCommand("log", "Set a category's level: log Battle verbose | log Battle off", Category = "Debug", Safe = true)]
         private string CmdLog(string category, string level)
         {
             if (level.Equals("off", StringComparison.OrdinalIgnoreCase))
@@ -416,7 +522,7 @@ namespace Crookedile.UI
             return $"{category} → {parsed}";
         }
 
-        [CheatCommand("loglevel", "Set the global log level", Category = "Debug")]
+        [CheatCommand("loglevel", "Set the global log level", Category = "Debug", Safe = true)]
         private string CmdLogLevel(string level)
         {
             var parsed = (LogLevel)Enum.Parse(typeof(LogLevel), level, true);
@@ -424,7 +530,7 @@ namespace Crookedile.UI
             return $"global → {parsed}";
         }
 
-        [CheatCommand("filter", "Only show logs whose category contains this text (blank clears)", Category = "Debug")]
+        [CheatCommand("filter", "Only show logs whose category contains this text (blank clears)", Category = "Debug", Safe = true)]
         private string CmdFilter(string text = "")
         {
             _categoryFilter = text;
@@ -441,7 +547,9 @@ namespace Crookedile.UI
             public string Description;
             public string Category;
             public MethodInfo Method;
-            public object Target;
+            public Type Owner;
+            public bool Safe;
+            public string Code;
             public ParameterInfo[] Parameters;
         }
 
@@ -455,6 +563,11 @@ namespace Crookedile.UI
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
+                // Only the game's own assemblies declare commands.
+                string assemblyName = assembly.GetName().Name;
+                if (!assemblyName.StartsWith("Crookedile") && !assemblyName.StartsWith("Assembly-CSharp"))
+                    continue;
+
                 Type[] types;
                 try
                 {
@@ -472,15 +585,9 @@ namespace Crookedile.UI
                     if (attr == null)
                         continue;
 
-                    object target = null;
-                    if (!method.IsStatic)
-                    {
-                        target = type == GetType()
-                            ? this
-                            : FindFirstObjectByType(type, FindObjectsInactive.Include);
-                        if (target == null)
-                            continue; // no live instance to call
-                    }
+                    // Instance commands must live on a component, or nothing could ever run them.
+                    if (!method.IsStatic && !typeof(UnityEngine.Object).IsAssignableFrom(type))
+                        continue;
 
                     _commands[attr.Command] = new Command
                     {
@@ -488,7 +595,9 @@ namespace Crookedile.UI
                         Description = attr.Description,
                         Category = attr.Category,
                         Method = method,
-                        Target = target,
+                        Owner = type,
+                        Safe = attr.Safe,
+                        Code = attr.Code?.ToLowerInvariant(),
                         Parameters = method.GetParameters(),
                     };
                 }

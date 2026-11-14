@@ -557,7 +557,7 @@ namespace Crookedile.Gameplay.Battle
                     continue;
                 var overrides = new int[effects.Count];
                 for (int j = 0; j < effects.Count; j++)
-                    overrides[j] = Random.Range(0, 4); // [0, 3] inclusive
+                    overrides[j] = BattleRandom.Range(0, 4); // [0, 3] inclusive
                 _confusedOverrides[i] = overrides;
             }
             GameLogger.LogInfo<CardPlayController>(
@@ -582,7 +582,7 @@ namespace Crookedile.Gameplay.Battle
             if (living.Count == 0)
                 return;
 
-            int targetIndex = living[Random.Range(0, living.Count)];
+            int targetIndex = living[BattleRandom.Range(0, living.Count)];
             // Momentum presses the opinion meter through the ledger (absorbs once, then raises opinion).
             GameLogger.LogInfo<CardPlayController>(
                 $"Momentum pressing opinion by {stacks} vs {_mgr.Enemies[targetIndex].EnemyData.EnemyName}"

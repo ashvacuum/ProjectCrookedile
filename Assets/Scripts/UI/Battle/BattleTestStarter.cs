@@ -262,6 +262,7 @@ namespace Crookedile.Gameplay.Battle
                 maxTurns = roundMaxTurns > 0 ? roundMaxTurns : (int?)null,
                 startingOpinion = roundStartOpinion,
                 maxOpinion = roundMaxOpinion,
+                seed = RunState.Current?.Rng?.Next(),
             };
         }
 

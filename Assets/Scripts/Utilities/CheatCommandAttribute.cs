@@ -32,6 +32,18 @@ namespace Crookedile.Utilities
         public string Category { get; set; }
 
         /// <summary>
+        /// True for a command that only reads or changes debug output (logs, save dumps). Running
+        /// it never counts as cheating; every other command flags the run as cheated.
+        /// </summary>
+        public bool Safe { get; set; }
+
+        /// <summary>
+        /// Optional cheat code: typing this anywhere outside the console runs the command with
+        /// its default arguments. Lower-case letters and digits only.
+        /// </summary>
+        public string Code { get; set; }
+
+        /// <summary>
         /// Creates a cheat command attribute.
         /// </summary>
         /// <param name="command">Command keyword (e.g., "add_money")</param>

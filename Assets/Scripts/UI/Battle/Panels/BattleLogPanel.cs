@@ -286,7 +286,7 @@ namespace Crookedile.UI.Battle
         private bool _showDebugOverlay;
         private Vector2 _debugScroll;
 
-        [CheatCommand("battlelog", "Toggle the IMGUI battle log overlay", Category = "Debug")]
+        [CheatCommand("battlelog", "Toggle the IMGUI battle log overlay", Category = "Debug", Safe = true)]
         private void ToggleDebugOverlay() => _showDebugOverlay = !_showDebugOverlay;
 
         private void OnGUI()

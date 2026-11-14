@@ -178,7 +178,7 @@ namespace Crookedile.Gameplay.Battle
                     .ToList();
                 if (offensive.Count > 0)
                 {
-                    CurrentIntent = offensive[Random.Range(0, offensive.Count)];
+                    CurrentIntent = offensive[BattleRandom.Range(0, offensive.Count)];
                     return CurrentIntent;
                 }
                 // No offensive move available — fall through to normal selection.

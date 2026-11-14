@@ -265,6 +265,21 @@ namespace Crookedile.Data
             !string.IsNullOrWhiteSpace(flag) && Flags.Contains(flag.Trim());
 
         /// <summary>
+        /// Reserved flag behind <see cref="Cheated"/>. A flag rather than a save field so it
+        /// rides the existing save format.
+        /// </summary>
+        public const string CHEATED_FLAG = "debug.cheated";
+
+        /// <summary>
+        /// True once a cheat has been used in this run. Where cheats are enforced
+        /// (<c>Cheats.Enforced</c>) such a run earns no profile progress when it ends.
+        /// </summary>
+        public bool Cheated => HasFlag(CHEATED_FLAG);
+
+        /// <summary>Flags this run as cheated, for good.</summary>
+        public void MarkCheated() => SetFlag(CHEATED_FLAG);
+
+        /// <summary>
         /// The locations currently on offer, and the day they were drawn for.
         ///
         /// Lives here rather than on the map screen because it has to survive a scene load: a

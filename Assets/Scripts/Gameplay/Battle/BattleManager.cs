@@ -281,6 +281,8 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public void StartBattle(BattleSetup setup)
         {
+            // First, before anything rolls: the opening shuffle is part of the seeded battle.
+            BattleRandom.Seed(setup.seed ?? BattleRandom.UnitySeed());
             if (BossBrain != null)
             {
                 BossBrain.StopPlanning();
@@ -725,23 +727,9 @@ namespace Crookedile.Gameplay.Battle
                 && enemy.Stats.IsHostile
                 && enemy.StatusEffects.GetStacks<StarstruckStatus>() > 0
             )
-            {
-                var context = new EffectExecutionContext(
-                    _playerStats,
-                    enemy.Stats,
-                    _playerStats,
-                    true,
-                    _playerDeck,
-                    _enemies,
-                    PlayerStatusEffects,
-                    enemy.StatusEffects,
-                    PlayerStatusEffects,
-                    this,
-                    attackerName: "Starstruck",
-                    attackerEnemyIndex: index
+                StarstruckStatus.ResolvePayoff(
+                    _effectResolver.CreatePlayerContextAgainst(enemy, "Starstruck")
                 );
-                StarstruckStatus.ResolvePayoff(context);
-            }
         }
 
         /// <summary>After the enemy turn: Glamour pushes Opinion up by its stacks, then decays.</summary>

@@ -810,7 +810,7 @@ namespace Crookedile.Gameplay.Battle
             // Fisher-Yates shuffle
             for (int i = _deck.Count - 1; i > 0; i--)
             {
-                int j = RandomHelper.Range(0, i + 1);
+                int j = BattleRandom.Range(0, i + 1);
                 CardData temp = _deck[i];
                 _deck[i] = _deck[j];
                 _deck[j] = temp;
@@ -891,7 +891,7 @@ namespace Crookedile.Gameplay.Battle
                     _deck.Add(card);
                     break;
                 case CardDestination.ShuffledIntoDrawPile:
-                    _deck.Insert(RandomHelper.Range(0, _deck.Count + 1), card);
+                    _deck.Insert(BattleRandom.Range(0, _deck.Count + 1), card);
                     break;
                 case CardDestination.Hand:
                     _hand.Add(card);

@@ -423,7 +423,7 @@
                 var remaining = new List<CardData>(candidates);
                 for (int i = 0; i < pickCount; i++)
                 {
-                    int idx = RandomHelper.Range(0, remaining.Count);
+                    int idx = BattleRandom.Range(0, remaining.Count);
                     chosen.Add(remaining[idx]);
                     remaining.RemoveAt(idx);
                 }

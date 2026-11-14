@@ -159,14 +159,14 @@ namespace Crookedile.Utilities
 
         #region Console commands
 
-        [CheatCommand("logsolo", "Mute all logs except one category (e.g. logsolo Card)")]
+        [CheatCommand("logsolo", "Mute all logs except one category (e.g. logsolo Card)", Safe = true)]
         private static string CmdLogSolo(string category)
         {
             SoloCategory(category);
             return $"Log focus → '{category}'. Everything else muted. Use 'logall' to restore.";
         }
 
-        [CheatCommand("logall", "Clear log focus — all categories log again")]
+        [CheatCommand("logall", "Clear log focus — all categories log again", Safe = true)]
         private static string CmdLogAll()
         {
             ClearSolo();

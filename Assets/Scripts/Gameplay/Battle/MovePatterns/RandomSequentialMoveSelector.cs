@@ -17,7 +17,7 @@ namespace Crookedile.Gameplay.Battle
         {
             if (!_initialized)
             {
-                _index = Random.Range(0, eligibleMoves.Count);
+                _index = BattleRandom.Range(0, eligibleMoves.Count);
                 _initialized = true;
             }
 

@@ -1,4 +1,4 @@
-﻿using Crookedile.Core;
+using Crookedile.Core;
 using Crookedile.Utilities;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -6,10 +6,13 @@ using UnityEngine;
 namespace Crookedile.Managers
 {
     /// <summary>
-    /// Development cheats and debug tools manager.
-    /// Only active when CHEATS_ENABLED compile flag is set.
-    /// Use menu: Crookedile > Toggle Cheats Build (Ctrl+Shift+C) to enable/disable.
-    /// Provides tools for testing, debugging, and speeding up development.
+    /// The game's cheat commands. Each <c>[CheatCommand]</c> is a dev-console command and, where it
+    /// has a <c>[Button]</c>, an Odin button on this component. Every command acts directly on the
+    /// run, the battle or the save system; none goes through the EventBus.
+    ///
+    /// Compiled in when <c>CHEATS_ENABLED</c> is set (menu: Crookedile > Toggle Cheats Build,
+    /// Ctrl+Shift+C) and runnable while <see cref="Cheats.Enabled"/> is on. A command not marked
+    /// <c>Safe</c> flags the run as cheated when the console runs it.
     /// </summary>
     [Debuggable("Cheats", LogLevel.Info)]
     public class CheatsManager : Singleton<CheatsManager>
@@ -17,112 +20,56 @@ namespace Crookedile.Managers
         [Header("Current State")]
         [ReadOnly]
         [SerializeField]
-        private bool _godModeActive = false;
-
-        [ReadOnly]
-        [SerializeField]
-        private bool _unlimitedResourcesActive = false;
-
-        [ReadOnly]
-        [SerializeField]
         private float _timeScale = 1f;
 
-        public bool GodModeActive => _godModeActive;
-        public bool UnlimitedResourcesActive => _unlimitedResourcesActive;
+        private static Gameplay.Battle.BattleManager Battle => Gameplay.Battle.BattleManager.Current;
 
-        protected override void OnAwake()
+        #region Run Cheats
+
+        [FoldoutGroup("Run Cheats")]
+        [Button("Adjust Funds")]
+        [CheatCommand("funds", "Add Funds to the run, or remove with a negative (funds -50)", Category = "Run")]
+        public void AdjustFunds(int amount = 100)
         {
-#if CHEATS_ENABLED
-            GameLogger.LogInfo("Cheats", "Cheats Manager initialized");
-            RegisterCommands();
-#else
-            GameLogger.LogWarning("Cheats", "Cheats disabled - CHEATS_ENABLED flag not set");
-#endif
+            if (Data.RunState.Current == null)
+            {
+                GameLogger.LogWarning("Cheats", "funds: no run in progress");
+                return;
+            }
+            Data.RunState.Current.AdjustFunds(amount);
+            GameLogger.LogInfo("Cheats", $"Funds now {Data.RunState.Current.Funds}");
         }
 
-        #region Cheat Commands
-
-        [FoldoutGroup("General Cheats")]
-        [Button("Toggle God Mode", ButtonSizes.Large)]
-        [GUIColor(0.3f, 1f, 0.3f)]
-        [CheatCommand("god", "Toggle invincibility", Category = "General")]
-        public void ToggleGodMode()
+        [FoldoutGroup("Run Cheats")]
+        [Button("Adjust Credibility")]
+        [CheatCommand("credibility", "Add Credibility to the run, or remove with a negative", Category = "Run")]
+        public void AdjustCredibility(int amount = 10)
         {
-            _godModeActive = !_godModeActive;
-            GameLogger.LogInfo("Cheats", $"God Mode: {(_godModeActive ? "ON" : "OFF")}");
-
-            EventBus.Publish(new GodModeToggleEvent { Enabled = _godModeActive });
-        }
-
-        [FoldoutGroup("General Cheats")]
-        [Button("Toggle Unlimited Resources", ButtonSizes.Large)]
-        [GUIColor(0.3f, 0.3f, 1f)]
-        [CheatCommand("unlimited", "Toggle unlimited resources", Category = "General")]
-        public void ToggleUnlimitedResources()
-        {
-            _unlimitedResourcesActive = !_unlimitedResourcesActive;
-            GameLogger.LogInfo(
-                "Cheats",
-                $"Unlimited Resources: {(_unlimitedResourcesActive ? "ON" : "OFF")}"
-            );
-
-            EventBus.Publish(
-                new UnlimitedResourcesToggleEvent { Enabled = _unlimitedResourcesActive }
-            );
+            if (Data.RunState.Current == null)
+            {
+                GameLogger.LogWarning("Cheats", "credibility: no run in progress");
+                return;
+            }
+            Data.RunState.Current.AdjustCredibility(amount);
+            GameLogger.LogInfo("Cheats", $"Credibility now {Data.RunState.Current.Credibility}");
         }
 
         #endregion
 
-        #region Resource Cheats
+        #region Battle Cheats
 
-        [FoldoutGroup("Resource Cheats")]
-        [Button("Give Max Resources", ButtonSizes.Large)]
-        [GUIColor(1f, 0.8f, 0.3f)]
-        [CheatCommand("maxres", "Give maximum resources", Category = "Resources")]
-        public void GiveMaxResources()
+        [FoldoutGroup("Battle Cheats")]
+        [Button("Raise Opinion")]
+        [CheatCommand("opinion", "Raise the Opinion Meter directly (opinion 20)", Category = "Battle")]
+        public void RaiseOpinion(int amount = 10)
         {
-            GiveResources(99999, 100, 100, 0, 30000);
-            GameLogger.LogInfo("Cheats", "Gave maximum resources");
-        }
-
-        [FoldoutGroup("Resource Cheats")]
-        [Button("Give Resources")]
-        [CheatCommand(
-            "give",
-            "Give resources (money, lagay, utang, heat, support)",
-            Category = "Resources"
-        )]
-        public void GiveResources(
-            [LabelText("₱")] int campaignFunds = 1000,
-            [LabelText("L")] int lagay = 10,
-            [LabelText("U")] int utangNaLoob = 10,
-            [LabelText("H")] int heat = 0,
-            [LabelText("Support")] int support = 5000
-        )
-        {
-            var resourceEvent = new CheatGiveResourcesEvent
+            if (Battle == null)
             {
-                CampaignFunds = campaignFunds,
-                Lagay = lagay,
-                UtangNaLoob = utangNaLoob,
-                Heat = heat,
-                Support = support,
-            };
-
-            EventBus.Publish(resourceEvent);
-            GameLogger.LogInfo(
-                "Cheats",
-                $"Gave resources: ₱{campaignFunds}, {lagay}L, {utangNaLoob}U, {heat}H, {support} Support"
-            );
-        }
-
-        [FoldoutGroup("Resource Cheats")]
-        [Button("Clear Heat")]
-        [CheatCommand("clearheat", "Remove all Heat", Category = "Resources")]
-        public void ClearHeat()
-        {
-            EventBus.Publish(new CheatClearHeatEvent());
-            GameLogger.LogInfo("Cheats", "Cleared all Heat");
+                GameLogger.LogWarning("Cheats", "opinion: no battle in progress");
+                return;
+            }
+            Battle.RaiseOpinion(amount);
+            GameLogger.LogInfo("Cheats", $"Opinion now {Battle.CurrentOpinion}");
         }
 
         #endregion
@@ -131,20 +78,15 @@ namespace Crookedile.Managers
 
         [FoldoutGroup("Card Cheats")]
         [Button("Draw Cards", ButtonSizes.Medium)]
-        [CheatCommand("draw", "Draw cards", Category = "Cards")]
+        [CheatCommand("draw", "Draw cards mid-battle", Category = "Cards")]
         public void DrawCards([LabelText("Amount")] int amount = 5)
         {
-            EventBus.Publish(new CheatDrawCardsEvent { Amount = amount });
-            GameLogger.LogInfo("Cheats", $"Drew {amount} cards");
-        }
-
-        [FoldoutGroup("Card Cheats")]
-        [Button("Refresh Hand", ButtonSizes.Medium)]
-        [CheatCommand("refreshhand", "Discard and redraw hand", Category = "Cards")]
-        public void RefreshHand()
-        {
-            EventBus.Publish(new CheatRefreshHandEvent());
-            GameLogger.LogInfo("Cheats", "Refreshed hand");
+            if (Battle?.PlayerDeck == null)
+            {
+                GameLogger.LogWarning("Cheats", "draw: no battle in progress");
+                return;
+            }
+            GameLogger.LogInfo("Cheats", $"Drew {Battle.PlayerDeck.DrawCards(amount)} card(s)");
         }
 
         [FoldoutGroup("Card Cheats")]
@@ -156,7 +98,7 @@ namespace Crookedile.Managers
         )]
         public void AddCardToHand([LabelText("Card name")] string cardName)
         {
-            var battle = FindFirstObjectByType<Gameplay.Battle.BattleManager>();
+            var battle = Battle;
             var database = Data.Cards.CardDatabase.Shared;
             if (battle == null || battle.PlayerDeck == null || database == null)
             {
@@ -215,7 +157,6 @@ namespace Crookedile.Managers
         public void UnlockAllCards()
         {
             Data.Save.SaveSystem.SetUnlockAll(true);
-            EventBus.Publish(new CheatUnlockAllCardsEvent());
             GameLogger.LogInfo("Cheats", "Unlocked all cards for this profile, from the next run");
         }
 
@@ -238,7 +179,7 @@ namespace Crookedile.Managers
 
         [FoldoutGroup("Card Cheats")]
         [Button("List Unlocks", ButtonSizes.Medium)]
-        [CheatCommand("unlocks", "List every unlockable card and whether this profile has it", Category = "Cards")]
+        [CheatCommand("unlocks", "List every unlockable card and whether this profile has it", Category = "Cards", Safe = true)]
         public void ListUnlocks()
         {
             foreach (var status in Data.Save.SaveSystem.GetUnlocks())
@@ -254,16 +195,16 @@ namespace Crookedile.Managers
 
         [FoldoutGroup("Save Debug")]
         [Button("Describe Saves", ButtonSizes.Medium)]
-        [CheatCommand("saveinfo", "Print every profile and run save, readable", Category = "Save")]
+        [CheatCommand("saveinfo", "Print every profile and run save, readable", Category = "Save", Safe = true)]
         public void SaveInfo() => GameLogger.LogInfo("Cheats", Data.Save.SaveDebug.Describe());
 
         [FoldoutGroup("Save Debug")]
         [Button("Export Dump", ButtonSizes.Medium)]
-        [CheatCommand("savedump", "Write the readable save dump to save-dump.txt in the save folder", Category = "Save")]
+        [CheatCommand("savedump", "Write the readable save dump to save-dump.txt in the save folder", Category = "Save", Safe = true)]
         public void SaveDump() => Data.Save.SaveDebug.ExportDump();
 
         [FoldoutGroup("Save Debug")]
-        [CheatCommand("savepath", "Print the save folder", Category = "Save")]
+        [CheatCommand("savepath", "Print the save folder", Category = "Save", Safe = true)]
         public void SavePath() => GameLogger.LogInfo("Cheats", Data.Save.SaveSystem.Root);
 
         [FoldoutGroup("Save Debug")]
@@ -284,7 +225,7 @@ namespace Crookedile.Managers
         public void LoadSnapshot(string name) => Data.Save.SaveDebug.RestoreSnapshot(name);
 
         [FoldoutGroup("Save Debug")]
-        [CheatCommand("savesnaps", "List save snapshots", Category = "Save")]
+        [CheatCommand("savesnaps", "List save snapshots", Category = "Save", Safe = true)]
         public void ListSnapshots()
         {
             var names = Data.Save.SaveDebug.ListSnapshots();
@@ -350,6 +291,7 @@ namespace Crookedile.Managers
 
         [FoldoutGroup("Time Cheats")]
         [Button("Set Time Scale")]
+        [CheatCommand("timescale", "Set the game speed (timescale 3); 1 is normal", Category = "Time", Safe = true)]
         public void SetTimeScale(float scale = 1f)
         {
             _timeScale = scale;
@@ -366,65 +308,10 @@ namespace Crookedile.Managers
             GameLogger.LogInfo("Cheats", $"Time scale adjusted to {_timeScale}x");
         }
 
-        [FoldoutGroup("Time Cheats")]
-        [Button("Skip Day", ButtonSizes.Medium)]
-        public void SkipDay()
-        {
-            EventBus.Publish(new CheatSkipDayEvent());
-            GameLogger.LogInfo("Cheats", "Skipped to next day");
-        }
-
-        [FoldoutGroup("Time Cheats")]
-        [Button("Jump to Day")]
-        public void JumpToDay(int day = 1)
-        {
-            EventBus.Publish(new CheatJumpToDayEvent { Day = day });
-            GameLogger.LogInfo("Cheats", $"Jumped to day {day}");
-        }
-
         #endregion
 
-        #region Battle Cheats
+        #region Scene and language
 
-        [FoldoutGroup("Battle Cheats")]
-        [Button("Win Current Battle", ButtonSizes.Large)]
-        [GUIColor(0.3f, 1f, 0.3f)]
-        [CheatCommand("win", "Instantly win the current battle", Category = "Battle")]
-        public void WinBattle()
-        {
-            EventBus.Publish(new CheatWinBattleEvent());
-            GameLogger.LogInfo("Cheats", "Force won current battle");
-        }
-
-        [FoldoutGroup("Battle Cheats")]
-        [Button("Set Opponent Confidence")]
-        [CheatCommand("setconfidence", "Set opponent's confidence (0-100)", Category = "Battle")]
-        public void SetOpponentConfidence(int confidence = 1)
-        {
-            confidence = Mathf.Clamp(confidence, 0, 100);
-            EventBus.Publish(new CheatSetOpponentConfidenceEvent { Confidence = confidence });
-            GameLogger.LogInfo("Cheats", $"Set opponent confidence to {confidence}");
-        }
-
-        #endregion
-
-        #region Manager Integration Examples
-
-        /// <summary>
-        /// Example: Call AudioManager from cheats
-        /// </summary>
-        [CheatCommand("mute_music", "Mute/unmute music", Category = "Audio")]
-        public void ToggleMusic()
-        {
-            if (AudioManager.Instance == null)
-                return;
-            // AudioManager.Instance.SetMusicVolume(0f); // Example
-            GameLogger.LogInfo("Cheats", "Toggled music");
-        }
-
-        /// <summary>
-        /// Example: Call SceneLoader from cheats
-        /// </summary>
         [CheatCommand("loadscene", "Load a scene by name", Category = "Scene")]
         public void LoadScene(string sceneName)
         {
@@ -434,10 +321,7 @@ namespace Crookedile.Managers
             GameLogger.LogInfo("Cheats", $"Loading scene: {sceneName}");
         }
 
-        /// <summary>
-        /// Example: Call LocalizationManager from cheats
-        /// </summary>
-        [CheatCommand("setlang", "Set language (english/tagalog)", Category = "Localization")]
+        [CheatCommand("setlang", "Set language (english/tagalog)", Category = "Localization", Safe = true)]
         public void SetLanguage(string language)
         {
             if (LocalizationManager.Instance == null)
@@ -454,68 +338,9 @@ namespace Crookedile.Managers
 
         #endregion
 
-        #region Utility
-
-        private void RegisterCommands()
-        {
-            // Commands are now auto-discovered via CheatCommandAttribute
-            GameLogger.LogInfo("Cheats", "Cheat commands registered via attributes");
-        }
-
         protected override void OnCleanup()
         {
-            // Reset time scale on cleanup
             Time.timeScale = 1f;
         }
-
-        #endregion
     }
-
-    #region Cheat Events
-
-    public class GodModeToggleEvent : IGameEvent
-    {
-        public bool Enabled;
-    }
-
-    public class UnlimitedResourcesToggleEvent : IGameEvent
-    {
-        public bool Enabled;
-    }
-
-    public class CheatGiveResourcesEvent : IGameEvent
-    {
-        public int CampaignFunds;
-        public int Lagay;
-        public int UtangNaLoob;
-        public int Heat;
-        public int Support;
-    }
-
-    public class CheatClearHeatEvent : IGameEvent { }
-
-    public class CheatDrawCardsEvent : IGameEvent
-    {
-        public int Amount;
-    }
-
-    public class CheatRefreshHandEvent : IGameEvent { }
-
-    public class CheatUnlockAllCardsEvent : IGameEvent { }
-
-    public class CheatSkipDayEvent : IGameEvent { }
-
-    public class CheatJumpToDayEvent : IGameEvent
-    {
-        public int Day;
-    }
-
-    public class CheatWinBattleEvent : IGameEvent { }
-
-    public class CheatSetOpponentConfidenceEvent : IGameEvent
-    {
-        public int Confidence;
-    }
-
-    #endregion
 }

@@ -182,9 +182,7 @@ namespace Crookedile.Gameplay.Battle
                 amount -= LineOfCreditReduction;
                 if (deck != null && deck.HandCount > 0 && _creditDiscount > 0)
                 {
-                    int index =
-                        Crookedile.Data.RunState.Current?.Rng.Next(deck.HandCount)
-                        ?? UnityEngine.Random.Range(0, deck.HandCount);
+                    int index = BattleRandom.Range(0, deck.HandCount);
                     deck.ReduceCostThisTurn(deck.Hand[index], _creditDiscount);
                 }
                 LineOfCreditReduction = 0;

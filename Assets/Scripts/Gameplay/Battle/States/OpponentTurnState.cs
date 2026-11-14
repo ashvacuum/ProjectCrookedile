@@ -141,7 +141,7 @@ namespace Crookedile.Gameplay.Battle
             if (enemy.Stats.IsReceptive)
             {
                 float skipChance = Mathf.Clamp01(Mathf.Abs(enemy.Stats.CurrentHostility) * 0.20f);
-                if (Random.value < skipChance)
+                if (BattleRandom.Value < skipChance)
                 {
                     GameLogger.LogInfo<BattleManager>(
                         $"Enemy [{i}] {enemy.EnemyData.EnemyName} is Receptive — held back "

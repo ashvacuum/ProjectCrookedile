@@ -26,6 +26,18 @@ namespace Crookedile.Managers
         /// <summary>True once SteamAPI.Init succeeded; gate every Steam call on this.</summary>
         public static bool Initialized { get; private set; }
 
+        /// <summary>
+        /// Gate every achievement and stat write on this, not on <see cref="Initialized"/>: it is
+        /// false once a cheat has been used this session or in the current run, wherever cheats
+        /// are enforced.
+        /// </summary>
+        public static bool ProgressAllowed =>
+            Initialized
+            && !(
+                Cheats.Enforced
+                && (Cheats.UsedThisSession || Data.RunState.Current?.Cheated == true)
+            );
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap() => _ = Instance;
 

@@ -26,7 +26,7 @@ namespace Crookedile.Gameplay.Battle
             var fromDraw = Costly(ctx.Deck.DrawPile);
             if (fromDraw.Count > 0)
             {
-                var card = fromDraw[RandomHelper.Range(0, fromDraw.Count)];
+                var card = fromDraw[BattleRandom.Range(0, fromDraw.Count)];
                 if (ctx.Deck.PullFromDrawPile(card))
                     GameLogger.LogInfo<TakeRandomCostlyCardEffect>(
                         $"Took {card.CardName} from the draw pile"
@@ -37,7 +37,7 @@ namespace Crookedile.Gameplay.Battle
             var fromDiscard = Costly(ctx.Deck.DiscardPile);
             if (fromDiscard.Count > 0)
             {
-                var card = fromDiscard[RandomHelper.Range(0, fromDiscard.Count)];
+                var card = fromDiscard[BattleRandom.Range(0, fromDiscard.Count)];
                 if (ctx.Deck.MoveFromDiscardToHand(card))
                     GameLogger.LogInfo<TakeRandomCostlyCardEffect>(
                         $"Took {card.CardName} from the discard pile"

@@ -10,7 +10,7 @@ namespace Crookedile.Gameplay.Battle
     public class RandomMoveSelector : IMovePatternSelector
     {
         public EnemyMoveData SelectMove(IReadOnlyList<EnemyMoveData> eligibleMoves) =>
-            eligibleMoves[Random.Range(0, eligibleMoves.Count)];
+            eligibleMoves[BattleRandom.Range(0, eligibleMoves.Count)];
 
         public void Reset() { }
     }

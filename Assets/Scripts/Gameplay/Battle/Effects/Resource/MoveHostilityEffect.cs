@@ -37,7 +37,7 @@ namespace Crookedile.Gameplay.Battle
             int moved = ctx.Target.ReduceHostility(amountOverride ?? _amount);
             if (moved <= 0)
                 return;
-            var receiver = others[RandomHelper.Range(0, others.Count)];
+            var receiver = others[BattleRandom.Range(0, others.Count)];
             receiver.Stats.GainHostility(moved);
             ctx.LastHostilityLost += moved;
             GameLogger.LogInfo<MoveHostilityEffect>(

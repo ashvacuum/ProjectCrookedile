@@ -34,7 +34,7 @@ namespace Crookedile.Gameplay.Battle
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
             // amountOverride ignored intentionally — Confused randomises authored amounts only
-            int rolled = RandomHelper.Range(_minDamage, _maxDamage + 1);
+            int rolled = BattleRandom.Range(_minDamage, _maxDamage + 1);
             BattleStats opinionTarget = ctx.IsPlayerCard ? ctx.Target : ctx.PlayerStats;
             ApplyOpinion(opinionTarget, ctx.Caster, rolled, ctx);
         }

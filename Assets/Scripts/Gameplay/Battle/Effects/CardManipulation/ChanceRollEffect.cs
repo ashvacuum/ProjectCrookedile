@@ -32,7 +32,7 @@ namespace Crookedile.Gameplay.Battle
 
         public override void Execute(EffectExecutionContext ctx, int? amountOverride = null)
         {
-            if (!RandomHelper.Chance(_chancePercent / 100f))
+            if (!BattleRandom.Chance(_chancePercent / 100f))
             {
                 GameLogger.LogInfo<ChanceRollEffect>($"Chance roll failed ({_chancePercent}%)");
                 return;
