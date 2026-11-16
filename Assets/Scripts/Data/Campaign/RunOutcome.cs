@@ -678,6 +678,37 @@ namespace Crookedile.Data.Campaign
     }
 
     /// <summary>
+    /// Takes an ally away (docs/allies.md §3): a named one, or one picked at random from those the
+    /// run holds. A lost ally rejoins its pool, so the run can meet them again. No-op when the
+    /// run doesn't hold the named ally, or holds none.
+    /// </summary>
+    [Serializable]
+    public class LoseAllyOutcome : RunOutcome
+    {
+        [Tooltip("On: lose a random ally the run holds. Off: lose the ally named below.")]
+        [SerializeField]
+        private bool _random;
+
+        [Tooltip("The ally who walks. Nothing happens if the run doesn't have them.")]
+        [HideIf(nameof(_random))]
+        [SerializeField]
+        private AllyData _ally;
+
+        public override void Apply(RunState state)
+        {
+            if (!_random)
+                state.RemoveAlly(_ally);
+            else if (state.Allies.Count > 0)
+                state.RemoveAlly(state.Allies[state.Rng.Next(state.Allies.Count)]);
+        }
+
+        public override string GetDescription() =>
+            _random ? "Lose a random ally"
+            : _ally != null ? $"Lose ally: {_ally.AllyName}"
+            : "Lose ally: (NONE SET)";
+    }
+
+    /// <summary>
     /// Ends the day: advances the day counter and refills Hours, exactly as returning to HQ
     /// does. This is the cost for an event that eats the rest of your evening.
     ///

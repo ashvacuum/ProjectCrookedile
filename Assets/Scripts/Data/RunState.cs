@@ -717,6 +717,39 @@ namespace Crookedile.Data
                 Allies.Add(ally);
         }
 
+        /// <summary>Removes <paramref name="ally"/> from the run; it rejoins its pool. False if not held.</summary>
+        public bool RemoveAlly(AllyData ally) => ally != null && Allies.Remove(ally);
+
+        /// <summary>
+        /// Boss allies the player owes a pick from; empty when none. The campaign screen draws it
+        /// over the map. Saved, so quitting before the pick doesn't lose the reward.
+        /// </summary>
+        public List<AllyData> PendingAllyOffer { get; private set; } = new List<AllyData>();
+
+        /// <summary>
+        /// Pays a won encounter's ally reward (docs/allies.md §2): an elite grants random elite
+        /// allies, a boss opens a pick from the boss pool. Other fights give none.
+        /// </summary>
+        public void GrantEncounterAllies(BattleEncounterData encounter)
+        {
+            var roster = AllyDatabase.Shared;
+            if (encounter == null || roster == null)
+                return;
+            if (encounter.IsElite)
+                foreach (var ally in roster.Draw(AllyPool.Elite, Origin, roster.EliteAllies, Allies, Rng))
+                    AddAlly(ally);
+            if (encounter.IsBoss)
+                PendingAllyOffer = roster.Draw(AllyPool.Boss, Origin, roster.BossAllyChoices, Allies, Rng);
+        }
+
+        /// <summary>Takes <paramref name="picked"/> from the open boss offer and closes it.</summary>
+        public void ResolveAllyOffer(AllyData picked)
+        {
+            if (picked != null && PendingAllyOffer.Contains(picked))
+                AddAlly(picked);
+            PendingAllyOffer.Clear();
+        }
+
         /// <summary>Records that the current battle was won (advances meta state).</summary>
         public void RecordBattleVictory() => AddToRunCounter(Save.ProfileCounters.BattlesWon);
 

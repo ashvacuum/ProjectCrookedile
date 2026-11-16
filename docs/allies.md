@@ -1,8 +1,8 @@
 # Allies — the run's build-warping layer
 
-> **Kind:** Design · **Status:** Proposal · **Updated:** 2026-11-09
+> **Kind:** Design · **Status:** Proposal · **Updated:** 2026-11-16
 >
-> **Summary:** What allies are for, where a run gets them (a starting ally per class, events, elite wins, boss wins), how they're lost, class pools, and a starter roster. Proposal: the sources, loss rules and roster below are not built yet.
+> **Summary:** What allies are for, where a run gets them (a starting ally per class, events, elite wins, boss wins), how they're lost, class pools, and a starter roster. Sources and event losses are built; the run-wide loss rule and the boss roster are not.
 >
 > **Source of truth:** this doc · **Related:** [`core-design.md`](core-design.md) · [`metagame-campaign.md`](metagame-campaign.md) · [`campaign-encounters.md`](campaign-encounters.md) · [`naming-glossary.md`](naming-glossary.md)
 
@@ -41,8 +41,8 @@ Every ally does one of three jobs:
 | Source | What you get | Pool | Status |
 |---|---|---|---|
 | Story events | One named ally, fixed by the event (`RecruitAllyOutcome`) | Hand-wired per event | **Built** |
-| Elite win | Pick 1 of 2 | Elite pool for your class, minus allies you hold | Not built |
-| Boss win | Pick 1 of 3, on top of the full Credibility restore | Boss pool for your class: a **mix** of pure and costly allies | Not built |
+| Elite win | One at random (`AllyDatabase` sets how many) | Elite pool for your class, minus allies you hold | **Built** |
+| Boss win | Pick 1 of 3 on the campaign map, on top of the full Credibility restore | Boss pool for your class: a **mix** of pure and costly allies | **Built**; no boss allies authored yet, so it offers nothing |
 
 - **Elites** are the hard optional fights: today the Televangelist, the Dynast and Barangay Tanod, marked by
   `BattleEncounterData.IsElite` (next to `IsBoss`; the encounter CSV's `is elite` column sets it).
@@ -58,7 +58,7 @@ Any ally can be lost. Politics runs on loyalty, and losing a friend should hurt 
 painful, memorable, recoverable.
 
 - **Event outcomes** can take an ally away: a named one ("Sell out your source" loses Anonymous Tip) or a random
-  one. This needs a `LoseAllyOutcome` next to `RecruitAllyOutcome`.
+  one, through `LoseAllyOutcome` (built).
 - **A run-wide rule** may also take one. Candidate: a crushing loss (Opinion collapsed to 0) makes your most recently
   recruited ally walk. Open call, §6.
 - A lost ally returns to its pool, so a run can meet them again.
@@ -85,8 +85,8 @@ same save path, and a boss ally can be designed to upgrade or replace it.
 `OriginDatabase` names each class's `StartingAlly`; `RunState.Create` recruits it, so it sits in `RunState.Allies`
 with every other ally and saves the same way. A battle with no run (the playtest bot's standalone fights) uses the
 origin's starting ally; `BattleManager.ConfigureForSimulation` can pass other allies or none (play-mode tests pass
-none). The ally assets live in `Assets/Data/Allies/` and kept their old asset GUIDs. A run saved before the change
-resumes without its starting ally.
+none). The ally assets live in `Assets/Data/Allies/` and kept their old asset GUIDs. A run saved before save schema v4
+gets its starting ally back on load; from v4 on, a missing starting ally was lost and stays lost.
 
 ## 5. Starter roster
 

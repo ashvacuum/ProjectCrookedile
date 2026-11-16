@@ -159,7 +159,10 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
-            // Encounter fully complete — the player won, so the run continues.
+            // Encounter fully complete — the player won, so the run continues. A boss pick opens
+            // on the campaign screen.
+            if (RunState.Current?.IsCampaignRun == true)
+                RunState.Current.GrantEncounterAllies(RunState.Current.CurrentEncounter);
             ReturnToCampaignOrRestart(runEnded: false);
         }
 

@@ -10,7 +10,7 @@ namespace Crookedile.Data.Save
     /// </summary>
     public class RunSaveData
     {
-        public const ushort SchemaVersion = 3;
+        public const ushort SchemaVersion = 4;
 
         public struct CardEntry
         {
@@ -58,6 +58,15 @@ namespace Crookedile.Data.Save
 
         /// <summary>Signed change to the origin's Credibility cap (v3+; older saves load as 0).</summary>
         public int MaxCredibilityBonus;
+
+        /// <summary>Boss allies offered but not yet picked (v4+; older saves load empty).</summary>
+        public List<string> PendingAllyOfferIds = new List<string>();
+
+        /// <summary>
+        /// Schema the data was read from. A save older than v4 predates losable allies, so a
+        /// missing starting ally there is a gap from before starting allies existed, never a loss.
+        /// </summary>
+        public ushort Version = SchemaVersion;
 
         public byte[] ToBytes() =>
             SaveEnvelope.Wrap(SaveKind.Run, SchemaVersion, SaveBinary.ToBytes(Write));
@@ -117,6 +126,7 @@ namespace Crookedile.Data.Save
             w.WriteCounters(RunCounters);
             w.Write(CardsSinceRare);
             w.Write(MaxCredibilityBonus);
+            w.WriteStrings(PendingAllyOfferIds);
         }
 
         private static RunSaveData Read(BinaryReader r, ushort version)
@@ -169,6 +179,9 @@ namespace Crookedile.Data.Save
                 data.CardsSinceRare = r.ReadInt32();
             if (version >= 3)
                 data.MaxCredibilityBonus = r.ReadInt32();
+            if (version >= 4)
+                data.PendingAllyOfferIds = r.ReadStringList();
+            data.Version = version;
             return data;
         }
     }

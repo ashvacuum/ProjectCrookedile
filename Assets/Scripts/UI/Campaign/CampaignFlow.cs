@@ -416,6 +416,8 @@ namespace Crookedile.UI.Campaign
 
             if (state.PendingCardChoice != null)
                 _content.Add(BuildCardChoicePanel(state.PendingCardChoice));
+            else if (state.PendingAllyOffer.Count > 0)
+                _content.Add(BuildAllyOfferPanel(state.PendingAllyOffer));
             else if (_openEvent != null)
                 _content.Add(BuildEventPanel());
             else
@@ -653,6 +655,44 @@ namespace Crookedile.UI.Campaign
                     desc.AddToClassList("blurb");
                     panel.Add(desc);
                 }
+            }
+
+            return panel;
+        }
+
+        /// <summary>
+        /// Draws the boss win's ally pick. No skip: <see cref="AllyDatabase.Draw"/> never offers
+        /// an empty list, and an ally is always worth taking.
+        /// </summary>
+        private VisualElement BuildAllyOfferPanel(List<AllyData> offer)
+        {
+            var panel = new VisualElement();
+            panel.AddToClassList("panel");
+
+            var title = new Label("Choose an ally");
+            title.AddToClassList("title");
+            panel.Add(title);
+
+            foreach (var ally in offer.ToArray())
+            {
+                if (ally == null)
+                    continue;
+
+                var button = new Button(() =>
+                {
+                    RunState.Current.ResolveAllyOffer(ally);
+                    GameLogger.LogInfo("Campaign", $"Ally chosen: '{ally.AllyName}'.", this);
+                    RefreshView();
+                })
+                {
+                    text = ally.AllyName,
+                };
+                button.AddToClassList("action-button");
+                panel.Add(button);
+
+                var desc = new Label(ally.Description);
+                desc.AddToClassList("blurb");
+                panel.Add(desc);
             }
 
             return panel;

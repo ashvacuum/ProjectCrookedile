@@ -61,6 +61,9 @@ namespace Crookedile.Data
             foreach (var ally in Allies)
                 if (ally != null)
                     data.AllyIds.Add(ally.Id);
+            foreach (var ally in PendingAllyOffer)
+                if (ally != null)
+                    data.PendingAllyOfferIds.Add(ally.Id);
             foreach (var location in TodaysLocations)
                 if (location != null)
                     data.TodaysLocationIds.Add(location.ID);
@@ -139,6 +142,20 @@ namespace Crookedile.Data
                 var ally = content.Ally(id);
                 if (ally != null)
                     run.Allies.Add(ally);
+                else
+                    lost.Add($"ally {id}");
+            }
+            // Saves from before starting allies existed resume without one; v4+ saves hold
+            // exactly what the run kept, since an ally can now be lost.
+            if (data.Version < 4)
+                foreach (var ally in StartingAllies(run.Origin))
+                    run.AddAlly(ally);
+
+            foreach (var id in data.PendingAllyOfferIds)
+            {
+                var ally = content.Ally(id);
+                if (ally != null)
+                    run.PendingAllyOffer.Add(ally);
                 else
                     lost.Add($"ally {id}");
             }

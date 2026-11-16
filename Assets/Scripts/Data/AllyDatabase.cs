@@ -23,7 +23,81 @@ namespace Crookedile.Data
         [SerializeField]
         private List<AllyData> _allies = new List<AllyData>();
 
+        [Tooltip("Allies granted at random from the class's elite pool after an elite win.")]
+        [MinValue(0)]
+        [SerializeField]
+        private int _eliteAllies = 1;
+
+        [Tooltip("Allies offered from the class's boss pool after a boss win; the player keeps one.")]
+        [MinValue(0)]
+        [SerializeField]
+        private int _bossAllyChoices = 3;
+
         public IReadOnlyList<AllyData> Allies => _allies;
+        public int EliteAllies => _eliteAllies;
+        public int BossAllyChoices => _bossAllyChoices;
+
+        public const string ResourcePath = "Databases/AllyDatabase";
+        private static AllyDatabase _cached;
+
+        /// <summary>The shipped roster, loaded from Resources.</summary>
+        public static AllyDatabase Shared
+        {
+            get
+            {
+                // Re-resolves on null rather than caching the miss — a domain reload clears this.
+                if (_cached == null)
+                    _cached = Resources.Load<AllyDatabase>(ResourcePath);
+                return _cached;
+            }
+        }
+
+        /// <summary>
+        /// Up to <paramref name="count"/> random allies from <paramref name="pool"/> that
+        /// <paramref name="origin"/> can be offered (its class allies plus shared ones), minus
+        /// <paramref name="exclude"/>. When the pool has both, the first two are one costly and
+        /// one pure ally, so a boss pick is a real decision. A short pool returns fewer, never a
+        /// duplicate.
+        /// </summary>
+        public List<AllyData> Draw(
+            AllyPool pool,
+            OriginType origin,
+            int count,
+            ICollection<AllyData> exclude,
+            System.Random rng
+        )
+        {
+            var pure = new List<AllyData>();
+            var costly = new List<AllyData>();
+            foreach (var ally in _allies)
+            {
+                if (ally == null || ally.Pool != pool || (exclude != null && exclude.Contains(ally)))
+                    continue;
+                if (ally.Origin.HasValue && ally.Origin.Value != origin)
+                    continue;
+                if (!pure.Contains(ally) && !costly.Contains(ally))
+                    (ally.HasCost ? costly : pure).Add(ally);
+            }
+
+            var picked = new List<AllyData>();
+            if (count >= 2 && pure.Count > 0 && costly.Count > 0)
+            {
+                picked.Add(TakeRandom(costly, rng));
+                picked.Add(TakeRandom(pure, rng));
+            }
+            pure.AddRange(costly);
+            while (picked.Count < count && pure.Count > 0)
+                picked.Add(TakeRandom(pure, rng));
+            return picked;
+        }
+
+        private static AllyData TakeRandom(List<AllyData> from, System.Random rng)
+        {
+            int i = rng.Next(from.Count);
+            var ally = from[i];
+            from.RemoveAt(i);
+            return ally;
+        }
 
         /// <summary>Allies listed twice, or blank rows — both make the index lie.</summary>
         private string DuplicateWarning()

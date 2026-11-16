@@ -254,6 +254,7 @@ namespace Crookedile.Tests
             run.Deck.Add(new RunSaveData.CardEntry { Id = "c1", Upgraded = false });
             run.Deck.Add(new RunSaveData.CardEntry { Id = "c2", Upgraded = true });
             run.AllyIds.Add("ally");
+            run.PendingAllyOfferIds.Add("boss-ally");
             run.VisitedLocationIds.Add("loc");
             run.Flags.Add("took_the_bribe");
             run.TodaysLocationIds.Add("loc2");
@@ -293,19 +294,41 @@ namespace Crookedile.Tests
             Assert.AreEqual(4, back.RunCounters["battles_won"]);
             Assert.AreEqual(7, back.CardsSinceRare);
             Assert.AreEqual(-5, back.MaxCredibilityBonus);
+            CollectionAssert.AreEqual(new[] { "boss-ally" }, back.PendingAllyOfferIds);
+            Assert.AreEqual(RunSaveData.SchemaVersion, back.Version);
+        }
+
+        [Test]
+        public void RunSave_Version3LoadsWithNoAllyOffer()
+        {
+            // A v3 payload is the v4 one without its trailing (empty) PendingAllyOfferIds count.
+            byte[] v4 = SaveEnvelope.Unwrap(
+                new RunSaveData { MaxCredibilityBonus = 12 }.ToBytes(),
+                SaveKind.Run,
+                out _
+            );
+            byte[] v3 = new byte[v4.Length - sizeof(int)];
+            Array.Copy(v4, v3, v3.Length);
+
+            var back = RunSaveData.FromBytes(SaveEnvelope.Wrap(SaveKind.Run, 3, v3));
+
+            Assert.AreEqual(12, back.MaxCredibilityBonus);
+            Assert.AreEqual(0, back.PendingAllyOfferIds.Count);
+            Assert.AreEqual(3, back.Version);
         }
 
         [Test]
         public void RunSave_Version2LoadsWithNoMaxCredibilityBonus()
         {
-            // A v2 payload is the v3 one without its trailing MaxCredibilityBonus int.
-            byte[] v3 = SaveEnvelope.Unwrap(
+            // A v2 payload is the v4 one without its trailing MaxCredibilityBonus int and
+            // empty PendingAllyOfferIds count.
+            byte[] v4 = SaveEnvelope.Unwrap(
                 new RunSaveData { CardsSinceRare = 4, MaxCredibilityBonus = 12 }.ToBytes(),
                 SaveKind.Run,
                 out _
             );
-            byte[] v2 = new byte[v3.Length - sizeof(int)];
-            Array.Copy(v3, v2, v2.Length);
+            byte[] v2 = new byte[v4.Length - 2 * sizeof(int)];
+            Array.Copy(v4, v2, v2.Length);
 
             var back = RunSaveData.FromBytes(SaveEnvelope.Wrap(SaveKind.Run, 2, v2));
 
@@ -316,14 +339,15 @@ namespace Crookedile.Tests
         [Test]
         public void RunSave_Version1LoadsWithNoPity()
         {
-            // A v1 payload is the v3 one without its trailing CardsSinceRare and MaxCredibilityBonus ints.
-            byte[] v3 = SaveEnvelope.Unwrap(
+            // A v1 payload is the v4 one without its trailing CardsSinceRare and MaxCredibilityBonus
+            // ints and empty PendingAllyOfferIds count.
+            byte[] v4 = SaveEnvelope.Unwrap(
                 new RunSaveData { Funds = 5, CardsSinceRare = 9 }.ToBytes(),
                 SaveKind.Run,
                 out _
             );
-            byte[] v1 = new byte[v3.Length - 2 * sizeof(int)];
-            Array.Copy(v3, v1, v1.Length);
+            byte[] v1 = new byte[v4.Length - 3 * sizeof(int)];
+            Array.Copy(v4, v1, v1.Length);
 
             var back = RunSaveData.FromBytes(SaveEnvelope.Wrap(SaveKind.Run, 1, v1));
 

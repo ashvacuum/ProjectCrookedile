@@ -224,6 +224,11 @@ namespace Crookedile.EditorTools.Playtest
                         guaranteeRare: guaranteeRare
                     );
                     state.NoteRewardOffer(offers);
+                    state.GrantEncounterAllies(battle); // mirrors PostBattleFlow
+                    if (state.PendingAllyOffer.Count > 0)
+                        state.ResolveAllyOffer(
+                            state.PendingAllyOffer[rng.Next(state.PendingAllyOffer.Count)]
+                        );
                     var reward = bot.ChooseReward(offers, rng);
                     if (reward != null)
                     {
