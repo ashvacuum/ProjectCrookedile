@@ -149,6 +149,7 @@ namespace Crookedile.Gameplay.Battle
             Subscribe<EnemyMaxedHostilityEvent>();
             Subscribe<EnemyMaxedReceptiveEvent>();
             Subscribe<EnemyConvertedEvent>();
+            Subscribe<FanaticDisillusionedEvent>();
             Subscribe<DebtUnpaidEvent>();
         }
 

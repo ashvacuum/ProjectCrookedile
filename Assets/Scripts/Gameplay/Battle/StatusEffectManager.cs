@@ -550,6 +550,8 @@ namespace Crookedile.Gameplay.Battle
         {
             _activeEffects.Remove(effect);
             _byId.Remove(effect.Id);
+            // Flags first, so whatever OnDepleted sets off sees the status as gone.
+            SyncHostilityFlags();
             effect.Behavior.OnDepleted(_owner, this);
         }
 
@@ -558,6 +560,7 @@ namespace Crookedile.Gameplay.Battle
             StatusEffect effect = _activeEffects[index];
             _activeEffects.RemoveAt(index);
             _byId.Remove(effect.Id);
+            SyncHostilityFlags();
             effect.Behavior.OnDepleted(_owner, this);
         }
 

@@ -749,6 +749,9 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Faith Leader pacify conversions made this player turn (Sermon harvest scaling).</summary>
         public int ConversionsThisTurn => _pacify?.ConversionsThisTurn ?? 0;
 
+        /// <summary>Faith Leader pacify conversions made this battle.</summary>
+        public int ConversionsThisBattle => _pacify?.ConversionsThisBattle ?? 0;
+
         /// <summary>The pacify statuses that count toward (and are consumed by) a conversion.</summary>
         public static bool IsPacifyStatus(StatusBehavior behavior) =>
             PacifyConversionEngine.IsPacifyStatus(behavior);

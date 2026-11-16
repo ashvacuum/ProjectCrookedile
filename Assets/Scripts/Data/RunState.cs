@@ -728,7 +728,8 @@ namespace Crookedile.Data
 
         /// <summary>
         /// Pays a won encounter's ally reward (docs/allies.md §2): an elite grants random elite
-        /// allies, a boss opens a pick from the boss pool. Other fights give none.
+        /// allies, a boss opens a pick from the boss and elite pools (boss-pool allies are the
+        /// boss-only ones). Other fights give none.
         /// </summary>
         public void GrantEncounterAllies(BattleEncounterData encounter)
         {
@@ -736,10 +737,17 @@ namespace Crookedile.Data
             if (encounter == null || roster == null)
                 return;
             if (encounter.IsElite)
-                foreach (var ally in roster.Draw(AllyPool.Elite, Origin, roster.EliteAllies, Allies, Rng))
+                foreach (var ally in roster.Draw(Origin, roster.EliteAllies, Allies, Rng, AllyPool.Elite))
                     AddAlly(ally);
             if (encounter.IsBoss)
-                PendingAllyOffer = roster.Draw(AllyPool.Boss, Origin, roster.BossAllyChoices, Allies, Rng);
+                PendingAllyOffer = roster.Draw(
+                    Origin,
+                    roster.BossAllyChoices,
+                    Allies,
+                    Rng,
+                    AllyPool.Boss,
+                    AllyPool.Elite
+                );
         }
 
         /// <summary>Takes <paramref name="picked"/> from the open boss offer and closes it.</summary>

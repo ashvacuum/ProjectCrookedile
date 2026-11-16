@@ -53,25 +53,29 @@ namespace Crookedile.Data
         }
 
         /// <summary>
-        /// Up to <paramref name="count"/> random allies from <paramref name="pool"/> that
+        /// Up to <paramref name="count"/> random allies from <paramref name="pools"/> that
         /// <paramref name="origin"/> can be offered (its class allies plus shared ones), minus
-        /// <paramref name="exclude"/>. When the pool has both, the first two are one costly and
+        /// <paramref name="exclude"/>. When the pools hold both, the first two are one costly and
         /// one pure ally, so a boss pick is a real decision. A short pool returns fewer, never a
         /// duplicate.
         /// </summary>
         public List<AllyData> Draw(
-            AllyPool pool,
             OriginType origin,
             int count,
             ICollection<AllyData> exclude,
-            System.Random rng
+            System.Random rng,
+            params AllyPool[] pools
         )
         {
             var pure = new List<AllyData>();
             var costly = new List<AllyData>();
             foreach (var ally in _allies)
             {
-                if (ally == null || ally.Pool != pool || (exclude != null && exclude.Contains(ally)))
+                if (
+                    ally == null
+                    || System.Array.IndexOf(pools, ally.Pool) < 0
+                    || (exclude != null && exclude.Contains(ally))
+                )
                     continue;
                 if (ally.Origin.HasValue && ally.Origin.Value != origin)
                     continue;

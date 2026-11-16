@@ -27,6 +27,9 @@ namespace Crookedile.Gameplay.Battle
         [SerializeReference]
         private StatusBehavior _behavior;
 
+        /// <summary>The status this effect applies.</summary>
+        public StatusBehavior Behavior => _behavior;
+
         [Tooltip("Base number of stacks to apply. Ignored when Stacks Source is not Fixed.")]
         [ShowIf("@_stacksSource == EffectContextValue.FixedAmount")]
         [SerializeField]

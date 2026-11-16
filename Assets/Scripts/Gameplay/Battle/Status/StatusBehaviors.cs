@@ -69,6 +69,10 @@ namespace Crookedile.Gameplay.Battle
                     jaded,
                     StatusDurationType.Permanent
                 );
+            if (owner != null && owner.OwnerEnemyIndex >= 0)
+                Crookedile.Core.EventBus.Publish(
+                    new FanaticDisillusionedEvent { EnemyIndex = owner.OwnerEnemyIndex }
+                );
         }
     }
 

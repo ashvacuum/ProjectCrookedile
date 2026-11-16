@@ -39,6 +39,9 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Resets the per-turn conversion tally. Call at the start of each player turn.</summary>
         public void ResetTurnTally() => ConversionsThisTurn = 0;
 
+        /// <summary>Conversions made this battle (the engine lives for one battle).</summary>
+        public int ConversionsThisBattle { get; private set; }
+
         /// <summary>The pacify statuses that count toward (and are consumed by) a conversion.</summary>
         public static bool IsPacifyStatus(StatusBehavior behavior) =>
             behavior != null && behavior.CountsTowardPacify;
@@ -136,6 +139,7 @@ namespace Crookedile.Gameplay.Battle
             enemyStats.SetHostility(0);
 
             ConversionsThisTurn++;
+            ConversionsThisBattle++;
 
             GameLogger.LogInfo<PacifyConversionEngine>(
                 $"Enemy [{idx}] converted — {consumed} pacify stacks consumed"

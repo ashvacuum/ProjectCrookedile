@@ -2,7 +2,7 @@
 
 > **Kind:** Design · **Status:** Proposal · **Updated:** 2026-11-16
 >
-> **Summary:** What allies are for, where a run gets them (a starting ally per class, events, elite wins, boss wins), how they're lost, class pools, and a starter roster. Sources and event losses are built; the run-wide loss rule and the boss roster are not.
+> **Summary:** What allies are for, where a run gets them (a starting ally per class, events, elite wins, boss wins), how they're lost, class pools, and a starter roster. Sources, event losses and the Faith Leader boss pool are built; the run-wide loss rule is not.
 >
 > **Source of truth:** this doc · **Related:** [`core-design.md`](core-design.md) · [`metagame-campaign.md`](metagame-campaign.md) · [`campaign-encounters.md`](campaign-encounters.md) · [`naming-glossary.md`](naming-glossary.md)
 
@@ -42,7 +42,7 @@ Every ally does one of three jobs:
 |---|---|---|---|
 | Story events | One named ally, fixed by the event (`RecruitAllyOutcome`) | Hand-wired per event | **Built** |
 | Elite win | One at random (`AllyDatabase` sets how many) | Elite pool for your class, minus allies you hold | **Built** |
-| Boss win | Pick 1 of 3 on the campaign map, on top of the full Credibility restore | Boss pool for your class: a **mix** of pure and costly allies | **Built**; no boss allies authored yet, so it offers nothing |
+| Boss win | Pick 1 of 3 on the campaign map, on top of the full Credibility restore | Boss and elite pools for your class: a **mix** of pure and costly allies. Boss-pool allies appear only here | **Built** |
 
 - **Elites** are the hard optional fights: today the Televangelist, the Dynast and Barangay Tanod, marked by
   `BattleEncounterData.IsElite` (next to `IsBoss`; the encounter CSV's `is elite` column sets it).
@@ -107,14 +107,14 @@ the shared elite pool below.
 Choir Director stands in for "the Fanatic follows a turn longer" until the Fanatic numbers settle (§6.2). Cut for now:
 Confessor (Guilt on a hostile enemy gains 1 Support) and Altar Server (first Policy each battle costs 0).
 
-### Faith Leader — boss pool (mixed)
+### Faith Leader — boss pool (built, mixed)
 
 | Ally | Effect | Cost |
 |---|---|---|
-| Megachurch Board | The conversion Policy starts in play every battle | Your Guilt cards cost +1 |
-| Firebrand Preacher | Fanatics push +3 | A disillusioned Fanatic goes to +3 Hostility instead of neutral |
+| Megachurch Board | The conversion Policy is in play every battle (the ally carries its passive) | Your Guilt cards cost +1 (cards in the deck at battle start whose effects apply Guilt) |
+| Firebrand Preacher | Fanatics push +3 (each convert gains 3 Strength) | A disillusioned Fanatic goes to +3 Hostility instead of neutral |
 | Revival Tent | The first enemy you convert each battle needs no conversion Policy | none |
-| Tithe Collector | +Funds per conversion, paid at day end | none |
+| Tithe Collector | +5 Funds per conversion, paid at once (not banked to day end yet) | none |
 
 Revival Tent deliberately bends the rule that conversion happens only while a conversion Policy is in play. It is a
 boss reward, so the exception is earned; drop it if the rule should hold everywhere.

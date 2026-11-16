@@ -537,6 +537,16 @@ namespace Crookedile.Gameplay.Battle
         public bool WasSilenced;
     }
 
+    /// <summary>
+    /// A Fanatic's buff ran out and it reverted to neutral (<c>FanaticStatus.OnDepleted</c>).
+    /// Published after the revert, so passives see the enemy as it now stands.
+    /// </summary>
+    public struct FanaticDisillusionedEvent : IGameEvent
+    {
+        /// <summary>Zero-based index into <c>BattleManager.Enemies</c> of the former Fanatic.</summary>
+        public int EnemyIndex;
+    }
+
     #endregion
 
     #region Opinion Meter Events
