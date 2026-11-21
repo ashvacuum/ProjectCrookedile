@@ -17,7 +17,7 @@ namespace Crookedile.Managers
     ///   • Assign <see cref="_floatingTextPrefab"/> to a prefab with a <see cref="FloatingText"/> component.
     /// </summary>
     [Debuggable("FloatingText", LogLevel.Warning)]
-    public class FloatingTextManager : Singleton<FloatingTextManager>
+    public class FloatingTextManager : SceneSingleton<FloatingTextManager>
     {
         #region Inspector Fields
         [Header("Canvas")]

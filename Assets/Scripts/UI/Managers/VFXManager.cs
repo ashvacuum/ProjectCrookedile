@@ -30,7 +30,7 @@ namespace Crookedile.Managers
     ///   • Assign <see cref="_vfxPrefab"/> to the shared VFX Base prefab (Image + Animator with all clips).
     /// </summary>
     [Debuggable("VFX", LogLevel.Warning)]
-    public class VFXManager : Singleton<VFXManager>
+    public class VFXManager : SceneSingleton<VFXManager>
     {
         #region Inspector Fields
         [Header("VFX Canvas")]

@@ -47,7 +47,7 @@ namespace Crookedile.UI.Battle
     ///   <see cref="DeckTransform"/> is supplied at runtime by <see cref="CardZoneBar"/>.
     /// </summary>
     [Debuggable("Card", LogLevel.Info)]
-    public class CardFlyAnimator : Singleton<CardFlyAnimator>
+    public class CardFlyAnimator : SceneSingleton<CardFlyAnimator>
     {
         #region Inspector
         [Header("Transforms")]

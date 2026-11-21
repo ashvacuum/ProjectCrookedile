@@ -25,7 +25,7 @@ namespace Crookedile.UI.Battle
     ///                                           re-parents to this transform, deactivates.
     /// </summary>
     [Debuggable("Pool")]
-    public class BattlePoolManager : Singleton<BattlePoolManager>
+    public class BattlePoolManager : SceneSingleton<BattlePoolManager>
     {
         [Header("Card Prefabs — one per CardType")]
         [Tooltip("CardButton prefab used for Pressure cards.")]
