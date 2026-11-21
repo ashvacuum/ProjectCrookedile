@@ -38,9 +38,6 @@ namespace Crookedile.Managers
                 && (Cheats.UsedThisSession || Data.RunState.Current?.Cheated == true)
             );
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Bootstrap() => _ = Instance;
-
 #if !DISABLESTEAMWORKS
         protected override void OnAwake()
         {

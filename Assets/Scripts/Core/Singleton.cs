@@ -2,6 +2,13 @@ using UnityEngine;
 
 namespace Crookedile.Core
 {
+    /// <summary>
+    /// One instance for the whole session, kept across scene loads. Only for services that own
+    /// everything they reference (audio, cheats, Steam, scene loading); the UI assembly's
+    /// <c>Bootstrap</c> creates them before the first scene, so <see cref="Instance"/> never
+    /// makes an unconfigured stand-in: a service the bootstrapper didn't start is null and logged.
+    /// A manager wired to objects in its scene is a <see cref="SceneSingleton{T}"/> instead.
+    /// </summary>
     public class Singleton<T> : MonoBehaviour
         where T : MonoBehaviour
     {
@@ -23,13 +30,12 @@ namespace Crookedile.Core
                     if (_instance == null)
                     {
                         _instance = FindFirstObjectByType<T>();
-
-                        if (_instance == null)
+                        if (_instance == null && !_reportedMissing)
                         {
-                            GameObject singletonObject = new GameObject();
-                            _instance = singletonObject.AddComponent<T>();
-                            singletonObject.name = typeof(T).ToString() + " (Singleton)";
-                            DontDestroyOnLoad(singletonObject);
+                            _reportedMissing = true;
+                            Debug.LogError(
+                                $"{typeof(T).Name} is not running: Bootstrap didn't start it."
+                            );
                         }
                     }
 
@@ -38,17 +44,21 @@ namespace Crookedile.Core
             }
         }
 
+        private static bool _reportedMissing;
+
         private void Awake()
         {
             if (_instance == null)
             {
                 _instance = this as T;
-                DontDestroyOnLoad(gameObject);
+                // Services share the bootstrapper's object; only a root can be kept across loads.
+                DontDestroyOnLoad(transform.root.gameObject);
                 OnAwake();
             }
             else if (_instance != this)
             {
-                Destroy(gameObject);
+                // Only this component: a shared services object must not lose its neighbours.
+                Destroy(this);
             }
         }
 

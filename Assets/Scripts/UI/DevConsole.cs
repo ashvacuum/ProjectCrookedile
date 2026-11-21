@@ -24,24 +24,13 @@ namespace Crookedile.UI
     /// Colour coding: log level tints the message, each category gets a stable hue,
     /// and the level buttons along the top light up when that level is shown.
     ///
-    /// Builds its own canvas at runtime, so there is nothing to wire up in a scene.
+    /// Builds its own canvas at runtime, so there is nothing to wire up in a scene. Started by
+    /// <see cref="Bootstrap"/> in cheat, editor and development builds.
     /// </summary>
     [Debuggable("Console", LogLevel.Info)]
     public class DevConsole : MonoBehaviour
     {
-        #region Bootstrap
-#if CHEATS_ENABLED || UNITY_EDITOR || DEVELOPMENT_BUILD
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void Bootstrap()
-        {
-            if (Instance != null)
-                return;
-            var go = new GameObject("[DevConsole]");
-            DontDestroyOnLoad(go);
-            go.AddComponent<DevConsole>();
-        }
-#endif
-
+        #region Instance
         public static DevConsole Instance { get; private set; }
 
         public bool IsVisible => _root != null && _root.activeSelf;
@@ -116,7 +105,7 @@ namespace Crookedile.UI
         {
             if (Instance != null && Instance != this)
             {
-                Destroy(gameObject);
+                Destroy(this); // only this component: it shares the bootstrapper's services object
                 return;
             }
             Instance = this;
