@@ -53,7 +53,7 @@ namespace Crookedile.Data.Save
             string.IsNullOrEmpty(id) || _enemies == null ? null : _enemies.GetByID(id);
 
         public AllyData Ally(string id) =>
-            string.IsNullOrEmpty(id) || _allies == null ? null : _allies.GetById(id);
+            string.IsNullOrEmpty(id) || _allies == null ? null : _allies.GetByID(id);
 
         public EncounterData Encounter(string id) =>
             !string.IsNullOrEmpty(id) && _encounters.TryGetValue(id, out var e) ? e : null;
