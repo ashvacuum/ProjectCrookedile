@@ -158,3 +158,8 @@ MonoBehaviour:
     color: {r: 1, g: 1, b: 1, a: 1}
     effectName: 
     description: 
+  - id: glamour
+    icon: {fileID: 21300000, guid: dadfd2e3b63961e4f9d6d7642c019b38, type: 3}
+    color: {r: 1, g: 1, b: 1, a: 1}
+    effectName: Glamour
+    description: After the enemy turn, raises Opinion by its stacks, then fades. Opinion hits that get past Support strip it.
