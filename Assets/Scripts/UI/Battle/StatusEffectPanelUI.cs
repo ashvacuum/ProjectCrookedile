@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Crookedile.Data.Battle;
 using Crookedile.Gameplay.Battle;
+using Crookedile.Utilities;
 using UnityEngine;
 
 namespace Crookedile.UI.Battle
@@ -17,6 +18,7 @@ namespace Crookedile.UI.Battle
     ///   1. Add this component to a child GameObject with a HorizontalLayoutGroup.
     ///   2. Assign <see cref="_iconMap"/>, <see cref="_iconPrefab"/>, and <see cref="_container"/>.
     /// </summary>
+    [Debuggable("Status")]
     public class StatusEffectPanelUI : MonoBehaviour
     {
         [Tooltip("ScriptableObject mapping status id → icon sprite and tint color.")]
@@ -50,8 +52,8 @@ namespace Crookedile.UI.Battle
                 return;
             if (_iconMap == null)
             {
-                Debug.LogWarning(
-                    $"[StatusEffectPanelUI] _iconMap is not assigned on {gameObject.name} — assign a StatusEffectIconMapSO in the Inspector.",
+                GameLogger.LogWarning<StatusEffectPanelUI>(
+                    $"_iconMap is not assigned on {gameObject.name} — assign a StatusEffectIconMapSO in the Inspector.",
                     this
                 );
                 return;
@@ -82,8 +84,8 @@ namespace Crookedile.UI.Battle
                         // Missing wiring must be LOUD: an active status with no map entry
                         // would otherwise be silently invisible to the player.
                         if (_warnedIds.Add(effect.Id))
-                            Debug.LogWarning(
-                                $"[StatusEffectPanelUI] Active status '{effect.Id}' has no entry in "
+                            GameLogger.LogWarning<StatusEffectPanelUI>(
+                                $"Active status '{effect.Id}' has no entry in "
                                     + $"'{_iconMap.name}' — its icon will not be shown. "
                                     + "Use Crookedile → Database → Statuses → Seed missing icon-map entries, then assign a sprite.",
                                 _iconMap
@@ -91,8 +93,8 @@ namespace Crookedile.UI.Battle
                         continue;
                     }
                     if (icon == null && _warnedIds.Add(effect.Id + ":icon"))
-                        Debug.LogWarning(
-                            $"[StatusEffectPanelUI] Icon-map entry '{effect.Id}' has no sprite assigned "
+                        GameLogger.LogWarning<StatusEffectPanelUI>(
+                            $"Icon-map entry '{effect.Id}' has no sprite assigned "
                                 + $"in '{_iconMap.name}' — the pill will render blank.",
                             _iconMap
                         );

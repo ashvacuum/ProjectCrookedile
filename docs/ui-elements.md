@@ -72,7 +72,7 @@ above it.*
 
 ## Cleanup
 
-- [ ] Delete the player's `Resolve` block (`Hp bar`, `ComposureImage`, `ResolveText`) from `Player Info Panel`.
+- [x] Delete the player's `Resolve` block (`Hp bar`, `ComposureImage`, `ResolveText`) from `Player Info Panel`.
   HP and composure are gone; no script references it.
 
 ## Open questions

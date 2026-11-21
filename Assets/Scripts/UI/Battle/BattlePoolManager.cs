@@ -24,6 +24,7 @@ namespace Crookedile.UI.Battle
     ///   3. <c>ReturnCard(btn)</c>             — reads <c>btn.PooledCardType</c>, resets state,
     ///                                           re-parents to this transform, deactivates.
     /// </summary>
+    [Debuggable("Pool")]
     public class BattlePoolManager : Singleton<BattlePoolManager>
     {
         [Header("Card Prefabs — one per CardType")]
@@ -92,8 +93,8 @@ namespace Crookedile.UI.Battle
                     transform
                 );
             else
-                Debug.LogWarning(
-                    "[BattlePoolManager] Pressure card prefab is not assigned — Pressure pool not created."
+                GameLogger.LogWarning<BattlePoolManager>(
+                    "Pressure card prefab is not assigned — Pressure pool not created."
                 );
 
             if (_rhetoricCardPrefab != null)
@@ -103,8 +104,8 @@ namespace Crookedile.UI.Battle
                     transform
                 );
             else
-                Debug.LogWarning(
-                    "[BattlePoolManager] Rhetoric card prefab is not assigned — Rhetoric pool not created."
+                GameLogger.LogWarning<BattlePoolManager>(
+                    "Rhetoric card prefab is not assigned — Rhetoric pool not created."
                 );
 
             if (_policyCardPrefab != null)
@@ -114,8 +115,8 @@ namespace Crookedile.UI.Battle
                     transform
                 );
             else
-                Debug.LogWarning(
-                    "[BattlePoolManager] Policy card prefab is not assigned — Policy pool not created."
+                GameLogger.LogWarning<BattlePoolManager>(
+                    "Policy card prefab is not assigned — Policy pool not created."
                 );
 
             if (_statusCardPrefab != null)
@@ -125,8 +126,8 @@ namespace Crookedile.UI.Battle
                     transform
                 );
             else
-                Debug.LogWarning(
-                    "[BattlePoolManager] Status card prefab is not assigned — Status pool not created."
+                GameLogger.LogWarning<BattlePoolManager>(
+                    "Status card prefab is not assigned — Status pool not created."
                 );
 
             if (_curseCardPrefab != null)
@@ -136,8 +137,8 @@ namespace Crookedile.UI.Battle
                     transform
                 );
             else
-                Debug.LogWarning(
-                    "[BattlePoolManager] Curse card prefab is not assigned — Curse pool not created."
+                GameLogger.LogWarning<BattlePoolManager>(
+                    "Curse card prefab is not assigned — Curse pool not created."
                 );
 
             if (_enemySlotPrefab != null)
@@ -147,8 +148,8 @@ namespace Crookedile.UI.Battle
                     transform
                 );
             else
-                Debug.LogWarning(
-                    "[BattlePoolManager] Enemy slot prefab is not assigned — slot pool not created."
+                GameLogger.LogWarning<BattlePoolManager>(
+                    "Enemy slot prefab is not assigned — slot pool not created."
                 );
         }
 

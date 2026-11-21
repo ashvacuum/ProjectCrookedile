@@ -3,6 +3,7 @@ using System.Linq;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
+using Crookedile.Utilities;
 using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
@@ -17,6 +18,7 @@ namespace Crookedile.Gameplay.Battle
     /// Drop on a GameObject alongside BattleManager and BattleUI; assign a
     /// BattleSession and (preferably) the per-origin starter deck lists below.
     /// </summary>
+    [Debuggable("BattleSetup")]
     public class BattleTestStarter : MonoBehaviour
     {
         /// <summary>One starter-deck entry: a direct card asset reference plus copy count.</summary>
@@ -137,8 +139,8 @@ namespace Crookedile.Gameplay.Battle
 
             if (effectiveSession == null || effectiveSession.RoundCount == 0)
             {
-                Debug.LogError(
-                    "[BattleTestStarter] No BattleSession assigned (or it has no rounds). "
+                GameLogger.LogError<BattleTestStarter>(
+                    "No BattleSession assigned (or it has no rounds). "
                         + "Create one via Right-click → Crookedile / Battle Session and assign it."
                 );
                 return;
@@ -168,12 +170,16 @@ namespace Crookedile.Gameplay.Battle
             // Continue an existing run — but only if it actually carries a deck. A stale or
             // empty RunState (e.g. left over in the editor, or a prior half-built run) would
             // otherwise launch a cardless battle; fall through to a fresh build instead.
-            if (RunState.Current != null && RunState.Current.Deck != null && RunState.Current.Deck.Count > 0)
+            if (
+                RunState.Current != null
+                && RunState.Current.Deck != null
+                && RunState.Current.Deck.Count > 0
+            )
             {
                 playerOrigin = RunState.Current.Origin;
                 playerDeck = RunState.Current.Deck;
-                Debug.Log(
-                    $"[BattleTestStarter] Continuing run — deck has {playerDeck.Count} cards, "
+                GameLogger.LogInfo<BattleTestStarter>(
+                    $"Continuing run — deck has {playerDeck.Count} cards, "
                         + $"battle index {RunState.Current.CurrentBattleIndex}."
                 );
                 return true;
@@ -181,9 +187,8 @@ namespace Crookedile.Gameplay.Battle
 
             if (RunState.Current != null)
             {
-                Debug.LogWarning(
-                    "[BattleTestStarter] RunState exists but its deck is empty — "
-                        + "rebuilding a fresh starter deck."
+                GameLogger.LogWarning<BattleTestStarter>(
+                    "RunState exists but its deck is empty — " + "rebuilding a fresh starter deck."
                 );
                 RunState.Clear();
             }
@@ -191,8 +196,8 @@ namespace Crookedile.Gameplay.Battle
             playerDeck = BuildDeck(playerOrigin);
             if (playerDeck.Count == 0)
             {
-                Debug.LogError(
-                    $"[BattleTestStarter] Player deck for {playerOrigin} is empty. "
+                GameLogger.LogError<BattleTestStarter>(
+                    $"Player deck for {playerOrigin} is empty. "
                         + "Assign card asset references (with count >= 1) to the "
                         + $"{playerOrigin} starter-deck list on BattleTestStarter, "
                         + "and make sure the origin matches the list you filled."
@@ -201,12 +206,12 @@ namespace Crookedile.Gameplay.Battle
             }
 
             List<List<EnemyData>> battleQueue = battleSession.BuildBattleQueue();
-            Debug.Log(
-                $"[BattleTestStarter] Session '{battleSession.name}' — {battleQueue.Count} rounds."
+            GameLogger.LogInfo<BattleTestStarter>(
+                $"Session '{battleSession.name}' — {battleQueue.Count} rounds."
             );
 
             RunState.Create(playerOrigin, playerDeck, battleQueue);
-            Debug.Log($"[BattleTestStarter] RunState created for origin: {playerOrigin}");
+            GameLogger.LogInfo<BattleTestStarter>($"RunState created for origin: {playerOrigin}");
             return true;
         }
 
@@ -225,15 +230,14 @@ namespace Crookedile.Gameplay.Battle
 
             if (battleEnemies.Count == 0)
             {
-                Debug.LogError(
-                    "[BattleTestStarter] No valid enemies for this battle — "
-                        + "check the session asset's rounds."
+                GameLogger.LogError<BattleTestStarter>(
+                    "No valid enemies for this battle — " + "check the session asset's rounds."
                 );
                 return null;
             }
 
-            Debug.Log(
-                $"[BattleTestStarter] Player ({playerOrigin}): {playerDeck.Count} cards | "
+            GameLogger.LogInfo<BattleTestStarter>(
+                $"Player ({playerOrigin}): {playerDeck.Count} cards | "
                     + $"Enemies: {string.Join(", ", battleEnemies.Select(e => e.EnemyName))}"
             );
 
@@ -246,8 +250,8 @@ namespace Crookedile.Gameplay.Battle
             int roundMaxOpinion =
                 currentRound != null && currentRound.maxOpinion > 0 ? currentRound.maxOpinion : 100;
 
-            Debug.Log(
-                $"[BattleTestStarter] Opinion Meter: start={roundStartOpinion}, max={roundMaxOpinion}, "
+            GameLogger.LogInfo<BattleTestStarter>(
+                $"Opinion Meter: start={roundStartOpinion}, max={roundMaxOpinion}, "
                     + $"maxTurns={(roundMaxTurns > 0 ? roundMaxTurns.ToString() : "none")} "
                     + $"(source: {(currentRound != null ? $"session round '{currentRound.label}'" : "defaults — round index out of range")})"
             );
@@ -278,10 +282,14 @@ namespace Crookedile.Gameplay.Battle
         {
             // The origin's authored deck is the one source of truth, shared with the campaign.
             // The inspector lists below remain as a test override for origins without one.
-            var authored = (originDatabase != null ? originDatabase : OriginDatabase.Shared)?.BuildStarterDeck(origin);
+            var authored = (
+                originDatabase != null ? originDatabase : OriginDatabase.Shared
+            )?.BuildStarterDeck(origin);
             if (authored != null && authored.Count > 0)
             {
-                Debug.Log($"[BattleTestStarter] Built {origin} deck from OriginDatabase: {authored.Count} cards.");
+                GameLogger.LogInfo<BattleTestStarter>(
+                    $"Built {origin} deck from OriginDatabase: {authored.Count} cards."
+                );
                 return authored;
             }
 
@@ -300,8 +308,8 @@ namespace Crookedile.Gameplay.Battle
                 {
                     if (entry?.card == null)
                     {
-                        Debug.LogWarning(
-                            $"[BattleTestStarter] Empty starter-deck entry for {origin} — skipping."
+                        GameLogger.LogWarning<BattleTestStarter>(
+                            $"Empty starter-deck entry for {origin} — skipping."
                         );
                         continue;
                     }
@@ -312,15 +320,15 @@ namespace Crookedile.Gameplay.Battle
                     for (int i = 0; i < copies; i++)
                         deck.Add(entry.card);
                 }
-                Debug.Log(
-                    $"[BattleTestStarter] Built {origin} deck from serialized list: "
+                GameLogger.LogInfo<BattleTestStarter>(
+                    $"Built {origin} deck from serialized list: "
                         + $"{deck.Count} cards ({entries.Count} entries)."
                 );
                 return deck;
             }
 
-            Debug.LogWarning(
-                $"[BattleTestStarter] No serialized starter deck for {origin} — "
+            GameLogger.LogWarning<BattleTestStarter>(
+                $"No serialized starter deck for {origin} — "
                     + "falling back to legacy name templates (populate the list to fix)."
             );
             return BuildDeckFromNameTemplate(origin);
@@ -338,8 +346,8 @@ namespace Crookedile.Gameplay.Battle
 
             if (template.Length == 0)
             {
-                Debug.LogError(
-                    $"[BattleTestStarter] No deck template defined for origin: {origin}"
+                GameLogger.LogError<BattleTestStarter>(
+                    $"No deck template defined for origin: {origin}"
                 );
                 return new List<CardData>();
             }
@@ -351,8 +359,8 @@ namespace Crookedile.Gameplay.Battle
             var database = CardDatabase.Shared;
             if (database == null)
             {
-                Debug.LogError(
-                    "[BattleTestStarter] No CardDatabase found at Resources/Databases/CardDatabase."
+                GameLogger.LogError<BattleTestStarter>(
+                    "No CardDatabase found at Resources/Databases/CardDatabase."
                 );
                 return new List<CardData>();
             }
@@ -360,8 +368,8 @@ namespace Crookedile.Gameplay.Battle
             List<CardData> allCards = database.GetAll();
             if (allCards.Count == 0)
             {
-                Debug.LogError(
-                    "[BattleTestStarter] CardDatabase is empty — open it and hit Refresh Database."
+                GameLogger.LogError<BattleTestStarter>(
+                    "CardDatabase is empty — open it and hit Refresh Database."
                 );
                 return new List<CardData>();
             }
@@ -370,15 +378,12 @@ namespace Crookedile.Gameplay.Battle
             foreach (var (cardName, count) in template)
             {
                 // Match by asset filename (c.name) first, then by CardData.CardName field.
-                CardData found = allCards.Find(c =>
-                    c.name == cardName || c.CardName == cardName
-                );
+                CardData found = allCards.Find(c => c.name == cardName || c.CardName == cardName);
 
                 if (found == null)
                 {
-                    Debug.LogWarning(
-                        $"[BattleTestStarter] Card not found: '{cardName}' "
-                            + $"(origin: {origin}). Skipping."
+                    GameLogger.LogWarning<BattleTestStarter>(
+                        $"Card not found: '{cardName}' " + $"(origin: {origin}). Skipping."
                     );
                     continue;
                 }
