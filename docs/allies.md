@@ -111,13 +111,14 @@ Confessor (Guilt on a hostile enemy gains 1 Support) and Altar Server (first Pol
 
 | Ally | Effect | Cost |
 |---|---|---|
-| Megachurch Board | The conversion Policy is in play every battle (the ally carries its passive) | Your Guilt cards cost +1 (cards in the deck at battle start whose effects apply Guilt) |
+| Megachurch Board | The conversion Policy (Gospel) is in play every battle (`PutPolicyInPlayEffect` at battle start) | Your Guilt cards cost +1 (cards in the deck at battle start whose effects apply Guilt) |
 | Firebrand Preacher | Fanatics push +3 (each convert gains 3 Strength) | A disillusioned Fanatic goes to +3 Hostility instead of neutral |
 | Revival Tent | The first enemy you convert each battle needs no conversion Policy | none |
 | Tithe Collector | +5 Funds per conversion, paid at once (not banked to day end yet) | none |
 
 Revival Tent deliberately bends the rule that conversion happens only while a conversion Policy is in play. It is a
-boss reward, so the exception is earned; drop it if the rule should hold everywhere.
+boss reward, so the exception is earned (kept, decided 2026-11-21). Megachurch Board stacks with a Gospel the player
+plays, the same as two copies (decided 2026-11-21).
 
 ### Celebrity — elite pool (built)
 
@@ -185,10 +186,10 @@ Burn, Replay, Pull, Return and Calm payoffs. None reward Hostility, and none red
 | Warm-Up Act (built) | Elite | Battle start: +1 Strength for the battle | none |
 | Debate Coach (built) | Elite | Each Pressure you play: gain 1 Support | none |
 | Hot Mic (built) | Elite | When an enemy turns hostile: +1 Strength until end of turn | none |
-| Campaign Manager | Boss | Card rewards show 4 choices instead of 3 | none |
+| Campaign Manager (built) | Boss | Card rewards show 4 choices instead of 3 (`ExtraCardRewardChoicesPassive`) | none |
 | Party Machine | Boss | +1 energy each turn | Each battle starts with one random enemy at +2 Hostility |
-| Dark Money Donor | Boss | +100 Funds now | −10 max Credibility |
-| Speechwriter (built) | Unassigned | Once per battle, at your turn start, discard any number of cards and draw that many | none |
+| Dark Money Donor (built) | Boss | +100 Funds now (`AllyData` on-recruit outcomes) | −10 max Credibility |
+| Speechwriter (built) | Story (event to be chosen) | Once per battle, at your turn start, discard any number of cards and draw that many | none |
 
 ### Existing story allies
 
@@ -203,7 +204,7 @@ These keep their events and gain a class tag.
 | The Beef | Support on Hostility changes | Endorsement Offer |
 | Fixer's Cousin | Makes a card free every Nth play | Old Friend, New Ask |
 | Hail Mary | Opinion boost while you're behind | Old Friend, New Ask |
-| Devil's Advocate | Riles the room when enemies turn receptive | **nothing** (needs an event) |
+| Devil's Advocate | Riles the room when enemies turn receptive | an event (to be chosen; decided 2026-11-21) |
 | The Driver | −25% travel time | **nothing** (moves to the shared elite pool) |
 
 Demo target: about 15–18 allies across the pools.
@@ -225,7 +226,7 @@ Demo target: about 15–18 allies across the pools.
   Story until it gets a source.
 - An ally pick after elite and boss wins, reusing the card-pick screen; the bot harness mirrors it.
 - `LoseAllyOutcome` (named or random); saves already store allies by ID, so a removal needs no schema change.
-- New effects only where the building blocks fall short: "a Policy starts in play", "card rewards show +N", the two
+- New effects only where the building blocks fall short: "a Policy starts in play" (built: `PutPolicyInPlayEffect`), "card rewards show +N" (built: `ExtraCardRewardChoicesPassive`), the two
   Fanatic tweaks. Every other ally above composes from existing triggers, conditions and effects.
 - **Built:** the Database window's Allies tab shows pool, class and cost columns, filters by pool, and warns on an
   empty authored description.

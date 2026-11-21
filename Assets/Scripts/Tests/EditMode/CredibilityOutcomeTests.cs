@@ -90,6 +90,33 @@ namespace Crookedile.Tests
             Assert.AreEqual(1, _run.Credibility, "a cut alone never ends the run");
         }
 
+        [Test]
+        public void RecruitOutcomesApplyOnceAndNotOnAPlainAdd()
+        {
+            var donor = ScriptableObject.CreateInstance<AllyData>();
+            _objects.Add(donor);
+            Set(
+                donor,
+                "_onRecruit",
+                new List<RunOutcome>
+                {
+                    Make<AdjustFundsOutcome>(("_amount", 100)),
+                    Make<AdjustMaxCredibilityOutcome>(("_amount", -10)),
+                }
+            );
+            int funds = _run.Funds;
+            int max = _run.MaxCredibility;
+
+            _run.RecruitAlly(donor);
+            _run.RecruitAlly(donor);
+            Assert.AreEqual(funds + 100, _run.Funds, "paid once; a held ally is ignored");
+            Assert.AreEqual(max - 10, _run.MaxCredibility);
+
+            _run.RemoveAlly(donor);
+            _run.AddAlly(donor);
+            Assert.AreEqual(funds + 100, _run.Funds, "a plain add (save load) pays nothing");
+        }
+
         private static T Make<T>(params (string field, object value)[] fields)
             where T : new()
         {

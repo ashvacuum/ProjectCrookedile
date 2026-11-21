@@ -89,8 +89,8 @@ namespace Crookedile.Data
         [LabelText("Battle Passives")]
         [Tooltip("Battle abilities this ally grants. Same hierarchy as card/origin passives; overworld abilities are authored separately below.")]
         [ValidateInput(
-            "@HasOverworldPassives || (_passives != null && _passives.Count > 0)",
-            "No battle or overworld passives — recruiting this ally would change nothing.",
+            "@HasOverworldPassives || HasRecruitOutcomes || (_passives != null && _passives.Count > 0)",
+            "No passives or on-recruit outcomes — recruiting this ally would change nothing.",
             InfoMessageType.Warning
         )]
         // Reads back what the passives below actually do, so a hand-written description can be
@@ -105,6 +105,16 @@ namespace Crookedile.Data
         [SerializeReference]
         [SerializeField]
         private List<OverworldPassive> _overworldPassives = new List<OverworldPassive>();
+
+        [Title("On recruit")]
+        [Tooltip("Applied once, the moment a run recruits this ally (event, elite or boss reward). Not applied to starting allies or when a save loads.")]
+        [SerializeReference]
+        [SerializeField]
+        private List<RunOutcome> _onRecruit = new List<RunOutcome>();
+
+        public IReadOnlyList<RunOutcome> OnRecruit => _onRecruit;
+
+        public bool HasRecruitOutcomes => _onRecruit != null && _onRecruit.Exists(o => o != null);
 
         public IReadOnlyList<OverworldPassive> OverworldPassives
         {
@@ -175,6 +185,11 @@ namespace Crookedile.Data
                         }
                     }
                 }
+
+                if (_onRecruit != null)
+                    foreach (var outcome in _onRecruit)
+                        if (outcome != null)
+                            parts.Add($"On recruit: {outcome.GetDescription()}");
 
                 return parts.Count == 0 ? "Does nothing yet." : string.Join("\n", parts);
             }

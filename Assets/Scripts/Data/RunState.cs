@@ -716,6 +716,21 @@ namespace Crookedile.Data
                 Allies.Add(ally);
         }
 
+        /// <summary>
+        /// Recruits <paramref name="ally"/> as a reward and applies its on-recruit outcomes once.
+        /// Gameplay grants go through here; <see cref="AddAlly"/> is the plain add a save load
+        /// uses, so reloading never pays an outcome twice. A held ally is ignored.
+        /// </summary>
+        public void RecruitAlly(AllyData ally)
+        {
+            if (ally == null || Allies.Contains(ally))
+                return;
+            Allies.Add(ally);
+            if (ally.OnRecruit != null)
+                foreach (var outcome in ally.OnRecruit)
+                    outcome?.Apply(this);
+        }
+
         /// <summary>Removes <paramref name="ally"/> from the run; it rejoins its pool. False if not held.</summary>
         public bool RemoveAlly(AllyData ally) => ally != null && Allies.Remove(ally);
 
@@ -737,7 +752,7 @@ namespace Crookedile.Data
                 return;
             if (encounter.IsElite)
                 foreach (var ally in roster.Draw(Origin, roster.EliteAllies, Allies, Rng, AllyPool.Elite))
-                    AddAlly(ally);
+                    RecruitAlly(ally);
             if (encounter.IsBoss)
                 PendingAllyOffer = roster.Draw(
                     Origin,
@@ -753,7 +768,7 @@ namespace Crookedile.Data
         public void ResolveAllyOffer(AllyData picked)
         {
             if (picked != null && PendingAllyOffer.Contains(picked))
-                AddAlly(picked);
+                RecruitAlly(picked);
             PendingAllyOffer.Clear();
         }
 

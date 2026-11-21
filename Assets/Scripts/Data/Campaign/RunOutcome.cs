@@ -659,7 +659,7 @@ namespace Crookedile.Data.Campaign
             : $"Set flag \"{_flag}\"";
     }
 
-    /// <summary>Grants an ally. Duplicates are ignored by <see cref="RunState.AddAlly"/>.</summary>
+    /// <summary>Grants an ally. Duplicates are ignored by <see cref="RunState.RecruitAlly"/>.</summary>
     [Serializable]
     public class RecruitAllyOutcome : RunOutcome
     {
@@ -670,7 +670,7 @@ namespace Crookedile.Data.Campaign
         [SerializeField]
         private AllyData _ally;
 
-        public override void Apply(RunState state) => state.AddAlly(_ally);
+        public override void Apply(RunState state) => state.RecruitAlly(_ally);
 
         // An unset ally silently no-ops at runtime; surfacing it in the description is what
         // makes that visible while authoring, since there is no health-check consumer up here yet.

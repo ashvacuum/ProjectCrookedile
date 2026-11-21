@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0631fbd07a48c2945984225525ba1ad8, type: 3}
+  m_Name: Dark Money Donor
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.AllyData
+  _id: 341df9c8f9fb4c94bb60dd9a5b596c52
+  _icon: {fileID: 0}
+  _allyName: Dark Money Donor
+  _description: Gain 100 Funds now. Lose 10 max Credibility.
+  _rarity: 2
+  _pool: 3
+  _hasOrigin: 0
+  _origin: 0
+  _hasCost: 1
+  _passives: []
+  _overworldPassives: []
+  _onRecruit:
+  - rid: 100
+  - rid: 101
+  references:
+    version: 2
+    RefIds:
+    - rid: 100
+      type: {class: AdjustFundsOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: 100
+    - rid: 101
+      type: {class: AdjustMaxCredibilityOutcome, ns: Crookedile.Data.Campaign, asm: Crookedile.Runtime}
+      data:
+        _amount: -10
