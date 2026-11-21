@@ -28,6 +28,47 @@ namespace Crookedile.Tests
         }
 
         [Test]
+        public void ExtraChoicesAllyWidensTheOffer()
+        {
+            var cards = CardDatabase.Shared;
+            Assume.That(cards?.Rewards, Is.Not.Null);
+            var ally = UnityEngine.ScriptableObject.CreateInstance<AllyData>();
+            try
+            {
+                var passive = new Crookedile.Data.Campaign.ExtraCardRewardChoicesPassive();
+                SetField(passive, "_extraChoices", 1);
+                SetField(
+                    ally,
+                    "_overworldPassives",
+                    new System.Collections.Generic.List<Crookedile.Data.Campaign.OverworldPassive> { passive }
+                );
+                int extra = Crookedile.Data.Campaign.ExtraCardRewardChoicesPassive.Total(new[] { ally });
+
+                var offer = cards.GenerateRewardOffer(
+                    OriginType.FaithLeader,
+                    rng: new System.Random(7),
+                    extraChoices: extra
+                );
+
+                Assert.AreEqual(1, extra);
+                Assert.AreEqual(cards.Rewards.DefaultOfferCount + 1, offer.Count);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(ally);
+            }
+        }
+
+        private static void SetField(object target, string field, object value) =>
+            target
+                .GetType()
+                .GetField(
+                    field,
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic
+                )
+                .SetValue(target, value);
+
+        [Test]
         public void EncounterOverrideIsTheBaseTierButAStrongWinStillBeatsIt()
         {
             var cards = CardDatabase.Shared;

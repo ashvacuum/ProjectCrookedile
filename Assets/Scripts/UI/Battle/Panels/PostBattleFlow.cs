@@ -1,5 +1,6 @@
 ﻿using Crookedile.Core;
 using Crookedile.Data;
+using Crookedile.Data.Campaign;
 using Crookedile.Data.Cards;
 using Crookedile.Gameplay.Battle;
 using Crookedile.Utilities;
@@ -91,7 +92,8 @@ namespace Crookedile.UI.Battle
                     var consolation = _cardDatabase.GenerateRewardOffer(
                         Battle != null ? Battle.PlayerOrigin : default,
                         rng: run.Rng,
-                        config: _cardDatabase.DefeatRewards
+                        config: _cardDatabase.DefeatRewards,
+                        extraChoices: ExtraCardRewardChoicesPassive.Total(run.Allies)
                     );
                     _rewardScreen.OpenSingle(
                         "Salvage Something",
@@ -134,7 +136,8 @@ namespace Crookedile.UI.Battle
                     bossFight: Battle?.Boss != null,
                     encounterOverride: run?.CurrentEncounter?.RewardOverride
                 ),
-                guaranteeRare: _lastResult.finalOpinion >= maxOpinion
+                guaranteeRare: _lastResult.finalOpinion >= maxOpinion,
+                extraChoices: ExtraCardRewardChoicesPassive.Total(run?.Allies)
             );
             run?.NoteRewardOffer(offers);
             _rewardScreen.OpenSingle("Choose a Card", offers, "Take Card", OnRewardChosen);

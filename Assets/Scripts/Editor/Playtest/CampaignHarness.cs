@@ -187,7 +187,8 @@ namespace Crookedile.EditorTools.Playtest
                                     cards.GenerateRewardOffer(
                                         origin,
                                         rng: state.Rng,
-                                        config: cards.DefeatRewards
+                                        config: cards.DefeatRewards,
+                                        extraChoices: ExtraCardRewardChoicesPassive.Total(state.Allies)
                                     ),
                                     rng
                                 );
@@ -221,7 +222,8 @@ namespace Crookedile.EditorTools.Playtest
                         rng: state.Rng,
                         cardsSinceRare: state.CardsSinceRare,
                         config: tier,
-                        guaranteeRare: guaranteeRare
+                        guaranteeRare: guaranteeRare,
+                        extraChoices: ExtraCardRewardChoicesPassive.Total(state.Allies)
                     );
                     state.NoteRewardOffer(offers);
                     state.GrantEncounterAllies(battle); // mirrors PostBattleFlow

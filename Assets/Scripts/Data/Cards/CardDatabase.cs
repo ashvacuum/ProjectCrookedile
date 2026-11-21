@@ -352,6 +352,7 @@ namespace Crookedile.Data.Cards
         /// </param>
         /// <param name="config">Weights and count to draw with; null = <see cref="Rewards"/>.</param>
         /// <param name="guaranteeRare">Swap the last pick for a Rare when the draw found none (a maxed-meter win).</param>
+        /// <param name="extraChoices">Cards added on top of the count, e.g. from <c>ExtraCardRewardChoicesPassive</c> allies.</param>
         public List<CardData> GenerateRewardOffer(
             OriginType origin,
             int? count = null,
@@ -359,11 +360,12 @@ namespace Crookedile.Data.Cards
             System.Random rng = null,
             int cardsSinceRare = 0,
             RewardConfig config = null,
-            bool guaranteeRare = false
+            bool guaranteeRare = false,
+            int extraChoices = 0
         )
         {
             config ??= Rewards;
-            int offerCount = count ?? config.DefaultOfferCount;
+            int offerCount = (count ?? config.DefaultOfferCount) + Mathf.Max(0, extraChoices);
             string originTag = origin.ToString().ToLower();
 
             // Build the candidate pool ─────────────────────────────────────────────────

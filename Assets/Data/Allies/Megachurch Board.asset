@@ -41,34 +41,12 @@ MonoBehaviour:
         _effects:
         - rid: 102
     - rid: 101
-      type: {class: StatusAppliedToEnemyTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: BattleStartTrigger, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _filterByStatus: 0
-        _filterStatus:
-          rid: -2
     - rid: 102
-      type: {class: ConvertPacifiedEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
+      type: {class: PutPolicyInPlayEffect, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
-        _target: 4
-        _statusesToConvert:
-        - rid: 103
-        _bufferStatus:
-          rid: 104
-        _stacksPerAward: 1
-        _awards:
-        - Behavior:
-            rid: 105
-          Stacks: 1
-          Duration: 0
-    - rid: 103
-      type: {class: GuiltStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-    - rid: 104
-      type: {class: JadedStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
-    - rid: 105
-      type: {class: FanaticStatus, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
-      data:
+        _policy: {fileID: 11400000, guid: 92c96e321faf1654a981ae39cda91242, type: 2}
     - rid: 110
       type: {class: BattlePassive, ns: Crookedile.Gameplay.Battle, asm: Crookedile.Runtime}
       data:
