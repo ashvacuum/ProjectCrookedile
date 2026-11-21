@@ -62,7 +62,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
 | [`needs-detailing.md`](docs/needs-detailing.md) | Living | 2026-11-07 | Design questions awaiting a call, ordered by how much they block. Read before authoring content. | this doc |
-| [`ui-elements.md`](docs/ui-elements.md) | Living | 2026-11-21 | The battle UI broken into reusable prefabs, smallest first, as a checklist to build against. | this doc |
+| [`ui-elements.md`](docs/ui-elements.md) | Living | 2026-11-21 | The battle UI broken into reusable prefabs, smallest first, plus the mock's unbuilt features, the screens outside battle and the build order. | this doc |
 
 ### Art
 

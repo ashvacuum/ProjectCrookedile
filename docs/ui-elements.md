@@ -2,7 +2,7 @@
 
 > **Kind:** Tracking · **Status:** Living · **Updated:** 2026-11-21
 >
-> **Summary:** The battle UI broken into reusable prefabs, smallest first, as a checklist to build against.
+> **Summary:** The battle UI broken into reusable prefabs, smallest first, plus the mock's unbuilt features, the screens outside battle and the build order.
 >
 > **Source of truth:** this doc · **Related:** [`art-bible.md`](art-bible.md) · [`ui-vfx.md`](ui-vfx.md)
 
@@ -70,11 +70,51 @@ above it.*
 
 ---
 
+## 4. Mock features with no code yet
+
+Sections 1–3 restyle what the battle already does. These four appear in the mock but nothing in the game feeds them;
+each waits on its open question below.
+
+- [ ] **Carried allies**: the "CARRYING" row of ally Chips in the Top Bar, each with a tooltip (`RunState.Allies`).
+- [ ] **Class resource tray**: the Chips above the hand ("Congregation", "Tithe Drive" in the mock).
+- [ ] **End Turn pips**: the three diamonds beside End Turn.
+- [ ] **Opinion chevrons**: the arrow run on the Opinion Meter where Support meets Denial.
+
+## 5. Outside the battle
+
+- [ ] **Campaign scene**: give `campaign.unity` a `UIRouter` and rebuild its HUD and popups (events, ally pick, card
+  reward) from the same elements. Replaces `CampaignFlow`'s IMGUI header readout.
+- [ ] **Class select** and the **first-fight "How it works" overlay**: built from Popup Shell, Buttons and Panel
+  Frame.
+
+---
+
+## Build order
+
+Code can run ahead of art: every element is built with greybox sprites, and the 9-slice kit and icons drop into the
+base prefabs later (art-bible §0.5 for sizes).
+
+1. **Basic pieces** (§1) and the TMP text styles. Move `CardZonePanel` onto `UIView` at the same time, so every
+   battle popup goes through `UIRouter` (dimmer, ESC, input blocking) before Popup Shell wraps them.
+2. **Groups** (§2), then make the four popups Popup Shell variants.
+3. **Screen sections** (§3) swapped into `main.unity`. LOG opens a uGUI `BattleLogPanel`; its IMGUI debug draw goes.
+4. **Mock features** (§4), once their questions are answered.
+5. **Steam Deck layout**: check every section at 1280×800 (16:10). Hand and target navigation already exist
+   (`BattleGamepadInput`); what's left is layout and focus visuals.
+6. **Outside the battle** (§5).
+
 ## Cleanup
 
 - [x] Delete the player's `Resolve` block (`Hp bar`, `ComposureImage`, `ResolveText`) from `Player Info Panel`.
   HP and composure are gone; no script references it.
+- [ ] Replace the IMGUI draws (`BattleLogPanel`, `CampaignFlow`): IMGUI receives no input under the Input System,
+  so neither can be clicked.
 
 ## Open questions
 
 - **LOG and Media Training:** Secondary buttons, or their own small icon-button style?
+- **End Turn pips:** what do they count? Energy already reads "3/3" under the Energy counter.
+- **Opinion chevrons:** this turn's projected push from enemy intents, or momentum?
+- **Resource tray:** what each class shows. Faith Leader's mock shows Congregation and Tithe Drive: Policies in play,
+  or class counters? What do Nepo Baby and Celebrity show?
+- **Campaign scene:** part of this UI push, or its own track after the battle UI?
