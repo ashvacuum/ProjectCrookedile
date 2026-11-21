@@ -450,9 +450,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fed93ac59e396c42bb32b341b894bcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.BattleUI
-  handPanel: {fileID: 1436815759}
   logPanel: {fileID: 1035820859}
-  resultPanel: {fileID: 4666463026194963306}
   enemyRow: {fileID: 766848211377123528}
   bossPanel: {fileID: 1551181047}
   <PlayerStatsPanel>k__BackingField: {fileID: 1468479633}
@@ -465,7 +463,6 @@ MonoBehaviour:
   endTurnButton: {fileID: 1806335340}
   _mediaTrainingButton: {fileID: 0}
   cardChoicePanel: {fileID: 2137863403}
-  cardZoneBar: {fileID: 8487920766331241102}
 --- !u!114 &507472322
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -481,7 +478,6 @@ MonoBehaviour:
   playerOrigin: 0
   originDatabase: {fileID: 11400000, guid: 96ddae083bcd53047b6197c1e76fae81, type: 2}
   battleManager: {fileID: 507472318}
-  battleUI: {fileID: 507472321}
   battleSession: {fileID: 11400000, guid: a0e0214204e47474da56aa150321e5c7, type: 2}
   faithLeaderDeck:
   - card: {fileID: 11400000, guid: 8d011eaa428c7c24ba579274d7adcccc, type: 2}
@@ -1146,17 +1142,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5033420588247998589, guid: b86d054b34fc61443a773e53e9a24666, type: 3}
   m_PrefabInstance: {fileID: 3230377069167379800}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1436815759 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1071437587440541793, guid: b86d054b34fc61443a773e53e9a24666, type: 3}
-  m_PrefabInstance: {fileID: 3230377069167379800}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5871ef66d33382740b3fede9234cf52b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.HandPanel
 --- !u!224 &1468479633 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8615146589443220447, guid: 273ae325d52ff8b498aeb86a50c93051, type: 3}
@@ -2234,17 +2219,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4e7ac35a32f066d46bce0727772aae7a, type: 3}
---- !u!114 &4666463026194963306 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4521634149776989092, guid: bbc6d84d5274fd042b29d78e732f18ef, type: 3}
-  m_PrefabInstance: {fileID: 2546239193502665302}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9334ad51963336e40a45b90e0dd99f0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.BattleResultPanel
 --- !u!1001 &5550063867375769819
 PrefabInstance:
   m_ObjectHideFlags: 0
