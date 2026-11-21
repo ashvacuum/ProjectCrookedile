@@ -118,7 +118,8 @@ namespace Crookedile.Data.Campaign
         public int HealAmount(RunState state)
         {
             float percent = Mathf.Max(_percent, StrongerCredibilityHealPassive.BestPercent(state.Allies));
-            return Mathf.CeilToInt(Mathf.Max(0f, state.MaxCredibility * percent * 0.01f));
+            // Double and /100 keep whole percents exact: 30% of 90 is 27, not a float 27.000002 rounded up to 28.
+            return (int)Math.Ceiling(Math.Max(0.0, state.MaxCredibility * (double)percent / 100.0));
         }
 
         public override void Apply(RunState state) => state.AdjustCredibility(HealAmount(state));

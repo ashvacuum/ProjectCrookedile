@@ -33,10 +33,13 @@ namespace Crookedile.Tests
             RunState.Clear();
         }
 
+        /// <summary>Whole-number percent of max Credibility, rounded up, in integer math.</summary>
+        private int PercentOfMax(int percent) => (_run.MaxCredibility * percent + 99) / 100;
+
         [Test]
         public void HealIsAPercentOfMaxWhateverCredibilityIsLeft()
         {
-            int heal = Mathf.CeilToInt(_run.MaxCredibility * 0.1f);
+            int heal = PercentOfMax(10);
             Make<HealPercentOfMaxCredibilityOutcome>(("_percent", 10f)).Apply(_run);
             Assert.AreEqual(50 + heal, _run.Credibility);
 
@@ -60,12 +63,12 @@ namespace Crookedile.Tests
             );
             _run.Allies.Add(ally);
 
-            int expected = Mathf.CeilToInt(_run.MaxCredibility * 0.2f);
+            int expected = PercentOfMax(20);
             Make<HealPercentOfMaxCredibilityOutcome>(("_percent", 10f)).Apply(_run);
             Assert.AreEqual(50 + expected, _run.Credibility);
 
             _run.AdjustCredibility(-_run.Credibility + 10);
-            int own = Mathf.CeilToInt(_run.MaxCredibility * 0.3f);
+            int own = PercentOfMax(30);
             Make<HealPercentOfMaxCredibilityOutcome>(("_percent", 30f)).Apply(_run);
             Assert.AreEqual(10 + own, _run.Credibility, "a bigger heal keeps its own percent");
         }
