@@ -1,6 +1,6 @@
 # Allies — the run's build-warping layer
 
-> **Kind:** Design · **Status:** Proposal · **Updated:** 2026-11-16
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-21
 >
 > **Summary:** What allies are for, where a run gets them (a starting ally per class, events, elite wins, boss wins), how they're lost, class pools, and a starter roster. Sources, event losses and the Faith Leader boss pool are built; the run-wide loss rule is not.
 >

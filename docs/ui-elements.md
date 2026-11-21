@@ -1,6 +1,6 @@
 # UI Elements Build List
 
-> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-10-09
+> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-11-21
 >
 > **Summary:** The battle UI broken into reusable prefabs, smallest first, as a checklist to build against.
 >
@@ -17,6 +17,9 @@ above it.*
 - Text style is not a prefab. Labels, numbers and titles use **TMP style sheet** styles (next to the existing
   `Keyword` style), so one edit restyles every text.
 - A finished element replaces every hand-built copy listed under "Replaces". Tick it only when no copy is left.
+- Prefabs are look only. Behaviour stays on the panel scripts, which all subclass `UIPanel` (battle panels
+  `BattlePanel`) and wire themselves, so swapping a hand-built copy for a prefab needs no binding code. Checked
+  2026-11-21 after the UIPanel rework: no element below is built yet.
 
 ---
 

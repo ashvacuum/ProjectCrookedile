@@ -175,10 +175,9 @@ namespace Crookedile.Data
         /// the seed is supposed to reproduce draws from here: reward offers, random-card
         /// outcomes, anything else decided on the map.
         ///
-        /// <para><b>Battle RNG deliberately stays on <c>UnityEngine.Random</c>.</b> Two reasons:
-        /// a shared global stream would make this seed depend on how many times combat happened
-        /// to roll — so adding one shuffle anywhere silently changes every later campaign draw —
-        /// and seeding battle would make reloading a fight replay identical draws.</para>
+        /// <para>Each battle rolls on its own <c>BattleRandom</c> stream, seeded by one draw from
+        /// here (<c>BattleSetup.seed</c>): however often combat rolls, the next campaign draw is
+        /// unchanged, and a battle replays from the run seed.</para>
         ///
         /// Note the seed fixes the *map*; the stream still diverges if the player makes
         /// different choices, which is correct — identical play gives identical results.

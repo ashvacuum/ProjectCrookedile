@@ -1,6 +1,6 @@
 # Crookedile — Core Design Doc
 
-> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-11-06
+> **Kind:** Design · **Status:** Canonical · **Updated:** 2026-11-21
 >
 > **Summary:** The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions.
 >
@@ -367,7 +367,7 @@ This is where each class's *potential* lives. Starters only teach the verb; rewa
 Two layers, like StS: **starter passives** = simple innate per-battle ability defining the baseline; **relics** = accumulated persistent passives that warp strategy (the real depth layer — TBD). Starter passives should be humble and reinforce the fantasy via their **trigger timing** (before / during / after).
 
 - **Nepo Baby (now)** — *once per battle, on the opening hand:* full-hand Mulligan (discard your hand, draw a fresh one). Privilege: he never has to live with a bad hand. Do-Over is the paid, weaker version in the pool.
-- **Celebrity (start of battle)** — *(open since the Glamour / IOU redesign: this passive was designed for the old Celebrity; the code currently points at a Nepo-style mulligan placeholder)* *the first card you play each battle is played upgraded.* "Mastering his craft" — his opening move is always the polished, rehearsed best-take. Uses the existing upgrade system (nothing new to build); adds a small *which card do I open with?* decision. Note: colorless/generic benefit — Celebrity's identity comes from the card pool, not this passive. *(Playtest watch: don't let any single card's upgraded version be a blowout, since this guarantees it turn one.)*
+- **Celebrity (start of battle)** — the **Publicist** starting ally (decided 2026-11-07): at battle start every enemy is Exposed, so the first hit on each deals double. The old "first card you play each battle is played upgraded" passive is retired. Details in [`celebrity-glamour-iou.md`](celebrity-glamour-iou.md).
 - **Faith Leader (after)** — *(candidate, unresolved)* leaning toward something that protects the patient setup or engages hostility:
   - Option A: first opinion shield each battle gets a bonus (shelters the setup) — risk: a bit generic.
   - Option B: start of battle, reduce all enemy hostility by 1 (on-theme; does *not* make all receptive, so doesn't auto-trigger echo chamber) — risk: softens a villain you may want.
@@ -409,4 +409,4 @@ The game is a card game wrapped in an overworld metagame, not a full campaign RP
 
 ### Recently resolved
 - ~~Celebrity's resource system~~ → **CUT.** No unique resource; manufacturing fantasy lives in the card pool (see §7). Over-engineered and made Celebrity inaccessible / too close to StS2's Regent.
-- ~~Celebrity's starter passive~~ → **LOCKED** for the old Celebrity: first card played each battle is upgraded. Reopened by the Glamour / IOU redesign (§9).
+- ~~Celebrity's starter passive~~ → **LOCKED** for the old Celebrity: first card played each battle is upgraded. Reopened by the Glamour / IOU redesign; resolved 2026-11-07 as the Publicist (§9).
