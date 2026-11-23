@@ -19,8 +19,8 @@ namespace Crookedile.Editor
         private const string MESH_PATH = ROOT_PATH + "/RoadSurfaceTileMesh.asset";
         private const string SCENE_PATH = ROOT_PATH + "/RoadSurfacePreview.unity";
         private const string SHADER_NAME = "Crookedile/2D/Half Cube Lit";
-        private const float TILE_HALF_WIDTH = 0.4f;
-        private const float TILE_HALF_HEIGHT = 0.2f;
+        private const float TILE_HALF_WIDTH = IsoGrid.HALF_WIDTH;
+        private const float TILE_HALF_HEIGHT = IsoGrid.HALF_HEIGHT;
         private static readonly string[] TILE_NAMES =
         {
             "Road Straight", "Road Corner", "Road T Junction", "Road Cross",
@@ -172,7 +172,7 @@ namespace Crookedile.Editor
                 }
             }
 
-            camera.transform.position = new Vector3(1.2f, 0f, -10f);
+            camera.transform.position = new Vector3(1.5f, 0f, -10f);
             EditorSceneManager.MarkSceneDirty(scene);
             if (!EditorSceneManager.SaveScene(scene, SCENE_PATH))
             {
@@ -187,7 +187,7 @@ namespace Crookedile.Editor
             Camera camera = new GameObject("Main Camera").AddComponent<Camera>();
             camera.tag = "MainCamera";
             camera.orthographic = true;
-            camera.orthographicSize = 1f;
+            camera.orthographicSize = 1.25f;
             camera.backgroundColor = new Color(0.13f, 0.15f, 0.18f, 1f);
             camera.clearFlags = CameraClearFlags.SolidColor;
             return camera;
@@ -195,7 +195,7 @@ namespace Crookedile.Editor
 
         private static Light2D CreateKeyLight()
         {
-            Vector3 lightPosition = new Vector3(0.4f, 1.1f, -1f);
+            Vector3 lightPosition = new Vector3(0.5f, 1.375f, -1f);
             GameObject lightObject = new GameObject("Road Preview Key Light");
             lightObject.transform.position = lightPosition;
             Light2D light = lightObject.AddComponent<Light2D>();
@@ -208,7 +208,7 @@ namespace Crookedile.Editor
             light.pointLightInnerAngle = 85f;
             light.shadowsEnabled = true;
             light.shadowIntensity = 0.55f;
-            light.transform.up = new Vector3(1.2f - lightPosition.x, -lightPosition.y, 0f).normalized;
+            light.transform.up = new Vector3(1.5f - lightPosition.x, -lightPosition.y, 0f).normalized;
 
             SerializedObject serializedLight = new SerializedObject(light);
             SerializedProperty normalDistance = serializedLight.FindProperty("m_NormalMapDistance");

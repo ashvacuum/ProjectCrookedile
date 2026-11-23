@@ -160,12 +160,12 @@ namespace Crookedile.Editor
             Camera camera = new GameObject("Main Camera").AddComponent<Camera>();
             camera.tag = "MainCamera";
             camera.orthographic = true;
-            camera.orthographicSize = 1f;
+            camera.orthographicSize = 1.25f;
             camera.backgroundColor = new Color(0.13f, 0.15f, 0.18f, 1f);
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.transform.position = new Vector3(0f, 0f, -10f);
 
-            Light2D keyLight = CreateLight("Key Light", Light2D.LightType.Point, 1, new Color(1f, 0.82f, 0.62f), 1.2f, new Vector3(-0.8f, 0.75f, -1f), 2.5f, 65f, 35f, 1.5f);
+            Light2D keyLight = CreateLight("Key Light", Light2D.LightType.Point, 1, new Color(1f, 0.82f, 0.62f), 1.2f, new Vector3(-1f, 0.94f, -1f), 3.1f, 65f, 35f, 1.5f);
             
 
             GameObject previewObject = CreateSpriteObject(material);

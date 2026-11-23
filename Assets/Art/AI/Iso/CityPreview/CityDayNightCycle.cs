@@ -18,7 +18,7 @@ namespace Crookedile.Art.Iso
         [Tooltip("0 is midday; 0.5 is midnight. Scrub it in edit mode to preview any hour.")]
         [SerializeField, Range(0f, 1f)] private float _timeOfDay;
         [Tooltip("The orbit radius of the moving key light in X and Y.")]
-        [SerializeField] private Vector2 _lightOrbitRadius = new Vector2(2.2f, 1.2f);
+        [SerializeField] private Vector2 _lightOrbitRadius = new Vector2(2.75f, 1.5f);
 
         [Header("Look (left of each gradient is midnight, right is midday)")]
         [Tooltip("Key Light2D color across the day.")]

@@ -1,6 +1,6 @@
 # City generator — half-cube campaign city
 
-> **Kind:** Design · **Status:** Proposal · **Updated:** 2026-11-23
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-23
 >
 > **Summary:** The campaign city: a Cebu-like city generated fresh each run from the seed, drawn with half-cube meshes on a 2:1 iso grid. Coast, radial avenues, streets, zones, landmarks and buildings; a painter for saved test maps. Replaces the sprite CityGenerator.
 >
@@ -169,6 +169,14 @@ slows.
 ## 7. Painter and test maps
 
 A Scene-view tool on the city view, for testing art, tiles and packing:
+
+*Built (initial, 2026-11-23):* **Crookedile → Art → Open City Map Editor** opens a scene with a `CityMapView` on a 64 × 64
+`CityMapData` test map (`Assets/Art/AI/Iso/CityMap`). Select the view and use the **City Map Painter** tool: brushes for
+street, avenue, clear road, land, sea, building lot (drag a rectangle, with a wall height) and remove building; Undo works.
+Streets pick their art from four neighbours; sea and avenues are placeholder colours. Duplicating the asset saves a test
+map and assigning another asset loads one. Not built yet: generating from a seed, zone painting, the console command,
+diagonal avenues and eight-neighbour art. The code lives beside the half-cube prototype until the generator moves it into
+the runtime assembly.
 
 - **Generate** from any seed in the editor.
 - **Paint** ground (land, sea), streets, avenues and zones; **place and remove** buildings; Undo works.

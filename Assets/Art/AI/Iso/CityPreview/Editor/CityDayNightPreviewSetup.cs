@@ -18,8 +18,8 @@ namespace Crookedile.Editor
         private const string SCENE_PATH = ROOT_PATH + "/CityDayNightPreview.unity";
         private const int GRID_SIZE = 5;
         private const int GRID_CENTER = GRID_SIZE / 2;
-        private const float TILE_HALF_WIDTH = 0.4f;
-        private const float TILE_HALF_HEIGHT = 0.2f;
+        private const float TILE_HALF_WIDTH = IsoGrid.HALF_WIDTH;
+        private const float TILE_HALF_HEIGHT = IsoGrid.HALF_HEIGHT;
         private static readonly string[] HOUSE_NAMES = { "House North West", "House North East", "House South West", "House South East" };
 
         #region Public API
@@ -110,7 +110,7 @@ namespace Crookedile.Editor
             Camera camera = new GameObject("Main Camera").AddComponent<Camera>();
             camera.tag = "MainCamera";
             camera.orthographic = true;
-            camera.orthographicSize = 1.6f;
+            camera.orthographicSize = 2f;
             camera.backgroundColor = new Color(0.53f, 0.72f, 0.86f);
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.transform.position = new Vector3(cityCenter.x, cityCenter.y, -10f);
@@ -131,7 +131,7 @@ namespace Crookedile.Editor
         private static Light2D CreateKeyLight(Vector3 cityCenter)
         {
             GameObject lightObject = new GameObject("Moving Day Night Key Light");
-            lightObject.transform.position = new Vector3(cityCenter.x + 2.2f, cityCenter.y, -1f);
+            lightObject.transform.position = new Vector3(cityCenter.x + 2.75f, cityCenter.y, -1f);
             Light2D light = lightObject.AddComponent<Light2D>();
             light.lightType = Light2D.LightType.Point;
             light.blendStyleIndex = 1;
