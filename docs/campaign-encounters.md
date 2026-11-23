@@ -1,6 +1,6 @@
 # Campaign Encounters
 
-> **Kind:** Systems · **Status:** Built · **Updated:** 2026-11-07
+> **Kind:** Systems · **Status:** Built · **Updated:** 2026-11-23
 >
 > **Summary:** How encounters are typed, authored, scheduled and drawn, with every field, outcome, requirement and default: battles, events, chaining, flags, pools, travel, enemy moves, statuses, run state, rewards and the editor tools.
 >
@@ -493,6 +493,27 @@ The roster is shared between these two previews; it does not recruit anyone in t
 The runtime, Travel preview, and simulation all use the same cost calculation. Duplicate ally
 references count once. Timing checks also cover stacking, rounding, opening/closing windows,
 and charging exactly the previewed cost after recruitment.
+
+### 6.2 Rain *(proposed 2026-11-23, not built)*
+
+Rain is a travel modifier: on a rainy day, roads near rainy districts are slower.
+
+- **Whole rainy days, some districts.** At the start of each day the run rolls whether it rains and, if so, which
+  districts are rainy. Rain lasts the whole day; there are no showers within a day.
+- **Which roads slow down.** A road with either endpoint in a rainy district gets the **rain multiplier** for that
+  whole day. It combines with the road's traffic windows by the existing rule: **the largest active multiplier wins**,
+  so rain only matters on a road when it is larger than that road's rush-hour multiplier at departure. Same 1–5 range
+  as traffic windows.
+- **Surprise, then predictable.** There is no forecast for future days. From 08:00 on a rainy day the player sees which
+  districts are rainy, and visit previews include the rain, so the previewed cost is still exactly the cost charged.
+- **Deterministic.** The roll is a pure function of the run seed and the day number, on its own random stream, so it
+  never shifts encounter draws and a run replays the same weather. Because it can be recomputed, it needs no save
+  field.
+- **Tunables** (on `CampaignTravelData`, tooltipped): chance a day is rainy, how many districts a rainy day covers (a
+  range), and the rain multiplier. Allies that reduce travel time apply after rain, as they do after traffic.
+- **Shown in the travel UI.** Rainy districts and the roads they slow are marked; route previews name rain as the
+  reason when it is the multiplier that applied. The city map shows rain across the whole map whenever any district
+  is rainy (`city-generator.md` §6.3); the map itself never decides who is affected.
 
 ---
 

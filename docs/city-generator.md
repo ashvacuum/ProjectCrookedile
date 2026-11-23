@@ -144,6 +144,28 @@ height, so a short building darkens a tall neighbour's roof.
   props) casts no shadow. Edges are as sharp as one cell of the height texture unless the steps are blended; soften
   with a few jittered samples if they read as stair-stepped.
 
+### 6.3 Rain
+
+Rain is a gameplay travel modifier on some districts for a whole day (`campaign-encounters.md` §6.2). The map does not
+know districts, so whenever any district is rainy **the whole map shows rain**; the travel UI marks which roads it
+slows.
+
+- **Two shader globals.** *Rain intensity* (is it raining) drives the light and the falling streaks. *Wetness* follows
+  it with a lag: surfaces soak in over a few seconds when rain starts and dry slowly when it stops, puddles last.
+- **Overcast light**, through the §6.1 sun: dim the sun, shift ambient to a cool grey, weaken and soften the §6.2
+  shadows, raise window emission. A slight desaturation and haze come from the URP Volume (settings, no code).
+- **Wet surfaces in the half-cube shader:**
+  - albedo darkens with wetness, more on pavement and concrete than on glass or metal;
+  - surfaces reflect the **overcast sky colour**, not a sun highlight, strongest on flat surfaces (roofs, roads, ground)
+    and weak on walls;
+  - **puddles** on roads and flat roofs come from a puddle-shape texture whose cut-off rises with wetness, starting in
+    crevices (the occlusion map); inside a puddle the surface turns smooth and mirror-like.
+- **Falling rain:** two or three scrolling layers of slanted streaks over the whole screen at different speeds,
+  angled by wind. Cheaper than particles and works at any zoom.
+- **Polish, last:** ripples in puddles, sparse splash particles, window glow smearing into wet roads.
+- Rain visuals are cosmetic, so their animation may use `UnityEngine.Random`; whether it rains comes only from the
+  seeded travel roll.
+
 ## 7. Painter and test maps
 
 A Scene-view tool on the city view, for testing art, tiles and packing:
@@ -168,7 +190,7 @@ The sprite system is deleted, not migrated: `CityGenerator.cs`, `CityZoneData.cs
 3. **Generator:** coast, downtown, avenues, streets, zones, landmarks, buildings.
 4. **Painter** and saved test maps.
 5. **Remove** the old system (§8).
-6. **Lighting from the campaign clock.**
+6. **Lighting from the campaign clock**, then **rain** (§6.3; the travel rule in `campaign-encounters.md` §6.2).
 
 ## 10. Choices made without a separate decision
 
