@@ -152,7 +152,7 @@ MonoBehaviour:
   _groundMaterial: {fileID: 2100000, guid: bcf69abc938d7ce4e8c962b802d4ac83, type: 2}
   _buildingPrefab: {fileID: 33268604104110306, guid: 1ea8acc98422f9744b860515d5e15050, type: 3}
   _seaColor: {r: 0.2, g: 0.45, b: 0.65, a: 1}
-  _avenueColor: {r: 0.22, g: 0.22, b: 0.25, a: 1}
+  _avenueColor: {r: 0.5, g: 0.48, b: 0.56, a: 1}
 --- !u!4 &528452949
 Transform:
   m_ObjectHideFlags: 0

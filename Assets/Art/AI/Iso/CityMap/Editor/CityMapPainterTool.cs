@@ -172,7 +172,8 @@ namespace Crookedile.Editor
                     changed = map.SetRoad(cell, CityMapData.Road.None);
                     break;
                 case Brush.Land:
-                    changed = map.SetGround(cell, CityMapData.Ground.Land);
+                    // Land means plain land: it also clears a street or avenue. `|` so both run.
+                    changed = map.SetGround(cell, CityMapData.Ground.Land) | map.SetRoad(cell, CityMapData.Road.None);
                     break;
                 case Brush.Sea:
                     changed = map.SetGround(cell, CityMapData.Ground.Sea);

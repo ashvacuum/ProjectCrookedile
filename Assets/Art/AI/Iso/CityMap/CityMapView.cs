@@ -43,7 +43,7 @@ namespace Crookedile.Art.Iso
         [Tooltip("Placeholder colour for sea cells until water art exists.")]
         [SerializeField] private Color _seaColor = new Color(0.2f, 0.45f, 0.65f);
         [Tooltip("Placeholder colour for avenue cells until avenue art exists.")]
-        [SerializeField] private Color _avenueColor = new Color(0.22f, 0.22f, 0.25f);
+        [SerializeField] private Color _avenueColor = new Color(0.5f, 0.48f, 0.56f);
 
         private readonly List<GameObject> _tiles = new List<GameObject>();
         private readonly List<GameObject> _buildings = new List<GameObject>();
