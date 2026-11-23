@@ -1,8 +1,8 @@
 # Isometric map-asset generation prompt (2:1 dimetric)
 
-> **Kind:** Reference · **Status:** Canonical · **Updated:** 2026-11-07
+> **Kind:** Reference · **Status:** Stale · **Updated:** 2026-11-23
 >
-> **Summary:** Campaign-map generation prompt: 2:1 dimetric tiles and buildings, plus the acceptance check every sprite has to pass.
+> **Summary:** Stale since 2026-11-23: the sprite-era prompt for 2:1 dimetric tiles and buildings. The map now uses flat face atlases on half-cube meshes (art-bible.md §9); a new prompt is still to write.
 >
 > **Source of truth:** this doc; grid guide [`iso-grid-guide-256x128.png`](iso-grid-guide-256x128.png) · **Related:** [`metagame-campaign.md`](../metagame-campaign.md) · [`art-bible.md`](../art-bible.md) · [`style-mock-prompt.md`](style-mock-prompt.md)
 

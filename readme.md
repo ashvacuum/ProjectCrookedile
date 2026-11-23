@@ -41,9 +41,10 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 |---|---|---|---|---|
 | [`allies.md`](docs/allies.md) | Partly built | 2026-11-21 | What allies are for, where a run gets them (a starting ally per class, events, elite wins, boss wins), how they're lost, class pools, and a starter roster. Sources, event losses and the Faith Leader boss pool are built; the run-wide loss rule is not. | this doc |
 | [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) | Partly built | 2026-11-21 | Celebrity's starting relic Last Impressions upgrades his first Pressure card each turn; his pillars are Star Power (Glamour), Leverage (Debt) and Content Machine (generated cards). The rules below cover Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points. | this doc; values in [`Data/Cards/Celebrity/GlamourIou/`](Assets/Data/Cards/Celebrity/GlamourIou), shared rules in [`GlamourIou.cs`](Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs), effects in [`Celebrity/`](Assets/Scripts/Gameplay/Battle/Celebrity) |
+| [`city-generator.md`](docs/city-generator.md) | Proposal | 2026-11-23 | The campaign city: a Cebu-like city generated fresh each run from the seed, drawn with half-cube meshes on a 2:1 iso grid. Coast, radial avenues, streets, zones, landmarks and buildings; a painter for saved test maps. Replaces the sprite CityGenerator. | this doc |
 | [`core-design.md`](docs/core-design.md) | Canonical | 2026-11-21 | The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes (each a starting relic plus three pillars), card types, starter decks. | this doc |
 | [`enemy-design-bible.md`](docs/enemy-design-bible.md) | Canonical | 2026-11-02 | The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete. | this doc |
-| [`metagame-campaign.md`](docs/metagame-campaign.md) | Partly built | 2026-11-07 | The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases. | this doc |
+| [`metagame-campaign.md`](docs/metagame-campaign.md) | Partly built | 2026-11-23 | The campaign map: Potionomics-style free roam over a generated half-cube iso city (spec in city-generator.md), with build phases. | this doc |
 | [`naming-glossary.md`](docs/naming-glossary.md) | Canonical | 2026-11-02 | Combat vocabulary mapped to "working a crowd" vocabulary. Read before naming anything. | this doc |
 | [`nepo-baby-class.md`](docs/nepo-baby-class.md) | Proposal | 2026-11-21 | The Nepo Baby class, redesigned 2026-11-21: Scry 1 relic, pillars Inheritance (The Family Name), Owed (plays itself when discarded) and Pulling Strings (deck advantage). The built burn / return / calm design below is superseded and kept as card salvage. | this doc; built in [`Data/Cards/NepoBaby/`](Assets/Data/Cards/NepoBaby) and [`NepoBabyConfig`](Assets/Resources/NepoBabyConfig.asset) |
 | [`unlocks.md`](docs/unlocks.md) | Canonical | 2026-10-03 | What unlocks (classes, cards, allies, events, campaigns), what earns each one, how fast, and how the player sees it. Achievements and unlocks are one system. Everything is unlocked for now. | this doc |
@@ -68,7 +69,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`art-bible.md`](docs/art-bible.md) | Canonical | 2026-11-07 | Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Database window's tabs are the live blank-slot checker. | this doc |
+| [`art-bible.md`](docs/art-bible.md) | Canonical | 2026-11-23 | Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Database window's tabs are the live blank-slot checker. | this doc |
 
 ### Generation prompts
 
@@ -76,7 +77,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 |---|---|---|---|---|
 | [`reference/aspirational-screen-prompts.md`](docs/reference/aspirational-screen-prompts.md) | Draft | 2026-11-07 | Image prompts for the target look of six more screens, each built on the G1 battle reference. | this doc |
 | [`reference/battle-ui-mock-prompt.md`](docs/reference/battle-ui-mock-prompt.md) | Draft | 2026-11-07 | Image-edit prompt for the battle screen UI, built on the committee-hearing battle mock rather than a new layout. | this doc |
-| [`reference/iso-tile-prompt.md`](docs/reference/iso-tile-prompt.md) | Canonical | 2026-11-07 | Campaign-map generation prompt: 2:1 dimetric tiles and buildings, plus the acceptance check every sprite has to pass. | this doc; grid guide [`iso-grid-guide-256x128.png`](docs/reference/iso-grid-guide-256x128.png) |
+| [`reference/iso-tile-prompt.md`](docs/reference/iso-tile-prompt.md) | Stale | 2026-11-23 | Stale since 2026-11-23: the sprite-era prompt for 2:1 dimetric tiles and buildings. The map now uses flat face atlases on half-cube meshes (art-bible.md §9); a new prompt is still to write. | this doc; grid guide [`iso-grid-guide-256x128.png`](docs/reference/iso-grid-guide-256x128.png) |
 | [`reference/music-prompt.md`](docs/reference/music-prompt.md) | Canonical | 2026-10-03 | BGM prompts. | this doc |
 | [`reference/style-mock-prompt.md`](docs/reference/style-mock-prompt.md) | Canonical | 2026-11-07 | Style-mock generation prompt: v6 hand-drawn satire, the current look. | this doc |
 | [`reference/ui-look-prompts.md`](docs/reference/ui-look-prompts.md) | Draft | 2026-11-07 | Image prompts for the battle screen: UI directions A to C, art styles D to F, and two reference blends (G, and H, the current candidate). | this doc |

@@ -1,14 +1,14 @@
 # Metagame — The Campaign Map
 
-> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-07
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-23
 >
-> **Summary:** The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases.
+> **Summary:** The campaign map: Potionomics-style free roam over a generated half-cube iso city (spec in city-generator.md), with build phases.
 >
-> **Source of truth:** this doc · **Related:** [`campaign-encounters.md`](campaign-encounters.md) · [`meta-progression.md`](meta-progression.md) · [`iso-tile-prompt.md`](reference/iso-tile-prompt.md)
+> **Source of truth:** this doc · **Related:** [`city-generator.md`](city-generator.md) · [`campaign-encounters.md`](campaign-encounters.md) · [`meta-progression.md`](meta-progression.md) · [`iso-tile-prompt.md`](reference/iso-tile-prompt.md)
 
 *As of 2026-09-18. Supersedes the "StS map structure" sketch in `core-design.md` §10 — the
 map is **Potionomics-style free roam**, not a branching node chain, and is **drawn as a 2:1
-isometric sprite city** (§1.5, locked 2026-09-18). Build phases at the bottom; open design
+isometric city** (§1.5; half-cube meshes since 2026-11-23, `city-generator.md`). Build phases at the bottom; open design
 questions marked ⚑ and mirrored in `needs-detailing.md`.*
 
 ---
@@ -36,66 +36,25 @@ Production overworld *art* is still deferred — but its **form is no longer ope
 Campaign v1 may ship greybox tiles; it may not ship a layout that a real iso city could not
 replace one-for-one.
 
-## 1.5 Map presentation — 2:1 isometric sprites *(LOCKED 2026-09-18)*
+## 1.5 Map presentation — half-cube iso city *(superseded 2026-11-23)*
 
-The campaign map is a **2D sprite city on a 2:1 isometric grid** — not a list of buttons, not
-a painted backdrop with hotspots. The city itself is generated per run from the seed (§1.6);
-none of it reaches battle code.
+The campaign map is a **city on a 2:1 isometric grid** — not a list of buttons, not a painted backdrop with
+hotspots. It is drawn with half-cube meshes (a roof and two walls lit from face atlases), not sprites on a Tilemap,
+and generated fresh each run from the seed. **The full spec is `city-generator.md`**: grid, data, generation rules,
+rendering, lighting and the test-map painter. This section keeps only what the campaign layer relies on.
 
-**Projection (one angle, no exceptions).** True 2:1 dimetric: plan rotated 45°, elevation
-**26.565°** (`atan(0.5)`). Every ground tile, road and building is drawn to this same
-projection and the same key-light direction. Mixed angles are the one flaw that cannot be
-fixed by re-arranging tiles. Full authoring spec — sizes, pivots, lighting, generation
-prompt — lives in `art-bible.md` §9.
+**Projection (one angle, no exceptions).** True 2:1 dimetric: plan rotated 45°, elevation **26.565°** (`atan(0.5)`).
+One cell is 1 × 0.5 world units (256 × 128 px at PPU 256); a 4K screen reads ~15 cells across.
 
-**Grid.** Unity `Grid`, Cell Layout = **Isometric Z as Y**, cell size `(1, 0.5, 1)`, ground
-tile 256×128 at PPU 256 — so one cell is one world unit and a 4K screen reads ~15 cells
-across. Sorting requires **Transparency Sort Mode = Custom Axis (0, 1, 0)** project-wide;
-without it buildings render through each other.
+**The boundary that keeps this cheap:** the city is **scenery**. Location hotspots are uGUI placed over the map from
+`MapLocation` data — they are not tiles, and the city generator never chooses where an encounter happens. Encounter
+scheduling stays a function of the pool and the day window (`campaign-encounters.md`), never of terrain.
 
-**Layer order.** ground → roads → zone props → buildings → location hotspots.
+## 1.6 City generation *(superseded 2026-11-23)*
 
-**The boundary that keeps this cheap:** the city is **scenery**. Location hotspots are uGUI
-placed over the map from `MapLocation` data — they are not tiles, and the city generator
-never chooses where an encounter happens. Encounter scheduling stays a function of the pool
-and the day window (`campaign-encounters.md`), never of terrain. Break this and the Encounter
-Designer's day-window logic starts fighting a tilemap for control of the schedule.
-
-**Cost note:** the tool is an afternoon; the sprites are the schedule. A generated city needs
-roughly 20–40 distinct buildings before it stops reading as four assets copy-pasted. Plan the
-art, not the code.
-
-## 1.6 City generation — seeded, one city per run *(LOCKED 2026-09-18)*
-
-**The city is generated from `RunState.Seed`, not authored.** Runs already vary by seed, so the
-city varies with them; the same seed replays the same city, exactly as it replays the same
-encounter schedule. Nothing is baked into `campaign.unity` — storing the city would be storing
-a cache of a pure function of the seed, and then owning its invalidation.
-
-Assembled almost entirely from packages already resolved in `Packages/packages-lock.json`
-(`com.unity.2d.tilemap.extras` 6.0.1 — **no new dependency**).
-
-| Job | What does it |
-|---|---|
-| Roads resolving their own corners, T-junctions, straights | **`RuleTile`** (Extras). The generator writes *cells*; the RuleTile picks every sprite. This is the bitmask auto-tiling we'd otherwise hand-roll — don't |
-| Ground varying per cell | **`RandomTile`** (Extras) |
-| Hand-authoring a city instead | Unity's **Tile Palette**, still available. Nothing stops a bespoke map later |
-| Road layout, zoning, building packing | `CityGenerator` — the one piece we write |
-
-**`CityGenerator`** (`Assets/Scripts/Gameplay/Campaign/CityGenerator.cs`): recursive block
-subdivision lays a one-cell road along each split until every block is at most `_maxBlock`
-across; each block takes a zone by Chebyshev distance from centre (square bands read as a city
-centre, where radial distance gives blobs on a square map); each block is then packed
-largest-footprint-first from that zone's weighted list. Deterministic from the seed via its own
-`System.Random`, for the same reason `EncounterPoolData` keeps one — seeding the city must not
-perturb battle RNG.
-
-**`CityZoneData`** (SO): a weighted building list plus each entry's N×N footprint. The generator
-holds them **ordered centre-outward** — element 0 is downtown, the last is the edge of town.
-
-Explicitly NOT in scope: zone growth simulation, RCI demand, building levels, simulated vehicle traffic, and
-wave-function collapse. WFC is a fortnight of fighting constraints for a layout that recursive
-subdivision gives in forty lines, and none of the rest is a mechanic here.
+Replaced by `city-generator.md`: still seeded and one city per run, but with a coastal downtown, radial avenues,
+streets, distance zones, landmarks and half-cube buildings. The sprite `CityGenerator` and `CityZoneData` are being
+deleted (`city-generator.md` §8).
 
 ### District travel and time of day (agreed 2026-09-21)
 
@@ -140,15 +99,6 @@ Travel and Simulate tabs accept a hypothetical ally roster for tuning; see
 Its **Simulate** tab uses earliest-finish visits including travel and waiting, without applying
 event outcomes or mandatory-finale exceptions. District assets are referenced directly; no
 new independent IDs or encounter registry is needed.
-
-**Sorting is the real failure mode, and it is set by pivots, not geometry.** Unity sorts these by
-Transparency Sort Axis `(0, 1, 0)` — each sprite's *pivot* decides what draws in front. A
-building whose base diamond is a few percent off still sorts correctly; two buildings with
-pivots at different heights sort wrong even when both are geometrically perfect. Hence the
-pivot rule in `art-bible.md` §9, and the building tilemap's **Renderer Mode = Individual**
-(Chunk batches the tilemap into one mesh and per-sprite sorting dies). Because nothing walks
-around this map, sorting resolves once and stays resolved — that is the payoff of §1.5's
-hotspots-not-traversal boundary.
 
 ## 2. Naming guard
 
@@ -202,8 +152,8 @@ Notes:
 | `MapLocation` (Serializable) | an `EncounterData` + unlock requirements (reuses `RunRequirement`) + repeatable flag |
 | `CampaignFlow` (Mono, campaign scene) | lists locations, spends Hours, dispatches on encounter type: Battle → hand `BattleSession` to the battle scene; Event → EventPanel; Shop → ShopPanel (later) |
 | `MapLocation._cell` | the location's grid cell — where its hotspot sits on the iso map (§1.5) |
-| `CityZoneData` (SO) | weighted building-prefab list + per-entry footprint, consumed by `CityGenerator` (§1.6). Scenery only; holds no encounter data |
-| `CityGenerator` (Mono, campaign scene) | seeded road subdivision + zoning + building packing; regenerates on `Start` from `RunState.Seed` (§1.6) |
+| `ZoneData`, `BuildingData` (SO) | zone bands with weighted building and landmark lists; half-cube building definitions (`city-generator.md` §3). Scenery only; hold no encounter data |
+| City generator (Mono, campaign scene) | coast, radial avenues, streets, zones, landmarks and buildings from `RunState.Seed` (`city-generator.md` §4) |
 
 ### Scenes & modes (locked shape)
 
@@ -260,9 +210,9 @@ location → spend hours → load encounter or event → return. HQ ends the day
 
 Presentation is locked to the iso city (§1.5) but **may land greybox** — untextured 2:1
 diamonds and colored blocks on the real grid, hotspots at their real cells. Prove the loop on
-the real projection, then swap sprites in without moving anything. A flat button list is no
+the real projection, then swap art in without moving anything. A flat button list is no
 longer an acceptable M1 shape: it hides exactly the layout questions the iso map has to
-answer. `CityGenerator` (§1.6) runs from day one — greybox prefabs in the zone lists give a
+answer. The city generator (`city-generator.md`) runs from day one — placeholder tiles and greybox half-cubes give a
 real generated city immediately, and swapping in art later touches no code.
 
 ### Phase M2 — events
