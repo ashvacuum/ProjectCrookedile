@@ -16,14 +16,14 @@ namespace Crookedile.Art.Iso
         private static readonly Vector3 RightNormal = new Vector3(0.6f, 0f, -0.8f).normalized;
         private static readonly Vector3 LeftTangent = new Vector3(0.8f, 0f, -0.6f).normalized;
         private static readonly Vector3 RightTangent = new Vector3(0.8f, 0f, 0.6f).normalized;
-        // Keeps a 1x1 building at the placement the previews were tuned with.
-        private const float FRONT_GROUND_Y = -0.48f;
+        // The pivot is the front tile's centre, so a 1x1 building's base is exactly that tile's diamond.
+        private const float FRONT_GROUND_Y = -0.2f;
 
         [Tooltip("Footprint length in tiles along the right wall.")]
         [SerializeField, Min(0.25f)] private float _rightTiles = 1f;
         [Tooltip("Footprint length in tiles along the left wall.")]
         [SerializeField, Min(0.25f)] private float _leftTiles = 1f;
-        [Tooltip("Wall height in world units. 0.4 matches one tile's wall in the original preview.")]
+        [Tooltip("Wall height in world units, measured up from the tile surface. 0.4 is one storey of the face atlas.")]
         [SerializeField, Min(0.05f)] private float _wallHeight = 0.4f;
 
         private Mesh _mesh;
