@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: RoadSurfaceLit
+  m_Shader: {fileID: 4800000, guid: 22af77a0bc17b3d46b11f52616d0c219, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: dd87eb15519a4067937d07aed08c8e1f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 8edbc3ebdfcd439abb8f6e6fde1c1edc, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 2800000, guid: 75b45f1a3ae446568eecbc42327d1cf2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecularMap:
+        m_Texture: {fileID: 2800000, guid: 83d3596abd484be1b31de6296ee999a7, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AmbientStrength: 0.38
+    - _AtlasFlipX: 0
+    - _AtlasFlipY: 0
+    - _AtlasQuarterTurns: 0
+    - _CustomDiffuse: 1
+    - _DiffuseStrength: 0.8
+    - _EdgeHighlightStrength: 0
+    - _EdgeHighlightWidth: 0.025
+    - _EmissionStrength: 0
+    - _NormalFlipX: 1
+    - _NormalFlipY: 1
+    - _NormalStrength: 1.25
+    - _OcclusionStrength: 0.65
+    - _SpecularEdgeOnly: 0
+    - _SpecularPower: 32
+    - _SpecularStrength: 0.035
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EdgeHighlightColor: {r: 1, g: 0.82, b: 0.58, a: 1}
+    - _EmissionColor: {r: 1, g: 0.78, b: 0.37999994, a: 1}
+    - _FaceSpecularScale: {r: 0.7, g: 0.08, b: 0.2, a: 0}
+    - _KeyLightColor: {r: 1, g: 0.88, b: 0.72, a: 1}
+    - _KeyLightDirection: {r: -0.4, g: 0.35, b: -0.85, a: 0}
+    - _LeftAtlasRect: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+    - _RightAtlasRect: {r: 0, g: 0, b: 0.5, a: 0.5}
+    - _RoofAtlasRect: {r: 0, g: 0.5, b: 0.5, a: 0.5}
+    - _RoofBaseColor: {r: 0.33999997, g: 0.45, b: 0.42999998, a: 1}
+    - _WallBaseColor: {r: 0.76, g: 0.69, b: 0.56, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

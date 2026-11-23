@@ -1,0 +1,1053 @@
+fileFormatVersion: 2
+guid: 61871390b7771474f9a4bdd0c9be1e63
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -133262799988156961
+    second: CampaignOffice_Facade_Albedo_0
+  - first:
+      213: 2801113696301815026
+    second: CampaignOffice_Facade_Albedo_1
+  - first:
+      213: 9131300848914915306
+    second: CampaignOffice_Facade_Albedo_2
+  - first:
+      213: -188475664976747971
+    second: CampaignOffice_Facade_Albedo_3
+  - first:
+      213: 3710428964820047721
+    second: CampaignOffice_Facade_Albedo_4
+  - first:
+      213: 122836376659919891
+    second: CampaignOffice_Facade_Albedo_5
+  - first:
+      213: 4094165693523719255
+    second: CampaignOffice_Facade_Albedo_6
+  - first:
+      213: -4089889064082909686
+    second: CampaignOffice_Facade_Albedo_7
+  - first:
+      213: -295416282341060761
+    second: CampaignOffice_Facade_Albedo_8
+  - first:
+      213: -6309067641818370885
+    second: CampaignOffice_Facade_Albedo_9
+  - first:
+      213: 7981641563656460892
+    second: CampaignOffice_Facade_Albedo_10
+  - first:
+      213: -8606036879078572323
+    second: CampaignOffice_Facade_Albedo_11
+  - first:
+      213: 1844046153665547035
+    second: CampaignOffice_Facade_Albedo_12
+  - first:
+      213: 2906562486286366920
+    second: CampaignOffice_Facade_Albedo_13
+  - first:
+      213: 247334869721916993
+    second: CampaignOffice_Facade_Albedo_14
+  - first:
+      213: -6687856890118212763
+    second: CampaignOffice_Facade_Albedo_15
+  - first:
+      213: 8884278497816270221
+    second: CampaignOffice_Facade_Albedo_16
+  - first:
+      213: 2145828259887767392
+    second: CampaignOffice_Facade_Albedo_17
+  - first:
+      213: -5531768433165612506
+    second: CampaignOffice_Facade_Albedo_18
+  - first:
+      213: -3777146711012189688
+    second: CampaignOffice_Facade_Albedo_19
+  - first:
+      213: -4510753387920724302
+    second: CampaignOffice_Facade_Albedo_20
+  - first:
+      213: -3896012947948190396
+    second: CampaignOffice_Facade_Albedo_21
+  - first:
+      213: 5824560465677683767
+    second: CampaignOffice_Facade_Albedo_22
+  - first:
+      213: 7490564836266335235
+    second: CampaignOffice_Facade_Albedo_23
+  - first:
+      213: -8735736403258199223
+    second: CampaignOffice_Facade_Albedo_24
+  - first:
+      213: -8028105643778221613
+    second: CampaignOffice_Facade_Albedo_25
+  - first:
+      213: -1872153938642100667
+    second: CampaignOffice_Facade_Albedo_26
+  - first:
+      213: 7405128613213634133
+    second: CampaignOffice_Facade_Albedo_27
+  - first:
+      213: -2603355010071234766
+    second: CampaignOffice_Facade_Albedo_28
+  - first:
+      213: 8039752712950354939
+    second: CampaignOffice_Facade_Albedo_29
+  - first:
+      213: -1052799922297798574
+    second: CampaignOffice_Facade_Albedo_30
+  - first:
+      213: 5015083834134504763
+    second: CampaignOffice_Facade_Albedo_31
+  - first:
+      213: 7056803525053385665
+    second: CampaignOffice_Facade_Albedo_32
+  - first:
+      213: 2033636415170764720
+    second: CampaignOffice_Facade_Albedo_33
+  - first:
+      213: 1508645335586890689
+    second: CampaignOffice_Facade_Albedo_34
+  - first:
+      213: -7384590567080122895
+    second: CampaignOffice_Facade_Albedo_35
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_0
+      rect:
+        serializedVersion: 2
+        x: 159
+        y: 1124
+        width: 131
+        height: 78
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd59ee0803e862ef0800000000000000
+      internalID: -133262799988156961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_1
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 1171
+        width: 23
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f41d8bd01e8fd620800000000000000
+      internalID: 2801113696301815026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_2
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 1128
+        width: 63
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aefdbcc0eb5e8be70800000000000000
+      internalID: 9131300848914915306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_3
+      rect:
+        serializedVersion: 2
+        x: 472
+        y: 1173
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d32614c9166626df0800000000000000
+      internalID: -188475664976747971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_4
+      rect:
+        serializedVersion: 2
+        x: 500
+        y: 1154
+        width: 50
+        height: 82
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9675b6c1c771e7330800000000000000
+      internalID: 3710428964820047721
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_5
+      rect:
+        serializedVersion: 2
+        x: 547
+        y: 1135
+        width: 49
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3148f44a80764b100800000000000000
+      internalID: 122836376659919891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_6
+      rect:
+        serializedVersion: 2
+        x: 605
+        y: 1162
+        width: 27
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7547216a10661d830800000000000000
+      internalID: 4094165693523719255
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_7
+      rect:
+        serializedVersion: 2
+        x: 631
+        y: 1171
+        width: 29
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a06559cb09bcd37c0800000000000000
+      internalID: -4089889064082909686
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_8
+      rect:
+        serializedVersion: 2
+        x: 659
+        y: 1173
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76fc136d47876ebf0800000000000000
+      internalID: -295416282341060761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_9
+      rect:
+        serializedVersion: 2
+        x: 747
+        y: 1167
+        width: 60
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bbc21891860b178a0800000000000000
+      internalID: -6309067641818370885
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_10
+      rect:
+        serializedVersion: 2
+        x: 796
+        y: 1070
+        width: 69
+        height: 102
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5a9c3ea6bc74ce60800000000000000
+      internalID: 7981641563656460892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_11
+      rect:
+        serializedVersion: 2
+        x: 838
+        y: 1175
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dde3c922e07319880800000000000000
+      internalID: -8606036879078572323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_12
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 1173
+        width: 53
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1b09a2e43e579910800000000000000
+      internalID: 1844046153665547035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_13
+      rect:
+        serializedVersion: 2
+        x: 963
+        y: 1175
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c833908e2f265820800000000000000
+      internalID: 2906562486286366920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_14
+      rect:
+        serializedVersion: 2
+        x: 995
+        y: 1173
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 146a75ae0c5be6300800000000000000
+      internalID: 247334869721916993
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_15
+      rect:
+        serializedVersion: 2
+        x: 1011
+        y: 1167
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 563fadb9795ff23a0800000000000000
+      internalID: -6687856890118212763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_16
+      rect:
+        serializedVersion: 2
+        x: 1013
+        y: 1124
+        width: 17
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d85dafb093c4b4b70800000000000000
+      internalID: 8884278497816270221
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_17
+      rect:
+        serializedVersion: 2
+        x: 1053
+        y: 1171
+        width: 41
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06fda9bee6387cd10800000000000000
+      internalID: 2145828259887767392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_18
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 1148
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62ac1792be53b33b0800000000000000
+      internalID: -5531768433165612506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_19
+      rect:
+        serializedVersion: 2
+        x: 489
+        y: 1147
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80a55991411e49bc0800000000000000
+      internalID: -3777146711012189688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_20
+      rect:
+        serializedVersion: 2
+        x: 587
+        y: 1156
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2be689351b59661c0800000000000000
+      internalID: -4510753387920724302
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_21
+      rect:
+        serializedVersion: 2
+        x: 635
+        y: 1130
+        width: 47
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 445c935add49ee9c0800000000000000
+      internalID: -3896012947948190396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_22
+      rect:
+        serializedVersion: 2
+        x: 675
+        y: 1142
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73c808932eef4d050800000000000000
+      internalID: 5824560465677683767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_23
+      rect:
+        serializedVersion: 2
+        x: 695
+        y: 1090
+        width: 30
+        height: 77
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30cdfa82805d3f760800000000000000
+      internalID: 7490564836266335235
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_24
+      rect:
+        serializedVersion: 2
+        x: 892
+        y: 1114
+        width: 42
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 943b850760e64c680800000000000000
+      internalID: -8735736403258199223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_25
+      rect:
+        serializedVersion: 2
+        x: 327
+        y: 1124
+        width: 54
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d95a43a370769090800000000000000
+      internalID: -8028105643778221613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_26
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 1137
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54e936279e5c406e0800000000000000
+      internalID: -1872153938642100667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_27
+      rect:
+        serializedVersion: 2
+        x: 474
+        y: 1124
+        width: 40
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55efdaa5d3d44c660800000000000000
+      internalID: 7405128613213634133
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_28
+      rect:
+        serializedVersion: 2
+        x: 522
+        y: 1130
+        width: 17
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 237787859660fdbd0800000000000000
+      internalID: -2603355010071234766
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_29
+      rect:
+        serializedVersion: 2
+        x: 454
+        y: 1098
+        width: 15
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf39369fe70f29f60800000000000000
+      internalID: 8039752712950354939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_30
+      rect:
+        serializedVersion: 2
+        x: 645
+        y: 1078
+        width: 29
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25081e37c04b361f0800000000000000
+      internalID: -1052799922297798574
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_31
+      rect:
+        serializedVersion: 2
+        x: 737
+        y: 1100
+        width: 12
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3524641d28299540800000000000000
+      internalID: 5015083834134504763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_32
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 1080
+        width: 46
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1cb0880ea6dcee160800000000000000
+      internalID: 7056803525053385665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_33
+      rect:
+        serializedVersion: 2
+        x: 850
+        y: 1074
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bf5d808b8de83c10800000000000000
+      internalID: 2033636415170764720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_34
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1222
+        height: 1035
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c3e4b780f8cfe410800000000000000
+      internalID: 1508645335586890689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Albedo_35
+      rect:
+        serializedVersion: 2
+        x: 706
+        y: 21
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f52d75210aa48990800000000000000
+      internalID: -7384590567080122895
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      CampaignOffice_Facade_Albedo_0: -133262799988156961
+      CampaignOffice_Facade_Albedo_1: 2801113696301815026
+      CampaignOffice_Facade_Albedo_10: 7981641563656460892
+      CampaignOffice_Facade_Albedo_11: -8606036879078572323
+      CampaignOffice_Facade_Albedo_12: 1844046153665547035
+      CampaignOffice_Facade_Albedo_13: 2906562486286366920
+      CampaignOffice_Facade_Albedo_14: 247334869721916993
+      CampaignOffice_Facade_Albedo_15: -6687856890118212763
+      CampaignOffice_Facade_Albedo_16: 8884278497816270221
+      CampaignOffice_Facade_Albedo_17: 2145828259887767392
+      CampaignOffice_Facade_Albedo_18: -5531768433165612506
+      CampaignOffice_Facade_Albedo_19: -3777146711012189688
+      CampaignOffice_Facade_Albedo_2: 9131300848914915306
+      CampaignOffice_Facade_Albedo_20: -4510753387920724302
+      CampaignOffice_Facade_Albedo_21: -3896012947948190396
+      CampaignOffice_Facade_Albedo_22: 5824560465677683767
+      CampaignOffice_Facade_Albedo_23: 7490564836266335235
+      CampaignOffice_Facade_Albedo_24: -8735736403258199223
+      CampaignOffice_Facade_Albedo_25: -8028105643778221613
+      CampaignOffice_Facade_Albedo_26: -1872153938642100667
+      CampaignOffice_Facade_Albedo_27: 7405128613213634133
+      CampaignOffice_Facade_Albedo_28: -2603355010071234766
+      CampaignOffice_Facade_Albedo_29: 8039752712950354939
+      CampaignOffice_Facade_Albedo_3: -188475664976747971
+      CampaignOffice_Facade_Albedo_30: -1052799922297798574
+      CampaignOffice_Facade_Albedo_31: 5015083834134504763
+      CampaignOffice_Facade_Albedo_32: 7056803525053385665
+      CampaignOffice_Facade_Albedo_33: 2033636415170764720
+      CampaignOffice_Facade_Albedo_34: 1508645335586890689
+      CampaignOffice_Facade_Albedo_35: -7384590567080122895
+      CampaignOffice_Facade_Albedo_4: 3710428964820047721
+      CampaignOffice_Facade_Albedo_5: 122836376659919891
+      CampaignOffice_Facade_Albedo_6: 4094165693523719255
+      CampaignOffice_Facade_Albedo_7: -4089889064082909686
+      CampaignOffice_Facade_Albedo_8: -295416282341060761
+      CampaignOffice_Facade_Albedo_9: -6309067641818370885
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

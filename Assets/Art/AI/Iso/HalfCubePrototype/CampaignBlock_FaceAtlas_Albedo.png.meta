@@ -1,0 +1,325 @@
+fileFormatVersion: 2
+guid: 46f7d168e51f07040a99413fc8667769
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4684303809757921477
+    second: CampaignBlock_FaceAtlas_Albedo_0
+  - first:
+      213: -4946164702867930484
+    second: CampaignBlock_FaceAtlas_Albedo_1
+  - first:
+      213: -3511463571222397017
+    second: CampaignBlock_FaceAtlas_Albedo_2
+  - first:
+      213: -2248474878875465358
+    second: CampaignBlock_FaceAtlas_Albedo_3
+  - first:
+      213: 8963558646992339944
+    second: CampaignBlock_FaceAtlas_Albedo_4
+  - first:
+      213: 207950245659829654
+    second: CampaignBlock_FaceAtlas_Albedo_5
+  - first:
+      213: -4911418027292834854
+    second: CampaignBlock_FaceAtlas_Albedo_6
+  - first:
+      213: 3099332996704040776
+    second: CampaignBlock_FaceAtlas_Albedo_7
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 627
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 0
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: CampaignBlock_FaceAtlas_Albedo_0
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 610
+        width: 585
+        height: 626
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3fbe57e0820efeb0800000000000000
+      internalID: -4684303809757921477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignBlock_FaceAtlas_Albedo_1
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 656
+        width: 595
+        height: 573
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c824bfc9861bb5bb0800000000000000
+      internalID: -4946164702867930484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignBlock_FaceAtlas_Albedo_2
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 15
+        width: 1040
+        height: 587
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7af709b8c76c44fc0800000000000000
+      internalID: -3511463571222397017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignBlock_FaceAtlas_Albedo_3
+      rect:
+        serializedVersion: 2
+        x: 987
+        y: 485
+        width: 37
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2790d36b200dbc0e0800000000000000
+      internalID: -2248474878875465358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignBlock_FaceAtlas_Albedo_4
+      rect:
+        serializedVersion: 2
+        x: 1025
+        y: 517
+        width: 51
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e30c553915f46c70800000000000000
+      internalID: 8963558646992339944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignBlock_FaceAtlas_Albedo_5
+      rect:
+        serializedVersion: 2
+        x: 1029
+        y: 456
+        width: 87
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 695628b85a9c2e200800000000000000
+      internalID: 207950245659829654
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignBlock_FaceAtlas_Albedo_6
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 415
+        width: 115
+        height: 77
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad3c2c3735327dbb0800000000000000
+      internalID: -4911418027292834854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignBlock_FaceAtlas_Albedo_7
+      rect:
+        serializedVersion: 2
+        x: 1007
+        y: 487
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 847f03580fa030b20800000000000000
+      internalID: 3099332996704040776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      CampaignBlock_FaceAtlas_Albedo_0: -4684303809757921477
+      CampaignBlock_FaceAtlas_Albedo_1: -4946164702867930484
+      CampaignBlock_FaceAtlas_Albedo_2: -3511463571222397017
+      CampaignBlock_FaceAtlas_Albedo_3: -2248474878875465358
+      CampaignBlock_FaceAtlas_Albedo_4: 8963558646992339944
+      CampaignBlock_FaceAtlas_Albedo_5: 207950245659829654
+      CampaignBlock_FaceAtlas_Albedo_6: -4911418027292834854
+      CampaignBlock_FaceAtlas_Albedo_7: 3099332996704040776
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

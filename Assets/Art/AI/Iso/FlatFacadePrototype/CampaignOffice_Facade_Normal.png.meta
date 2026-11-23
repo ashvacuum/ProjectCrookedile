@@ -1,0 +1,1677 @@
+fileFormatVersion: 2
+guid: 3ba00bd582985e54d94d75d72119b41d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5947664734963245689
+    second: CampaignOffice_Facade_Normal_0
+  - first:
+      213: 5531128729004331315
+    second: CampaignOffice_Facade_Normal_1
+  - first:
+      213: -4505531415994079773
+    second: CampaignOffice_Facade_Normal_2
+  - first:
+      213: -3834288607546063979
+    second: CampaignOffice_Facade_Normal_3
+  - first:
+      213: 8792234071210797135
+    second: CampaignOffice_Facade_Normal_4
+  - first:
+      213: -9090002415591010514
+    second: CampaignOffice_Facade_Normal_5
+  - first:
+      213: -1840150787798338979
+    second: CampaignOffice_Facade_Normal_6
+  - first:
+      213: -2338907176387202030
+    second: CampaignOffice_Facade_Normal_7
+  - first:
+      213: 4707473897179602834
+    second: CampaignOffice_Facade_Normal_8
+  - first:
+      213: 712590403718349506
+    second: CampaignOffice_Facade_Normal_9
+  - first:
+      213: -4090365431790882611
+    second: CampaignOffice_Facade_Normal_10
+  - first:
+      213: -7605386430826978725
+    second: CampaignOffice_Facade_Normal_11
+  - first:
+      213: -8443089075963570294
+    second: CampaignOffice_Facade_Normal_12
+  - first:
+      213: -1633940674406953747
+    second: CampaignOffice_Facade_Normal_13
+  - first:
+      213: 1761203092986571525
+    second: CampaignOffice_Facade_Normal_14
+  - first:
+      213: 1907230797629882269
+    second: CampaignOffice_Facade_Normal_15
+  - first:
+      213: -4288250744240271366
+    second: CampaignOffice_Facade_Normal_16
+  - first:
+      213: -4277730040745680070
+    second: CampaignOffice_Facade_Normal_17
+  - first:
+      213: -3659797089559421898
+    second: CampaignOffice_Facade_Normal_18
+  - first:
+      213: 7526538572473237356
+    second: CampaignOffice_Facade_Normal_19
+  - first:
+      213: -8752259836968544726
+    second: CampaignOffice_Facade_Normal_20
+  - first:
+      213: -5441403098441848421
+    second: CampaignOffice_Facade_Normal_21
+  - first:
+      213: -5231337272920487207
+    second: CampaignOffice_Facade_Normal_22
+  - first:
+      213: -3099158069973819318
+    second: CampaignOffice_Facade_Normal_23
+  - first:
+      213: -1695966871422201427
+    second: CampaignOffice_Facade_Normal_24
+  - first:
+      213: 1369420038270568465
+    second: CampaignOffice_Facade_Normal_25
+  - first:
+      213: 9184528896800792284
+    second: CampaignOffice_Facade_Normal_26
+  - first:
+      213: 4426748084551948510
+    second: CampaignOffice_Facade_Normal_27
+  - first:
+      213: -8711568058477291995
+    second: CampaignOffice_Facade_Normal_28
+  - first:
+      213: 7345298980316703204
+    second: CampaignOffice_Facade_Normal_29
+  - first:
+      213: 1748188625310142123
+    second: CampaignOffice_Facade_Normal_30
+  - first:
+      213: 3839581268651422699
+    second: CampaignOffice_Facade_Normal_31
+  - first:
+      213: 2875850797171973600
+    second: CampaignOffice_Facade_Normal_32
+  - first:
+      213: -1507985068939001341
+    second: CampaignOffice_Facade_Normal_33
+  - first:
+      213: -8891550581472611515
+    second: CampaignOffice_Facade_Normal_34
+  - first:
+      213: -4242523647582719281
+    second: CampaignOffice_Facade_Normal_35
+  - first:
+      213: 2999481147235724806
+    second: CampaignOffice_Facade_Normal_36
+  - first:
+      213: -2561713314616527235
+    second: CampaignOffice_Facade_Normal_37
+  - first:
+      213: -5239493200955444578
+    second: CampaignOffice_Facade_Normal_38
+  - first:
+      213: -2149200963257408235
+    second: CampaignOffice_Facade_Normal_39
+  - first:
+      213: -1810521721187708037
+    second: CampaignOffice_Facade_Normal_40
+  - first:
+      213: 2328376249075705886
+    second: CampaignOffice_Facade_Normal_41
+  - first:
+      213: 3479417406803220910
+    second: CampaignOffice_Facade_Normal_42
+  - first:
+      213: -6144636203684676591
+    second: CampaignOffice_Facade_Normal_43
+  - first:
+      213: -5762997293829967325
+    second: CampaignOffice_Facade_Normal_44
+  - first:
+      213: -7118364527869359230
+    second: CampaignOffice_Facade_Normal_45
+  - first:
+      213: 209130100762492212
+    second: CampaignOffice_Facade_Normal_46
+  - first:
+      213: 5350473772922237671
+    second: CampaignOffice_Facade_Normal_47
+  - first:
+      213: 8483540234972558584
+    second: CampaignOffice_Facade_Normal_48
+  - first:
+      213: 7923470978099380039
+    second: CampaignOffice_Facade_Normal_49
+  - first:
+      213: 2787880088113493547
+    second: CampaignOffice_Facade_Normal_50
+  - first:
+      213: -2379451121118246294
+    second: CampaignOffice_Facade_Normal_51
+  - first:
+      213: 6420289565723340881
+    second: CampaignOffice_Facade_Normal_52
+  - first:
+      213: -6229699443655721654
+    second: CampaignOffice_Facade_Normal_53
+  - first:
+      213: -4770183692189829005
+    second: CampaignOffice_Facade_Normal_54
+  - first:
+      213: -3842212628302535464
+    second: CampaignOffice_Facade_Normal_55
+  - first:
+      213: 4723181071518161644
+    second: CampaignOffice_Facade_Normal_56
+  - first:
+      213: 518397063103310792
+    second: CampaignOffice_Facade_Normal_57
+  - first:
+      213: 8895298013828790690
+    second: CampaignOffice_Facade_Normal_58
+  - first:
+      213: -367852524093442711
+    second: CampaignOffice_Facade_Normal_59
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1181
+        width: 94
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78dd5658f66a57da0800000000000000
+      internalID: -5947664734963245689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_1
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 1189
+        width: 16
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 331d24b164482cc40800000000000000
+      internalID: 5531128729004331315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_2
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 1205
+        width: 34
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e56f496c032971c0800000000000000
+      internalID: -4505531415994079773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_3
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 1163
+        width: 75
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 593c3ec83ded9cac0800000000000000
+      internalID: -3834288607546063979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_4
+      rect:
+        serializedVersion: 2
+        x: 205
+        y: 1193
+        width: 37
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f482b94fd4a440a70800000000000000
+      internalID: 8792234071210797135
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_5
+      rect:
+        serializedVersion: 2
+        x: 261
+        y: 1189
+        width: 61
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2f4143c6f2d9d180800000000000000
+      internalID: -9090002415591010514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_6
+      rect:
+        serializedVersion: 2
+        x: 334
+        y: 1177
+        width: 76
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d52ff18ab987676e0800000000000000
+      internalID: -1840150787798338979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_7
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 1204
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21434dca0588a8fd0800000000000000
+      internalID: -2338907176387202030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_8
+      rect:
+        serializedVersion: 2
+        x: 510
+        y: 1205
+        width: 22
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29f50d6719e445140800000000000000
+      internalID: 4707473897179602834
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_9
+      rect:
+        serializedVersion: 2
+        x: 537
+        y: 1202
+        width: 27
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c20cfb5231a3e900800000000000000
+      internalID: 712590403718349506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_10
+      rect:
+        serializedVersion: 2
+        x: 583
+        y: 1208
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc0319cbf4a1c37c0800000000000000
+      internalID: -4090365431790882611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_11
+      rect:
+        serializedVersion: 2
+        x: 625
+        y: 1207
+        width: 11
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b526bf2165d347690800000000000000
+      internalID: -7605386430826978725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_12
+      rect:
+        serializedVersion: 2
+        x: 637
+        y: 1205
+        width: 39
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a87d534083f14da80800000000000000
+      internalID: -8443089075963570294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_13
+      rect:
+        serializedVersion: 2
+        x: 737
+        y: 1205
+        width: 24
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dec49e51d931359e0800000000000000
+      internalID: -1633940674406953747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_14
+      rect:
+        serializedVersion: 2
+        x: 828
+        y: 1193
+        width: 85
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50ba8ceb1ec017810800000000000000
+      internalID: 1761203092986571525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_15
+      rect:
+        serializedVersion: 2
+        x: 922
+        y: 1206
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9ff9653e48d77a10800000000000000
+      internalID: 1907230797629882269
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_16
+      rect:
+        serializedVersion: 2
+        x: 952
+        y: 1183
+        width: 106
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aff01c11ba21d74c0800000000000000
+      internalID: -4288250744240271366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_17
+      rect:
+        serializedVersion: 2
+        x: 1101
+        y: 1205
+        width: 40
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a33265c313372a4c0800000000000000
+      internalID: -4277730040745680070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_18
+      rect:
+        serializedVersion: 2
+        x: 1129
+        y: 1179
+        width: 72
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 63c5dceffe9c53dc0800000000000000
+      internalID: -3659797089559421898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_19
+      rect:
+        serializedVersion: 2
+        x: 169
+        y: 1192
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6ffa8054f2a37860800000000000000
+      internalID: 7526538572473237356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_20
+      rect:
+        serializedVersion: 2
+        x: 488
+        y: 1127
+        width: 180
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a26529bbc0ab98680800000000000000
+      internalID: -8752259836968544726
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_21
+      rect:
+        serializedVersion: 2
+        x: 231
+        y: 1100
+        width: 72
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b99e9a536b04c74b0800000000000000
+      internalID: -5441403098441848421
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_22
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 1144
+        width: 45
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9da4053977e8667b0800000000000000
+      internalID: -5231337272920487207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_23
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 1108
+        width: 53
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a40ec68c7249df4d0800000000000000
+      internalID: -3099158069973819318
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_24
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 1142
+        width: 90
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da19c06bd17b678e0800000000000000
+      internalID: -1695966871422201427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_25
+      rect:
+        serializedVersion: 2
+        x: 687
+        y: 1156
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1184b61f448210310800000000000000
+      internalID: 1369420038270568465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_26
+      rect:
+        serializedVersion: 2
+        x: 697
+        y: 1158
+        width: 13
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cde1f13be50067f70800000000000000
+      internalID: 9184528896800792284
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_27
+      rect:
+        serializedVersion: 2
+        x: 725
+        y: 1154
+        width: 16
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed81cd1dde7fe6d30800000000000000
+      internalID: 4426748084551948510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_28
+      rect:
+        serializedVersion: 2
+        x: 731
+        y: 1110
+        width: 114
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52652d5b10b4a1780800000000000000
+      internalID: -8711568058477291995
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_29
+      rect:
+        serializedVersion: 2
+        x: 843
+        y: 1138
+        width: 30
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e9e0da618ebfe560800000000000000
+      internalID: 7345298980316703204
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_30
+      rect:
+        serializedVersion: 2
+        x: 872
+        y: 1102
+        width: 85
+        height: 84
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bae4dfbda40d24810800000000000000
+      internalID: 1748188625310142123
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_31
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 1146
+        width: 12
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be3363422dee84530800000000000000
+      internalID: 3839581268651422699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_32
+      rect:
+        serializedVersion: 2
+        x: 938
+        y: 1156
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ed9578201319e720800000000000000
+      internalID: 2875850797171973600
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_33
+      rect:
+        serializedVersion: 2
+        x: 948
+        y: 1150
+        width: 20
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3024c47c19f821be0800000000000000
+      internalID: -1507985068939001341
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_34
+      rect:
+        serializedVersion: 2
+        x: 969
+        y: 1114
+        width: 29
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54338e80bddda9480800000000000000
+      internalID: -8891550581472611515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_35
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 1144
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc233aa68378f15c0800000000000000
+      internalID: -4242523647582719281
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_36
+      rect:
+        serializedVersion: 2
+        x: 721
+        y: 1140
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60e6773263c40a920800000000000000
+      internalID: 2999481147235724806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_37
+      rect:
+        serializedVersion: 2
+        x: 795
+        y: 1130
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d76b4e91057f27cd0800000000000000
+      internalID: -2561713314616527235
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_38
+      rect:
+        serializedVersion: 2
+        x: 952
+        y: 1138
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e92f9f991b49947b0800000000000000
+      internalID: -5239493200955444578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_39
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 1124
+        width: 17
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5156d126c118c22e0800000000000000
+      internalID: -2149200963257408235
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_40
+      rect:
+        serializedVersion: 2
+        x: 506
+        y: 1116
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b735a7e461cbfd6e0800000000000000
+      internalID: -1810521721187708037
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_41
+      rect:
+        serializedVersion: 2
+        x: 786
+        y: 1114
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e182d9dbcdd005020800000000000000
+      internalID: 2328376249075705886
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_42
+      rect:
+        serializedVersion: 2
+        x: 850
+        y: 1124
+        width: 19
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea911dd52bf594030800000000000000
+      internalID: 3479417406803220910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_43
+      rect:
+        serializedVersion: 2
+        x: 498
+        y: 1098
+        width: 26
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11cbe5dadedd9baa0800000000000000
+      internalID: -6144636203684676591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_44
+      rect:
+        serializedVersion: 2
+        x: 551
+        y: 1094
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3223ab3be78b500b0800000000000000
+      internalID: -5762997293829967325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_45
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1227
+        height: 1063
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28b0b963d2d763d90800000000000000
+      internalID: -7118364527869359230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_46
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 521
+        width: 25
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43d3ac7f7baf6e200800000000000000
+      internalID: 209130100762492212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_47
+      rect:
+        serializedVersion: 2
+        x: 530
+        y: 90
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e2f2176c83b04a40800000000000000
+      internalID: 5350473772922237671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_48
+      rect:
+        serializedVersion: 2
+        x: 536
+        y: 87
+        width: 9
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f4f54f55e69bb570800000000000000
+      internalID: 8483540234972558584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_49
+      rect:
+        serializedVersion: 2
+        x: 545
+        y: 86
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74ffabdcfd2d5fd60800000000000000
+      internalID: 7923470978099380039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_50
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 23
+        width: 90
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b26b3685b2a80b620800000000000000
+      internalID: 2787880088113493547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_51
+      rect:
+        serializedVersion: 2
+        x: 635
+        y: 61
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6a875defcd7afed0800000000000000
+      internalID: -2379451121118246294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_52
+      rect:
+        serializedVersion: 2
+        x: 643
+        y: 65
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15036180853791950800000000000000
+      internalID: 6420289565723340881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_53
+      rect:
+        serializedVersion: 2
+        x: 665
+        y: 69
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4db373cc59ab89a0800000000000000
+      internalID: -6229699443655721654
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_54
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 33
+        width: 12
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 378f9a99437eccdb0800000000000000
+      internalID: -4770183692189829005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_55
+      rect:
+        serializedVersion: 2
+        x: 601
+        y: 31
+        width: 11
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d4e182b8f7bdaac0800000000000000
+      internalID: -3842212628302535464
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_56
+      rect:
+        serializedVersion: 2
+        x: 665
+        y: 52
+        width: 19
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cea50b9f82c1c8140800000000000000
+      internalID: 4723181071518161644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_57
+      rect:
+        serializedVersion: 2
+        x: 673
+        y: 31
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8cbe0eed167b13700800000000000000
+      internalID: 518397063103310792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_58
+      rect:
+        serializedVersion: 2
+        x: 956
+        y: 34
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a9b08d0a62727b70800000000000000
+      internalID: 8895298013828790690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignOffice_Facade_Normal_59
+      rect:
+        serializedVersion: 2
+        x: 563
+        y: 15
+        width: 15
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 965fdab041025eaf0800000000000000
+      internalID: -367852524093442711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      CampaignOffice_Facade_Normal_0: -5947664734963245689
+      CampaignOffice_Facade_Normal_1: 5531128729004331315
+      CampaignOffice_Facade_Normal_10: -4090365431790882611
+      CampaignOffice_Facade_Normal_11: -7605386430826978725
+      CampaignOffice_Facade_Normal_12: -8443089075963570294
+      CampaignOffice_Facade_Normal_13: -1633940674406953747
+      CampaignOffice_Facade_Normal_14: 1761203092986571525
+      CampaignOffice_Facade_Normal_15: 1907230797629882269
+      CampaignOffice_Facade_Normal_16: -4288250744240271366
+      CampaignOffice_Facade_Normal_17: -4277730040745680070
+      CampaignOffice_Facade_Normal_18: -3659797089559421898
+      CampaignOffice_Facade_Normal_19: 7526538572473237356
+      CampaignOffice_Facade_Normal_2: -4505531415994079773
+      CampaignOffice_Facade_Normal_20: -8752259836968544726
+      CampaignOffice_Facade_Normal_21: -5441403098441848421
+      CampaignOffice_Facade_Normal_22: -5231337272920487207
+      CampaignOffice_Facade_Normal_23: -3099158069973819318
+      CampaignOffice_Facade_Normal_24: -1695966871422201427
+      CampaignOffice_Facade_Normal_25: 1369420038270568465
+      CampaignOffice_Facade_Normal_26: 9184528896800792284
+      CampaignOffice_Facade_Normal_27: 4426748084551948510
+      CampaignOffice_Facade_Normal_28: -8711568058477291995
+      CampaignOffice_Facade_Normal_29: 7345298980316703204
+      CampaignOffice_Facade_Normal_3: -3834288607546063979
+      CampaignOffice_Facade_Normal_30: 1748188625310142123
+      CampaignOffice_Facade_Normal_31: 3839581268651422699
+      CampaignOffice_Facade_Normal_32: 2875850797171973600
+      CampaignOffice_Facade_Normal_33: -1507985068939001341
+      CampaignOffice_Facade_Normal_34: -8891550581472611515
+      CampaignOffice_Facade_Normal_35: -4242523647582719281
+      CampaignOffice_Facade_Normal_36: 2999481147235724806
+      CampaignOffice_Facade_Normal_37: -2561713314616527235
+      CampaignOffice_Facade_Normal_38: -5239493200955444578
+      CampaignOffice_Facade_Normal_39: -2149200963257408235
+      CampaignOffice_Facade_Normal_4: 8792234071210797135
+      CampaignOffice_Facade_Normal_40: -1810521721187708037
+      CampaignOffice_Facade_Normal_41: 2328376249075705886
+      CampaignOffice_Facade_Normal_42: 3479417406803220910
+      CampaignOffice_Facade_Normal_43: -6144636203684676591
+      CampaignOffice_Facade_Normal_44: -5762997293829967325
+      CampaignOffice_Facade_Normal_45: -7118364527869359230
+      CampaignOffice_Facade_Normal_46: 209130100762492212
+      CampaignOffice_Facade_Normal_47: 5350473772922237671
+      CampaignOffice_Facade_Normal_48: 8483540234972558584
+      CampaignOffice_Facade_Normal_49: 7923470978099380039
+      CampaignOffice_Facade_Normal_5: -9090002415591010514
+      CampaignOffice_Facade_Normal_50: 2787880088113493547
+      CampaignOffice_Facade_Normal_51: -2379451121118246294
+      CampaignOffice_Facade_Normal_52: 6420289565723340881
+      CampaignOffice_Facade_Normal_53: -6229699443655721654
+      CampaignOffice_Facade_Normal_54: -4770183692189829005
+      CampaignOffice_Facade_Normal_55: -3842212628302535464
+      CampaignOffice_Facade_Normal_56: 4723181071518161644
+      CampaignOffice_Facade_Normal_57: 518397063103310792
+      CampaignOffice_Facade_Normal_58: 8895298013828790690
+      CampaignOffice_Facade_Normal_59: -367852524093442711
+      CampaignOffice_Facade_Normal_6: -1840150787798338979
+      CampaignOffice_Facade_Normal_7: -2338907176387202030
+      CampaignOffice_Facade_Normal_8: 4707473897179602834
+      CampaignOffice_Facade_Normal_9: 712590403718349506
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

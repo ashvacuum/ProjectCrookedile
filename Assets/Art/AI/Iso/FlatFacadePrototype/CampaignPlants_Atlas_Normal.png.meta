@@ -1,0 +1,3159 @@
+fileFormatVersion: 2
+guid: c5641a2f94eb73942908263e701088a9
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1482819876457351564
+    second: CampaignPlants_Atlas_Normal_0
+  - first:
+      213: 6775811117677581332
+    second: CampaignPlants_Atlas_Normal_1
+  - first:
+      213: 6843135103947300716
+    second: CampaignPlants_Atlas_Normal_2
+  - first:
+      213: -8248199412910057123
+    second: CampaignPlants_Atlas_Normal_3
+  - first:
+      213: -7494595888200530125
+    second: CampaignPlants_Atlas_Normal_4
+  - first:
+      213: 2817319239376214207
+    second: CampaignPlants_Atlas_Normal_5
+  - first:
+      213: -4654655708363633040
+    second: CampaignPlants_Atlas_Normal_6
+  - first:
+      213: 3501558809796174108
+    second: CampaignPlants_Atlas_Normal_7
+  - first:
+      213: -6096224752047075827
+    second: CampaignPlants_Atlas_Normal_8
+  - first:
+      213: -6361568741713770811
+    second: CampaignPlants_Atlas_Normal_9
+  - first:
+      213: -7120714488452923178
+    second: CampaignPlants_Atlas_Normal_10
+  - first:
+      213: -1528198738406164144
+    second: CampaignPlants_Atlas_Normal_11
+  - first:
+      213: 6065387273923836624
+    second: CampaignPlants_Atlas_Normal_12
+  - first:
+      213: -1152889563801381349
+    second: CampaignPlants_Atlas_Normal_13
+  - first:
+      213: 2732843231966081261
+    second: CampaignPlants_Atlas_Normal_14
+  - first:
+      213: 6571769816223446080
+    second: CampaignPlants_Atlas_Normal_15
+  - first:
+      213: 3183995789949021508
+    second: CampaignPlants_Atlas_Normal_16
+  - first:
+      213: 647143719956029998
+    second: CampaignPlants_Atlas_Normal_17
+  - first:
+      213: -2295707371542342185
+    second: CampaignPlants_Atlas_Normal_18
+  - first:
+      213: -4225159065214438265
+    second: CampaignPlants_Atlas_Normal_19
+  - first:
+      213: 1130016295515961947
+    second: CampaignPlants_Atlas_Normal_20
+  - first:
+      213: 4159533057478157390
+    second: CampaignPlants_Atlas_Normal_21
+  - first:
+      213: -2738753567199453502
+    second: CampaignPlants_Atlas_Normal_22
+  - first:
+      213: -2070170069682110683
+    second: CampaignPlants_Atlas_Normal_23
+  - first:
+      213: -6709030247110095423
+    second: CampaignPlants_Atlas_Normal_24
+  - first:
+      213: -3595288154586967432
+    second: CampaignPlants_Atlas_Normal_25
+  - first:
+      213: 2257445082017900108
+    second: CampaignPlants_Atlas_Normal_26
+  - first:
+      213: 1101783971089136625
+    second: CampaignPlants_Atlas_Normal_27
+  - first:
+      213: -889659386233279258
+    second: CampaignPlants_Atlas_Normal_28
+  - first:
+      213: -178922617718254785
+    second: CampaignPlants_Atlas_Normal_29
+  - first:
+      213: -2795117162356018527
+    second: CampaignPlants_Atlas_Normal_30
+  - first:
+      213: 53265892780343183
+    second: CampaignPlants_Atlas_Normal_31
+  - first:
+      213: 1647733428078466432
+    second: CampaignPlants_Atlas_Normal_32
+  - first:
+      213: -2721120328140444499
+    second: CampaignPlants_Atlas_Normal_33
+  - first:
+      213: 7199908268672764174
+    second: CampaignPlants_Atlas_Normal_34
+  - first:
+      213: -2080095218466667783
+    second: CampaignPlants_Atlas_Normal_35
+  - first:
+      213: 8152438040957079435
+    second: CampaignPlants_Atlas_Normal_36
+  - first:
+      213: 5899068774166288506
+    second: CampaignPlants_Atlas_Normal_37
+  - first:
+      213: 8606335610520286365
+    second: CampaignPlants_Atlas_Normal_38
+  - first:
+      213: -2150143393721607556
+    second: CampaignPlants_Atlas_Normal_39
+  - first:
+      213: 2397187677337983645
+    second: CampaignPlants_Atlas_Normal_40
+  - first:
+      213: 5986837856784057412
+    second: CampaignPlants_Atlas_Normal_41
+  - first:
+      213: -4593952196182738124
+    second: CampaignPlants_Atlas_Normal_42
+  - first:
+      213: 6050142939070568112
+    second: CampaignPlants_Atlas_Normal_43
+  - first:
+      213: -5132386068538278377
+    second: CampaignPlants_Atlas_Normal_44
+  - first:
+      213: -6422583355015493769
+    second: CampaignPlants_Atlas_Normal_45
+  - first:
+      213: -7105071538897917957
+    second: CampaignPlants_Atlas_Normal_46
+  - first:
+      213: 1245677258849782263
+    second: CampaignPlants_Atlas_Normal_47
+  - first:
+      213: 6651506657895221452
+    second: CampaignPlants_Atlas_Normal_48
+  - first:
+      213: -5587326865965313638
+    second: CampaignPlants_Atlas_Normal_49
+  - first:
+      213: -6186951413282444903
+    second: CampaignPlants_Atlas_Normal_50
+  - first:
+      213: -2594450439031227060
+    second: CampaignPlants_Atlas_Normal_51
+  - first:
+      213: -6136423149253205763
+    second: CampaignPlants_Atlas_Normal_52
+  - first:
+      213: 6448683773185593369
+    second: CampaignPlants_Atlas_Normal_53
+  - first:
+      213: -4144610978023920822
+    second: CampaignPlants_Atlas_Normal_54
+  - first:
+      213: 4417428039774766312
+    second: CampaignPlants_Atlas_Normal_55
+  - first:
+      213: 5577869554354587487
+    second: CampaignPlants_Atlas_Normal_56
+  - first:
+      213: 1812256007006738067
+    second: CampaignPlants_Atlas_Normal_57
+  - first:
+      213: 6227264324591524395
+    second: CampaignPlants_Atlas_Normal_58
+  - first:
+      213: 319242419305500945
+    second: CampaignPlants_Atlas_Normal_59
+  - first:
+      213: -8136239990875743547
+    second: CampaignPlants_Atlas_Normal_60
+  - first:
+      213: -1035594170131428113
+    second: CampaignPlants_Atlas_Normal_61
+  - first:
+      213: -1444895109803850576
+    second: CampaignPlants_Atlas_Normal_62
+  - first:
+      213: -6652821351525223261
+    second: CampaignPlants_Atlas_Normal_63
+  - first:
+      213: 6540318572492734159
+    second: CampaignPlants_Atlas_Normal_64
+  - first:
+      213: 2916206865335307044
+    second: CampaignPlants_Atlas_Normal_65
+  - first:
+      213: 8374221026976998882
+    second: CampaignPlants_Atlas_Normal_66
+  - first:
+      213: -7982988630442719880
+    second: CampaignPlants_Atlas_Normal_67
+  - first:
+      213: -7241477936660738252
+    second: CampaignPlants_Atlas_Normal_68
+  - first:
+      213: 2533315225924768528
+    second: CampaignPlants_Atlas_Normal_69
+  - first:
+      213: -6912764730280701590
+    second: CampaignPlants_Atlas_Normal_70
+  - first:
+      213: 630611077838504066
+    second: CampaignPlants_Atlas_Normal_71
+  - first:
+      213: -56385415213637447
+    second: CampaignPlants_Atlas_Normal_72
+  - first:
+      213: -5832830832447006581
+    second: CampaignPlants_Atlas_Normal_73
+  - first:
+      213: -4581130832326151699
+    second: CampaignPlants_Atlas_Normal_74
+  - first:
+      213: -620517447164621125
+    second: CampaignPlants_Atlas_Normal_75
+  - first:
+      213: -7393870754151473999
+    second: CampaignPlants_Atlas_Normal_76
+  - first:
+      213: 4606192094885748049
+    second: CampaignPlants_Atlas_Normal_77
+  - first:
+      213: -594226445219686363
+    second: CampaignPlants_Atlas_Normal_78
+  - first:
+      213: -1807313139354058683
+    second: CampaignPlants_Atlas_Normal_79
+  - first:
+      213: 1570191298722054044
+    second: CampaignPlants_Atlas_Normal_80
+  - first:
+      213: 9126768809787627482
+    second: CampaignPlants_Atlas_Normal_81
+  - first:
+      213: 9055383977506730602
+    second: CampaignPlants_Atlas_Normal_82
+  - first:
+      213: 6291524183745366670
+    second: CampaignPlants_Atlas_Normal_83
+  - first:
+      213: -1746975622527320524
+    second: CampaignPlants_Atlas_Normal_84
+  - first:
+      213: -86728253612439447
+    second: CampaignPlants_Atlas_Normal_85
+  - first:
+      213: -329474437404241387
+    second: CampaignPlants_Atlas_Normal_86
+  - first:
+      213: -3038871971868566275
+    second: CampaignPlants_Atlas_Normal_87
+  - first:
+      213: -4275974601763804756
+    second: CampaignPlants_Atlas_Normal_88
+  - first:
+      213: -4773693450045906622
+    second: CampaignPlants_Atlas_Normal_89
+  - first:
+      213: 4166192323129092163
+    second: CampaignPlants_Atlas_Normal_90
+  - first:
+      213: -7834173210141535408
+    second: CampaignPlants_Atlas_Normal_91
+  - first:
+      213: 4285050577639085982
+    second: CampaignPlants_Atlas_Normal_92
+  - first:
+      213: 6579845748575561372
+    second: CampaignPlants_Atlas_Normal_93
+  - first:
+      213: 2084996097331785534
+    second: CampaignPlants_Atlas_Normal_94
+  - first:
+      213: -9206425948646419569
+    second: CampaignPlants_Atlas_Normal_95
+  - first:
+      213: -6916151599639360492
+    second: CampaignPlants_Atlas_Normal_96
+  - first:
+      213: 6629122724243698727
+    second: CampaignPlants_Atlas_Normal_97
+  - first:
+      213: -3157625851529909303
+    second: CampaignPlants_Atlas_Normal_98
+  - first:
+      213: 5226283348584457862
+    second: CampaignPlants_Atlas_Normal_99
+  - first:
+      213: -8113756011624630799
+    second: CampaignPlants_Atlas_Normal_100
+  - first:
+      213: -6568747681449987217
+    second: CampaignPlants_Atlas_Normal_101
+  - first:
+      213: 8572341516291960477
+    second: CampaignPlants_Atlas_Normal_102
+  - first:
+      213: 2619472145282767390
+    second: CampaignPlants_Atlas_Normal_103
+  - first:
+      213: -5288407355684091169
+    second: CampaignPlants_Atlas_Normal_104
+  - first:
+      213: -7511826329130129029
+    second: CampaignPlants_Atlas_Normal_105
+  - first:
+      213: 3049237999087518649
+    second: CampaignPlants_Atlas_Normal_106
+  - first:
+      213: 3708919638004221757
+    second: CampaignPlants_Atlas_Normal_107
+  - first:
+      213: 578379451976738924
+    second: CampaignPlants_Atlas_Normal_108
+  - first:
+      213: 6461408609734011432
+    second: CampaignPlants_Atlas_Normal_109
+  - first:
+      213: -4532143600659682546
+    second: CampaignPlants_Atlas_Normal_110
+  - first:
+      213: -4890468757742729827
+    second: CampaignPlants_Atlas_Normal_111
+  - first:
+      213: 1371787235674949559
+    second: CampaignPlants_Atlas_Normal_112
+  - first:
+      213: -7618737078986753527
+    second: CampaignPlants_Atlas_Normal_113
+  - first:
+      213: -3608591875526610223
+    second: CampaignPlants_Atlas_Normal_114
+  - first:
+      213: 8032264515347441048
+    second: CampaignPlants_Atlas_Normal_115
+  - first:
+      213: 8173716438837736812
+    second: CampaignPlants_Atlas_Normal_116
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_0
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 1148
+        width: 192
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 476feddbd27fb6be0800000000000000
+      internalID: -1482819876457351564
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_1
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 1156
+        width: 63
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 414905ecf44880e50800000000000000
+      internalID: 6775811117677581332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_2
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 1221
+        width: 21
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6fd8ccde13b7fe50800000000000000
+      internalID: 6843135103947300716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_3
+      rect:
+        serializedVersion: 2
+        x: 498
+        y: 1205
+        width: 23
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5919e4b552888d80800000000000000
+      internalID: -8248199412910057123
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_4
+      rect:
+        serializedVersion: 2
+        x: 517
+        y: 1177
+        width: 47
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33744bc6fb8ddf790800000000000000
+      internalID: -7494595888200530125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_5
+      rect:
+        serializedVersion: 2
+        x: 647
+        y: 564
+        width: 590
+        height: 682
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb894e1ebe0291720800000000000000
+      internalID: 2817319239376214207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_6
+      rect:
+        serializedVersion: 2
+        x: 1155
+        y: 1110
+        width: 82
+        height: 113
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07ecd3f6b47576fb0800000000000000
+      internalID: -4654655708363633040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_7
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 1157
+        width: 63
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c116a0a7f29089030800000000000000
+      internalID: 3501558809796174108
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_8
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 1191
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0e4a4f13ebd56ba0800000000000000
+      internalID: -6096224752047075827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_9
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 1183
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c60ce73fea27b7a0800000000000000
+      internalID: -6361568741713770811
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_10
+      rect:
+        serializedVersion: 2
+        x: 472
+        y: 1181
+        width: 13
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d049c066e32e2d90800000000000000
+      internalID: -7120714488452923178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_11
+      rect:
+        serializedVersion: 2
+        x: 488
+        y: 1189
+        width: 30
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 059b91b185fbacae0800000000000000
+      internalID: -1528198738406164144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_12
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 1046
+        width: 126
+        height: 170
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0dab76ff6959c2450800000000000000
+      internalID: 6065387273923836624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_13
+      rect:
+        serializedVersion: 2
+        x: 561
+        y: 1158
+        width: 37
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b161d5ccc0d1000f0800000000000000
+      internalID: -1152889563801381349
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_14
+      rect:
+        serializedVersion: 2
+        x: 683
+        y: 1170
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de03b24b0720de520800000000000000
+      internalID: 2732843231966081261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_15
+      rect:
+        serializedVersion: 2
+        x: 498
+        y: 1158
+        width: 14
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 044f1a144dd933b50800000000000000
+      internalID: 6571769816223446080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_16
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 988
+        width: 106
+        height: 177
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44d204a2d43df2c20800000000000000
+      internalID: 3183995789949021508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_17
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 518
+        width: 528
+        height: 628
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e22aa9ad8cd1bf800800000000000000
+      internalID: 647143719956029998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_18
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 1062
+        width: 45
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d519fa0f420420e0800000000000000
+      internalID: -2295707371542342185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_19
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 996
+        width: 78
+        height: 124
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7843f5e47383d55c0800000000000000
+      internalID: -4225159065214438265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_20
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 1095
+        width: 21
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5ab1ac65df9eaf00800000000000000
+      internalID: 1130016295515961947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_21
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 1078
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e44ea721741a9b930800000000000000
+      internalID: 4159533057478157390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_22
+      rect:
+        serializedVersion: 2
+        x: 579
+        y: 1092
+        width: 13
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ce1eb3242efdf9d0800000000000000
+      internalID: -2738753567199453502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_23
+      rect:
+        serializedVersion: 2
+        x: 587
+        y: 1070
+        width: 23
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52fb3f33a474543e0800000000000000
+      internalID: -2070170069682110683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_24
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 1091
+        width: 11
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1cdc6a5498cb4e2a0800000000000000
+      internalID: -6709030247110095423
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_25
+      rect:
+        serializedVersion: 2
+        x: 1174
+        y: 1090
+        width: 25
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8729ca8d878fa1ec0800000000000000
+      internalID: -3595288154586967432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_26
+      rect:
+        serializedVersion: 2
+        x: 605
+        y: 1078
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4621a5775e045f10800000000000000
+      internalID: 2257445082017900108
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_27
+      rect:
+        serializedVersion: 2
+        x: 538
+        y: 899
+        width: 76
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1fbbcf72fa25a4f00800000000000000
+      internalID: 1101783971089136625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_28
+      rect:
+        serializedVersion: 2
+        x: 627
+        y: 891
+        width: 43
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ec2978708b47a3f0800000000000000
+      internalID: -889659386233279258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_29
+      rect:
+        serializedVersion: 2
+        x: 649
+        y: 923
+        width: 13
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f33de90c3d6548df0800000000000000
+      internalID: -178922617718254785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_30
+      rect:
+        serializedVersion: 2
+        x: 673
+        y: 931
+        width: 17
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a2fb2000cfb539d0800000000000000
+      internalID: -2795117162356018527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_31
+      rect:
+        serializedVersion: 2
+        x: 530
+        y: 907
+        width: 24
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8ff0d91c0d3db000800000000000000
+      internalID: 53265892780343183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_32
+      rect:
+        serializedVersion: 2
+        x: 545
+        y: 881
+        width: 39
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0855721a2dcedd610800000000000000
+      internalID: 1647733428078466432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_33
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 877
+        width: 39
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dac281a8a73ac3ad0800000000000000
+      internalID: -2721120328140444499
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_34
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 783
+        width: 70
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0943a17c663be360800000000000000
+      internalID: 7199908268672764174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_35
+      rect:
+        serializedVersion: 2
+        x: 468
+        y: 564
+        width: 176
+        height: 313
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f24e4c6b640223e0800000000000000
+      internalID: -2080095218466667783
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_36
+      rect:
+        serializedVersion: 2
+        x: 585
+        y: 843
+        width: 35
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8fc0ac6437432170800000000000000
+      internalID: 8152438040957079435
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_37
+      rect:
+        serializedVersion: 2
+        x: 1190
+        y: 841
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a78d7c5abc3bdd150800000000000000
+      internalID: 5899068774166288506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_38
+      rect:
+        serializedVersion: 2
+        x: 57
+        y: 831
+        width: 6
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d943bd2b3a8df6770800000000000000
+      internalID: 8606335610520286365
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_39
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 827
+        width: 19
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7a1211b9f72922e0800000000000000
+      internalID: -2150143393721607556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_40
+      rect:
+        serializedVersion: 2
+        x: 1172
+        y: 813
+        width: 17
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9a9cafdd75844120800000000000000
+      internalID: 2397187677337983645
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_41
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 755
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4448975af45851350800000000000000
+      internalID: 5986837856784057412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_42
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 753
+        width: 6
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43bf66f31d00f30c0800000000000000
+      internalID: -4593952196182738124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_43
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 656
+        width: 14
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b693a3b2fc66f350800000000000000
+      internalID: 6050142939070568112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_44
+      rect:
+        serializedVersion: 2
+        x: 545
+        y: 624
+        width: 17
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71ebc9e201a16c8b0800000000000000
+      internalID: -5132386068538278377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_45
+      rect:
+        serializedVersion: 2
+        x: 754
+        y: 618
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77707f787766ed6a0800000000000000
+      internalID: -6422583355015493769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_46
+      rect:
+        serializedVersion: 2
+        x: 782
+        y: 618
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf760446417b56d90800000000000000
+      internalID: -7105071538897917957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_47
+      rect:
+        serializedVersion: 2
+        x: 1091
+        y: 485
+        width: 161
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f90686fdd8894110800000000000000
+      internalID: 1245677258849782263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_48
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 576
+        width: 9
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc88dfc6016ee4c50800000000000000
+      internalID: 6651506657895221452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_49
+      rect:
+        serializedVersion: 2
+        x: 488
+        y: 562
+        width: 9
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a91142e71d3d572b0800000000000000
+      internalID: -5587326865965313638
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_50
+      rect:
+        serializedVersion: 2
+        x: 665
+        y: 568
+        width: 11
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 999e2b03878832aa0800000000000000
+      internalID: -6186951413282444903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_51
+      rect:
+        serializedVersion: 2
+        x: 667
+        y: 481
+        width: 74
+        height: 116
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4dff2a5219aefbd0800000000000000
+      internalID: -2594450439031227060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_52
+      rect:
+        serializedVersion: 2
+        x: 719
+        y: 0
+        width: 428
+        height: 590
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df0674d68ab07daa0800000000000000
+      internalID: -6136423149253205763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_53
+      rect:
+        serializedVersion: 2
+        x: 754
+        y: 563
+        width: 21
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9109d81a9b35e7950800000000000000
+      internalID: 6448683773185593369
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_54
+      rect:
+        serializedVersion: 2
+        x: 1043
+        y: 586
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4b23ba46426b76c0800000000000000
+      internalID: -4144610978023920822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_55
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 542
+        width: 18
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e400abc56bdd4d30800000000000000
+      internalID: 4417428039774766312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_56
+      rect:
+        serializedVersion: 2
+        x: 157
+        y: 539
+        width: 35
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5785ce8ec2986d40800000000000000
+      internalID: 5577869554354587487
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_57
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 548
+        width: 9
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39654b39c3d662910800000000000000
+      internalID: 1812256007006738067
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_58
+      rect:
+        serializedVersion: 2
+        x: 496
+        y: 527
+        width: 28
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2a9db5e8efab6650800000000000000
+      internalID: 6227264324591524395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_59
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 527
+        width: 58
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 111d0f7f94d2e6400800000000000000
+      internalID: 319242419305500945
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_60
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 554
+        width: 18
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ca168006d4461f80800000000000000
+      internalID: -8136239990875743547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_61
+      rect:
+        serializedVersion: 2
+        x: 577
+        y: 488
+        width: 67
+        height: 77
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fecc9ddc694d0a1f0800000000000000
+      internalID: -1035594170131428113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_62
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 532
+        width: 5
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b441729d83b2fbe0800000000000000
+      internalID: -1444895109803850576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_63
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 497
+        width: 19
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a4743c9a3e6ca3a0800000000000000
+      internalID: -6652821351525223261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_64
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 513
+        width: 14
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fceb15fe611e3ca50800000000000000
+      internalID: 6540318572492734159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_65
+      rect:
+        serializedVersion: 2
+        x: 555
+        y: 513
+        width: 27
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 42bcddb71b2787820800000000000000
+      internalID: 2916206865335307044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_66
+      rect:
+        serializedVersion: 2
+        x: 574
+        y: 535
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e5229fc7a5373470800000000000000
+      internalID: 8374221026976998882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_67
+      rect:
+        serializedVersion: 2
+        x: 653
+        y: 489
+        width: 25
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 875ca74e22ab63190800000000000000
+      internalID: -7982988630442719880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_68
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 532
+        height: 527
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43f02800f2a118b90800000000000000
+      internalID: -7241477936660738252
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_69
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 485
+        width: 40
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0139551a6c4282320800000000000000
+      internalID: 2533315225924768528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_70
+      rect:
+        serializedVersion: 2
+        x: 199
+        y: 507
+        width: 11
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6115cb6a1de010a0800000000000000
+      internalID: -6912764730280701590
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_71
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 519
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2808df52f6160c800800000000000000
+      internalID: 630611077838504066
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_72
+      rect:
+        serializedVersion: 2
+        x: 522
+        y: 481
+        width: 36
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b0adab73cda73ff0800000000000000
+      internalID: -56385415213637447
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_73
+      rect:
+        serializedVersion: 2
+        x: 1172
+        y: 471
+        width: 35
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b88dc05f24f9d0fa0800000000000000
+      internalID: -5832830832447006581
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_74
+      rect:
+        serializedVersion: 2
+        x: 593
+        y: 473
+        width: 19
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de13c95a7cd8c60c0800000000000000
+      internalID: -4581130832326151699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_75
+      rect:
+        serializedVersion: 2
+        x: 609
+        y: 487
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bbe02d06baa7367f0800000000000000
+      internalID: -620517447164621125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_76
+      rect:
+        serializedVersion: 2
+        x: 673
+        y: 480
+        width: 9
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcd6a739b1b36990800000000000000
+      internalID: -7393870754151473999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_77
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 388
+        width: 84
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15d90ee3e4b7cef30800000000000000
+      internalID: 4606192094885748049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_78
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 453
+        width: 18
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52899884232e0c7f0800000000000000
+      internalID: -594226445219686363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_79
+      rect:
+        serializedVersion: 2
+        x: 613
+        y: 464
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 540c7ea76422be6e0800000000000000
+      internalID: -1807313139354058683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_80
+      rect:
+        serializedVersion: 2
+        x: 621
+        y: 477
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9fbcbdbaa07ac510800000000000000
+      internalID: 1570191298722054044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_81
+      rect:
+        serializedVersion: 2
+        x: 639
+        y: 379
+        width: 63
+        height: 101
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad7918670ebc8ae70800000000000000
+      internalID: 9126768809787627482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_82
+      rect:
+        serializedVersion: 2
+        x: 1157
+        y: 473
+        width: 16
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a627d0400cf2bad70800000000000000
+      internalID: 9055383977506730602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_83
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 463
+        width: 15
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8a0ce349ebff4750800000000000000
+      internalID: 6291524183745366670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_84
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 441
+        width: 33
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43efdfb5dee71c7e0800000000000000
+      internalID: -1746975622527320524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_85
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 449
+        width: 22
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 968c073ec11ebcef0800000000000000
+      internalID: -86728253612439447
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_86
+      rect:
+        serializedVersion: 2
+        x: 549
+        y: 345
+        width: 73
+        height: 131
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 512d2fbaeb87d6bf0800000000000000
+      internalID: -329474437404241387
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_87
+      rect:
+        serializedVersion: 2
+        x: 1161
+        y: 465
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dfc12eeca02c3d5d0800000000000000
+      internalID: -3038871971868566275
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_88
+      rect:
+        serializedVersion: 2
+        x: 1192
+        y: 449
+        width: 19
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca9a64931cfa8a4c0800000000000000
+      internalID: -4275974601763804756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_89
+      rect:
+        serializedVersion: 2
+        x: 681
+        y: 449
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 241a76b691f60cdb0800000000000000
+      internalID: -4773693450045906622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_90
+      rect:
+        serializedVersion: 2
+        x: 1206
+        y: 451
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 348a11e28d941d930800000000000000
+      internalID: 4166192323129092163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_91
+      rect:
+        serializedVersion: 2
+        x: 671
+        y: 423
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 053d1acf8fc674390800000000000000
+      internalID: -7834173210141535408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_92
+      rect:
+        serializedVersion: 2
+        x: 489
+        y: 119
+        width: 127
+        height: 203
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9792c41cce877b30800000000000000
+      internalID: 4285050577639085982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_93
+      rect:
+        serializedVersion: 2
+        x: 617
+        y: 208
+        width: 104
+        height: 114
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c96e5b8c8de405b50800000000000000
+      internalID: 6579845748575561372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_94
+      rect:
+        serializedVersion: 2
+        x: 647
+        y: 309
+        width: 33
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3f698b57e46fec10800000000000000
+      internalID: 2084996097331785534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_95
+      rect:
+        serializedVersion: 2
+        x: 1075
+        y: 23
+        width: 148
+        height: 312
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f83ddff90643c3080800000000000000
+      internalID: -9206425948646419569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_96
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 238
+        width: 9
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41c0fb273c4e400a0800000000000000
+      internalID: -6916151599639360492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_97
+      rect:
+        serializedVersion: 2
+        x: 603
+        y: 256
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 724f30fbeff5ffb50800000000000000
+      internalID: 6629122724243698727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_98
+      rect:
+        serializedVersion: 2
+        x: 1196
+        y: 246
+        width: 13
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9cb28f1940cdd24d0800000000000000
+      internalID: -3157625851529909303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_99
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 229
+        width: 7
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6866ae7f30d778840800000000000000
+      internalID: 5226283348584457862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_100
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 238
+        width: 14
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f57cec55e5266f80800000000000000
+      internalID: -8113756011624630799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_101
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 246
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f63b00459ce17d4a0800000000000000
+      internalID: -6568747681449987217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_102
+      rect:
+        serializedVersion: 2
+        x: 629
+        y: 224
+        width: 13
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9e6aebd03317f670800000000000000
+      internalID: 8572341516291960477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_103
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 232
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1a1c9e990c3a5420800000000000000
+      internalID: 2619472145282767390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_104
+      rect:
+        serializedVersion: 2
+        x: 667
+        y: 124
+        width: 120
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fda03e8778dcb96b0800000000000000
+      internalID: -5288407355684091169
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_105
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 216
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b79a5c5c0c1a0c790800000000000000
+      internalID: -7511826329130129029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_106
+      rect:
+        serializedVersion: 2
+        x: 677
+        y: 200
+        width: 21
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b30c3bfdc1115a20800000000000000
+      internalID: 3049237999087518649
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_107
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 190
+        width: 24
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3746b392cab87330800000000000000
+      internalID: 3708919638004221757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_108
+      rect:
+        serializedVersion: 2
+        x: 530
+        y: 55
+        width: 50
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6865741c01d60800800000000000000
+      internalID: 578379451976738924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_109
+      rect:
+        serializedVersion: 2
+        x: 563
+        y: 0
+        width: 83
+        height: 103
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82aa8d385e88ba950800000000000000
+      internalID: 6461408609734011432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_110
+      rect:
+        serializedVersion: 2
+        x: 617
+        y: 101
+        width: 13
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0bae9358679a11c0800000000000000
+      internalID: -4532143600659682546
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_111
+      rect:
+        serializedVersion: 2
+        x: 428
+        y: 19
+        width: 65
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d95499d5390912cb0800000000000000
+      internalID: -4890468757742729827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_112
+      rect:
+        serializedVersion: 2
+        x: 496
+        y: 61
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b702d90931990310800000000000000
+      internalID: 1371787235674949559
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_113
+      rect:
+        serializedVersion: 2
+        x: 500
+        y: 51
+        width: 28
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90ab5e11efec44690800000000000000
+      internalID: -7618737078986753527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_114
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 67
+        width: 22
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d230efeec4bbedc0800000000000000
+      internalID: -3608591875526610223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_115
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 55
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 895624b1506587f60800000000000000
+      internalID: 8032264515347441048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Normal_116
+      rect:
+        serializedVersion: 2
+        x: 1037
+        y: 17
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c65b1bf7bcfde6170800000000000000
+      internalID: 8173716438837736812
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      CampaignPlants_Atlas_Normal_0: -1482819876457351564
+      CampaignPlants_Atlas_Normal_1: 6775811117677581332
+      CampaignPlants_Atlas_Normal_10: -7120714488452923178
+      CampaignPlants_Atlas_Normal_100: -8113756011624630799
+      CampaignPlants_Atlas_Normal_101: -6568747681449987217
+      CampaignPlants_Atlas_Normal_102: 8572341516291960477
+      CampaignPlants_Atlas_Normal_103: 2619472145282767390
+      CampaignPlants_Atlas_Normal_104: -5288407355684091169
+      CampaignPlants_Atlas_Normal_105: -7511826329130129029
+      CampaignPlants_Atlas_Normal_106: 3049237999087518649
+      CampaignPlants_Atlas_Normal_107: 3708919638004221757
+      CampaignPlants_Atlas_Normal_108: 578379451976738924
+      CampaignPlants_Atlas_Normal_109: 6461408609734011432
+      CampaignPlants_Atlas_Normal_11: -1528198738406164144
+      CampaignPlants_Atlas_Normal_110: -4532143600659682546
+      CampaignPlants_Atlas_Normal_111: -4890468757742729827
+      CampaignPlants_Atlas_Normal_112: 1371787235674949559
+      CampaignPlants_Atlas_Normal_113: -7618737078986753527
+      CampaignPlants_Atlas_Normal_114: -3608591875526610223
+      CampaignPlants_Atlas_Normal_115: 8032264515347441048
+      CampaignPlants_Atlas_Normal_116: 8173716438837736812
+      CampaignPlants_Atlas_Normal_12: 6065387273923836624
+      CampaignPlants_Atlas_Normal_13: -1152889563801381349
+      CampaignPlants_Atlas_Normal_14: 2732843231966081261
+      CampaignPlants_Atlas_Normal_15: 6571769816223446080
+      CampaignPlants_Atlas_Normal_16: 3183995789949021508
+      CampaignPlants_Atlas_Normal_17: 647143719956029998
+      CampaignPlants_Atlas_Normal_18: -2295707371542342185
+      CampaignPlants_Atlas_Normal_19: -4225159065214438265
+      CampaignPlants_Atlas_Normal_2: 6843135103947300716
+      CampaignPlants_Atlas_Normal_20: 1130016295515961947
+      CampaignPlants_Atlas_Normal_21: 4159533057478157390
+      CampaignPlants_Atlas_Normal_22: -2738753567199453502
+      CampaignPlants_Atlas_Normal_23: -2070170069682110683
+      CampaignPlants_Atlas_Normal_24: -6709030247110095423
+      CampaignPlants_Atlas_Normal_25: -3595288154586967432
+      CampaignPlants_Atlas_Normal_26: 2257445082017900108
+      CampaignPlants_Atlas_Normal_27: 1101783971089136625
+      CampaignPlants_Atlas_Normal_28: -889659386233279258
+      CampaignPlants_Atlas_Normal_29: -178922617718254785
+      CampaignPlants_Atlas_Normal_3: -8248199412910057123
+      CampaignPlants_Atlas_Normal_30: -2795117162356018527
+      CampaignPlants_Atlas_Normal_31: 53265892780343183
+      CampaignPlants_Atlas_Normal_32: 1647733428078466432
+      CampaignPlants_Atlas_Normal_33: -2721120328140444499
+      CampaignPlants_Atlas_Normal_34: 7199908268672764174
+      CampaignPlants_Atlas_Normal_35: -2080095218466667783
+      CampaignPlants_Atlas_Normal_36: 8152438040957079435
+      CampaignPlants_Atlas_Normal_37: 5899068774166288506
+      CampaignPlants_Atlas_Normal_38: 8606335610520286365
+      CampaignPlants_Atlas_Normal_39: -2150143393721607556
+      CampaignPlants_Atlas_Normal_4: -7494595888200530125
+      CampaignPlants_Atlas_Normal_40: 2397187677337983645
+      CampaignPlants_Atlas_Normal_41: 5986837856784057412
+      CampaignPlants_Atlas_Normal_42: -4593952196182738124
+      CampaignPlants_Atlas_Normal_43: 6050142939070568112
+      CampaignPlants_Atlas_Normal_44: -5132386068538278377
+      CampaignPlants_Atlas_Normal_45: -6422583355015493769
+      CampaignPlants_Atlas_Normal_46: -7105071538897917957
+      CampaignPlants_Atlas_Normal_47: 1245677258849782263
+      CampaignPlants_Atlas_Normal_48: 6651506657895221452
+      CampaignPlants_Atlas_Normal_49: -5587326865965313638
+      CampaignPlants_Atlas_Normal_5: 2817319239376214207
+      CampaignPlants_Atlas_Normal_50: -6186951413282444903
+      CampaignPlants_Atlas_Normal_51: -2594450439031227060
+      CampaignPlants_Atlas_Normal_52: -6136423149253205763
+      CampaignPlants_Atlas_Normal_53: 6448683773185593369
+      CampaignPlants_Atlas_Normal_54: -4144610978023920822
+      CampaignPlants_Atlas_Normal_55: 4417428039774766312
+      CampaignPlants_Atlas_Normal_56: 5577869554354587487
+      CampaignPlants_Atlas_Normal_57: 1812256007006738067
+      CampaignPlants_Atlas_Normal_58: 6227264324591524395
+      CampaignPlants_Atlas_Normal_59: 319242419305500945
+      CampaignPlants_Atlas_Normal_6: -4654655708363633040
+      CampaignPlants_Atlas_Normal_60: -8136239990875743547
+      CampaignPlants_Atlas_Normal_61: -1035594170131428113
+      CampaignPlants_Atlas_Normal_62: -1444895109803850576
+      CampaignPlants_Atlas_Normal_63: -6652821351525223261
+      CampaignPlants_Atlas_Normal_64: 6540318572492734159
+      CampaignPlants_Atlas_Normal_65: 2916206865335307044
+      CampaignPlants_Atlas_Normal_66: 8374221026976998882
+      CampaignPlants_Atlas_Normal_67: -7982988630442719880
+      CampaignPlants_Atlas_Normal_68: -7241477936660738252
+      CampaignPlants_Atlas_Normal_69: 2533315225924768528
+      CampaignPlants_Atlas_Normal_7: 3501558809796174108
+      CampaignPlants_Atlas_Normal_70: -6912764730280701590
+      CampaignPlants_Atlas_Normal_71: 630611077838504066
+      CampaignPlants_Atlas_Normal_72: -56385415213637447
+      CampaignPlants_Atlas_Normal_73: -5832830832447006581
+      CampaignPlants_Atlas_Normal_74: -4581130832326151699
+      CampaignPlants_Atlas_Normal_75: -620517447164621125
+      CampaignPlants_Atlas_Normal_76: -7393870754151473999
+      CampaignPlants_Atlas_Normal_77: 4606192094885748049
+      CampaignPlants_Atlas_Normal_78: -594226445219686363
+      CampaignPlants_Atlas_Normal_79: -1807313139354058683
+      CampaignPlants_Atlas_Normal_8: -6096224752047075827
+      CampaignPlants_Atlas_Normal_80: 1570191298722054044
+      CampaignPlants_Atlas_Normal_81: 9126768809787627482
+      CampaignPlants_Atlas_Normal_82: 9055383977506730602
+      CampaignPlants_Atlas_Normal_83: 6291524183745366670
+      CampaignPlants_Atlas_Normal_84: -1746975622527320524
+      CampaignPlants_Atlas_Normal_85: -86728253612439447
+      CampaignPlants_Atlas_Normal_86: -329474437404241387
+      CampaignPlants_Atlas_Normal_87: -3038871971868566275
+      CampaignPlants_Atlas_Normal_88: -4275974601763804756
+      CampaignPlants_Atlas_Normal_89: -4773693450045906622
+      CampaignPlants_Atlas_Normal_9: -6361568741713770811
+      CampaignPlants_Atlas_Normal_90: 4166192323129092163
+      CampaignPlants_Atlas_Normal_91: -7834173210141535408
+      CampaignPlants_Atlas_Normal_92: 4285050577639085982
+      CampaignPlants_Atlas_Normal_93: 6579845748575561372
+      CampaignPlants_Atlas_Normal_94: 2084996097331785534
+      CampaignPlants_Atlas_Normal_95: -9206425948646419569
+      CampaignPlants_Atlas_Normal_96: -6916151599639360492
+      CampaignPlants_Atlas_Normal_97: 6629122724243698727
+      CampaignPlants_Atlas_Normal_98: -3157625851529909303
+      CampaignPlants_Atlas_Normal_99: 5226283348584457862
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

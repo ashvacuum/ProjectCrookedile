@@ -1,0 +1,871 @@
+fileFormatVersion: 2
+guid: 1449208e1d625b9428f9f98a74c751e8
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3590496686813114163
+    second: CampaignPlants_Atlas_Albedo_0
+  - first:
+      213: 8761997890641523290
+    second: CampaignPlants_Atlas_Albedo_1
+  - first:
+      213: -4658848448944313046
+    second: CampaignPlants_Atlas_Albedo_2
+  - first:
+      213: -6972842953217045163
+    second: CampaignPlants_Atlas_Albedo_3
+  - first:
+      213: -2962959487660870134
+    second: CampaignPlants_Atlas_Albedo_4
+  - first:
+      213: 1562218316651935400
+    second: CampaignPlants_Atlas_Albedo_5
+  - first:
+      213: -4094248492871043248
+    second: CampaignPlants_Atlas_Albedo_6
+  - first:
+      213: -1909970266602499848
+    second: CampaignPlants_Atlas_Albedo_7
+  - first:
+      213: -2082250038997238316
+    second: CampaignPlants_Atlas_Albedo_8
+  - first:
+      213: 3921200002370494326
+    second: CampaignPlants_Atlas_Albedo_9
+  - first:
+      213: 6728846456889547072
+    second: CampaignPlants_Atlas_Albedo_10
+  - first:
+      213: -8104828318521558872
+    second: CampaignPlants_Atlas_Albedo_11
+  - first:
+      213: -5531951408139899955
+    second: CampaignPlants_Atlas_Albedo_12
+  - first:
+      213: -530756729906051295
+    second: CampaignPlants_Atlas_Albedo_13
+  - first:
+      213: -7606283100986171192
+    second: CampaignPlants_Atlas_Albedo_14
+  - first:
+      213: 2268984116458568496
+    second: CampaignPlants_Atlas_Albedo_15
+  - first:
+      213: -8108833075398505740
+    second: CampaignPlants_Atlas_Albedo_16
+  - first:
+      213: 4911162670442383527
+    second: CampaignPlants_Atlas_Albedo_17
+  - first:
+      213: -8766743821319468124
+    second: CampaignPlants_Atlas_Albedo_18
+  - first:
+      213: 4731858073867617205
+    second: CampaignPlants_Atlas_Albedo_19
+  - first:
+      213: 7812995588469797230
+    second: CampaignPlants_Atlas_Albedo_20
+  - first:
+      213: -2233733418751341348
+    second: CampaignPlants_Atlas_Albedo_21
+  - first:
+      213: -1211884628039988142
+    second: CampaignPlants_Atlas_Albedo_22
+  - first:
+      213: 4876921070248687795
+    second: CampaignPlants_Atlas_Albedo_23
+  - first:
+      213: -6416355142984470533
+    second: CampaignPlants_Atlas_Albedo_24
+  - first:
+      213: -1715290360907934148
+    second: CampaignPlants_Atlas_Albedo_25
+  - first:
+      213: 6433033678980208724
+    second: CampaignPlants_Atlas_Albedo_26
+  - first:
+      213: 3902916780546673867
+    second: CampaignPlants_Atlas_Albedo_27
+  - first:
+      213: 1656682586050805643
+    second: CampaignPlants_Atlas_Albedo_28
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 612
+        width: 526
+        height: 614
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33f66b0a6b104d130800000000000000
+      internalID: 3590496686813114163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_1
+      rect:
+        serializedVersion: 2
+        x: 506
+        y: 1156
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a52f86298aed89970800000000000000
+      internalID: 8761997890641523290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_2
+      rect:
+        serializedVersion: 2
+        x: 559
+        y: 388
+        width: 674
+        height: 846
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2d6b42f402785fb0800000000000000
+      internalID: -4658848448944313046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_3
+      rect:
+        serializedVersion: 2
+        x: 1218
+        y: 1116
+        width: 17
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55d89ea174c7b3f90800000000000000
+      internalID: -6972842953217045163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_4
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 1068
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a06b91e5b0471e6d0800000000000000
+      internalID: -2962959487660870134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_5
+      rect:
+        serializedVersion: 2
+        x: 579
+        y: 1060
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a6b5a1384d1ea510800000000000000
+      internalID: 1562218316651935400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_6
+      rect:
+        serializedVersion: 2
+        x: 555
+        y: 1004
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0573e3020be4e27c0800000000000000
+      internalID: -4094248492871043248
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_7
+      rect:
+        serializedVersion: 2
+        x: 612
+        y: 951
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f09997792c6e75e0800000000000000
+      internalID: -1909970266602499848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_8
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 818
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ddb60c2f9c5a13e0800000000000000
+      internalID: -2082250038997238316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_9
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 824
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67fdd8270a6ea6630800000000000000
+      internalID: 3921200002370494326
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_10
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 819
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0491c0b933aa16d50800000000000000
+      internalID: 6728846456889547072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_11
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 504
+        width: 83
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a8fef4e59dd58f80800000000000000
+      internalID: -8104828318521558872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_12
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 537
+        width: 42
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcb691bf08f8a33b0800000000000000
+      internalID: -5531951408139899955
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_13
+      rect:
+        serializedVersion: 2
+        x: 552
+        y: 564
+        width: 8
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1274dc3f09f52a8f0800000000000000
+      internalID: -530756729906051295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_14
+      rect:
+        serializedVersion: 2
+        x: 723
+        y: 33
+        width: 462
+        height: 542
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c0a9a8c1dd017690800000000000000
+      internalID: -7606283100986171192
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_15
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 23
+        width: 393
+        height: 540
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03b3486480d0d7f10800000000000000
+      internalID: 2268984116458568496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_16
+      rect:
+        serializedVersion: 2
+        x: 1172
+        y: 515
+        width: 13
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fa0fe5c743a77f80800000000000000
+      internalID: -8108833075398505740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_17
+      rect:
+        serializedVersion: 2
+        x: 705
+        y: 457
+        width: 16
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a880e5ad64f72440800000000000000
+      internalID: 4911162670442383527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 324
+        width: 106
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ab076551f4465680800000000000000
+      internalID: -8766743821319468124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_19
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 152
+        width: 130
+        height: 117
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b3817409dfeaa140800000000000000
+      internalID: 4731858073867617205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_20
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 172
+        width: 76
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e61bf6ab7165d6c60800000000000000
+      internalID: 7812995588469797230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_21
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 154
+        width: 15
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cdc486c5a4f2001e0800000000000000
+      internalID: -2233733418751341348
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_22
+      rect:
+        serializedVersion: 2
+        x: 496
+        y: 168
+        width: 12
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25c8be40a558e2fe0800000000000000
+      internalID: -1211884628039988142
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_23
+      rect:
+        serializedVersion: 2
+        x: 506
+        y: 226
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b87ac5dfdd4ea340800000000000000
+      internalID: 4876921070248687795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_24
+      rect:
+        serializedVersion: 2
+        x: 506
+        y: 208
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bffe8a52ef684f6a0800000000000000
+      internalID: -6416355142984470533
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_25
+      rect:
+        serializedVersion: 2
+        x: 559
+        y: 0
+        width: 97
+        height: 169
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c365e6731801238e0800000000000000
+      internalID: -1715290360907934148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_26
+      rect:
+        serializedVersion: 2
+        x: 583
+        y: 160
+        width: 121
+        height: 148
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4585dbf1c0ab64950800000000000000
+      internalID: 6433033678980208724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_27
+      rect:
+        serializedVersion: 2
+        x: 619
+        y: 150
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcc45642222f92630800000000000000
+      internalID: 3902916780546673867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CampaignPlants_Atlas_Albedo_28
+      rect:
+        serializedVersion: 2
+        x: 1129
+        y: 196
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8f3227d808bdf610800000000000000
+      internalID: 1656682586050805643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      CampaignPlants_Atlas_Albedo_0: 3590496686813114163
+      CampaignPlants_Atlas_Albedo_1: 8761997890641523290
+      CampaignPlants_Atlas_Albedo_10: 6728846456889547072
+      CampaignPlants_Atlas_Albedo_11: -8104828318521558872
+      CampaignPlants_Atlas_Albedo_12: -5531951408139899955
+      CampaignPlants_Atlas_Albedo_13: -530756729906051295
+      CampaignPlants_Atlas_Albedo_14: -7606283100986171192
+      CampaignPlants_Atlas_Albedo_15: 2268984116458568496
+      CampaignPlants_Atlas_Albedo_16: -8108833075398505740
+      CampaignPlants_Atlas_Albedo_17: 4911162670442383527
+      CampaignPlants_Atlas_Albedo_18: -8766743821319468124
+      CampaignPlants_Atlas_Albedo_19: 4731858073867617205
+      CampaignPlants_Atlas_Albedo_2: -4658848448944313046
+      CampaignPlants_Atlas_Albedo_20: 7812995588469797230
+      CampaignPlants_Atlas_Albedo_21: -2233733418751341348
+      CampaignPlants_Atlas_Albedo_22: -1211884628039988142
+      CampaignPlants_Atlas_Albedo_23: 4876921070248687795
+      CampaignPlants_Atlas_Albedo_24: -6416355142984470533
+      CampaignPlants_Atlas_Albedo_25: -1715290360907934148
+      CampaignPlants_Atlas_Albedo_26: 6433033678980208724
+      CampaignPlants_Atlas_Albedo_27: 3902916780546673867
+      CampaignPlants_Atlas_Albedo_28: 1656682586050805643
+      CampaignPlants_Atlas_Albedo_3: -6972842953217045163
+      CampaignPlants_Atlas_Albedo_4: -2962959487660870134
+      CampaignPlants_Atlas_Albedo_5: 1562218316651935400
+      CampaignPlants_Atlas_Albedo_6: -4094248492871043248
+      CampaignPlants_Atlas_Albedo_7: -1909970266602499848
+      CampaignPlants_Atlas_Albedo_8: -2082250038997238316
+      CampaignPlants_Atlas_Albedo_9: 3921200002370494326
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
