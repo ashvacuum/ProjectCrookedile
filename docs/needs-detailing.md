@@ -1,6 +1,6 @@
 # Needs Detailing — design questions awaiting a decision
 
-> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-11-07
+> **Kind:** Tracking · **Status:** Living · **Updated:** 2026-11-21
 >
 > **Summary:** Design questions awaiting a call, ordered by how much they block. Read before authoring content.
 >
@@ -38,19 +38,26 @@ turn). A Fanatic's Strength adds to its push. Gospel and God's Chosen no longer 
 
 ## 2. Nepo Baby open questions (blocks: Nepo build)
 
-The class was redesigned (2026-10-03, `nepo-baby-class.md`): no Patronage, no summons. Open questions with their defaults are in that doc's section 8 (seed vs junk, "I'm Just Like You" type, whether replays raise Hostility, Hostility-scaled junk injection, Friends in High Places). Section 12 lists the conflicts with the old code and how each was resolved; Patronage is removed, and the summon effect stays for enemy content.
+Redesigned again on 2026-11-21 (`nepo-baby-class.md`, "Redesign"): Scry 1 relic; pillars Inheritance, Owed, Pulling
+Strings. Open: Invest numbers for The Family Name; whether its return rule gets the "Birthright" keyword; the starter
+deck rebuild; which old burn-design cards survive as salvage.
 
-## 3. CardType colour taxonomy carries no meaning as authored
+## 3. Silenced after the card-type re-type
 
-Pressure (green, persuade) vs Rhetoric (red, aggressive) is applied at random: draw-only cards
-sit in Rhetoric, and pressure is split across both. The colours are load-bearing for the player
-read and for `Silenced` (= "no Rhetoric"), so they need a consistent rule — or the split needs to
-stop pretending to be one.
+Card types now mean roles (`core-design.md` §8, resolved below): Pressure = attack, Rhetoric = skill. `Silenced` is
+"no Rhetoric", which used to read as "no aggressive cards" and would now block defends, draw and calming. Decide whether
+Silenced becomes "no Pressure" (can't attack) before the re-type lands.
 
 ---
 
 ## Resolved
 
+- **CardType taxonomy** (2026-11-21): the type is the card's role. **Pressure = attack**: a card that pushes the meter is
+  Pressure first and foremost, whatever else it does. **Rhetoric = skill** (defend, statuses, calming, draw, tricks).
+  **Policy = persistent.** Heckle and Scandal unchanged. 18 Pressure cards that never push and 11 Rhetoric cards that do
+  get re-typed once the card pools settle (`core-design.md` §8).
+- **Starting relics and pillars** (2026-11-21): each class has one upfront relic and three pillars (`core-design.md`
+  §7, §9). This supersedes the Celebrity starting-ally entry below: the Publicist is replaced by Last Impressions.
 - **Celebrity starting ally** (2026-11-07): the **Publicist**: at battle start every enemy is Exposed, so the
   first hit on each deals double. Charm disarms the room on entrance; the old "first card upgraded" passive and the
   borrowed mulligan (now the Speechwriter, a shared ally) are both dropped for Celebrity (`celebrity-glamour-iou.md`, `allies.md` §4.1).

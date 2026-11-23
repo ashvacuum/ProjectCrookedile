@@ -1,8 +1,8 @@
 # Celebrity: Glamour / IOU / Promises
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-11-07
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-21
 >
-> **Summary:** Celebrity banks and spends Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points.
+> **Summary:** Celebrity's starting relic Last Impressions upgrades his first Pressure card each turn; his pillars are Star Power (Glamour), Leverage (Debt) and Content Machine (generated cards). The rules below cover Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points.
 >
 > **Source of truth:** this doc; values in [`Data/Cards/Celebrity/GlamourIou/`](../Assets/Data/Cards/Celebrity/GlamourIou/), shared rules in [`GlamourIou.cs`](../Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs), effects in [`Celebrity/`](../Assets/Scripts/Gameplay/Battle/Celebrity/) · **Related:** [`core-design.md`](core-design.md) · [`needs-detailing.md`](needs-detailing.md)
 
@@ -20,7 +20,16 @@ This revision supersedes the earlier defensive v0.2 proposals. There is no blank
 Enemy debuffs, hostility changes, and limited card recovery are now explicit parts of this kit.
 Celebrity has no separate conversion mechanic; these effects use normal stance and Opinion rules.
 
-**Starting ally: the Publicist** (decided 2026-11-07). At battle start every enemy is Exposed: the first hit on
+**Class shape (2026-11-21, see `core-design.md` §7).** Glamour and Debt are pillars, not his identity:
+
+- **Starting relic: Last Impressions.** The first Pressure card you play each turn uses its upgraded effect, that play
+  only; the card never changes. Generated cards (Soundbites) don't count. Not built yet.
+- **Pillars:** **Star Power** (Glamour), **Leverage** (Debt; Promises and recovery/booking fold in), **Content Machine**
+  (Soundbites and other generated cards; volume payoffs).
+- **Glue:** the core defensive cards, Settle Up, and the villain cards (Aggravate, Soothe, Manufactured Outrage) beside
+  Star Power. Feud is no longer a pillar. Starstruck is proposed for cutting.
+
+**Superseded starting ally: the Publicist** (decided 2026-11-07, replaced by Last Impressions on 2026-11-21). At battle start every enemy is Exposed: the first hit on
 each one deals double, then the status is spent. His charm and persona lower the room's defenses on entrance;
 the Glamour engine carries the rest of the fight. Asset: [`Publicist`](../Assets/Data/Allies/Publicist.asset).
 
@@ -73,7 +82,7 @@ Recovery preserves its normal energy cost unless the effect sets a cost reductio
 which lasts the turn the card reaches hand (now for recovery, next turn for booking). Recovery does not access Exhaust.
 Booked cards arrive after next turn's normal draws; hand overflow goes to discard rather than losing the card.
 
-### Starstruck
+### Starstruck *(proposed cut, 2026-11-21)*
 
 Never Meet Your Heroes applies the debuff to a non-hostile opponent for 3 enemy turns.
 Each enemy-turn start raises their Hostility by 2, respecting Fanatic, Devotion, Ward, and hostility limits.

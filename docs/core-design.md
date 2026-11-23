@@ -2,7 +2,7 @@
 
 > **Kind:** Design · **Status:** Canonical · **Updated:** 2026-11-21
 >
-> **Summary:** The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions.
+> **Summary:** The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes (each a starting relic plus three pillars), card types, starter decks.
 >
 > **Source of truth:** this doc · **Related:** [`needs-detailing.md`](needs-detailing.md) · [`naming-glossary.md`](naming-glossary.md) · [`enemy-design-bible.md`](enemy-design-bible.md)
 
@@ -151,56 +151,88 @@ Energy is **3 per turn**.
 
 ## 7. The Three Archetypes
 
-Each asks a different question every turn and lives at a different point in time.
+**Class shape *(2026-11-21)*.** Like most Slay the Spire classes, each archetype has **one upfront mechanic** that runs
+from the first turn, carried by its **starting relic** (a starting ally) and taught by the starter deck, and **three
+pillars** in the reward pool: three ways to bend that mechanic, each strong on its own, so a run's picks decide which
+version of the class you play. Shared **glue** cards serve any pillar. The relics act on different things, so the
+classes stay apart: Faith Leader acts on **enemies**, Celebrity on **his own cards**, Nepo Baby on **his draw pile**.
 
-| Archetype | Question | Time | Can uniquely... | Fears... |
-|---|---|---|---|---|
-| **Nepo Baby** | "What do I burn to get it now?" | **Now** | Consume his own deck: burn, pull, replay, retrieve | The room's anger (Hostility clock) and junk rotting a thinned deck |
-| **Celebrity** | "What can I promise now and pay for later?" | **Borrowed time** | Build Glamour that lifts the meter every round, and borrow energy against next turn (Debt) | Hits that leak past Support (Scrutiny strips Glamour) and the bill coming due (unpaid Debt hits the meter) |
-| **Faith Leader** | "Who can I pacify into a follower?" | **After** | Stack statuses to convert enemies into Fanatics who follow your attacks and defends for a turn | Disruption before reaching 3 stacks; a Hardened room (can't pacify) |
+**Why:** the 2026-11-06 playtest showed every class playing as its basics (Faith Leader's basic attack and defend were
+60% of plays; each reward card about 1-2%) and Faith Leader's conversion never firing. The identity showed too late.
 
-> A distinctiveness test: each archetype must have a **unique capability** AND a **unique fear**. Overlapping fears are what make archetypes feel samey. Watch especially that Celebrity fears *self-overreach* while Faith Leader fears *opponent disruption* — if Celebrity's risk becomes "opponent breaks my setup," they've merged.
+**No buttons.** Every relic fires on its own or through normal card play. Nothing asks the player to press a button or
+choose to spend a resource.
 
-### Nepo Baby — *the glass cannon*
-> **Full spec: `nepo-baby-class.md`** (cards, config, open questions, conflicts with current code).
+| Archetype | Starting relic | Acts on | Pillars |
+|---|---|---|---|
+| **Faith Leader** | The first attack each turn applies 1 Guilt to its target (untargeted: a random enemy that plans to attack you, else any random enemy) | Enemies | **Congregation**, **Inquisition**, **Martyr** |
+| **Celebrity** | **Last Impressions:** the first Pressure card you play each turn uses its upgraded effect | His own cards | **Star Power**, **Leverage**, **Content Machine** |
+| **Nepo Baby** | At the start of your turn, **Scry 1** | His draw pile | **Inheritance**, **Owed**, **Pulling Strings** |
 
-Someone who has never been told no. He spends the family's resources (his own deck) to get exactly what he wants, and the whole room pays the bill (Hostility). Best-in-class damage and access, thin defense, a clock set by the room's anger. **The hardest class and the most mechanically different: his resource is the deck itself, not a status.** Celebrity *creates* cards; Nepo *consumes* them.
+> A distinctiveness test: each archetype must have a **unique capability** AND a **unique fear**. Overlapping fears are what make archetypes feel samey.
 
-**Three lanes plus a valve package**, each lane with its own verb and its own brake:
-- **Burn** (exhaust from hand as a cost): the high-ceiling engine. His cards are mostly cost 2-3, so burning one is a big swing. Thins the deck, so it is the lane Heckle/Scandal rot punishes.
-- **Return** (cards come back to hand): powerful but sparse (at most ~15% of the pool). Brake: in-turn cost increase.
-- **Calm** (Hostility control): small hits, steady Hostility reduction, payoffs for a room with no Hostile enemies. Wins elites and bosses by outlasting.
-- **Valves:** scry, skip, cycle, redirect. Every valve costs something (Hostility, energy or deck cleanliness).
+### Nepo Baby — *his power isn't his own* *(redesigned 2026-11-21)*
+> **Full spec: [`nepo-baby-class.md`](nepo-baby-class.md).** Burn (exhaust as a cost) is no longer his identity: it was
+> undefined and hard to grasp.
 
-**Cost model:** burning is paid in cards; pulling and scanning is paid in Hostility. Hostility is a **pure price and clock**, never rewarded (rewarding it is Faith Leader's lane).
+Someone handed everything. He never has to live with a bad draw, and his strongest card is his surname. His mechanic is
+**deck filtering**: he only ever gets the good cards, because someone tipped him off.
 
-**Guardrails:** no stacking statuses on enemies and no deep conversion (calming caps at Neutral; never rewarded for all-Receptive). No token generators or "add X cards to hand" engines (Celebrity's lane). **Policies can never be burned.** No player-side summoning.
+- **Relic: Scry 1** at the start of your turn. One light choice: keep the top card or discard it.
+- **Inheritance:** **The Family Name**, a starter Pressure card, grows through **Invest** cards and returns to the
+  **top of your draw pile** after play, so the relic's Scry decides each turn whether you draw it again. ("Birthright" is
+  reserved as a possible keyword for its return rule.)
+- **Owed** (keyword): "When discarded, play it." Only discards caused by an effect count (Scry, discard-and-draw,
+  choose-to-discard), never the end-of-turn hand discard. Owed pays him for throwing cards away.
+- **Pulling Strings:** deck advantage. Return cards from the discard pile to hand, into the draw pile or onto its top;
+  "Scry X; if a Policy is among them, play it"; and similar. Brake: a card returned from the discard pile to hand can't be
+  returned again that battle (closes the Owed loop).
+- **Fear:** a draw pile full of junk the filter can't keep up with.
 
-**Fear:** a thinned deck rotting with Heckles and Scandals while an angry room hits through thin shields.
-
-### Celebrity — *the empty promise* (Glamour / IOU)
-> **Full spec: [`celebrity-glamour-iou.md`](celebrity-glamour-iou.md)** (rules, all cards, open questions). Canonical
-> since 2026-10-03.
+### Celebrity — *the empty promise* *(pillars set 2026-11-21)*
+> **Full spec: [`celebrity-glamour-iou.md`](celebrity-glamour-iou.md)** (rules, all cards, open questions).
 
 A guy who knows nothing, talks the talk, and never walks the walk. Every promise is empty and it is all for the press.
-He does not convert enemies. He wins by spectacle and borrowed momentum.
+He does not convert enemies. Glamour and Debt are **pillars**, not his identity: his identity is the polish.
 
-- **Glamour** (a status on the player): after the enemy acts, the meter rises by your Glamour, then Glamour drops by 1.
-  **Scrutiny:** every hit that leaks past Support strips 1 Glamour. Bank it for ticks or spend it on Sway, draws, and suppression.
-- **IOU / Debt:** Borrow cards give energy now and Debt that is settled at the start of your next turn, out of that
-  turn's energy first and the meter second. The fast, aggressive overcharge engine.
-- **Promises:** reserve existing Debt, then play a costly card next turn to earn cancellation; missed commitments collect at that turn's end.
-- **Soundbites:** zero-energy 2-Sway tokens. Signature Catchphrase turns them into Glamour-generating Movie Quotes for the battle.
-- **Structure:** four core Support cards protect a flexible offensive base; persistent Policies declare the build,
-  one-shot Policies are tactical.
-- **Guardrails:** explicit hostility tools and limited Debt-funded recovery are allowed; no separate conversion mechanic or recovery from Exhaust.
+- **Relic: Last Impressions.** The first Pressure card you play each turn uses its upgraded effect ("he practised that
+  line"). That play only: the card itself never changes. Generated cards (Soundbites) don't count.
+- **Star Power (Glamour):** after the enemy acts, the meter rises by your Glamour, then Glamour drops by 1; every hit
+  that leaks past Support strips 1 (Scrutiny). Bank it for ticks or spend it.
+- **Leverage (Debt):** borrow energy now; Debt settles at the start of your next turn, energy first, then the meter.
+  Promises and card recovery/booking fold in here.
+- **Content Machine:** Soundbites and other generated cards; payoffs for volume.
+- **Glue:** the core defensive cards; the villain cards (Aggravate, Soothe, Manufactured Outrage) sit beside Star Power.
+  Feud is not a pillar (it acts on an enemy, which is Faith Leader's side). Starstruck is proposed for cutting.
 
-**Design history:** the open-canvas Celebrity (draft into Attention / Scandal / Drama King) was replaced by this build
-on 2026-10-03. An earlier "Credibility" resource was cut before that as over-engineered. Glamour and Debt are a
-status and a number that live on cards, not a separate class meter.
+**Design history:** the open-canvas Celebrity (Attention / Scandal / Drama King) was replaced by the Glamour / IOU build
+on 2026-10-03; an earlier "Credibility" resource was cut as over-engineered. The 2026-11-21 redesign gave him a relic
+and three pillars, and replaced the Publicist (enemies start Exposed) as his starting ally.
 
 ### Faith Leader — *the converter* (status specialist)
-**Spine (as concrete as Nepo Baby's burn):**
+
+**2026-11-21 redesign.** The old engine needed many cards and much preparation and leaned on luck: Guilt drains a stack
+every turn, so three stacks had to land on one enemy within a turn. Now:
+
+- **Relic:** the first attack each turn applies **1 Guilt to its target**: the enemy the speech is aimed at, whatever it
+  intends. An untargeted first attack guilts a random enemy that plans to attack you; with no attackers, any random
+  enemy. A guilty Fanatic gets the Guilt too.
+- **Guilt keeps draining** (1 per turn), so the relic alone never builds to a conversion. Guilt blunts the push of
+  whoever carries it (a Fanatic's follow included) and feeds the payoffs that count guilty enemies (Searching Souls,
+  Public Penance, Heavy Conscience): that is the base class.
+- **Inquisition:** amplify Guilt past the drain (more per application, more triggers, gather it onto one enemy, spread
+  it) and **earn conversion**. **Gospel** (conversion only while a conversion Policy is in play) is this pillar's
+  keystone, not a card every Faith Leader needs. The Fanatic rules below are Inquisition's engine.
+- **Martyr** (Inquisition's extension): Fanatics push harder per hostile enemy. Only while Fanatics exist; converting a
+  hostile enemy lowers the count it scales on, so the choice is more followers or angrier ones.
+- **Congregation:** calm the room into the echo chamber and **outrun it** with much bigger output; the echo chamber still
+  applies. Keystone **Tithe**: while the echo chamber is active, gain 1 energy at the start of your turn. Also a cheap
+  Policy: draw 1 extra card at turn start while every enemy is receptive.
+- **Rulings:** a Hardened enemy at the threshold is Silenced, not converted. A Fanatic that reaches the threshold while
+  still following converts again on the spot: +1 Fanatic stack, no Jaded (Jaded comes on disillusion). Guilt on a Fanatic
+  primes it to be converted again once disillusioned.
+
+**Inquisition's engine (as concrete as Nepo Baby's filter):**
 
 > **Stack Guilt on an enemy to the pacify threshold. This consumes the Guilt and converts them. Normal enemy → becomes a Fanatic, a loyal follower that copies your attacks and defends for as long as the Fanatic buff lasts, then is disillusioned and reverts to neutral. Hardened enemy → silenced instead (can't be converted, but can be shut up).**
 >
@@ -290,6 +322,22 @@ placeholders: design the **relationships**, tune the magnitudes in play.
 The built decks are authored per origin in [`OriginDatabase`](../Assets/Resources/Databases/OriginDatabase.asset) (card +
 count). Where its list differs from the tables below, these tables are the design. All three classes have an authored deck.
 
+**2026-11-21: starters now teach the relic.** Each starter is to be rebuilt so the class's relic (§7) does something
+from turn 1, with a few cards that hint at each pillar. The decks below are the pre-redesign versions and are kept until
+the rebuild.
+
+### Card types *(2026-11-21)*
+
+The type is the card's role, so relics and pillars can key off it and the frame colour tells the player what counts:
+
+- **Pressure = attack.** If a card pushes the meter, it is Pressure first and foremost, whatever else it does.
+- **Rhetoric = skill:** defend, statuses, calming, draw and tricks.
+- **Policy = persistent:** it stays in play.
+- **Heckle** and **Scandal:** unchanged, the junk cards.
+
+An audit on 2026-11-21 found 18 Pressure cards that never push the meter and 11 Rhetoric cards that do. They get
+re-typed once the class card pools settle.
+
 ### Shared basics (the "Strike / Defend" layer)
 
 Every class has its own basic pair, mechanically near-identical, no flavor riders (StS approach). Across all three the two basics are functionally:
@@ -303,22 +351,19 @@ And every class carries **one default hostility card** (the universal echo-chamb
 
 So each deck = ~4 offense + ~3 defense + 1 hostility + identity cards.
 
-### Nepo Baby — *burn for a big swing*
+### Nepo Baby — *to be rebuilt*
 
-The full starter (Name Drop ×4, Pull Rank, Daddy's Lawyer ×2, I'm Just Like You ×2, Blow the Allowance) and its rulings
-are in [`nepo-baby-class.md`](nepo-baby-class.md) §5. It follows the standard shape with a glass-cannon tilt: pressure
-pitched above the other classes, shields below.
-
-**Why this set:** Blow the Allowance teaches the burn (the bigger the card, the bigger the swing). Pull Rank teaches the price: free damage now, enemy anger later, and thin shields to absorb it. It is a poor burn target (printed cost 0), which is intended. "I'm Just Like You" is Rhetoric so it feeds Old Boys' Club from fight one (open question 8.2).
-
-**Known tuning risk (playtest):** Pull Rank against encounters that punish Hostility changes, and how fast a burn-heavy deck thins into Heckle/Scandal rot.
+The current starter (Name Drop ×4, Pull Rank, Daddy's Lawyer ×2, I'm Just Like You ×2, Blow the Allowance) teaches the
+retired burn design. The rebuild centres on **The Family Name** (Inheritance) with the Scry relic, plus a card or two
+hinting at Owed and Pulling Strings. See [`nepo-baby-class.md`](nepo-baby-class.md).
 
 ### Celebrity — *spectacle on credit*
 
 Starter (10), from [`celebrity-glamour-iou.md`](celebrity-glamour-iou.md): 3 **Hot Take** (Pressure, 1: Sway 6),
 3 **No Comment** (Pressure, 1: 7 Support), 3 **Autograph** (Pressure, 1: -2 Hostility), 1 **Smile and Wave**
 (Rhetoric, 1: 5 Support + 3 Glamour). The base plays fine alone; Smile and Wave is the one seed, showing Glamour
-lifting the meter on its own. The IOU pole arrives through rewards.
+lifting the meter on its own. The IOU pole arrives through rewards. Under the card-type rule, No Comment (Support) and
+Autograph (calming) become Rhetoric, so Hot Take is the starter's Pressure card that Last Impressions upgrades.
 
 ### Faith Leader — *stack to convert*
 
@@ -338,6 +383,9 @@ The engine and status kit are in §7.
 
 **Echo-chamber immunity:** converts revert to *neutral*, so Faith Leader's engine never floods the row with permanent receptives → can't self-trigger the all-receptive penalty. (Still wants a hostile present on non-converting turns; a Hardened enemy is the ideal permanent villain.)
 
+**Rebuild note (2026-11-21):** five Guilt cards compensated for having no Guilt source. With the relic supplying
+Guilt, two or three are enough, and the freed slots can hint at Congregation and Inquisition.
+
 Tuning flags are in §7.
 
 ### Legibility pass (the trim check)
@@ -352,26 +400,24 @@ The discipline isn't a card count — it's whether a new player can read the ope
 
 ### The "potential" layer (kept separate from starters)
 
-Once starters feel right, sketch the **subset of directions** each class's *reward pool* opens — explicitly NOT in the starter, so the two don't bleed:
-
-- **Nepo Baby** — three lanes plus valves (full card list in `nepo-baby-class.md` section 6): **Burn** (Executive Privilege, Dynasty, Legacy Admission, Encore, Born Into It, Bail Out; Trust Fund as an unlock-gated Rare), **Pull and scan** paid in Hostility (Inside Information, Background Check, Call in a Favor, Special Order), a deliberately sparse **Return** lane (I Know a Guy, Heirloom, Family Seat, Hand-Me-Downs), a slow **Calm** lane capped at Neutral (Apology Tour, Smooth Things Over, Smooth Operator), and **valves** that each cost something (Skip the Line, VIP Access, Do-Over, Not My Problem). Cap valves per reward screen so he stays a glass cannon.
-- **Celebrity** — bank and spend **Glamour** (Iconic Line, Media Training, Victim Narrative, Disarming Charm), borrow **Debt** for tempo (Cash Advance, Fine Print, Second Take, Line of Credit, Overpromise), and earn relief through **Promises** (Paid-Off Promises). Pick villains with **Aggravate** (Callout, Rage Bait, Feud, Tell-All Interview, Settle the Score, Manufactured Outrage) and pay for **Soothe** with Glamour or Debt (Photo With a Fan, Empty Promise, Red Carpet, Star Power, NDA, Beloved). Soundbites connect the engines; Signature Catchphrase turns them into Movie Quotes. Full list in `celebrity-glamour-iou.md`.
-- **Faith Leader** — **multi-Guilt** cards (apply 2+ Guilt at once, so conversion isn't always 3 turns — a priority), bigger **harvest payoffs** that scale off Fanatics present (Sermon, Crusade), over-stacking past 3 for a bigger burst, Preach-style hard-silence tools, cards that exploit the *defensive* side of Guilt (e.g. punish a guilty enemy harder). Texture comes from what Guilt payoffs give, not from status combinations.
-
-This is where each class's *potential* lives. Starters only teach the verb; rewards reveal the ceiling.
+Each class's reward pool is its three pillars plus shared glue (§7): **Faith Leader** Congregation, Inquisition, Martyr;
+**Celebrity** Star Power, Leverage, Content Machine; **Nepo Baby** Inheritance, Owed, Pulling Strings. Starters only
+teach the relic; rewards reveal the ceiling.
 
 ---
 
-## 9. Starter Passives (innate ability, StS-style)
+## 9. Starting relics *(2026-11-21)*
 
-Two layers, like StS: **starter passives** = simple innate per-battle ability defining the baseline; **relics** = accumulated persistent passives that warp strategy (the real depth layer — TBD). Starter passives should be humble and reinforce the fantasy via their **trigger timing** (before / during / after).
+Each class's starting ally is its **starting relic**: the upfront mechanic from §7, active from the first turn. Allies
+collected during a run are the accumulated relics that warp strategy (`allies.md`).
 
-- **Nepo Baby (now)** — *once per battle, on the opening hand:* full-hand Mulligan (discard your hand, draw a fresh one). Privilege: he never has to live with a bad hand. Do-Over is the paid, weaker version in the pool.
-- **Celebrity (start of battle)** — the **Publicist** starting ally (decided 2026-11-07): at battle start every enemy is Exposed, so the first hit on each deals double. The old "first card you play each battle is played upgraded" passive is retired. Details in [`celebrity-glamour-iou.md`](celebrity-glamour-iou.md).
-- **Faith Leader (after)** — *(candidate, unresolved)* leaning toward something that protects the patient setup or engages hostility:
-  - Option A: first opinion shield each battle gets a bonus (shelters the setup) — risk: a bit generic.
-  - Option B: start of battle, reduce all enemy hostility by 1 (on-theme; does *not* make all receptive, so doesn't auto-trigger echo chamber) — risk: softens a villain you may want.
-  - **Decide via playtest**, depends on how harsh the echo chamber feels in practice.
+- **Faith Leader:** the first attack each turn applies 1 Guilt to its target (untargeted: a random enemy that plans to
+  attack you, else any random enemy). Replaces the unresolved shield-bonus and hostility-reduction candidates.
+- **Celebrity: Last Impressions.** The first Pressure card you play each turn uses its upgraded effect, that play only;
+  generated cards don't count. Replaces the Publicist (enemies start Exposed) and the retired "first card each battle is
+  played upgraded" passive, which is still hardcoded in `CardPlayController` and goes when this is built.
+- **Nepo Baby:** Scry 1 at the start of your turn. Replaces the once-per-battle opening mulligan, which was judged too
+  weak next to the per-turn relics.
 
 ---
 
@@ -402,7 +448,7 @@ The game is a card game wrapped in an overworld metagame, not a full campaign RP
 ## Open Threads
 - Full enemy roster & complete voice-intent set
 - Relic design space (where build variety lives) → proposal in [`allies.md`](allies.md) (2026-11-06)
-- Finalizing Faith Leader's starter passive trigger
+- ~~Finalizing Faith Leader's starter passive trigger~~ → her starting relic (§9, 2026-11-21)
 - What receptive enemies grant (mirror to the hostile-draw reward)
 - Whether the default hostility card is removable
 - ~~Celebrity sub-archetype pools~~ → replaced by the Glamour / IOU build (2026-10-03).

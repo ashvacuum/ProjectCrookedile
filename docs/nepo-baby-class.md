@@ -1,10 +1,50 @@
-# Nepo Baby: Burn / Return / Calm class spec (v0.1)
+# Nepo Baby: Scry / Owed / Inheritance class spec
 
-> **Kind:** Design · **Status:** Built · **Updated:** 2026-11-07
+> **Kind:** Design · **Status:** Proposal · **Updated:** 2026-11-21
 >
-> **Summary:** The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders.
+> **Summary:** The Nepo Baby class, redesigned 2026-11-21: Scry 1 relic, pillars Inheritance (The Family Name), Owed (plays itself when discarded) and Pulling Strings (deck advantage). The built burn / return / calm design below is superseded and kept as card salvage.
 >
 > **Source of truth:** this doc; built in [`Data/Cards/NepoBaby/`](../Assets/Data/Cards/NepoBaby/) and [`NepoBabyConfig`](../Assets/Resources/NepoBabyConfig.asset) · **Related:** [`core-design.md`](core-design.md) · [`core-design.md` §8](core-design.md#8-starter-decks) · [`crookedile-card-art-prompts.xlsx`](crookedile-card-art-prompts.xlsx)
+
+## Redesign (2026-11-21)
+
+**Fantasy: his power isn't his own.** Someone handed everything. He never has to live with a bad draw, and his
+strongest card is his surname. His mechanic is **deck filtering**: he only ever gets the good cards, because someone
+tipped him off. Burn (exhaust as a cost) is no longer his identity: it was hard to grasp and the class was undefined.
+
+Class shape and rules for all three classes: [`core-design.md`](core-design.md) §7.
+
+### Starting relic
+
+**At the start of your turn, Scry 1:** look at the top card of your draw pile and discard it or keep it. A light choice
+that reuses the choose-to-discard screen; pillar cards can raise the count. Replaces the once-per-battle opening
+mulligan (too weak next to the other classes' per-turn relics). No button: it fires on its own.
+
+### Pillars
+
+| Pillar | What it does with his deck | Rules |
+|---|---|---|
+| **Inheritance** | Recycles one card | **The Family Name**, a starter Pressure card, grows through **Invest** cards ("Invest 2: The Family Name pushes 2 more this battle") and returns to the **top of your draw pile** after play, so the relic's Scry decides each turn whether you draw it again. "Birthright" is reserved as a possible keyword for its return rule. |
+| **Owed** | Gets paid for throwing cards away | Keyword **Owed**: "When discarded, play it." Only discards caused by an effect count (Scry, discard-and-draw, choose-to-discard), never the end-of-turn hand discard. |
+| **Pulling Strings** | Puts any card where he wants it | Return cards from the discard pile to hand, into the draw pile or onto its top; "Scry X; if a Policy is among them, play it"; similar deck-advantage effects. Brake: a card returned from the discard pile to hand can't be returned again that battle (closes the Owed loop). |
+
+**Glue:** Scry boosters and top-of-deck control serve all three.
+
+**Fear:** a draw pile full of junk the filter can't keep up with.
+
+### What exists and what is new
+
+- **Exists:** `ScryEffect` (Skip the Line), choose-to-discard plus draw (Pull Strings), `CardDiscardedTrigger` and
+  `CardDiscardedEvent`.
+- **New:** the Scry relic (an ally); The Family Name and Invest; the Owed keyword; return-to-top and "Scry X, play a
+  Policy found" effects; a discard **reason** on `CardDiscardedEvent` (today it fires for Scry, choose-to-discard and the
+  end-of-turn hand discard alike, so Owed can't tell them apart).
+- **Retired:** the opening mulligan relic (Do-Over stays as a card); burn as the class verb. Cards below are salvage:
+  Inside Information, Background Check, Call in a Favor and the Return-lane cards fit Pulling Strings.
+
+---
+
+# Previous design (superseded 2026-11-21): burn / return / calm
 
 This is the Nepo Baby class. It replaced the Patronage / summon design (2026-10-03); `core-design.md`,
 `enemy-design-bible.md` now summarise this doc (starter decks are in `core-design.md` §8). Section 12 lists the conflicts with

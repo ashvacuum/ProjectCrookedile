@@ -40,12 +40,12 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
 | [`allies.md`](docs/allies.md) | Partly built | 2026-11-21 | What allies are for, where a run gets them (a starting ally per class, events, elite wins, boss wins), how they're lost, class pools, and a starter roster. Sources, event losses and the Faith Leader boss pool are built; the run-wide loss rule is not. | this doc |
-| [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) | Built | 2026-11-07 | Celebrity banks and spends Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points. | this doc; values in [`Data/Cards/Celebrity/GlamourIou/`](Assets/Data/Cards/Celebrity/GlamourIou), shared rules in [`GlamourIou.cs`](Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs), effects in [`Celebrity/`](Assets/Scripts/Gameplay/Battle/Celebrity) |
-| [`core-design.md`](docs/core-design.md) | Canonical | 2026-11-21 | The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes, their starter decks and reward-pool directions. | this doc |
+| [`celebrity-glamour-iou.md`](docs/celebrity-glamour-iou.md) | Partly built | 2026-11-21 | Celebrity's starting relic Last Impressions upgrades his first Pressure card each turn; his pillars are Star Power (Glamour), Leverage (Debt) and Content Machine (generated cards). The rules below cover Glamour, borrows tempo through Debt, and earns repayment relief through next-turn commitments. Four core Support cards protect the engine; rare Charm Offensive is a hybrid exception. Numbers are playtest starting points. | this doc; values in [`Data/Cards/Celebrity/GlamourIou/`](Assets/Data/Cards/Celebrity/GlamourIou), shared rules in [`GlamourIou.cs`](Assets/Scripts/Gameplay/Battle/Celebrity/GlamourIou.cs), effects in [`Celebrity/`](Assets/Scripts/Gameplay/Battle/Celebrity) |
+| [`core-design.md`](docs/core-design.md) | Canonical | 2026-11-21 | The combat model: Opinion Meter, hostility, the Echo Chamber rule, voice intents, turn structure, the three archetypes (each a starting relic plus three pillars), card types, starter decks. | this doc |
 | [`enemy-design-bible.md`](docs/enemy-design-bible.md) | Canonical | 2026-11-02 | The v2 shared-meter enemy model: enemies are conditions to manage, not HP bars to delete. | this doc |
 | [`metagame-campaign.md`](docs/metagame-campaign.md) | Partly built | 2026-11-07 | The campaign map: Potionomics-style free roam drawn as a 2:1 isometric sprite city, with build phases. | this doc |
 | [`naming-glossary.md`](docs/naming-glossary.md) | Canonical | 2026-11-02 | Combat vocabulary mapped to "working a crowd" vocabulary. Read before naming anything. | this doc |
-| [`nepo-baby-class.md`](docs/nepo-baby-class.md) | Built | 2026-11-07 | The Nepo Baby class: burn / return / calm lanes, all 42 cards, its config, and build notes. Numbers are placeholders. | this doc; built in [`Data/Cards/NepoBaby/`](Assets/Data/Cards/NepoBaby) and [`NepoBabyConfig`](Assets/Resources/NepoBabyConfig.asset) |
+| [`nepo-baby-class.md`](docs/nepo-baby-class.md) | Proposal | 2026-11-21 | The Nepo Baby class, redesigned 2026-11-21: Scry 1 relic, pillars Inheritance (The Family Name), Owed (plays itself when discarded) and Pulling Strings (deck advantage). The built burn / return / calm design below is superseded and kept as card salvage. | this doc; built in [`Data/Cards/NepoBaby/`](Assets/Data/Cards/NepoBaby) and [`NepoBabyConfig`](Assets/Resources/NepoBabyConfig.asset) |
 | [`unlocks.md`](docs/unlocks.md) | Canonical | 2026-10-03 | What unlocks (classes, cards, allies, events, campaigns), what earns each one, how fast, and how the player sees it. Achievements and unlocks are one system. Everything is unlocked for now. | this doc |
 
 ### Systems — code reference
@@ -61,7 +61,7 @@ header, then run `python3 tools/check_docs.py --fix`. The same script checks lin
 
 | Doc | Status | Updated | What it covers | Source of truth |
 |---|---|---|---|---|
-| [`needs-detailing.md`](docs/needs-detailing.md) | Living | 2026-11-07 | Design questions awaiting a call, ordered by how much they block. Read before authoring content. | this doc |
+| [`needs-detailing.md`](docs/needs-detailing.md) | Living | 2026-11-21 | Design questions awaiting a call, ordered by how much they block. Read before authoring content. | this doc |
 | [`ui-elements.md`](docs/ui-elements.md) | Living | 2026-11-21 | The battle UI broken into reusable prefabs, smallest first, plus the mock's unbuilt features, the screens outside battle and the build order. | this doc |
 
 ### Art
