@@ -169,6 +169,13 @@ height, so a short building darkens a tall neighbour's roof.
 
 ### 6.3 Rain
 
+*Overcast light, wet surfaces and puddles built for testing, 2026-11-24:* `CityRain` on `CitySun` (Rain header) holds an
+intensity the campaign will set from the day's rain roll; scrub it to preview. Overcast light blends the sun's clouds
+toward an overcast `CityClouds` and dims the sun, tints ambient grey, fades shadows and boosts window emission.
+Puddles use grid noise rather than a puddle texture, and wetness only fades with the intensity (no slower drying,
+since rain lasts whole days). Wet flat surfaces also smear window glow down the screen. Not built: falling streaks,
+ripples, splashes, and wiring the intensity to the campaign.
+
 Rain is a gameplay travel modifier on some districts for a whole day (`campaign-encounters.md` §6.2). The map does not
 know districts, so whenever any district is rainy **the whole map shows rain**; the travel UI marks which roads it
 slows.

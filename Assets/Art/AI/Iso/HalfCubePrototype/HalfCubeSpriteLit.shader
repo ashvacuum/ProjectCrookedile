@@ -81,6 +81,8 @@ Shader "Crookedile/2D/Half Cube Lit"
             TEXTURE2D(_CityGlowMap);         // window light over the grid, texel x = row; filtered
             SAMPLER(sampler_CityGlowMap);
             float4 _CityGlow;                // height fade (cells), enabled (0 = no glow map)
+            float4 _CityRain;                // wetness (0 = dry), darkening, sky reflection, puddle coverage
+            float4 _CityRainSurface;         // puddle size (cells), glow smear strength, glow smear length (cells)
 
             struct Attributes
             {
@@ -317,6 +319,31 @@ Shader "Crookedile/2D/Half Cube Lit"
                 return (half3)SAMPLE_TEXTURE2D(_CityGlowMap, sampler_CityGlowMap, uv).rgb * fade;
             }
 
+            // 0 to 1 puddle cover on a flat surface: noise over the grid whose cut-off falls as wetness rises, biased
+            // into creases (dark occlusion) so they fill first. No puddle texture: shapes are the noise.
+            half PuddleMask(float3 gridPosition, half occlusionMask, half wetness)
+            {
+                float noise = CloudNoise(gridPosition.xy / max(_CityRainSurface.x, 0.1) + 41.7) * 0.75 + 0.5;
+                float crease = (1.0 - occlusionMask) * 0.3;
+                float threshold = 1.0 - _CityRain.w * wetness;
+                return (half)smoothstep(threshold, threshold + 0.08, noise + crease);
+            }
+
+            // Window glow from just up the screen, stretched down a wet surface like light on a wet street.
+            half3 GlowSmear(float3 gridPosition)
+            {
+                half3 sum = 0.0h;
+                [unroll]
+                for (int index = 1; index <= 3; index++)
+                {
+                    // (+row, -column) is straight up the screen.
+                    float2 up = float2(0.5, -0.5) * (_CityRainSurface.z * index / 3.0);
+                    sum += WindowGlow(float3(gridPosition.xy + up, 0.0));
+                }
+
+                return sum / 3.0h;
+            }
+
             Varyings LitVertex(Attributes input)
             {
                 UNITY_SETUP_INSTANCE_ID(input);
@@ -362,6 +389,14 @@ Shader "Crookedile/2D/Half Cube Lit"
                 normalTS.y *= UNITY_ACCESS_INSTANCED_PROP(PerInstance, _NormalFlipY);
                 half3 normal = normalize(input.tangentWS * normalTS.x + input.bitangentWS * normalTS.y + input.normalWS * normalTS.z);
 
+                // Rain (city-generator.md §6.3): flat surfaces soak fully, walls a quarter. Puddles only lie flat, turn
+                // the surface smooth (no normal map) and mirror the overcast sky.
+                half flat = input.faceId < 0.5h ? 1.0h : 0.0h;
+                half wetness = (half)_CityRain.x * lerp(0.25h, 1.0h, flat);
+                half puddle = wetness > 0.0h ? PuddleMask(input.gridPosition, occlusionMask, (half)_CityRain.x) * flat : 0.0h;
+                albedo *= 1.0h - (half)_CityRain.y * saturate(wetness + puddle * 0.3h);
+                normal = normalize(lerp(normal, (half3)normalize(input.normalWS), puddle));
+
                 half3 toSun = (half3)_CitySunDirection.xyz;
                 half3 sunColor = (half3)_CitySunColor.rgb;
                 half visibility = SunVisibility(input.gridPosition, input.faceId) * CloudShade(input.gridPosition);
@@ -381,6 +416,9 @@ Shader "Crookedile/2D/Half Cube Lit"
                 color += (specular + edgeHighlight * _EdgeHighlightStrength * _EdgeHighlightColor.rgb) * sunColor * visibility;
                 color += emissionMask * _EmissionColor.rgb * _EmissionStrength * _CityEmissionScale;
                 color += albedo * occlusion * WindowGlow(input.gridPosition) * _CityEmissionScale;
+                half shine = saturate(wetness * flat * 0.4h + puddle);
+                color += (half3)_CityAmbientColor.rgb * (half)_CityRain.z * shine;
+                color += GlowSmear(input.gridPosition) * (half)_CityRainSurface.y * shine * _CityEmissionScale;
                 return half4(color, input.color.a);
             }
             ENDHLSL

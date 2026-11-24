@@ -42,16 +42,133 @@ namespace Crookedile.Art.Iso
         [SerializeField, Min(0f)]
         private float _windCellsPerSecond = 0.6f;
 
-        public void Apply()
+        public CityClouds() { }
+
+        public CityClouds(float coverage, float softness, float density, float sizeCells)
         {
-            float windRadians = _windAzimuth * Mathf.Deg2Rad;
-            Vector2 wind =
-                new Vector2(Mathf.Cos(windRadians), Mathf.Sin(windRadians)) * _windCellsPerSecond;
+            _coverage = coverage;
+            _softness = softness;
+            _density = density;
+            _sizeCells = sizeCells;
+        }
+
+        // Applies these clouds, blended `blend` of the way toward `toward` (rain's overcast sky).
+        public void Apply(CityClouds toward = null, float blend = 0f)
+        {
+            toward ??= this;
+            float windRadians =
+                Mathf.Lerp(_windAzimuth, toward._windAzimuth, blend) * Mathf.Deg2Rad;
+            float windSpeed = Mathf.Lerp(_windCellsPerSecond, toward._windCellsPerSecond, blend);
+            Vector2 wind = new Vector2(Mathf.Cos(windRadians), Mathf.Sin(windRadians)) * windSpeed;
             Shader.SetGlobalVector(
                 CloudsId,
-                new Vector4(_coverage, _softness, _density, _sizeCells)
+                Vector4.Lerp(
+                    new Vector4(_coverage, _softness, _density, _sizeCells),
+                    new Vector4(toward._coverage, toward._softness, toward._density, toward._sizeCells),
+                    blend
+                )
             );
             Shader.SetGlobalVector(CloudWindId, new Vector4(wind.x, wind.y, 0f, 0f));
+        }
+    }
+
+    // Rain on the city's light and surfaces (city-generator.md §6.3). Cosmetic only: the campaign's seeded day roll
+    // decides whether it rains and sets Intensity; the map shows rain everywhere when any district is rainy.
+    [Serializable]
+    public sealed class CityRain
+    {
+        private static readonly int RainId = Shader.PropertyToID("_CityRain");
+        private static readonly int RainSurfaceId = Shader.PropertyToID("_CityRainSurface");
+
+        [Tooltip("How hard it rains: 0 = dry, 1 = full rain. The campaign sets this; scrub it to preview.")]
+        [SerializeField, Range(0f, 1f)]
+        private float _intensity;
+
+        [Tooltip(
+            "Seconds for surfaces to soak or dry after the intensity changes, in Play mode. Edit mode follows it at once."
+        )]
+        [SerializeField, Min(0f)]
+        private float _soakSeconds = 4f;
+
+        [Header("Overcast light")]
+        [Tooltip("Share of direct sunlight removed at full rain.")]
+        [SerializeField, Range(0f, 1f)]
+        private float _sunDim = 0.6f;
+
+        [Tooltip("Ambient colour is multiplied by this at full rain: a cool grey.")]
+        [SerializeField]
+        private Color _ambientTint = new Color(0.78f, 0.82f, 0.9f);
+
+        [Tooltip("Building shadow strength is multiplied by this at full rain, so shadows go faint.")]
+        [SerializeField, Range(0f, 1f)]
+        private float _shadowScale = 0.4f;
+
+        [Tooltip("Window emission is multiplied by this at full rain: lights come on in the gloom.")]
+        [SerializeField, Min(0f)]
+        private float _emissionBoost = 2f;
+
+        [Tooltip("Clouds at full rain. The sun's own clouds blend toward these as intensity rises.")]
+        [SerializeField, InlineProperty]
+        private CityClouds _overcast = new CityClouds(0.95f, 0.8f, 0.5f, 20f);
+
+        [Header("Wet surfaces")]
+        [Tooltip("How much wet roofs and ground darken: 0 = not at all, 1 = black. Walls get a quarter of it.")]
+        [SerializeField, Range(0f, 1f)]
+        private float _darkening = 0.35f;
+
+        [Tooltip("Strength of the overcast sky reflected in wet roofs and roads. Puddles reflect it in full.")]
+        [SerializeField, Range(0f, 2f)]
+        private float _reflection = 0.5f;
+
+        [Tooltip(
+            "Share of flat ground and roofs under puddles when fully wet. Puddles start in creases (the occlusion map)."
+        )]
+        [SerializeField, Range(0f, 1f)]
+        private float _puddleCoverage = 0.35f;
+
+        [Tooltip("Typical puddle size, in cells.")]
+        [SerializeField, Min(0.1f)]
+        private float _puddleSizeCells = 1.2f;
+
+        [Tooltip("Strength of window glow smeared down wet roads, like reflections on a wet street at night.")]
+        [SerializeField, Range(0f, 2f)]
+        private float _glowSmear = 0.6f;
+
+        [Tooltip("How far the glow smear stretches down the screen, in cells.")]
+        [SerializeField, Range(0f, 4f)]
+        private float _glowSmearCells = 1.5f;
+
+        [NonSerialized]
+        private float _wetness;
+
+        public float Intensity
+        {
+            get => _intensity;
+            set => _intensity = Mathf.Clamp01(value);
+        }
+
+        public float SunDim => _sunDim;
+        public Color AmbientTint => _ambientTint;
+        public float ShadowScale => _shadowScale;
+        public float EmissionBoost => _emissionBoost;
+        public CityClouds Overcast => _overcast;
+
+        public void Apply()
+        {
+            // ponytail: wetness only fades; rain lasts whole days, so no lingering puddles after it stops. Add a slower
+            // dry rate if the map stays on screen when rain ends.
+            _wetness =
+                Application.isPlaying && _soakSeconds > 0f
+                    ? Mathf.MoveTowards(_wetness, _intensity, Time.deltaTime / _soakSeconds)
+                    : _intensity;
+            Shader.SetGlobalVector(
+                RainId,
+                new Vector4(_wetness, _darkening, _reflection, _puddleCoverage)
+            );
+            Shader.SetGlobalVector(
+                RainSurfaceId,
+                new Vector4(_puddleSizeCells, _glowSmear, _glowSmearCells, 0f)
+            );
         }
     }
 
@@ -154,12 +271,21 @@ namespace Crookedile.Art.Iso
         [SerializeField, InlineProperty, HideLabel]
         private CityClouds _clouds = new CityClouds();
 
+        [Header("Rain")]
+        [Tooltip(
+            "Overcast light and wet surfaces. The campaign sets Rain.Intensity from the day's rain roll; scrub it here to preview."
+        )]
+        [SerializeField, InlineProperty, HideLabel]
+        private CityRain _rain = new CityRain();
+
         // The forecast hook: assign a whole cloud setting, and the sun applies it from the next frame.
         public CityClouds Clouds
         {
             get => _clouds;
             set => _clouds = value ?? new CityClouds();
         }
+
+        public CityRain Rain => _rain;
 
         #region Lifecycle
 
@@ -224,19 +350,28 @@ namespace Crookedile.Art.Iso
             );
 
             // The sun fades out over its last few degrees above the horizon.
+            // Rain turns the light overcast: dimmer sun, cool grey ambient, faint shadows, windows lit.
+            float rain = _rain.Intensity;
             Color sunColor =
                 _sunColor.Evaluate(Mathf.Clamp01(dayProgress))
-                * Mathf.SmoothStep(0f, 1f, elevation / 8f);
+                * Mathf.SmoothStep(0f, 1f, elevation / 8f)
+                * (1f - (rain * _rain.SunDim));
+            Color ambient =
+                _ambientColor.Evaluate(daylight) * Color.Lerp(Color.white, _rain.AmbientTint, rain);
+            float emission =
+                Mathf.Lerp(_emission.x, _emission.y, daylight) * Mathf.Lerp(1f, _rain.EmissionBoost, rain);
+            float shadowStrength = _shadowStrength * Mathf.Lerp(1f, _rain.ShadowScale, rain);
             Shader.SetGlobalVector(SunDirectionId, IsoGrid.GridToView(toSunGrid).normalized);
             Shader.SetGlobalVector(SunDirectionGridId, toSunGrid);
             Shader.SetGlobalColor(SunColorId, sunColor);
-            Shader.SetGlobalColor(AmbientColorId, _ambientColor.Evaluate(daylight));
-            Shader.SetGlobalFloat(EmissionScaleId, Mathf.Lerp(_emission.x, _emission.y, daylight));
+            Shader.SetGlobalColor(AmbientColorId, ambient);
+            Shader.SetGlobalFloat(EmissionScaleId, emission);
             Shader.SetGlobalVector(
                 ShadowId,
-                new Vector4(_shadowStrength, _shadowStepCells, _shadowReachCells, _shadowBiasCells)
+                new Vector4(shadowStrength, _shadowStepCells, _shadowReachCells, _shadowBiasCells)
             );
-            _clouds.Apply();
+            _clouds.Apply(_rain.Overcast, rain);
+            _rain.Apply();
         }
 
         #endregion
