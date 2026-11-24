@@ -1,10 +1,9 @@
+using Crookedile.Art.Iso;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
-using Crookedile.Art.Iso;
 
 namespace Crookedile.Editor
 {
@@ -23,10 +22,22 @@ namespace Crookedile.Editor
         private const float TILE_HALF_HEIGHT = IsoGrid.HALF_HEIGHT;
         private static readonly string[] TILE_NAMES =
         {
-            "Road Straight", "Road Corner", "Road T Junction", "Road Cross",
-            "Crosswalk", "Road End", "Driveway", "Manhole",
-            "Pavement Plain", "Pavement Cracked", "Pavement Corner", "Pavement T Junction",
-            "Curb Ramp", "Sidewalk Corner", "Grass Verge", "Storm Drain",
+            "Road Straight",
+            "Road Corner",
+            "Road T Junction",
+            "Road Cross",
+            "Crosswalk",
+            "Road End",
+            "Driveway",
+            "Manhole",
+            "Pavement Plain",
+            "Pavement Cracked",
+            "Pavement Corner",
+            "Pavement T Junction",
+            "Curb Ramp",
+            "Sidewalk Corner",
+            "Grass Verge",
+            "Storm Drain",
         };
 
         [MenuItem("Crookedile/Art/Build Road Surface Preview")]
@@ -39,9 +50,17 @@ namespace Crookedile.Editor
             Texture2D normal = AssetDatabase.LoadAssetAtPath<Texture2D>(NORMAL_PATH);
             Texture2D specular = AssetDatabase.LoadAssetAtPath<Texture2D>(SPECULAR_PATH);
             Texture2D occlusion = AssetDatabase.LoadAssetAtPath<Texture2D>(OCCLUSION_PATH);
-            if (shader == null || albedo == null || normal == null || specular == null || occlusion == null)
+            if (
+                shader == null
+                || albedo == null
+                || normal == null
+                || specular == null
+                || occlusion == null
+            )
             {
-                throw new System.InvalidOperationException("A road atlas texture or the half-cube shader failed to import.");
+                throw new System.InvalidOperationException(
+                    "A road atlas texture or the half-cube shader failed to import."
+                );
             }
 
             Material material = CreateRoadMaterial(shader, albedo, normal, specular, occlusion);
@@ -63,7 +82,13 @@ namespace Crookedile.Editor
             AssetDatabase.SaveAssets();
         }
 
-        private static Material CreateRoadMaterial(Shader shader, Texture2D albedo, Texture2D normal, Texture2D specular, Texture2D occlusion)
+        private static Material CreateRoadMaterial(
+            Shader shader,
+            Texture2D albedo,
+            Texture2D normal,
+            Texture2D specular,
+            Texture2D occlusion
+        )
         {
             Material material = AssetDatabase.LoadAssetAtPath<Material>(MATERIAL_PATH);
             if (material == null)
@@ -104,14 +129,15 @@ namespace Crookedile.Editor
                 new Vector3(TILE_HALF_WIDTH, 0f, 0f),
                 new Vector3(0f, -TILE_HALF_HEIGHT, 0f),
             };
-            Vector3[] normals = { Vector3.back, Vector3.back, Vector3.back, Vector3.back };
-            Vector4[] tangents =
-            {
-                new Vector4(1f, 0f, 0f, 1f),
-                new Vector4(1f, 0f, 0f, 1f),
-                new Vector4(1f, 0f, 0f, 1f),
-                new Vector4(1f, 0f, 0f, 1f),
-            };
+            Vector3 up = IsoGrid.UpView;
+            Vector3[] normals = { up, up, up, up };
+            Vector4 alongRow = new Vector4(
+                IsoGrid.RowView.x,
+                IsoGrid.RowView.y,
+                IsoGrid.RowView.z,
+                1f
+            );
+            Vector4[] tangents = { alongRow, alongRow, alongRow, alongRow };
             Vector2[] uvs =
             {
                 new Vector2(0f, 0f),
@@ -141,7 +167,10 @@ namespace Crookedile.Editor
             Scene scene = SceneManager.GetSceneByPath(SCENE_PATH);
             if (!scene.IsValid() || !scene.isLoaded)
             {
-                scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
+                scene = EditorSceneManager.NewScene(
+                    NewSceneSetup.EmptyScene,
+                    NewSceneMode.Additive
+                );
             }
             else
             {
@@ -154,7 +183,7 @@ namespace Crookedile.Editor
 
             SceneManager.SetActiveScene(scene);
             Camera camera = CreateCamera();
-            Light2D light = CreateKeyLight();
+            new GameObject("Sun").AddComponent<CitySun>();
             GameObject tileRoot = new GameObject("Road Surface Tiles");
 
             for (int row = 0; row < 4; row++)
@@ -167,7 +196,14 @@ namespace Crookedile.Editor
                         (row - column) * TILE_HALF_HEIGHT,
                         0f
                     );
-                    GameObject tile = CreateRoadTile(tileIndex, row, column, mesh, material, light, position);
+                    GameObject tile = CreateRoadTile(
+                        tileIndex,
+                        row,
+                        column,
+                        mesh,
+                        material,
+                        position
+                    );
                     tile.transform.SetParent(tileRoot.transform, true);
                 }
             }
@@ -176,7 +212,9 @@ namespace Crookedile.Editor
             EditorSceneManager.MarkSceneDirty(scene);
             if (!EditorSceneManager.SaveScene(scene, SCENE_PATH))
             {
-                throw new System.InvalidOperationException("The road surface preview scene could not be saved.");
+                throw new System.InvalidOperationException(
+                    "The road surface preview scene could not be saved."
+                );
             }
 
             SceneManager.SetActiveScene(scene);
@@ -193,41 +231,14 @@ namespace Crookedile.Editor
             return camera;
         }
 
-        private static Light2D CreateKeyLight()
-        {
-            Vector3 lightPosition = new Vector3(0.5f, 1.375f, -1f);
-            GameObject lightObject = new GameObject("Road Preview Key Light");
-            lightObject.transform.position = lightPosition;
-            Light2D light = lightObject.AddComponent<Light2D>();
-            light.lightType = Light2D.LightType.Point;
-            light.blendStyleIndex = 1;
-            light.color = new Color(1f, 0.88f, 0.72f, 1f);
-            light.intensity = 1.2f;
-            light.pointLightOuterRadius = 4f;
-            light.pointLightOuterAngle = 125f;
-            light.pointLightInnerAngle = 85f;
-            light.shadowsEnabled = true;
-            light.shadowIntensity = 0.55f;
-            light.transform.up = new Vector3(1.5f - lightPosition.x, -lightPosition.y, 0f).normalized;
-
-            SerializedObject serializedLight = new SerializedObject(light);
-            SerializedProperty normalDistance = serializedLight.FindProperty("m_NormalMapDistance");
-            if (normalDistance != null)
-            {
-                normalDistance.floatValue = 1.5f;
-            }
-
-            SerializedProperty normalQuality = serializedLight.FindProperty("m_NormalMapQuality");
-            if (normalQuality != null)
-            {
-                normalQuality.intValue = (int)Light2D.NormalMapQuality.Accurate;
-            }
-
-            serializedLight.ApplyModifiedProperties();
-            return light;
-        }
-
-        private static GameObject CreateRoadTile(int tileIndex, int row, int column, Mesh mesh, Material material, Light2D light, Vector3 position)
+        private static GameObject CreateRoadTile(
+            int tileIndex,
+            int row,
+            int column,
+            Mesh mesh,
+            Material material,
+            Vector3 position
+        )
         {
             GameObject tile = new GameObject(TILE_NAMES[tileIndex]);
             tile.transform.position = position;
@@ -240,12 +251,6 @@ namespace Crookedile.Editor
             meshRenderer.sortingOrder = -Mathf.RoundToInt(position.y * 100f);
 
             tile.AddComponent<CityRoadTile>().SetAtlasCell(row, column, 0);
-
-            HalfCubeLightLink lightLink = tile.AddComponent<HalfCubeLightLink>();
-            SerializedObject serializedLink = new SerializedObject(lightLink);
-            serializedLink.FindProperty("_aimLightAtObject").boolValue = false;
-            serializedLink.ApplyModifiedPropertiesWithoutUndo();
-            lightLink.SetLight(light);
             return tile;
         }
     }

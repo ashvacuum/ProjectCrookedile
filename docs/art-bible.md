@@ -1,6 +1,6 @@
 # Crookedile — Art Bible & Handoff Spec
 
-> **Kind:** Art · **Status:** Canonical · **Updated:** 2026-11-23
+> **Kind:** Art · **Status:** Canonical · **Updated:** 2026-11-24
 >
 > **Summary:** Art direction, resolution spec and generation prompts (portraits, icons, card backs) for artists. Card prompts are in the card-art workbook; the Database window's tabs are the live blank-slot checker.
 >
@@ -276,7 +276,8 @@ half-cube (a roof and the two front walls). Artists paint **flat, face-on textur
 projection and the shader does the lighting. It wears the §0.1 look: thick ink outlines and softly painted fills.
 
 ### Projection — one angle, no exceptions
-**True 2:1 dimetric:** plan rotated 45°, camera elevation **26.565°** (`atan(0.5)`), **orthographic**. A square
+**True 2:1 dimetric:** plan rotated 45°, camera elevation **30°**, **orthographic**; the diamond's edges then run at
+26.565° (`atan(0.5)`) on screen. A square
 ground footprint draws as a diamond exactly twice as wide as tall. Because textures are painted face-on and projected
 by the mesh, the angle is fixed by code and cannot drift between assets.
 

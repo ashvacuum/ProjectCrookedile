@@ -1,6 +1,6 @@
 # Metagame — The Campaign Map
 
-> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-23
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-24
 >
 > **Summary:** The campaign map: Potionomics-style free roam over a generated half-cube iso city (spec in city-generator.md), with build phases.
 >
@@ -43,7 +43,7 @@ hotspots. It is drawn with half-cube meshes (a roof and two walls lit from face 
 and generated fresh each run from the seed. **The full spec is `city-generator.md`**: grid, data, generation rules,
 rendering, lighting and the test-map painter. This section keeps only what the campaign layer relies on.
 
-**Projection (one angle, no exceptions).** True 2:1 dimetric: plan rotated 45°, elevation **26.565°** (`atan(0.5)`).
+**Projection (one angle, no exceptions).** True 2:1 dimetric: plan rotated 45°, camera elevation **30°** (the diamond's edges run at 26.565°, `atan(0.5)`).
 One cell is 1 × 0.5 world units (256 × 128 px at PPU 256); a 4K screen reads ~15 cells across.
 
 **The boundary that keeps this cheap:** the city is **scenery**. Location hotspots are uGUI placed over the map from

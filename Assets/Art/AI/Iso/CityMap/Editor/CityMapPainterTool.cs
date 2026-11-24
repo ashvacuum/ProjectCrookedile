@@ -4,7 +4,6 @@ using UnityEditor;
 using UnityEditor.EditorTools;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
 namespace Crookedile.Editor
@@ -25,9 +24,19 @@ namespace Crookedile.Editor
             RemoveBuilding,
         }
 
-        private static readonly string[] BrushNames = { "Street", "Avenue", "Clear road", "Land", "Sea", "Building", "Remove building" };
+        private static readonly string[] BrushNames =
+        {
+            "Street",
+            "Avenue",
+            "Clear road",
+            "Land",
+            "Sea",
+            "Building",
+            "Remove building",
+        };
         private static Brush _brush;
         private static float _wallHeight = 0.5f;
+        private static int _seed;
         private Vector2Int? _lotStart;
 
         public override GUIContent toolbarIcon => new GUIContent("City", "City Map Painter");
@@ -56,7 +65,7 @@ namespace Crookedile.Editor
                 view.Rebuild();
             }
 
-            DrawToolbar();
+            DrawToolbar(view);
             int controlId = GUIUtility.GetControlID(FocusType.Passive);
             Event current = Event.current;
             if (current.type == EventType.Layout)
@@ -76,7 +85,11 @@ namespace Crookedile.Editor
             }
             else
             {
-                DrawLot(view, new RectInt(cell, Vector2Int.one), view.Map.InBounds(cell) ? Color.white : Color.red);
+                DrawLot(
+                    view,
+                    new RectInt(cell, Vector2Int.one),
+                    view.Map.InBounds(cell) ? Color.white : Color.red
+                );
                 HandlePaintBrush(view, cell, current, controlId);
             }
 
@@ -90,21 +103,45 @@ namespace Crookedile.Editor
 
         #region Private API
 
-        private static void DrawToolbar()
+        private static void DrawToolbar(CityMapView view)
         {
             Handles.BeginGUI();
-            GUILayout.BeginArea(new Rect(10f, 10f, 620f, 48f), EditorStyles.helpBox);
+            GUILayout.BeginArea(new Rect(10f, 10f, 620f, 72f), EditorStyles.helpBox);
             _brush = (Brush)GUILayout.Toolbar((int)_brush, BrushNames);
             if (_brush == Brush.Building)
             {
                 _wallHeight = EditorGUILayout.Slider("Wall height", _wallHeight, 0.25f, 4f);
             }
 
+            // Randomize rolls a new seed; Regenerate replays the seed in the field. Tuning is on the City Map View.
+            GUILayout.BeginHorizontal();
+            _seed = EditorGUILayout.IntField("Seed", _seed);
+            bool randomize = GUILayout.Button("Randomize", GUILayout.Width(90f));
+            bool regenerate = GUILayout.Button("Regenerate", GUILayout.Width(90f));
+            GUILayout.EndHorizontal();
             GUILayout.EndArea();
             Handles.EndGUI();
+
+            if (randomize || regenerate)
+            {
+                if (randomize)
+                {
+                    _seed = UnityEngine.Random.Range(0, int.MaxValue);
+                }
+
+                Undo.RecordObject(view.Map, "Randomize City Map");
+                view.Randomizer.Fill(view.Map, _seed);
+                EditorUtility.SetDirty(view.Map);
+                view.Rebuild();
+            }
         }
 
-        private void HandlePaintBrush(CityMapView view, Vector2Int cell, Event current, int controlId)
+        private void HandlePaintBrush(
+            CityMapView view,
+            Vector2Int cell,
+            Event current,
+            int controlId
+        )
         {
             if (IsPress(current, controlId))
             {
@@ -173,7 +210,9 @@ namespace Crookedile.Editor
                     break;
                 case Brush.Land:
                     // Land means plain land: it also clears a street or avenue. `|` so both run.
-                    changed = map.SetGround(cell, CityMapData.Ground.Land) | map.SetRoad(cell, CityMapData.Road.None);
+                    changed =
+                        map.SetGround(cell, CityMapData.Ground.Land)
+                        | map.SetRoad(cell, CityMapData.Road.None);
                     break;
                 case Brush.Sea:
                     changed = map.SetGround(cell, CityMapData.Ground.Sea);
@@ -204,7 +243,10 @@ namespace Crookedile.Editor
 
         private static bool IsPress(Event current, int controlId)
         {
-            return current.type == EventType.MouseDown && current.button == 0 && !current.alt && HandleUtility.nearestControl == controlId;
+            return current.type == EventType.MouseDown
+                && current.button == 0
+                && !current.alt
+                && HandleUtility.nearestControl == controlId;
         }
 
         private static RectInt LotBetween(Vector2Int from, Vector2Int to)
@@ -213,7 +255,11 @@ namespace Crookedile.Editor
             return new RectInt(min, Vector2Int.Max(from, to) - min + Vector2Int.one);
         }
 
-        private static bool TryGetHoveredCell(CityMapView view, Vector2 mousePosition, out Vector2Int cell)
+        private static bool TryGetHoveredCell(
+            CityMapView view,
+            Vector2 mousePosition,
+            out Vector2Int cell
+        )
         {
             Ray ray = HandleUtility.GUIPointToWorldRay(mousePosition);
             Plane mapPlane = new Plane(view.transform.forward, view.transform.position);
@@ -223,7 +269,9 @@ namespace Crookedile.Editor
                 return false;
             }
 
-            cell = IsoGrid.LocalToCell(view.transform.InverseTransformPoint(ray.GetPoint(distance)));
+            cell = IsoGrid.LocalToCell(
+                view.transform.InverseTransformPoint(ray.GetPoint(distance))
+            );
             return true;
         }
 
@@ -257,14 +305,15 @@ namespace Crookedile.Editor
         #endregion
     }
 
-    // Builds and opens a scene ready for painting: camera, global light and a CityMapView on a 64 x 64 test map.
+    // Builds and opens a scene ready for painting: camera, CitySun and a CityMapView on a 64 x 64 test map.
     public static class CityMapEditorScene
     {
         private const string ROOT_PATH = "Assets/Art/AI/Iso/CityMap";
         private const string MAP_PATH = ROOT_PATH + "/CityMap.asset";
         private const string SCENE_PATH = ROOT_PATH + "/CityMapEditor.unity";
         private const string GROUND_MATERIAL_PATH = "Assets/Art/AI/Iso/Roads/RoadSurfaceLit.mat";
-        private const string BUILDING_PREFAB_PATH = "Assets/Art/AI/Iso/HalfCubePrototype/HalfCubePreview.prefab";
+        private const string BUILDING_PREFAB_PATH =
+            "Assets/Art/AI/Iso/HalfCubePrototype/HalfCubePreview.prefab";
 
         [MenuItem("Crookedile/Art/Open City Map Editor")]
         public static void Open()
@@ -282,6 +331,12 @@ namespace Crookedile.Editor
             {
                 throw new System.InvalidOperationException($"{SCENE_PATH} has no CityMapView.");
             }
+            // Scenes built before the sun existed get one; the city is lit by nothing else.
+            if (Object.FindFirstObjectByType<CitySun>() == null)
+            {
+                new GameObject("Sun").AddComponent<CitySun>();
+                EditorSceneManager.MarkSceneDirty(scene);
+            }
 
             Selection.activeGameObject = view.gameObject;
             // The selection only reaches the tool manager on the next editor update.
@@ -297,17 +352,27 @@ namespace Crookedile.Editor
             {
                 Vector2Int size = view.Map.Size;
                 sceneView.in2DMode = true;
-                sceneView.LookAt(view.transform.TransformPoint(IsoGrid.CellToLocal(size.x * 0.5f, size.y * 0.5f)), Quaternion.identity, 12f);
+                sceneView.LookAt(
+                    view.transform.TransformPoint(
+                        IsoGrid.CellToLocal(size.x * 0.5f, size.y * 0.5f)
+                    ),
+                    Quaternion.identity,
+                    12f
+                );
             }
         }
 
         private static Scene BuildScene()
         {
             Material groundMaterial = AssetDatabase.LoadAssetAtPath<Material>(GROUND_MATERIAL_PATH);
-            GameObject buildingPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BUILDING_PREFAB_PATH);
+            GameObject buildingPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                BUILDING_PREFAB_PATH
+            );
             if (groundMaterial == null || buildingPrefab == null)
             {
-                throw new System.InvalidOperationException("Build the road and half-cube previews before opening the city map editor.");
+                throw new System.InvalidOperationException(
+                    "Build the road and half-cube previews before opening the city map editor."
+                );
             }
 
             CityMapData map = AssetDatabase.LoadAssetAtPath<CityMapData>(MAP_PATH);
@@ -317,7 +382,10 @@ namespace Crookedile.Editor
                 AssetDatabase.CreateAsset(map, MAP_PATH);
             }
 
-            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            Scene scene = EditorSceneManager.NewScene(
+                NewSceneSetup.EmptyScene,
+                NewSceneMode.Single
+            );
             Vector3 center = IsoGrid.CellToLocal(map.Size.x * 0.5f, map.Size.y * 0.5f);
 
             Camera camera = new GameObject("Main Camera").AddComponent<Camera>();
@@ -328,10 +396,7 @@ namespace Crookedile.Editor
             camera.backgroundColor = new Color(0.13f, 0.15f, 0.18f);
             camera.transform.position = new Vector3(center.x, center.y, -10f);
 
-            Light2D globalLight = new GameObject("Global Light").AddComponent<Light2D>();
-            globalLight.lightType = Light2D.LightType.Global;
-            globalLight.blendStyleIndex = 0;
-            globalLight.intensity = 1f;
+            new GameObject("Sun").AddComponent<CitySun>();
 
             CityMapView view = new GameObject("City Map").AddComponent<CityMapView>();
             SerializedObject serializedView = new SerializedObject(view);
@@ -343,7 +408,9 @@ namespace Crookedile.Editor
 
             if (!EditorSceneManager.SaveScene(scene, SCENE_PATH))
             {
-                throw new System.InvalidOperationException("The city map editor scene could not be saved.");
+                throw new System.InvalidOperationException(
+                    "The city map editor scene could not be saved."
+                );
             }
 
             AssetDatabase.SaveAssets();

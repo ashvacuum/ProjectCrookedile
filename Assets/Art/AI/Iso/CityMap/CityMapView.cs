@@ -14,12 +14,17 @@ namespace Crookedile.Art.Iso
         private const int EAST = 2;
         private const int SOUTH = 4;
         private const int WEST = 8;
+
         // Ground never overlaps a building, so every tile draws below every building.
         private const int GROUND_SORTING_ORDER = -1000;
         private static readonly int RoofBaseColorId = Shader.PropertyToID("_RoofBaseColor");
         private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
         private static readonly int SpecularStrengthId = Shader.PropertyToID("_SpecularStrength");
         private static readonly int OcclusionStrengthId = Shader.PropertyToID("_OcclusionStrength");
+        private static readonly int HeightMapId = Shader.PropertyToID("_CityHeightMap");
+        private static readonly int HeightMapSizeId = Shader.PropertyToID("_CityHeightMapSize");
+        private static readonly int MapOriginId = Shader.PropertyToID("_CityMapOrigin");
+        private static readonly int GridId = Shader.PropertyToID("_CityGrid");
 
         // Road atlas cells (row, column) and which neighbours each connects to unrotated.
         private static readonly (Vector2Int cell, int mask)[] RoadPieces =
@@ -35,15 +40,38 @@ namespace Crookedile.Art.Iso
         private static readonly (Vector2Int cell, int quarterTurns)[] RoadByMask = BuildRoadTable();
 
         [Tooltip("The map to draw. Any City Map asset works as a saved test map.")]
-        [InlineEditor, SerializeField] private CityMapData _map;
-        [Tooltip("Lit material using the road atlas; its pavement and street cells draw land and streets.")]
-        [SerializeField] private Material _groundMaterial;
+        [SerializeField]
+        private CityMapData _map;
+
+        [Tooltip(
+            "Lit material using the road atlas; its pavement and street cells draw land and streets."
+        )]
+        [SerializeField]
+        private Material _groundMaterial;
+
         [Tooltip("Half-cube building prefab spawned for each lot.")]
-        [SerializeField] private GameObject _buildingPrefab;
+        [SerializeField]
+        private GameObject _buildingPrefab;
+
         [Tooltip("Placeholder colour for sea cells until water art exists.")]
-        [SerializeField] private Color _seaColor = new Color(0.2f, 0.45f, 0.65f);
+        [SerializeField]
+        private Color _seaColor = new Color(0.2f, 0.45f, 0.65f);
+
         [Tooltip("Placeholder colour for avenue cells until avenue art exists.")]
-        [SerializeField] private Color _avenueColor = new Color(0.5f, 0.48f, 0.56f);
+        [SerializeField]
+        private Color _avenueColor = new Color(0.5f, 0.48f, 0.56f);
+
+        [Tooltip(
+            "Tuning for the painter's Randomize button, which replaces the whole map with a random test city."
+        )]
+        [SerializeField, InlineProperty]
+        private CityMapRandomizer _randomizer = new CityMapRandomizer();
+
+        [Tooltip(
+            "Window light spilling onto streets and nearby walls at night. Rebaked whenever the buildings change."
+        )]
+        [SerializeField, InlineProperty]
+        private CityGlow _glow = new CityGlow();
 
         private readonly List<GameObject> _tiles = new List<GameObject>();
         private readonly List<GameObject> _buildings = new List<GameObject>();
@@ -52,8 +80,10 @@ namespace Crookedile.Art.Iso
         private Material _seaMaterial;
         private Material _avenueMaterial;
         private Texture2D _clearTexture;
+        private Texture2D _heightMap;
 
         public CityMapData Map => _map;
+        public CityMapRandomizer Randomizer => _randomizer;
 
         #region Lifecycle
 
@@ -62,13 +92,31 @@ namespace Crookedile.Art.Iso
             Rebuild();
         }
 
+        private void Update()
+        {
+            // The shadow test maps world positions to cells, so it follows the map if the view moves.
+            Shader.SetGlobalVector(MapOriginId, transform.position);
+        }
+
         private void OnDisable()
         {
             Clear();
+            Shader.SetGlobalVector(HeightMapSizeId, Vector4.zero);
             DestroyOwned(_tileMesh);
             DestroyOwned(_seaMaterial);
             DestroyOwned(_avenueMaterial);
             DestroyOwned(_clearTexture);
+            DestroyOwned(_heightMap);
+            _glow.Release();
+        }
+
+        private void OnValidate()
+        {
+            // Glow tuning shows straight away; the bake is cheap next to rebuilding the tiles.
+            if (isActiveAndEnabled)
+            {
+                _glow.Publish(_map);
+            }
         }
 
         #endregion
@@ -115,7 +163,10 @@ namespace Crookedile.Art.Iso
                         Vector2Int neighbour = cell + new Vector2Int(row, column);
                         if (_map.InBounds(neighbour))
                         {
-                            ApplyTile(_tiles[(neighbour.x * _builtSize.y) + neighbour.y], neighbour);
+                            ApplyTile(
+                                _tiles[(neighbour.x * _builtSize.y) + neighbour.y],
+                                neighbour
+                            );
                         }
                     }
                 }
@@ -130,6 +181,8 @@ namespace Crookedile.Art.Iso
             }
 
             _buildings.Clear();
+            PublishHeightMap();
+            _glow.Publish(_map);
             if (_map == null || _buildingPrefab == null)
             {
                 return;
@@ -141,9 +194,69 @@ namespace Crookedile.Art.Iso
             }
         }
 
+        // One texel per cell holding the building height there, for the shader's shadow test (city-generator.md §6.2).
+        // ponytail: one map at a time; a second enabled view overwrites the first's globals.
+        private void PublishHeightMap()
+        {
+            if (_map == null)
+            {
+                Shader.SetGlobalVector(HeightMapSizeId, Vector4.zero);
+                return;
+            }
+
+            Vector2Int size = _map.Size;
+            if (_heightMap == null || _heightMap.width != size.x || _heightMap.height != size.y)
+            {
+                DestroyOwned(_heightMap);
+                _heightMap = new Texture2D(size.x, size.y, TextureFormat.RFloat, false, true)
+                {
+                    name = "City Height Map",
+                    hideFlags = HideFlags.HideAndDontSave,
+                    filterMode = FilterMode.Point,
+                    wrapMode = TextureWrapMode.Clamp,
+                };
+            }
+
+            Color[] heights = new Color[size.x * size.y];
+            float tallest = 0f;
+            foreach (CityMapData.Building building in _map.Buildings)
+            {
+                tallest = Mathf.Max(tallest, building.WallHeight);
+                foreach (Vector2Int cell in building.Lot.allPositionsWithin)
+                {
+                    // Texel x is the row and y the column, matching the shader's Load(int2(row, column)).
+                    heights[(cell.y * size.x) + cell.x] = new Color(
+                        building.WallHeight,
+                        0f,
+                        0f,
+                        0f
+                    );
+                }
+            }
+
+            _heightMap.SetPixels(heights);
+            _heightMap.Apply(false);
+            Shader.SetGlobalTexture(HeightMapId, _heightMap);
+            Shader.SetGlobalVector(
+                HeightMapSizeId,
+                new Vector4(size.x, size.y, tallest / IsoGrid.SCREEN_HEIGHT_PER_CELL, 0f)
+            );
+            Shader.SetGlobalVector(MapOriginId, transform.position);
+            Shader.SetGlobalVector(
+                GridId,
+                new Vector4(
+                    IsoGrid.HALF_WIDTH,
+                    IsoGrid.HALF_HEIGHT,
+                    IsoGrid.SCREEN_HEIGHT_PER_CELL,
+                    0f
+                )
+            );
+        }
+
         public bool NeedsFullRebuild()
         {
-            return _map != null && (_builtSize != _map.Size || _tiles.Count != _builtSize.x * _builtSize.y);
+            return _map != null
+                && (_builtSize != _map.Size || _tiles.Count != _builtSize.x * _builtSize.y);
         }
 
         #endregion
@@ -152,7 +265,10 @@ namespace Crookedile.Art.Iso
 
         private GameObject CreateTile(Vector2Int cell)
         {
-            GameObject tile = new GameObject($"Cell {cell.x},{cell.y}") { hideFlags = HideFlags.HideAndDontSave };
+            GameObject tile = new GameObject($"Cell {cell.x},{cell.y}")
+            {
+                hideFlags = HideFlags.HideAndDontSave,
+            };
             tile.transform.SetParent(transform, false);
             tile.transform.localPosition = IsoGrid.CellToLocal(cell);
             tile.AddComponent<MeshFilter>().sharedMesh = _tileMesh;
@@ -191,7 +307,10 @@ namespace Crookedile.Art.Iso
             }
 
             // Cosmetic only: a fixed hash so a cell keeps its look between rebuilds.
-            Vector2Int pavement = ((cell.x * 73856093) ^ (cell.y * 19349663)) % 6 == 0 ? PavementCracked : PavementPlain;
+            Vector2Int pavement =
+                ((cell.x * 73856093) ^ (cell.y * 19349663)) % 6 == 0
+                    ? PavementCracked
+                    : PavementPlain;
             roadTile.SetAtlasCell(pavement.x, pavement.y, 0);
         }
 
@@ -240,7 +359,10 @@ namespace Crookedile.Art.Iso
 
             if (_clearTexture == null)
             {
-                _clearTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false) { hideFlags = HideFlags.HideAndDontSave };
+                _clearTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false)
+                {
+                    hideFlags = HideFlags.HideAndDontSave,
+                };
                 _clearTexture.SetPixel(0, 0, Color.clear);
                 _clearTexture.Apply();
             }
@@ -262,7 +384,11 @@ namespace Crookedile.Art.Iso
         // The half-cube shader fills transparent texels with _RoofBaseColor, so a clear texture gives a flat lit colour.
         private Material CreatePlaceholderMaterial(string materialName, Color color)
         {
-            Material material = new Material(_groundMaterial) { name = materialName, hideFlags = HideFlags.HideAndDontSave };
+            Material material = new Material(_groundMaterial)
+            {
+                name = materialName,
+                hideFlags = HideFlags.HideAndDontSave,
+            };
             material.SetTexture(MainTexId, _clearTexture);
             material.SetFloat(SpecularStrengthId, 0f);
             material.SetFloat(OcclusionStrengthId, 0f);
@@ -281,10 +407,23 @@ namespace Crookedile.Art.Iso
                 IsoGrid.CellToLocal(0.5f, 0.5f),
                 IsoGrid.CellToLocal(-0.5f, 0.5f),
             };
-            mesh.normals = new[] { Vector3.back, Vector3.back, Vector3.back, Vector3.back };
-            Vector4 tangent = new Vector4(1f, 0f, 0f, 1f);
+            // Ground faces up in the 3D city, like a roof; uv.x runs along +row.
+            Vector3 up = IsoGrid.UpView;
+            mesh.normals = new[] { up, up, up, up };
+            Vector4 tangent = new Vector4(
+                IsoGrid.RowView.x,
+                IsoGrid.RowView.y,
+                IsoGrid.RowView.z,
+                1f
+            );
             mesh.tangents = new[] { tangent, tangent, tangent, tangent };
-            mesh.uv = new[] { new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(0f, 1f) };
+            mesh.uv = new[]
+            {
+                new Vector2(0f, 0f),
+                new Vector2(1f, 0f),
+                new Vector2(1f, 1f),
+                new Vector2(0f, 1f),
+            };
             mesh.SetUVs(1, new[] { Vector2.zero, Vector2.zero, Vector2.zero, Vector2.zero });
             mesh.colors = new[] { Color.white, Color.white, Color.white, Color.white };
             mesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
@@ -315,7 +454,8 @@ namespace Crookedile.Art.Iso
                     }
                 }
 
-                Found:;
+                Found:
+                ;
             }
 
             return table;

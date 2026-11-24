@@ -26,11 +26,16 @@ namespace Crookedile.Art.Iso
         public sealed class Building
         {
             [Tooltip("The lot's lowest row and column.")]
-            [SerializeField] private Vector2Int _origin;
+            [SerializeField]
+            private Vector2Int _origin;
+
             [Tooltip("Rows (right wall) by columns (left wall) of the lot.")]
-            [SerializeField] private Vector2Int _size = Vector2Int.one;
+            [SerializeField]
+            private Vector2Int _size = Vector2Int.one;
+
             [Tooltip("Wall height in world units. 0.5 is one storey.")]
-            [SerializeField, Min(0.05f)] private float _wallHeight = 0.5f;
+            [SerializeField, Min(0.05f)]
+            private float _wallHeight = 0.5f;
 
             public Building(RectInt lot, float wallHeight)
             {
@@ -47,12 +52,21 @@ namespace Crookedile.Art.Iso
         }
 
         [Tooltip("Map size in rows by columns.")]
-        [SerializeField] private Vector2Int _size = new Vector2Int(64, 64);
-        [SerializeField, HideInInspector] private Vector2Int _storedSize;
-        [SerializeField, HideInInspector] private Ground[] _ground = Array.Empty<Ground>();
-        [SerializeField, HideInInspector] private Road[] _roads = Array.Empty<Road>();
+        [SerializeField]
+        private Vector2Int _size = new Vector2Int(64, 64);
+
+        [SerializeField, HideInInspector]
+        private Vector2Int _storedSize;
+
+        [SerializeField, HideInInspector]
+        private Ground[] _ground = Array.Empty<Ground>();
+
+        [SerializeField, HideInInspector]
+        private Road[] _roads = Array.Empty<Road>();
+
         [Tooltip("Building lots. The painter adds and removes these; edit heights here.")]
-        [SerializeField] private List<Building> _buildings = new List<Building>();
+        [SerializeField]
+        private List<Building> _buildings = new List<Building>();
 
         public Vector2Int Size => _size;
         public IReadOnlyList<Building> Buildings => _buildings;
@@ -123,6 +137,14 @@ namespace Crookedile.Art.Iso
             return true;
         }
 
+        // Back to bare land: no sea, roads or lots.
+        public void Clear()
+        {
+            Array.Clear(_ground, 0, _ground.Length);
+            Array.Clear(_roads, 0, _roads.Length);
+            _buildings.Clear();
+        }
+
         public int BuildingAt(Vector2Int cell)
         {
             for (int index = 0; index < _buildings.Count; index++)
@@ -141,7 +163,12 @@ namespace Crookedile.Art.Iso
         {
             foreach (Vector2Int cell in lot.allPositionsWithin)
             {
-                if (!InBounds(cell) || GetGround(cell) != Ground.Land || GetRoad(cell) != Road.None || BuildingAt(cell) >= 0)
+                if (
+                    !InBounds(cell)
+                    || GetGround(cell) != Ground.Land
+                    || GetRoad(cell) != Road.None
+                    || BuildingAt(cell) >= 0
+                )
                 {
                     return false;
                 }
@@ -211,7 +238,10 @@ namespace Crookedile.Art.Iso
             _roads = roads;
             _storedSize = _size;
             RectInt bounds = new RectInt(Vector2Int.zero, _size);
-            _buildings.RemoveAll(building => !bounds.Contains(building.Lot.min) || !bounds.Contains(building.Lot.max - Vector2Int.one));
+            _buildings.RemoveAll(building =>
+                !bounds.Contains(building.Lot.min)
+                || !bounds.Contains(building.Lot.max - Vector2Int.one)
+            );
         }
 
         #endregion

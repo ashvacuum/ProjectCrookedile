@@ -12,6 +12,25 @@ namespace Crookedile.Art.Iso
         public static readonly Vector3 RowAxis = new Vector3(HALF_WIDTH, HALF_HEIGHT, 0f);
         public static readonly Vector3 ColumnAxis = new Vector3(HALF_WIDTH, -HALF_HEIGHT, 0f);
 
+        // The 3D city behind the 2D drawing: plan rotated 45°, orthographic camera at 30° elevation (the only angle that
+        // draws a square cell twice as wide as tall). Unit directions in view space, where -z faces the camera.
+        public static readonly Vector3 RowView = new Vector3(0.7071068f, 0.3535534f, 0.6123724f);
+        public static readonly Vector3 ColumnView = new Vector3(
+            0.7071068f,
+            -0.3535534f,
+            -0.6123724f
+        );
+        public static readonly Vector3 UpView = new Vector3(0f, 0.8660254f, -0.5f);
+
+        // Screen units a point rises when lifted by one cell side of 3D height (cell side 0.7071 x cos 30°).
+        public const float SCREEN_HEIGHT_PER_CELL = 0.6123724f;
+
+        // A direction in (row, column, up) to view space.
+        public static Vector3 GridToView(Vector3 grid)
+        {
+            return (RowView * grid.x) + (ColumnView * grid.y) + (UpView * grid.z);
+        }
+
         public static Vector3 CellToLocal(Vector2Int cell)
         {
             return CellToLocal(cell.x, cell.y);

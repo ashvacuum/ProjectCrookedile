@@ -1,6 +1,6 @@
 # City generator — half-cube campaign city
 
-> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-23
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-24
 >
 > **Summary:** The campaign city: a Cebu-like city generated fresh each run from the seed, drawn with half-cube meshes on a 2:1 iso grid. Coast, radial avenues, streets, zones, landmarks and buildings; a painter for saved test maps. Replaces the sprite CityGenerator.
 >
@@ -47,8 +47,8 @@ Deterministic from the seed through its own `System.Random`, so generating the c
 (`BattleRandom`) or the encounter pool's draws.
 
 ### 4.1 Coast
-The seed picks one map edge as the sea. The coastline runs along it with a seeded, jagged depth inside a tunable
-range. Sea cells are ground = sea; nothing else is placed on them.
+The seed picks one map edge as the sea. The coastline runs along it with a seeded depth inside a tunable range; the
+depth steps in or out only now and then (a tunable chance per cell), so the shore wanders rather than saw-tooths. Sea cells are ground = sea; nothing else is placed on them.
 
 ### 4.2 Downtown
 A point on the coastline, near its middle with a seeded offset. Zones and avenues are measured from it.
@@ -57,13 +57,26 @@ A point on the coastline, near its middle with a seeded offset. Zones and avenue
 A seeded number of avenues (default 3–5) start at downtown and head inland to the map edge, spread across the inland
 half-plane. Each avenue is **two cells wide** and moves in **eight directions** (both grid axes and the two
 diagonals): long straight runs (a tunable length range) joined by 45° bends, so it reads as a winding boulevard.
+Sideways moves are short (a separate, smaller length range); long sideways runs read as a staircase, not a road.
 Avenues may cross each other; a crossing is an avenue junction.
 
 ### 4.4 Streets
-Land between the avenues splits into regions. Each region is cut recursively by **one-cell streets, along the grid
-axes only**, at a seeded position across its longer side, until no block is wider than the max block size; a cut
-that would leave a block thinner than the min block size is refused. Streets stop where they meet another road, so
-every block touches a road.
+Streets **march**. Each is a walker, one cell wide, that starts beside an avenue (a tunable chance per avenue-side cell)
+and steps straight along a grid axis:
+
+- **Blocks.** Every block length (a tunable range) it reaches a corner. There it may sprout a side street on each side,
+  and rarely turns. The side-street chance falls from a downtown value to an edge value with distance from downtown,
+  so downtown is a dense grid and the edge of town thins to a few long roads.
+- **Closing.** Meeting another road ends the walker and closes a block.
+- **Dying.** It also stops at the sea, the map edge, beside a parallel road (so roads never merge two cells wide), or
+  at random (a small chance per cell), which leaves a dead end. A walker that stops short of one block without meeting
+  a road is erased, so there are no stubs.
+
+Blocks are whatever the walkers close off. Buildings only go on lots that touch a road (§4.7), so block edges fill,
+deep block interiors stay open yards, and open land past the last street stays empty.
+
+*Superseded 2026-11-24:* recursive cuts of the regions between avenues. They made an even grid with no growth,
+dead ends or thinning; marching was chosen instead.
 
 ### 4.5 Zones
 Each block takes the first zone whose distance band contains the block's distance from downtown (zones are ordered
@@ -75,6 +88,8 @@ of that zone that fits it, fronting a road. A landmark that fits nowhere is skip
 
 ### 4.7 Buildings
 Each block is packed largest footprint first from its zone's weighted list; storeys roll within the building's range.
+**Every lot touches a road** (a road cell beside one of its four sides): a building nobody can reach makes no sense, so a
+lot that touches none is not built.
 
 ## 5. Roads and tiles
 
@@ -104,15 +119,20 @@ Each block is packed largest footprint first from its zone's weighted list; stor
 
 ### 6.1 Lighting: one 3D sun
 
+*Built 2026-11-23:* `CitySun` (`Assets/Art/AI/Iso/CityMap`) sets the globals; the half-cube shader no longer uses URP's
+2D lights. The sun follows its own minute-of-day field for now (scrub it, or set seconds-per-day for a Play-mode
+loop); wiring it to the campaign clock is still to do.
+
 Buildings are lit as the 3D boxes they stand for, not as flat 2D shapes.
 
-- **Face normals are true 3D directions in view space** (camera elevation 26.565°, plan rotated 45°):
+- **Face normals are true 3D directions in view space** (camera elevation 30°, plan rotated 45°; 30° is the only
+  elevation that draws a square cell twice as wide as tall, and 26.565° is the angle of the diamond's edges on screen):
 
   | Face | Normal (x, y, z; −z faces the camera) |
   |---|---|
-  | Roof | (0, 0.894, −0.447) |
-  | Left wall | (−0.707, −0.316, −0.632) |
-  | Right wall | (0.707, −0.316, −0.632) |
+  | Roof | (0, 0.866, −0.5) |
+  | Left wall | (−0.707, −0.354, −0.612) |
+  | Right wall | (0.707, −0.354, −0.612) |
 
   Ground and road cells use the roof normal. With these, a sun behind a building lights its roof and leaves both
   front walls in shade. The prototype's roof faces the camera instead, which is why its back-lighting looks wrong.
@@ -125,6 +145,9 @@ Buildings are lit as the 3D boxes they stand for, not as flat 2D shapes.
   colour over the day are tunable curves and gradients. Night lighting only applies if a day ever runs past dusk.
 
 ### 6.2 Shadows: height-aware, from a height texture
+
+*Built 2026-11-23:* `CityMapView` publishes the height texture; `CitySun` holds the strength, step, reach and bias.
+Scenes without a city map (the previews) get sunlight but no shadows.
 
 URP's `ShadowCaster2D` is not used: it projects each building's whole outline across the screen with no idea of
 height, so a short building darkens a tall neighbour's roof.
@@ -166,6 +189,39 @@ slows.
 - Rain visuals are cosmetic, so their animation may use `UnityEngine.Random`; whether it rains comes only from the
   seeded travel roll.
 
+### 6.4 Clouds: shadows only
+
+*Built for testing, 2026-11-24.* No cloud is drawn. Two layers of drifting Perlin-style noise over the grid dim
+**direct sunlight only** (diffuse, specular and edge light; ambient and window glow are untouched), so a cloud reads as
+a soft passing shade over roofs and roads:
+
+- **Coverage** (how much sky is cloud), **softness** (edge width), **density** (share of sun a thick cloud blocks;
+  kept below the building shadow strength so buildings still read through it), **size** in cells, **wind** direction
+  and speed. The second layer is smaller and slower, so shapes change as they drift.
+- Each point reads the clouds along its ray to the sun, so a roof and the ground it shades agree and the pattern leans
+  as the sun moves. Sunlight is building shadow x cloud shade.
+- The values live in a `CityClouds` object on `CitySun` (Clouds header). **The forecast hook:** a future weather
+  system authors one `CityClouds` per forecast (clear, partly cloudy, overcast, rain) and assigns `CitySun.Clouds`.
+  Not built yet: the forecast itself, an overcast tint on sun and ambient colour, and a fade between forecasts.
+- Cost: two noise evaluations per pixel, small next to the shadow march.
+
+### 6.5 Window glow: baked light pools
+
+*Built for testing, 2026-11-24.* Window light spilling onto streets and nearby walls at night, without real lights:
+
+- **Bake.** `CityGlow` (tuned on the city view) paints a soft RGB texture over the grid, 4 texels per cell by default,
+  rebuilt with the buildings and never per frame. Each lit building pours its window colour out from all four walls
+  (back walls too, as with shadows). Light walks only through open ground, so it never passes through a building to
+  the street behind; it fades with distance over a reach in cells. More storeys give brighter light.
+- **Shader.** One filtered read at the pixel's grid position, faded out with height so it lights streets and low
+  walls rather than roofs, added as albedo x glow x the sun's night emission scale, so it vanishes by day for free.
+- **Test variety.** Each building rolls lit or dark and warm (tungsten) or cool (fluorescent), seeded by its lot, so
+  it keeps its lights when others change. Building types (`BuildingData`) take over colour and window density later.
+- **Lamp posts (later).** A lamp is the same spread from a one-texel source with its own colour and reach, plus a
+  small post mesh; the bake, shader read and no-bleed rule are shared. Not built: no lamps on the map yet.
+- **Limits.** Static light only: moving or individually flickering lights need a per-frame overlay. Lit surfaces cast
+  no shadows of their own. URP Bloom can add the halo on the windows themselves; that is a post-processing setting.
+
 ## 7. Painter and test maps
 
 A Scene-view tool on the city view, for testing art, tiles and packing:
@@ -174,7 +230,10 @@ A Scene-view tool on the city view, for testing art, tiles and packing:
 `CityMapData` test map (`Assets/Art/AI/Iso/CityMap`). Select the view and use the **City Map Painter** tool: brushes for
 street, avenue, clear road, land, sea, building lot (drag a rectangle, with a wall height) and remove building; Undo works.
 Streets pick their art from four neighbours; sea and avenues are placeholder colours. Duplicating the asset saves a test
-map and assigning another asset loads one. Not built yet: generating from a seed, zone painting, the console command,
+map and assigning another asset loads one. The toolbar's **Randomize** (new seed) and **Regenerate** (the seed in
+the field) replace the map with a random test city from `CityMapRandomizer`, tuned on the view: coast, axis-only two-cell
+avenues from downtown with short jogs, §4.4's marching streets, and lots that each touch a road, taller toward downtown. It stands in for §4
+(no zones, landmarks, diagonals or `BuildingData`). Not built yet: the §4 generator, zone painting, the console command,
 diagonal avenues and eight-neighbour art. The code lives beside the half-cube prototype until the generator moves it into
 the runtime assembly.
 

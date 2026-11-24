@@ -1,10 +1,8 @@
-using System.Collections.Generic;
 using Crookedile.Art.Iso;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
 namespace Crookedile.Editor
@@ -14,13 +12,20 @@ namespace Crookedile.Editor
         private const string ROOT_PATH = "Assets/Art/AI/Iso/CityPreview";
         private const string ROAD_MATERIAL_PATH = "Assets/Art/AI/Iso/Roads/RoadSurfaceLit.mat";
         private const string ROAD_MESH_PATH = "Assets/Art/AI/Iso/Roads/RoadSurfaceTileMesh.asset";
-        private const string HOUSE_PREFAB_PATH = "Assets/Art/AI/Iso/HalfCubePrototype/HalfCubePreview.prefab";
+        private const string HOUSE_PREFAB_PATH =
+            "Assets/Art/AI/Iso/HalfCubePrototype/HalfCubePreview.prefab";
         private const string SCENE_PATH = ROOT_PATH + "/CityDayNightPreview.unity";
         private const int GRID_SIZE = 5;
         private const int GRID_CENTER = GRID_SIZE / 2;
         private const float TILE_HALF_WIDTH = IsoGrid.HALF_WIDTH;
         private const float TILE_HALF_HEIGHT = IsoGrid.HALF_HEIGHT;
-        private static readonly string[] HOUSE_NAMES = { "House North West", "House North East", "House South West", "House South East" };
+        private static readonly string[] HOUSE_NAMES =
+        {
+            "House North West",
+            "House North East",
+            "House South West",
+            "House South East",
+        };
 
         #region Public API
 
@@ -32,30 +37,33 @@ namespace Crookedile.Editor
             GameObject housePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(HOUSE_PREFAB_PATH);
             if (roadMaterial == null || roadMesh == null || housePrefab == null)
             {
-                throw new System.InvalidOperationException("Build the road and half-cube previews before building the city preview.");
+                throw new System.InvalidOperationException(
+                    "Build the road and half-cube previews before building the city preview."
+                );
             }
 
             Scene scene = OpenPreviewScene();
             SceneManager.SetActiveScene(scene);
 
             Vector3 cityCenter = GridPosition(GRID_CENTER, GRID_CENTER);
-            Camera previewCamera = CreateCamera(cityCenter);
-            Light2D ambientLight = CreateAmbientLight();
-            Light2D keyLight = CreateKeyLight(cityCenter);
+            CreateCamera(cityCenter);
             GameObject roadRoot = new GameObject("City Road Tiles");
             GameObject houseRoot = new GameObject("City Houses");
-            List<Renderer> litRenderers = new List<Renderer>(GRID_SIZE * GRID_SIZE + HOUSE_NAMES.Length);
+            CreateRoadGrid(roadMesh, roadMaterial, roadRoot.transform);
+            CreateHouses(housePrefab, houseRoot.transform);
 
-            CreateRoadGrid(roadMesh, roadMaterial, keyLight, roadRoot.transform, litRenderers);
-            CreateHouses(housePrefab, keyLight, houseRoot.transform, litRenderers);
-
-            CityDayNightCycle cycle = new GameObject("Day Night Cycle").AddComponent<CityDayNightCycle>();
-            cycle.Configure(keyLight, ambientLight, previewCamera, litRenderers.ToArray(), cityCenter);
+            // In Play mode the sun runs a whole day every 30 seconds; scrub its minute in edit mode.
+            CitySun sun = new GameObject("Sun").AddComponent<CitySun>();
+            SerializedObject serializedSun = new SerializedObject(sun);
+            serializedSun.FindProperty("_previewSecondsPerDay").floatValue = 30f;
+            serializedSun.ApplyModifiedPropertiesWithoutUndo();
 
             EditorSceneManager.MarkSceneDirty(scene);
             if (!EditorSceneManager.SaveScene(scene, SCENE_PATH))
             {
-                throw new System.InvalidOperationException("The day-night city preview scene could not be saved.");
+                throw new System.InvalidOperationException(
+                    "The day-night city preview scene could not be saved."
+                );
             }
 
             AssetDatabase.SaveAssets();
@@ -88,7 +96,12 @@ namespace Crookedile.Editor
 
         private static bool IsUnfinishedCityPreview(Scene scene)
         {
-            if (!scene.IsValid() || !scene.isLoaded || scene.path.Length > 0 || scene.name != "Untitled")
+            if (
+                !scene.IsValid()
+                || !scene.isLoaded
+                || scene.path.Length > 0
+                || scene.name != "Untitled"
+            )
             {
                 return false;
             }
@@ -117,50 +130,7 @@ namespace Crookedile.Editor
             return camera;
         }
 
-        private static Light2D CreateAmbientLight()
-        {
-            GameObject lightObject = new GameObject("Day Night Ambient");
-            Light2D light = lightObject.AddComponent<Light2D>();
-            light.lightType = Light2D.LightType.Global;
-            light.blendStyleIndex = 0;
-            light.color = Color.white;
-            light.intensity = 1f;
-            return light;
-        }
-
-        private static Light2D CreateKeyLight(Vector3 cityCenter)
-        {
-            GameObject lightObject = new GameObject("Moving Day Night Key Light");
-            lightObject.transform.position = new Vector3(cityCenter.x + 2.75f, cityCenter.y, -1f);
-            Light2D light = lightObject.AddComponent<Light2D>();
-            light.lightType = Light2D.LightType.Point;
-            light.blendStyleIndex = 1;
-            light.color = new Color(1f, 0.8f, 0.58f);
-            light.intensity = 0.9f;
-            light.pointLightOuterRadius = 6f;
-            light.pointLightOuterAngle = 360f;
-            light.pointLightInnerAngle = 360f;
-            light.shadowsEnabled = true;
-            light.shadowIntensity = 0.7f;
-
-            SerializedObject serializedLight = new SerializedObject(light);
-            SerializedProperty normalDistance = serializedLight.FindProperty("m_NormalMapDistance");
-            if (normalDistance != null)
-            {
-                normalDistance.floatValue = 1.5f;
-            }
-
-            SerializedProperty normalQuality = serializedLight.FindProperty("m_NormalMapQuality");
-            if (normalQuality != null)
-            {
-                normalQuality.intValue = (int)Light2D.NormalMapQuality.Accurate;
-            }
-
-            serializedLight.ApplyModifiedProperties();
-            return light;
-        }
-
-        private static void CreateRoadGrid(Mesh mesh, Material material, Light2D keyLight, Transform parent, List<Renderer> litRenderers)
+        private static void CreateRoadGrid(Mesh mesh, Material material, Transform parent)
         {
             for (int row = 0; row < GRID_SIZE; row++)
             {
@@ -180,15 +150,11 @@ namespace Crookedile.Editor
                     CityRoadTile roadTile = tile.AddComponent<CityRoadTile>();
                     int quarterTurns = column == GRID_CENTER && row != GRID_CENTER ? 1 : 0;
                     roadTile.SetAtlasCell(tileIndex / 4, tileIndex % 4, quarterTurns);
-
-                    HalfCubeLightLink lightLink = tile.AddComponent<HalfCubeLightLink>();
-                    SetLightLink(lightLink, keyLight);
-                    litRenderers.Add(meshRenderer);
                 }
             }
         }
 
-        private static void CreateHouses(GameObject housePrefab, Light2D keyLight, Transform parent, List<Renderer> litRenderers)
+        private static void CreateHouses(GameObject housePrefab, Transform parent)
         {
             int houseIndex = 0;
             int[] houseRows = { 0, 0, GRID_SIZE - 1, GRID_SIZE - 1 };
@@ -198,7 +164,9 @@ namespace Crookedile.Editor
                 GameObject house = PrefabUtility.InstantiatePrefab(housePrefab) as GameObject;
                 if (house == null)
                 {
-                    throw new System.InvalidOperationException("A city house could not be instantiated from the half-cube prefab.");
+                    throw new System.InvalidOperationException(
+                        "A city house could not be instantiated from the half-cube prefab."
+                    );
                 }
 
                 house.name = HOUSE_NAMES[houseIndex++];
@@ -212,32 +180,7 @@ namespace Crookedile.Editor
                 {
                     meshRenderer.sortingOrder = -Mathf.RoundToInt(position.y * 100f) + 5;
                 }
-
-                HalfCubeLightLink lightLink = house.GetComponent<HalfCubeLightLink>();
-                if (lightLink != null)
-                {
-                    SetLightLink(lightLink, keyLight);
-                }
-
-                Renderer[] houseRenderers = house.GetComponentsInChildren<Renderer>();
-                for (int rendererIndex = 0; rendererIndex < houseRenderers.Length; rendererIndex++)
-                {
-                    litRenderers.Add(houseRenderers[rendererIndex]);
-                }
             }
-        }
-
-        private static void SetLightLink(HalfCubeLightLink lightLink, Light2D keyLight)
-        {
-            SerializedObject serializedLink = new SerializedObject(lightLink);
-            SerializedProperty aimAtObject = serializedLink.FindProperty("_aimLightAtObject");
-            if (aimAtObject != null)
-            {
-                aimAtObject.boolValue = false;
-                serializedLink.ApplyModifiedPropertiesWithoutUndo();
-            }
-
-            lightLink.SetLight(keyLight);
         }
 
         private static int GetTileIndex(int row, int column)
@@ -282,7 +225,9 @@ namespace Crookedile.Editor
                 return "Storm Drain";
             }
 
-            return tileIndex == 0 ? "Road Straight" : tileIndex == 9 ? "Pavement Cracked" : "Pavement Plain";
+            return tileIndex == 0 ? "Road Straight"
+                : tileIndex == 9 ? "Pavement Cracked"
+                : "Pavement Plain";
         }
 
         private static Vector3 GridPosition(int row, int column)
