@@ -195,7 +195,7 @@ namespace Crookedile.Editor
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.transform.position = new Vector3(0f, 0f, -10f);
 
-            new GameObject("Sun").AddComponent<CitySun>();
+            new GameObject("Sky").AddComponent<CitySky>();
 
             GameObject previewObject = CreateSpriteObject(material);
             previewObject.name = "Half Cube";

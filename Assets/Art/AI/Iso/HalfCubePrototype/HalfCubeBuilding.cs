@@ -4,7 +4,7 @@ namespace Crookedile.Art.Iso
 {
     // Builds the half-cube mesh (roof diamond plus left and right walls) from a footprint in iso tiles.
     // The front-bottom corner stays fixed, so the building grows back and up from the tile it stands on.
-    // Normals are the faces' true 3D directions and every vertex carries its height, so CitySun lighting and the
+    // Normals are the faces' true 3D directions and every vertex carries its height, so CitySky lighting and the
     // height-aware shadows treat it as the box it stands for (city-generator.md §6).
     [ExecuteAlways]
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]

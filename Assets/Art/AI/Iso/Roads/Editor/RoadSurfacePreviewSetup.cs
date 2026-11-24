@@ -183,7 +183,7 @@ namespace Crookedile.Editor
 
             SceneManager.SetActiveScene(scene);
             Camera camera = CreateCamera();
-            new GameObject("Sun").AddComponent<CitySun>();
+            new GameObject("Sky").AddComponent<CitySky>();
             GameObject tileRoot = new GameObject("Road Surface Tiles");
 
             for (int row = 0; row < 4; row++)

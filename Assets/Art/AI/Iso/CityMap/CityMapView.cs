@@ -64,13 +64,13 @@ namespace Crookedile.Art.Iso
         [Tooltip(
             "Tuning for the painter's Randomize button, which replaces the whole map with a random test city."
         )]
-        [SerializeField, InlineProperty]
+        [SerializeField, FoldoutGroup("Randomizer", Expanded = false), InlineProperty, HideLabel]
         private CityMapRandomizer _randomizer = new CityMapRandomizer();
 
         [Tooltip(
             "Window light spilling onto streets and nearby walls at night. Rebaked whenever the buildings change."
         )]
-        [SerializeField, InlineProperty]
+        [SerializeField, FoldoutGroup("Window Glow", Expanded = false), InlineProperty, HideLabel]
         private CityGlow _glow = new CityGlow();
 
         private readonly List<GameObject> _tiles = new List<GameObject>();

@@ -119,7 +119,7 @@ lot that touches none is not built.
 
 ### 6.1 Lighting: one 3D sun
 
-*Built 2026-11-23:* `CitySun` (`Assets/Art/AI/Iso/CityMap`) sets the globals; the half-cube shader no longer uses URP's
+*Built 2026-11-23:* `CitySky` (`Assets/Art/AI/Iso/CityMap`) sets the globals; the half-cube shader no longer uses URP's
 2D lights. The sun follows its own minute-of-day field for now (scrub it, or set seconds-per-day for a Play-mode
 loop); wiring it to the campaign clock is still to do.
 
@@ -143,10 +143,14 @@ Buildings are lit as the 3D boxes they stand for, not as flat 2D shapes.
 - **The sun follows the campaign clock.** The day runs 08:00 to 16:00 (`campaign-encounters.md` §6): low morning sun
   from one side at the start, rising, then late-afternoon sun from the other side at the end. Azimuth, elevation and
   colour over the day are tunable curves and gradients. Night lighting only applies if a day ever runs past dusk.
+- **Moonlight** *(built for testing, 2026-11-24)*. While the sun is down, `CityMoon` on `CitySky` (Moon tab) takes
+  its place as the one light: its own rise and set minutes (wrapping past midnight), peak elevation, sweep between two
+  azimuths, a dim blue-white colour and a phase (0 = new moon, 1 = full). Shadows and cloud shade then work by moonlight
+  with no shader change. One light at a time: if the moon is up before sunset, only the sun shows.
 
 ### 6.2 Shadows: height-aware, from a height texture
 
-*Built 2026-11-23:* `CityMapView` publishes the height texture; `CitySun` holds the strength, step, reach and bias.
+*Built 2026-11-23:* `CityMapView` publishes the height texture; `CitySky` holds the strength, step, reach and bias.
 Scenes without a city map (the previews) get sunlight but no shadows.
 
 URP's `ShadowCaster2D` is not used: it projects each building's whole outline across the screen with no idea of
@@ -169,12 +173,12 @@ height, so a short building darkens a tall neighbour's roof.
 
 ### 6.3 Rain
 
-*Overcast light, wet surfaces and puddles built for testing, 2026-11-24:* `CityRain` on `CitySun` (Rain header) holds an
+*Overcast light, wet surfaces and puddles built for testing, 2026-11-24:* `CityRain` on `CitySky` (Rain tab) holds an
 intensity the campaign will set from the day's rain roll; scrub it to preview. Overcast light blends the sun's clouds
 toward an overcast `CityClouds` and dims the sun, tints ambient grey, fades shadows and boosts window emission.
-Puddles use grid noise rather than a puddle texture, and wetness only fades with the intensity (no slower drying,
+Puddles use grid noise rather than a puddle texture, shifted by a puddle seed the campaign sets from the run seed, and wetness only fades with the intensity (no slower drying,
 since rain lasts whole days). Wet flat surfaces also smear window glow down the screen. Not built: falling streaks,
-ripples, splashes, and wiring the intensity to the campaign.
+ripples, splashes, and wiring the intensity and puddle seed to the campaign.
 
 Rain is a gameplay travel modifier on some districts for a whole day (`campaign-encounters.md` §6.2). The map does not
 know districts, so whenever any district is rainy **the whole map shows rain**; the travel UI marks which roads it
@@ -207,10 +211,13 @@ a soft passing shade over roofs and roads:
   and speed. The second layer is smaller and slower, so shapes change as they drift.
 - Each point reads the clouds along its ray to the sun, so a roof and the ground it shades agree and the pattern leans
   as the sun moves. Sunlight is building shadow x cloud shade.
-- The values live in a `CityClouds` object on `CitySun` (Clouds header). **The forecast hook:** a future weather
-  system authors one `CityClouds` per forecast (clear, partly cloudy, overcast, rain) and assigns `CitySun.Clouds`.
+- The values live in a `CityClouds` object on `CitySky` (Clouds tab). **The forecast hook:** a future weather
+  system authors one `CityClouds` per forecast (clear, partly cloudy, overcast, rain) and assigns `CitySky.Clouds`.
   Not built yet: the forecast itself, an overcast tint on sun and ambient colour, and a fade between forecasts.
-- Cost: two noise evaluations per pixel, small next to the shadow march.
+- **City bounce** *(2026-11-24)*. Clouds also give a little light back: city light off their undersides, a warm
+  sodium colour (per `CityClouds`, so overcast rain nights glow more) read straight overhead and scaled by the night
+  emission, so it vanishes by day.
+- Cost: four noise evaluations per pixel (two for shade, two for bounce), small next to the shadow march.
 
 ### 6.5 Window glow: baked light pools
 

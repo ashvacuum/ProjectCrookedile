@@ -52,11 +52,11 @@ namespace Crookedile.Editor
             CreateRoadGrid(roadMesh, roadMaterial, roadRoot.transform);
             CreateHouses(housePrefab, houseRoot.transform);
 
-            // In Play mode the sun runs a whole day every 30 seconds; scrub its minute in edit mode.
-            CitySun sun = new GameObject("Sun").AddComponent<CitySun>();
-            SerializedObject serializedSun = new SerializedObject(sun);
-            serializedSun.FindProperty("_previewSecondsPerDay").floatValue = 30f;
-            serializedSun.ApplyModifiedPropertiesWithoutUndo();
+            // In Play mode the sky runs a whole day every 30 seconds; scrub its minute in edit mode.
+            CitySky sky = new GameObject("Sky").AddComponent<CitySky>();
+            SerializedObject serializedSky = new SerializedObject(sky);
+            serializedSky.FindProperty("_previewSecondsPerDay").floatValue = 30f;
+            serializedSky.ApplyModifiedPropertiesWithoutUndo();
 
             EditorSceneManager.MarkSceneDirty(scene);
             if (!EditorSceneManager.SaveScene(scene, SCENE_PATH))

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using Random = System.Random;
 
@@ -21,10 +22,12 @@ namespace Crookedile.Art.Iso
             Vector2Int.down,
         };
 
+        [Title("Coast")]
+
         [Tooltip(
             "Sea depth from the coast edge, in cells (min, max). The coastline wanders inside this range."
         )]
-        [SerializeField]
+        [SerializeField, MinMaxSlider(1, 20, true), SuffixLabel("cells", true)]
         private Vector2Int _coastDepth = new Vector2Int(3, 8);
 
         [Tooltip(
@@ -39,12 +42,14 @@ namespace Crookedile.Art.Iso
         [SerializeField, Range(0f, 0.5f)]
         private float _downtownOffset = 0.2f;
 
+        [Title("Avenues")]
+
         [Tooltip("Number of avenues leaving downtown (min, max).")]
-        [SerializeField]
+        [SerializeField, MinMaxSlider(1, 8, true)]
         private Vector2Int _avenueCount = new Vector2Int(3, 5);
 
         [Tooltip("Length of each straight avenue run, in cells (min, max).")]
-        [SerializeField]
+        [SerializeField, MinMaxSlider(2, 40, true), SuffixLabel("cells", true)]
         private Vector2Int _avenueRun = new Vector2Int(10, 20);
 
         [Tooltip(
@@ -56,8 +61,10 @@ namespace Crookedile.Art.Iso
         [Tooltip(
             "Length of a sideways jog, in cells (min, max). Short jogs keep the avenue reading as one boulevard."
         )]
-        [SerializeField]
+        [SerializeField, MinMaxSlider(1, 10, true), SuffixLabel("cells", true)]
         private Vector2Int _avenueJog = new Vector2Int(2, 4);
+
+        [Title("Streets")]
 
         [Tooltip(
             "Chance that each avenue-side cell starts a street marching away from the avenue."
@@ -68,13 +75,13 @@ namespace Crookedile.Art.Iso
         [Tooltip(
             "Cells between side streets, so block length (min, max). Min is also the shortest street kept."
         )]
-        [SerializeField]
+        [SerializeField, MinMaxSlider(2, 16, true), SuffixLabel("cells", true)]
         private Vector2Int _streetBlock = new Vector2Int(4, 7);
 
         [Tooltip(
             "Chance of a side street on each side at every block, at downtown (X) and at the far edge (Y). The falloff thins the town outward."
         )]
-        [SerializeField]
+        [SerializeField, LabelText("Street Branch Chance (Downtown, Edge)")]
         private Vector2 _streetBranchChance = new Vector2(0.8f, 0.15f);
 
         [Tooltip(
@@ -89,8 +96,10 @@ namespace Crookedile.Art.Iso
         [SerializeField, Range(0f, 0.5f)]
         private float _streetDeathChance = 0.01f;
 
+        [Title("Lots and buildings")]
+
         [Tooltip("Lot side length, in cells (min, max).")]
-        [SerializeField]
+        [SerializeField, MinMaxSlider(1, 6, true), SuffixLabel("cells", true)]
         private Vector2Int _lotSize = new Vector2Int(1, 3);
 
         [Tooltip("Chance that a free lot gets a building; the rest stay empty land.")]
@@ -98,15 +107,15 @@ namespace Crookedile.Art.Iso
         private float _lotFill = 0.85f;
 
         [Tooltip("Storeys of a building at downtown (min, max).")]
-        [SerializeField]
+        [SerializeField, MinMaxSlider(1, 12, true)]
         private Vector2Int _downtownStoreys = new Vector2Int(2, 4);
 
         [Tooltip("Storeys of a building at the far edge of town (min, max).")]
-        [SerializeField]
+        [SerializeField, MinMaxSlider(1, 12, true)]
         private Vector2Int _edgeStoreys = new Vector2Int(1, 1);
 
         [Tooltip("Wall height of one storey, in world units.")]
-        [SerializeField, Min(0.05f)]
+        [SerializeField, Min(0.05f), SuffixLabel("units", true)]
         private float _storeyHeight = 0.5f;
 
         public void Fill(CityMapData map, int seed)

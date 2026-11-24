@@ -1,4 +1,4 @@
-// Lights the half-cube city (city-generator.md §6): one sun set as globals by CitySun, and height-aware shadows that
+// Lights the half-cube city (city-generator.md §6): one light (sun or moon) set as globals by CitySky, and height-aware shadows that
 // step toward the sun across the per-cell height texture CityMapView publishes. URP's 2D lights do not touch it.
 Shader "Crookedile/2D/Half Cube Lit"
 {
@@ -65,11 +65,11 @@ Shader "Crookedile/2D/Half Cube Lit"
             TEXTURE2D(_EmissionMap);
             SAMPLER(sampler_EmissionMap);
 
-            // Globals from CitySun and CityMapView; never material properties, so no material can override them.
+            // Globals from CitySky and CityMapView; never material properties, so no material can override them.
             TEXTURE2D(_CityHeightMap);       // per cell: building wall height in screen units, texel (row, column)
-            float4 _CitySunDirection;        // view space, toward the sun
-            float4 _CitySunDirectionGrid;    // (row, column, up) in cell units, toward the sun
-            float4 _CitySunColor;
+            float4 _CityLightDirection;        // view space, toward the sun
+            float4 _CityLightDirectionGrid;    // (row, column, up) in cell units, toward the sun
+            float4 _CityLightColor;
             float4 _CityAmbientColor;
             float _CityEmissionScale;
             float4 _CityShadow;              // strength, step (cells), reach (cells), bias (cells)
@@ -78,11 +78,13 @@ Shader "Crookedile/2D/Half Cube Lit"
             float4 _CityHeightMapSize;       // rows, columns, tallest building (cells); rows 0 = no map, no shadows
             float4 _CityClouds;              // coverage (0 = none), softness, density, size (cells)
             float4 _CityCloudWind;           // xy = drift in cells per second along (row, column)
+            float4 _CityCloudLight;          // city light bounced off cloud undersides, rgb
             TEXTURE2D(_CityGlowMap);         // window light over the grid, texel x = row; filtered
             SAMPLER(sampler_CityGlowMap);
             float4 _CityGlow;                // height fade (cells), enabled (0 = no glow map)
             float4 _CityRain;                // wetness (0 = dry), darkening, sky reflection, puddle coverage
             float4 _CityRainSurface;         // puddle size (cells), glow smear strength, glow smear length (cells)
+            float4 _CityRainSeed;            // xy = puddle noise offset from the run seed, in noise cells
 
             struct Attributes
             {
@@ -226,7 +228,7 @@ Shader "Crookedile/2D/Half Cube Lit"
             // ponytail: one sample per step gives cell-sharp edges; jitter a few samples if they read as stair-stepped.
             half SunVisibility(float3 gridPosition, half faceId)
             {
-                float3 toSun = _CitySunDirectionGrid.xyz;
+                float3 toSun = _CityLightDirectionGrid.xyz;
                 if (toSun.z <= 0.0)
                 {
                     return 0.0h;
@@ -282,6 +284,18 @@ Shader "Crookedile/2D/Half Cube Lit"
                 return lerp(bottom, top, blend.y);
             }
 
+            // 0 in clear sky, 1 under thick cloud, at a grid position. The second layer is smaller and slower, so shapes
+            // change as they drift instead of sliding as one sheet.
+            float CloudCover(float2 position)
+            {
+                float2 drift = _CityCloudWind.xy * _Time.y;
+                float size = max(_CityClouds.w, 0.5);
+                float noise = CloudNoise((position - drift) / size) * 0.65 + CloudNoise((position - drift * 0.6) / (size * 0.45) + 17.3) * 0.35;
+                float density = saturate(noise * 0.75 + 0.5);
+                float threshold = 1.0 - _CityClouds.x;
+                return smoothstep(threshold - _CityClouds.y * 0.5, threshold + _CityClouds.y * 0.5 + 1e-4, density);
+            }
+
             // 1 in clear sky, down to 1 - density under thick cloud. Nothing cloud-shaped is drawn: two layers of drifting
             // noise over the grid dim direct sunlight with soft edges. Each point reads the clouds along its ray to the
             // sun, so a roof and the ground it shades agree and the pattern leans as the sun moves.
@@ -289,21 +303,26 @@ Shader "Crookedile/2D/Half Cube Lit"
             // the CPU if forecasts change wind mid-scene.
             half CloudShade(float3 gridPosition)
             {
-                float3 toSun = _CitySunDirectionGrid.xyz;
+                float3 toSun = _CityLightDirectionGrid.xyz;
                 if (_CityClouds.x <= 0.0 || toSun.z <= 0.0)
                 {
                     return 1.0h;
                 }
 
                 float2 position = gridPosition.xy - toSun.xy * (gridPosition.z / max(toSun.z, 0.1));
-                float2 drift = _CityCloudWind.xy * _Time.y;
-                float size = max(_CityClouds.w, 0.5);
-                // The second layer is smaller and slower, so shapes change as they drift instead of sliding as one sheet.
-                float noise = CloudNoise((position - drift) / size) * 0.65 + CloudNoise((position - drift * 0.6) / (size * 0.45) + 17.3) * 0.35;
-                float density = saturate(noise * 0.75 + 0.5);
-                float threshold = 1.0 - _CityClouds.x;
-                float cloud = smoothstep(threshold - _CityClouds.y * 0.5, threshold + _CityClouds.y * 0.5 + 1e-4, density);
-                return (half)(1.0 - cloud * _CityClouds.z);
+                return (half)(1.0 - CloudCover(position) * _CityClouds.z);
+            }
+
+            // City light bounced off the cloud overhead: a warm glow under cloud, scaled by the night emission so it
+            // vanishes by day. Read straight up, not along the light, since the source is the city itself.
+            half3 CloudLight(float3 gridPosition)
+            {
+                if (_CityClouds.x <= 0.0)
+                {
+                    return 0.0h;
+                }
+
+                return (half3)_CityCloudLight.rgb * (half)(CloudCover(gridPosition.xy) * _CityEmissionScale);
             }
 
             // Baked window light at this point, fading out with height so it lights streets and low walls, not roofs.
@@ -323,7 +342,7 @@ Shader "Crookedile/2D/Half Cube Lit"
             // into creases (dark occlusion) so they fill first. No puddle texture: shapes are the noise.
             half PuddleMask(float3 gridPosition, half occlusionMask, half wetness)
             {
-                float noise = CloudNoise(gridPosition.xy / max(_CityRainSurface.x, 0.1) + 41.7) * 0.75 + 0.5;
+                float noise = CloudNoise(gridPosition.xy / max(_CityRainSurface.x, 0.1) + 41.7 + _CityRainSeed.xy) * 0.75 + 0.5;
                 float crease = (1.0 - occlusionMask) * 0.3;
                 float threshold = 1.0 - _CityRain.w * wetness;
                 return (half)smoothstep(threshold, threshold + 0.08, noise + crease);
@@ -397,12 +416,12 @@ Shader "Crookedile/2D/Half Cube Lit"
                 albedo *= 1.0h - (half)_CityRain.y * saturate(wetness + puddle * 0.3h);
                 normal = normalize(lerp(normal, (half3)normalize(input.normalWS), puddle));
 
-                half3 toSun = (half3)_CitySunDirection.xyz;
-                half3 sunColor = (half3)_CitySunColor.rgb;
+                half3 toSun = (half3)_CityLightDirection.xyz;
+                half3 sunColor = (half3)_CityLightColor.rgb;
                 half visibility = SunVisibility(input.gridPosition, input.faceId) * CloudShade(input.gridPosition);
                 half diffuse = saturate(dot(normal, toSun)) * visibility;
                 half occlusion = lerp(1.0h, occlusionMask, _OcclusionStrength);
-                half3 color = albedo * occlusion * ((half3)_CityAmbientColor.rgb * _AmbientStrength + sunColor * diffuse * _DiffuseStrength);
+                half3 color = albedo * occlusion * ((half3)_CityAmbientColor.rgb * _AmbientStrength + sunColor * diffuse * _DiffuseStrength + CloudLight(input.gridPosition));
 
                 half3 halfDirection = normalize(toSun + half3(0, 0, -1));
                 half faceSpecularScale = input.faceId < 0.5h ? _FaceSpecularScale.x : input.faceId < 1.5h ? _FaceSpecularScale.y : _FaceSpecularScale.z;

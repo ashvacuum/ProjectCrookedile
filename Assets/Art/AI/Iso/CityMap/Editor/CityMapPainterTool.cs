@@ -305,7 +305,7 @@ namespace Crookedile.Editor
         #endregion
     }
 
-    // Builds and opens a scene ready for painting: camera, CitySun and a CityMapView on a 64 x 64 test map.
+    // Builds and opens a scene ready for painting: camera, CitySky and a CityMapView on a 64 x 64 test map.
     public static class CityMapEditorScene
     {
         private const string ROOT_PATH = "Assets/Art/AI/Iso/CityMap";
@@ -332,9 +332,9 @@ namespace Crookedile.Editor
                 throw new System.InvalidOperationException($"{SCENE_PATH} has no CityMapView.");
             }
             // Scenes built before the sun existed get one; the city is lit by nothing else.
-            if (Object.FindFirstObjectByType<CitySun>() == null)
+            if (Object.FindFirstObjectByType<CitySky>() == null)
             {
-                new GameObject("Sun").AddComponent<CitySun>();
+                new GameObject("Sky").AddComponent<CitySky>();
                 EditorSceneManager.MarkSceneDirty(scene);
             }
 
@@ -396,7 +396,7 @@ namespace Crookedile.Editor
             camera.backgroundColor = new Color(0.13f, 0.15f, 0.18f);
             camera.transform.position = new Vector3(center.x, center.y, -10f);
 
-            new GameObject("Sun").AddComponent<CitySun>();
+            new GameObject("Sky").AddComponent<CitySky>();
 
             CityMapView view = new GameObject("City Map").AddComponent<CityMapView>();
             SerializedObject serializedView = new SerializedObject(view);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = System.Random;
@@ -17,11 +18,11 @@ namespace Crookedile.Art.Iso
         private const float DIAGONAL = 1.4142135f;
 
         [Tooltip("Glow texels per cell side. More is smoother and slower to bake.")]
-        [SerializeField, Range(1, 8)]
+        [SerializeField, Range(1, 8), SuffixLabel("per cell", true)]
         private int _texelsPerCell = 4;
 
         [Tooltip("How far window light reaches from a wall, in cells.")]
-        [SerializeField, Range(0.5f, 8f)]
+        [SerializeField, Range(0.5f, 8f), SuffixLabel("cells", true)]
         private float _reachCells = 2.5f;
 
         [Tooltip("Brightness of the light at the wall, before the sun's night emission scale.")]
@@ -49,7 +50,7 @@ namespace Crookedile.Art.Iso
         [Tooltip(
             "Height above the ground, in cells, over which the glow fades out, so it lights streets and low walls, not roofs."
         )]
-        [SerializeField, Min(0.05f)]
+        [SerializeField, Min(0.05f), SuffixLabel("cells", true)]
         private float _heightFadeCells = 1.5f;
 
         [NonSerialized]
