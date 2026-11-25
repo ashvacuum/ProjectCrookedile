@@ -1,14 +1,14 @@
 # City generator — half-cube campaign city
 
-> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-24
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-25
 >
 > **Summary:** The campaign city: a Cebu-like city generated fresh each run from the seed, drawn with half-cube meshes on a 2:1 iso grid. Coast, radial avenues, streets, zones, landmarks and buildings; a painter for saved test maps. Replaces the sprite CityGenerator.
 >
 > **Source of truth:** this doc · **Related:** [`metagame-campaign.md`](metagame-campaign.md) · [`art-bible.md`](art-bible.md) · [`campaign-encounters.md`](campaign-encounters.md)
 
 *Agreed 2026-11-23. Supersedes `metagame-campaign.md` §1.5–1.6 and the building half of `art-bible.md` §9 (sprite
-buildings on a Tilemap, `CityGenerator`, `CityZoneData`). Nothing here is built yet; the half-cube prototype in
-`Assets/Art/AI/Iso` is the starting point.*
+buildings on a Tilemap, `CityGenerator`, `CityZoneData`). Code lives in `Assets/Scripts/Gameplay/City` (runtime) and `Assets/Scripts/Editor/City` (tools); the shader, materials,
+atlases and test scenes stay in `Assets/Art/AI/Iso`.*
 
 ## 1. What the city is
 
@@ -119,7 +119,7 @@ lot that touches none is not built.
 
 ### 6.1 Lighting: one 3D sun
 
-*Built 2026-11-23:* `CitySky` (`Assets/Art/AI/Iso/CityMap`) sets the globals; the half-cube shader no longer uses URP's
+*Built 2026-11-23:* `CitySky` sets the globals; the half-cube shader no longer uses URP's
 2D lights. The sun follows its own minute-of-day field for now (scrub it, or set seconds-per-day for a Play-mode
 loop); wiring it to the campaign clock is still to do.
 
@@ -248,8 +248,7 @@ map and assigning another asset loads one. The toolbar's **Randomize** (new seed
 the field) replace the map with a random test city from `CityMapRandomizer`, tuned on the view: coast, axis-only two-cell
 avenues from downtown with short jogs, §4.4's marching streets, and lots that each touch a road, taller toward downtown. It stands in for §4
 (no zones, landmarks, diagonals or `BuildingData`). Not built yet: the §4 generator, zone painting, the console command,
-diagonal avenues and eight-neighbour art. The code lives beside the half-cube prototype until the generator moves it into
-the runtime assembly.
+diagonal avenues and eight-neighbour art. The campaign scene does not draw the city yet.
 
 - **Generate** from any seed in the editor.
 - **Paint** ground (land, sea), streets, avenues and zones; **place and remove** buildings; Undo works.
@@ -260,9 +259,10 @@ the runtime assembly.
 
 ## 8. Removed
 
-The sprite system is deleted, not migrated: `CityGenerator.cs`, `CityZoneData.cs` and its one asset `Factory.asset`,
+*Done 2026-11-25.* The sprite system is deleted, not migrated: `CityGenerator.cs`, `CityZoneData.cs` and its one asset `Factory.asset`,
 `IsoFootprintGizmo.cs`, the sprite building prefabs in `Assets/Art/AI/Iso/Buildings`, the `CityZoneData` entries in
-`ContentAssetNaming.cs`, and the gizmo's row in the readme's data-file table.
+`ContentAssetNaming.cs`, and the campaign scene's leftover `Grid` of sprite prefabs. The readme's iso-grid guide row
+points at `IsoGrid.cs` instead of the gizmo.
 
 ## 9. Build order
 

@@ -74,7 +74,7 @@ namespace Crookedile.EditorTools
             foreach (
                 string guid in AssetDatabase.FindAssets(
                     "t:CardData t:EnemyData t:EnemyMoveData t:EncounterData t:AllyData "
-                        + "t:AudioClipData t:DistrictData t:CityZoneData",
+                        + "t:AudioClipData t:DistrictData",
                     new[] { "Assets" }
                 )
             )
@@ -138,9 +138,6 @@ namespace Crookedile.EditorTools
                     field = "_clipName";
                     break;
                 case DistrictData _:
-                    field = "_displayName";
-                    break;
-                case CityZoneData _:
                     field = "_displayName";
                     break;
                 default:

@@ -1,6 +1,6 @@
 # Metagame — The Campaign Map
 
-> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-24
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-25
 >
 > **Summary:** The campaign map: Potionomics-style free roam over a generated half-cube iso city (spec in city-generator.md), with build phases.
 >
@@ -53,7 +53,7 @@ scheduling stays a function of the pool and the day window (`campaign-encounters
 ## 1.6 City generation *(superseded 2026-11-23)*
 
 Replaced by `city-generator.md`: still seeded and one city per run, but with a coastal downtown, radial avenues,
-streets, distance zones, landmarks and half-cube buildings. The sprite `CityGenerator` and `CityZoneData` are being
+streets, distance zones, landmarks and half-cube buildings. The sprite `CityGenerator` and `CityZoneData` were
 deleted (`city-generator.md` §8).
 
 ### District travel and time of day (agreed 2026-09-21)
