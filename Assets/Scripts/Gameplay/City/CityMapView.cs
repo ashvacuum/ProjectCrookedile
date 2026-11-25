@@ -85,6 +85,13 @@ namespace Crookedile.Gameplay.City
         public CityMapData Map => _map;
         public CityMapRandomizer Randomizer => _randomizer;
 
+        // Draws another map, such as one generated for the run.
+        public void Show(CityMapData map)
+        {
+            _map = map;
+            Rebuild();
+        }
+
         #region Lifecycle
 
         private void OnEnable()

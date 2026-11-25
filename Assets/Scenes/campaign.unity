@@ -168,6 +168,208 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &629140825
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 629140827}
+  - component: {fileID: 629140826}
+  m_Layer: 0
+  m_Name: Campaign City
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &629140826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 629140825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4c7d4cc1c092904a92c9fbcaa574132, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Gameplay.City.CampaignCity
+  _view: {fileID: 1917154959}
+  _sky: {fileID: 913078232}
+  _camera: {fileID: 1793976950}
+  _framePadding: 1.05
+--- !u!4 &629140827
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 629140825}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &913078231
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 913078233}
+  - component: {fileID: 913078232}
+  m_Layer: 0
+  m_Name: Sky
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &913078232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 913078231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c91aff5eed7a584c94087d1268183db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Gameplay.City.CitySky
+  _minuteOfDay: 600
+  _previewSecondsPerDay: 0
+  _sunriseMinute: 360
+  _sunsetMinute: 1080
+  _middayElevation: 60
+  _sunriseAzimuth: 200
+  _sunsetAzimuth: 340
+  _sunColor:
+    serializedVersion: 2
+    key0: {r: 1, g: 0.62, b: 0.38, a: 1}
+    key1: {r: 1, g: 0.95, b: 0.86, a: 1}
+    key2: {r: 1, g: 0.55, b: 0.32, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 32768
+    ctime2: 65535
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 3
+    m_NumAlphaKeys: 2
+  _ambientColor:
+    serializedVersion: 2
+    key0: {r: 0.32, g: 0.38, b: 0.62, a: 1}
+    key1: {r: 0.8, g: 0.78, b: 0.82, a: 1}
+    key2: {r: 1, g: 0.97, b: 0.9, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 32768
+    ctime2: 65535
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 3
+    m_NumAlphaKeys: 2
+  _emission: {x: 1.6, y: 0.05}
+  _moon:
+    _riseMinute: 1140
+    _setMinute: 300
+    _peakElevation: 50
+    _riseAzimuth: 160
+    _setAzimuth: 20
+    _color: {r: 0.32, g: 0.4, b: 0.6, a: 1}
+    _phase: 1
+  _shadowStrength: 0.65
+  _shadowStepCells: 0.2
+  _shadowReachCells: 24
+  _shadowBiasCells: 0.05
+  _clouds:
+    _coverage: 0.4
+    _softness: 0.5
+    _density: 0.35
+    _sizeCells: 12
+    _windAzimuth: 30
+    _windCellsPerSecond: 0.6
+    _cityBounce: {r: 0.22, g: 0.15, b: 0.1, a: 1}
+  _rain:
+    _intensity: 0
+    _soakSeconds: 4
+    _sunDim: 0.6
+    _ambientTint: {r: 0.78, g: 0.82, b: 0.9, a: 1}
+    _shadowScale: 0.4
+    _emissionBoost: 2
+    _overcast:
+      _coverage: 0.95
+      _softness: 0.8
+      _density: 0.5
+      _sizeCells: 20
+      _windAzimuth: 30
+      _windCellsPerSecond: 0.6
+      _cityBounce: {r: 0.22, g: 0.15, b: 0.1, a: 1}
+    _darkening: 0.35
+    _reflection: 0.5
+    _puddleCoverage: 0.35
+    _puddleSizeCells: 1.2
+    _puddleSeed: 0
+    _glowSmear: 0.6
+    _glowSmearCells: 1.5
+--- !u!4 &913078233
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 913078231}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1793976949
 GameObject:
   m_ObjectHideFlags: 0
@@ -219,7 +421,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
+  orthographic: 1
   orthographic size: 5
   m_Depth: 0
   m_CullingMask:
@@ -245,6 +447,82 @@ Transform:
   m_GameObject: {fileID: 1793976949}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1917154958
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1917154960}
+  - component: {fileID: 1917154959}
+  m_Layer: 0
+  m_Name: City Map
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1917154959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1917154958}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed05595b04076c14993eb73609a8fd27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Gameplay.City.CityMapView
+  _map: {fileID: 0}
+  _groundMaterial: {fileID: 2100000, guid: bcf69abc938d7ce4e8c962b802d4ac83, type: 2}
+  _buildingPrefab: {fileID: 33268604104110306, guid: 1ea8acc98422f9744b860515d5e15050, type: 3}
+  _seaColor: {r: 0.2, g: 0.45, b: 0.65, a: 1}
+  _avenueColor: {r: 0.5, g: 0.48, b: 0.56, a: 1}
+  _randomizer:
+    _coastDepth: {x: 3, y: 8}
+    _coastWobbleChance: 0.25
+    _downtownOffset: 0.2
+    _avenueCount: {x: 3, y: 5}
+    _avenueRun: {x: 10, y: 20}
+    _avenueJogChance: 0.3
+    _avenueJog: {x: 2, y: 4}
+    _streetStartChance: 0.06
+    _streetBlock: {x: 4, y: 7}
+    _streetBranchChance: {x: 0.8, y: 0.15}
+    _streetTurnChance: 0.1
+    _streetDeathChance: 0.01
+    _lotSize: {x: 1, y: 3}
+    _lotFill: 0.85
+    _downtownStoreys: {x: 2, y: 4}
+    _edgeStoreys: {x: 1, y: 1}
+    _storeyHeight: 0.5
+  _glow:
+    _texelsPerCell: 4
+    _reachCells: 2.5
+    _strength: 0.6
+    _litChance: 0.7
+    _warmColor: {r: 1, g: 0.72, b: 0.42, a: 1}
+    _coolColor: {r: 0.75, g: 0.85, b: 1, a: 1}
+    _coolChance: 0.25
+    _heightFadeCells: 1.5
+--- !u!4 &1917154960
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1917154958}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -257,3 +535,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 1793976951}
   - {fileID: 94031221}
+  - {fileID: 913078233}
+  - {fileID: 1917154960}
+  - {fileID: 629140827}

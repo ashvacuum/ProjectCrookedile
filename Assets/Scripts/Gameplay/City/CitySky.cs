@@ -401,6 +401,13 @@ namespace Crookedile.Gameplay.City
         public CityRain Rain => _rain;
         public CityMoon Moon => _moon;
 
+        // The time the sky shows, 0 to 1439. The campaign sets it from the run's clock every frame.
+        public float MinuteOfDay
+        {
+            get => _minuteOfDay;
+            set => _minuteOfDay = Mathf.Repeat(value, MINUTES_PER_DAY);
+        }
+
         [ShowInInspector, ReadOnly, LabelText("Light Now")]
         [BoxGroup("Time"), PropertyOrder(1)]
         private string LightReadout => _lightReadout;

@@ -120,8 +120,8 @@ lot that touches none is not built.
 ### 6.1 Lighting: one 3D sun
 
 *Built 2026-11-23:* `CitySky` sets the globals; the half-cube shader no longer uses URP's
-2D lights. The sun follows its own minute-of-day field for now (scrub it, or set seconds-per-day for a Play-mode
-loop); wiring it to the campaign clock is still to do.
+2D lights. On the campaign map the sky follows the run's clock (§9); elsewhere it follows its own minute-of-day
+field (scrub it, or set seconds-per-day for a Play-mode loop).
 
 Buildings are lit as the 3D boxes they stand for, not as flat 2D shapes.
 
@@ -248,7 +248,10 @@ map and assigning another asset loads one. The toolbar's **Randomize** (new seed
 the field) replace the map with a random test city from `CityMapRandomizer`, tuned on the view: coast, axis-only two-cell
 avenues from downtown with short jogs, §4.4's marching streets, and lots that each touch a road, taller toward downtown. It stands in for §4
 (no zones, landmarks, diagonals or `BuildingData`). Not built yet: the §4 generator, zone painting, the console command,
-diagonal avenues and eight-neighbour art. The campaign scene does not draw the city yet.
+diagonal avenues and eight-neighbour art. *Built 2026-11-25:* `campaign.unity` draws the run's city. `CampaignCity` fills a fresh `CityMapData` from
+`RunState.Seed` with the randomizer (tuned on the scene's City Map view), so the same run always draws the same city
+and nothing extra is saved; it sets the puddle seed from the run seed and frames the whole map. It reads the run and
+never changes it. District markers, pan and zoom are not built.
 
 - **Generate** from any seed in the editor.
 - **Paint** ground (land, sea), streets, avenues and zones; **place and remove** buildings; Undo works.
@@ -271,7 +274,8 @@ points at `IsoGrid.cs` instead of the gizmo.
 3. **Generator:** coast, downtown, avenues, streets, zones, landmarks, buildings.
 4. **Painter** and saved test maps.
 5. **Remove** the old system (§8).
-6. **Lighting from the campaign clock**, then **rain** (§6.3; the travel rule in `campaign-encounters.md` §6.2).
+6. **Lighting from the campaign clock** *(built 2026-11-25: `CampaignCity` sets `CitySky.MinuteOfDay` from
+   `RunState.ClockMinute` every frame)*, then **rain** (§6.3; the travel rule in `campaign-encounters.md` §6.2).
 
 ## 10. Choices made without a separate decision
 
