@@ -41,6 +41,13 @@ namespace Crookedile.Managers
 #if !DISABLESTEAMWORKS
         protected override void OnAwake()
         {
+            // The editor never starts Steam, so working in it doesn't show as playing the app.
+            if (Application.isEditor)
+            {
+                GameLogger.LogInfo<SteamManager>("Steam skipped in the editor.");
+                return;
+            }
+
             if (!Packsize.Test() || !DllCheck.Test())
             {
                 GameLogger.LogError<SteamManager>(
