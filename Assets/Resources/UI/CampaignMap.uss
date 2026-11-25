@@ -118,3 +118,19 @@
     font-size: 12px;
     color: rgb(230, 225, 210);
 }
+
+/* District markers over the city, drawn by CampaignMapView. */
+.district-marker {
+    background-color: rgba(20, 20, 24, 0.85);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(230, 225, 210);
+    white-space: nowrap;
+}
+
+.district-marker--here {
+    background-color: rgba(200, 150, 60, 0.95);
+    color: rgb(20, 20, 24);
+}

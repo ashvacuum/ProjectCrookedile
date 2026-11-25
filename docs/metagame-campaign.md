@@ -1,6 +1,6 @@
 # Metagame — The Campaign Map
 
-> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-25
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-26
 >
 > **Summary:** The campaign map: Potionomics-style free roam over a generated half-cube iso city (spec in city-generator.md), with build phases.
 >
@@ -19,7 +19,9 @@ The campaign is a **map you roam, paced by a time budget** — not a corridor of
 
 - **Campaign HQ** is the main base. Runs start and return here.
 - Each day (⚑ naming/cadence) grants **campaign action points**. Choosing any location on
-  the map spends them. When they run out, the day ends.
+  the map spends them. When they run out, the day ends: returning to HQ is offered only once no location
+  left that day fits in the remaining time, never as a free way to cut the day short (*built 2026-11-26*;
+  the 15-minute wait still lets the player run the clock down).
 - Locations are NOT all battles. Three kinds:
   - **Encounters** — the card battles (the game).
   - **Events** — sceneries with options and choices: pick an option, get an outcome
@@ -46,9 +48,10 @@ rendering, lighting and the test-map painter. This section keeps only what the c
 **Projection (one angle, no exceptions).** True 2:1 dimetric: plan rotated 45°, camera elevation **30°** (the diamond's edges run at 26.565°, `atan(0.5)`).
 One cell is 1 × 0.5 world units (256 × 128 px at PPU 256); a 4K screen reads ~15 cells across.
 
-**The boundary that keeps this cheap:** the city is **scenery**. Location hotspots are uGUI placed over the map from
-`MapLocation` data — they are not tiles, and the city generator never chooses where an encounter happens. Encounter
-scheduling stays a function of the pool and the day window (`campaign-encounters.md`), never of terrain.
+**The boundary that keeps this cheap:** the city is **scenery**, plus one thing: each district stands on a building
+the generator picks by the district's placement rule (`city-generator.md` §4.8). The city never chooses where an
+encounter happens, and travel times stay authored on the roads. Encounter scheduling stays a function of the pool and
+the day window (`campaign-encounters.md`), never of terrain.
 
 ## 1.6 City generation *(superseded 2026-11-23)*
 
@@ -206,7 +209,7 @@ campaign checkpoints (`meta-progression.md`).
 
 ### Phase M1 — campaign skeleton
 `CampaignMapData`/`MapLocationData` + `RunState` hours/day. Overworld = one scene: click a
-location → spend hours → load encounter or event → return. HQ ends the day / rests.
+location → spend hours → load encounter or event → return. HQ ends the day / rests, once nothing else fits (§1).
 
 Presentation is locked to the iso city (§1.5) but **may land greybox** — untextured 2:1
 diamonds and colored blocks on the real grid, hotspots at their real cells. Prove the loop on

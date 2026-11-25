@@ -1,6 +1,6 @@
 # City generator — half-cube campaign city
 
-> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-25
+> **Kind:** Design · **Status:** Partly built · **Updated:** 2026-11-26
 >
 > **Summary:** The campaign city: a Cebu-like city generated fresh each run from the seed, drawn with half-cube meshes on a 2:1 iso grid. Coast, radial avenues, streets, zones, landmarks and buildings; a painter for saved test maps. Replaces the sprite CityGenerator.
 >
@@ -15,9 +15,11 @@ atlases and test scenes stay in `Assets/Art/AI/Iso`.*
 - **Generated per run, rules only.** Every run builds a new city from `RunState.Seed`; the same seed gives the same
   city. There is no hand-made template: the Cebu feel comes from the rules (a coastal downtown, avenues radiating
   inland, density falling off with distance). Hand-painted maps exist only as saved test maps (§7).
-- **Scenery only.** The city does not know where districts are and never decides where an encounter happens.
-  Encounter scheduling stays a function of the pool, the day window and the travel network
-  (`campaign-encounters.md` §6). Location hotspots stay uGUI placed from `MapLocation` data over the map.
+- **Scenery, plus where districts stand.** The city never decides where an encounter happens: encounter scheduling
+  stays a function of the pool, the day window and the travel network (`campaign-encounters.md` §6), and travel times
+  stay authored on `CampaignTravelData`'s roads, never measured from the generated streets. The one thing the city
+  knows is where each district's marker stands (§4.8, *ruled 2026-11-25*; this replaces the earlier "the city does not
+  know where districts are" and the unbuilt `MapLocation` hotspots).
 - **Close to Cebu, not a replica.** No real map data is imported.
 
 ## 2. Grid
@@ -90,6 +92,25 @@ of that zone that fits it, fronting a road. A landmark that fits nowhere is skip
 Each block is packed largest footprint first from its zone's weighted list; storeys roll within the building's range.
 **Every lot touches a road** (a road cell beside one of its four sides): a building nobody can reach makes no sense, so a
 lot that touches none is not built.
+
+### 4.8 Districts
+*Built 2026-11-25.* Each `DistrictData` has a **placement** rule, and after the buildings are placed each district on
+the travel network takes one building by its rule:
+
+| Rule | Picks |
+|---|---|
+| Downtown | the building nearest downtown |
+| Coast | the building nearest the sea |
+| Avenue | a building on an avenue, about halfway out |
+| Edge | the building farthest from downtown |
+| Anywhere | any building |
+
+- HQ goes first, then road endpoints in road order; each takes the best building left. Districts keep a minimum
+  spacing when the city has room, and a small seeded jitter picks among the few best spots rather than always the very
+  best. Both are tunable on `CampaignCity` (`CityDistrictPlacer`).
+- Seeded from the run seed on its own stream, so a run always places its districts the same way and nothing is saved.
+- A district with no building left gets no marker and a `GameLogger` warning.
+- The district's marker stands on its building's roof (§7).
 
 ## 5. Roads and tiles
 
@@ -250,8 +271,14 @@ avenues from downtown with short jogs, §4.4's marching streets, and lots that e
 (no zones, landmarks, diagonals or `BuildingData`). Not built yet: the §4 generator, zone painting, the console command,
 diagonal avenues and eight-neighbour art. *Built 2026-11-25:* `campaign.unity` draws the run's city. `CampaignCity` fills a fresh `CityMapData` from
 `RunState.Seed` with the randomizer (tuned on the scene's City Map view), so the same run always draws the same city
-and nothing extra is saved; it sets the puddle seed from the run seed and frames the whole map. It reads the run and
-never changes it. District markers, pan and zoom are not built.
+and nothing extra is saved; it sets the puddle seed from the run seed and places the districts (§4.8). It reads the run and never changes it.
+`CampaignMapView` (on the `CampaignFlow` object) opens on the current district, pans by dragging (left mouse by
+default) and zooms toward the cursor with the scroll wheel, clamped to the city and ignored over `CampaignFlow`'s
+panels. Each district shows a name marker on its building, and the current district's is highlighted. Districts with a
+location still on today's list glow: the half-cube shader's **selection glow**, a pulsing band along every face's
+edges plus a faint fill, set per building (`CityMapView.SetBuildingGlow`) and tuned on the material (edge width,
+fill, pulse speed) and on `CampaignMapView` (colour and strength). Markers are not clickable yet: visits still
+start from the panel.
 
 - **Generate** from any seed in the editor.
 - **Paint** ground (land, sea), streets, avenues and zones; **place and remove** buildings; Undo works.

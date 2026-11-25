@@ -24,6 +24,10 @@ Shader "Crookedile/2D/Half Cube Lit"
         _EdgeHighlightColor("Edge Highlight Color", Color) = (1, 0.82, 0.58, 1)
         _EdgeHighlightStrength("Edge Highlight Strength", Range(0, 2)) = 0.5
         _EdgeHighlightWidth("Edge Highlight Width", Range(0.005, 0.1)) = 0.025
+        _SelectionEdgeWidth("Selection Glow Edge Width", Range(0.01, 0.5)) = 0.12
+        _SelectionFill("Selection Glow Face Fill", Range(0, 1)) = 0.12
+        _SelectionPulseSpeed("Selection Glow Pulse Speed", Range(0, 10)) = 2.5
+        [PerRendererData] _SelectionColor("Selection Glow (rgb, a = strength)", Color) = (1, 0.8, 0.35, 0)
         [PerRendererData] _RoofAtlasRect("Roof Atlas Rect", Vector) = (0, 0.5, 0.5, 0.5)
         [PerRendererData] _LeftAtlasRect("Left Atlas Rect", Vector) = (0.5, 0.5, 0.5, 0.5)
         [PerRendererData] _RightAtlasRect("Right Atlas Rect", Vector) = (0, 0, 0.5, 0.5)
@@ -126,6 +130,9 @@ Shader "Crookedile/2D/Half Cube Lit"
                 half _EdgeHighlightStrength;
                 half _EdgeHighlightWidth;
                 half _OcclusionStrength;
+                half _SelectionEdgeWidth;
+                half _SelectionFill;
+                half _SelectionPulseSpeed;
             CBUFFER_END
 
             UNITY_INSTANCING_BUFFER_START(PerInstance)
@@ -138,6 +145,7 @@ Shader "Crookedile/2D/Half Cube Lit"
                 UNITY_DEFINE_INSTANCED_PROP(float, _NormalStrength)
                 UNITY_DEFINE_INSTANCED_PROP(float, _NormalFlipX)
                 UNITY_DEFINE_INSTANCED_PROP(float, _NormalFlipY)
+                UNITY_DEFINE_INSTANCED_PROP(float4, _SelectionColor)
             UNITY_INSTANCING_BUFFER_END(PerInstance)
 
             float2 TransformAtlasUV(float2 uv, float quarterTurns, float flipX, float flipY)
@@ -438,6 +446,18 @@ Shader "Crookedile/2D/Half Cube Lit"
                 half shine = saturate(wetness * flat * 0.4h + puddle);
                 color += (half3)_CityAmbientColor.rgb * (half)_CityRain.z * shine;
                 color += GlowSmear(input.gridPosition) * (half)_CityRainSurface.y * shine * _CityEmissionScale;
+                // Selection glow (a building picked out on the map, e.g. a district with somewhere to go):
+                // a pulsing band along every face's edges plus a faint fill, so the box reads as outlined in
+                // light at any sun. Off (a = 0) unless a renderer sets _SelectionColor.
+                half4 selection = (half4)UNITY_ACCESS_INSTANCED_PROP(PerInstance, _SelectionColor);
+                if (selection.a > 0.0h)
+                {
+                    half2 fromEdge = min((half2)input.uv, 1.0h - (half2)input.uv);
+                    half edge = 1.0h - smoothstep(0.0h, _SelectionEdgeWidth, min(fromEdge.x, fromEdge.y));
+                    half pulse = 0.7h + 0.3h * (half)sin(_Time.y * _SelectionPulseSpeed);
+                    color += selection.rgb * selection.a * pulse * max(edge, _SelectionFill);
+                }
+
                 return half4(color, input.color.a);
             }
             ENDHLSL

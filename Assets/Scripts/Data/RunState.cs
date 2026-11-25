@@ -307,6 +307,17 @@ namespace Crookedile.Data
                 ? TodaysLocations.Find(l => l is BattleEncounterData { IsBoss: true })
                 : null;
 
+        /// <summary>
+        /// Whether the day may end yet: true once no location left today, other than an HQ-like stop
+        /// that itself ends the day, fits in the remaining time (metagame-campaign.md §1). Until then
+        /// neither End Day nor HQ is offered, so the day can't be cut short for free. A visit's plan
+        /// includes waiting for a location to open, so one that opens later still counts.
+        /// </summary>
+        public bool DayCanEnd() =>
+            !TodaysLocations.Exists(l =>
+                l != null && l is not EventEncounterData { EndsDay: true } && PlanVisit(l).CanEnter
+            );
+
         /// <summary>Drops a location from the current offering once it's been resolved.</summary>
         public void RemoveTodaysLocation(EncounterData encounter) =>
             TodaysLocations.Remove(encounter);

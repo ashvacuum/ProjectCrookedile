@@ -1,12 +1,15 @@
+using System.Collections.Generic;
 using Crookedile.Data;
+using Crookedile.Data.Campaign;
 using Crookedile.Utilities;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Gameplay.City
 {
     // Shows the run's city on the campaign map (city-generator.md §1): generated from RunState.Seed, so the same run
-    // always draws the same city and nothing extra is saved, and a sky that follows the campaign clock. Scenery only:
-    // it reads the run and never changes it.
+    // always draws the same city and nothing extra is saved, with each district placed on a building by its rule and a
+    // sky that follows the campaign clock. It reads the run and never changes it.
     [Debuggable("City", LogLevel.Info)]
     public sealed class CampaignCity : MonoBehaviour
     {
@@ -18,16 +21,56 @@ namespace Crookedile.Gameplay.City
         [SerializeField]
         private CitySky _sky;
 
-        [Tooltip("Camera framed on the whole city when it is built.")]
-        [SerializeField]
-        private Camera _camera;
-
-        [Tooltip("Extra room around the city when framing it: 1 fits it exactly.")]
-        [SerializeField, Min(0.5f)]
-        private float _framePadding = 1.05f;
+        [Tooltip("How districts are placed on each run's city. Each district's own rule is on its DistrictData.")]
+        [SerializeField, InlineProperty, HideLabel]
+        private CityDistrictPlacer _placer = new CityDistrictPlacer();
 
         private RunState _builtFor;
         private CityMapData _map;
+        private Vector2Int _downtown;
+        private readonly Dictionary<DistrictData, Vector3> _districtPositions = new Dictionary<DistrictData, Vector3>();
+        private readonly Dictionary<DistrictData, int> _districtBuildings = new Dictionary<DistrictData, int>();
+
+        // Raised after a new city is built, for the map camera and markers.
+        public event System.Action Built;
+
+        public bool IsBuilt => _builtFor != null && _map != null;
+
+        public IReadOnlyDictionary<DistrictData, Vector3> DistrictPositions => _districtPositions;
+
+        // The city's extent in world space, for clamping the camera.
+        public Rect WorldBounds
+        {
+            get
+            {
+                if (_map == null || _view == null)
+                {
+                    return default;
+                }
+
+                Vector2Int size = _map.Size;
+                Vector3 origin = _view.transform.position;
+                float left = IsoGrid.CellToLocal(-0.5f, -0.5f).x;
+                float right = IsoGrid.CellToLocal(size.x - 0.5f, size.y - 0.5f).x;
+                float bottom = IsoGrid.CellToLocal(-0.5f, size.y - 0.5f).y;
+                float top = IsoGrid.CellToLocal(size.x - 0.5f, -0.5f).y;
+                return Rect.MinMaxRect(origin.x + left, origin.y + bottom, origin.x + right, origin.y + top);
+            }
+        }
+
+        // Lights the district's building with the selection glow (alpha 0 turns it off). No-op for a district
+        // with no building.
+        public void SetDistrictGlow(DistrictData district, Color glow)
+        {
+            if (_view != null && district != null && _districtBuildings.TryGetValue(district, out int index))
+            {
+                _view.SetBuildingGlow(index, glow);
+            }
+        }
+
+        // Where the run's city is centred: downtown on the coast.
+        public Vector3 DowntownPosition =>
+            _view != null ? _view.transform.position + IsoGrid.CellToLocal(_downtown) : Vector3.zero;
 
         #region Lifecycle
 
@@ -79,38 +122,50 @@ namespace Crookedile.Gameplay.City
             }
 
             // The randomizer stands in for the §4 generator; its own System.Random keeps run and battle draws untouched.
-            _view.Randomizer.Fill(_map, run.Seed);
+            _downtown = _view.Randomizer.Fill(_map, run.Seed);
             _view.Show(_map);
             if (_sky != null)
             {
                 _sky.Rain.PuddleSeed = run.Seed;
             }
 
-            Frame();
+            PlaceDistricts(run);
             GameLogger.LogInfo<CampaignCity>(
-                $"Built the run's city from seed {run.Seed}: {_map.Buildings.Count} buildings.",
+                $"Built the run's city from seed {run.Seed}: {_map.Buildings.Count} buildings, "
+                    + $"{_districtPositions.Count} districts placed.",
                 this
             );
+            Built?.Invoke();
         }
 
-        // ponytail: fits the whole map once; replace with pan and zoom around the current district when the map gets
-        // markers (city-generator.md, campaign map step 3).
-        private void Frame()
+        private void PlaceDistricts(RunState run)
         {
-            if (_camera == null)
+            _districtPositions.Clear();
+            _districtBuildings.Clear();
+            if (run.Travel == null)
             {
                 return;
             }
 
-            Vector2Int size = _map.Size;
-            Vector3 origin = _view.transform.position;
-            Vector3 center = origin + IsoGrid.CellToLocal(size.x * 0.5f - 0.5f, size.y * 0.5f - 0.5f);
-            float width = IsoGrid.CellToLocal(size.x, size.y).x - IsoGrid.CellToLocal(0f, 0f).x;
-            float height = IsoGrid.CellToLocal(size.x, 0f).y - IsoGrid.CellToLocal(0f, size.y).y;
-            _camera.orthographic = true;
-            _camera.orthographicSize =
-                Mathf.Max(height * 0.5f, width * 0.5f / Mathf.Max(_camera.aspect, 0.01f)) * _framePadding;
-            _camera.transform.position = new Vector3(center.x, center.y, _camera.transform.position.z);
+            List<DistrictData> districts = run.Travel.Districts();
+            Dictionary<DistrictData, int> placed = _placer.Place(_map, _downtown, districts, run.Seed);
+            foreach (DistrictData district in districts)
+            {
+                if (!placed.TryGetValue(district, out int index))
+                {
+                    GameLogger.LogWarning<CampaignCity>($"No building left for {district.DisplayName}; it has no marker.", this);
+                    continue;
+                }
+
+                // The marker stands on the roof: the lot's centre lifted by the wall height.
+                _districtBuildings[district] = index;
+                CityMapData.Building building = _map.Buildings[index];
+                Vector2 center = building.Lot.center - new Vector2(0.5f, 0.5f);
+                _districtPositions[district] =
+                    _view.transform.position
+                    + IsoGrid.CellToLocal(center.x, center.y)
+                    + (Vector3.up * building.WallHeight);
+            }
         }
 
         #endregion

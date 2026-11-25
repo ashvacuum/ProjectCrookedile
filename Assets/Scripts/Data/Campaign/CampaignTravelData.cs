@@ -46,6 +46,29 @@ namespace Crookedile.Data.Campaign
             get { return Mathf.Clamp(_dayStartMinute, 0, MINUTES_PER_DAY - 1); }
         }
 
+        // Every district on the network, once each: HQ first, then road endpoints in road order. The order is stable, so
+        // a seeded placement of these districts replays.
+        public List<DistrictData> Districts()
+        {
+            var districts = new List<DistrictData>();
+            void Add(DistrictData district)
+            {
+                if (district != null && !districts.Contains(district))
+                {
+                    districts.Add(district);
+                }
+            }
+
+            Add(_headquarters);
+            foreach (Road road in _roads)
+            {
+                Add(road.From);
+                Add(road.To);
+            }
+
+            return districts;
+        }
+
         [Serializable]
         public class Road
         {

@@ -1,6 +1,6 @@
 # Campaign Encounters
 
-> **Kind:** Systems · **Status:** Built · **Updated:** 2026-11-23
+> **Kind:** Systems · **Status:** Built · **Updated:** 2026-11-26
 >
 > **Summary:** How encounters are typed, authored, scheduled and drawn, with every field, outcome, requirement and default: battles, events, chaining, flags, pools, travel, enemy moves, statuses, run state, rewards and the editor tools.
 >
@@ -406,6 +406,12 @@ A 30-minute event then finishes at 09:30, spending 90 minutes from the daily Hou
 The player can also wait 15 minutes on the map to change departure time. No path, arrival at
 or after closing, invalid windows, insufficient total time, and crossing midnight block entry.
 The clock and last district survive battle returns. Advancing the day resets both time and HQ.
+**The day ends only when nothing else fits** (`RunState.DayCanEnd`, *built 2026-11-26*): **End Day is going home to
+HQ.** The HQ event (an `EventEncounterData` with `EndsDay`) is not a place on the map list; the End Day button is
+held back while any other location left today can still be entered, waiting for it to open included, so a day can't
+be cut short for free. Waiting 15 minutes runs the clock down. Once offered, End Day is free (the overnight return
+costs nothing) and opens today's HQ event, whose options each end the day; on a day with no HQ event (a boss day) it
+just ends the day. The playtest bots follow the same rule.
 
 Daily offerings remain cached across time changes and scene loads. Future/expired entries
 remain visible; they are not rerolled. Direct narrative chains retain their existing free,

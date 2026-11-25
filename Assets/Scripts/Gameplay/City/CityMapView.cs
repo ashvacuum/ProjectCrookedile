@@ -25,6 +25,7 @@ namespace Crookedile.Gameplay.City
         private static readonly int HeightMapSizeId = Shader.PropertyToID("_CityHeightMapSize");
         private static readonly int MapOriginId = Shader.PropertyToID("_CityMapOrigin");
         private static readonly int GridId = Shader.PropertyToID("_CityGrid");
+        private static readonly int SelectionColorId = Shader.PropertyToID("_SelectionColor");
 
         // Road atlas cells (row, column) and which neighbours each connects to unrotated.
         private static readonly (Vector2Int cell, int mask)[] RoadPieces =
@@ -81,9 +82,31 @@ namespace Crookedile.Gameplay.City
         private Material _avenueMaterial;
         private Texture2D _clearTexture;
         private Texture2D _heightMap;
+        private MaterialPropertyBlock _glowBlock;
 
         public CityMapData Map => _map;
         public CityMapRandomizer Randomizer => _randomizer;
+
+        // Lights a building with the shader's selection glow: rgb is the colour, alpha the strength, and
+        // an alpha of 0 turns it off. The index is the building's place in Map.Buildings. Cleared when the
+        // buildings are rebuilt.
+        public void SetBuildingGlow(int index, Color glow)
+        {
+            if (index < 0 || index >= _buildings.Count || _buildings[index] == null)
+            {
+                return;
+            }
+
+            if (!_buildings[index].TryGetComponent(out MeshRenderer meshRenderer))
+            {
+                return;
+            }
+
+            _glowBlock ??= new MaterialPropertyBlock();
+            meshRenderer.GetPropertyBlock(_glowBlock);
+            _glowBlock.SetColor(SelectionColorId, glow);
+            meshRenderer.SetPropertyBlock(_glowBlock);
+        }
 
         // Draws another map, such as one generated for the run.
         public void Show(CityMapData map)

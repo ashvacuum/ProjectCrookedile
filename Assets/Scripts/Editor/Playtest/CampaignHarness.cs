@@ -104,8 +104,14 @@ namespace Crookedile.EditorTools.Playtest
                             rec,
                             $"'{loc.name}' has no battle session — the map refuses to enter it."
                         );
+                    // Mirrors the map: HQ is End Day, offered free once nothing else fits
+                    // (RunState.DayCanEnd), wherever the bot is. A bot that declines everything earlier
+                    // is a player waiting out the clock, which ends the day the same way.
+                    bool dayCanEnd = state.DayCanEnd();
                     var enterable = state
-                        .TodaysLocations.Where(l => Playable(l) && state.PlanVisit(l).CanEnter)
+                        .TodaysLocations.Where(l =>
+                            Playable(l) && (IsDayEnder(l) ? dayCanEnd : state.PlanVisit(l).CanEnter)
+                        )
                         .ToList();
                     var boss = state.TodaysLocations.FirstOrDefault(l =>
                         l is BattleEncounterData b && b.IsBoss
@@ -136,7 +142,8 @@ namespace Crookedile.EditorTools.Playtest
                         state.AdvanceDay();
                         continue;
                     }
-                    charge = true;
+                    // Going home to HQ is free, as on the map.
+                    charge = !IsDayEnder(next);
                 }
 
                 if (!Playable(next))

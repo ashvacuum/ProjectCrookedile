@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.DistrictData
   _displayName: Public Market and Plaza
   _mapPosition: {x: 330, y: 300}
+  _placement: 3

@@ -118,7 +118,8 @@ namespace Crookedile.Gameplay.City
         [SerializeField, Min(0.05f), SuffixLabel("units", true)]
         private float _storeyHeight = 0.5f;
 
-        public void Fill(CityMapData map, int seed)
+        // Returns downtown, the cell zones and district placement measure from.
+        public Vector2Int Fill(CityMapData map, int seed)
         {
             Random rng = new Random(seed);
             map.Clear();
@@ -167,6 +168,7 @@ namespace Crookedile.Gameplay.City
 
             MarchStreets(map, rng, downtown);
             PlaceBuildings(map, rng, downtown);
+            return downtown;
         }
 
         private void PaintAvenue(

@@ -489,12 +489,14 @@ namespace Crookedile.UI.Campaign
             scroll.AddToClassList("scroll-view");
             panel.Add(scroll);
 
-            if (state.TodaysLocations.Count == 0)
+            // HQ is not a place on the list: going home is End Day (below), offered at the end of the day.
+            var hq = state.TodaysLocations.Find(loc => loc is EventEncounterData { EndsDay: true });
+            if (!state.TodaysLocations.Exists(loc => loc != null && loc != hq))
                 scroll.Add(new Label("Nothing on offer today — end the day to move on."));
 
             foreach (var loc in state.TodaysLocations)
             {
-                if (loc == null)
+                if (loc == null || loc == hq)
                     continue;
                 scroll.Add(BuildLocationListItem(state, loc));
             }
@@ -533,10 +535,27 @@ namespace Crookedile.UI.Campaign
                 return panel;
             }
 
-            // HQ is always enabled at 0 cost so the day can be ended even at 0 Hours.
+            // The day ends when its time runs out (RunState.DayCanEnd): until nothing else fits, End Day is
+            // not offered, so the day can't be cut short for free; Wait burns the clock down when the
+            // player wants to. Once offered it costs nothing, so the day can always end, even at 0 Hours.
+            if (!state.DayCanEnd())
+            {
+                var hint = new Label(
+                    "The day ends at HQ once nothing else fits in your remaining time."
+                );
+                hint.AddToClassList("meta-line");
+                panel.Add(hint);
+                return panel;
+            }
+
+            // End Day is going home to HQ: free (the overnight return costs nothing), it opens today's HQ
+            // event, whose options each end the day. With no HQ event today it just ends the day.
             var endDayButton = new Button(() =>
             {
-                EndDay();
+                if (hq != null)
+                    Enter(hq, chargeHours: false);
+                else
+                    EndDay();
                 RefreshView();
             })
             {

@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.DistrictData
   _displayName: Campaign Headquarters
   _mapPosition: {x: 50, y: 60}
+  _placement: 3
