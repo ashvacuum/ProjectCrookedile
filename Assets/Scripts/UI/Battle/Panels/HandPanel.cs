@@ -62,10 +62,25 @@ namespace Crookedile.UI.Battle
             }
         }
 
-        private void OnCardClicked(CardData card, int handIndex)
+        // The button whose click is being played. RequestPlayCard publishes CardPlayedEvent before
+        // it returns, so OnCardPlayed takes this exact button: copies of a card share one CardData,
+        // and matching by card alone could fly a different copy to discard.
+        private CardButton _playingButton;
+
+        private void OnCardClicked(CardData card, int handIndex, CardButton button)
         {
             if (Battle != null && Battle.IsPlayerTurn)
-                Battle.RequestPlayCard(card, handIndex);
+            {
+                _playingButton = button;
+                try
+                {
+                    Battle.RequestPlayCard(card, handIndex);
+                }
+                finally
+                {
+                    _playingButton = null;
+                }
+            }
             else
                 GameLogger.LogWarning<HandPanel>(
                     $"Card play blocked: '{card?.CardName}' outside the player turn"
@@ -81,7 +96,7 @@ namespace Crookedile.UI.Battle
             // to discard in OnCardPlayResolved so order is: VFX → discard → new draws appear.
             // A deal still in progress lands first so its loop can't fight the close-up.
             CardFlyAnimator.Instance?.FinishDraw();
-            _pendingDiscardButton = ExtractCard(evt.Card);
+            _pendingDiscardButton = ExtractCard(evt.Card, _playingButton);
             ArrangeCards(animated: true);
         }
 
@@ -187,21 +202,27 @@ namespace Crookedile.UI.Battle
 
             ValidateLayoutContainerOnce();
 
-            // Remember where each on-screen card is, one entry per copy, so rebuilt buttons pick
-            // up exactly where the old ones were and glide on from there. Only cards not in this
-            // snapshot animate in as draws. A card still waiting in the deck mid-draw is inactive,
-            // so it isn't recorded and deals in again.
-            var previous = new Dictionary<CardData, Queue<(Vector3 pos, Quaternion rot)>>();
+            // Cards already on screen keep their own button, one per copy, and carry on from where
+            // they are; only cards with no button showing are rented and animate in as draws. A
+            // card still waiting in the deck mid-draw is inactive, so it is pooled and deals in
+            // again. Reusing buttons, rather than pooling the whole hand and matching new ones to
+            // old positions, means a play that only removes a card can never re-deal the rest.
+            CardFlyAnimator.Instance?.CancelDraw();
+            var onScreen = new Dictionary<CardData, Queue<CardButton>>();
             foreach (var b in _activeButtons)
             {
-                if (b?.CardData == null || !b.gameObject.activeSelf)
+                if (b == null)
                     continue;
-                if (!previous.TryGetValue(b.CardData, out var copies))
-                    previous[b.CardData] = copies = new Queue<(Vector3, Quaternion)>();
-                copies.Enqueue((b.transform.localPosition, b.transform.localRotation));
+                if (b.CardData == null || !b.gameObject.activeSelf)
+                {
+                    ReturnCard(b);
+                    continue;
+                }
+                if (!onScreen.TryGetValue(b.CardData, out var copies))
+                    onScreen[b.CardData] = copies = new Queue<CardButton>();
+                copies.Enqueue(b);
             }
-
-            ClearHand();
+            _activeButtons.Clear();
 
             int currentAP = Battle.PlayerStats.CurrentActionPoints;
             bool isSilenced = Battle.PlayerStatusEffects?.HasStatus<SilencedStatus>() ?? false;
@@ -211,6 +232,28 @@ namespace Crookedile.UI.Battle
             for (int i = 0; i < hand.Count; i++)
             {
                 CardData card = hand[i];
+                int idx = i;
+                var captured = card;
+                int cost = Battle.GetEffectiveCardCost(card);
+                bool unplayable =
+                    card.IsUnplayable || (isSilenced && card.CardType == CardType.Rhetoric);
+                bool discounted = Battle.PlayerDeck.GetCardCostReduction(card) != 0;
+
+                if (onScreen.TryGetValue(card, out var copies) && copies.Count > 0)
+                {
+                    CardButton kept = copies.Dequeue();
+                    kept.Rebind(
+                        i,
+                        currentAP,
+                        cost,
+                        unplayable,
+                        discounted,
+                        () => OnCardClicked(captured, idx, kept)
+                    );
+                    _activeButtons.Add(kept);
+                    continue;
+                }
+
                 CardButton btn = BattlePoolManager.Instance.RentCard(
                     card.CardType,
                     cardButtonContainer
@@ -218,30 +261,24 @@ namespace Crookedile.UI.Battle
                 if (btn == null)
                     continue;
 
-                int idx = i;
-                var captured = card;
                 btn.Initialize(
                     card,
                     i,
                     currentAP,
-                    Battle.GetEffectiveCardCost(card),
-                    card.IsUnplayable || (isSilenced && card.CardType == CardType.Rhetoric),
-                    Battle.PlayerDeck.GetCardCostReduction(card) != 0,
-                    () => OnCardClicked(captured, idx)
+                    cost,
+                    unplayable,
+                    discounted,
+                    () => OnCardClicked(captured, idx, btn)
                 );
+                btn.SetCardBackForOrigin(Battle.PlayerOrigin);
                 _activeButtons.Add(btn);
-                if (previous.TryGetValue(card, out var copies) && copies.Count > 0)
-                {
-                    var (pos, rot) = copies.Dequeue();
-                    btn.transform.localPosition = pos;
-                    btn.transform.localRotation = rot;
-                }
-                else
-                {
-                    btn.SetCardBackForOrigin(Battle.PlayerOrigin);
-                    newButtons.Add(btn);
-                }
+                newButtons.Add(btn);
             }
+
+            // Buttons for cards that left the hand some other way (a discard effect, say).
+            foreach (var copies in onScreen.Values)
+                foreach (var leftover in copies)
+                    ReturnCard(leftover);
 
             if (CardFlyAnimator.Instance != null && newButtons.Count > 0)
             {
@@ -300,9 +337,13 @@ namespace Crookedile.UI.Battle
         #region Helpers
 
         /// <summary>Removes and returns the button for <paramref name="card"/> WITHOUT pooling it (used before a discard-fly).</summary>
-        private CardButton ExtractCard(CardData card)
+        // Prefers the button that asked to play (it may show the upgraded copy's old data); falls back
+        // to the first button showing the card, for plays that don't start from a click.
+        private CardButton ExtractCard(CardData card, CardButton played = null)
         {
-            int idx = _activeButtons.FindIndex(b => b != null && b.CardData == card);
+            int idx = played != null ? _activeButtons.IndexOf(played) : -1;
+            if (idx < 0)
+                idx = _activeButtons.FindIndex(b => b != null && b.CardData == card);
             if (idx < 0)
                 return null;
             var btn = _activeButtons[idx];

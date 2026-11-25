@@ -19,15 +19,16 @@ namespace Crookedile.Utilities
 
             for (int i = 0; i < initialSize; i++)
             {
-                CreateNewObject();
+                _pool.Enqueue(CreateNewObject());
             }
         }
 
+        // A fresh, inactive instance that is not in the queue: Get hands it straight out, so
+        // queuing it too would hand the same object to two callers.
         private T CreateNewObject()
         {
             T obj = Object.Instantiate(_prefab, _parent);
             obj.gameObject.SetActive(false);
-            _pool.Enqueue(obj);
             return obj;
         }
 
@@ -48,7 +49,8 @@ namespace Crookedile.Utilities
 
         public void Return(T obj)
         {
-            if (obj == null)
+            // An object returned twice would be handed out twice; queues here are small, so the scan is cheap.
+            if (obj == null || _pool.Contains(obj))
                 return;
             obj.gameObject.SetActive(false);
             _pool.Enqueue(obj);

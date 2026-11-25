@@ -134,6 +134,7 @@ namespace Crookedile.UI.Battle
                 if (card == null)
                     continue;
                 card.transform.DOKill();
+                card.ClearSpread();
                 card.transform.SetParent(transform);
                 card.gameObject.SetActive(true);
             }
@@ -179,14 +180,25 @@ namespace Crookedile.UI.Battle
 
         #endregion
 
+        /// <summary>
+        /// Stops an animated arrangement where it is. Call before anything else takes over the
+        /// cards' slots (a deal), so the arrangement can't finish later and snap cards to slots
+        /// worked out for the old hand.
+        /// </summary>
+        public void StopArrangeAnimation()
+        {
+            _lerpSequence?.Kill();
+            _lerpSequence = null;
+        }
+
         #region Hover Spread API
         /// <summary>
         /// Fans the hand apart from the hovered card when <paramref name="active"/> is true:
         /// cards to its left shift left, cards to its right shift right, creating a gap around it.
         /// When <paramref name="active"/> is false all cards return to their base arc positions.
         /// Pass <paramref name="hoveredCard"/> when activating so the layout knows the pivot.
-        /// Uses <see cref="CardButton.SetLayoutTarget"/> so the existing per-card
-        /// <c>Update()</c> lerp handles smooth animation — no coroutine conflict.
+        /// Only each card's visual moves (<see cref="CardButton.SetLayoutTarget"/>); slots and hit
+        /// areas stay put, so the spread never changes which card the pointer is over.
         /// </summary>
         public void SetHoverSpread(bool active, CardButton hoveredCard = null)
         {

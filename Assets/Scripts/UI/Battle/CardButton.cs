@@ -203,8 +203,19 @@ namespace Crookedile.UI.Battle
 
         private int baseSiblingIndex;
 
-        // True once SetBasePosition() has been called explicitly. Prevents Update() from
-        // lerping cards toward (0,0) before a layout group has had a chance to position them.
+        // Hover and the hand's hover spread move only this child, which holds every graphic. The
+        // root keeps its hand slot and carries the hit area, so lifting or spreading never changes
+        // which card the pointer is over. Built from the prefab's children in Awake.
+        // ponytail: split at runtime so neither card prefab needs editing; bake it into the
+        // prefabs if another tool needs to see the split in the editor.
+        private RectTransform _visual;
+
+        // Covers the lifted visual while hovered, so hover holds while the pointer is over the
+        // raised card, not just its slot.
+        private Image _hoverHitArea;
+
+        // True once SetBasePosition() has been called explicitly. Hover spread waits for it, so a
+        // card the layout has not placed yet is never pushed relative to a stale slot.
         private bool _basePositionSet;
 
         // Picker mode: card is a plain selectable button (reward / choose-a-card grids), not a
@@ -274,6 +285,7 @@ namespace Crookedile.UI.Battle
         #region Unity Lifecycle
         private void Awake()
         {
+            BuildVisualSplit();
             baseScale = Vector3.one;
             basePosition = transform.localPosition;
             baseRotation = transform.localRotation;
@@ -287,6 +299,10 @@ namespace Crookedile.UI.Battle
 
         private void OnDisable()
         {
+            // A pooled card must be inert: no hover or spread tween left driving its visual.
+            if (_visual != null)
+                _visual.DOKill();
+
             // Returning to the pool / leaving play must not strand an armed-targeting session.
             // Clear statics directly — no tweens on a deactivating object.
             if (ArmedCard != this)
@@ -326,6 +342,7 @@ namespace Crookedile.UI.Battle
             isPlayable = !forceUnplayable && CanAfford(currentActionPoints);
 
             transform.DOKill();
+            SetVisualPose(Vector3.zero, Quaternion.identity, Vector3.one, animated: false);
             baseScale = Vector3.one;
             basePosition = transform.localPosition;
             baseRotation = transform.localRotation;
@@ -335,6 +352,29 @@ namespace Crookedile.UI.Battle
             SetFaceDown(false);
             SetConditionHighlight(false); // pooled buttons must not carry the last card's rim
 
+            UpdateDisplay();
+        }
+
+        /// <summary>
+        /// Refreshes a card that stays on screen through a hand change: its hand index, cost,
+        /// playability and click callback. Leaves its transform, hover and highlight alone, so it
+        /// carries on from where it is.
+        /// </summary>
+        public void Rebind(
+            int index,
+            int currentActionPoints,
+            int effectiveCost,
+            bool forceUnplayable,
+            bool isCostDiscounted,
+            Action onClick
+        )
+        {
+            handIndex = index;
+            onClickCallback = onClick;
+            _effectiveCost = effectiveCost;
+            _forceUnplayable = forceUnplayable;
+            _isCostDiscounted = isCostDiscounted;
+            isPlayable = !forceUnplayable && CanAfford(currentActionPoints);
             UpdateDisplay();
         }
 
@@ -417,24 +457,29 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
-        /// Updates this card's target layout position during hover-spread, without a full
-        /// rearrange. Non-hovered cards animate smoothly to the new position via
-        /// <c>Update()</c>'s lerp. Hovered cards only update their base so the hover-lift
-        /// position is preserved; they'll animate to the spread base when hover ends.
-        /// Called by <see cref="CardHandLayout.SetHoverSpread"/>.
+        /// Shows this card at a hover-spread spot (<paramref name="localPos"/>, <paramref name="angleDeg"/>,
+        /// in the hand container's space) by easing its visual there. The card's slot and hit area
+        /// stay put, so the spread never moves cards out from under the pointer. The hovered card
+        /// keeps its hover pose. Called by <see cref="CardHandLayout.SetHoverSpread"/>.
         /// </summary>
         public void SetLayoutTarget(Vector3 localPos, float angleDeg)
         {
-            basePosition = localPos;
-            baseRotation = Quaternion.Euler(0f, 0f, -angleDeg);
-            if (!isHovered && _basePositionSet)
-            {
-                transform.DOKill();
-                transform.DOLocalMove(localPos, hoverTweenDuration).SetEase(Ease.OutQuad);
-                transform
-                    .DOLocalRotateQuaternion(baseRotation, hoverTweenDuration)
-                    .SetEase(Ease.OutQuad);
-            }
+            if (isHovered || !_basePositionSet)
+                return;
+            Quaternion toSlot = Quaternion.Inverse(baseRotation);
+            SetVisualPose(
+                toSlot * (localPos - basePosition),
+                toSlot * Quaternion.Euler(0f, 0f, -angleDeg),
+                Vector3.one,
+                animated: true
+            );
+        }
+
+        /// <summary>Drops any hover-spread offset: the visual eases back onto the slot. Leaves a hovered card alone.</summary>
+        public void ClearSpread()
+        {
+            if (!isHovered)
+                SetVisualPose(Vector3.zero, Quaternion.identity, Vector3.one, animated: true);
         }
 
         /// <summary>
@@ -448,7 +493,10 @@ namespace Crookedile.UI.Battle
             basePosition = position;
             // Capture the arc-tilt rotation that CardHandLayout wrote to localRotation.
             baseRotation = transform.localRotation;
-            // Card is already at this position (placed by ApplyToCard). Just record the base.
+            // Card is already at this position (placed by ApplyToCard). A hovered card re-aims its
+            // lift from the new slot so it stays upright at the hover height.
+            if (isHovered && !_pickerMode)
+                ShowHoverPose();
         }
 
         /// <summary>
@@ -483,11 +531,7 @@ namespace Crookedile.UI.Battle
                 return;
             }
 
-            TweenTo(
-                baseScale * hoverScale,
-                new Vector3(basePosition.x, ComputeHoverY(), basePosition.z),
-                Quaternion.identity
-            );
+            ShowHoverPose();
 
             // Bring this card in front of all its neighbours while hovered.
             transform.SetAsLastSibling();
@@ -524,7 +568,8 @@ namespace Crookedile.UI.Battle
                 return;
 
             _showingKeywordTooltips = true;
-            BattleTooltipUI.Instance.ShowBeside((RectTransform)transform, entries);
+            // Beside the raised visual, where the card is drawn, not its slot.
+            BattleTooltipUI.Instance.ShowBeside(_visual != null ? _visual : (RectTransform)transform, entries);
         }
 
         private bool _showingKeywordTooltips;
@@ -683,6 +728,7 @@ namespace Crookedile.UI.Battle
             // Clear hover state; card stays at its arc position (no re-parenting or cursor-follow).
             isHovered = false;
             TweenTo(baseScale, rotation: Quaternion.identity);
+            SetVisualPose(Vector3.zero, Quaternion.identity, Vector3.one, animated: true);
 
             // Drag bypasses OnPointerExit so we must collapse the spread manually here.
             HandLayout?.SetHoverSpread(false);
@@ -945,8 +991,92 @@ namespace Crookedile.UI.Battle
                     .SetEase(Ease.OutQuad);
         }
 
-        /// <summary>Eases back to the resting hand slot.</summary>
-        private void ReturnToRest() => TweenTo(baseScale, basePosition, baseRotation);
+        /// <summary>Eases back to the resting hand slot, with the visual back on the slot.</summary>
+        private void ReturnToRest()
+        {
+            TweenTo(baseScale, basePosition, baseRotation);
+            SetVisualPose(Vector3.zero, Quaternion.identity, Vector3.one, animated: true);
+        }
+
+        /// <summary>
+        /// Raises the visual to the hover pose: upright, scaled up, at the shared hover height
+        /// above this card's slot. The slot and its hit area don't move; the hover hit area covers
+        /// the raised card so hover holds over it.
+        /// </summary>
+        private void ShowHoverPose()
+        {
+            Quaternion toSlot = Quaternion.Inverse(baseRotation);
+            Vector3 lift = new Vector3(0f, ComputeHoverY() - basePosition.y, 0f);
+            SetVisualPose(toSlot * lift, toSlot, Vector3.one * hoverScale, animated: true);
+            if (_hoverHitArea != null)
+                _hoverHitArea.enabled = true;
+        }
+
+        /// <summary>
+        /// Places the visual relative to the card's root (its slot). Any pose other than the hover
+        /// pose turns the hover hit area off, so only the slot catches the pointer.
+        /// </summary>
+        private void SetVisualPose(Vector3 localPosition, Quaternion localRotation, Vector3 localScale, bool animated)
+        {
+            if (_visual == null)
+                return;
+            if (_hoverHitArea != null)
+                _hoverHitArea.enabled = false;
+
+            _visual.DOKill();
+            if (!animated)
+            {
+                _visual.localPosition = localPosition;
+                _visual.localRotation = localRotation;
+                _visual.localScale = localScale;
+                return;
+            }
+
+            _visual.DOLocalMove(localPosition, hoverTweenDuration).SetEase(Ease.OutQuad);
+            _visual.DOLocalRotateQuaternion(localRotation, hoverTweenDuration).SetEase(Ease.OutQuad);
+            _visual.DOScale(localScale, hoverTweenDuration).SetEase(Ease.OutQuad);
+        }
+
+        /// <summary>
+        /// Moves the prefab's children under a new full-size Visual child and gives the root an
+        /// invisible hit area. Child graphics stop catching the pointer, so the slot-sized root
+        /// decides hover (and the hover hit area on the Visual, while hovered).
+        /// </summary>
+        private void BuildVisualSplit()
+        {
+            if (_visual != null)
+                return;
+
+            var root = (RectTransform)transform;
+            var children = new List<Transform>(root.childCount);
+            foreach (Transform child in root)
+                children.Add(child);
+
+            _visual = new GameObject("Visual", typeof(RectTransform)).GetComponent<RectTransform>();
+            _visual.SetParent(root, false);
+            _visual.anchorMin = Vector2.zero;
+            _visual.anchorMax = Vector2.one;
+            _visual.pivot = root.pivot;
+            _visual.offsetMin = Vector2.zero;
+            _visual.offsetMax = Vector2.zero;
+            foreach (Transform child in children)
+                child.SetParent(_visual, false);
+
+            foreach (Graphic graphic in _visual.GetComponentsInChildren<Graphic>(true))
+                graphic.raycastTarget = false;
+
+            if (!TryGetComponent(out Graphic slotHitArea))
+                slotHitArea = gameObject.AddComponent<Image>();
+            slotHitArea.color = Color.clear;
+            slotHitArea.raycastTarget = true;
+            slotHitArea.canvasRenderer.cullTransparentMesh = true;
+
+            _hoverHitArea = _visual.gameObject.AddComponent<Image>();
+            _hoverHitArea.color = Color.clear;
+            _hoverHitArea.raycastTarget = true;
+            _hoverHitArea.canvasRenderer.cullTransparentMesh = true;
+            _hoverHitArea.enabled = false;
+        }
 
         /// <summary>Visible "nope" punch when an unplayable card is clicked or dragged.</summary>
         private void PlayUnplayableNudge()

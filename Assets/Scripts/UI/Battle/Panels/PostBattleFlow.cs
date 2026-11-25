@@ -35,14 +35,9 @@ namespace Crookedile.UI.Battle
 
         private void OnEnable()
         {
+            // BattleEndState publishes the result on entering the end state, after the state-change
+            // notice, so the panel opens here, with the result in hand.
             On<BattleEndedEvent>(OnBattleEnded);
-            // The result opens once the battle has settled into its end state, not on the
-            // BattleEndedEvent that precedes it.
-            On<BattleStateChangedEvent>(evt =>
-            {
-                if (evt.Current == BattleState.BattleEnd)
-                    resultPanel?.Show(_lastResult?.isVictory == true);
-            });
             if (resultPanel != null)
                 resultPanel.OnContinueClicked += OnResultContinueClicked;
         }
@@ -61,6 +56,8 @@ namespace Crookedile.UI.Battle
             // Victory: update RunState so the next battle knows this one was won.
             if (evt.Result.isVictory)
                 RunState.Current?.RecordBattleVictory();
+
+            resultPanel?.Show(evt.Result.isVictory);
         }
 
         /// <summary>

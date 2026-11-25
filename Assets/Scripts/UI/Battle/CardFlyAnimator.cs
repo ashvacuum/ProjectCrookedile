@@ -222,6 +222,7 @@ namespace Crookedile.UI.Battle
         )
         {
             FinishDraw();
+            layout?.StopArrangeAnimation();
 
             var run = new DrawRun { Layout = layout, Cards = new List<DrawCard>(allCards.Count) };
             var launchOrder = new List<DrawCard>(newCards.Count);
@@ -281,8 +282,13 @@ namespace Crookedile.UI.Battle
                     if (card.Launched && card.Btn != null)
                         settled &= StepCard(card, dt, elapsed);
 
-                if (settled || elapsed > MaxDrawSeconds)
+                if (settled)
                     break;
+                if (elapsed > MaxDrawSeconds)
+                {
+                    LogUnsettled(run, launchOrder.Count - next);
+                    break;
+                }
 
                 await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
                 if (this == null)
@@ -291,6 +297,34 @@ namespace Crookedile.UI.Battle
 
             if (_draw == run)
                 FinishDraw();
+        }
+
+        /// <summary>
+        /// A deal that hits <see cref="MaxDrawSeconds"/> has a card that never came to rest. Names
+        /// each one and why (off its slot, tilted, scaled, or driven by a tween), so the cause
+        /// shows in the log instead of as a card hanging mid-hand.
+        /// </summary>
+        private void LogUnsettled(DrawRun run, int notLaunched)
+        {
+            var report = new System.Text.StringBuilder(
+                $"Deal hit its {MaxDrawSeconds:0} s cap; snapping. Not launched: {notLaunched}."
+            );
+            foreach (var card in run.Cards)
+            {
+                if (!card.Launched || card.Btn == null)
+                    continue;
+                var t = card.Btn.transform;
+                float offSlot = (t.localPosition - card.TargetPos).magnitude;
+                float tilt = Mathf.Abs(Mathf.DeltaAngle(t.localEulerAngles.z, -card.TargetAngle));
+                if (offSlot < 1f && tilt < 0.5f && Mathf.Abs(card.Scale - 1f) < 0.01f)
+                    continue;
+                report.Append(
+                    $" | '{card.Btn.CardData?.CardName}' new={card.IsNew} active={card.Btn.gameObject.activeInHierarchy} "
+                        + $"offSlot={offSlot:F1} tilt={tilt:F1} scale={card.Scale:F2} "
+                        + $"tweening={DOTween.IsTweening(t)} parent='{(t.parent != null ? t.parent.name : "none")}'"
+                );
+            }
+            GameLogger.LogWarning("Card", report.ToString(), this);
         }
 
         /// <summary>
