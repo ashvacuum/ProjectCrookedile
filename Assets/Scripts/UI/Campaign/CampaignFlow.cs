@@ -75,10 +75,11 @@ namespace Crookedile.UI.Campaign
             EnsureRunState();
             RunState.Current.ConfigureTravel(_pool != null ? _pool.Travel : null);
 
-            // Resumed from a save taken on the way into a battle: that battle restarts.
+            // Resumed from a save taken on the way into a battle: that round restarts, keeping
+            // the rounds already won.
             if (RunState.Current.PendingBattle != null)
             {
-                StartBattle(RunState.Current.PendingBattle);
+                StartBattle(RunState.Current.PendingBattle, resume: true);
                 return;
             }
 
@@ -247,7 +248,7 @@ namespace Crookedile.UI.Campaign
             }
         }
 
-        private void StartBattle(BattleEncounterData battle)
+        private void StartBattle(BattleEncounterData battle, bool resume = false)
         {
             var state = RunState.Current;
             if (battle.Session == null)
@@ -260,7 +261,8 @@ namespace Crookedile.UI.Campaign
                 return;
             }
 
-            state.StartEncounter(battle.Session.BuildBattleQueue());
+            if (!resume || state.BattleQueue == null)
+                state.StartEncounter(battle.Session.BuildBattleQueue());
             state.SetPendingBattle(battle);
             SaveSystem.Checkpoint(); // quitting mid-battle resumes into this battle, restarted
             GameLogger.LogInfo("Campaign", $"Entering battle '{battle.name}'.", this);

@@ -155,6 +155,9 @@ namespace Crookedile.UI.Battle
                 // More rounds remain in THIS encounter — advance the index and reload into
                 // the next fight. Unchanged whether this is a campaign or test run.
                 RunState.Current.AdvanceToNextBattle();
+                // Saved as pending so quitting before the next round resumes into it.
+                RunState.Current.SetPendingBattle(RunState.Current.CurrentEncounter);
+                Crookedile.Data.Save.SaveSystem.Checkpoint();
                 SceneLoader.Instance?.ReloadCurrentScene();
                 return;
             }
