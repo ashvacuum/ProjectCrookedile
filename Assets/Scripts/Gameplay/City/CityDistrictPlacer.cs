@@ -15,9 +15,23 @@ namespace Crookedile.Gameplay.City
     [Serializable]
     public sealed class CityDistrictPlacer
     {
-        [Tooltip("Area centres (districts and scenery) keep at least this far apart when the city has room, so areas stay distinct.")]
+        [Tooltip(
+            "Area centres (districts and scenery) try to keep this far apart, so areas stay distinct. A spot closer than this to another centre pays for it in score, so an area shifts a little rather than jumping across the map."
+        )]
         [SerializeField, Min(0f), SuffixLabel("cells", true)]
         private float _areaSpacingCells = 24f;
+
+        [Tooltip(
+            "Score cost per cell an area centre crowds inside the spacing. Higher spreads areas apart harder; lower keeps each nearer its ideal spot."
+        )]
+        [SerializeField, Min(0f)]
+        private float _crowdingCost = 2f;
+
+        [Tooltip(
+            "Area centres stay within this share of the way from downtown to the farthest land, so districts stay reachable and the city concentrates around its centre. Edge then means the edge of this reach."
+        )]
+        [SerializeField, Range(0.1f, 1f)]
+        private float _reachShare = 0.6f;
 
         [Tooltip(
             "Random spread added to each spot's score, so a rule picks among the few best spots rather than always the very best."
@@ -26,7 +40,9 @@ namespace Crookedile.Gameplay.City
         private float _jitterCells = 3f;
 
         // The cell each area is centred on, in the order of the rules given (districts first, then scenery areas, so
-        // districts get the best spots). Candidates are open land (no sea, no road); an area that finds none is null.
+        // districts get the best spots). Candidates are open land (no sea, no road) within the reach of downtown; an
+        // area that finds none is null. Each pick is the rule's score plus jitter plus a crowding cost for sitting
+        // inside the spacing of a centre already placed, so crowding nudges an area rather than overriding its rule.
         public List<Vector2Int?> PlaceCentres(
             CityMapData map,
             Vector2Int downtown,
@@ -35,45 +51,52 @@ namespace Crookedile.Gameplay.City
         )
         {
             var centres = new List<Vector2Int?>(rules.Count);
-            var candidates = new List<Vector2Int>();
-            float farthest = 0f;
+            var land = new List<Vector2Int>();
+            float farthestLand = 0f;
             foreach (Vector2Int cell in new RectInt(Vector2Int.zero, map.Size).allPositionsWithin)
             {
-                if (map.GetGround(cell) == CityMapData.Ground.Sea || map.GetRoad(cell) != CityMapData.Road.None)
+                if (map.GetGround(cell) != CityMapData.Ground.Land || map.GetRoad(cell) != CityMapData.Road.None)
                 {
                     continue;
                 }
 
-                candidates.Add(cell);
-                farthest = Mathf.Max(farthest, Vector2.Distance(cell, downtown));
+                land.Add(cell);
+                farthestLand = Mathf.Max(farthestLand, Vector2.Distance(cell, downtown));
             }
 
+            float reach = farthestLand * _reachShare;
+            List<Vector2Int> candidates = land.FindAll(cell => Vector2.Distance(cell, downtown) <= reach);
             var rng = new Random(seed ^ 0x5D1C7);
-            int[] seaDistance = SeaDistance(map);
+            int[] seaDistance = WaterDistance(map, CityMapData.Ground.Sea);
+            int[] riverDistance = WaterDistance(map, CityMapData.Ground.River);
             var taken = new List<Vector2Int>();
             foreach (DistrictPlacement rule in rules)
             {
                 Vector2Int best = default;
                 bool found = false;
-                bool bestSpaced = false;
                 float bestScore = float.MaxValue;
                 foreach (Vector2Int cell in candidates)
                 {
-                    if (taken.Contains(cell))
+                    float nearest = float.MaxValue;
+                    foreach (Vector2Int other in taken)
+                    {
+                        nearest = Mathf.Min(nearest, Vector2.Distance(other, cell));
+                    }
+
+                    if (nearest < 0.5f)
                     {
                         continue;
                     }
 
-                    bool spaced = taken.TrueForAll(other => Vector2.Distance(other, cell) >= _areaSpacingCells);
+                    float crowding = Mathf.Max(0f, _areaSpacingCells - nearest) * _crowdingCost;
                     float score =
-                        Score(rule, map, cell, downtown, farthest, seaDistance)
+                        Score(rule, map, cell, downtown, reach, seaDistance, riverDistance)
+                        + crowding
                         + (float)rng.NextDouble() * _jitterCells;
-                    // A well-spaced spot always beats a crowded one; crowding is only the fallback.
-                    if (!found || (spaced && !bestSpaced) || (spaced == bestSpaced && score < bestScore))
+                    if (score < bestScore)
                     {
                         best = cell;
                         found = true;
-                        bestSpaced = spaced;
                         bestScore = score;
                     }
                 }
@@ -125,14 +148,15 @@ namespace Crookedile.Gameplay.City
             return tallest >= 0 ? tallest : nearest;
         }
 
-        // Lower is better, in cells.
+        // Lower is better, in cells. `farthest` is the reach: Edge favours its edge, Avenue its halfway point.
         private static float Score(
             DistrictPlacement placement,
             CityMapData map,
             Vector2Int cell,
             Vector2Int downtown,
             float farthest,
-            int[] seaDistance
+            int[] seaDistance,
+            int[] riverDistance
         )
         {
             float fromDowntown = Vector2.Distance(cell, downtown);
@@ -143,8 +167,9 @@ namespace Crookedile.Gameplay.City
                 case DistrictPlacement.Edge:
                     return farthest - fromDowntown;
                 case DistrictPlacement.Coast:
-                    int steps = seaDistance[(cell.x * map.Size.y) + cell.y];
-                    return steps == int.MaxValue ? float.MaxValue / 2f : steps;
+                    return Steps(seaDistance, map, cell);
+                case DistrictPlacement.River:
+                    return Steps(riverDistance, map, cell);
                 case DistrictPlacement.Avenue:
                     // Beside an avenue, about halfway out; away from one is a poor last resort.
                     return Mathf.Abs(fromDowntown - (farthest * 0.5f)) + (BesideAvenue(map, cell) ? 0f : farthest);
@@ -153,8 +178,14 @@ namespace Crookedile.Gameplay.City
             }
         }
 
-        // Steps from each cell to the nearest sea cell (4 neighbours), or int.MaxValue on a map with no sea.
-        private static int[] SeaDistance(CityMapData map)
+        private static float Steps(int[] distance, CityMapData map, Vector2Int cell)
+        {
+            int steps = distance[(cell.x * map.Size.y) + cell.y];
+            return steps == int.MaxValue ? float.MaxValue / 2f : steps;
+        }
+
+        // Steps from each cell to the nearest cell of that water (4 neighbours), or int.MaxValue on a map without it.
+        private static int[] WaterDistance(CityMapData map, CityMapData.Ground water)
         {
             Vector2Int size = map.Size;
             var distance = new int[size.x * size.y];
@@ -164,9 +195,9 @@ namespace Crookedile.Gameplay.City
                 for (int column = 0; column < size.y; column++)
                 {
                     var cell = new Vector2Int(row, column);
-                    bool sea = map.GetGround(cell) == CityMapData.Ground.Sea;
-                    distance[(row * size.y) + column] = sea ? 0 : int.MaxValue;
-                    if (sea)
+                    bool wet = map.GetGround(cell) == water;
+                    distance[(row * size.y) + column] = wet ? 0 : int.MaxValue;
+                    if (wet)
                     {
                         frontier.Enqueue(cell);
                     }

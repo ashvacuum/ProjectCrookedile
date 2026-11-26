@@ -35,6 +35,27 @@ namespace Crookedile.Gameplay.City
         private static readonly int MapOriginId = Shader.PropertyToID("_CityMapOrigin");
         private static readonly int GridId = Shader.PropertyToID("_CityGrid");
         private static readonly int SelectionColorId = Shader.PropertyToID("_SelectionColor");
+        private static readonly int WaterShoreId = Shader.PropertyToID("_WaterShore");
+        private static readonly int WaterMidId = Shader.PropertyToID("_WaterMid");
+        private static readonly int WaterDeepId = Shader.PropertyToID("_WaterDeep");
+        private static readonly int WaterMidCellsId = Shader.PropertyToID("_WaterMidCells");
+        private static readonly int WaterDeepCellsId = Shader.PropertyToID("_WaterDeepCells");
+        private static readonly int WaterBandWobbleId = Shader.PropertyToID("_WaterBandWobble");
+        private static readonly int WaterMottleId = Shader.PropertyToID("_WaterMottle");
+        private static readonly int WaterInkId = Shader.PropertyToID("_WaterInk");
+        private static readonly int WaterInkPixelsId = Shader.PropertyToID("_WaterInkPixels");
+        private static readonly int WaterFoamColorId = Shader.PropertyToID("_WaterFoamColor");
+        private static readonly int WaterFoamCellsId = Shader.PropertyToID("_WaterFoamCells");
+        private static readonly int WaterFoamBreathId = Shader.PropertyToID("_WaterFoamBreath");
+        private static readonly int WaterStrokeDensityId = Shader.PropertyToID("_WaterStrokeDensity");
+        private static readonly int WaterStrokeSpacingId = Shader.PropertyToID("_WaterStrokeSpacing");
+        private static readonly int WaterStrokeLengthId = Shader.PropertyToID("_WaterStrokeLength");
+        private static readonly int WaterStrokePixelsId = Shader.PropertyToID("_WaterStrokePixels");
+        private static readonly int WaterStrokeShoreId = Shader.PropertyToID("_WaterStrokeShore");
+        private static readonly int WaterSpeedId = Shader.PropertyToID("_WaterSpeed");
+        private static readonly int WaterNightGlowId = Shader.PropertyToID("_WaterNightGlow");
+        private static readonly int WaterShoreMapId = Shader.PropertyToID("_WaterShoreMap");
+        private static readonly int WaterShoreSizeId = Shader.PropertyToID("_WaterShoreSize");
 
         // Road atlas cells (row, column) and which neighbours each connects to unrotated.
         private static readonly (Vector2Int cell, int mask)[] RoadPieces =
@@ -79,9 +100,81 @@ namespace Crookedile.Gameplay.City
         [SerializeField]
         private GameObject _buildingPrefab;
 
-        [Tooltip("Placeholder colour for sea cells until water art exists.")]
-        [SerializeField]
-        private Color _seaColor = new Color(0.2f, 0.45f, 0.65f);
+        [Tooltip("Water colour along the shore and in narrow rivers.")]
+        [SerializeField, FoldoutGroup("Water", Expanded = false)]
+        private Color _shoreWater = new Color(0.42f, 0.66f, 0.60f);
+
+        [Tooltip("Water colour of the middle band.")]
+        [SerializeField, FoldoutGroup("Water")]
+        private Color _middleWater = new Color(0.28f, 0.52f, 0.54f);
+
+        [Tooltip("Water colour offshore and over the open sea past the coast.")]
+        [SerializeField, FoldoutGroup("Water")]
+        private Color _deepWater = new Color(0.18f, 0.36f, 0.44f);
+
+        [Tooltip("How far from the shore the middle band starts.")]
+        [SerializeField, Range(0.5f, 16f), SuffixLabel("cells", true), FoldoutGroup("Water")]
+        private float _middleBandCells = 1.5f;
+
+        [Tooltip("How far from the shore the deep band starts.")]
+        [SerializeField, Range(1f, 32f), SuffixLabel("cells", true), FoldoutGroup("Water")]
+        private float _deepBandCells = 5f;
+
+        [Tooltip("How far the band edges wander, so they read as painted washes rather than contour lines.")]
+        [SerializeField, Range(0f, 3f), SuffixLabel("cells", true), FoldoutGroup("Water")]
+        private float _bandWobble = 0.6f;
+
+        [Tooltip("Faint tone variation across the water, like brushwork. 0 is flat colour.")]
+        [SerializeField, Range(0f, 0.3f), FoldoutGroup("Water")]
+        private float _mottle = 0.05f;
+
+        [Tooltip("Colour of the ink line at the waterline.")]
+        [SerializeField, FoldoutGroup("Water")]
+        private Color _inkColor = new Color(0.15f, 0.18f, 0.20f);
+
+        [Tooltip("Width of the ink line at the waterline, in screen pixels, so it matches at every zoom.")]
+        [SerializeField, Range(0f, 8f), SuffixLabel("px", true), FoldoutGroup("Water")]
+        private float _inkPixels = 2f;
+
+        [Tooltip("Colour of the shore foam and the wave strokes.")]
+        [SerializeField, FoldoutGroup("Water")]
+        private Color _foamColor = new Color(0.93f, 0.89f, 0.77f);
+
+        [Tooltip("Width of the foam band inside the ink line. Capped small so a one-cell river stays water.")]
+        [SerializeField, Range(0f, 0.3f), SuffixLabel("cells", true), FoldoutGroup("Water")]
+        private float _foamCells = 0.12f;
+
+        [Tooltip("How much the foam band swells and thins along the shore.")]
+        [SerializeField, Range(0f, 1f), FoldoutGroup("Water")]
+        private float _foamSwell = 0.3f;
+
+        [Tooltip("Share of offshore spots carrying a wave stroke. 0 turns strokes off.")]
+        [SerializeField, Range(0f, 1f), FoldoutGroup("Water")]
+        private float _strokeDensity = 0.15f;
+
+        [Tooltip("Spacing between the spots a wave stroke can sit on.")]
+        [SerializeField, Range(1f, 10f), SuffixLabel("cells", true), FoldoutGroup("Water")]
+        private float _strokeSpacing = 3f;
+
+        [Tooltip("Length of a wave stroke.")]
+        [SerializeField, Range(0.1f, 2f), SuffixLabel("cells", true), FoldoutGroup("Water")]
+        private float _strokeLength = 0.4f;
+
+        [Tooltip("Line weight of a wave stroke, in screen pixels.")]
+        [SerializeField, Range(0.5f, 6f), SuffixLabel("px", true), FoldoutGroup("Water")]
+        private float _strokePixels = 1.5f;
+
+        [Tooltip("How far from the shore wave strokes begin, so rivers and shallows stay calm.")]
+        [SerializeField, Range(0f, 16f), SuffixLabel("cells", true), FoldoutGroup("Water")]
+        private float _strokeShoreCells = 2f;
+
+        [Tooltip("How fast the water moves: the foam's swell, the strokes' drift and fade, the bands' wander. Low keeps it calm.")]
+        [SerializeField, Range(0f, 1f), FoldoutGroup("Water")]
+        private float _waterSpeed = 0.15f;
+
+        [Tooltip("At night, how much the shore's lit windows smear across the water.")]
+        [SerializeField, Range(0f, 1f), FoldoutGroup("Water")]
+        private float _nightGlow = 0.3f;
 
         [Tooltip("Placeholder colour for avenue cells until avenue art exists.")]
         [SerializeField]
@@ -149,6 +242,7 @@ namespace Crookedile.Gameplay.City
         private Texture2D _clearTexture;
         private Texture2D _heightMap;
         private MaterialPropertyBlock _outlineBlock;
+        private Texture2D _shoreMap;
 
         public CityMapData Map => _map;
         public CityMapRandomizer Randomizer => _randomizer;
@@ -216,15 +310,17 @@ namespace Crookedile.Gameplay.City
             DestroyOwned(_parkMaterial);
             DestroyOwned(_clearTexture);
             DestroyOwned(_heightMap);
+            DestroyOwned(_shoreMap);
             _glow.Release();
         }
 
         private void OnValidate()
         {
-            // Glow tuning shows straight away; the bake is cheap next to rebuilding the ground.
+            // Glow and water tuning show straight away; both are cheap next to rebuilding the ground.
             if (isActiveAndEnabled)
             {
                 _glow.Publish(_map);
+                ApplyWaterSettings();
             }
         }
 
@@ -244,6 +340,7 @@ namespace Crookedile.Gameplay.City
             EnsureSharedAssets();
             _builtSize = _map.Size;
             _builtChunkCells = _chunkCells;
+            BuildShoreMap();
             for (int row = 0; row < _builtSize.x; row += _builtChunkCells)
             {
                 for (int column = 0; column < _builtSize.y; column += _builtChunkCells)
@@ -288,6 +385,7 @@ namespace Crookedile.Gameplay.City
                 }
             }
 
+            BuildShoreMap();
             foreach (int index in dirty)
             {
                 BuildChunkMesh(_chunks[index]);
@@ -440,14 +538,19 @@ namespace Crookedile.Gameplay.City
                 {
                     vertices.Add(center + CellCorners[corner]);
                     uvs.Add(CornerUvs[corner]);
-                    // w = 2 marks a baked cell (the shader tests w > 1.5: a missing channel can read w = 1). Sea,
-                    // avenue and park are flat placeholder colours and keep the per-renderer atlas path (w = 0).
+                    // w = 2 marks a baked ground cell and w = 3 water (the shader's tests sit above 1.5: a missing
+                    // channel can read w = 1); water reads its shore distance from the shore map. Avenue and park are
+                    // flat placeholder colours (w = 0).
                     if (submesh == GROUND_SUBMESH)
                     {
                         Vector2 turned = TurnAtlasUv(CornerUvs[corner], quarterTurns);
                         atlas.Add(
                             new Vector4(rect.x + (turned.x * rect.z), rect.y + (turned.y * rect.w), quarterTurns, 2f)
                         );
+                    }
+                    else if (submesh == SEA_SUBMESH)
+                    {
+                        atlas.Add(new Vector4(0f, 0f, 0f, 3f));
                     }
                     else
                     {
@@ -505,6 +608,12 @@ namespace Crookedile.Gameplay.City
             if (_map.GetGround(cell) == CityMapData.Ground.Park && road == CityMapData.Road.None)
             {
                 return PARK_SUBMESH;
+            }
+
+            // A river draws as water; a road across it draws as road, the bridge.
+            if (_map.GetGround(cell) == CityMapData.Ground.River && road == CityMapData.Road.None)
+            {
+                return SEA_SUBMESH;
             }
 
             if (road == CityMapData.Road.Avenue)
@@ -606,6 +715,8 @@ namespace Crookedile.Gameplay.City
             var middle = new Vector2(0.5f, 0.5f);
             _apronMesh.uv = new[] { middle, middle, middle, middle };
             _apronMesh.SetUVs(1, new[] { Vector2.zero, Vector2.zero, Vector2.zero, Vector2.zero });
+            var water = new Vector4(0f, 0f, 0f, 3f);
+            _apronMesh.SetUVs(2, new[] { water, water, water, water });
             _apronMesh.colors = new[] { Color.white, Color.white, Color.white, Color.white };
             _apronMesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
             _apronMesh.RecalculateBounds();
@@ -616,6 +727,109 @@ namespace Crookedile.Gameplay.City
             MeshRenderer apronRenderer = _apron.AddComponent<MeshRenderer>();
             apronRenderer.sortingOrder = GROUND_SORTING_ORDER;
             apronRenderer.sharedMaterial = _seaMaterial;
+        }
+
+        // One texel per cell holding the steps (4 neighbours) to the nearest land, land 0, for the water shader's
+        // distance from the waterline. Texel x is the row, as in the height map. Capped, since the deepest band sits
+        // well inside the cap.
+        private void BuildShoreMap()
+        {
+            const int CAP = 64;
+            Vector2Int size = _map.Size;
+            int[] steps = new int[size.x * size.y];
+            var frontier = new Queue<Vector2Int>();
+            for (int row = 0; row < size.x; row++)
+            {
+                for (int column = 0; column < size.y; column++)
+                {
+                    var cell = new Vector2Int(row, column);
+                    bool water = IsWater(cell);
+                    steps[(column * size.x) + row] = water ? CAP : 0;
+                    if (!water)
+                    {
+                        frontier.Enqueue(cell);
+                    }
+                }
+            }
+
+            Vector2Int[] neighbours = { Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down };
+            while (frontier.Count > 0)
+            {
+                Vector2Int cell = frontier.Dequeue();
+                int next = steps[(cell.y * size.x) + cell.x] + 1;
+                foreach (Vector2Int offset in neighbours)
+                {
+                    Vector2Int neighbour = cell + offset;
+                    if (_map.InBounds(neighbour) && steps[(neighbour.y * size.x) + neighbour.x] > next)
+                    {
+                        steps[(neighbour.y * size.x) + neighbour.x] = next;
+                        frontier.Enqueue(neighbour);
+                    }
+                }
+            }
+
+            if (_shoreMap == null || _shoreMap.width != size.x || _shoreMap.height != size.y)
+            {
+                DestroyOwned(_shoreMap);
+                _shoreMap = new Texture2D(size.x, size.y, TextureFormat.RHalf, false, true)
+                {
+                    name = "City Shore Distance",
+                    hideFlags = HideFlags.HideAndDontSave,
+                    filterMode = FilterMode.Bilinear,
+                    wrapMode = TextureWrapMode.Clamp,
+                };
+            }
+
+            var texels = new Color[steps.Length];
+            for (int index = 0; index < steps.Length; index++)
+            {
+                texels[index] = new Color(steps[index], 0f, 0f, 0f);
+            }
+
+            _shoreMap.SetPixels(texels);
+            _shoreMap.Apply(false);
+            ApplyWaterSettings();
+        }
+
+        private bool IsWater(Vector2Int cell)
+        {
+            CityMapData.Ground ground = _map.GetGround(cell);
+            return ground == CityMapData.Ground.Sea || ground == CityMapData.Ground.River;
+        }
+
+        // Pushes the Water settings and the shore map to the sea material, which draws the sea, rivers and the open sea
+        // past the coast.
+        private void ApplyWaterSettings()
+        {
+            if (_seaMaterial == null)
+            {
+                return;
+            }
+
+            _seaMaterial.SetColor(WaterShoreId, _shoreWater);
+            _seaMaterial.SetColor(WaterMidId, _middleWater);
+            _seaMaterial.SetColor(WaterDeepId, _deepWater);
+            _seaMaterial.SetFloat(WaterMidCellsId, _middleBandCells);
+            _seaMaterial.SetFloat(WaterDeepCellsId, _deepBandCells);
+            _seaMaterial.SetFloat(WaterBandWobbleId, _bandWobble);
+            _seaMaterial.SetFloat(WaterMottleId, _mottle);
+            _seaMaterial.SetColor(WaterInkId, _inkColor);
+            _seaMaterial.SetFloat(WaterInkPixelsId, _inkPixels);
+            _seaMaterial.SetColor(WaterFoamColorId, _foamColor);
+            _seaMaterial.SetFloat(WaterFoamCellsId, _foamCells);
+            _seaMaterial.SetFloat(WaterFoamBreathId, _foamSwell);
+            _seaMaterial.SetFloat(WaterStrokeDensityId, _strokeDensity);
+            _seaMaterial.SetFloat(WaterStrokeSpacingId, _strokeSpacing);
+            _seaMaterial.SetFloat(WaterStrokeLengthId, _strokeLength);
+            _seaMaterial.SetFloat(WaterStrokePixelsId, _strokePixels);
+            _seaMaterial.SetFloat(WaterStrokeShoreId, _strokeShoreCells);
+            _seaMaterial.SetFloat(WaterSpeedId, _waterSpeed);
+            _seaMaterial.SetFloat(WaterNightGlowId, _nightGlow);
+            if (_shoreMap != null)
+            {
+                _seaMaterial.SetTexture(WaterShoreMapId, _shoreMap);
+                _seaMaterial.SetVector(WaterShoreSizeId, new Vector4(_shoreMap.width, _shoreMap.height, 0f, 0f));
+            }
         }
 
         // The half-cube shader's TransformAtlasUV for a quarter-turn count, baked on the CPU.
@@ -750,7 +964,7 @@ namespace Crookedile.Gameplay.City
 
             if (_seaMaterial == null)
             {
-                _seaMaterial = CreatePlaceholderMaterial("Sea Placeholder", _seaColor);
+                _seaMaterial = CreatePlaceholderMaterial("Water", _deepWater);
             }
 
             if (_avenueMaterial == null)
@@ -763,7 +977,7 @@ namespace Crookedile.Gameplay.City
                 _parkMaterial = CreatePlaceholderMaterial("Park Placeholder", _parkColor);
             }
 
-            _seaMaterial.SetColor(RoofBaseColorId, _seaColor);
+            ApplyWaterSettings();
             _avenueMaterial.SetColor(RoofBaseColorId, _avenueColor);
             _parkMaterial.SetColor(RoofBaseColorId, _parkColor);
         }

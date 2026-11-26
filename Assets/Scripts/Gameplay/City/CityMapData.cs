@@ -9,12 +9,14 @@ namespace Crookedile.Gameplay.City
     [CreateAssetMenu(menuName = "Crookedile/Campaign/City Map", fileName = "CityMap")]
     public sealed class CityMapData : ScriptableObject
     {
-        // Park is open land kept free of streets and lots by the generator: fields, plazas, empty patches.
+        // Park is open land kept free of streets and lots by the generator: fields, plazas, empty patches. River is
+        // water that roads may cross, so a road on a river cell is a bridge; sea takes no road at all.
         public enum Ground : byte
         {
             Land,
             Sea,
             Park,
+            River,
         }
 
         public enum Road : byte
@@ -154,7 +156,8 @@ namespace Crookedile.Gameplay.City
             }
 
             _ground[Index(cell)] = ground;
-            // Sea and park are open ground: painting them clears a road (a street may be painted back over a park).
+            // Sea, park and river are open ground: painting them clears a road (a road may be painted back over a park
+            // or across a river, as a bridge).
             if (ground != Ground.Land)
             {
                 _roads[Index(cell)] = Road.None;

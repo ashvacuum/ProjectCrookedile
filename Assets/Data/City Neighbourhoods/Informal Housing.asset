@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63b2015e7d8bc7241b868984fe7ffcb7, type: 3}
   m_Name: Informal Housing
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.CityNeighbourhoodData
-  _placement: 2
+  _placement: 5
   _areaRadiusCells: 18
   _storeys: {x: 1, y: 1}
   _lotSize: {x: 1, y: 1}
@@ -29,3 +29,4 @@ MonoBehaviour:
   - {r: 0.72, g: 0.74, b: 0.76, a: 1}
   - {r: 0.6, g: 0.28, b: 0.24, a: 1}
   _streetLayout: 0
+  _buildingGap: 0

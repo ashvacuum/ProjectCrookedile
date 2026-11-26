@@ -26,6 +26,27 @@ Shader "Crookedile/2D/Half Cube Lit"
         _EdgeHighlightWidth("Edge Highlight Width", Range(0.005, 0.1)) = 0.025
         _SelectionOutlinePixels("Selection Outline Width (px)", Range(1, 8)) = 3
         _SelectionPulseSpeed("Selection Outline Pulse Speed", Range(0, 10)) = 2.5
+        _WaterShore("Water Shore", Color) = (0.42, 0.66, 0.60, 1)
+        _WaterMid("Water Middle", Color) = (0.28, 0.52, 0.54, 1)
+        _WaterDeep("Water Deep", Color) = (0.18, 0.36, 0.44, 1)
+        _WaterMidCells("Water Middle Band From (cells)", Range(0.5, 16)) = 1.5
+        _WaterDeepCells("Water Deep Band From (cells)", Range(1, 32)) = 5
+        _WaterBandWobble("Water Band Wobble (cells)", Range(0, 3)) = 0.6
+        _WaterMottle("Water Mottle", Range(0, 0.3)) = 0.05
+        _WaterInk("Water Ink", Color) = (0.15, 0.18, 0.20, 1)
+        _WaterInkPixels("Water Ink Width (px)", Range(0, 8)) = 2
+        _WaterFoamColor("Water Foam", Color) = (0.93, 0.89, 0.77, 1)
+        _WaterFoamCells("Water Foam Width (cells)", Range(0, 0.3)) = 0.12
+        _WaterFoamBreath("Water Foam Swell", Range(0, 1)) = 0.3
+        _WaterStrokeDensity("Water Stroke Density", Range(0, 1)) = 0.15
+        _WaterStrokeSpacing("Water Stroke Spacing (cells)", Range(1, 10)) = 3
+        _WaterStrokeLength("Water Stroke Length (cells)", Range(0.1, 2)) = 0.4
+        _WaterStrokePixels("Water Stroke Weight (px)", Range(0.5, 6)) = 1.5
+        _WaterStrokeShore("Water Strokes From (cells)", Range(0, 16)) = 2
+        _WaterSpeed("Water Speed", Range(0, 1)) = 0.15
+        _WaterNightGlow("Water Night Glow", Range(0, 1)) = 0.3
+        [HideInInspector][NoScaleOffset] _WaterShoreMap("Water Shore Distance", 2D) = "black" {}
+        [HideInInspector] _WaterShoreSize("Water Shore Map Size", Vector) = (1, 1, 0, 0)
         [PerRendererData] _SelectionColor("Selection Outline (rgb, a = strength)", Color) = (1, 0.8, 0.35, 0)
         [PerRendererData] _RoofAtlasRect("Roof Atlas Rect", Vector) = (0, 0.5, 0.5, 0.5)
         [PerRendererData] _LeftAtlasRect("Left Atlas Rect", Vector) = (0.5, 0.5, 0.5, 0.5)
@@ -67,6 +88,8 @@ Shader "Crookedile/2D/Half Cube Lit"
             SAMPLER(sampler_OcclusionMap);
             TEXTURE2D(_EmissionMap);
             SAMPLER(sampler_EmissionMap);
+            TEXTURE2D(_WaterShoreMap);
+            SAMPLER(sampler_WaterShoreMap);
 
             // Globals from CitySky and CityMapView; never material properties, so no material can override them.
             TEXTURE2D(_CityHeightMap);       // per cell: building wall height in screen units, texel (row, column)
@@ -141,6 +164,26 @@ Shader "Crookedile/2D/Half Cube Lit"
                 half _OcclusionStrength;
                 half _SelectionOutlinePixels;
                 half _SelectionPulseSpeed;
+                half4 _WaterShore;
+                half4 _WaterMid;
+                half4 _WaterDeep;
+                half _WaterMidCells;
+                half _WaterDeepCells;
+                half _WaterBandWobble;
+                half _WaterMottle;
+                half4 _WaterInk;
+                half _WaterInkPixels;
+                half4 _WaterFoamColor;
+                half _WaterFoamCells;
+                half _WaterFoamBreath;
+                half _WaterStrokeDensity;
+                half _WaterStrokeSpacing;
+                half _WaterStrokeLength;
+                half _WaterStrokePixels;
+                half _WaterStrokeShore;
+                half _WaterSpeed;
+                half _WaterNightGlow;
+                float4 _WaterShoreSize;
             CBUFFER_END
 
             UNITY_INSTANCING_BUFFER_START(PerInstance)
@@ -379,6 +422,77 @@ Shader "Crookedile/2D/Half Cube Lit"
                 return sum / 3.0h;
             }
 
+            // Cells from the waterline at a grid position. _WaterShoreMap holds, per cell, the steps to the nearest land
+            // (land 0); filtered, its 0.5 contour lies on the shared edge of a land and a water cell, so subtracting
+            // 0.5 gives the distance from the waterline (negative only in the filtered-off tips of water corners). Past
+            // the map edge it keeps growing, so the open sea past the coast carries on from the coast's last cells.
+            float ShoreDistance(float2 position)
+            {
+                float2 size = max(_WaterShoreSize.xy, 1.0);
+                float2 inside = clamp(position, -0.5, size - 0.5);
+                float steps = SAMPLE_TEXTURE2D(_WaterShoreMap, sampler_WaterShoreMap, (inside + 0.5) / size).r;
+                return steps - 0.5 + length(position - inside);
+            }
+
+            float WaterHash(float2 lattice)
+            {
+                return frac(sin(dot(lattice, float2(12.9898, 78.233))) * 43758.5453);
+            }
+
+            // Sparse cream wave strokes: at most one short arch per spot of a screen-space lattice, on a seeded share of
+            // the spots, each fading in and out on its own slow cycle while the set drifts. Line weight is in pixels.
+            half WaveStrokes(float2 position, float time)
+            {
+                float2 screen = float2(position.x + position.y, position.x - position.y) * float2(0.5, 0.25);
+                float pixel = max(fwidth(screen.y), 1e-5);
+                float spacing = max((float)_WaterStrokeSpacing, 0.25);
+                float2 lattice = (screen + float2(time * 0.3, time * 0.05)) / spacing;
+                float2 id = floor(lattice);
+                float chance = WaterHash(id);
+                float2 centre = 0.3 + 0.4 * float2(WaterHash(id + 17.1), WaterHash(id + 43.7));
+                float2 local = (frac(lattice) - centre) * spacing;
+                float halfLength = max((float)_WaterStrokeLength * 0.5, 1e-3);
+                float sag = local.y + 0.5 * local.x * local.x / halfLength;
+                float mark = saturate(_WaterStrokePixels * 0.5 - abs(sag) / pixel + 0.5);
+                float ends = 1.0 - smoothstep(halfLength * 0.6, halfLength, abs(local.x));
+                float life = saturate(sin(time * 2.0 + chance * 40.0) * 1.5);
+                return (half)(mark * ends * life * step(chance, _WaterStrokeDensity));
+            }
+
+            // Sea and river (CityMapView marks their vertices atlasData.w = 3), painted to sit with the city's ink and
+            // wash: stepped teal bands by distance from the shore with wandering edges, a dark ink line at the waterline
+            // with a cream foam band inside it that slowly swells and thins, sparse wave strokes offshore, and a faint
+            // slow mottle for brushwork. Lit flat like the ground, so the clock, building shadows and cloud shade apply.
+            half4 WaterColor(Varyings input)
+            {
+                float2 position = input.gridPosition.xy;
+                float time = _Time.y * _WaterSpeed;
+                float shore = ShoreDistance(position);
+                float pixel = max(fwidth(shore), 1e-5);
+
+                float banded = shore + CloudNoise(position * 0.35 + float2(time * 0.2, 11.3)) * _WaterBandWobble;
+                const float soft = 0.12;
+                half3 albedo = lerp(_WaterShore.rgb, _WaterMid.rgb, (half)smoothstep(_WaterMidCells - soft, _WaterMidCells + soft, banded));
+                albedo = lerp(albedo, _WaterDeep.rgb, (half)smoothstep(_WaterDeepCells - soft, _WaterDeepCells + soft, banded));
+                albedo *= 1.0h + (half)(CloudNoise(position * 0.18 + float2(-time * 0.1, 5.7)) * _WaterMottle);
+
+                half strokes = WaveStrokes(position, time) * (half)smoothstep(_WaterStrokeShore, _WaterStrokeShore + 1.0, shore);
+                albedo = lerp(albedo, _WaterFoamColor.rgb, strokes);
+
+                float swell = 1.0 + _WaterFoamBreath * CloudNoise(position * 0.5 + float2(time, -time * 0.7) + 3.1) * 1.4;
+                half foam = (half)saturate((_WaterFoamCells * swell - shore) / pixel + 0.5);
+                albedo = lerp(albedo, _WaterFoamColor.rgb, foam);
+                half ink = (half)saturate(_WaterInkPixels + 0.5 - abs(shore) / pixel);
+                albedo = lerp(albedo, _WaterInk.rgb, ink);
+
+                half visibility = SunVisibility(input.gridPosition, 0.0h) * CloudShade(input.gridPosition);
+                half diffuse = saturate(dot(normalize(input.normalWS), (half3)_CityLightDirection.xyz)) * visibility;
+                half3 color = albedo * ((half3)_CityAmbientColor.rgb * _AmbientStrength + (half3)_CityLightColor.rgb * diffuse * _DiffuseStrength + CloudLight(input.gridPosition));
+                // Night: window light falls on the water like on the street, with a faint smear from the shore.
+                color += (albedo * WindowGlow(input.gridPosition) + GlowSmear(input.gridPosition) * _WaterNightGlow) * _CityEmissionScale;
+                return half4(color, input.color.a);
+            }
+
             Varyings LitVertex(Attributes input)
             {
                 UNITY_SETUP_INSTANCE_ID(input);
@@ -404,6 +518,12 @@ Shader "Crookedile/2D/Half Cube Lit"
             half4 LitFragment(Varyings input) : SV_Target
             {
                 UNITY_SETUP_INSTANCE_ID(input);
+                // atlasData.w: 2 = a baked ground cell, 3 = water; 0 or 1 (a mesh without the channel, on D3D) = neither.
+                if (input.atlasData.w > 2.5)
+                {
+                    return WaterColor(input);
+                }
+
                 bool bakedAtlas = input.atlasData.w > 1.5;
                 float2 atlasUV = bakedAtlas ? input.atlasData.xy : GetAtlasUV(input.uv, input.faceId);
                 half4 source = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, atlasUV);

@@ -284,6 +284,7 @@ namespace Crookedile.Gameplay.City
                 BlockCells = type.BlockCells,
                 StreetBranchChance = type.StreetBranchChance,
                 Grid = type.StreetLayout == StreetLayout.Grid,
+                BuildingGap = type.BuildingGap,
                 GableChance = type.GableChance,
                 RoofPitch = type.RoofPitch,
                 RoofColors = type.RoofColors,

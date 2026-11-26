@@ -38,7 +38,7 @@ atlases and test scenes stay in `Assets/Art/AI/Iso`.*
 
 | Piece | Kind | Holds |
 |---|---|---|
-| **City map** | plain data, saved as `CityMapData` (SO) for test maps | size; per cell: ground (land, sea, park), road (none, street, avenue), zone; list of placed buildings (building, footprint origin, W × L, storeys) |
+| **City map** | plain data, saved as `CityMapData` (SO) for test maps | size; per cell: ground (land, sea, park, river), road (none, street, avenue), zone; list of placed buildings (building, footprint origin, W × L, storeys) |
 | ~~**`ZoneData`**~~ | — | *Superseded 2026-11-26:* zones are district neighbourhoods, a profile on `DistrictData` (§4.5). Landmark lists move to districts when landmarks are built |
 | **`BuildingData`** | SO, Database tab | id from the asset GUID; face atlas material and roof / left wall / right wall cells; allowed W × L footprints; storey range and storey height |
 | **Generator settings** | serialized fields on the generator | size, coast depth range, avenue count range, run-length range, block size limits, zone list ordered centre-outward |
@@ -53,8 +53,19 @@ Deterministic from the seed through its own `System.Random`, so generating the c
 ### 4.1 Coast
 Exactly one map edge is sea; the other three are land. On a rectangular map it is a **long side**, and of those the one
 **facing the camera** (the bottom of the screen: the last column on a map with more rows), so the city strings along a
-shore the player looks across (both rules tunable on the randomizer, *2026-11-26*). The coastline runs along it with a seeded depth inside a tunable range; the
-depth steps in or out only now and then (a tunable chance per cell), so the shore wanders rather than saw-tooths. Sea cells are ground = sea; nothing else is placed on them.
+shore the player looks across (both rules tunable on the randomizer, *2026-11-26*). **The coastline waves** *(2026-11-26)*: its depth is two
+sine waves with seeded counts and phases, broad bays (1.5–3.5 along the coast) plus a shorter ripple riding on them,
+spanning a depth range of 4–20 cells so bays and headlands read at city scale. Small random steps (at most two cells
+off the wave) roughen it so it never looks drawn with a ruler. All tunable on the randomizer. Sea cells are ground =
+sea; nothing else is placed on them.
+
+### 4.1b Rivers
+*Built 2026-11-26.* The mountains are taken to be at the back of the map (the land edge opposite the sea), so rivers run
+from there down to the coast: 2–3 rivers, 1–2 cells wide, each starting at its own share of the back edge and
+meandering on the way (count, width and meander tunable on the randomizer). They are carved right after the coast and
+before any road, so the highway and avenues cross them as **bridges** (a road on a river cell). Streets and lots stop
+at the bank. River is its own ground type: it draws as water, takes roads where sea does not, and the painter has a
+River brush.
 
 ### 4.2 Downtown
 A point on the coastline, near its middle with a seeded offset. Zones and avenues are measured from it.
@@ -132,7 +143,7 @@ covering it, else the town fallback.
 | Capitol | Civic Center (the political district) | 3–5 | 3–4 | 50% | blocks 5–8, sparse | Avenue | — |
 | Market | Public Market and Plaza | 1–2 | 1–2 | 80% | blocks 3–5 | Avenue | — |
 | Reclamation | Reclamation (Port and Malls) | 2–4 | 3–5 | 65% | blocks 5–8, sparse | Coast | — |
-| Informal Housing | Riverside Community | 1 | 1 | 85% | blocks 2–3, dense lanes | Coast | 2 |
+| Informal Housing | Riverside Community | 1 | 1 | 85% | blocks 2–3, dense lanes | River | 2 |
 | Middle-Class Housing | Residential Barangay | 1–2 | 1–2 | 55% | blocks 3–5, small roads | Anywhere | 3, town fallback |
 | Affluent Housing | Affluent Subdivision | 2–3 | 2–3 | 55% | blocks 5–7 | Edge | 1 |
 | Exclusive Village | Exclusive Village | 2 | 3–4 | 40% | blocks 6–9, few roads | Edge | 1 |
@@ -160,6 +171,18 @@ Each block is packed largest footprint first from its zone's weighted list; stor
 **Every lot touches a road** (a road cell beside one of its four sides): a building nobody can reach makes no sense, so a
 lot that touches none is not built.
 
+**Building gap** *(2026-11-26)*: each built lot keeps a ring of open land around it, so buildings don't stand wall to
+wall. It is set per neighbourhood type: 1 cell for most, 2 for the Exclusive Village, 0 for Informal Housing and the
+Market, which really are packed. A lot whose fill roll leaves it empty holds no ring.
+
+**Remoteness** *(2026-11-26)*: the city concentrates around downtown, and going up or down the coast gets remote.
+Each cell's remoteness is 0 within the **town core** (by default the 30% of the way from downtown to either end of the
+coast) and rises smoothly to 1 at the far ends; it is measured along the coast only, so inland never counts as remote.
+Toward the ends the **ordinary town** (the fallback and any land outside neighbourhoods) loses lot fill (down to 20%),
+side streets (down to 25%), and past a remoteness of 0.55 its grid stops, leaving sparse wandering roads. Open patches
+favour the ends, so the countryside gathers the fields. Districts and scenery areas are places and keep their own look
+wherever they stand. All of it is tunable in the randomizer's Remoteness section.
+
 ### 4.8 Districts
 *Built 2026-11-25; centres before buildings since 2026-11-26.* Each neighbourhood type has a **placement** rule. Once
 the coast, highway and avenues are down, each district on the travel network, then each scenery area, takes the centre
@@ -171,11 +194,16 @@ of its area, an open land cell, by its type's rule (a district with no type: Any
 | Coast | the cell nearest the sea |
 | Avenue | a cell beside an avenue, about halfway out |
 | Edge | the cell farthest from downtown |
+| River | the cell nearest a riverbank (informal settlements line the rivers) |
 | Anywhere | any cell |
 
-- HQ goes first, then road endpoints in road order, then scenery areas; each takes the best cell left. Centres keep a
-  minimum spacing (24 cells) when the city has room, so areas stay distinct, and a small seeded jitter picks among the few best spots. Both
-  are tunable on `CampaignCity` (`CityDistrictPlacer`).
+- HQ goes first, then road endpoints in road order, then scenery areas; each takes the best cell left.
+- **Reach** *(2026-11-26)*: centres stay within 60% of the way from downtown to the farthest land, so districts stay
+  reachable and the city concentrates around its centre; Edge means the edge of that reach, and Avenue its halfway point.
+- **Spacing is a soft cost** *(2026-11-26)*: a spot inside 24 cells of a centre already placed pays 2 score per cell of
+  crowding, so an area shifts a little off its ideal spot rather than jumping across the map, which a hard spacing rule
+  used to do. A small seeded jitter picks among the few best spots. All tunable on `CampaignCity`
+  (`CityDistrictPlacer`, Area placement box).
 - After the buildings are placed, the district's marker goes on the **tallest building within its area**, the nearest on
   a tie, else the nearest building anywhere; no two districts share one.
 - Seeded from the run seed on its own stream, so a run always places its districts the same way and nothing is saved.
@@ -205,6 +233,17 @@ of its area, an open land cell, by its type's rule (a district with no type: Any
   data (`TEXCOORD2`, read by the half-cube shader when its w is 2; a mesh without the channel can read w = 1 on D3D), so a 192 × 112 map is 84 meshes rather than 21,504
   objects and the ground batches. Sea and avenue cells are each chunk's other two submeshes. Painting rebuilds only the
   chunks a change touches. *Built 2026-11-26.*
+- **Water** *(built 2026-11-26)*. Sea, rivers and the open sea past the coast share one painted look in the half-cube
+  shader, in the city's ink-and-wash style rather than realistic water: stepped teal bands by distance from the shore,
+  their edges wandering so they read as washes; a dark ink line at the waterline at a fixed pixel width, like the
+  buildings' outlines; a thin cream foam band inside it that slowly swells and thins; sparse cream wave strokes
+  offshore that drift and fade in and out; and a faint slow mottle for brushwork. It is lit flat like the ground, so the
+  clock, building shadows and cloud shade apply, and at night window light falls on it with a faint smear. Distance
+  from the waterline comes from a per-cell shore map (steps to the nearest land, bilinear-filtered so the 0.5 contour
+  sits on the cell edge), which gives a one-cell river a real middle instead of turning it all to shore; it keeps
+  growing past the map edge so the open sea carries on from the coast. Water vertices are marked `atlasData.w = 3`.
+  Colours, band distances, ink and foam widths, stroke density, size and weight, and one calm speed for all the motion
+  are in the City Map view's Water foldout.
 - **Open sea past the coast** *(built 2026-11-26)*. The view finds the coast (the map edge that is mostly sea) and
   draws one flat sea quad past it, 32 cells by default (tunable on the view), so the city looks out over water.
 - **Culling by chunk** *(built 2026-11-26)*. Buildings are grouped under the chunk their front cell is in. In Play mode
@@ -371,7 +410,7 @@ pixels, pulse speed) and on `CampaignMapView` (colour and strength; *2026-11-26*
 start from the panel.
 
 - **Generate** from any seed in the editor.
-- **Paint** ground (land, sea, park), streets, avenues and zones; **place and remove** buildings; Undo works.
+- **Paint** ground (land, sea, park, river), streets, avenues and zones; **place and remove** buildings; Undo works.
 - **Save** the current map as a `CityMapData` test map, and **load** one in place of the generated city: an editor
   field on the city view, plus a dev-console command. Loading a test map only changes scenery, so the command is
   `Safe = true`.

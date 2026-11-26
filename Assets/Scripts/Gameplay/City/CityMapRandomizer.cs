@@ -20,6 +20,8 @@ namespace Crookedile.Gameplay.City
         public float StreetBranchChance;
         // Regular streets every block across the area, anchored on Center; false leaves organic marching streets.
         public bool Grid;
+        // Cells of open land kept around every built lot; 0 lets buildings stand wall to wall.
+        public int BuildingGap;
         public float GableChance;
         public Vector2 RoofPitch;
         public IReadOnlyList<Color> RoofColors;
@@ -45,10 +47,20 @@ namespace Crookedile.Gameplay.City
         [Title("Coast")]
 
         [Tooltip(
-            "Sea depth from the coast edge, in cells (min, max). The coastline wanders inside this range."
+            "How far the sea reaches in from the coast edge, in cells (min, max). The coastline waves between the two: bays reach the max, headlands the min."
         )]
-        [SerializeField, MinMaxSlider(1, 20, true), SuffixLabel("cells", true)]
-        private Vector2Int _coastDepth = new Vector2Int(3, 8);
+        [SerializeField, MinMaxSlider(1, 40, true), SuffixLabel("cells", true)]
+        private Vector2Int _coastDepthRange = new Vector2Int(4, 20);
+
+        [Tooltip(
+            "Broad bays along the whole coast (min, max), as full waves of the coastline. A seeded count in this range, with a random phase."
+        )]
+        [SerializeField, MinMaxSlider(0.5f, 8f, true)]
+        private Vector2 _coastBays = new Vector2(1.5f, 3.5f);
+
+        [Tooltip("A shorter wave riding on the bays: 0 keeps the bays smooth, 1 makes it as strong as the bays.")]
+        [SerializeField, Range(0f, 1f)]
+        private float _coastRipple = 0.35f;
 
         [Tooltip(
             "On a map longer one way than the other, put the sea along one of the two long sides, so the city strings along the shore like Cebu. Off, or on a square map, any edge can be the coast."
@@ -61,6 +73,21 @@ namespace Crookedile.Gameplay.City
         )]
         [SerializeField]
         private bool _coastFacesCamera = true;
+
+        [Title("Rivers")]
+        [Tooltip(
+            "Rivers running from the mountains at the back edge down to the sea (min, max). Only the highway and avenues bridge them; streets and lots stop at the bank."
+        )]
+        [SerializeField, MinMaxSlider(0, 8, true)]
+        private Vector2Int _rivers = new Vector2Int(2, 3);
+
+        [Tooltip("River width in cells (min, max).")]
+        [SerializeField, MinMaxSlider(1, 4, true), SuffixLabel("cells", true)]
+        private Vector2Int _riverWidth = new Vector2Int(1, 2);
+
+        [Tooltip("How much a river wanders sideways on its way to the sea: 0 runs straight, 1 loops.")]
+        [SerializeField, Range(0f, 1f)]
+        private float _riverMeander = 0.35f;
 
         [Tooltip(
             "A straight two-cell highway running the whole length of the land, parallel to the coast, like a city's main north-south road."
@@ -89,7 +116,65 @@ namespace Crookedile.Gameplay.City
         private float _openPatchClearance = 6f;
 
         [Tooltip(
-            "Chance per cell along the coast that its depth steps in or out by one. Low keeps the shore smooth."
+            "Cells of open land kept around every built lot outside neighbourhoods (each neighbourhood type sets its own). 0 lets buildings stand wall to wall."
+        )]
+        [SerializeField, Range(0, 3), SuffixLabel("cells", true)]
+        private int _buildingGap = 1;
+
+        [Title("Remoteness")]
+        [Tooltip(
+            "Share of the way from downtown to either end of the coast that stays full town. Past it the ordinary town thins out toward the ends: going up or down the coast gets remote."
+        )]
+        [SerializeField, Range(0f, 1f)]
+        private float _townCore = 0.3f;
+
+        [Tooltip("Ordinary town's lot fill at the far ends, as a share of its fill in the core.")]
+        [SerializeField, Range(0f, 1f)]
+        private float _remoteFill = 0.2f;
+
+        [Tooltip("Ordinary town's side streets at the far ends, as a share of the core's: rural roads, not a web.")]
+        [SerializeField, Range(0f, 1f)]
+        private float _remoteStreets = 0.25f;
+
+        [Tooltip(
+            "Remoteness past which the ordinary town's grid stops and only sparse wandering roads go on (0 = the core's edge, 1 = the far ends)."
+        )]
+        [SerializeField, Range(0f, 1f)]
+        private float _gridReach = 0.55f;
+
+        [Tooltip(
+            "Chance an open patch is allowed in the core; toward the ends it rises to 1, so the countryside gathers the fields and the core keeps its town."
+        )]
+        [SerializeField, Range(0f, 1f)]
+        private float _patchCoreChance = 0.3f;
+
+        // How remote a cell is: 0 in the town core around downtown, rising to 1 at the far ends of the coast. Measured
+        // along the coast only, so going inland never counts as remote.
+        private readonly struct Spread
+        {
+            private readonly Vector2Int _along;
+            private readonly int _downtownStep;
+            private readonly float _farthest;
+            private readonly float _core;
+
+            public Spread(Vector2Int along, int downtownStep, int coastLength, float core)
+            {
+                _along = along;
+                _downtownStep = downtownStep;
+                _farthest = Mathf.Max(1f, Mathf.Max(downtownStep, coastLength - 1 - downtownStep));
+                _core = core;
+            }
+
+            public float At(Vector2Int cell)
+            {
+                int step = (cell.x * _along.x) + (cell.y * _along.y);
+                float share = Mathf.Abs(step - _downtownStep) / _farthest;
+                return share <= _core ? 0f : Mathf.SmoothStep(0f, 1f, (share - _core) / Mathf.Max(1e-3f, 1f - _core));
+            }
+        }
+
+        [Tooltip(
+            "Roughness on top of the waves: the chance per cell along the coast that the shore steps in or out by one (never more than two from the wave). Low keeps the shore smooth."
         )]
         [SerializeField, Range(0f, 1f)]
         private float _coastWobbleChance = 0.25f;
@@ -194,15 +279,31 @@ namespace Crookedile.Gameplay.City
             Vector2Int along = new Vector2Int(Mathf.Abs(inland.y), Mathf.Abs(inland.x));
             int coastLength = along.x != 0 ? size.x : size.y;
             int depthLimit = inland.x != 0 ? size.x : size.y;
-            int depth = Range(rng, _coastDepth);
+            // The shore is two sine waves with seeded counts and phases (broad bays plus a shorter ripple riding on
+            // them) between the depth range's two ends, roughened by small random steps.
+            float bays = Mathf.Lerp(_coastBays.x, _coastBays.y, (float)rng.NextDouble());
+            float rippleWaves = bays * Mathf.Lerp(2.3f, 3.7f, (float)rng.NextDouble());
+            float bayPhase = (float)rng.NextDouble() * Mathf.PI * 2f;
+            float ripplePhase = (float)rng.NextDouble() * Mathf.PI * 2f;
+            int shallowest = Mathf.Min(_coastDepthRange.x, _coastDepthRange.y);
+            int deepest = Mathf.Max(_coastDepthRange.x, _coastDepthRange.y);
+            int roughness = 0;
             int[] coast = new int[coastLength];
             for (int step = 0; step < coastLength; step++)
             {
+                float along01 = step / (float)Mathf.Max(1, coastLength - 1);
+                float wave =
+                    (
+                        Mathf.Sin((along01 * bays * Mathf.PI * 2f) + bayPhase)
+                        + (_coastRipple * Mathf.Sin((along01 * rippleWaves * Mathf.PI * 2f) + ripplePhase))
+                    ) / (1f + _coastRipple);
                 if (rng.NextDouble() < _coastWobbleChance)
                 {
-                    depth = Mathf.Clamp(depth + rng.Next(-1, 2), _coastDepth.x, _coastDepth.y);
+                    roughness = Mathf.Clamp(roughness + rng.Next(-1, 2), -2, 2);
                 }
 
+                int depth = Mathf.RoundToInt(Mathf.Lerp(shallowest, deepest, (wave + 1f) * 0.5f)) + roughness;
+                depth = Mathf.Clamp(depth, 1, Mathf.Max(1, depthLimit - 4));
                 coast[step] = depth;
                 for (int into = 0; into < Mathf.Min(depth, depthLimit); into++)
                 {
@@ -222,6 +323,8 @@ namespace Crookedile.Gameplay.City
             );
             Vector2Int downtown = FromEdge(size, inland, along, downtownStep, coast[downtownStep]);
 
+            // Rivers go down before the roads, so the highway and avenues bridge them.
+            CarveRivers(map, rng, inland, along, coastLength, depthLimit);
             if (_highway)
             {
                 PaintHighway(map, inland, along, coastLength, depthLimit);
@@ -236,11 +339,61 @@ namespace Crookedile.Gameplay.City
             }
 
             IReadOnlyList<CityArea> areas = chooseAreas?.Invoke(map, downtown) ?? Array.Empty<CityArea>();
-            CarveOpenPatches(map, rng, areas);
-            PaintGrids(map, rng, areas);
-            MarchStreets(map, rng, downtown, areas);
-            PlaceBuildings(map, rng, downtown, areas);
+            var spread = new Spread(along, downtownStep, coastLength, _townCore);
+            CarveOpenPatches(map, rng, areas, spread);
+            PaintGrids(map, rng, areas, spread);
+            MarchStreets(map, rng, downtown, areas, spread);
+            PlaceBuildings(map, rng, downtown, areas, spread);
             return downtown;
+        }
+
+        // Rivers from the mountains at the back edge to the sea. Each starts at its own share of the back edge, then steps
+        // toward the coast one row at a time while a drifting sideways offset makes it meander. When it shifts sideways
+        // the row is filled between its old and new place, so the water stays one connected channel. It ends on
+        // reaching the sea.
+        private void CarveRivers(
+            CityMapData map,
+            Random rng,
+            Vector2Int inland,
+            Vector2Int along,
+            int coastLength,
+            int depthLimit
+        )
+        {
+            int rivers = Range(rng, _rivers);
+            for (int river = 0; river < rivers; river++)
+            {
+                // Spread along the back edge, clear of the strip's very ends.
+                float share = (river + (float)rng.NextDouble()) / Mathf.Max(1, rivers);
+                float lateral = Mathf.Lerp(coastLength * 0.1f, coastLength * 0.9f, share);
+                float drift = 0f;
+                int width = Range(rng, _riverWidth);
+                int previous = Mathf.RoundToInt(lateral);
+                for (int into = depthLimit - 1; into >= 0; into--)
+                {
+                    drift = Mathf.Clamp(drift + ((((float)rng.NextDouble() * 2f) - 1f) * _riverMeander), -1f, 1f);
+                    lateral = Mathf.Clamp(lateral + drift, 0f, coastLength - width);
+                    int step = Mathf.RoundToInt(lateral);
+                    bool reachedSea = false;
+                    for (int across = Mathf.Min(previous, step); across <= Mathf.Max(previous, step) + width - 1; across++)
+                    {
+                        Vector2Int cell = FromEdge(map.Size, inland, along, Mathf.Clamp(across, 0, coastLength - 1), into);
+                        if (map.GetGround(cell) == CityMapData.Ground.Sea)
+                        {
+                            reachedSea = true;
+                            continue;
+                        }
+
+                        map.SetGround(cell, CityMapData.Ground.River);
+                    }
+
+                    previous = step;
+                    if (reachedSea)
+                    {
+                        break;
+                    }
+                }
+            }
         }
 
         // A straight two-cell avenue the length of the coast, at the inland fraction between the deepest coast and the
@@ -253,7 +406,7 @@ namespace Crookedile.Gameplay.City
             int depthLimit
         )
         {
-            int nearest = Mathf.Min(_coastDepth.y + 1, depthLimit - 2);
+            int nearest = Mathf.Min(Mathf.Max(_coastDepthRange.x, _coastDepthRange.y) + 3, depthLimit - 2);
             int into = Mathf.RoundToInt(Mathf.Lerp(nearest, depthLimit - 2, _highwayInland));
             for (int step = 0; step < coastLength; step++)
             {
@@ -299,15 +452,22 @@ namespace Crookedile.Gameplay.City
             return nearest >= 0 ? nearest : fallback;
         }
 
-        private static bool InGridArea(IReadOnlyList<CityArea> areas, Vector2Int cell)
+        // Whether a cell gets grid streets: a grid neighbourhood, or the ordinary town's grid inside its reach.
+        private bool IsGridAt(IReadOnlyList<CityArea> areas, Vector2Int cell, Spread spread)
         {
             int index = AreaIndexAt(areas, cell);
-            return index >= 0 && areas[index].Grid;
+            return index >= 0 && areas[index].Grid && (!IsTown(areas[index]) || spread.At(cell) <= _gridReach);
+        }
+
+        // The ordinary town: the fallback area that covers whatever no neighbourhood does.
+        private static bool IsTown(CityArea area)
+        {
+            return float.IsPositiveInfinity(area.Radius);
         }
 
         // Ragged circles of park on open land (not sea, not road), kept off neighbourhood centres. Laid after the
         // highway and avenues, which run through them, and before streets and lots, which then avoid them.
-        private void CarveOpenPatches(CityMapData map, Random rng, IReadOnlyList<CityArea> areas)
+        private void CarveOpenPatches(CityMapData map, Random rng, IReadOnlyList<CityArea> areas, Spread spread)
         {
             Vector2Int size = map.Size;
             int patches = Range(rng, _openPatches);
@@ -317,11 +477,14 @@ namespace Crookedile.Gameplay.City
                 float radius = Mathf.Lerp(_openPatchRadius.x, _openPatchRadius.y, (float)rng.NextDouble());
                 Vector2Int centre = default;
                 bool placed = false;
-                // A few tries for a spot clear of every neighbourhood centre; a crowded city gets fewer patches.
-                for (int attempt = 0; attempt < 12 && !placed; attempt++)
+                // A few tries for a spot clear of every neighbourhood centre, favouring the remote ends; a crowded city
+                // gets fewer patches.
+                for (int attempt = 0; attempt < 20 && !placed; attempt++)
                 {
                     centre = new Vector2Int(rng.Next(size.x), rng.Next(size.y));
-                    placed = IsFree(map, centre) && ClearOfCentres(areas, centre, radius + _openPatchClearance);
+                    bool kept = rng.NextDouble() < Mathf.Lerp(_patchCoreChance, 1f, spread.At(centre));
+                    placed =
+                        kept && IsFree(map, centre) && ClearOfCentres(areas, centre, radius + _openPatchClearance);
                 }
 
                 if (!placed)
@@ -377,7 +540,7 @@ namespace Crookedile.Gameplay.City
         // centre (the town fallback's on downtown) with spacing rolled once per area from its block length. A grid line
         // that would run alongside an existing road is skipped, so it joins the road instead of doubling it.
         // ponytail: axis-aligned grids only; a rotated grid needs diagonal road art.
-        private void PaintGrids(CityMapData map, Random rng, IReadOnlyList<CityArea> areas)
+        private void PaintGrids(CityMapData map, Random rng, IReadOnlyList<CityArea> areas, Spread spread)
         {
             var spacing = new Vector2Int[areas.Count];
             bool anyGrid = false;
@@ -412,7 +575,7 @@ namespace Crookedile.Gameplay.City
                     }
 
                     int index = AreaIndexAt(areas, cell);
-                    if (index < 0 || !areas[index].Grid)
+                    if (index < 0 || !IsGridAt(areas, cell, spread))
                     {
                         continue;
                     }
@@ -495,7 +658,8 @@ namespace Crookedile.Gameplay.City
             CityMapData map,
             Random rng,
             Vector2Int downtown,
-            IReadOnlyList<CityArea> areas
+            IReadOnlyList<CityArea> areas,
+            Spread spread
         )
         {
             Queue<(Vector2Int cell, Vector2Int heading)> walkers =
@@ -513,7 +677,7 @@ namespace Crookedile.Gameplay.City
 
                     foreach (Vector2Int axis in Axes)
                     {
-                        if (IsFree(map, cell + axis) && rng.NextDouble() < _streetStartChance)
+                        if (IsFree(map, cell + axis) && rng.NextDouble() < _streetStartChance * TownStreets(areas, cell, spread))
                         {
                             walkers.Enqueue((cell, axis));
                         }
@@ -548,7 +712,7 @@ namespace Crookedile.Gameplay.City
                         !IsFree(map, next)
                         || IsRoad(map, next + side)
                         || IsRoad(map, next - side)
-                        || InGridArea(areas, next)
+                        || IsGridAt(areas, next, spread)
                     )
                     {
                         // Sea, park, map edge, about to run alongside a road, or into a grid that has its own streets.
@@ -573,16 +737,14 @@ namespace Crookedile.Gameplay.City
                     if (TryAreaAt(areas, cell, out CityArea area))
                     {
                         block = Range(rng, area.BlockCells);
-                        branchChance = area.StreetBranchChance;
+                        branchChance = area.StreetBranchChance * TownStreets(areas, cell, spread);
                     }
                     else
                     {
                         block = Range(rng, _streetBlock);
-                        branchChance = Mathf.Lerp(
-                            _streetBranchChance.x,
-                            _streetBranchChance.y,
-                            Falloff(map, cell, downtown)
-                        );
+                        branchChance =
+                            Mathf.Lerp(_streetBranchChance.x, _streetBranchChance.y, Falloff(map, cell, downtown))
+                            * TownStreets(areas, cell, spread);
                     }
                     for (int sign = -1; sign <= 1; sign += 2)
                     {
@@ -652,7 +814,8 @@ namespace Crookedile.Gameplay.City
             CityMapData map,
             Random rng,
             Vector2Int downtown,
-            IReadOnlyList<CityArea> areas
+            IReadOnlyList<CityArea> areas,
+            Spread spread
         )
         {
             Vector2Int size = map.Size;
@@ -690,10 +853,20 @@ namespace Crookedile.Gameplay.City
                         taken[(used.x * size.y) + used.y] = true;
                     }
 
-                    if (rng.NextDouble() >= (inArea ? area.LotFill : _lotFill))
+                    // The ordinary town thins toward the remote ends; neighbourhoods are places and keep their fill.
+                    float fill = inArea ? area.LotFill : _lotFill;
+                    if (!inArea || IsTown(area))
+                    {
+                        fill *= Mathf.Lerp(1f, _remoteFill, spread.At(cell));
+                    }
+
+                    if (rng.NextDouble() >= fill)
                     {
                         continue;
                     }
+
+                    // Open land around the building: later lots can't use the ring, so it stays yard.
+                    MarkGap(taken, size, lot, inArea ? area.BuildingGap : _buildingGap);
 
                     if (inArea)
                     {
@@ -716,6 +889,33 @@ namespace Crookedile.Gameplay.City
                         Mathf.Lerp(_downtownStoreys.y, _edgeStoreys.y, distance)
                     );
                     map.AddBuilding(lot, Range(rng, new Vector2Int(low, high)) * _storeyHeight);
+                }
+            }
+        }
+
+        // Side streets in the ordinary town thin toward the remote ends; neighbourhoods keep theirs.
+        private float TownStreets(IReadOnlyList<CityArea> areas, Vector2Int cell, Spread spread)
+        {
+            int index = AreaIndexAt(areas, cell);
+            bool town = index < 0 || IsTown(areas[index]);
+            return town ? Mathf.Lerp(1f, _remoteStreets, spread.At(cell)) : 1f;
+        }
+
+        private static void MarkGap(bool[] taken, Vector2Int size, RectInt lot, int gap)
+        {
+            if (gap <= 0)
+            {
+                return;
+            }
+
+            for (int row = lot.xMin - gap; row < lot.xMax + gap; row++)
+            {
+                for (int column = lot.yMin - gap; column < lot.yMax + gap; column++)
+                {
+                    if (row >= 0 && column >= 0 && row < size.x && column < size.y)
+                    {
+                        taken[(row * size.y) + column] = true;
+                    }
                 }
             }
         }

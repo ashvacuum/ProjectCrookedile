@@ -21,6 +21,7 @@ namespace Crookedile.Editor
             Land,
             Sea,
             Park,
+            River,
             Building,
             RemoveBuilding,
         }
@@ -33,6 +34,7 @@ namespace Crookedile.Editor
             "Land",
             "Sea",
             "Park",
+            "River",
             "Building",
             "Remove building",
         };
@@ -108,7 +110,7 @@ namespace Crookedile.Editor
         private static void DrawToolbar(CityMapView view)
         {
             Handles.BeginGUI();
-            GUILayout.BeginArea(new Rect(10f, 10f, 620f, 72f), EditorStyles.helpBox);
+            GUILayout.BeginArea(new Rect(10f, 10f, 720f, 72f), EditorStyles.helpBox);
             _brush = (Brush)GUILayout.Toolbar((int)_brush, BrushNames);
             if (_brush == Brush.Building)
             {
@@ -221,6 +223,9 @@ namespace Crookedile.Editor
                     break;
                 case Brush.Park:
                     changed = map.SetGround(cell, CityMapData.Ground.Park);
+                    break;
+                case Brush.River:
+                    changed = map.SetGround(cell, CityMapData.Ground.River);
                     break;
                 case Brush.RemoveBuilding:
                     changed = lotsChanged = map.RemoveBuildingAt(cell);

@@ -28,3 +28,4 @@ MonoBehaviour:
   - {r: 0.7, g: 0.33, b: 0.22, a: 1}
   - {r: 0.45, g: 0.3, b: 0.22, a: 1}
   _streetLayout: 1
+  _buildingGap: 2

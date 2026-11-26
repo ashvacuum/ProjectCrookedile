@@ -12,6 +12,7 @@ namespace Crookedile.Data.Campaign
         Coast,
         Avenue,
         Edge,
+        River,
     }
 
     // How a neighbourhood's streets are laid out: a planned grid, or organic streets that wander off the avenues.
@@ -29,7 +30,7 @@ namespace Crookedile.Data.Campaign
     public class CityNeighbourhoodData : ScriptableObject
     {
         [Tooltip(
-            "Where the area is centred on each run's city: Downtown = nearest the centre, Coast = nearest the sea, Avenue = beside an avenue partway out, Edge = farthest out, Anywhere = a random spot."
+            "Where the area is centred on each run's city: Downtown = nearest the centre, Coast = nearest the sea, Avenue = beside an avenue partway out, Edge = farthest out, River = on a riverbank, Anywhere = a random spot."
         )]
         [SerializeField]
         private DistrictPlacement _placement = DistrictPlacement.Anywhere;
@@ -54,6 +55,12 @@ namespace Crookedile.Data.Campaign
         )]
         [SerializeField, Range(0f, 1f)]
         private float _lotFill = 0.85f;
+
+        [Tooltip(
+            "Cells of open land kept around every building in the area, so buildings don't stand wall to wall. 0 packs them tight, as in informal settlements and markets."
+        )]
+        [SerializeField, Range(0, 3), SuffixLabel("cells", true)]
+        private int _buildingGap = 1;
 
         [Title("Streets")]
         [Tooltip(
@@ -105,6 +112,7 @@ namespace Crookedile.Data.Campaign
         public Vector2Int Storeys => _storeys;
         public Vector2Int LotSize => _lotSize;
         public float LotFill => _lotFill;
+        public int BuildingGap => _buildingGap;
         public StreetLayout StreetLayout => _streetLayout;
         public Vector2Int BlockCells => _blockCells;
         public float StreetBranchChance => _streetBranchChance;

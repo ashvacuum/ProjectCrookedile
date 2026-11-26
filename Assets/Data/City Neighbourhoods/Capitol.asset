@@ -25,3 +25,4 @@ MonoBehaviour:
   _roofPitch: {x: 18, y: 24}
   _roofColors: []
   _streetLayout: 1
+  _buildingGap: 1
