@@ -1,18 +1,8 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Crookedile.Data.Campaign
 {
-    // Where on the generated city a district's marker stands (city-generator.md §4.8). Only the drawing uses it: travel
-    // times stay on CampaignTravelData's roads and encounters still come from the pool.
-    public enum DistrictPlacement
-    {
-        Anywhere,
-        Downtown,
-        Coast,
-        Avenue,
-        Edge,
-    }
-
     [CreateAssetMenu(menuName = "Crookedile/Campaign/District", fileName = "New District")]
     public class DistrictData : ScriptableObject
     {
@@ -27,17 +17,18 @@ namespace Crookedile.Data.Campaign
         private Vector2 _mapPosition = new Vector2(-1f, -1f);
 
         [Tooltip(
-            "Where the district stands on each run's city: Downtown = nearest the centre, Coast = nearest the sea, Avenue = on an avenue partway out, Edge = farthest out, Anywhere = a random building."
+            "What the district looks like on each run's city and where it sits: its buildings, streets and placement rule. Several districts can share a type."
         )]
-        [SerializeField]
-        private DistrictPlacement _placement = DistrictPlacement.Anywhere;
+        [SerializeField, InlineEditor]
+        private CityNeighbourhoodData _neighbourhood;
 
         public Vector2 MapPosition
         {
             get { return _mapPosition; }
         }
 
-        public DistrictPlacement Placement => _placement;
+        // Null for a district with no look of its own: it still gets a marker, on the town around it.
+        public CityNeighbourhoodData Neighbourhood => _neighbourhood;
 
         public string DisplayName
         {

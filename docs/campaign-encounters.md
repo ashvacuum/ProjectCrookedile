@@ -390,6 +390,10 @@ The current routing assets live in `Assets/Data/Campaign Routing`. HQ, the resid
 barangay, market/plaza, civic center, business district, and riverside form six connected
 districts. The civic-to-business bridge carries directional commuter traffic; the market-to-riverside
 bridge provides a quieter southern detour. Rush windows are 07:30–09:30 and 15:00–17:00.
+*Added 2026-11-26, placeholder roads to tune:* **Reclamation (Port and Malls)** (15 minutes from the business
+district), **Affluent Subdivision** (15 minutes from the residential barangay) and **Exclusive Village** (12 minutes
+beyond it), all two-way with the usual rush windows and no encounters yet. Every district now points at a
+`CityNeighbourhoodData` type for how it looks on the city (`city-generator.md` §4.5).
 Use Encounter Designer's travel graph and inline Odin inspectors to edit these assets.
 
 The daily budget is eight hours (08:00–16:00), including travel and waiting. Brgy Fiesta

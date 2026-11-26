@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.DistrictData
   _mapPosition: {x: 610, y: 60}
   _displayName: Business District
-  _placement: 1
+  _neighbourhood: {fileID: 11400000, guid: bbd33c91ab9a4c9883be8d823dee3ec1, type: 2}

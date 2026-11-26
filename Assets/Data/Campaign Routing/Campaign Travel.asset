@@ -108,3 +108,36 @@ MonoBehaviour:
     - _startMinute: 900
       _endMinute: 1020
       _multiplier: 1.5
+  - _from: {fileID: 11400000, guid: 953c76c063bd23d4f852ccff3d65ef38, type: 2}
+    _to: {fileID: 11400000, guid: ac682b60f15c426a99d7ede89f4eb1cd, type: 2}
+    _bidirectional: 1
+    _baseMinutes: 15
+    _traffic:
+    - _startMinute: 450
+      _endMinute: 570
+      _multiplier: 1.25
+    - _startMinute: 900
+      _endMinute: 1020
+      _multiplier: 1.25
+  - _from: {fileID: 11400000, guid: b255cbc01a87415c883d377da23e2407, type: 2}
+    _to: {fileID: 11400000, guid: 898b4aa3293a45a7bdfcc9d954623dcd, type: 2}
+    _bidirectional: 1
+    _baseMinutes: 15
+    _traffic:
+    - _startMinute: 450
+      _endMinute: 570
+      _multiplier: 1.25
+    - _startMinute: 900
+      _endMinute: 1020
+      _multiplier: 1.25
+  - _from: {fileID: 11400000, guid: 898b4aa3293a45a7bdfcc9d954623dcd, type: 2}
+    _to: {fileID: 11400000, guid: da2b358518414576a7b20be3586379ae, type: 2}
+    _bidirectional: 1
+    _baseMinutes: 12
+    _traffic:
+    - _startMinute: 450
+      _endMinute: 570
+      _multiplier: 1.25
+    - _startMinute: 900
+      _endMinute: 1020
+      _multiplier: 1.25

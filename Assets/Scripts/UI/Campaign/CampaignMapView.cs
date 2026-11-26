@@ -228,26 +228,25 @@ namespace Crookedile.UI.Campaign
             return world;
         }
 
-        // The camera's centre stays over the city; a view wider than the city stays centred on it.
+        // The whole view stays on the map, never past its edges: zoom is capped at the most the map's narrow side
+        // can fill, then the centre is pulled in until every corner of the view stands on a map cell.
         private void Clamp()
         {
-            Rect bounds = _city.WorldBounds;
-            if (bounds.width <= 0f)
+            if (!_city.IsBuilt)
             {
                 return;
             }
 
+            _camera.orthographicSize = Mathf.Min(
+                _camera.orthographicSize,
+                _city.MaxViewHalfHeight(_camera.aspect)
+            );
             float halfHeight = _camera.orthographicSize;
-            float halfWidth = halfHeight * _camera.aspect;
-            Vector3 position = _camera.transform.position;
-            position.x = ClampAxis(position.x, bounds.xMin + halfWidth, bounds.xMax - halfWidth);
-            position.y = ClampAxis(position.y, bounds.yMin + halfHeight, bounds.yMax - halfHeight);
-            _camera.transform.position = position;
-        }
-
-        private static float ClampAxis(float value, float min, float max)
-        {
-            return min > max ? (min + max) * 0.5f : Mathf.Clamp(value, min, max);
+            _camera.transform.position = _city.ClampViewCenter(
+                _camera.transform.position,
+                halfHeight * _camera.aspect,
+                halfHeight
+            );
         }
 
         // Whether the pointer is over one of CampaignFlow's panels or its tooltip, where clicks belong to the UI.

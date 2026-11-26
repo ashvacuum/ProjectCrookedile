@@ -38,7 +38,7 @@ atlases and test scenes stay in `Assets/Art/AI/Iso`.*
 | Piece | Kind | Holds |
 |---|---|---|
 | **City map** | plain data, saved as `CityMapData` (SO) for test maps | size; per cell: ground (land, sea), road (none, street, avenue), zone; list of placed buildings (building, footprint origin, W × L, storeys) |
-| **`ZoneData`** | SO, Database tab | name, distance band (§4.4), placeholder colour, weighted building list, landmark list |
+| ~~**`ZoneData`**~~ | — | *Superseded 2026-11-26:* zones are district neighbourhoods, a profile on `DistrictData` (§4.5). Landmark lists move to districts when landmarks are built |
 | **`BuildingData`** | SO, Database tab | id from the asset GUID; face atlas material and roof / left wall / right wall cells; allowed W × L footprints; storey range and storey height |
 | **Generator settings** | serialized fields on the generator | size, coast depth range, avenue count range, run-length range, block size limits, zone list ordered centre-outward |
 
@@ -65,6 +65,10 @@ diagonals): long straight runs (a tunable length range) joined by 45° bends, so
 Sideways moves are short (a separate, smaller length range); long sideways runs read as a staircase, not a road.
 Avenues may cross each other; a crossing is an avenue junction.
 
+**The highway** *(built 2026-11-26)*: one straight two-cell avenue runs the whole length of the land, parallel to the
+coast, like Cebu's main north–south road. Its position across the land (0 = just inland of the coast, 1 = the far
+edge, default the middle) and whether it exists are randomizer settings. Streets sprout off it as off any avenue.
+
 ### 4.4 Streets
 Streets **march**. Each is a walker, one cell wide, that starts beside an avenue (a tunable chance per avenue-side cell)
 and steps straight along a grid axis:
@@ -83,9 +87,46 @@ deep block interiors stay open yards, and open land past the last street stays e
 *Superseded 2026-11-24:* recursive cuts of the regions between avenues. They made an even grid with no growth,
 dead ends or thinning; marching was chosen instead.
 
-### 4.5 Zones
-Each block takes the first zone whose distance band contains the block's distance from downtown (zones are ordered
-centre-outward: element 0 is downtown, the last is the edge of town).
+### 4.5 Zones: district neighbourhoods
+*Ruled and built 2026-11-26; replaces the distance-band `ZoneData`.* A city's character comes from **neighbourhood
+types** (`CityNeighbourhoodData`, `Assets/Data/City Neighbourhoods`), not from bands around downtown. Each district
+points at one, and several can share a type. A type's fields, all tunable on the asset:
+
+| Field | Sets |
+|---|---|
+| Placement | where the area is centred (§4.8) |
+| Area radius | how far the area reaches, in cells |
+| Storeys | building height range |
+| Lot size | lot side range, so building footprint |
+| Lot fill | share of lots built; the rest stay yards, plazas and gaps |
+| Block cells, street branch chance | street density: short blocks and high branching give a web of small roads |
+| Scenery areas | extra copies of the type scattered around town beyond the districts that use it |
+| Town fallback | builds all land outside every area (one type; ordinary housing) |
+
+**Housing is everywhere.** Besides the districts, each type the network's districts use scatters its scenery areas,
+and the town-fallback type builds whatever land no area covers, so there is housing all over the city, not only
+where there is somewhere to visit.
+
+Generation order: coast, downtown, highway and avenues; then every **area centre**, districts first (§4.8), then
+scenery; then streets and lots, each built to the type of the nearest area covering it, else the town fallback.
+
+| Type | Districts | Storeys | Lots | Fill | Streets | Placement | Scenery |
+|---|---|---|---|---|---|---|---|
+| Business Towers | Business District | 5–10 | 2–3 | 85% | blocks 4–6 | Downtown | — |
+| Capitol | Civic Center (the political district) | 3–5 | 3–4 | 50% | blocks 5–8, sparse | Avenue | — |
+| Market | Public Market and Plaza | 1–2 | 1–2 | 80% | blocks 3–5 | Avenue | — |
+| Reclamation | Reclamation (Port and Malls) | 2–4 | 3–5 | 65% | blocks 5–8, sparse | Coast | — |
+| Informal Housing | Riverside Community | 1 | 1 | 85% | blocks 2–3, dense lanes | Coast | 2 |
+| Middle-Class Housing | Residential Barangay | 1–2 | 1–2 | 55% | blocks 3–5, small roads | Anywhere | 3, town fallback |
+| Affluent Housing | Affluent Subdivision | 2–3 | 2–3 | 55% | blocks 5–7 | Edge | 1 |
+| Exclusive Village | Exclusive Village | 2 | 3–4 | 40% | blocks 6–9, few roads | Edge | 1 |
+| HQ Grounds | Campaign Headquarters | 2–3 | 2 | 70% | blocks 4–7 | Avenue | — |
+
+Fill is kept well below full (*retuned 2026-11-26*): the town fallback covers every unclaimed cell, so its fill and
+street grain set how packed the whole city feels.
+
+Every building is still the one `CampaignBlock` half-cube, so for now a district reads through height, lot size, gaps
+and street grain. House and tower art arrives with `BuildingData` (§3).
 
 ### 4.6 Landmarks
 Each zone lists must-have landmarks. The generator places each once, before ordinary buildings, in the largest block
@@ -97,20 +138,23 @@ Each block is packed largest footprint first from its zone's weighted list; stor
 lot that touches none is not built.
 
 ### 4.8 Districts
-*Built 2026-11-25.* Each `DistrictData` has a **placement** rule, and after the buildings are placed each district on
-the travel network takes one building by its rule:
+*Built 2026-11-25; centres before buildings since 2026-11-26.* Each neighbourhood type has a **placement** rule. Once
+the coast, highway and avenues are down, each district on the travel network, then each scenery area, takes the centre
+of its area, an open land cell, by its type's rule (a district with no type: Anywhere):
 
-| Rule | Picks |
+| Rule | Centres on |
 |---|---|
-| Downtown | the building nearest downtown |
-| Coast | the building nearest the sea |
-| Avenue | a building on an avenue, about halfway out |
-| Edge | the building farthest from downtown |
-| Anywhere | any building |
+| Downtown | the cell nearest downtown |
+| Coast | the cell nearest the sea |
+| Avenue | a cell beside an avenue, about halfway out |
+| Edge | the cell farthest from downtown |
+| Anywhere | any cell |
 
-- HQ goes first, then road endpoints in road order; each takes the best building left. Districts keep a minimum
-  spacing when the city has room, and a small seeded jitter picks among the few best spots rather than always the very
-  best. Both are tunable on `CampaignCity` (`CityDistrictPlacer`).
+- HQ goes first, then road endpoints in road order, then scenery areas; each takes the best cell left. Centres keep a
+  minimum spacing (24 cells) when the city has room, so areas stay distinct, and a small seeded jitter picks among the few best spots. Both
+  are tunable on `CampaignCity` (`CityDistrictPlacer`).
+- After the buildings are placed, the district's marker goes on the **tallest building within its area**, the nearest on
+  a tie, else the nearest building anywhere; no two districts share one.
 - Seeded from the run seed on its own stream, so a run always places its districts the same way and nothing is saved.
 - A district with no building left gets no marker and a `GameLogger` warning.
 - The district's marker stands on its building's roof (§7).
@@ -138,6 +182,8 @@ the travel network takes one building by its rule:
   data (`TEXCOORD2`, read by the half-cube shader when its w is 2; a mesh without the channel can read w = 1 on D3D), so a 192 × 64 map is 48 meshes rather than 12,288
   objects and the ground batches. Sea and avenue cells are each chunk's other two submeshes. Painting rebuilds only the
   chunks a change touches. *Built 2026-11-26.*
+- **Open sea past the coast** *(built 2026-11-26)*. The view finds the coast (the map edge that is mostly sea) and
+  draws one flat sea quad past it, 32 cells by default (tunable on the view), so the city looks out over water.
 - **Culling by chunk** *(built 2026-11-26)*. Buildings are grouped under the chunk their front cell is in. In Play mode
   each chunk whose bounds (ground plus its buildings' roofs) miss the camera's view and a margin turns its renderers off,
   so the cost follows what is on screen, not the map's size. Renderers, not GameObjects, so buildings keep their meshes.
@@ -259,7 +305,9 @@ a soft passing shade over roofs and roads:
   (back walls too, as with shadows). Light walks only through open ground, so it never passes through a building to
   the street behind; it fades with distance over a reach in cells. More storeys give brighter light.
 - **Shader.** One filtered read at the pixel's grid position, faded out with height so it lights streets and low
-  walls rather than roofs, added as albedo x glow x the sun's night emission scale, so it vanishes by day for free.
+  walls rather than roofs, added as albedo x glow x the sun's night emission scale, so it vanishes by day for free. The emission reaches its day value at a
+  tunable daylight (**Lights Off By** on the sky, default 0.2, about 45 minutes after sunrise), so windows are dark
+  by the 08:00 start of a campaign day.
 - **Test variety.** Each building rolls lit or dark and warm (tungsten) or cool (fluorescent), seeded by its lot, so
   it keeps its lights when others change. Building types (`BuildingData`) take over colour and window density later.
 - **Lamp posts (later).** A lamp is the same spread from a one-texel source with its own colour and reach, plus a
@@ -283,7 +331,9 @@ diagonal avenues and eight-neighbour art. *Built 2026-11-25:* `campaign.unity` d
 `RunState.Seed` with the randomizer (tuned on the scene's City Map view), so the same run always draws the same city
 and nothing extra is saved; it sets the puddle seed from the run seed and places the districts (§4.8). It reads the run and never changes it.
 `CampaignMapView` (on the `CampaignFlow` object) opens on the current district, pans by dragging (left mouse by
-default) and zooms toward the cursor with the scroll wheel, clamped to the city and ignored over `CampaignFlow`'s
+default) and zooms toward the cursor with the scroll wheel, with the whole view kept on the city: every corner on a map cell or on the open sea past the coast, so the three land
+edges are hard limits and the coast side opens onto the water; zoom-out is capped by the city's narrow side, sea
+included. It is ignored over `CampaignFlow`'s
 panels. Each district shows a name marker on its building, and the current district's is highlighted. Districts with a
 location still on today's list glow: the half-cube shader's **selection glow**, a pulsing band along every face's
 edges plus a faint fill, set per building (`CityMapView.SetBuildingGlow`) and tuned on the material (edge width,

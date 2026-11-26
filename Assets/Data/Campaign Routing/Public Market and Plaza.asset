@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.DistrictData
   _displayName: Public Market and Plaza
   _mapPosition: {x: 330, y: 300}
-  _placement: 3
+  _neighbourhood: {fileID: 11400000, guid: c240221a0d9c4858aacebe132ad54fcf, type: 2}

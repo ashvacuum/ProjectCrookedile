@@ -6,10 +6,25 @@ using Random = System.Random;
 
 namespace Crookedile.Gameplay.City
 {
-    // Fills a CityMapData with a random test city from a seed: coast, winding two-cell avenues out of downtown, streets
-    // that march off the avenues until they die or close a block, and lots along the roads that grow taller toward
+    // A neighbourhood on the generated city (city-generator.md §4.5): cells within Radius of Center build their streets
+    // and lots to this profile; where areas overlap the nearest centre wins. An infinite Radius makes the area the town
+    // fallback: it covers only cells no other area does. The campaign fills these from its neighbourhood types.
+    public struct CityArea
+    {
+        public Vector2Int Center;
+        public float Radius;
+        public Vector2Int Storeys;
+        public Vector2Int LotSize;
+        public float LotFill;
+        public Vector2Int BlockCells;
+        public float StreetBranchChance;
+    }
+
+    // Fills a CityMapData with a random city from a seed: coast, a highway down the length of the land, winding two-cell
+    // avenues out of downtown, streets that march off the avenues until they die or close a block, and lots along the
+    // roads. Inside a neighbourhood (CityArea) streets and lots follow its profile; elsewhere lots grow taller toward
     // downtown. A stand-in for the generator (city-generator.md §4).
-    // ponytail: axis-only avenues, no zones or landmarks. The §4 generator replaces this once diagonal art, zones and
+    // ponytail: axis-only avenues, no landmarks. The §4 generator replaces this once diagonal art, landmarks and
     // BuildingData exist.
     [Serializable]
     public sealed class CityMapRandomizer
@@ -41,6 +56,16 @@ namespace Crookedile.Gameplay.City
         )]
         [SerializeField]
         private bool _coastFacesCamera = true;
+
+        [Tooltip(
+            "A straight two-cell highway running the whole length of the land, parallel to the coast, like a city's main north-south road."
+        )]
+        [SerializeField]
+        private bool _highway = true;
+
+        [Tooltip("Where the highway runs across the land: 0 = just inland of the coast, 1 = the far edge.")]
+        [SerializeField, Range(0f, 1f), ShowIf(nameof(_highway))]
+        private float _highwayInland = 0.5f;
 
         [Tooltip(
             "Chance per cell along the coast that its depth steps in or out by one. Low keeps the shore smooth."
@@ -130,8 +155,14 @@ namespace Crookedile.Gameplay.City
         [SerializeField, Min(0.05f), SuffixLabel("units", true)]
         private float _storeyHeight = 0.5f;
 
-        // Returns downtown, the cell zones and district placement measure from.
-        public Vector2Int Fill(CityMapData map, int seed)
+        // Returns downtown, the cell district placement measures from. chooseAreas runs once the coast, highway and
+        // avenues are down and before streets and lots, so a caller can centre neighbourhoods on what is there; null
+        // gives a city with no neighbourhoods.
+        public Vector2Int Fill(
+            CityMapData map,
+            int seed,
+            Func<CityMapData, Vector2Int, IReadOnlyList<CityArea>> chooseAreas = null
+        )
         {
             Random rng = new Random(seed);
             map.Clear();
@@ -170,6 +201,11 @@ namespace Crookedile.Gameplay.City
             );
             Vector2Int downtown = FromEdge(size, inland, along, downtownStep, coast[downtownStep]);
 
+            if (_highway)
+            {
+                PaintHighway(map, inland, along, coastLength, depthLimit);
+            }
+
             // Avenues head inland or along the coast, never back to sea.
             Vector2Int[] headings = { inland, along, -along };
             int avenues = Range(rng, _avenueCount);
@@ -178,9 +214,71 @@ namespace Crookedile.Gameplay.City
                 PaintAvenue(map, rng, downtown, headings[index % headings.Length], inland);
             }
 
-            MarchStreets(map, rng, downtown);
-            PlaceBuildings(map, rng, downtown);
+            IReadOnlyList<CityArea> areas = chooseAreas?.Invoke(map, downtown) ?? Array.Empty<CityArea>();
+            MarchStreets(map, rng, downtown, areas);
+            PlaceBuildings(map, rng, downtown, areas);
             return downtown;
+        }
+
+        // A straight two-cell avenue the length of the coast, at the inland fraction between the deepest coast and the
+        // far edge. Where the coast reaches past it, the sea wins.
+        private void PaintHighway(
+            CityMapData map,
+            Vector2Int inland,
+            Vector2Int along,
+            int coastLength,
+            int depthLimit
+        )
+        {
+            int nearest = Mathf.Min(_coastDepth.y + 1, depthLimit - 2);
+            int into = Mathf.RoundToInt(Mathf.Lerp(nearest, depthLimit - 2, _highwayInland));
+            for (int step = 0; step < coastLength; step++)
+            {
+                for (int lane = 0; lane < 2; lane++)
+                {
+                    map.SetRoad(
+                        FromEdge(map.Size, inland, along, step, into + lane),
+                        CityMapData.Road.Avenue
+                    );
+                }
+            }
+        }
+
+        // The neighbourhood a cell belongs to: the nearest centre within its radius, else the town fallback, or none.
+        private static bool TryAreaAt(IReadOnlyList<CityArea> areas, Vector2Int cell, out CityArea area)
+        {
+            area = default;
+            float best = float.MaxValue;
+            bool hasFallback = false;
+            CityArea fallback = default;
+            foreach (CityArea candidate in areas)
+            {
+                if (float.IsPositiveInfinity(candidate.Radius))
+                {
+                    if (!hasFallback)
+                    {
+                        fallback = candidate;
+                        hasFallback = true;
+                    }
+
+                    continue;
+                }
+
+                float distance = Vector2.Distance(cell, candidate.Center);
+                if (distance <= candidate.Radius && distance < best)
+                {
+                    best = distance;
+                    area = candidate;
+                }
+            }
+
+            if (best < float.MaxValue)
+            {
+                return true;
+            }
+
+            area = fallback;
+            return hasFallback;
         }
 
         private void PaintAvenue(
@@ -230,7 +328,12 @@ namespace Crookedile.Gameplay.City
         // Streets are walkers that start beside avenues and march straight one cell at a time. At every block corner they
         // may sprout a side street each way (less often far from downtown) and rarely turn. Meeting another road closes a
         // block and ends the walker; one that stops short of a block without meeting a road is erased as a stub.
-        private void MarchStreets(CityMapData map, Random rng, Vector2Int downtown)
+        private void MarchStreets(
+            CityMapData map,
+            Random rng,
+            Vector2Int downtown,
+            IReadOnlyList<CityArea> areas
+        )
         {
             Queue<(Vector2Int cell, Vector2Int heading)> walkers =
                 new Queue<(Vector2Int, Vector2Int)>();
@@ -260,7 +363,11 @@ namespace Crookedile.Gameplay.City
             while (walkers.Count > 0 && budget > 0)
             {
                 (Vector2Int cell, Vector2Int heading) = walkers.Dequeue();
-                int block = Range(rng, _streetBlock);
+                Vector2Int blockRange = TryAreaAt(areas, cell, out CityArea startArea)
+                    ? startArea.BlockCells
+                    : _streetBlock;
+                int shortest = Mathf.Min(blockRange.x, blockRange.y);
+                int block = Range(rng, blockRange);
                 int sinceCorner = 0;
                 bool joined = false;
                 painted.Clear();
@@ -294,12 +401,21 @@ namespace Crookedile.Gameplay.City
                     }
 
                     sinceCorner = 0;
-                    block = Range(rng, _streetBlock);
-                    float branchChance = Mathf.Lerp(
-                        _streetBranchChance.x,
-                        _streetBranchChance.y,
-                        Falloff(map, cell, downtown)
-                    );
+                    float branchChance;
+                    if (TryAreaAt(areas, cell, out CityArea area))
+                    {
+                        block = Range(rng, area.BlockCells);
+                        branchChance = area.StreetBranchChance;
+                    }
+                    else
+                    {
+                        block = Range(rng, _streetBlock);
+                        branchChance = Mathf.Lerp(
+                            _streetBranchChance.x,
+                            _streetBranchChance.y,
+                            Falloff(map, cell, downtown)
+                        );
+                    }
                     for (int sign = -1; sign <= 1; sign += 2)
                     {
                         if (rng.NextDouble() < branchChance)
@@ -314,7 +430,7 @@ namespace Crookedile.Gameplay.City
                     }
                 }
 
-                if (!joined && painted.Count < _streetBlock.x)
+                if (!joined && painted.Count < shortest)
                 {
                     foreach (Vector2Int stub in painted)
                     {
@@ -364,7 +480,12 @@ namespace Crookedile.Gameplay.City
             return false;
         }
 
-        private void PlaceBuildings(CityMapData map, Random rng, Vector2Int downtown)
+        private void PlaceBuildings(
+            CityMapData map,
+            Random rng,
+            Vector2Int downtown,
+            IReadOnlyList<CityArea> areas
+        )
         {
             Vector2Int size = map.Size;
             bool[] taken = new bool[size.x * size.y];
@@ -378,14 +499,18 @@ namespace Crookedile.Gameplay.City
                         continue;
                     }
 
+                    // A neighbourhood's profile, or the town's: lots taller toward downtown.
+                    bool inArea = TryAreaAt(areas, cell, out CityArea area);
+                    Vector2Int lotSize = inArea ? area.LotSize : _lotSize;
+
                     // Every building fronts a road. A lot that touches none is left free for a later lot to cover
                     // part of; cells no road-touching lot reaches stay open land (yards, block interiors).
                     RectInt lot = GrowLot(
                         map,
                         taken,
                         cell,
-                        Range(rng, _lotSize),
-                        Range(rng, _lotSize)
+                        Range(rng, lotSize),
+                        Range(rng, lotSize)
                     );
                     if (!TouchesRoad(map, lot))
                     {
@@ -397,8 +522,14 @@ namespace Crookedile.Gameplay.City
                         taken[(used.x * size.y) + used.y] = true;
                     }
 
-                    if (rng.NextDouble() >= _lotFill)
+                    if (rng.NextDouble() >= (inArea ? area.LotFill : _lotFill))
                     {
+                        continue;
+                    }
+
+                    if (inArea)
+                    {
+                        map.AddBuilding(lot, Range(rng, area.Storeys) * _storeyHeight);
                         continue;
                     }
 

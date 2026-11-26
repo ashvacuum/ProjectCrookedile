@@ -7,95 +7,135 @@ using Random = System.Random;
 
 namespace Crookedile.Gameplay.City
 {
-    // Picks one building per district on a generated city by its placement rule (city-generator.md §4.8), so the
-    // district's marker has somewhere to stand. Seeded, so a run always places its districts the same way. Placement
-    // is drawing only: travel times stay authored on the roads.
+    // Places neighbourhoods on a generated city (city-generator.md §4.5, §4.8). First, once the coast, highway and
+    // avenues are down, it picks the centre of each area (districts and scenery) by its placement rule; the randomizer
+    // then builds that area's streets and lots to its neighbourhood type. Afterwards it puts each district's marker on
+    // the tallest building near its centre. Seeded, so a run always places its districts the same way. Placement is drawing only:
+    // travel times stay authored on the roads.
     [Serializable]
     public sealed class CityDistrictPlacer
     {
-        [Tooltip("Districts keep at least this far apart, centre to centre, when the city has room.")]
+        [Tooltip("Area centres (districts and scenery) keep at least this far apart when the city has room, so areas stay distinct.")]
         [SerializeField, Min(0f), SuffixLabel("cells", true)]
-        private float _minSpacingCells = 8f;
+        private float _areaSpacingCells = 24f;
 
         [Tooltip(
-            "Random spread added to each building's score, so a rule picks among the few best spots rather than always the very best."
+            "Random spread added to each spot's score, so a rule picks among the few best spots rather than always the very best."
         )]
         [SerializeField, Min(0f), SuffixLabel("cells", true)]
         private float _jitterCells = 3f;
 
-        // District to the index of its building in map.Buildings. A district with no building left is absent.
-        public Dictionary<DistrictData, int> Place(
+        // The cell each area is centred on, in the order of the rules given (districts first, then scenery areas, so
+        // districts get the best spots). Candidates are open land (no sea, no road); an area that finds none is null.
+        public List<Vector2Int?> PlaceCentres(
             CityMapData map,
             Vector2Int downtown,
-            IReadOnlyList<DistrictData> districts,
+            IReadOnlyList<DistrictPlacement> rules,
             int seed
         )
         {
-            var placed = new Dictionary<DistrictData, int>();
-            IReadOnlyList<CityMapData.Building> buildings = map.Buildings;
-            if (buildings.Count == 0)
+            var centres = new List<Vector2Int?>(rules.Count);
+            var candidates = new List<Vector2Int>();
+            float farthest = 0f;
+            foreach (Vector2Int cell in new RectInt(Vector2Int.zero, map.Size).allPositionsWithin)
             {
-                return placed;
+                if (map.GetGround(cell) == CityMapData.Ground.Sea || map.GetRoad(cell) != CityMapData.Road.None)
+                {
+                    continue;
+                }
+
+                candidates.Add(cell);
+                farthest = Mathf.Max(farthest, Vector2.Distance(cell, downtown));
             }
 
             var rng = new Random(seed ^ 0x5D1C7);
             int[] seaDistance = SeaDistance(map);
-            float farthest = 0f;
-            foreach (CityMapData.Building building in buildings)
+            var taken = new List<Vector2Int>();
+            foreach (DistrictPlacement rule in rules)
             {
-                farthest = Mathf.Max(farthest, Vector2.Distance(building.Lot.center, downtown));
-            }
-
-            var taken = new List<Vector2>();
-            foreach (DistrictData district in districts)
-            {
-                int best = -1;
+                Vector2Int best = default;
+                bool found = false;
                 bool bestSpaced = false;
                 float bestScore = float.MaxValue;
-                for (int index = 0; index < buildings.Count; index++)
+                foreach (Vector2Int cell in candidates)
                 {
-                    if (placed.ContainsValue(index))
+                    if (taken.Contains(cell))
                     {
                         continue;
                     }
 
-                    Vector2 center = buildings[index].Lot.center;
-                    bool spaced = taken.TrueForAll(other => Vector2.Distance(other, center) >= _minSpacingCells);
+                    bool spaced = taken.TrueForAll(other => Vector2.Distance(other, cell) >= _areaSpacingCells);
                     float score =
-                        Score(district.Placement, map, buildings[index], downtown, farthest, seaDistance)
+                        Score(rule, map, cell, downtown, farthest, seaDistance)
                         + (float)rng.NextDouble() * _jitterCells;
                     // A well-spaced spot always beats a crowded one; crowding is only the fallback.
-                    if ((spaced && !bestSpaced) || (spaced == bestSpaced && score < bestScore))
+                    if (!found || (spaced && !bestSpaced) || (spaced == bestSpaced && score < bestScore))
                     {
-                        best = index;
+                        best = cell;
+                        found = true;
                         bestSpaced = spaced;
                         bestScore = score;
                     }
                 }
 
-                if (best < 0)
+                centres.Add(found ? best : (Vector2Int?)null);
+                if (found)
                 {
-                    break;
+                    taken.Add(best);
                 }
-
-                placed[district] = best;
-                taken.Add(buildings[best].Lot.center);
             }
 
-            return placed;
+            return centres;
+        }
+
+        // The building that stands for a district: the tallest within radius of its centre, nearest on a tie, else the
+        // nearest anywhere. Skips buildings already taken by another district; -1 when none is left.
+        public int PickBuilding(CityMapData map, Vector2Int centre, float radius, ICollection<int> taken)
+        {
+            IReadOnlyList<CityMapData.Building> buildings = map.Buildings;
+            int tallest = -1;
+            int nearest = -1;
+            float tallestHeight = float.MinValue;
+            float tallestDistance = float.MaxValue;
+            float nearestDistance = float.MaxValue;
+            for (int index = 0; index < buildings.Count; index++)
+            {
+                if (taken.Contains(index))
+                {
+                    continue;
+                }
+
+                float distance = Vector2.Distance(buildings[index].Lot.center, centre);
+                if (distance < nearestDistance)
+                {
+                    nearest = index;
+                    nearestDistance = distance;
+                }
+
+                float height = buildings[index].WallHeight;
+                bool taller = height > tallestHeight || (Mathf.Approximately(height, tallestHeight) && distance < tallestDistance);
+                if (distance <= radius && taller)
+                {
+                    tallest = index;
+                    tallestHeight = height;
+                    tallestDistance = distance;
+                }
+            }
+
+            return tallest >= 0 ? tallest : nearest;
         }
 
         // Lower is better, in cells.
         private static float Score(
             DistrictPlacement placement,
             CityMapData map,
-            CityMapData.Building building,
+            Vector2Int cell,
             Vector2Int downtown,
             float farthest,
             int[] seaDistance
         )
         {
-            float fromDowntown = Vector2.Distance(building.Lot.center, downtown);
+            float fromDowntown = Vector2.Distance(cell, downtown);
             switch (placement)
             {
                 case DistrictPlacement.Downtown:
@@ -103,10 +143,11 @@ namespace Crookedile.Gameplay.City
                 case DistrictPlacement.Edge:
                     return farthest - fromDowntown;
                 case DistrictPlacement.Coast:
-                    return NearestSea(map, building.Lot, seaDistance);
+                    int steps = seaDistance[(cell.x * map.Size.y) + cell.y];
+                    return steps == int.MaxValue ? float.MaxValue / 2f : steps;
                 case DistrictPlacement.Avenue:
-                    // On an avenue, about halfway out; off an avenue is a poor last resort.
-                    return Mathf.Abs(fromDowntown - (farthest * 0.5f)) + (TouchesAvenue(map, building.Lot) ? 0f : farthest);
+                    // Beside an avenue, about halfway out; away from one is a poor last resort.
+                    return Mathf.Abs(fromDowntown - (farthest * 0.5f)) + (BesideAvenue(map, cell) ? 0f : farthest);
                 default:
                     return 0f;
             }
@@ -151,25 +192,14 @@ namespace Crookedile.Gameplay.City
             return distance;
         }
 
-        private static float NearestSea(CityMapData map, RectInt lot, int[] seaDistance)
+        // Whether any of the cell's eight neighbours is an avenue.
+        private static bool BesideAvenue(CityMapData map, Vector2Int cell)
         {
-            int nearest = int.MaxValue;
-            foreach (Vector2Int cell in lot.allPositionsWithin)
+            for (int row = -1; row <= 1; row++)
             {
-                nearest = Mathf.Min(nearest, seaDistance[(cell.x * map.Size.y) + cell.y]);
-            }
-
-            return nearest == int.MaxValue ? float.MaxValue / 2f : nearest;
-        }
-
-        private static bool TouchesAvenue(CityMapData map, RectInt lot)
-        {
-            for (int row = lot.xMin - 1; row <= lot.xMax; row++)
-            {
-                for (int column = lot.yMin - 1; column <= lot.yMax; column++)
+                for (int column = -1; column <= 1; column++)
                 {
-                    var cell = new Vector2Int(row, column);
-                    if (!lot.Contains(cell) && map.GetRoad(cell) == CityMapData.Road.Avenue)
+                    if (map.GetRoad(cell + new Vector2Int(row, column)) == CityMapData.Road.Avenue)
                     {
                         return true;
                     }

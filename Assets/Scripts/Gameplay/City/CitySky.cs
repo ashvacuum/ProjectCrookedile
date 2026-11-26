@@ -349,6 +349,13 @@ namespace Crookedile.Gameplay.City
         [TabGroup(TABS, "Sun")]
         private Vector2 _emission = new Vector2(1.6f, 0.05f);
 
+        [Tooltip(
+            "Daylight at which window emission and window glow reach their midday value: 0 = sunrise, 1 = midday. Low turns the lights off soon after dawn; 0.2 is about 45 minutes after sunrise."
+        )]
+        [SerializeField, Range(0.01f, 1f), LabelText("Lights Off By (Daylight)")]
+        [TabGroup(TABS, "Sun")]
+        private float _emissionDaylight = 0.2f;
+
         [Tooltip("Light while the sun is down: path, colour and phase. Shadows and cloud shade follow it.")]
         [SerializeField, InlineProperty, HideLabel]
         [TabGroup(TABS, "Moon")]
@@ -549,7 +556,8 @@ namespace Crookedile.Gameplay.City
             Color ambient =
                 _ambientColor.Evaluate(daylight) * Color.Lerp(Color.white, _rain.AmbientTint, rain);
             float emission =
-                Mathf.Lerp(_emission.x, _emission.y, daylight) * Mathf.Lerp(1f, _rain.EmissionBoost, rain);
+                Mathf.Lerp(_emission.x, _emission.y, Mathf.Clamp01(daylight / _emissionDaylight))
+                * Mathf.Lerp(1f, _rain.EmissionBoost, rain);
             float shadowStrength = _shadowStrength * Mathf.Lerp(1f, _rain.ShadowScale, rain);
             Shader.SetGlobalVector(LightDirectionId, IsoGrid.GridToView(toLightGrid).normalized);
             Shader.SetGlobalVector(LightDirectionGridId, toLightGrid);

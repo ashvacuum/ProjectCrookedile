@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.DistrictData
   _displayName: Civic Center
   _mapPosition: {x: 330, y: 60}
-  _placement: 1
+  _neighbourhood: {fileID: 11400000, guid: b36ae23559854759962bd7e35a48cec4, type: 2}

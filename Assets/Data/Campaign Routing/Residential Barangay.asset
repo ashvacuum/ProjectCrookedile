@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Campaign.DistrictData
   _displayName: Residential Barangay
   _mapPosition: {x: 50, y: 300}
-  _placement: 4
+  _neighbourhood: {fileID: 11400000, guid: fc8acc9ab6834c6ab878079073ca4376, type: 2}

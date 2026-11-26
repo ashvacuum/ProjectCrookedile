@@ -44,9 +44,16 @@ namespace Crookedile.Gameplay.City
 
         public static Vector2Int LocalToCell(Vector3 local)
         {
+            Vector2 grid = LocalToGrid(local);
+            return new Vector2Int(Mathf.RoundToInt(grid.x), Mathf.RoundToInt(grid.y));
+        }
+
+        // The exact (row, column) under a local ground point, unrounded; the inverse of CellToLocal(float, float).
+        public static Vector2 LocalToGrid(Vector3 local)
+        {
             float row = ((local.x / HALF_WIDTH) + (local.y / HALF_HEIGHT)) * 0.5f;
             float column = ((local.x / HALF_WIDTH) - (local.y / HALF_HEIGHT)) * 0.5f;
-            return new Vector2Int(Mathf.RoundToInt(row), Mathf.RoundToInt(column));
+            return new Vector2(row, column);
         }
 
         // Larger is nearer the camera: a lower screen position draws in front.

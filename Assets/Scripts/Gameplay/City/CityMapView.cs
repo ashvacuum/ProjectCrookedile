@@ -103,6 +103,12 @@ namespace Crookedile.Gameplay.City
         private float _cullMargin = 2f;
 
         [Tooltip(
+            "Open sea drawn past the coast edge, in cells, so the city looks out over water and the camera can pan out over it. The coast is the map edge that is mostly sea; 0 draws none."
+        )]
+        [SerializeField, Range(0, 128), SuffixLabel("cells", true), FoldoutGroup("Chunks and culling")]
+        private int _seaApronCells = 32;
+
+        [Tooltip(
             "Tuning for the painter's Randomize button, which replaces the whole map with a random test city."
         )]
         [SerializeField, FoldoutGroup("Randomizer", Expanded = false), InlineProperty, HideLabel]
@@ -127,6 +133,8 @@ namespace Crookedile.Gameplay.City
         }
 
         private readonly List<Chunk> _chunks = new List<Chunk>();
+        private GameObject _apron;
+        private Mesh _apronMesh;
         private readonly List<GameObject> _buildings = new List<GameObject>();
         private Vector2Int _builtSize;
         private int _builtChunkCells;
@@ -138,6 +146,13 @@ namespace Crookedile.Gameplay.City
 
         public CityMapData Map => _map;
         public CityMapRandomizer Randomizer => _randomizer;
+
+        // From land toward the open sea in grid steps, (0, +1) when the last column is the coast; zero when no edge is
+        // mostly sea. Set on rebuild.
+        public Vector2Int SeaOutward { get; private set; }
+
+        // How far the open sea reaches past the coast edge, in cells; 0 when there is no coast.
+        public int SeaApronCells => SeaOutward == Vector2Int.zero ? 0 : _seaApronCells;
 
         // Lights a building with the shader's selection glow: rgb is the colour, alpha the strength, and
         // an alpha of 0 turns it off. The index is the building's place in Map.Buildings. Cleared when the
@@ -237,6 +252,7 @@ namespace Crookedile.Gameplay.City
             }
 
             RebuildBuildings();
+            BuildSeaApron();
         }
 
         // Re-picks the art of these cells and their neighbours; call after painting ground or roads. Rebuilds only
@@ -498,6 +514,98 @@ namespace Crookedile.Gameplay.City
             return GROUND_SUBMESH;
         }
 
+        // The coast is the map edge with the most sea, if more than half of it is sea.
+        private Vector2Int DetectSeaOutward()
+        {
+            Vector2Int size = _map.Size;
+            (Vector2Int outward, int length, System.Func<int, Vector2Int> cell)[] edges =
+            {
+                (Vector2Int.left, size.y, index => new Vector2Int(0, index)),
+                (Vector2Int.right, size.y, index => new Vector2Int(size.x - 1, index)),
+                (Vector2Int.down, size.x, index => new Vector2Int(index, 0)),
+                (Vector2Int.up, size.x, index => new Vector2Int(index, size.y - 1)),
+            };
+            Vector2Int best = Vector2Int.zero;
+            float bestShare = 0.5f;
+            foreach ((Vector2Int outward, int length, System.Func<int, Vector2Int> cell) in edges)
+            {
+                int sea = 0;
+                for (int index = 0; index < length; index++)
+                {
+                    sea += _map.GetGround(cell(index)) == CityMapData.Ground.Sea ? 1 : 0;
+                }
+
+                float share = sea / (float)Mathf.Max(1, length);
+                if (share > bestShare)
+                {
+                    best = outward;
+                    bestShare = share;
+                }
+            }
+
+            return best;
+        }
+
+        // One flat sea quad past the coast edge, as wide as that edge. Its uvs sit mid-face so the shader's edge
+        // highlight and selection glow never draw on it; it has no atlas data, so it takes the sea material's look.
+        private void BuildSeaApron()
+        {
+            SeaOutward = DetectSeaOutward();
+            if (SeaOutward == Vector2Int.zero || _seaApronCells <= 0)
+            {
+                return;
+            }
+
+            Vector2 min = new Vector2(-0.5f, -0.5f);
+            Vector2 max = new Vector2(_builtSize.x - 0.5f, _builtSize.y - 0.5f);
+            if (SeaOutward.x > 0)
+            {
+                min.x = max.x;
+                max.x += _seaApronCells;
+            }
+            else if (SeaOutward.x < 0)
+            {
+                max.x = min.x;
+                min.x -= _seaApronCells;
+            }
+            else if (SeaOutward.y > 0)
+            {
+                min.y = max.y;
+                max.y += _seaApronCells;
+            }
+            else
+            {
+                max.y = min.y;
+                min.y -= _seaApronCells;
+            }
+
+            _apronMesh = new Mesh { name = "City Sea Apron", hideFlags = HideFlags.HideAndDontSave };
+            _apronMesh.vertices = new[]
+            {
+                IsoGrid.CellToLocal(min.x, min.y),
+                IsoGrid.CellToLocal(max.x, min.y),
+                IsoGrid.CellToLocal(max.x, max.y),
+                IsoGrid.CellToLocal(min.x, max.y),
+            };
+            Vector3 up = IsoGrid.UpView;
+            var tangent = new Vector4(IsoGrid.RowView.x, IsoGrid.RowView.y, IsoGrid.RowView.z, 1f);
+            _apronMesh.normals = new[] { up, up, up, up };
+            _apronMesh.tangents = new[] { tangent, tangent, tangent, tangent };
+            var middle = new Vector2(0.5f, 0.5f);
+            _apronMesh.uv = new[] { middle, middle, middle, middle };
+            _apronMesh.SetUVs(1, new[] { Vector2.zero, Vector2.zero, Vector2.zero, Vector2.zero });
+            _apronMesh.colors = new[] { Color.white, Color.white, Color.white, Color.white };
+            _apronMesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
+            _apronMesh.RecalculateBounds();
+
+            _apron = new GameObject("Sea Apron") { hideFlags = HideFlags.HideAndDontSave };
+            _apron.transform.SetParent(transform, false);
+            _apron.AddComponent<MeshFilter>().sharedMesh = _apronMesh;
+            MeshRenderer apronRenderer = _apron.AddComponent<MeshRenderer>();
+            apronRenderer.sortingOrder = GROUND_SORTING_ORDER;
+            apronRenderer.sharedMaterial = _seaMaterial;
+        }
+
         // The half-cube shader's TransformAtlasUV for a quarter-turn count, baked on the CPU.
         private static Vector2 TurnAtlasUv(Vector2 uv, int quarterTurns)
         {
@@ -702,6 +810,11 @@ namespace Crookedile.Gameplay.City
 
             _chunks.Clear();
             _buildings.Clear();
+            DestroyOwned(_apron);
+            DestroyOwned(_apronMesh);
+            _apron = null;
+            _apronMesh = null;
+            SeaOutward = Vector2Int.zero;
             _builtSize = Vector2Int.zero;
         }
 
