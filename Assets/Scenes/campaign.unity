@@ -187,6 +187,7 @@ MonoBehaviour:
   _startZoom: 6
   _zoomRange: {x: 2.5, y: 18}
   _zoomPerNotch: 0.12
+  _openOutline: {r: 1, g: 0.8, b: 0.35, a: 0.9}
 --- !u!1 &629140825
 GameObject:
   m_ObjectHideFlags: 0
@@ -218,9 +219,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Gameplay.City.CampaignCity
   _view: {fileID: 1917154959}
   _sky: {fileID: 913078232}
+  _mapSize: {x: 256, y: 128}
   _placer:
-    _minSpacingCells: 8
-    _jitterCells: 3
+    _areaSpacingCells: 36
+    _crowdingCost: 2
+    _reachShare: 0.6
+    _jitterCells: 10
 --- !u!4 &629140827
 Transform:
   m_ObjectHideFlags: 0
@@ -333,6 +337,7 @@ MonoBehaviour:
     m_NumColorKeys: 3
     m_NumAlphaKeys: 2
   _emission: {x: 1.6, y: 0.05}
+  _emissionDaylight: 0.2
   _moon:
     _riseMinute: 1140
     _setMinute: 300
@@ -550,10 +555,51 @@ MonoBehaviour:
   _map: {fileID: 0}
   _groundMaterial: {fileID: 2100000, guid: bcf69abc938d7ce4e8c962b802d4ac83, type: 2}
   _buildingPrefab: {fileID: 33268604104110306, guid: 1ea8acc98422f9744b860515d5e15050, type: 3}
-  _seaColor: {r: 0.2, g: 0.45, b: 0.65, a: 1}
+  _shoreWater: {r: 0.42, g: 0.66, b: 0.6, a: 1}
+  _middleWater: {r: 0.28, g: 0.52, b: 0.54, a: 1}
+  _deepWater: {r: 0.18, g: 0.36, b: 0.44, a: 1}
+  _middleBandCells: 1.5
+  _deepBandCells: 5
+  _bandWobble: 0.6
+  _mottle: 0.05
+  _inkColor: {r: 0.15, g: 0.18, b: 0.2, a: 1}
+  _inkPixels: 2
+  _foamColor: {r: 0.93, g: 0.89, b: 0.77, a: 1}
+  _foamCells: 0.12
+  _foamSwell: 0.3
+  _strokeDensity: 0.15
+  _strokeSpacing: 3
+  _strokeLength: 0.4
+  _strokePixels: 1.5
+  _strokeShoreCells: 2
+  _waterSpeed: 0.15
+  _nightGlow: 0.3
   _avenueColor: {r: 0.5, g: 0.48, b: 0.56, a: 1}
+  _parkColor: {r: 0.38, g: 0.56, b: 0.32, a: 1}
+  _chunkCells: 16
+  _cullCamera: {fileID: 0}
+  _cullMargin: 2
+  _seaApronCells: 32
   _randomizer:
-    _coastDepth: {x: 3, y: 8}
+    _coastDepthRange: {x: 4, y: 20}
+    _coastBays: {x: 1.5, y: 3.5}
+    _coastRipple: 0.35
+    _coastOnLongSide: 1
+    _coastFacesCamera: 1
+    _rivers: {x: 2, y: 3}
+    _riverWidth: {x: 1, y: 2}
+    _riverMeander: 0.35
+    _highway: 1
+    _highwayInland: 0.5
+    _openPatches: {x: 10, y: 16}
+    _openPatchRadius: {x: 2.5, y: 7}
+    _openPatchClearance: 6
+    _buildingGap: 1
+    _townCore: 0.3
+    _remoteFill: 0.2
+    _remoteStreets: 0.25
+    _gridReach: 0.55
+    _patchCoreChance: 0.3
     _coastWobbleChance: 0.25
     _downtownOffset: 0.2
     _avenueCount: {x: 3, y: 5}

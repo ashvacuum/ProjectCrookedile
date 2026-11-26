@@ -14,13 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Crookedile.Runtime::Crookedile.Data.Enemy.EnemyData
   _id: 11d08081dc217b9978c39bc6444095e2
   _enemyName: Ahas
-  _portrait: {fileID: 0}
+  _portrait: {fileID: 21300000, guid: d848aaabede0b3c46b3b15807620c3f3, type: 3}
   _startingHostility: 2
   _maxHostility: 6
   _minHostility: -5
   _neutralZone: 0
-  _demographicClass: 0
-  _demographicValues: 0
   _startingEffects: []
   _passives: []
   _movePattern: 0
