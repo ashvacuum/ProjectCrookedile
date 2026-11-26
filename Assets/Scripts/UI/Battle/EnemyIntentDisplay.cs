@@ -109,6 +109,9 @@ namespace Crookedile.UI.Battle
 
         private EnemyMoveData _currentMove;
 
+        /// <summary>The move on show, or null while the intent is hidden.</summary>
+        public EnemyMoveData CurrentMove => _currentMove;
+
         // Bob state
         private float _bobPhase; // random per-instance offset so enemies don't sync
         private bool _isBobbing;

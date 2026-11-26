@@ -81,11 +81,18 @@ namespace Crookedile.UI.Battle
 
         private void OnStatusEffectApplied(StatusEffectAppliedEvent evt)
         {
-            // Refresh the specific enemy slot so its status display reflects the change.
-            if (evt.IsToPlayer || evt.EnemyIndex < 0 || evt.EnemyIndex >= _slots.Count)
+            // A player status changes what every enemy's attack would do to them.
+            if (evt.IsToPlayer)
+            {
+                foreach (var s in _slots)
+                    s?.RefreshIntent();
+                return;
+            }
+            if (evt.EnemyIndex < 0 || evt.EnemyIndex >= _slots.Count)
                 return;
 
             _slots[evt.EnemyIndex]?.Refresh();
+            _slots[evt.EnemyIndex]?.RefreshIntent();
 
             // Stunning an enemy neutralises its turn — clear the intent immediately so the
             // player sees the threat is handled rather than a move that will never fire.
