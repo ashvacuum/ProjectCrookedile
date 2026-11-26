@@ -218,7 +218,6 @@ GameObject:
   - component: {fileID: 6145321337583792224}
   - component: {fileID: 8480413168276344660}
   - component: {fileID: 8825016854489755981}
-  - component: {fileID: 8424824501382755196}
   m_Layer: 5
   m_Name: HP Bar
   m_TagString: Untagged
@@ -283,19 +282,6 @@ MonoBehaviour:
   m_FillOrigin: 1
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8424824501382755196
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1126158169604375879}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63b5c8bdc3081d54091fdcf3c09205c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Crookedile.UI.Battle.HPBarHoverTrigger
-  _slot: {fileID: 2845183935342811957}
 --- !u!1 &1579504727246197396
 GameObject:
   m_ObjectHideFlags: 0

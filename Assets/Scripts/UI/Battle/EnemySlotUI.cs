@@ -85,13 +85,6 @@ namespace Crookedile.UI.Battle
         [SerializeField]
         private string _stanceGrowTag = "<+grow>";
 
-        [Header("Name Hover")]
-        [Tooltip(
-            "Duration in seconds for the enemy name to fade in or out when the HP bar is hovered."
-        )]
-        [SerializeField]
-        private float _nameFadeDuration = 0.2f;
-
         [SerializeField]
         private Image selectionHighlight;
 
@@ -141,9 +134,18 @@ namespace Crookedile.UI.Battle
             if (dragDropHighlight != null)
                 dragDropHighlight.enabled = false;
 
-            // Name is always visible — no HP bar to hover over
+            // A pooled slot may come back from MarkDefeated: everything it hid shows again.
             if (nameText != null)
+            {
+                nameText.gameObject.SetActive(true);
                 nameText.alpha = 1f;
+            }
+            if (_stanceBackground != null)
+                _stanceBackground.gameObject.SetActive(true);
+            else if (_stanceText != null)
+                _stanceText.gameObject.SetActive(true);
+            if (_intentDisplay != null)
+                _intentDisplay.gameObject.SetActive(true);
 
             _intentDisplay?.ShowIntent(null); // hidden until intent is declared
 
@@ -249,6 +251,16 @@ namespace Crookedile.UI.Battle
         }
 
         /// <summary>
+        /// Recomputes the shown intent's numbers against the current statuses (Guilt, Strength,
+        /// the player's Vulnerable…). No-op while the intent is hidden.
+        /// </summary>
+        public void RefreshIntent()
+        {
+            if (_intentDisplay?.CurrentMove != null)
+                UpdateIntent(_intentDisplay.CurrentMove);
+        }
+
+        /// <summary>
         /// Highlights or un-highlights this slot to show it is the current focus target.
         /// </summary>
         public void SetSelected(bool selected)
@@ -311,35 +323,6 @@ namespace Crookedile.UI.Battle
         /// The panel will reappear when the next EnemyIntentDeclaredEvent fires.
         /// </summary>
         public void ClearIntent() => _intentDisplay?.ShowIntent(null);
-
-        #endregion
-
-        #region Name Hover Fade
-        /// <summary>
-        /// Fades the enemy name label in. Called by <see cref="HPBarHoverTrigger"/> on pointer-enter.
-        /// </summary>
-        public void ShowNameLabel()
-        {
-            if (nameText == null || !nameText.gameObject.activeInHierarchy)
-                return;
-            DOTween.Kill(nameText);
-            DOTween
-                .To(() => nameText.alpha, x => nameText.alpha = x, 1f, _nameFadeDuration)
-                .SetLink(gameObject);
-        }
-
-        /// <summary>
-        /// Fades the enemy name label out. Called by <see cref="HPBarHoverTrigger"/> on pointer-exit.
-        /// </summary>
-        public void HideNameLabel()
-        {
-            if (nameText == null)
-                return;
-            DOTween.Kill(nameText);
-            DOTween
-                .To(() => nameText.alpha, x => nameText.alpha = x, 0f, _nameFadeDuration)
-                .SetLink(gameObject);
-        }
 
         #endregion
 
