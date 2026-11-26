@@ -65,8 +65,30 @@ namespace Crookedile.Data.Enemy
         private string _enemyName = "Unknown Enemy";
 
         [Tooltip("Portrait or artwork sprite shown in the battle scene")]
+        [InlineButton("AssignRandomPortrait", "Random")]
         [SerializeField]
         private Sprite _portrait;
+
+#if UNITY_EDITOR
+        private const string PlaceholderArtFolder = "Assets/Art/2D_Fantasy_characters_png/transparent";
+
+        // ponytail: placeholder art from the fantasy pack; replace with authored portraits per enemy.
+        private void AssignRandomPortrait()
+        {
+            string[] guids = UnityEditor.AssetDatabase.FindAssets(
+                "t:Sprite",
+                new[] { PlaceholderArtFolder }
+            );
+            if (guids.Length == 0)
+                return;
+            string path = UnityEditor.AssetDatabase.GUIDToAssetPath(
+                guids[UnityEngine.Random.Range(0, guids.Length)]
+            );
+            UnityEditor.Undo.RecordObject(this, "Random Portrait");
+            _portrait = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+#endif
 
         #endregion
 
