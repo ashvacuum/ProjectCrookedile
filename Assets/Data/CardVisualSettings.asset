@@ -16,14 +16,14 @@ MonoBehaviour:
   _faithLeaderCardBack: {fileID: 21300000, guid: a0e51c749187cfb4383284e0a5d6725e, type: 3}
   _nepoBabyCardBack: {fileID: 21300000, guid: 9bb65edd49322274c8bb670f251bf5c4, type: 3}
   _actorCardBack: {fileID: 21300000, guid: 60e08d6205752cd4d80e7ea0d06e7f1f, type: 3}
-  _pressureFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
-  _rhetoricFrame: {fileID: 21300000, guid: dc67360bcc0d7cb408982a16417918a0, type: 3}
-  _policyFrame: {fileID: 21300000, guid: 25322d8af2aefbf47b6829c9b7d7bdf2, type: 3}
-  _statusFrame: {fileID: 21300000, guid: 25322d8af2aefbf47b6829c9b7d7bdf2, type: 3}
-  _curseFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
-  _basicFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
-  _enhancedFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
-  _rareFrame: {fileID: 21300000, guid: f4ac515dea90e7a40ac662c519f3fd3c, type: 3}
+  _pressureFrame: {fileID: 21300000, guid: b2e0c02e72d857f41a3d3f44f5e26e72, type: 3}
+  _rhetoricFrame: {fileID: 21300000, guid: b518f983b3517e347b2282aba5ebc7bd, type: 3}
+  _policyFrame: {fileID: 21300000, guid: 4ea9efa041d5fdc40b6df21ace21cc13, type: 3}
+  _statusFrame: {fileID: 21300000, guid: 64353f784b7532b489cbfcdb5c3b313e, type: 3}
+  _curseFrame: {fileID: 21300000, guid: 156260d34e613d242b1d22f8a86a6965, type: 3}
+  _basicFrame: {fileID: 0}
+  _enhancedFrame: {fileID: 0}
+  _rareFrame: {fileID: 0}
   _upgradedNameSuffix: +
   _upgradedNameColor: {r: 0.115417674, g: 0.5924529, b: 0, a: 1}
   _discountedCostColor: {r: 0.7344565, g: 0.87169814, b: 0.08388037, a: 1}
