@@ -100,6 +100,10 @@ Shader "Crookedile/2D/Half Cube Lit"
                 // turns, and w = 2. A mesh without this channel reads (0, 0, 0, 1) on some APIs (D3D), so baked means
                 // w above 1.5, and such meshes use the per-renderer atlas rects instead.
                 float4 atlasData : TEXCOORD2;
+                // Which of the face's uv edges lie on the building's outline: (uv.x = 0, uv.x = 1, uv.y = 0, uv.y = 1),
+                // 2 = outlined. Set by HalfCubeBuilding; a mesh without it reads (0, 0, 0, 1) on D3D, so the test is
+                // above 1.5 and such meshes never outline.
+                float4 outlineEdges : TEXCOORD3;
                 half4 color : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
@@ -115,6 +119,7 @@ Shader "Crookedile/2D/Half Cube Lit"
                 half3 tangentWS : TEXCOORD4;
                 half3 bitangentWS : TEXCOORD5;
                 float4 atlasData : TEXCOORD6;
+                float4 outlineEdges : TEXCOORD7;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -384,6 +389,7 @@ Shader "Crookedile/2D/Half Cube Lit"
                 output.positionCS = TransformWorldToHClip(positionWS);
                 output.uv = input.uv;
                 output.atlasData = input.atlasData;
+                output.outlineEdges = input.outlineEdges;
                 output.color = input.color * _Color;
                 output.faceId = input.faceData.x;
                 // Heights are authored in object space; a scaled object scales them with its geometry.
@@ -453,9 +459,8 @@ Shader "Crookedile/2D/Half Cube Lit"
                 color += GlowSmear(input.gridPosition) * (half)_CityRainSurface.y * shine * _CityEmissionScale;
                 // Selection outline (a building picked out on the map, e.g. a district with somewhere to go): a
                 // pulsing line of fixed screen width around the building's silhouette, except its two ground
-                // edges: the roof's two back edges (roof uv.y = 0 and uv.x = 1) and the walls' two outer verticals
-                // (left wall uv.x = 0, right wall uv.x = 1). HalfCubeBuilding's face uvs set which edge is which.
-                // Off (a = 0) unless a renderer sets _SelectionColor.
+                // edges. Each face marks which of its uv edges are on that outline (outlineEdges), so a flat roof
+                // and a gable both outline correctly. Off (a = 0) unless a renderer sets _SelectionColor.
                 half4 selection = (half4)UNITY_ACCESS_INSTANCED_PROP(PerInstance, _SelectionColor);
                 if (selection.a > 0.0h)
                 {
@@ -463,9 +468,12 @@ Shader "Crookedile/2D/Half Cube Lit"
                     float2 pixelUv = max(fwidth(input.uv), 1e-5);
                     float2 fromLow = input.uv / pixelUv;
                     float2 fromHigh = (1.0 - input.uv) / pixelUv;
-                    float pixels = input.faceId < 0.5h ? min(fromLow.y, fromHigh.x)
-                        : input.faceId < 1.5h ? fromLow.x
-                        : fromHigh.x;
+                    float4 edges = input.outlineEdges;
+                    float pixels = 1e6;
+                    pixels = edges.x > 1.5 ? min(pixels, fromLow.x) : pixels;
+                    pixels = edges.y > 1.5 ? min(pixels, fromHigh.x) : pixels;
+                    pixels = edges.z > 1.5 ? min(pixels, fromLow.y) : pixels;
+                    pixels = edges.w > 1.5 ? min(pixels, fromHigh.y) : pixels;
                     half onOutline = (half)saturate(_SelectionOutlinePixels - pixels);
                     half pulse = 0.75h + 0.25h * (half)sin(_Time.y * _SelectionPulseSpeed);
                     color = lerp(color, selection.rgb * pulse, onOutline * saturate(selection.a));

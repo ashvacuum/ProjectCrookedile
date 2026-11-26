@@ -9,10 +9,12 @@ namespace Crookedile.Gameplay.City
     [CreateAssetMenu(menuName = "Crookedile/Campaign/City Map", fileName = "CityMap")]
     public sealed class CityMapData : ScriptableObject
     {
+        // Park is open land kept free of streets and lots by the generator: fields, plazas, empty patches.
         public enum Ground : byte
         {
             Land,
             Sea,
+            Park,
         }
 
         public enum Road : byte
@@ -37,15 +39,48 @@ namespace Crookedile.Gameplay.City
             [SerializeField, Min(0.05f)]
             private float _wallHeight = 0.5f;
 
+            [Tooltip("Flat roof, or a gable with its ridge along the lot's longer side.")]
+            [SerializeField]
+            private RoofStyle _roof = RoofStyle.Flat;
+
+            [Tooltip("Slope of a gable roof, in degrees (under 30, or the back slope vanishes from the camera).")]
+            [SerializeField, Range(5f, 28f)]
+            private float _roofPitch = 20f;
+
+            [Tooltip("Tint on the roof faces. White, or a clear colour from older maps, leaves the roof as painted.")]
+            [SerializeField]
+            private Color _roofColor = Color.white;
+
             public Building(RectInt lot, float wallHeight)
+                : this(lot, wallHeight, RoofStyle.Flat, 20f, Color.white) { }
+
+            public Building(RectInt lot, float wallHeight, RoofStyle roof, float roofPitch, Color roofColor)
             {
                 _origin = lot.position;
                 _size = lot.size;
                 _wallHeight = wallHeight;
+                _roof = roof;
+                _roofPitch = Mathf.Clamp(roofPitch, 5f, 28f);
+                _roofColor = roofColor;
             }
 
             public RectInt Lot => new RectInt(_origin, _size);
             public float WallHeight => _wallHeight;
+            public RoofStyle Roof => _roof;
+            public float RoofPitch => _roofPitch;
+            public Color RoofColor => _roofColor.a > 0f ? _roofColor : Color.white;
+
+            // How far a gable's ridge rises above the eaves (0 for a flat roof), in world units.
+            public float RidgeRise =>
+                _roof == RoofStyle.Gable
+                    ? HalfCubeBuilding.RidgeRise(Mathf.Min(_size.x, _size.y), _roofPitch)
+                    : 0f;
+
+            // The top of the building: the ridge on a gable, the roof on a flat roof.
+            public float TopHeight => _wallHeight + RidgeRise;
+
+            // The single height the shadow test uses for the whole lot: a gable's average, eaves plus half the rise.
+            public float ShadowHeight => _wallHeight + (RidgeRise * 0.5f);
 
             // The lot cell nearest the camera, where the half-cube's pivot sits.
             public Vector2Int FrontCell => new Vector2Int(_origin.x, _origin.y + _size.y - 1);
@@ -119,7 +154,8 @@ namespace Crookedile.Gameplay.City
             }
 
             _ground[Index(cell)] = ground;
-            if (ground == Ground.Sea)
+            // Sea and park are open ground: painting them clears a road (a street may be painted back over a park).
+            if (ground != Ground.Land)
             {
                 _roads[Index(cell)] = Road.None;
             }
@@ -186,12 +222,17 @@ namespace Crookedile.Gameplay.City
 
         public bool AddBuilding(RectInt lot, float wallHeight)
         {
+            return AddBuilding(lot, wallHeight, RoofStyle.Flat, 20f, Color.white);
+        }
+
+        public bool AddBuilding(RectInt lot, float wallHeight, RoofStyle roof, float roofPitch, Color roofColor)
+        {
             if (!CanPlace(lot))
             {
                 return false;
             }
 
-            _buildings.Add(new Building(lot, wallHeight));
+            _buildings.Add(new Building(lot, wallHeight, roof, roofPitch, roofColor));
             return true;
         }
 

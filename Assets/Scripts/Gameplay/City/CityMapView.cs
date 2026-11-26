@@ -22,6 +22,7 @@ namespace Crookedile.Gameplay.City
         private const int GROUND_SUBMESH = 0;
         private const int SEA_SUBMESH = 1;
         private const int AVENUE_SUBMESH = 2;
+        private const int PARK_SUBMESH = 3;
 
         // Ground never overlaps a building, so every chunk draws below every building.
         private const int GROUND_SORTING_ORDER = -1000;
@@ -86,6 +87,10 @@ namespace Crookedile.Gameplay.City
         [SerializeField]
         private Color _avenueColor = new Color(0.5f, 0.48f, 0.56f);
 
+        [Tooltip("Placeholder colour for park cells (open land the generator keeps empty) until grass art exists.")]
+        [SerializeField]
+        private Color _parkColor = new Color(0.38f, 0.56f, 0.32f);
+
         [Tooltip(
             "Side of a ground chunk, in cells. Each chunk is one mesh and the unit of culling: bigger means fewer objects, smaller means tighter culling."
         )]
@@ -140,6 +145,7 @@ namespace Crookedile.Gameplay.City
         private int _builtChunkCells;
         private Material _seaMaterial;
         private Material _avenueMaterial;
+        private Material _parkMaterial;
         private Texture2D _clearTexture;
         private Texture2D _heightMap;
         private MaterialPropertyBlock _outlineBlock;
@@ -207,6 +213,7 @@ namespace Crookedile.Gameplay.City
             Shader.SetGlobalVector(HeightMapSizeId, Vector4.zero);
             DestroyOwned(_seaMaterial);
             DestroyOwned(_avenueMaterial);
+            DestroyOwned(_parkMaterial);
             DestroyOwned(_clearTexture);
             DestroyOwned(_heightMap);
             _glow.Release();
@@ -344,12 +351,12 @@ namespace Crookedile.Gameplay.City
             float tallest = 0f;
             foreach (CityMapData.Building building in _map.Buildings)
             {
-                tallest = Mathf.Max(tallest, building.WallHeight);
+                tallest = Mathf.Max(tallest, building.ShadowHeight);
                 foreach (Vector2Int cell in building.Lot.allPositionsWithin)
                 {
                     // Texel x is the row and y the column, matching the shader's Load(int2(row, column)).
                     heights[(cell.y * size.x) + cell.x] = new Color(
-                        building.WallHeight,
+                        building.ShadowHeight,
                         0f,
                         0f,
                         0f
@@ -408,7 +415,7 @@ namespace Crookedile.Gameplay.City
             chunk.Root.AddComponent<MeshFilter>().sharedMesh = chunk.Mesh;
             chunk.Ground = chunk.Root.AddComponent<MeshRenderer>();
             chunk.Ground.sortingOrder = GROUND_SORTING_ORDER;
-            chunk.Ground.sharedMaterials = new[] { _groundMaterial, _seaMaterial, _avenueMaterial };
+            chunk.Ground.sharedMaterials = new[] { _groundMaterial, _seaMaterial, _avenueMaterial, _parkMaterial };
             BuildChunkMesh(chunk);
             return chunk;
         }
@@ -421,7 +428,7 @@ namespace Crookedile.Gameplay.City
             var vertices = new List<Vector3>(cellCount * 4);
             var uvs = new List<Vector2>(cellCount * 4);
             var atlas = new List<Vector4>(cellCount * 4);
-            var submeshes = new[] { new List<int>(), new List<int>(), new List<int>() };
+            var submeshes = new[] { new List<int>(), new List<int>(), new List<int>(), new List<int>() };
 
             foreach (Vector2Int cell in chunk.Cells.allPositionsWithin)
             {
@@ -433,8 +440,8 @@ namespace Crookedile.Gameplay.City
                 {
                     vertices.Add(center + CellCorners[corner]);
                     uvs.Add(CornerUvs[corner]);
-                    // w = 2 marks a baked cell (the shader tests w > 1.5: a missing channel can read w = 1). Sea and
-                    // avenue are flat placeholder colours and keep the per-renderer atlas path (w = 0).
+                    // w = 2 marks a baked cell (the shader tests w > 1.5: a missing channel can read w = 1). Sea,
+                    // avenue and park are flat placeholder colours and keep the per-renderer atlas path (w = 0).
                     if (submesh == GROUND_SUBMESH)
                     {
                         Vector2 turned = TurnAtlasUv(CornerUvs[corner], quarterTurns);
@@ -495,6 +502,11 @@ namespace Crookedile.Gameplay.City
             }
 
             CityMapData.Road road = _map.GetRoad(cell);
+            if (_map.GetGround(cell) == CityMapData.Ground.Park && road == CityMapData.Road.None)
+            {
+                return PARK_SUBMESH;
+            }
+
             if (road == CityMapData.Road.Avenue)
             {
                 return AVENUE_SUBMESH;
@@ -648,7 +660,14 @@ namespace Crookedile.Gameplay.City
             instance.transform.localPosition = IsoGrid.CellToLocal(front);
             if (instance.TryGetComponent(out HalfCubeBuilding halfCube))
             {
-                halfCube.Configure(building.Lot.width, building.Lot.height, building.WallHeight);
+                halfCube.Configure(
+                    building.Lot.width,
+                    building.Lot.height,
+                    building.WallHeight,
+                    building.Roof,
+                    building.RoofPitch,
+                    building.RoofColor
+                );
             }
 
             if (instance.TryGetComponent(out MeshRenderer meshRenderer))
@@ -739,8 +758,14 @@ namespace Crookedile.Gameplay.City
                 _avenueMaterial = CreatePlaceholderMaterial("Avenue Placeholder", _avenueColor);
             }
 
+            if (_parkMaterial == null)
+            {
+                _parkMaterial = CreatePlaceholderMaterial("Park Placeholder", _parkColor);
+            }
+
             _seaMaterial.SetColor(RoofBaseColorId, _seaColor);
             _avenueMaterial.SetColor(RoofBaseColorId, _avenueColor);
+            _parkMaterial.SetColor(RoofBaseColorId, _parkColor);
         }
 
         // The half-cube shader fills transparent texels with _RoofBaseColor, so a clear texture gives a flat lit colour.

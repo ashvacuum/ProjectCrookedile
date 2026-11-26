@@ -21,3 +21,7 @@ MonoBehaviour:
   _streetBranchChance: 0.4
   _sceneryAreas: 0
   _townFallback: 0
+  _gableChance: 0.0
+  _roofPitch: {x: 18, y: 24}
+  _roofColors: []
+  _streetLayout: 1

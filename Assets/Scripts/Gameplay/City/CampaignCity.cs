@@ -25,7 +25,7 @@ namespace Crookedile.Gameplay.City
             "Size of each run's city in rows by columns. More rows than columns gives a long coastal strip, like Metro Cebu along its shore; the randomizer puts the sea down the long side facing the camera."
         )]
         [SerializeField]
-        private Vector2Int _mapSize = new Vector2Int(192, 64);
+        private Vector2Int _mapSize = new Vector2Int(192, 112);
 
         [Tooltip(
             "How neighbourhood areas (districts and scenery) are spread over each run's city. Each type's own rule is on its CityNeighbourhoodData."
@@ -283,6 +283,10 @@ namespace Crookedile.Gameplay.City
                 LotFill = type.LotFill,
                 BlockCells = type.BlockCells,
                 StreetBranchChance = type.StreetBranchChance,
+                Grid = type.StreetLayout == StreetLayout.Grid,
+                GableChance = type.GableChance,
+                RoofPitch = type.RoofPitch,
+                RoofColors = type.RoofColors,
             };
         }
 
@@ -319,7 +323,7 @@ namespace Crookedile.Gameplay.City
                 _districtPositions[district] =
                     _view.transform.position
                     + IsoGrid.CellToLocal(center.x, center.y)
-                    + (Vector3.up * building.WallHeight);
+                    + (Vector3.up * building.TopHeight);
             }
         }
 

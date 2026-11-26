@@ -20,6 +20,7 @@ namespace Crookedile.Editor
             ClearRoad,
             Land,
             Sea,
+            Park,
             Building,
             RemoveBuilding,
         }
@@ -31,6 +32,7 @@ namespace Crookedile.Editor
             "Clear road",
             "Land",
             "Sea",
+            "Park",
             "Building",
             "Remove building",
         };
@@ -216,6 +218,9 @@ namespace Crookedile.Editor
                     break;
                 case Brush.Sea:
                     changed = map.SetGround(cell, CityMapData.Ground.Sea);
+                    break;
+                case Brush.Park:
+                    changed = map.SetGround(cell, CityMapData.Ground.Park);
                     break;
                 case Brush.RemoveBuilding:
                     changed = lotsChanged = map.RemoveBuildingAt(cell);

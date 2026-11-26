@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -11,6 +12,13 @@ namespace Crookedile.Data.Campaign
         Coast,
         Avenue,
         Edge,
+    }
+
+    // How a neighbourhood's streets are laid out: a planned grid, or organic streets that wander off the avenues.
+    public enum StreetLayout
+    {
+        Organic,
+        Grid,
     }
 
     // A kind of neighbourhood on the generated city (city-generator.md §4.5): how its buildings and streets look and
@@ -49,6 +57,12 @@ namespace Crookedile.Data.Campaign
 
         [Title("Streets")]
         [Tooltip(
+            "Grid lays regular streets every block across the area (business districts, subdivisions, ordinary housing). Organic leaves wandering streets off the avenues, the informal settlements' tangle."
+        )]
+        [SerializeField]
+        private StreetLayout _streetLayout = StreetLayout.Grid;
+
+        [Tooltip(
             "Cells between side streets in the area, so block length (min, max). Short blocks give a tight web of small roads."
         )]
         [SerializeField, MinMaxSlider(2, 16, true), SuffixLabel("cells", true)]
@@ -57,6 +71,21 @@ namespace Crookedile.Data.Campaign
         [Tooltip("Chance of a side street on each side at every block corner. High gives many small roads.")]
         [SerializeField, Range(0f, 1f)]
         private float _streetBranchChance = 0.5f;
+
+        [Title("Roofs")]
+        [Tooltip(
+            "Chance a building in the area gets a gable roof; the rest are flat. In the Philippines gables mark affluent houses, so most types keep this at 0."
+        )]
+        [SerializeField, Range(0f, 1f)]
+        private float _gableChance;
+
+        [Tooltip("Slope of a gable roof, in degrees (min, max). Keep it under 30: steeper back slopes vanish from the camera.")]
+        [SerializeField, MinMaxSlider(5f, 28f, true), SuffixLabel("°", true)]
+        private Vector2 _roofPitch = new Vector2(18f, 24f);
+
+        [Tooltip("Roof tints, one picked per building (a seeded roll). Empty leaves roofs as painted.")]
+        [SerializeField]
+        private List<Color> _roofColors = new List<Color>();
 
         [Title("Around town")]
         [Tooltip(
@@ -76,8 +105,12 @@ namespace Crookedile.Data.Campaign
         public Vector2Int Storeys => _storeys;
         public Vector2Int LotSize => _lotSize;
         public float LotFill => _lotFill;
+        public StreetLayout StreetLayout => _streetLayout;
         public Vector2Int BlockCells => _blockCells;
         public float StreetBranchChance => _streetBranchChance;
+        public float GableChance => _gableChance;
+        public Vector2 RoofPitch => _roofPitch;
+        public IReadOnlyList<Color> RoofColors => _roofColors;
         public int SceneryAreas => _sceneryAreas;
         public bool TownFallback => _townFallback;
     }

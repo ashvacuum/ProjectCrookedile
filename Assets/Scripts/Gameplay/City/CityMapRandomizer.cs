@@ -18,6 +18,11 @@ namespace Crookedile.Gameplay.City
         public float LotFill;
         public Vector2Int BlockCells;
         public float StreetBranchChance;
+        // Regular streets every block across the area, anchored on Center; false leaves organic marching streets.
+        public bool Grid;
+        public float GableChance;
+        public Vector2 RoofPitch;
+        public IReadOnlyList<Color> RoofColors;
     }
 
     // Fills a CityMapData with a random city from a seed: coast, a highway down the length of the land, winding two-cell
@@ -66,6 +71,22 @@ namespace Crookedile.Gameplay.City
         [Tooltip("Where the highway runs across the land: 0 = just inland of the coast, 1 = the far edge.")]
         [SerializeField, Range(0f, 1f), ShowIf(nameof(_highway))]
         private float _highwayInland = 0.5f;
+
+        [Tooltip(
+            "Open patches of park (fields, plazas, empty land) scattered over the city (min, max). Nothing is built or paved there, so the city breathes."
+        )]
+        [SerializeField, MinMaxSlider(0, 40, true)]
+        private Vector2Int _openPatches = new Vector2Int(18, 28);
+
+        [Tooltip("Radius of an open patch, in cells (min, max). Edges are ragged.")]
+        [SerializeField, MinMaxSlider(1f, 16f, true), SuffixLabel("cells", true)]
+        private Vector2 _openPatchRadius = new Vector2(2.5f, 7f);
+
+        [Tooltip(
+            "Open patches keep at least this far, beyond their own radius, from a neighbourhood's centre, so a district never sits in an empty field."
+        )]
+        [SerializeField, Min(0f), SuffixLabel("cells", true)]
+        private float _openPatchClearance = 6f;
 
         [Tooltip(
             "Chance per cell along the coast that its depth steps in or out by one. Low keeps the shore smooth."
@@ -215,6 +236,8 @@ namespace Crookedile.Gameplay.City
             }
 
             IReadOnlyList<CityArea> areas = chooseAreas?.Invoke(map, downtown) ?? Array.Empty<CityArea>();
+            CarveOpenPatches(map, rng, areas);
+            PaintGrids(map, rng, areas);
             MarchStreets(map, rng, downtown, areas);
             PlaceBuildings(map, rng, downtown, areas);
             return downtown;
@@ -247,38 +270,178 @@ namespace Crookedile.Gameplay.City
         // The neighbourhood a cell belongs to: the nearest centre within its radius, else the town fallback, or none.
         private static bool TryAreaAt(IReadOnlyList<CityArea> areas, Vector2Int cell, out CityArea area)
         {
-            area = default;
-            float best = float.MaxValue;
-            bool hasFallback = false;
-            CityArea fallback = default;
-            foreach (CityArea candidate in areas)
-            {
-                if (float.IsPositiveInfinity(candidate.Radius))
-                {
-                    if (!hasFallback)
-                    {
-                        fallback = candidate;
-                        hasFallback = true;
-                    }
+            int index = AreaIndexAt(areas, cell);
+            area = index >= 0 ? areas[index] : default;
+            return index >= 0;
+        }
 
+        private static int AreaIndexAt(IReadOnlyList<CityArea> areas, Vector2Int cell)
+        {
+            int nearest = -1;
+            int fallback = -1;
+            float best = float.MaxValue;
+            for (int index = 0; index < areas.Count; index++)
+            {
+                if (float.IsPositiveInfinity(areas[index].Radius))
+                {
+                    fallback = fallback < 0 ? index : fallback;
                     continue;
                 }
 
-                float distance = Vector2.Distance(cell, candidate.Center);
-                if (distance <= candidate.Radius && distance < best)
+                float distance = Vector2.Distance(cell, areas[index].Center);
+                if (distance <= areas[index].Radius && distance < best)
                 {
                     best = distance;
-                    area = candidate;
+                    nearest = index;
                 }
             }
 
-            if (best < float.MaxValue)
+            return nearest >= 0 ? nearest : fallback;
+        }
+
+        private static bool InGridArea(IReadOnlyList<CityArea> areas, Vector2Int cell)
+        {
+            int index = AreaIndexAt(areas, cell);
+            return index >= 0 && areas[index].Grid;
+        }
+
+        // Ragged circles of park on open land (not sea, not road), kept off neighbourhood centres. Laid after the
+        // highway and avenues, which run through them, and before streets and lots, which then avoid them.
+        private void CarveOpenPatches(CityMapData map, Random rng, IReadOnlyList<CityArea> areas)
+        {
+            Vector2Int size = map.Size;
+            int patches = Range(rng, _openPatches);
+            float maxRadius = Mathf.Max(_openPatchRadius.x, _openPatchRadius.y);
+            for (int patch = 0; patch < patches; patch++)
             {
-                return true;
+                float radius = Mathf.Lerp(_openPatchRadius.x, _openPatchRadius.y, (float)rng.NextDouble());
+                Vector2Int centre = default;
+                bool placed = false;
+                // A few tries for a spot clear of every neighbourhood centre; a crowded city gets fewer patches.
+                for (int attempt = 0; attempt < 12 && !placed; attempt++)
+                {
+                    centre = new Vector2Int(rng.Next(size.x), rng.Next(size.y));
+                    placed = IsFree(map, centre) && ClearOfCentres(areas, centre, radius + _openPatchClearance);
+                }
+
+                if (!placed)
+                {
+                    continue;
+                }
+
+                int reach = Mathf.CeilToInt(maxRadius * 1.2f);
+                for (int row = centre.x - reach; row <= centre.x + reach; row++)
+                {
+                    for (int column = centre.y - reach; column <= centre.y + reach; column++)
+                    {
+                        var cell = new Vector2Int(row, column);
+                        if (!IsFree(map, cell))
+                        {
+                            continue;
+                        }
+
+                        // A cell hash wobbles the edge between 80% and 120% of the radius.
+                        float wobble = 0.8f + (0.4f * Hash01(cell, patch));
+                        if (Vector2.Distance(cell, centre) <= radius * wobble)
+                        {
+                            map.SetGround(cell, CityMapData.Ground.Park);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static bool ClearOfCentres(IReadOnlyList<CityArea> areas, Vector2Int cell, float distance)
+        {
+            foreach (CityArea area in areas)
+            {
+                if (!float.IsPositiveInfinity(area.Radius) && Vector2.Distance(cell, area.Center) < distance)
+                {
+                    return false;
+                }
             }
 
-            area = fallback;
-            return hasFallback;
+            return true;
+        }
+
+        private static float Hash01(Vector2Int cell, int salt)
+        {
+            uint hash = unchecked((uint)((cell.x * 73856093) ^ (cell.y * 19349663) ^ (salt * 83492791)));
+            hash ^= hash >> 13;
+            hash = unchecked(hash * 1274126177u);
+            hash ^= hash >> 16;
+            return (hash & 0xFFFF) / 65535f;
+        }
+
+        // Regular streets across each grid neighbourhood: one every block in both directions, anchored on the area's
+        // centre (the town fallback's on downtown) with spacing rolled once per area from its block length. A grid line
+        // that would run alongside an existing road is skipped, so it joins the road instead of doubling it.
+        // ponytail: axis-aligned grids only; a rotated grid needs diagonal road art.
+        private void PaintGrids(CityMapData map, Random rng, IReadOnlyList<CityArea> areas)
+        {
+            var spacing = new Vector2Int[areas.Count];
+            bool anyGrid = false;
+            for (int index = 0; index < areas.Count; index++)
+            {
+                if (!areas[index].Grid)
+                {
+                    continue;
+                }
+
+                anyGrid = true;
+                spacing[index] = new Vector2Int(
+                    Range(rng, areas[index].BlockCells) + 1,
+                    Range(rng, areas[index].BlockCells) + 1
+                );
+            }
+
+            if (!anyGrid)
+            {
+                return;
+            }
+
+            Vector2Int size = map.Size;
+            for (int row = 0; row < size.x; row++)
+            {
+                for (int column = 0; column < size.y; column++)
+                {
+                    var cell = new Vector2Int(row, column);
+                    if (!IsFree(map, cell))
+                    {
+                        continue;
+                    }
+
+                    int index = AreaIndexAt(areas, cell);
+                    if (index < 0 || !areas[index].Grid)
+                    {
+                        continue;
+                    }
+
+                    Vector2Int offset = cell - areas[index].Center;
+                    bool onRowLine = Modulo(offset.x, spacing[index].x) == 0;
+                    bool onColumnLine = Modulo(offset.y, spacing[index].y) == 0;
+                    if (!onRowLine && !onColumnLine)
+                    {
+                        continue;
+                    }
+
+                    // A line along one axis that would sit beside a road on the other runs alongside it: skip.
+                    bool besideRoad = onRowLine && !onColumnLine
+                        ? IsRoad(map, cell + Vector2Int.right) || IsRoad(map, cell + Vector2Int.left)
+                        : !onRowLine && onColumnLine
+                            && (IsRoad(map, cell + Vector2Int.up) || IsRoad(map, cell + Vector2Int.down));
+                    if (!besideRoad)
+                    {
+                        map.SetRoad(cell, CityMapData.Road.Street);
+                    }
+                }
+            }
+        }
+
+        private static int Modulo(int value, int divisor)
+        {
+            int result = value % divisor;
+            return result < 0 ? result + divisor : result;
         }
 
         private void PaintAvenue(
@@ -381,9 +544,14 @@ namespace Crookedile.Gameplay.City
                         break;
                     }
 
-                    if (!IsFree(map, next) || IsRoad(map, next + side) || IsRoad(map, next - side))
+                    if (
+                        !IsFree(map, next)
+                        || IsRoad(map, next + side)
+                        || IsRoad(map, next - side)
+                        || InGridArea(areas, next)
+                    )
                     {
-                        // Sea, map edge, or about to run alongside a road.
+                        // Sea, park, map edge, about to run alongside a road, or into a grid that has its own streets.
                         break;
                     }
 
@@ -529,7 +697,14 @@ namespace Crookedile.Gameplay.City
 
                     if (inArea)
                     {
-                        map.AddBuilding(lot, Range(rng, area.Storeys) * _storeyHeight);
+                        // Always three roof draws, so retuning a type's roofs never moves the city's lots or heights.
+                        float height = Range(rng, area.Storeys) * _storeyHeight;
+                        bool gable = rng.NextDouble() < area.GableChance;
+                        float pitch = Mathf.Lerp(area.RoofPitch.x, area.RoofPitch.y, (float)rng.NextDouble());
+                        int colorCount = area.RoofColors != null ? area.RoofColors.Count : 0;
+                        int colorIndex = rng.Next(Mathf.Max(1, colorCount));
+                        Color color = colorCount > 0 ? area.RoofColors[colorIndex] : Color.white;
+                        map.AddBuilding(lot, height, gable ? RoofStyle.Gable : RoofStyle.Flat, pitch, color);
                         continue;
                     }
 

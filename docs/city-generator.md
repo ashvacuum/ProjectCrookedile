@@ -28,8 +28,9 @@ atlases and test scenes stay in `Assets/Art/AI/Iso`.*
   the camera pans.
 - **Cell to world:** cell `(row, col)` sits at `x = (col + row) · 0.5`, `y = (row − col) · 0.25`. `+row` runs up-right on
   screen, `+col` runs down-right. The half-cube prototype used 0.4 × 0.2 half extents; everything scales by 1.25.
-- **Size: rows × columns, any rectangle.** The campaign city is **192 × 64**, a long coastal strip like Metro Cebu along
-  its shore (`CampaignCity` map size, *2026-11-26*); test maps default to 64 × 64.
+- **Size: rows × columns, any rectangle.** The campaign city is **192 × 112**: a long coast like Metro Cebu's, and deep
+  enough inland that the city is not all a short walk from the port (`CampaignCity` map size; *2026-11-26*, deepened
+  from 192 × 64). Test maps default to 64 × 64.
 - **Grid diagonals are screen-straight.** One step along both axes at once draws as a horizontal or vertical line on
   screen. Diagonal avenues (§4.3) use this.
 
@@ -37,7 +38,7 @@ atlases and test scenes stay in `Assets/Art/AI/Iso`.*
 
 | Piece | Kind | Holds |
 |---|---|---|
-| **City map** | plain data, saved as `CityMapData` (SO) for test maps | size; per cell: ground (land, sea), road (none, street, avenue), zone; list of placed buildings (building, footprint origin, W × L, storeys) |
+| **City map** | plain data, saved as `CityMapData` (SO) for test maps | size; per cell: ground (land, sea, park), road (none, street, avenue), zone; list of placed buildings (building, footprint origin, W × L, storeys) |
 | ~~**`ZoneData`**~~ | — | *Superseded 2026-11-26:* zones are district neighbourhoods, a profile on `DistrictData` (§4.5). Landmark lists move to districts when landmarks are built |
 | **`BuildingData`** | SO, Database tab | id from the asset GUID; face atlas material and roof / left wall / right wall cells; allowed W × L footprints; storey range and storey height |
 | **Generator settings** | serialized fields on the generator | size, coast depth range, avenue count range, run-length range, block size limits, zone list ordered centre-outward |
@@ -70,7 +71,21 @@ coast, like Cebu's main north–south road. Its position across the land (0 = ju
 edge, default the middle) and whether it exists are randomizer settings. Streets sprout off it as off any avenue.
 
 ### 4.4 Streets
-Streets **march**. Each is a walker, one cell wide, that starts beside an avenue (a tunable chance per avenue-side cell)
+*Grids since 2026-11-26.* Each neighbourhood type (§4.5) lays its streets out as a **grid** or **organically**:
+
+- **Grid:** regular streets every block in both directions across the area, anchored on its centre (the town fallback's
+  on downtown), spacing rolled once per area from the type's block length. A grid line that would run beside an
+  existing road is skipped, so it joins the road instead of doubling it. Business districts, the capitol, the market,
+  reclamation, HQ and every tier of ordinary housing are grids, so planned town reads as blocks.
+- **Organic:** the marching streets below. Only **informal housing** is organic: the tangle of lanes where nothing was
+  planned. Marching streets stop at a grid area's edge, so grids stay clean.
+
+**Open patches** *(2026-11-26)*: before streets and lots, the randomizer scatters ragged patches of **park** ground
+(fields, plazas, empty land; 18–28 patches of 2.5–7 cells, tunable), kept clear of neighbourhood centres. Nothing is
+paved or built there; the highway and avenues run through them. Park draws as a green placeholder until grass art
+exists, and the painter has a Park brush.
+
+Organic streets **march**. Each is a walker, one cell wide, that starts beside an avenue (a tunable chance per avenue-side cell)
 and steps straight along a grid axis:
 
 - **Blocks.** Every block length (a tunable range) it reaches a corner. There it may sprout a side street on each side,
@@ -108,7 +123,8 @@ and the town-fallback type builds whatever land no area covers, so there is hous
 where there is somewhere to visit.
 
 Generation order: coast, downtown, highway and avenues; then every **area centre**, districts first (§4.8), then
-scenery; then streets and lots, each built to the type of the nearest area covering it, else the town fallback.
+scenery; then open patches; then grid streets, organic streets and lots, each built to the type of the nearest area
+covering it, else the town fallback.
 
 | Type | Districts | Storeys | Lots | Fill | Streets | Placement | Scenery |
 |---|---|---|---|---|---|---|---|
@@ -125,8 +141,15 @@ scenery; then streets and lots, each built to the type of the nearest area cover
 Fill is kept well below full (*retuned 2026-11-26*): the town fallback covers every unclaimed cell, so its fill and
 street grain set how packed the whole city feels.
 
-Every building is still the one `CampaignBlock` half-cube, so for now a district reads through height, lot size, gaps
-and street grain. House and tower art arrives with `BuildingData` (§3).
+**Roofs** *(built 2026-11-26)*: each type also has a gable chance, a pitch range and a roof colour palette. In the
+Philippines gables mark affluent houses, so only **Affluent Housing** (85%) and **Exclusive Village** (90%) roll gables;
+every other type is flat. Every type with a palette tints its roofs, one colour per building: concrete and pale greys
+for middle-class housing, rust and blue tin for informal housing, glass greys for the towers, terracotta and dark
+tile for the affluent gables. The roof always takes the same three random draws, so retuning roofs never moves the
+city's lots or heights.
+
+Every building is still the one `CampaignBlock` half-cube, so for now a district reads through height, lot size, gaps,
+street grain and roofs. House and tower art arrives with `BuildingData` (§3).
 
 ### 4.6 Landmarks
 Each zone lists must-have landmarks. The generator places each once, before ordinary buildings, in the largest block
@@ -179,7 +202,7 @@ of its area, an open land cell, by its type's rule (a district with no type: Any
 
 - **Ground and roads never overlap**, so they draw beneath everything and do not sort against buildings. They are baked
   into chunk meshes (16 × 16 cells, tunable on the view), with each cell's atlas cell and rotation carried in the vertex
-  data (`TEXCOORD2`, read by the half-cube shader when its w is 2; a mesh without the channel can read w = 1 on D3D), so a 192 × 64 map is 48 meshes rather than 12,288
+  data (`TEXCOORD2`, read by the half-cube shader when its w is 2; a mesh without the channel can read w = 1 on D3D), so a 192 × 112 map is 84 meshes rather than 21,504
   objects and the ground batches. Sea and avenue cells are each chunk's other two submeshes. Painting rebuilds only the
   chunks a change touches. *Built 2026-11-26.*
 - **Open sea past the coast** *(built 2026-11-26)*. The view finds the coast (the map edge that is mostly sea) and
@@ -189,8 +212,13 @@ of its area, an open land cell, by its type's rule (a district with no type: Any
   so the cost follows what is on screen, not the map's size. Renderers, not GameObjects, so buildings keep their meshes.
   Edit mode draws everything. Shadows and window glow read the city's textures, so a culled building still shades and
   lights what is on screen.
-- **Buildings are individual half-cube meshes** (`HalfCubeBuilding`: footprint in tiles, wall height). A building's base
-  is exactly its footprint's diamonds. Buildings sort by their front cell's grid depth.
+- **Buildings are individual half-cube meshes** (`HalfCubeBuilding`: footprint in tiles, wall height, roof). A building's
+  base is exactly its footprint's diamonds. Buildings sort by their front cell's grid depth.
+- **Roofs** are flat or **gable**: two slopes up to a ridge along the lot's longer side, with the gable-end triangle on
+  the visible short wall. Slopes carry their true 3D normals, so the sun lights them apart and they read as pitched.
+  Pitch stays under 30°: from the 30° camera a steeper back slope faces away and vanishes. The ridge rise is half
+  the short side at the pitch; the shadow test uses each lot's average roof height (eaves plus half the rise). Roof
+  faces take the building's roof tint. The gable triangle samples the wall art's top row until facades get trim art.
   - *Known limit:* long footprints beside each other can still sort wrong (the classic iso case). Measure it on real
     generated maps before adding splitting.
 
@@ -336,13 +364,14 @@ edges are hard limits and the coast side opens onto the water; zoom-out is cappe
 included. It is ignored over `CampaignFlow`'s
 panels. Each district shows a name marker on its building, and the current district's is highlighted. Districts with a
 location still on today's list are outlined: the half-cube shader's **selection outline**, a pulsing line of fixed
-screen width around the building's silhouette except its two ground edges (the roof's two back edges and the walls'
-two outer verticals), set per building (`CityMapView.SetBuildingOutline`) and tuned on the material (width in
+screen width around the building's silhouette except its two ground edges (on a flat roof its two back edges and the
+walls' two outer verticals; on a gable the back eave, both roof ends and the walls' outer verticals). Each face marks
+its own outline edges in `TEXCOORD3`, so any roof shape outlines correctly. Set per building (`CityMapView.SetBuildingOutline`) and tuned on the material (width in
 pixels, pulse speed) and on `CampaignMapView` (colour and strength; *2026-11-26*, replacing a glow on every face). Markers are not clickable yet: visits still
 start from the panel.
 
 - **Generate** from any seed in the editor.
-- **Paint** ground (land, sea), streets, avenues and zones; **place and remove** buildings; Undo works.
+- **Paint** ground (land, sea, park), streets, avenues and zones; **place and remove** buildings; Undo works.
 - **Save** the current map as a `CityMapData` test map, and **load** one in place of the generated city: an editor
   field on the city view, plus a dev-console command. Loading a test map only changes scenery, so the command is
   `Safe = true`.
