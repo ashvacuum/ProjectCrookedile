@@ -896,8 +896,14 @@ namespace Crookedile.UI.Battle
         {
             if (cardData?.Effects == null)
                 return false;
+            // An Opinion shift moves the shared meter, so it alone never asks for a target; it
+            // lands on the focused enemy (whose statuses still apply).
             foreach (var effect in cardData.Effects)
-                if (effect != null && effect.Target == TargetType.Opponent)
+                if (
+                    effect != null
+                    && effect.Target == TargetType.Opponent
+                    && effect is not Crookedile.Gameplay.Battle.ApplyOpinionEffect
+                )
                     return true;
             return false;
         }
