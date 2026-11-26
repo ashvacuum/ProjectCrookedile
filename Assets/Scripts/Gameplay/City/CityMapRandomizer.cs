@@ -31,6 +31,18 @@ namespace Crookedile.Gameplay.City
         private Vector2Int _coastDepth = new Vector2Int(3, 8);
 
         [Tooltip(
+            "On a map longer one way than the other, put the sea along one of the two long sides, so the city strings along the shore like Cebu. Off, or on a square map, any edge can be the coast."
+        )]
+        [SerializeField]
+        private bool _coastOnLongSide = true;
+
+        [Tooltip(
+            "Put the sea on an edge facing the camera (the bottom of the screen: row 0 or the last column), so the city looks out to sea from the player's side."
+        )]
+        [SerializeField]
+        private bool _coastFacesCamera = true;
+
+        [Tooltip(
             "Chance per cell along the coast that its depth steps in or out by one. Low keeps the shore smooth."
         )]
         [SerializeField, Range(0f, 1f)]
@@ -125,8 +137,8 @@ namespace Crookedile.Gameplay.City
             map.Clear();
             Vector2Int size = map.Size;
 
-            // The sea edge, and inland pointing away from it.
-            Vector2Int inland = Axes[rng.Next(Axes.Length)];
+            // The sea edge, and inland pointing away from it. Only one edge is sea; the other three are land.
+            Vector2Int inland = PickInland(rng, size);
             Vector2Int along = new Vector2Int(Mathf.Abs(inland.y), Mathf.Abs(inland.x));
             int coastLength = along.x != 0 ? size.x : size.y;
             int depthLimit = inland.x != 0 ? size.x : size.y;
@@ -465,6 +477,26 @@ namespace Crookedile.Gameplay.City
                 inland.y < 0 ? size.y - 1 : 0
             );
             return edge + (along * step) + (inland * into);
+        }
+
+        // Inland points away from the sea. A coast along the long side runs the length of the map, so inland is
+        // across the short side. The edges facing the camera are row 0 (inland +row) and the last column (inland
+        // -column), the two edges along the bottom of the screen. Each rule narrows the choice; a seeded pick
+        // breaks any tie.
+        private Vector2Int PickInland(Random rng, Vector2Int size)
+        {
+            var candidates = new List<Vector2Int>(Axes);
+            if (_coastOnLongSide && size.x != size.y)
+            {
+                candidates.RemoveAll(axis => size.x > size.y ? axis.x != 0 : axis.y != 0);
+            }
+
+            if (_coastFacesCamera)
+            {
+                candidates.RemoveAll(axis => axis != Vector2Int.right && axis != Vector2Int.down);
+            }
+
+            return candidates[rng.Next(candidates.Count)];
         }
 
         private static int Range(Random rng, Vector2Int range)

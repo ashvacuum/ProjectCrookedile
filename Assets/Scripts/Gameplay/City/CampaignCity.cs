@@ -21,6 +21,12 @@ namespace Crookedile.Gameplay.City
         [SerializeField]
         private CitySky _sky;
 
+        [Tooltip(
+            "Size of each run's city in rows by columns. More rows than columns gives a long coastal strip, like Metro Cebu along its shore; the randomizer puts the sea down the long side facing the camera."
+        )]
+        [SerializeField]
+        private Vector2Int _mapSize = new Vector2Int(192, 64);
+
         [Tooltip("How districts are placed on each run's city. Each district's own rule is on its DistrictData.")]
         [SerializeField, InlineProperty, HideLabel]
         private CityDistrictPlacer _placer = new CityDistrictPlacer();
@@ -120,6 +126,8 @@ namespace Crookedile.Gameplay.City
                 _map.name = "Run City";
                 _map.hideFlags = HideFlags.DontSave;
             }
+
+            _map.Resize(_mapSize);
 
             // The randomizer stands in for the §4 generator; its own System.Random keeps run and battle draws untouched.
             _downtown = _view.Randomizer.Fill(_map, run.Seed);

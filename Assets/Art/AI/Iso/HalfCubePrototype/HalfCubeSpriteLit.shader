@@ -97,6 +97,10 @@ Shader "Crookedile/2D/Half Cube Lit"
                 float4 tangentOS : TANGENT;
                 float2 uv : TEXCOORD0;
                 float2 faceData : TEXCOORD1; // face id (0 roof or ground, 1 left wall, 2 right wall), height
+                // Baked atlas lookup for meshes that hold many cells (CityMapView's ground chunks): atlas uv, quarter
+                // turns, and w = 2. A mesh without this channel reads (0, 0, 0, 1) on some APIs (D3D), so baked means
+                // w above 1.5, and such meshes use the per-renderer atlas rects instead.
+                float4 atlasData : TEXCOORD2;
                 half4 color : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
@@ -111,6 +115,7 @@ Shader "Crookedile/2D/Half Cube Lit"
                 half3 normalWS : TEXCOORD3;
                 half3 tangentWS : TEXCOORD4;
                 half3 bitangentWS : TEXCOORD5;
+                float4 atlasData : TEXCOORD6;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -380,6 +385,7 @@ Shader "Crookedile/2D/Half Cube Lit"
                 float3 positionWS = TransformObjectToWorld(input.positionOS);
                 output.positionCS = TransformWorldToHClip(positionWS);
                 output.uv = input.uv;
+                output.atlasData = input.atlasData;
                 output.color = input.color * _Color;
                 output.faceId = input.faceData.x;
                 // Heights are authored in object space; a scaled object scales them with its geometry.
@@ -394,7 +400,8 @@ Shader "Crookedile/2D/Half Cube Lit"
             half4 LitFragment(Varyings input) : SV_Target
             {
                 UNITY_SETUP_INSTANCE_ID(input);
-                float2 atlasUV = GetAtlasUV(input.uv, input.faceId);
+                bool bakedAtlas = input.atlasData.w > 1.5;
+                float2 atlasUV = bakedAtlas ? input.atlasData.xy : GetAtlasUV(input.uv, input.faceId);
                 half4 source = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, atlasUV);
                 half4 normalSource = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, atlasUV);
                 half specularMask = SAMPLE_TEXTURE2D(_SpecularMap, sampler_SpecularMap, atlasUV).r;
@@ -408,9 +415,9 @@ Shader "Crookedile/2D/Half Cube Lit"
                 normalTS = normalize(lerp(half3(0, 0, 1), normalTS, normalSource.a * normalStrength));
                 normalTS = TransformAtlasNormal(
                     normalTS,
-                    UNITY_ACCESS_INSTANCED_PROP(PerInstance, _AtlasQuarterTurns),
-                    UNITY_ACCESS_INSTANCED_PROP(PerInstance, _AtlasFlipX),
-                    UNITY_ACCESS_INSTANCED_PROP(PerInstance, _AtlasFlipY)
+                    bakedAtlas ? input.atlasData.z : UNITY_ACCESS_INSTANCED_PROP(PerInstance, _AtlasQuarterTurns),
+                    bakedAtlas ? 0.0 : UNITY_ACCESS_INSTANCED_PROP(PerInstance, _AtlasFlipX),
+                    bakedAtlas ? 0.0 : UNITY_ACCESS_INSTANCED_PROP(PerInstance, _AtlasFlipY)
                 );
                 normalTS.x *= UNITY_ACCESS_INSTANCED_PROP(PerInstance, _NormalFlipX);
                 normalTS.y *= UNITY_ACCESS_INSTANCED_PROP(PerInstance, _NormalFlipY);

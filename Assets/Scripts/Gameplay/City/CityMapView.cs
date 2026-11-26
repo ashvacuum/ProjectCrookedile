@@ -4,8 +4,11 @@ using UnityEngine;
 
 namespace Crookedile.Gameplay.City
 {
-    // Draws a CityMapData: one ground tile per cell and a half-cube per building lot (city-generator.md §5-6).
-    // Everything it spawns is DontSave and rebuilt on enable, so the scene stores only the map reference.
+    // Draws a CityMapData (city-generator.md §5-6): the ground as square chunks, one mesh per chunk with each
+    // cell's atlas piece baked in, and a half-cube per building lot, grouped by the chunk its front cell is in.
+    // In Play mode chunks outside the camera's view switch their renderers off, so the cost follows what is on
+    // screen rather than the map's size. Everything it spawns is DontSave and rebuilt on enable, so the scene
+    // stores only the map reference.
     [ExecuteAlways]
     public sealed class CityMapView : MonoBehaviour
     {
@@ -15,7 +18,12 @@ namespace Crookedile.Gameplay.City
         private const int SOUTH = 4;
         private const int WEST = 8;
 
-        // Ground never overlaps a building, so every tile draws below every building.
+        // Chunk submeshes, one per ground material.
+        private const int GROUND_SUBMESH = 0;
+        private const int SEA_SUBMESH = 1;
+        private const int AVENUE_SUBMESH = 2;
+
+        // Ground never overlaps a building, so every chunk draws below every building.
         private const int GROUND_SORTING_ORDER = -1000;
         private static readonly int RoofBaseColorId = Shader.PropertyToID("_RoofBaseColor");
         private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
@@ -40,6 +48,22 @@ namespace Crookedile.Gameplay.City
         private static readonly Vector2Int PavementCracked = new Vector2Int(2, 1);
         private static readonly (Vector2Int cell, int quarterTurns)[] RoadByMask = BuildRoadTable();
 
+        // One cell's quad, around its centre; uv.x runs along +row and uv.y along +column, like the road preview tile.
+        private static readonly Vector3[] CellCorners =
+        {
+            IsoGrid.CellToLocal(-0.5f, -0.5f),
+            IsoGrid.CellToLocal(0.5f, -0.5f),
+            IsoGrid.CellToLocal(0.5f, 0.5f),
+            IsoGrid.CellToLocal(-0.5f, 0.5f),
+        };
+        private static readonly Vector2[] CornerUvs =
+        {
+            new Vector2(0f, 0f),
+            new Vector2(1f, 0f),
+            new Vector2(1f, 1f),
+            new Vector2(0f, 1f),
+        };
+
         [Tooltip("The map to draw. Any City Map asset works as a saved test map.")]
         [SerializeField]
         private CityMapData _map;
@@ -63,6 +87,22 @@ namespace Crookedile.Gameplay.City
         private Color _avenueColor = new Color(0.5f, 0.48f, 0.56f);
 
         [Tooltip(
+            "Side of a ground chunk, in cells. Each chunk is one mesh and the unit of culling: bigger means fewer objects, smaller means tighter culling."
+        )]
+        [SerializeField, Range(4, 64), FoldoutGroup("Chunks and culling", Expanded = false)]
+        private int _chunkCells = 16;
+
+        [Tooltip("Camera whose view decides which chunks draw in Play mode. Blank uses the main camera.")]
+        [SerializeField, FoldoutGroup("Chunks and culling")]
+        private Camera _cullCamera;
+
+        [Tooltip(
+            "Extra room around the camera's view before a chunk is switched off, in world units, so nothing pops in at the screen edge while panning."
+        )]
+        [SerializeField, Min(0f), SuffixLabel("units", true), FoldoutGroup("Chunks and culling")]
+        private float _cullMargin = 2f;
+
+        [Tooltip(
             "Tuning for the painter's Randomize button, which replaces the whole map with a random test city."
         )]
         [SerializeField, FoldoutGroup("Randomizer", Expanded = false), InlineProperty, HideLabel]
@@ -74,10 +114,22 @@ namespace Crookedile.Gameplay.City
         [SerializeField, FoldoutGroup("Window Glow", Expanded = false), InlineProperty, HideLabel]
         private CityGlow _glow = new CityGlow();
 
-        private readonly List<GameObject> _tiles = new List<GameObject>();
+        // A square block of cells: one ground mesh, and the buildings whose front cell is inside it.
+        private sealed class Chunk
+        {
+            public RectInt Cells;
+            public GameObject Root;
+            public Mesh Mesh;
+            public MeshRenderer Ground;
+            public readonly List<MeshRenderer> Buildings = new List<MeshRenderer>();
+            public Bounds Bounds;
+            public bool Visible = true;
+        }
+
+        private readonly List<Chunk> _chunks = new List<Chunk>();
         private readonly List<GameObject> _buildings = new List<GameObject>();
         private Vector2Int _builtSize;
-        private Mesh _tileMesh;
+        private int _builtChunkCells;
         private Material _seaMaterial;
         private Material _avenueMaterial;
         private Texture2D _clearTexture;
@@ -126,13 +178,18 @@ namespace Crookedile.Gameplay.City
         {
             // The shadow test maps world positions to cells, so it follows the map if the view moves.
             Shader.SetGlobalVector(MapOriginId, transform.position);
+
+            // Edit mode draws everything, so the Scene view and the painter never lose chunks off the game camera.
+            if (Application.isPlaying)
+            {
+                Cull();
+            }
         }
 
         private void OnDisable()
         {
             Clear();
             Shader.SetGlobalVector(HeightMapSizeId, Vector4.zero);
-            DestroyOwned(_tileMesh);
             DestroyOwned(_seaMaterial);
             DestroyOwned(_avenueMaterial);
             DestroyOwned(_clearTexture);
@@ -142,7 +199,7 @@ namespace Crookedile.Gameplay.City
 
         private void OnValidate()
         {
-            // Glow tuning shows straight away; the bake is cheap next to rebuilding the tiles.
+            // Glow tuning shows straight away; the bake is cheap next to rebuilding the ground.
             if (isActiveAndEnabled)
             {
                 _glow.Publish(_map);
@@ -164,18 +221,26 @@ namespace Crookedile.Gameplay.City
 
             EnsureSharedAssets();
             _builtSize = _map.Size;
-            for (int row = 0; row < _builtSize.x; row++)
+            _builtChunkCells = _chunkCells;
+            for (int row = 0; row < _builtSize.x; row += _builtChunkCells)
             {
-                for (int column = 0; column < _builtSize.y; column++)
+                for (int column = 0; column < _builtSize.y; column += _builtChunkCells)
                 {
-                    _tiles.Add(CreateTile(new Vector2Int(row, column)));
+                    var cells = new RectInt(
+                        row,
+                        column,
+                        Mathf.Min(_builtChunkCells, _builtSize.x - row),
+                        Mathf.Min(_builtChunkCells, _builtSize.y - column)
+                    );
+                    _chunks.Add(CreateChunk(cells));
                 }
             }
 
             RebuildBuildings();
         }
 
-        // Re-picks the art of these cells and their neighbours; call after painting ground or roads.
+        // Re-picks the art of these cells and their neighbours; call after painting ground or roads. Rebuilds only
+        // the chunks those cells fall in.
         public void RefreshCells(IEnumerable<Vector2Int> cells)
         {
             if (NeedsFullRebuild())
@@ -184,6 +249,7 @@ namespace Crookedile.Gameplay.City
                 return;
             }
 
+            var dirty = new HashSet<int>();
             foreach (Vector2Int cell in cells)
             {
                 for (int row = -1; row <= 1; row++)
@@ -193,13 +259,16 @@ namespace Crookedile.Gameplay.City
                         Vector2Int neighbour = cell + new Vector2Int(row, column);
                         if (_map.InBounds(neighbour))
                         {
-                            ApplyTile(
-                                _tiles[(neighbour.x * _builtSize.y) + neighbour.y],
-                                neighbour
-                            );
+                            dirty.Add(ChunkIndex(neighbour));
                         }
                     }
                 }
+            }
+
+            foreach (int index in dirty)
+            {
+                BuildChunkMesh(_chunks[index]);
+                UpdateChunkBounds(_chunks[index]);
             }
         }
 
@@ -211,16 +280,24 @@ namespace Crookedile.Gameplay.City
             }
 
             _buildings.Clear();
-            PublishHeightMap();
-            _glow.Publish(_map);
-            if (_map == null || _buildingPrefab == null)
+            foreach (Chunk chunk in _chunks)
             {
-                return;
+                chunk.Buildings.Clear();
             }
 
-            for (int index = 0; index < _map.Buildings.Count; index++)
+            PublishHeightMap();
+            _glow.Publish(_map);
+            if (_map != null && _buildingPrefab != null && _chunks.Count > 0)
             {
-                _buildings.Add(CreateBuilding(_map.Buildings[index]));
+                for (int index = 0; index < _map.Buildings.Count; index++)
+                {
+                    _buildings.Add(CreateBuilding(_map.Buildings[index]));
+                }
+            }
+
+            foreach (Chunk chunk in _chunks)
+            {
+                UpdateChunkBounds(chunk);
             }
         }
 
@@ -286,65 +363,157 @@ namespace Crookedile.Gameplay.City
         public bool NeedsFullRebuild()
         {
             return _map != null
-                && (_builtSize != _map.Size || _tiles.Count != _builtSize.x * _builtSize.y);
+                && (_builtSize != _map.Size || _builtChunkCells != _chunkCells || _chunks.Count == 0);
         }
 
         #endregion
 
         #region Private API
 
-        private GameObject CreateTile(Vector2Int cell)
+        private int ChunksAcross => (_builtSize.y + _builtChunkCells - 1) / _builtChunkCells;
+
+        private int ChunkIndex(Vector2Int cell)
         {
-            GameObject tile = new GameObject($"Cell {cell.x},{cell.y}")
-            {
-                hideFlags = HideFlags.HideAndDontSave,
-            };
-            tile.transform.SetParent(transform, false);
-            tile.transform.localPosition = IsoGrid.CellToLocal(cell);
-            tile.AddComponent<MeshFilter>().sharedMesh = _tileMesh;
-            MeshRenderer meshRenderer = tile.AddComponent<MeshRenderer>();
-            meshRenderer.sortingOrder = GROUND_SORTING_ORDER;
-            tile.AddComponent<CityRoadTile>();
-            ApplyTile(tile, cell);
-            return tile;
+            return ((cell.x / _builtChunkCells) * ChunksAcross) + (cell.y / _builtChunkCells);
         }
 
-        // ponytail: one GameObject per cell (4,096 at 64 x 64); bake 16 x 16 chunk meshes (city-generator.md §6) if
-        // building or painting gets slow.
-        private void ApplyTile(GameObject tile, Vector2Int cell)
+        private Chunk CreateChunk(RectInt cells)
         {
-            MeshRenderer meshRenderer = tile.GetComponent<MeshRenderer>();
-            CityRoadTile roadTile = tile.GetComponent<CityRoadTile>();
+            var chunk = new Chunk
+            {
+                Cells = cells,
+                Root = new GameObject($"Chunk {cells.x},{cells.y}")
+                {
+                    hideFlags = HideFlags.HideAndDontSave,
+                },
+                Mesh = new Mesh { name = $"City Chunk {cells.x},{cells.y}", hideFlags = HideFlags.HideAndDontSave },
+            };
+            chunk.Root.transform.SetParent(transform, false);
+            chunk.Root.AddComponent<MeshFilter>().sharedMesh = chunk.Mesh;
+            chunk.Ground = chunk.Root.AddComponent<MeshRenderer>();
+            chunk.Ground.sortingOrder = GROUND_SORTING_ORDER;
+            chunk.Ground.sharedMaterials = new[] { _groundMaterial, _seaMaterial, _avenueMaterial };
+            BuildChunkMesh(chunk);
+            return chunk;
+        }
+
+        // Every cell of the chunk as a quad, sorted into the ground, sea and avenue submeshes. Ground cells carry
+        // their atlas piece and rotation in uv2 (see the half-cube shader's atlasData), so one mesh draws them all.
+        private void BuildChunkMesh(Chunk chunk)
+        {
+            int cellCount = chunk.Cells.width * chunk.Cells.height;
+            var vertices = new List<Vector3>(cellCount * 4);
+            var uvs = new List<Vector2>(cellCount * 4);
+            var atlas = new List<Vector4>(cellCount * 4);
+            var submeshes = new[] { new List<int>(), new List<int>(), new List<int>() };
+
+            foreach (Vector2Int cell in chunk.Cells.allPositionsWithin)
+            {
+                int submesh = CellLook(cell, out Vector2Int atlasCell, out int quarterTurns);
+                Vector3 center = IsoGrid.CellToLocal(cell);
+                int first = vertices.Count;
+                Vector4 rect = CityRoadTile.AtlasRect(atlasCell.x, atlasCell.y);
+                for (int corner = 0; corner < 4; corner++)
+                {
+                    vertices.Add(center + CellCorners[corner]);
+                    uvs.Add(CornerUvs[corner]);
+                    // w = 2 marks a baked cell (the shader tests w > 1.5: a missing channel can read w = 1). Sea and
+                    // avenue are flat placeholder colours and keep the per-renderer atlas path (w = 0).
+                    if (submesh == GROUND_SUBMESH)
+                    {
+                        Vector2 turned = TurnAtlasUv(CornerUvs[corner], quarterTurns);
+                        atlas.Add(
+                            new Vector4(rect.x + (turned.x * rect.z), rect.y + (turned.y * rect.w), quarterTurns, 2f)
+                        );
+                    }
+                    else
+                    {
+                        atlas.Add(Vector4.zero);
+                    }
+                }
+
+                submeshes[submesh].AddRange(new[] { first, first + 1, first + 2, first, first + 2, first + 3 });
+            }
+
+            // Ground faces up in the 3D city, like a roof; tangents run along +row with uv.x.
+            Vector3 up = IsoGrid.UpView;
+            var tangent = new Vector4(IsoGrid.RowView.x, IsoGrid.RowView.y, IsoGrid.RowView.z, 1f);
+            var normals = new Vector3[vertices.Count];
+            var tangents = new Vector4[vertices.Count];
+            var faceData = new Vector2[vertices.Count];
+            var colors = new Color[vertices.Count];
+            for (int index = 0; index < vertices.Count; index++)
+            {
+                normals[index] = up;
+                tangents[index] = tangent;
+                colors[index] = Color.white;
+            }
+
+            Mesh mesh = chunk.Mesh;
+            mesh.Clear();
+            mesh.SetVertices(vertices);
+            mesh.normals = normals;
+            mesh.tangents = tangents;
+            mesh.SetUVs(0, uvs);
+            mesh.SetUVs(1, faceData);
+            mesh.SetUVs(2, atlas);
+            mesh.colors = colors;
+            mesh.subMeshCount = submeshes.Length;
+            for (int index = 0; index < submeshes.Length; index++)
+            {
+                mesh.SetTriangles(submeshes[index], index);
+            }
+
+            mesh.RecalculateBounds();
+        }
+
+        // Which submesh the cell draws in and, for ground, its atlas piece. Avenues count as road, so a street
+        // meeting an avenue joins it.
+        private int CellLook(Vector2Int cell, out Vector2Int atlasCell, out int quarterTurns)
+        {
+            atlasCell = Vector2Int.zero;
+            quarterTurns = 0;
             if (_map.GetGround(cell) == CityMapData.Ground.Sea)
             {
-                meshRenderer.sharedMaterial = _seaMaterial;
-                return;
+                return SEA_SUBMESH;
             }
 
             CityMapData.Road road = _map.GetRoad(cell);
             if (road == CityMapData.Road.Avenue)
             {
-                meshRenderer.sharedMaterial = _avenueMaterial;
-                return;
+                return AVENUE_SUBMESH;
             }
 
-            meshRenderer.sharedMaterial = _groundMaterial;
             if (road == CityMapData.Road.Street)
             {
-                (Vector2Int atlasCell, int quarterTurns) = RoadByMask[NeighbourMask(cell)];
-                roadTile.SetAtlasCell(atlasCell.x, atlasCell.y, quarterTurns);
-                return;
+                (atlasCell, quarterTurns) = RoadByMask[NeighbourMask(cell)];
+                return GROUND_SUBMESH;
             }
 
             // Cosmetic only: a fixed hash so a cell keeps its look between rebuilds.
-            Vector2Int pavement =
+            atlasCell =
                 ((cell.x * 73856093) ^ (cell.y * 19349663)) % 6 == 0
                     ? PavementCracked
                     : PavementPlain;
-            roadTile.SetAtlasCell(pavement.x, pavement.y, 0);
+            return GROUND_SUBMESH;
         }
 
-        // Avenues count as road, so a street meeting an avenue joins it.
+        // The half-cube shader's TransformAtlasUV for a quarter-turn count, baked on the CPU.
+        private static Vector2 TurnAtlasUv(Vector2 uv, int quarterTurns)
+        {
+            switch (quarterTurns)
+            {
+                case 1:
+                    return new Vector2(uv.y, 1f - uv.x);
+                case 2:
+                    return new Vector2(1f - uv.x, 1f - uv.y);
+                case 3:
+                    return new Vector2(1f - uv.y, uv.x);
+                default:
+                    return uv;
+            }
+        }
+
         private int NeighbourMask(Vector2Int cell)
         {
             int mask = 0;
@@ -360,10 +529,12 @@ namespace Crookedile.Gameplay.City
             return _map.GetRoad(cell) != CityMapData.Road.None;
         }
 
+        // Parented to the chunk its front cell is in, so culling switches it with that chunk.
         private GameObject CreateBuilding(CityMapData.Building building)
         {
             Vector2Int front = building.FrontCell;
-            GameObject instance = Instantiate(_buildingPrefab, transform, false);
+            Chunk chunk = _chunks[ChunkIndex(front)];
+            GameObject instance = Instantiate(_buildingPrefab, chunk.Root.transform, false);
             instance.name = $"Building {building.Lot.x},{building.Lot.y}";
             instance.hideFlags = HideFlags.HideAndDontSave;
             instance.transform.localPosition = IsoGrid.CellToLocal(front);
@@ -375,18 +546,71 @@ namespace Crookedile.Gameplay.City
             if (instance.TryGetComponent(out MeshRenderer meshRenderer))
             {
                 meshRenderer.sortingOrder = IsoGrid.Depth(front);
+                meshRenderer.enabled = chunk.Visible;
+                chunk.Buildings.Add(meshRenderer);
             }
 
             return instance;
         }
 
-        private void EnsureSharedAssets()
+        // The chunk's ground plus every building on it, roofs included, so a tall building never pops in late.
+        private static void UpdateChunkBounds(Chunk chunk)
         {
-            if (_tileMesh == null)
+            chunk.Bounds = chunk.Ground.bounds;
+            foreach (MeshRenderer building in chunk.Buildings)
             {
-                _tileMesh = CreateTileMesh();
+                if (building != null)
+                {
+                    chunk.Bounds.Encapsulate(building.bounds);
+                }
+            }
+        }
+
+        // Switches each chunk's renderers on or off by whether its bounds touch the camera's view plus the margin.
+        // Renderers, not GameObjects: disabling a building would make HalfCubeBuilding throw its mesh away and
+        // rebuild it each time it scrolls back into view.
+        // ponytail: orthographic cameras only, which is all the city uses; a perspective camera skips culling.
+        private void Cull()
+        {
+            Camera viewer = _cullCamera != null ? _cullCamera : Camera.main;
+            if (viewer == null || !viewer.orthographic)
+            {
+                return;
             }
 
+            float halfHeight = viewer.orthographicSize + _cullMargin;
+            float halfWidth = (viewer.orthographicSize * viewer.aspect) + _cullMargin;
+            Vector3 center = viewer.transform.position;
+            var view = Rect.MinMaxRect(
+                center.x - halfWidth,
+                center.y - halfHeight,
+                center.x + halfWidth,
+                center.y + halfHeight
+            );
+            foreach (Chunk chunk in _chunks)
+            {
+                Vector3 min = chunk.Bounds.min;
+                Vector3 max = chunk.Bounds.max;
+                bool visible = view.Overlaps(Rect.MinMaxRect(min.x, min.y, max.x, max.y));
+                if (visible == chunk.Visible)
+                {
+                    continue;
+                }
+
+                chunk.Visible = visible;
+                chunk.Ground.enabled = visible;
+                foreach (MeshRenderer building in chunk.Buildings)
+                {
+                    if (building != null)
+                    {
+                        building.enabled = visible;
+                    }
+                }
+            }
+        }
+
+        private void EnsureSharedAssets()
+        {
             if (_clearTexture == null)
             {
                 _clearTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false)
@@ -424,41 +648,6 @@ namespace Crookedile.Gameplay.City
             material.SetFloat(OcclusionStrengthId, 0f);
             material.SetColor(RoofBaseColorId, color);
             return material;
-        }
-
-        private static Mesh CreateTileMesh()
-        {
-            // Same layout as the road preview tile: uv.x runs along +row and uv.y along +column.
-            Mesh mesh = new Mesh { name = "City Map Tile", hideFlags = HideFlags.HideAndDontSave };
-            mesh.vertices = new[]
-            {
-                IsoGrid.CellToLocal(-0.5f, -0.5f),
-                IsoGrid.CellToLocal(0.5f, -0.5f),
-                IsoGrid.CellToLocal(0.5f, 0.5f),
-                IsoGrid.CellToLocal(-0.5f, 0.5f),
-            };
-            // Ground faces up in the 3D city, like a roof; uv.x runs along +row.
-            Vector3 up = IsoGrid.UpView;
-            mesh.normals = new[] { up, up, up, up };
-            Vector4 tangent = new Vector4(
-                IsoGrid.RowView.x,
-                IsoGrid.RowView.y,
-                IsoGrid.RowView.z,
-                1f
-            );
-            mesh.tangents = new[] { tangent, tangent, tangent, tangent };
-            mesh.uv = new[]
-            {
-                new Vector2(0f, 0f),
-                new Vector2(1f, 0f),
-                new Vector2(1f, 1f),
-                new Vector2(0f, 1f),
-            };
-            mesh.SetUVs(1, new[] { Vector2.zero, Vector2.zero, Vector2.zero, Vector2.zero });
-            mesh.colors = new[] { Color.white, Color.white, Color.white, Color.white };
-            mesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
-            mesh.RecalculateBounds();
-            return mesh;
         }
 
         // For every neighbour mask, the atlas piece and quarter turns that connect exactly those neighbours.
@@ -502,19 +691,16 @@ namespace Crookedile.Gameplay.City
             return turned;
         }
 
+        // Destroying a chunk's root destroys its buildings with it.
         private void Clear()
         {
-            for (int index = 0; index < _tiles.Count; index++)
+            foreach (Chunk chunk in _chunks)
             {
-                DestroyOwned(_tiles[index]);
+                DestroyOwned(chunk.Root);
+                DestroyOwned(chunk.Mesh);
             }
 
-            _tiles.Clear();
-            for (int index = 0; index < _buildings.Count; index++)
-            {
-                DestroyOwned(_buildings[index]);
-            }
-
+            _chunks.Clear();
             _buildings.Clear();
             _builtSize = Vector2Int.zero;
         }

@@ -28,7 +28,8 @@ atlases and test scenes stay in `Assets/Art/AI/Iso`.*
   the camera pans.
 - **Cell to world:** cell `(row, col)` sits at `x = (col + row) · 0.5`, `y = (row − col) · 0.25`. `+row` runs up-right on
   screen, `+col` runs down-right. The half-cube prototype used 0.4 × 0.2 half extents; everything scales by 1.25.
-- **Size: 64 × 64 cells**, a tunable field.
+- **Size: rows × columns, any rectangle.** The campaign city is **192 × 64**, a long coastal strip like Metro Cebu along
+  its shore (`CampaignCity` map size, *2026-11-26*); test maps default to 64 × 64.
 - **Grid diagonals are screen-straight.** One step along both axes at once draws as a horizontal or vertical line on
   screen. Diagonal avenues (§4.3) use this.
 
@@ -49,7 +50,9 @@ Deterministic from the seed through its own `System.Random`, so generating the c
 (`BattleRandom`) or the encounter pool's draws.
 
 ### 4.1 Coast
-The seed picks one map edge as the sea. The coastline runs along it with a seeded depth inside a tunable range; the
+Exactly one map edge is sea; the other three are land. On a rectangular map it is a **long side**, and of those the one
+**facing the camera** (the bottom of the screen: the last column on a map with more rows), so the city strings along a
+shore the player looks across (both rules tunable on the randomizer, *2026-11-26*). The coastline runs along it with a seeded depth inside a tunable range; the
 depth steps in or out only now and then (a tunable chance per cell), so the shore wanders rather than saw-tooths. Sea cells are ground = sea; nothing else is placed on them.
 
 ### 4.2 Downtown
@@ -131,8 +134,15 @@ the travel network takes one building by its rule:
 ## 6. Rendering
 
 - **Ground and roads never overlap**, so they draw beneath everything and do not sort against buildings. They are baked
-  into chunk meshes (16 × 16 cells), with each cell's atlas cell and rotation carried in the vertex data, so a 64 × 64
-  map is 16 meshes rather than 4,096 objects.
+  into chunk meshes (16 × 16 cells, tunable on the view), with each cell's atlas cell and rotation carried in the vertex
+  data (`TEXCOORD2`, read by the half-cube shader when its w is 2; a mesh without the channel can read w = 1 on D3D), so a 192 × 64 map is 48 meshes rather than 12,288
+  objects and the ground batches. Sea and avenue cells are each chunk's other two submeshes. Painting rebuilds only the
+  chunks a change touches. *Built 2026-11-26.*
+- **Culling by chunk** *(built 2026-11-26)*. Buildings are grouped under the chunk their front cell is in. In Play mode
+  each chunk whose bounds (ground plus its buildings' roofs) miss the camera's view and a margin turns its renderers off,
+  so the cost follows what is on screen, not the map's size. Renderers, not GameObjects, so buildings keep their meshes.
+  Edit mode draws everything. Shadows and window glow read the city's textures, so a culled building still shades and
+  lights what is on screen.
 - **Buildings are individual half-cube meshes** (`HalfCubeBuilding`: footprint in tiles, wall height). A building's base
   is exactly its footprint's diamonds. Buildings sort by their front cell's grid depth.
   - *Known limit:* long footprints beside each other can still sort wrong (the classic iso case). Measure it on real
@@ -309,7 +319,8 @@ points at `IsoGrid.cs` instead of the gizmo.
 These follow from the answers above; change them here if they are wrong.
 
 - Streets are axis-aligned only; only avenues run diagonally.
-- The sea edge is picked by the seed rather than fixed.
+- The sea is one edge: a long side on a rectangular map, and one facing the camera (row 0 or the last column), both
+  tunable on the randomizer; the seed picks only when the rules leave a choice.
 - Avenue count defaults to 3–5.
 - A landmark that does not fit is skipped with a warning, not forced.
 - Chunk size 16 × 16.

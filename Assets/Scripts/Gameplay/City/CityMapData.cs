@@ -88,6 +88,13 @@ namespace Crookedile.Gameplay.City
 
         #region Public API
 
+        // Changes the map's rows by columns, keeping the cells that still fit; at least 1 x 1.
+        public void Resize(Vector2Int size)
+        {
+            _size = Vector2Int.Max(size, Vector2Int.one);
+            FitArraysToSize();
+        }
+
         public bool InBounds(Vector2Int cell)
         {
             return cell.x >= 0 && cell.y >= 0 && cell.x < _size.x && cell.y < _size.y;

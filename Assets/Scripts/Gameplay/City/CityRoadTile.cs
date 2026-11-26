@@ -15,6 +15,16 @@ namespace Crookedile.Gameplay.City
         private const float ATLAS_CELL_SIZE = 0.25f;
         private const float ATLAS_CELL_INSET = 0.01f;
 
+        // The UV rect (x, y, width, height) of a cell in the 4 x 4 road atlas, row counted from the top, inset a
+        // little so filtering never bleeds a neighbouring cell. Shared with CityMapView's baked chunk meshes.
+        public static Vector4 AtlasRect(int row, int column)
+        {
+            float x = column * ATLAS_CELL_SIZE;
+            float y = 0.75f - (row * ATLAS_CELL_SIZE);
+            float inset = ATLAS_CELL_SIZE * ATLAS_CELL_INSET;
+            return new Vector4(x + inset, y + inset, ATLAS_CELL_SIZE - (inset * 2f), ATLAS_CELL_SIZE - (inset * 2f));
+        }
+
         [Tooltip("Atlas row of this tile's cell in the 4x4 road atlas, counted from the top.")]
         [SerializeField, Range(0, 3)] private int _atlasRow;
         [Tooltip("Atlas column of this tile's cell in the 4x4 road atlas, counted from the left.")]
@@ -64,10 +74,7 @@ namespace Crookedile.Gameplay.City
                 _propertyBlock = new MaterialPropertyBlock();
             }
 
-            float x = _atlasColumn * ATLAS_CELL_SIZE;
-            float y = 0.75f - (_atlasRow * ATLAS_CELL_SIZE);
-            float inset = ATLAS_CELL_SIZE * ATLAS_CELL_INSET;
-            Vector4 atlasRect = new Vector4(x + inset, y + inset, ATLAS_CELL_SIZE - (inset * 2f), ATLAS_CELL_SIZE - (inset * 2f));
+            Vector4 atlasRect = AtlasRect(_atlasRow, _atlasColumn);
 
             _renderer.GetPropertyBlock(_propertyBlock);
             _propertyBlock.SetVector(RoofAtlasRectId, atlasRect);
