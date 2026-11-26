@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Drown out the Haters
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 21300000, guid: 20bced9d6238d6242af6e0646c7d46cf, type: 3}
+  _artwork: {fileID: 21300000, guid: c83c9927007500c48915a23407ec011d, type: 3}
   _description: 
   _flavorText: 
   _costs:

@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Pressure
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 21300000, guid: b5969b88dc0f9ba4489e2813b16a5334, type: 3}
+  _artwork: {fileID: 21300000, guid: 789ccacada13d644887105f2a470c99c, type: 3}
   _description: 
   _flavorText: 
   _costs:

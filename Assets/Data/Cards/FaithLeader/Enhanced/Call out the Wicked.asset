@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Call out the Wicked
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 0}
+  _artwork: {fileID: -5350100727898548168, guid: df33545ec49a3d84abdc44a75ab162f7, type: 3}
   _description: 
   _flavorText: 
   _costs:

@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Blessed are the Persecuted
   _cardType: 0
   _rarity: 1
-  _artwork: {fileID: 21300000, guid: e0c26c463b247614283185813e809987, type: 3}
+  _artwork: {fileID: -2622886262496488750, guid: 776010841965a1f41ab6e1ec24bc3a20, type: 3}
   _description: 
   _flavorText: 
   _costs:

@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Congregation
   _cardType: 1
   _rarity: 1
-  _artwork: {fileID: 0}
+  _artwork: {fileID: -253737058692636666, guid: 6be15c38a630596448af333b2c38ce93, type: 3}
   _description: 
   _flavorText: 
   _costs:

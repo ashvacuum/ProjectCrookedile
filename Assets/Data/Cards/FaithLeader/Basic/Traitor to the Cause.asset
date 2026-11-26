@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Traitor to the Cause
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: 21300000, guid: 94f67c7740574d846bf2864bd30cb74b, type: 3}
   _description: 
   _flavorText: 
   _costs:

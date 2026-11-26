@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Guilt
   _cardType: 0
   _rarity: 0
-  _artwork: {fileID: 21300000, guid: 6d0a4f17c76454c48b66176d60d04bdb, type: 3}
+  _artwork: {fileID: 21300000, guid: 30bde7978c88f1f4184dcca20428a891, type: 3}
   _description: 
   _flavorText: 
   _costs:

@@ -16,7 +16,7 @@ MonoBehaviour:
   _cardName: Quiet Reflection
   _cardType: 1
   _rarity: 0
-  _artwork: {fileID: 21300000, guid: a9b6833eafb96f4458f5bb82d0e152d5, type: 3}
+  _artwork: {fileID: 21300000, guid: 91af25c06bd602f4a908f29870f92be2, type: 3}
   _description: 
   _flavorText: 
   _costs: []
