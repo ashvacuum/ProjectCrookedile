@@ -120,6 +120,13 @@ namespace Crookedile.UI.Battle
         private int _displayedDrawCount = -1;
 
         [Tooltip(
+            "Optional authored Save & Quit button; when absent, one is created in the top-right corner. "
+                + "Every move is saved as it's made, so quitting resumes into this exact battle."
+        )]
+        [SerializeField]
+        private Button _saveQuitButton;
+
+        [Tooltip(
             "General-purpose interactive card picker for card-choice effects (ChooseFromDiscard, Upgrade, Retain, etc.)."
         )]
         [SerializeField]
@@ -146,6 +153,45 @@ namespace Crookedile.UI.Battle
             if (endTurnButton != null)
                 endTurnButton.onClick.AddListener(OnEndTurnClicked);
             InitializeMediaTrainingButton();
+            InitializeSaveQuitButton();
+        }
+
+        private void InitializeSaveQuitButton()
+        {
+            if (_saveQuitButton == null && endTurnButton != null)
+            {
+                // ponytail: built in code at a fixed corner; author one in the scene for real styling.
+                var go = new GameObject(
+                    "SaveQuitButton",
+                    typeof(RectTransform),
+                    typeof(Image),
+                    typeof(Button)
+                );
+                var rect = (RectTransform)go.transform;
+                var canvas = endTurnButton.GetComponentInParent<Canvas>().rootCanvas;
+                rect.SetParent(canvas.transform, false);
+                rect.anchorMin = rect.anchorMax = rect.pivot = Vector2.one;
+                rect.sizeDelta = new Vector2(180, 44);
+                rect.anchoredPosition = new Vector2(-16, -16);
+                go.GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f, 0.85f);
+                var label = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
+                label.transform.SetParent(rect, false);
+                var labelRect = (RectTransform)label.transform;
+                labelRect.anchorMin = Vector2.zero;
+                labelRect.anchorMax = Vector2.one;
+                labelRect.offsetMin = labelRect.offsetMax = Vector2.zero;
+                var text = label.GetComponent<TMP_Text>();
+                var originalLabel = endTurnButton.GetComponentInChildren<TMP_Text>();
+                if (originalLabel != null)
+                    text.font = originalLabel.font;
+                text.text = "Save & Quit";
+                text.fontSize = 18;
+                text.alignment = TextAlignmentOptions.Center;
+                text.raycastTarget = false;
+                _saveQuitButton = go.GetComponent<Button>();
+            }
+            if (_saveQuitButton != null)
+                _saveQuitButton.onClick.AddListener(AppQuit.Quit);
         }
 
         private void InitializeMediaTrainingButton()

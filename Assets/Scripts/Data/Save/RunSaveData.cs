@@ -5,8 +5,8 @@ namespace Crookedile.Data.Save
 {
     /// <summary>
     /// A run in progress, as plain data: every <see cref="RunState"/> field a resume needs,
-    /// with content held by ID. Written at campaign checkpoints; a battle in progress is not
-    /// saved, so resuming during one restarts that battle.
+    /// with content held by ID. Written at campaign checkpoints, never mid-battle: a battle in
+    /// progress is its round-start state here plus the decisions in <see cref="BattleLogData"/>.
     /// </summary>
     public class RunSaveData
     {

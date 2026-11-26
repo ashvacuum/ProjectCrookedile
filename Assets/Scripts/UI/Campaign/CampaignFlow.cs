@@ -262,7 +262,10 @@ namespace Crookedile.UI.Campaign
             }
 
             if (!resume || state.BattleQueue == null)
+            {
                 state.StartEncounter(battle.Session.BuildBattleQueue());
+                SaveSystem.ClearBattleLog(); // a fresh battle has no decisions to replay
+            }
             state.SetPendingBattle(battle);
             SaveSystem.Checkpoint(); // quitting mid-battle resumes into this battle, restarted
             GameLogger.LogInfo("Campaign", $"Entering battle '{battle.name}'.", this);
@@ -565,6 +568,18 @@ namespace Crookedile.UI.Campaign
             };
             endDayButton.AddToClassList("action-button");
             panel.Add(endDayButton);
+
+            // The map saves on every change; launching the game continues this run.
+            var saveQuitButton = new Button(() =>
+            {
+                SaveSystem.Checkpoint();
+                AppQuit.Quit();
+            })
+            {
+                text = "Save & Quit",
+            };
+            saveQuitButton.AddToClassList("action-button");
+            panel.Add(saveQuitButton);
 
             return panel;
         }

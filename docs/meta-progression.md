@@ -1,6 +1,6 @@
 # Meta-progression: profiles, saves, unlocks, achievements (v0.2)
 
-> **Kind:** Systems · **Status:** Partly built · **Updated:** 2026-10-05
+> **Kind:** Systems · **Status:** Partly built · **Updated:** 2026-11-26
 >
 > **Summary:** Profiles, the binary save format, run save/continue, unlocks and the save debugging tools. Achievements and Steam are designed, not built.
 >
@@ -26,8 +26,8 @@ scene continues a saved run or starts a new one on entry, and the dev console li
 - **Unlocks:** `UnlockCondition` on `CardData` (`CounterAtLeast`, `WonRunAs`, `GrantedByEvent`), answered by
   `UnlockRules`. Runs snapshot their unlocks at start. Campaign hooks: `UnlockContentOutcome`, `HasUnlocked`.
   Trust Fund unlocks by winning a run as Nepo Baby.
-- **Lifecycle:** the campaign map checkpoints on every redraw and before battles. Quitting mid-battle restarts
-  that battle. Winning the last day or losing a battle calls `EndRun`, which updates counters and reports unlocks.
+- **Lifecycle:** the campaign map checkpoints on every redraw, before battles and between rounds. Every decision in
+  a battle is written to `battle.sav` as it's made, so quitting mid-battle resumes into the same spot. Winning the last day or losing a battle calls `EndRun`, which updates counters and reports unlocks.
 - **Debugging:** The Save Debugger has structured profile and run fields, expandable content lists with clickable assets,
   a Saved checkpoint / Live run selector, and local timestamps. Live campaign state refreshes twice per second;
   saved data refreshes on Reload from disk. The open event is only available in the saved checkpoint.
@@ -87,6 +87,8 @@ One rule holds it together: **the profile is the source of truth. Steam will be 
     profile.sav.bak            previous good copy
     run.sav                    RunSaveData, only while a run is in progress
     run.sav.bak
+    battle.sav                 BattleLogData: the pending round's decisions, only mid-battle
+    battle.sav.bak
   debug-snapshots/<name>/      Save Debugger snapshots (dev only)
 ```
 
@@ -204,7 +206,9 @@ counters are bumped by `SaveSystem` at run start and end and by `RunState.Record
 - `StartNewRun(origin, seed)`: the origin's starter deck, the profile's unlock snapshot, `runs_started`, first save.
 - `ContinueRun(pool, out openEvent)`: rebuilds `RunState` from `run.sav` (falling back to `.bak`).
 - `Checkpoint(openEventId)`: writes `run.sav` for campaign runs only. `CampaignFlow` calls it on every map redraw
-  and before each battle; an event that's open but unanswered is saved so a resume reopens it.
+  and before each battle, `PostBattleFlow` between rounds; an event that's open but unanswered is saved so a resume
+  reopens it. A checkpoint with no pending battle deletes `battle.sav`.
+- `SaveBattleLog` / `LoadBattleLog` / `ClearBattleLog`: the pending round's decisions (see below).
 - `EndRun(victory)`: folds the run's counters into the profile, updates won/lost/per-origin/highest-day, saves the
   profile, deletes `run.sav`, clears `RunState`, and returns the cards that became unlocked. Called when the last day
   is survived (victory) and when a campaign battle is lost.
@@ -212,8 +216,14 @@ counters are bumped by `SaveSystem` at run start and end and by `RunState.Record
 
 `CampaignFlow` continues the profile's saved run on entry, or starts a new one with its inspector origin and seed.
 
-**Resume granularity: the campaign map.** Quitting mid-battle resumes into that battle, restarted from its first
-round (Slay the Spire's rule). No battle state is ever saved.
+**Resume granularity: the decision.** `run.sav` is never written mid-battle: it stays as it was when the round began.
+Alongside it, `battle.sav` (`BattleLogData`) holds the round's decisions, keyed by encounter ID and round index:
+card plays (hand index and focused enemy), End Turn, Media Training and card-choice answers (indices into the offered
+cards). A battle is deterministic from its seed (`BattleRandom`, drawn from the restored `RunRng`), so a resume starts
+the same round and `BattleManager.StartBattleWithReplay` feeds the decisions back with every delay and card VFX
+skipped. Quitting on the result or reward screen replays to the end and offers the same reward. If content changed
+since the save and a decision no longer fits, the replay stops there and the player carries on from that point.
+Save & Quit (map and battle) just quits: everything is already on disk, and launching the game continues the run.
 
 **Deterministic resume:** the run RNG is `RunRng`, a xorshift128 generator behind the `System.Random` API, whose
 four-`uint` state is saved. Same seed and same choices give the same run, across a save and reload.

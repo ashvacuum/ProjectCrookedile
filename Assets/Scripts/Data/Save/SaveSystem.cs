@@ -27,6 +27,7 @@ namespace Crookedile.Data.Save
         private const string IndexFile = "profiles.idx";
         private const string ProfileFile = "profile.sav";
         private const string RunFile = "run.sav";
+        private const string BattleLogFile = "battle.sav";
 
         private static SaveFileStore _store;
         private static ProfileIndex _index;
@@ -212,7 +213,7 @@ namespace Crookedile.Data.Save
             if (deck.Count == 0)
                 GameLogger.LogWarning("Save", $"Starter deck for {origin} is empty.");
 
-            Store.Delete(RunPath(profile.Id));
+            DeleteRunFiles(profile.Id);
             var run = RunState.Create(origin, deck, battleQueue: null, isCampaignRun: true, maxHours: maxHours, seed: seed);
             run.SetUnlockedContent(UnlockedIds(profile, cards));
 
@@ -262,6 +263,9 @@ namespace Crookedile.Data.Save
             try
             {
                 Store.Write(RunPath(ActiveProfile.Id), run.ToSaveData(openEventId).ToBytes());
+                // Off the battle: no round left for a battle log to replay into.
+                if (run.PendingBattle == null)
+                    ClearBattleLog();
             }
             catch (Exception e)
             {
@@ -292,7 +296,7 @@ namespace Crookedile.Data.Save
             // A cheated run ends like any other but leaves the profile exactly as it found it.
             if (run.Cheated && Cheats.Enforced)
             {
-                Store.Delete(RunPath(profile.Id));
+                DeleteRunFiles(profile.Id);
                 RunState.Clear();
                 GameLogger.LogInfo("Save", "Run ended with cheats used: no profile progress recorded.");
                 return unlocked;
@@ -316,7 +320,7 @@ namespace Crookedile.Data.Save
                     unlocked.Add(card);
 
             SaveProfile();
-            Store.Delete(RunPath(profile.Id));
+            DeleteRunFiles(profile.Id);
             RunState.Clear();
             GameLogger.LogInfo(
                 "Save",
@@ -328,9 +332,54 @@ namespace Crookedile.Data.Save
         /// <summary>Throws away the run in progress without counting it.</summary>
         public static void AbandonRun()
         {
-            Store.Delete(RunPath(ActiveProfile.Id));
+            DeleteRunFiles(ActiveProfile.Id);
             RunState.Clear();
         }
+
+        private static void DeleteRunFiles(string profileId)
+        {
+            Store.Delete(RunPath(profileId));
+            Store.Delete(BattleLogPath(profileId));
+        }
+
+        #endregion
+
+        #region Battle log
+
+        internal static string BattleLogPath(string profileId) =>
+            System.IO.Path.Combine(ProfileFolder(profileId), BattleLogFile);
+
+        /// <summary>
+        /// Writes the decisions made so far in the pending battle round. The run save itself
+        /// stays as it was when the round began, so a resume replays these from there.
+        /// </summary>
+        public static void SaveBattleLog(BattleLogData log)
+        {
+            if (RunState.Current is not { IsCampaignRun: true } || log == null)
+                return;
+            try
+            {
+                Store.Write(BattleLogPath(ActiveProfile.Id), log.ToBytes());
+            }
+            catch (Exception e)
+            {
+                GameLogger.LogError("Save", $"Battle log write failed: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// The saved decisions for the round <paramref name="encounterId"/> /
+        /// <paramref name="battleIndex"/>, or null when there are none for that round.
+        /// </summary>
+        public static BattleLogData LoadBattleLog(string encounterId, int battleIndex)
+        {
+            if (!Store.TryRead(BattleLogPath(ActiveProfile.Id), BattleLogData.FromBytes, out var log, out _))
+                return null;
+            return log.EncounterId == encounterId && log.BattleIndex == battleIndex ? log : null;
+        }
+
+        /// <summary>Forgets the battle in progress: the next battle starts clean.</summary>
+        public static void ClearBattleLog() => Store.Delete(BattleLogPath(ActiveProfile.Id));
 
         #endregion
 

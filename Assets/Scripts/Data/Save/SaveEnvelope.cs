@@ -10,6 +10,7 @@ namespace Crookedile.Data.Save
         ProfileIndex = 1,
         Profile = 2,
         Run = 3,
+        BattleLog = 4,
     }
 
     /// <summary>A save file is unreadable: wrong kind, truncated, or failing its checksum.</summary>

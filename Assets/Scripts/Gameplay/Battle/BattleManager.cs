@@ -6,6 +6,7 @@ using Crookedile.Core;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
+using Crookedile.Data.Save;
 using Crookedile.Data.VFX;
 using Crookedile.Utilities;
 using Cysharp.Threading.Tasks;
@@ -245,6 +246,23 @@ namespace Crookedile.Gameplay.Battle
         /// <summary>Asks the player to pick cards; with nobody to ask, the choice is cancelled.</summary>
         public void RequestCardChoice(CardChoiceRequest request)
         {
+            // Every answer is recorded, as indices into the offered cards.
+            var confirm = request.OnConfirmed;
+            request.OnConfirmed = picked =>
+            {
+                RecordInput(
+                    new BattleInput
+                    {
+                        Kind = BattleInputKind.CardChoice,
+                        Picks = PickIndices(request.Choices, picked),
+                    }
+                );
+                confirm?.Invoke(picked);
+            };
+
+            if (TryReplayChoice(request))
+                return;
+
             if (CardChoicePrompt != null)
             {
                 CardChoicePrompt(request);
@@ -283,6 +301,7 @@ namespace Crookedile.Gameplay.Battle
         {
             // First, before anything rolls: the opening shuffle is part of the seeded battle.
             BattleRandom.Seed(setup.seed ?? BattleRandom.UnitySeed());
+            _inputs.Clear();
             if (BossBrain != null)
             {
                 BossBrain.StopPlanning();
@@ -601,6 +620,7 @@ namespace Crookedile.Gameplay.Battle
                 GameLogger.LogWarning<BattleManager>("Cannot end player turn — not player's turn!");
                 return;
             }
+            RecordInput(new BattleInput { Kind = BattleInputKind.EndTurn });
             TransitionToState(BattleState.TurnEnd);
         }
 
@@ -627,7 +647,170 @@ namespace Crookedile.Gameplay.Battle
                 );
                 return;
             }
+            RecordInput(
+                new BattleInput
+                {
+                    Kind = BattleInputKind.PlayCard,
+                    HandIndex = handIndex,
+                    TargetIndex = _focusedEnemyIndex,
+                }
+            );
             _cards.PlayCard(card, handIndex);
+        }
+
+        #endregion
+
+        #region Input log and replay
+        // A battle is deterministic from its seed (BattleRandom), so the player's decisions
+        // alone rebuild it: the campaign saves them, and a resume replays them at full speed.
+
+        private readonly List<BattleInput> _inputs = new List<BattleInput>();
+        private IReadOnlyList<BattleInput> _replay;
+        private int _replayCursor;
+        private bool _fastForward;
+
+        [Tooltip(
+            "Frames a replay may wait for the battle to accept its next decision before it "
+                + "gives up and hands the battle to the player as it stands."
+        )]
+        [SerializeField]
+        private int _replayStallFrames = 1200;
+
+        /// <summary>The player's decisions this battle, in order.</summary>
+        public IReadOnlyList<BattleInput> Inputs => _inputs;
+
+        /// <summary>Called after each decision is recorded (the campaign saves the log here).</summary>
+        public Action InputRecorded { get; set; }
+
+        /// <summary>True while saved decisions are being replayed.</summary>
+        public bool IsReplaying => _replay != null;
+
+        /// <summary>
+        /// Drops every pacing delay and skips card VFX, so a replay runs in a few frames. The
+        /// outcome is the same; only the waiting goes.
+        /// </summary>
+        public bool FastForward => _fastForward;
+
+        private void RecordInput(BattleInput input)
+        {
+            _inputs.Add(input);
+            if (!IsReplaying)
+                InputRecorded?.Invoke();
+        }
+
+        private static List<int> PickIndices(IReadOnlyList<CardData> choices, List<CardData> picked)
+        {
+            var indices = new List<int>();
+            if (choices == null || picked == null)
+                return indices;
+            foreach (var card in picked)
+                for (int i = 0; i < choices.Count; i++)
+                    if (ReferenceEquals(choices[i], card) && !indices.Contains(i))
+                    {
+                        indices.Add(i);
+                        break;
+                    }
+            return indices;
+        }
+
+        private bool TryReplayChoice(CardChoiceRequest request)
+        {
+            if (
+                !IsReplaying
+                || _replayCursor >= _replay.Count
+                || _replay[_replayCursor].Kind != BattleInputKind.CardChoice
+            )
+                return false;
+
+            var picks = _replay[_replayCursor++].Picks;
+            var cards = new List<CardData>();
+            if (picks != null && request.Choices != null)
+                foreach (int i in picks)
+                    if (i >= 0 && i < request.Choices.Count)
+                        cards.Add(request.Choices[i]);
+            request.OnConfirmed?.Invoke(cards);
+            return true;
+        }
+
+        private bool IsReadyForInput =>
+            CurrentState == BattleState.PlayerTurn && _isPlayerTurn && !IsCardResolving;
+
+        /// <summary>
+        /// Starts the battle and replays <paramref name="inputs"/> into it, which must be the
+        /// decisions recorded for this same setup and seed. Armed before the battle starts so a
+        /// choice asked during setup (a mulligan) is answered too. Stops early, leaving the
+        /// battle playable as it stands, if it ends or stops accepting the next decision
+        /// (content changed since the save).
+        /// </summary>
+        public async UniTask StartBattleWithReplay(BattleSetup setup, IReadOnlyList<BattleInput> inputs)
+        {
+            if (inputs == null || inputs.Count == 0)
+            {
+                StartBattle(setup);
+                return;
+            }
+            var ct = this.GetCancellationTokenOnDestroy();
+            _replay = inputs;
+            _replayCursor = 0;
+            _fastForward = true;
+            try
+            {
+                StartBattle(setup);
+                int stalled = 0;
+                while (_replayCursor < _replay.Count && CurrentState != BattleState.BattleEnd)
+                {
+                    var input = _replay[_replayCursor];
+                    // A choice is answered when its prompt arrives (TryReplayChoice).
+                    if (input.Kind != BattleInputKind.CardChoice && IsReadyForInput)
+                    {
+                        _replayCursor++;
+                        stalled = 0;
+                        ApplyReplayInput(input);
+                    }
+                    else if (++stalled > _replayStallFrames)
+                    {
+                        GameLogger.LogWarning<BattleManager>(
+                            $"Replay stalled at decision {_replayCursor + 1}/{_replay.Count} ({input.Kind}); "
+                                + "resuming from here."
+                        );
+                        break;
+                    }
+                    await UniTask.Yield(ct);
+                }
+                GameLogger.LogInfo<BattleManager>(
+                    $"Replayed {_replayCursor}/{inputs.Count} saved decisions."
+                );
+            }
+            finally
+            {
+                _replay = null;
+                _fastForward = false;
+            }
+        }
+
+        private void ApplyReplayInput(BattleInput input)
+        {
+            switch (input.Kind)
+            {
+                case BattleInputKind.PlayCard:
+                    var hand = _playerDeck?.Hand;
+                    if (hand == null || input.HandIndex < 0 || input.HandIndex >= hand.Count)
+                        return;
+                    if (
+                        input.TargetIndex != _focusedEnemyIndex
+                        && input.TargetIndex >= 0
+                        && input.TargetIndex < _enemies.Count
+                    )
+                        SetFocusedEnemy(input.TargetIndex);
+                    RequestPlayCard(hand[input.HandIndex], input.HandIndex);
+                    break;
+                case BattleInputKind.EndTurn:
+                    RequestEndTurn();
+                    break;
+                case BattleInputKind.MediaTraining:
+                    TryUseMediaTraining();
+                    break;
+            }
         }
 
         #endregion
@@ -691,6 +874,7 @@ namespace Crookedile.Gameplay.Battle
             if (!CanUseMediaTraining)
                 return false;
 
+            RecordInput(new BattleInput { Kind = BattleInputKind.MediaTraining });
             Celebrity.MediaTrainingAvailable = false;
             PlayerStatusEffects.RemoveStacksNotify<GlamourStatus>(Celebrity.MediaTrainingCost);
             _playerDeck.DrawCards(Celebrity.MediaTrainingDraw);
@@ -1081,10 +1265,10 @@ namespace Crookedile.Gameplay.Battle
         internal int PlayerTurnNumber => _playerTurnNumber;
 
         /// <summary>Pause before the enemy side acts (OpponentTurnState).</summary>
-        internal float OpponentTurnDelay => _opponentTurnDelay;
+        internal float OpponentTurnDelay => _fastForward ? 0f : _opponentTurnDelay;
 
         /// <summary>Pause between individual enemy actions (OpponentTurnState).</summary>
-        internal float PerEnemyAttackDelay => _perEnemyAttackDelay;
+        internal float PerEnemyAttackDelay => _fastForward ? 0f : _perEnemyAttackDelay;
 
         /// <summary>Resets per-battle session state: class state and the card-play pipeline (InitializeState).</summary>
         internal void ResetBattleSessionState()

@@ -190,7 +190,7 @@ namespace Crookedile.Gameplay.Battle
                 $"Player played: {card.CardName}  hasVFX={(card.CardVFX != null)}"
             );
 
-            if (card.CardVFX != null && _mgr.CardPlayFeedback != null)
+            if (card.CardVFX != null && _mgr.CardPlayFeedback != null && !_mgr.FastForward)
             {
                 // VFX path: await the UI layer's animation. The implementation guarantees
                 // the hit-frame callback fires and the task completes exactly once, including

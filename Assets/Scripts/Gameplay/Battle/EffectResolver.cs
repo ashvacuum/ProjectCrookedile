@@ -35,6 +35,9 @@ namespace Crookedile.Gameplay.Battle
         /// </summary>
         public float EffectStepDelay = 0.15f;
 
+        private float StepDelay =>
+            _battleManager != null && _battleManager.FastForward ? 0f : EffectStepDelay;
+
         public EffectResolver(
             BattleStats playerStats,
             BattleStats opponentStats,
@@ -243,7 +246,7 @@ namespace Crookedile.Gameplay.Battle
             {
                 effects[i]?.Execute(execCtx);
                 if (i < effects.Count - 1)
-                    await UniTask.WaitForSeconds(EffectStepDelay, cancellationToken: ct);
+                    await UniTask.WaitForSeconds(StepDelay, cancellationToken: ct);
             }
         }
 
@@ -276,8 +279,8 @@ namespace Crookedile.Gameplay.Battle
                 )
                     return;
 
-                if (EffectStepDelay > 0)
-                    await UniTask.WaitForSeconds(EffectStepDelay, cancellationToken: ct);
+                if (StepDelay > 0)
+                    await UniTask.WaitForSeconds(StepDelay, cancellationToken: ct);
             }
         }
     }

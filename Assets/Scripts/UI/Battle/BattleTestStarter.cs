@@ -3,7 +3,9 @@ using System.Linq;
 using Crookedile.Data;
 using Crookedile.Data.Cards;
 using Crookedile.Data.Enemy;
+using Crookedile.Data.Save;
 using Crookedile.Utilities;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Crookedile.Gameplay.Battle
@@ -153,7 +155,29 @@ namespace Crookedile.Gameplay.Battle
             if (setup == null)
                 return;
 
-            battleManager.StartBattle(setup);
+            // A campaign round saves its decisions as they're made; a resume replays them.
+            var run = RunState.Current;
+            var log =
+                run is { IsCampaignRun: true } && run.CurrentEncounter != null
+                    ? SaveSystem.LoadBattleLog(run.CurrentEncounter.ID, run.CurrentBattleIndex)
+                    : null;
+            battleManager.InputRecorded = SaveBattleLog;
+            battleManager.StartBattleWithReplay(setup, log?.Inputs).ContinueWith(SaveBattleLog).Forget();
+        }
+
+        private void SaveBattleLog()
+        {
+            var run = RunState.Current;
+            if (run is not { IsCampaignRun: true } || run.CurrentEncounter == null)
+                return;
+            SaveSystem.SaveBattleLog(
+                new BattleLogData
+                {
+                    EncounterId = run.CurrentEncounter.ID,
+                    BattleIndex = run.CurrentBattleIndex,
+                    Inputs = new List<BattleInput>(battleManager.Inputs),
+                }
+            );
         }
 
         #endregion
