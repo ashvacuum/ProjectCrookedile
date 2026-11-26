@@ -335,9 +335,10 @@ default) and zooms toward the cursor with the scroll wheel, with the whole view 
 edges are hard limits and the coast side opens onto the water; zoom-out is capped by the city's narrow side, sea
 included. It is ignored over `CampaignFlow`'s
 panels. Each district shows a name marker on its building, and the current district's is highlighted. Districts with a
-location still on today's list glow: the half-cube shader's **selection glow**, a pulsing band along every face's
-edges plus a faint fill, set per building (`CityMapView.SetBuildingGlow`) and tuned on the material (edge width,
-fill, pulse speed) and on `CampaignMapView` (colour and strength). Markers are not clickable yet: visits still
+location still on today's list are outlined: the half-cube shader's **selection outline**, a pulsing line of fixed
+screen width around the building's silhouette except its two ground edges (the roof's two back edges and the walls'
+two outer verticals), set per building (`CityMapView.SetBuildingOutline`) and tuned on the material (width in
+pixels, pulse speed) and on `CampaignMapView` (colour and strength; *2026-11-26*, replacing a glow on every face). Markers are not clickable yet: visits still
 start from the panel.
 
 - **Generate** from any seed in the editor.

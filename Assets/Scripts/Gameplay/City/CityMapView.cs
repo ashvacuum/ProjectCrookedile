@@ -142,7 +142,7 @@ namespace Crookedile.Gameplay.City
         private Material _avenueMaterial;
         private Texture2D _clearTexture;
         private Texture2D _heightMap;
-        private MaterialPropertyBlock _glowBlock;
+        private MaterialPropertyBlock _outlineBlock;
 
         public CityMapData Map => _map;
         public CityMapRandomizer Randomizer => _randomizer;
@@ -154,10 +154,10 @@ namespace Crookedile.Gameplay.City
         // How far the open sea reaches past the coast edge, in cells; 0 when there is no coast.
         public int SeaApronCells => SeaOutward == Vector2Int.zero ? 0 : _seaApronCells;
 
-        // Lights a building with the shader's selection glow: rgb is the colour, alpha the strength, and
+        // Outlines a building with the shader's selection outline: rgb is the colour, alpha the strength, and
         // an alpha of 0 turns it off. The index is the building's place in Map.Buildings. Cleared when the
         // buildings are rebuilt.
-        public void SetBuildingGlow(int index, Color glow)
+        public void SetBuildingOutline(int index, Color outline)
         {
             if (index < 0 || index >= _buildings.Count || _buildings[index] == null)
             {
@@ -169,10 +169,10 @@ namespace Crookedile.Gameplay.City
                 return;
             }
 
-            _glowBlock ??= new MaterialPropertyBlock();
-            meshRenderer.GetPropertyBlock(_glowBlock);
-            _glowBlock.SetColor(SelectionColorId, glow);
-            meshRenderer.SetPropertyBlock(_glowBlock);
+            _outlineBlock ??= new MaterialPropertyBlock();
+            meshRenderer.GetPropertyBlock(_outlineBlock);
+            _outlineBlock.SetColor(SelectionColorId, outline);
+            meshRenderer.SetPropertyBlock(_outlineBlock);
         }
 
         // Draws another map, such as one generated for the run.
@@ -547,7 +547,7 @@ namespace Crookedile.Gameplay.City
         }
 
         // One flat sea quad past the coast edge, as wide as that edge. Its uvs sit mid-face so the shader's edge
-        // highlight and selection glow never draw on it; it has no atlas data, so it takes the sea material's look.
+        // highlight and selection outline never draw on it; it has no atlas data, so it takes the sea material's look.
         private void BuildSeaApron()
         {
             SeaOutward = DetectSeaOutward();

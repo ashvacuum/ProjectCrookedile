@@ -5,6 +5,7 @@ using Crookedile.Gameplay.City;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.UIElements;
 
@@ -54,12 +55,13 @@ namespace Crookedile.UI.Campaign
         private float _zoomPerNotch = 0.12f;
 
         [Tooltip(
-            "Glow on the buildings of districts with a location still open today: rgb is the colour, alpha the strength. Alpha 0 turns it off."
+            "Outline around the buildings of districts with a location still open today: rgb is the colour, alpha the strength. Alpha 0 turns it off."
         )]
         [SerializeField]
-        private Color _openGlow = new Color(1f, 0.8f, 0.35f, 0.9f);
+        [FormerlySerializedAs("_openGlow")]
+        private Color _openOutline = new Color(1f, 0.8f, 0.35f, 0.9f);
 
-        private readonly HashSet<DistrictData> _glowing = new HashSet<DistrictData>();
+        private readonly HashSet<DistrictData> _outlined = new HashSet<DistrictData>();
         private readonly HashSet<DistrictData> _open = new HashSet<DistrictData>();
 
         private UIDocument _documentCache;
@@ -134,7 +136,7 @@ namespace Crookedile.UI.Campaign
         private void LateUpdate()
         {
             UpdateMarkers();
-            UpdateGlow();
+            UpdateOutlines();
         }
 
         #endregion
@@ -159,14 +161,14 @@ namespace Crookedile.UI.Campaign
             _camera.transform.position = new Vector3(focus.x, focus.y, _camera.transform.position.z);
             Clamp();
             RebuildMarkers();
-            // A rebuilt city has fresh buildings with no glow, so every open district is lit again.
-            _glowing.Clear();
-            UpdateGlow();
+            // A rebuilt city has fresh buildings with no outline, so every open district is outlined again.
+            _outlined.Clear();
+            UpdateOutlines();
         }
 
-        // Lights the districts with a location still on today's list and dims the rest. Only changes
+        // Outlines the districts with a location still on today's list and clears the rest. Only changes
         // touch the renderers, so a quiet frame costs one pass over today's few locations.
-        private void UpdateGlow()
+        private void UpdateOutlines()
         {
             if (_city == null)
                 return;
@@ -183,29 +185,29 @@ namespace Crookedile.UI.Campaign
                 }
             }
 
-            if (_open.SetEquals(_glowing))
+            if (_open.SetEquals(_outlined))
             {
                 return;
             }
 
-            foreach (DistrictData district in _glowing)
+            foreach (DistrictData district in _outlined)
             {
                 if (!_open.Contains(district))
                 {
-                    _city.SetDistrictGlow(district, Color.clear);
+                    _city.SetDistrictOutline(district, Color.clear);
                 }
             }
 
             foreach (DistrictData district in _open)
             {
-                if (!_glowing.Contains(district))
+                if (!_outlined.Contains(district))
                 {
-                    _city.SetDistrictGlow(district, _openGlow);
+                    _city.SetDistrictOutline(district, _openOutline);
                 }
             }
 
-            _glowing.Clear();
-            _glowing.UnionWith(_open);
+            _outlined.Clear();
+            _outlined.UnionWith(_open);
         }
 
         private ButtonControl DragControl(Mouse mouse)

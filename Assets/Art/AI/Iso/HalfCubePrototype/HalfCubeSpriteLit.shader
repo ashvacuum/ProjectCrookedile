@@ -24,10 +24,9 @@ Shader "Crookedile/2D/Half Cube Lit"
         _EdgeHighlightColor("Edge Highlight Color", Color) = (1, 0.82, 0.58, 1)
         _EdgeHighlightStrength("Edge Highlight Strength", Range(0, 2)) = 0.5
         _EdgeHighlightWidth("Edge Highlight Width", Range(0.005, 0.1)) = 0.025
-        _SelectionEdgeWidth("Selection Glow Edge Width", Range(0.01, 0.5)) = 0.12
-        _SelectionFill("Selection Glow Face Fill", Range(0, 1)) = 0.12
-        _SelectionPulseSpeed("Selection Glow Pulse Speed", Range(0, 10)) = 2.5
-        [PerRendererData] _SelectionColor("Selection Glow (rgb, a = strength)", Color) = (1, 0.8, 0.35, 0)
+        _SelectionOutlinePixels("Selection Outline Width (px)", Range(1, 8)) = 3
+        _SelectionPulseSpeed("Selection Outline Pulse Speed", Range(0, 10)) = 2.5
+        [PerRendererData] _SelectionColor("Selection Outline (rgb, a = strength)", Color) = (1, 0.8, 0.35, 0)
         [PerRendererData] _RoofAtlasRect("Roof Atlas Rect", Vector) = (0, 0.5, 0.5, 0.5)
         [PerRendererData] _LeftAtlasRect("Left Atlas Rect", Vector) = (0.5, 0.5, 0.5, 0.5)
         [PerRendererData] _RightAtlasRect("Right Atlas Rect", Vector) = (0, 0, 0.5, 0.5)
@@ -135,8 +134,7 @@ Shader "Crookedile/2D/Half Cube Lit"
                 half _EdgeHighlightStrength;
                 half _EdgeHighlightWidth;
                 half _OcclusionStrength;
-                half _SelectionEdgeWidth;
-                half _SelectionFill;
+                half _SelectionOutlinePixels;
                 half _SelectionPulseSpeed;
             CBUFFER_END
 
@@ -453,16 +451,24 @@ Shader "Crookedile/2D/Half Cube Lit"
                 half shine = saturate(wetness * flat * 0.4h + puddle);
                 color += (half3)_CityAmbientColor.rgb * (half)_CityRain.z * shine;
                 color += GlowSmear(input.gridPosition) * (half)_CityRainSurface.y * shine * _CityEmissionScale;
-                // Selection glow (a building picked out on the map, e.g. a district with somewhere to go):
-                // a pulsing band along every face's edges plus a faint fill, so the box reads as outlined in
-                // light at any sun. Off (a = 0) unless a renderer sets _SelectionColor.
+                // Selection outline (a building picked out on the map, e.g. a district with somewhere to go): a
+                // pulsing line of fixed screen width around the building's silhouette, except its two ground
+                // edges: the roof's two back edges (roof uv.y = 0 and uv.x = 1) and the walls' two outer verticals
+                // (left wall uv.x = 0, right wall uv.x = 1). HalfCubeBuilding's face uvs set which edge is which.
+                // Off (a = 0) unless a renderer sets _SelectionColor.
                 half4 selection = (half4)UNITY_ACCESS_INSTANCED_PROP(PerInstance, _SelectionColor);
                 if (selection.a > 0.0h)
                 {
-                    half2 fromEdge = min((half2)input.uv, 1.0h - (half2)input.uv);
-                    half edge = 1.0h - smoothstep(0.0h, _SelectionEdgeWidth, min(fromEdge.x, fromEdge.y));
-                    half pulse = 0.7h + 0.3h * (half)sin(_Time.y * _SelectionPulseSpeed);
-                    color += selection.rgb * selection.a * pulse * max(edge, _SelectionFill);
+                    // Distance to an edge in pixels: its uv distance over how much uv one pixel spans.
+                    float2 pixelUv = max(fwidth(input.uv), 1e-5);
+                    float2 fromLow = input.uv / pixelUv;
+                    float2 fromHigh = (1.0 - input.uv) / pixelUv;
+                    float pixels = input.faceId < 0.5h ? min(fromLow.y, fromHigh.x)
+                        : input.faceId < 1.5h ? fromLow.x
+                        : fromHigh.x;
+                    half onOutline = (half)saturate(_SelectionOutlinePixels - pixels);
+                    half pulse = 0.75h + 0.25h * (half)sin(_Time.y * _SelectionPulseSpeed);
+                    color = lerp(color, selection.rgb * pulse, onOutline * saturate(selection.a));
                 }
 
                 return half4(color, input.color.a);

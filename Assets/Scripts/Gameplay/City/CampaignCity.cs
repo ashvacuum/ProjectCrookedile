@@ -46,13 +46,13 @@ namespace Crookedile.Gameplay.City
 
         public IReadOnlyDictionary<DistrictData, Vector3> DistrictPositions => _districtPositions;
 
-        // Lights the district's building with the selection glow (alpha 0 turns it off). No-op for a district
+        // Outlines the district's building with the selection outline (alpha 0 turns it off). No-op for a district
         // with no building.
-        public void SetDistrictGlow(DistrictData district, Color glow)
+        public void SetDistrictOutline(DistrictData district, Color outline)
         {
             if (_view != null && district != null && _districtBuildings.TryGetValue(district, out int index))
             {
-                _view.SetBuildingGlow(index, glow);
+                _view.SetBuildingOutline(index, outline);
             }
         }
 
